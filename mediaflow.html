@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow · Cloud Accounts</title>
+<title>MediaFlow by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -102,7 +102,7 @@ input,select,textarea{font-family:inherit;}
 
 .sidebar{
 
-  width:236px; flex-shrink:0;
+  width:var(--sidebar-width,236px); flex-shrink:0;
 
   background:linear-gradient(180deg, #131826 0%, #10131F 100%);
 
@@ -161,6 +161,21 @@ input,select,textarea{font-family:inherit;}
 .sidebar-foot .k{font-size:11px; color:var(--text-mute); text-transform:uppercase; letter-spacing:.06em;}
 
 .sidebar-foot .v{font-family:var(--font-display); font-size:22px; margin-top:2px;}
+.sidebar-resizer{position:absolute;top:0;right:-4px;width:8px;height:100%;cursor:col-resize;z-index:20;}
+.sidebar-resizer::after{content:'';position:absolute;top:0;bottom:0;left:3px;width:2px;background:transparent;transition:background .15s;}
+.sidebar:hover .sidebar-resizer::after{background:var(--border-soft);}
+body.sidebar-resizing{cursor:col-resize;user-select:none;}
+body.sidebar-resizing *{cursor:col-resize !important;user-select:none !important;}
+.account-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--panel);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--text-dim);}
+.account-profile-btn{border:0;background:transparent;color:var(--text-dim);padding:0;min-width:0;flex:1;text-align:left;cursor:pointer;font:inherit;}
+.account-profile-btn:hover .account-menu-email{color:var(--text);}
+.profile-avatar-wrap{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.profile-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:var(--panel-raised);display:grid;place-items:center;font-size:25px;font-weight:800;color:var(--text-dim);overflow:hidden;}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;}
+.profile-avatar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.profile-note{font-size:11.5px;color:var(--text-mute);line-height:1.55;margin-top:7px;}
+.profile-card{max-width:720px;}
+.profile-section{margin-bottom:22px;}
 
 /* ---------- Main ---------- */
 
@@ -590,6 +605,43 @@ function friendlyAuthError(err){return String(err?.message||err||'Authentication
 async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
 async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 async function signOut(){if(!supabase)return;await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
+function profileInitials(){const email=String(AUTH_USER?.email||'').trim();return email?email.slice(0,1).toUpperCase():'?';}
+function getAvatarUrl(){return String(AUTH_USER?.user_metadata?.avatar_url||'').trim();}
+function renderAccountAvatar(){const url=getAvatarUrl();return url?`<img class="account-avatar" src="${escapeHtml(url)}" alt="Profile picture">`:`<span class="account-avatar">${escapeHtml(profileInitials())}</span>`;}
+function renderProfileAvatar(){const url=getAvatarUrl();return url?`<div class="profile-avatar"><img src="${escapeHtml(url)}" alt="Profile picture"></div>`:`<div class="profile-avatar">${escapeHtml(profileInitials())}</div>`;}
+async function updateAccountEmail(){
+ const input=document.getElementById('profile-email'); const email=input?.value.trim();
+ if(!email||!email.includes('@')){alert('Enter a valid email address.');return;}
+ if(email===String(AUTH_USER?.email||'').trim()){alert('That is already your current email.');return;}
+ try{const {data,error}=await supabase.auth.updateUser({email});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();alert('Email update requested. Check your email and follow the confirmation link if Supabase requires confirmation.');}catch(err){alert(friendlyAuthError(err));}
+}
+async function updateAccountPassword(){
+ const a=document.getElementById('profile-password'); const b=document.getElementById('profile-password-confirm');
+ const password=a?.value||'',confirm=b?.value||'';
+ if(password.length<6){alert('Password must be at least 6 characters.');return;}
+ if(password!==confirm){alert('Passwords do not match.');return;}
+ try{const {error}=await supabase.auth.updateUser({password});if(error)throw error;a.value='';b.value='';alert('Password updated successfully.');}catch(err){alert(friendlyAuthError(err));}
+}
+function readAndStoreAvatar(file){
+ if(!file)return;
+ if(!file.type.startsWith('image/')){alert('Please choose an image file.');return;}
+ const reader=new FileReader();
+ reader.onload=()=>{
+   const img=new Image();
+   img.onload=async()=>{
+     const max=256,scale=Math.min(1,max/Math.max(img.width,img.height));
+     const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+     const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+     const dataUrl=canvas.toDataURL('image/jpeg',0.82);
+     try{const {data,error}=await supabase.auth.updateUser({data:{avatar_url:dataUrl}});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();}catch(err){alert(friendlyAuthError(err));}
+   };
+   img.onerror=()=>alert('Could not read that image.'); img.src=reader.result;
+ };
+ reader.readAsDataURL(file);
+}
+async function removeAvatar(){
+ try{const {data,error}=await supabase.auth.updateUser({data:{avatar_url:null}});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();}catch(err){alert(friendlyAuthError(err));}
+}
 window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut};
 
 const UNITS = {
@@ -702,6 +754,8 @@ let S = {
   histFilters: {category:'all', type:'all', range:'all'},
 
   showReasonDetail: false,
+
+  profileReturnView: 'dashboard',
 
 };
 
@@ -1494,6 +1548,7 @@ function renderShell(){
    app.innerHTML = ` 
 
     <div class="sidebar">
+      <div class="sidebar-resizer" onmousedown="beginSidebarResize(event)" title="Drag to resize sidebar"></div>
 
       <div class="brand">
 
@@ -1521,7 +1576,7 @@ function renderShell(){
 
       </div>
 
-      <div class="sidebar-foot"><div class="account-menu"><span class="cloud-badge">CLOUD</span><span class="account-menu-email">${escapeHtml(AUTH_USER?.email||'')}</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
+      <div class="sidebar-foot"><div class="account-menu">${renderAccountAvatar()}<button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(AUTH_USER?.email||'')}</span></button><span class="cloud-badge">CLOUD</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
         <div class="k">Day streak</div>
 
@@ -1529,7 +1584,7 @@ function renderShell(){
 
         <div style="font-size:10.5px; color:var(--text-mute); margin-top:10px;">
 
-          ${STORAGE_MODE==='cloud'?'● Saved to your Claude storage':STORAGE_MODE==='local'?'● Saved in this browser':'● Not saving — see banner above'}
+          ${STORAGE_MODE==='cloud'?'● Saved to cloud storage':STORAGE_MODE==='local'?'● Saved in this browser':'● Not saving — see banner above'}
 
         </div>
 
@@ -1600,6 +1655,7 @@ function renderView(){
   else if(S.view==='stats') html = renderStats();
 
   else if(S.view==='settings') html = renderSettings();
+  else if(S.view==='profile') html = renderProfile();
 
   root.innerHTML = `<div class="fade-in">${html}</div>`;
 
@@ -2449,6 +2505,53 @@ function statCard(label, t){
 
 /* ============================================================
 
+   VIEW: PROFILE SETTINGS
+
+   ============================================================ */
+
+function renderProfile(){
+  const email=escapeHtml(AUTH_USER?.email||'');
+  return `
+    <div class="view-head"><div><button class="btn btn-ghost btn-sm" onclick="App.backFromProfile()">← Back</button><div class="view-title" style="margin-top:12px;">Profile settings</div><div class="view-desc">Manage your MediaFlow account and profile.</div></div></div>
+    <div class="profile-card">
+      <div class="section-label">PROFILE PICTURE</div>
+      <div class="card profile-section">
+        <div class="profile-avatar-wrap">
+          ${renderProfileAvatar()}
+          <div><div style="font-weight:700;">Your profile picture</div><div class="profile-note">Images are resized to 256px and stored with your Supabase account profile.</div></div>
+        </div>
+        <div class="profile-avatar-actions">
+          <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input type="file" accept="image/*" style="display:none" onchange="readAndStoreAvatar(this.files[0])"></label>
+          ${getAvatarUrl()?'<button class="btn btn-danger" onclick="removeAvatar()">Remove picture</button>':''}
+        </div>
+      </div>
+
+      <div class="section-label">EMAIL</div>
+      <div class="card profile-section">
+        <div class="field"><label class="field-label">Email address</label><input id="profile-email" type="email" autocomplete="email" value="${email}"></div>
+        <div class="profile-note">Changing your email may require confirmation from the new address before it becomes active.</div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountEmail()">Change email</button></div>
+      </div>
+
+      <div class="section-label">PASSWORD</div>
+      <div class="card profile-section">
+        <div class="field-row">
+          <div class="field"><label class="field-label">New password</label><input id="profile-password" type="password" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"></div>
+          <div class="field"><label class="field-label">Confirm new password</label><input id="profile-password-confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repeat password"></div>
+        </div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountPassword()">Change password</button></div>
+      </div>
+
+      <div class="section-label">ACCOUNT</div>
+      <div class="card">
+        <div style="font-weight:700;">Cloud account</div>
+        <div class="profile-note">Your MediaFlow library, history, settings and progress are synced to this Supabase account. Signing out does not delete your cloud data.</div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+
    VIEW: SETTINGS
 
    ============================================================ */
@@ -2886,6 +2989,8 @@ function libraryModalHtml(d){
 const App = {
 
   setView(v){ S.view=v; render(); },
+  openProfile(){ S.profileReturnView=S.view==='profile'?'dashboard':S.view; S.view='profile'; render(); },
+  backFromProfile(){ S.view=S.profileReturnView||'dashboard'; render(); },
 
   startSession, endSession, rotateTask, skipTask, openLogForm, cancelLogForm, submitLog,
 
@@ -3675,6 +3780,35 @@ function triggerDownload(blob, filename){
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 200);
 
 }
+
+/* ============================================================
+
+   DESKTOP SIDEBAR RESIZING
+
+   ============================================================ */
+
+const SIDEBAR_WIDTH_KEY='mf_sidebar_width';
+const SIDEBAR_MIN=190, SIDEBAR_MAX=380;
+function applySidebarWidth(width){
+  const w=Math.max(SIDEBAR_MIN,Math.min(SIDEBAR_MAX,Number(width)||236));
+  document.documentElement.style.setProperty('--sidebar-width',w+'px');
+  try{localStorage.setItem(SIDEBAR_WIDTH_KEY,String(w));}catch(e){}
+  return w;
+}
+function loadSidebarWidth(){try{const v=Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));if(v)applySidebarWidth(v);}catch(e){}}
+let sidebarResizeState=null;
+function beginSidebarResize(e){
+  if(window.innerWidth<=860)return;
+  e.preventDefault();
+  const sidebar=document.querySelector('.sidebar');if(!sidebar)return;
+  sidebarResizeState={startX:e.clientX,startWidth:sidebar.getBoundingClientRect().width};
+  document.body.classList.add('sidebar-resizing');
+  window.addEventListener('mousemove',onSidebarResize);
+  window.addEventListener('mouseup',endSidebarResize,{once:true});
+}
+function onSidebarResize(e){if(!sidebarResizeState)return;applySidebarWidth(sidebarResizeState.startWidth+(e.clientX-sidebarResizeState.startX));}
+function endSidebarResize(){sidebarResizeState=null;document.body.classList.remove('sidebar-resizing');window.removeEventListener('mousemove',onSidebarResize);}
+loadSidebarWidth();
 
 /* ============================================================
 
