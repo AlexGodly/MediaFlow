@@ -517,6 +517,26 @@ input[type=checkbox]{width:16px; height:16px; accent-color:var(--flow);}
 @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
 
 .loader-wrap{display:flex; align-items:center; justify-content:center; height:100vh; width:100%; color:var(--text-mute); font-size:14px;}
+.import-overlay{position:fixed;inset:0;background:rgba(6,7,12,.72);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:120;padding:20px;}
+.import-card{width:min(560px,100%);background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-l);padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.import-title{font-family:var(--font-display);font-size:22px;font-weight:600;}
+.import-sub{color:var(--text-dim);font-size:13px;line-height:1.5;margin-top:5px;}
+.import-track{height:10px;background:#10141F;border:1px solid var(--border-soft);border-radius:99px;overflow:hidden;margin-top:18px;}
+.import-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--flow-dim),var(--flow));transition:width .15s ease;}
+.import-meta{display:flex;justify-content:space-between;gap:12px;margin-top:9px;font-size:12px;color:var(--text-mute);}
+.import-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:18px;}
+.import-stat{background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:9px;padding:10px;}
+.import-stat b{display:block;font-family:var(--font-display);font-size:18px;color:var(--text);}
+.import-stat span{font-size:10.5px;color:var(--text-mute);}
+.new-entry-box{margin:12px 0;padding:14px;border:1px solid var(--flow-dim);border-radius:10px;background:rgba(232,169,74,.055);}
+.new-entry-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.new-entry-title{font-weight:800;font-size:13px;}
+.new-entry-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--flow);background:rgba(232,169,74,.1);padding:3px 7px;border-radius:99px;}
+.new-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.new-entry-grid .field{margin-bottom:4px;}
+.new-entry-note{font-size:11px;color:var(--text-mute);margin-top:8px;line-height:1.45;}
+@media (max-width:600px){.import-stats{grid-template-columns:1fr 1fr;}.new-entry-grid{grid-template-columns:1fr;}}
+
 
 .reason-explain{margin-top:14px; padding:12px 14px; background:var(--panel-raised); border:1px solid var(--border-soft); border-radius:10px; font-size:12.5px; color:var(--text-dim); line-height:1.6;}
 
@@ -1434,7 +1454,7 @@ function renderShell(){
 
   const app = document.getElementById('app');
 
-  app.innerHTML = `
+   app.innerHTML = ` 
 
     <div class="sidebar">
 
@@ -1454,7 +1474,7 @@ function renderShell(){
 
       <div class="nav">
 
-        ${NAV_ITEMS.map(n=>`
+         ${NAV_ITEMS.map(n=>` 
 
           <div class="nav-item ${S.view===n.id?'active':''}" onclick="App.setView('${n.id}')">
 
@@ -1488,7 +1508,7 @@ function renderShell(){
 
     <div class="mobile-tabbar">
 
-      ${NAV_ITEMS.map(n=>`
+       ${NAV_ITEMS.map(n=>` 
 
         <div class="mtab ${S.view===n.id?'active':''}" onclick="App.setView('${n.id}')">
 
@@ -1570,7 +1590,7 @@ function renderDashboard(){
 
   if(!S.sessionActive || !S.currentTask){
 
-    heroHtml = `
+     heroHtml = ` 
 
       <div class="hero">
 
@@ -1606,7 +1626,7 @@ function renderDashboard(){
 
     const amountStr = t.low===t.high ? `${t.low} ${unitLabel(t.unit,t.low)}` : `${t.low}–${t.high} ${unitLabel(t.unit,t.high)}`;
 
-    heroHtml = `
+     heroHtml = ` 
 
       <div class="hero">
 
@@ -1634,7 +1654,7 @@ function renderDashboard(){
 
         </div>
 
-        ${S.logging ? renderLogForm(t,cat) : `
+         ${S.logging ? renderLogForm(t,cat) : ` 
 
         <div class="hero-actions">
 
@@ -1660,7 +1680,7 @@ function renderDashboard(){
 
   const cats = S.categories.filter(c=>c.enabled);
 
-  const balanceHtml = cats.length===0 ? `<div class="empty-state"><div class="em-icon">🗂️</div><div class="em-title">No categories enabled</div><div>Enable some in Settings to get a task.</div></div>` : `
+   const balanceHtml = cats.length===0 ? `<div class="empty-state"><div class="em-icon">🗂️</div><div class="em-title">No categories enabled</div><div>Enable some in Settings to get a task.</div></div>` : ` 
 
     <div class="balance-list">
 
@@ -1688,7 +1708,7 @@ function renderDashboard(){
 
     </div>`;
 
-  return `
+   return ` 
 
     <div class="view-head">
 
@@ -1792,7 +1812,7 @@ function renderLogForm(t, cat){
 
     </datalist>
 
-    ${entries.length===0 ? `<small class="hint">Add one or more — e.g. "One Piece" ×1, "Detective Conan" ×3. Matches in your Library get suggested as you type.</small>` : `
+     ${entries.length===0 ? `<small class="hint">Add one or more — e.g. "One Piece" ×1, "Detective Conan" ×3. Matches in your Library get suggested as you type.</small>` : ` 
 
     <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
 
@@ -1808,6 +1828,54 @@ function renderLogForm(t, cat){
 
     </div>
 
+    ${entries.filter(e=>e.isNew).map(e=>{
+      const idx=entries.indexOf(e);
+      const item=e.libraryId?S.library.find(i=>i.id===e.libraryId):null;
+      if(!item) return '';
+      return `
+        <div class="new-entry-box">
+          <div class="new-entry-head">
+            <div class="new-entry-title">📚 New library entry</div>
+            <div class="new-entry-badge">Added automatically</div>
+          </div>
+          <div class="new-entry-grid">
+            <div class="field">
+              <label class="field-label">Title</label>
+              <input type="text" value="${escapeHtml(item.title)}" onchange="App.updateLogEntryDetail(${idx},'title',this.value)">
+            </div>
+            <div class="field">
+              <label class="field-label">Current progress</label>
+              <input type="number" min="0" value="${item.progress||0}" onchange="App.updateLogEntryDetail(${idx},'progress',this.value)">
+            </div>
+            <div class="field">
+              <label class="field-label">Total (optional)</label>
+              <input type="number" min="0" value="${item.total??''}" placeholder="Unknown" onchange="App.updateLogEntryDetail(${idx},'total',this.value)">
+            </div>
+            <div class="field">
+              <label class="field-label">Status</label>
+              <select onchange="App.updateLogEntryDetail(${idx},'status',this.value)">
+                ${['planned','active','paused','completed','dropped'].map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Priority</label>
+              <select onchange="App.updateLogEntryDetail(${idx},'priority',this.value)">
+                ${['low','medium','high'].map(s=>`<option value="${s}" ${item.priority===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Estimated minutes</label>
+              <input type="number" min="0" value="${item.estimatedMinutes??''}" placeholder="Optional" onchange="App.updateLogEntryDetail(${idx},'estimatedMinutes',this.value)">
+            </div>
+            <div class="field" style="grid-column:1/-1;">
+              <label class="field-label">Tags</label>
+              <input type="text" value="${escapeHtml((item.tags||[]).join(', '))}" placeholder="e.g. shonen, backlog" onchange="App.updateLogEntryDetail(${idx},'tags',this.value)">
+            </div>
+          </div>
+          <div class="new-entry-note">This title is already in your Library. Saving this log will also add the consumed quantity to its progress.</div>
+        </div>`;
+    }).join('')}
+
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
 
       <small class="hint" style="margin:0;">Total from titles: <b style="color:var(--text);">${total}</b> ${unitLabel(t.unit,total)}</small>
@@ -1820,7 +1888,7 @@ function renderLogForm(t, cat){
 
       <input type="checkbox" ${S.logDraft.updateLibrary?'checked':''} onchange="App.toggleUpdateLibrary(this.checked)">
 
-      Also bump progress on matched Library titles
+      Update Library progress automatically
 
     </label>`}
 
@@ -1986,7 +2054,7 @@ function renderLibrary(){
 
   }
 
-  return `
+   return ` 
 
     <div class="view-head">
 
@@ -2102,7 +2170,7 @@ function renderHistory(){
 
   }).join('') || `<div class="empty-state"><div class="em-icon">🕓</div><div class="em-title">No sessions yet</div><div>Complete a task from the dashboard to see it here.</div></div>`;
 
-  return `
+   return ` 
 
     <div class="view-head">
 
@@ -2180,7 +2248,7 @@ function renderStats(){
 
   const maxW = Math.max(1, ...weekMinutesByCat.map(x=>x.m));
 
-  const balanceHtml = weekMinutesByCat.map(({c,m})=>`
+   const balanceHtml = weekMinutesByCat.map(({c,m})=>` 
 
     <div class="bal-bar-row">
 
@@ -2258,7 +2326,7 @@ function renderStats(){
 
   const avgCompletion = nonSkipped>0 ? Math.round(completedOrOver/nonSkipped*100) : 0;
 
-  return `
+   return ` 
 
     <div class="view-head"><div><div class="view-title">Statistics</div><div class="view-desc">Your consumption, measured.</div></div></div>
 
@@ -2350,7 +2418,7 @@ function renderSettings(){
 
   const st = S.settings;
 
-  const catRows = S.categories.map(c=>`
+   const catRows = S.categories.map(c=>` 
 
     <div class="cat-manage-row">
 
@@ -2366,7 +2434,7 @@ function renderSettings(){
 
     </div>`).join('');
 
-  return `
+   return ` 
 
     <div class="view-head"><div><div class="view-title">Settings</div><div class="view-desc">Tune the rotation to fit your life.</div></div></div>
 
@@ -2380,7 +2448,7 @@ function renderSettings(){
 
           <div class="intensity-row">
 
-            ${Object.entries(INTENSITY_PRESETS).map(([k,p])=>`
+             ${Object.entries(INTENSITY_PRESETS).map(([k,p])=>` 
 
               <div class="intensity-opt ${st.intensity===k?'active':''}" onclick="App.setIntensity('${k}')">
 
@@ -2558,7 +2626,7 @@ function categoryModalHtml(d){
 
   const isNew = !d.id;
 
-  return `
+   return ` 
 
     <div class="modal-title">${isNew?'Add category':'Edit category'}</div>
 
@@ -2642,7 +2710,7 @@ function sessionModalHtml(d){
 
   const cat = getCategory(d.categoryId);
 
-  return `
+   return ` 
 
     <div class="modal-title">Edit logged entry</div>
 
@@ -2700,7 +2768,7 @@ function libraryModalHtml(d){
 
   const isNew = !d.id;
 
-  return `
+   return ` 
 
     <div class="modal-title">${isNew?'Add title':'Edit title'}</div>
 
@@ -2772,22 +2840,35 @@ const App = {
 
   addLogEntry(){
 
-    const title = (S.entryDraft.title||'').trim();
-
+    const title=(S.entryDraft.title||'').trim();
     if(!title) return;
 
-    const qty = Math.max(1, Number(S.entryDraft.qty)||1);
+    const qty=Math.max(1,Number(S.entryDraft.qty)||1);
+    const cat=getCategory(S.currentTask.categoryId);
+    let match=findLibraryMatch(cat.id,title);
+    let isNew=false;
 
-    const cat = getCategory(S.currentTask.categoryId);
+    if(!match){
+      match={
+        id:uid(),
+        title,
+        categoryId:cat.id,
+        progress:0,
+        total:null,
+        status:'active',
+        priority:'medium',
+        estimatedMinutes:null,
+        tags:['manual'],
+        source:'manual'
+      };
+      S.library.push(match);
+      isNew=true;
+      persistLibrary();
+    }
 
-    const match = findLibraryMatch(cat.id, title);
-
-    S.logDraft.entries = S.logDraft.entries || [];
-
-    S.logDraft.entries.push({title, qty, libraryId: match ? match.id : null});
-
-    S.entryDraft = {title:'', qty:1};
-
+    S.logDraft.entries=S.logDraft.entries||[];
+    S.logDraft.entries.push({title,qty,libraryId:match.id,isNew});
+    S.entryDraft={title:'',qty:1};
     render();
 
   },
@@ -2795,6 +2876,35 @@ const App = {
   removeLogEntry(idx){
 
     S.logDraft.entries.splice(idx,1); render();
+
+  },
+
+  updateLogEntryDetail(idx,key,value){
+
+    const entry=(S.logDraft.entries||[])[idx];
+    if(!entry||!entry.libraryId) return;
+
+    const item=S.library.find(i=>i.id===entry.libraryId);
+    if(!item) return;
+
+    if(key==='title'){
+      const title=String(value||'').trim();
+      if(title){ item.title=title; entry.title=title; }
+    }else if(key==='progress'){
+      item.progress=Math.max(0,Number(value)||0);
+    }else if(key==='total'){
+      item.total=value===''?null:Math.max(0,Number(value)||0);
+    }else if(key==='status'){
+      item.status=value;
+    }else if(key==='priority'){
+      item.priority=value;
+    }else if(key==='estimatedMinutes'){
+      item.estimatedMinutes=value===''?null:Math.max(0,Number(value)||0);
+    }else if(key==='tags'){
+      item.tags=String(value||'').split(',').map(t=>t.trim()).filter(Boolean);
+    }
+
+    persistLibrary();
 
   },
 
@@ -3083,155 +3193,213 @@ const App = {
   },
 
   importMalXml(file){
-
     if(!file) return;
 
-    const reader = new FileReader();
-
-    reader.onload = ()=>{
-
+    const reader=new FileReader();
+    reader.onload=async ()=>{
       try{
+        const text=reader.result||'';
+        const isManga=/<manga(?:\s|>)/i.test(text);
+        const tag=isManga?'manga':'anime';
 
-        const doc = new DOMParser().parseFromString(reader.result, 'text/xml');
+        // Avoid DOMParser's giant synchronous DOM allocation. Scan one MAL entry at a time.
+        const re=new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`,'gi');
+        const blocks=[];
+        let m;
+        while((m=re.exec(text))!==null) blocks.push(m[1]);
 
-        if(doc.querySelector('parsererror')) throw new Error('bad xml');
+        if(blocks.length===0){
+          alert('No entries found in that file — make sure it is a MAL list export XML.');
+          return;
+        }
 
-        const isManga = !!doc.querySelector('manga');
+        const statusMap={'Watching':'active','Reading':'active','Completed':'completed','On-Hold':'paused','Dropped':'dropped','Plan to Watch':'planned','Plan to Read':'planned'};
+        const getTag=(block,name)=>{
+          const x=block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`,'i'));
+          return x?x[1].replace(/<!\\[CDATA\\[|\\]\\]>/g,'').trim():'';
+        };
 
-        const nodes = Array.from(doc.querySelectorAll(isManga ? 'manga' : 'anime'));
+        showImportProgress(`Importing MyAnimeList ${isManga?'manga':'anime'}`,blocks.length);
 
-        if(nodes.length===0){ alert('No entries found in that file — make sure it is a MAL list export XML.'); return; }
+        let added=0,updated=0,skipped=0;
+        const BATCH=30;
+        const SAVE_EVERY=210;
 
-        const statusMap = {'Watching':'active','Reading':'active','Completed':'completed','On-Hold':'paused','Dropped':'dropped','Plan to Watch':'planned','Plan to Read':'planned'};
+        for(let r=0;r<blocks.length;r+=BATCH){
+          const endBatch=Math.min(r+BATCH,blocks.length);
 
-        let added=0, updated=0;
+          for(let j=r;j<endBatch;j++){
+            const block=blocks[j];
+            const title=getTag(block,isManga?'manga_title':'series_title');
+            if(!title){skipped++;continue;}
 
-        nodes.forEach(n=>{
+            const seriesType=getTag(block,'series_type').toLowerCase();
+            const progress=Number(getTag(block,isManga?'my_read_chapters':'my_watched_episodes'))||0;
+            const total=Number(getTag(block,isManga?'series_chapters':'series_episodes'))||null;
+            const malStatus=getTag(block,'my_status');
+            const status=statusMap[malStatus]||'planned';
 
-          const text = sel=> n.querySelector(sel) ? n.querySelector(sel).textContent.trim() : '';
+            let categoryId=isManga?'manga':'backlog';
+            if(isManga&&/manhwa|manhua/.test(seriesType)) categoryId='manhwa';
+            if(!isManga){
+              if(seriesType==='movie') categoryId='animemovies';
+              else if(seriesType==='tv'&&/currently airing/i.test(getTag(block,'series_status'))) categoryId='seasonal';
+            }
+            if(!S.categories.find(c=>c.id===categoryId)) categoryId=isManga?'manga':'backlog';
 
-          const title = isManga ? text('manga_title') : text('series_title');
-
-          if(!title) return;
-
-          const seriesType = (text('series_type')||'').toLowerCase();
-
-          const progress = Number(isManga ? text('my_read_chapters') : text('my_watched_episodes')) || 0;
-
-          const total = Number(isManga ? text('series_chapters') : text('series_episodes')) || null;
-
-          const malStatus = text('my_status');
-
-          const status = statusMap[malStatus] || 'planned';
-
-          let categoryId = isManga ? 'manga' : 'backlog';
-
-          if(isManga && /manhwa|manhua/.test(seriesType)) categoryId = 'manhwa';
-
-          if(!isManga){
-
-            if(seriesType==='movie') categoryId='animemovies';
-
-            else if(seriesType==='tv' && /currently airing/i.test(text('series_status')||'')) categoryId='seasonal';
-
+            const existing=S.library.find(i=>i.title.toLowerCase()===title.toLowerCase()&&i.categoryId===categoryId);
+            if(existing){
+              existing.progress=progress;
+              if(total) existing.total=total;
+              existing.status=status;
+              existing.source='mal';
+              updated++;
+            }else{
+              S.library.push({
+                id:uid(),title,categoryId,progress,total,status,
+                priority:'medium',estimatedMinutes:null,tags:['MAL'],source:'mal'
+              });
+              added++;
+            }
           }
 
-          if(!S.categories.find(c=>c.id===categoryId)) categoryId = isManga?'manga':'backlog';
+          const done=endBatch;
+          updateImportProgress(done,blocks.length,added,updated,skipped,`Processing entries ${done.toLocaleString()} of ${blocks.length.toLocaleString()}...`);
 
-          const existing = S.library.find(i=>i.title.toLowerCase()===title.toLowerCase() && i.categoryId===categoryId);
+          if(done%SAVE_EVERY===0 || done===blocks.length) await saveState();
+          await yieldToBrowser();
+        }
 
-          if(existing){
-
-            existing.progress = progress; if(total) existing.total = total; existing.status = status; existing.source='mal';
-
-            updated++;
-
-          } else {
-
-            S.library.push({id:uid(), title, categoryId, progress, total, status, priority:'medium', estimatedMinutes:null, tags:['MAL'], source:'mal'});
-
-            added++;
-
-          }
-
-        });
-
-        persistLibrary(); render();
-
-        alert(`Imported from MyAnimeList: ${added} added, ${updated} updated.`);
-
-      }catch(e){ alert("Couldn't parse that file as a MAL export XML."); }
-
+        closeImportProgress();
+        render();
+        alert(`Imported from MyAnimeList: ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
+      }catch(e){
+        console.error('MAL import failed',e);
+        closeImportProgress();
+        alert("Couldn't parse that file as a MAL export XML.");
+      }
     };
-
     reader.readAsText(file);
-
   },
 
   importCsv(file){
-
     if(!file) return;
 
-    const reader = new FileReader();
-
-    reader.onload = ()=>{
-
+    const reader=new FileReader();
+    reader.onload=async ()=>{
       try{
+        const text=reader.result||'';
+        if(!text.trim()){alert('That CSV looks empty.');return;}
 
-        const rows = parseCsvText(reader.result);
+        // Incremental CSV parser: it keeps its cursor and yields between batches,
+        // so a very large file does not monopolize the main UI thread.
+        const parser={i:0,row:[],field:'',inQuotes:false,done:false};
+        const nextRows=(maxRows)=>{
+          const out=[];
+          while(parser.i<text.length&&out.length<maxRows){
+            const c=text[parser.i++];
+            if(parser.inQuotes){
+              if(c==='"'){
+                if(text[parser.i]==='"'){parser.field+='"';parser.i++;}
+                else parser.inQuotes=false;
+              }else parser.field+=c;
+            }else{
+              if(c==='"') parser.inQuotes=true;
+              else if(c===','){parser.row.push(parser.field);parser.field='';}
+              else if(c==='\\n'){
+                parser.row.push(parser.field);parser.field='';
+                if(parser.row.some(f=>f&&f.trim())) out.push(parser.row);
+                parser.row=[];
+              }else if(c==='\\r'){
+                // Ignore CR. LF terminates the row.
+              }else parser.field+=c;
+            }
+          }
 
-        if(rows.length<2){ alert('That CSV looks empty.'); return; }
+          if(parser.i>=text.length&&!parser.done){
+            if(parser.field.length||parser.row.length){
+              parser.row.push(parser.field);
+              if(parser.row.some(f=>f&&f.trim())) out.push(parser.row);
+            }
+            parser.row=[];parser.field='';parser.done=true;
+          }
+          return out;
+        };
 
-        const header = rows[0].map(h=>h.trim().toLowerCase());
+        const first=nextRows(1);
+        if(first.length===0){alert('That CSV looks empty.');return;}
 
-        const find = (...names)=> header.findIndex(h=>names.some(n=>h.includes(n)));
+        const header=first[0].map(h=>h.trim().toLowerCase());
+        const find=(...names)=>header.findIndex(h=>names.some(n=>h.includes(n)));
+        const iTitle=find('title','name');
+        const iProgress=find('progress','watched','read','chapters_read','episodes_watched');
+        const iTotal=find('total','episodes','chapters');
+        const iStatus=find('status');
 
-        const iTitle = find('title','name');
+        if(iTitle<0){alert('Could not find a "title" column in that CSV.');return;}
 
-        const iProgress = find('progress','watched','read','chapters_read','episodes_watched');
+        // Newline count is an intentionally cheap estimate for the progress bar.
+        const estimatedTotal=Math.max(1,(text.match(/\\n/g)||[]).length);
+        showImportProgress('Importing CSV',estimatedTotal);
 
-        const iTotal = find('total','episodes','chapters');
+        let processed=0,added=0,updated=0,skipped=0;
+        const BATCH=40;
+        const SAVE_EVERY=200;
 
-        const iStatus = find('status');
+        while(!parser.done){
+          const rows=nextRows(BATCH);
+          if(rows.length===0){await yieldToBrowser();continue;}
 
-        if(iTitle<0){ alert('Could not find a "title" column in that CSV.'); return; }
+          for(const row of rows){
+            processed++;
+            if(!row||!row[iTitle]){skipped++;continue;}
 
-        let added=0, updated=0;
+            const title=row[iTitle].trim();
+            if(!title){skipped++;continue;}
 
-        for(let r=1;r<rows.length;r++){
+            const progress=iProgress>=0?Number(row[iProgress])||0:0;
+            const total=iTotal>=0&&row[iTotal]?Number(row[iTotal])||null:null;
+            const rawStatus=iStatus>=0?row[iStatus].trim().toLowerCase():'';
+            const status=/complet/.test(rawStatus)?'completed':
+              /watch|read|active|progress/.test(rawStatus)?'active':
+              /hold|pause/.test(rawStatus)?'paused':
+              /drop/.test(rawStatus)?'dropped':'planned';
 
-          const row = rows[r]; if(!row || !row[iTitle]) continue;
+            const categoryId=S.categories.find(c=>c.enabled)?.id||S.categories[0]?.id;
+            if(!categoryId){skipped++;continue;}
 
-          const title = row[iTitle].trim(); if(!title) continue;
+            const existing=S.library.find(i=>i.title.toLowerCase()===title.toLowerCase());
+            if(existing){
+              existing.progress=progress;
+              if(total) existing.total=total;
+              existing.status=status;
+              existing.source='simkl';
+              updated++;
+            }else{
+              S.library.push({
+                id:uid(),title,categoryId,progress,total,status,
+                priority:'medium',estimatedMinutes:null,tags:['imported'],source:'simkl'
+              });
+              added++;
+            }
+          }
 
-          const progress = iProgress>=0 ? Number(row[iProgress])||0 : 0;
-
-          const total = iTotal>=0 && row[iTotal] ? Number(row[iTotal])||null : null;
-
-          const rawStatus = iStatus>=0 ? row[iStatus].trim().toLowerCase() : '';
-
-          const status = /complet/.test(rawStatus)?'completed': /watch|read|active|progress/.test(rawStatus)?'active': /hold|pause/.test(rawStatus)?'paused': /drop/.test(rawStatus)?'dropped':'planned';
-
-          const categoryId = S.categories.find(c=>c.enabled)?.id || S.categories[0].id;
-
-          const existing = S.library.find(i=>i.title.toLowerCase()===title.toLowerCase());
-
-          if(existing){ existing.progress=progress; if(total) existing.total=total; existing.status=status; existing.source='simkl'; updated++; }
-
-          else { S.library.push({id:uid(), title, categoryId, progress, total, status, priority:'medium', estimatedMinutes:null, tags:['imported'], source:'simkl'}); added++; }
-
+          updateImportProgress(processed,estimatedTotal,added,updated,skipped,`Processing rows... ${processed.toLocaleString()} processed`);
+          if(processed%SAVE_EVERY<BATCH) await saveState();
+          await yieldToBrowser();
         }
 
-        persistLibrary(); render();
-
-        alert(`Imported ${added} added, ${updated} updated. Double-check categories in Library — CSV imports can't always tell anime from TV from movies, so titles land in your first enabled category by default.`);
-
-      }catch(e){ alert("Couldn't parse that CSV file."); }
-
+        await saveState();
+        closeImportProgress();
+        render();
+        alert(`Imported ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
+      }catch(e){
+        console.error('CSV import failed',e);
+        closeImportProgress();
+        alert("Couldn't parse that CSV file.");
+      }
     };
-
     reader.readAsText(file);
-
   },
 
   exportCSV(){
@@ -3308,6 +3476,41 @@ function parseCsvText(text){
 
   return rows.filter(r=>r.some(f=>f&&f.trim()));
 
+}
+
+
+function showImportProgress(title, total){
+  let el=document.getElementById('mediaflow-import-progress');
+  if(!el){ el=document.createElement('div'); el.id='mediaflow-import-progress'; document.body.appendChild(el); }
+  el.className='import-overlay';
+  el.innerHTML=`
+    <div class="import-card">
+      <div class="import-title">${escapeHtml(title)}</div>
+      <div class="import-sub" id="import-progress-sub">Reading your file without freezing the page...</div>
+      <div class="import-track"><div class="import-fill" id="import-progress-fill"></div></div>
+      <div class="import-meta"><span id="import-progress-count">0 / ${total.toLocaleString()}</span><span id="import-progress-pct">0%</span></div>
+      <div class="import-stats">
+        <div class="import-stat"><b id="import-added">0</b><span>Added</span></div>
+        <div class="import-stat"><b id="import-updated">0</b><span>Updated</span></div>
+        <div class="import-stat"><b id="import-skipped">0</b><span>Skipped</span></div>
+      </div>
+    </div>`;
+}
+function updateImportProgress(done,total,added,updated,skipped,phase){
+  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  const fill=document.getElementById('import-progress-fill'); if(fill) fill.style.width=pct+'%';
+  const count=document.getElementById('import-progress-count'); if(count) count.textContent=`${done.toLocaleString()} / ${total.toLocaleString()}`;
+  const pctEl=document.getElementById('import-progress-pct'); if(pctEl) pctEl.textContent=pct+'%';
+  const sub=document.getElementById('import-progress-sub'); if(sub) sub.textContent=phase||'Importing...';
+  const a=document.getElementById('import-added'); if(a) a.textContent=added.toLocaleString();
+  const u=document.getElementById('import-updated'); if(u) u.textContent=updated.toLocaleString();
+  const s=document.getElementById('import-skipped'); if(s) s.textContent=skipped.toLocaleString();
+}
+function closeImportProgress(){
+  const el=document.getElementById('mediaflow-import-progress'); if(el) el.remove();
+}
+function yieldToBrowser(){
+  return new Promise(resolve=>setTimeout(resolve,0));
 }
 
 function triggerDownload(blob, filename){
