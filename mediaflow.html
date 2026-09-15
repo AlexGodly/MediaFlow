@@ -1348,7 +1348,6 @@ function normalizeSeasonalLibraryItems(){
       item.categoryId=backlog.id;
       item.status='completed';
       item.progress=item.total!=null ? Math.max(Number(item.progress)||0,Number(item.total)||0) : item.progress;
-      item.tags=Array.from(new Set([...(item.tags||[]),'backlog']));
       changed=true;
     }
   });
@@ -1360,7 +1359,7 @@ function logTitleCandidates(query){
   if(!q) return [];
   return S.library.filter(i=>{
     if(!i || !['seasonal','backlog'].includes(i.categoryId)) return false;
-    if(i.status==='dropped') return false;
+    if(i.status==='dropped' || i.status==='completed') return false;
     return cleanTitle(i.title).toLowerCase().includes(q);
   }).slice(0,8);
 }
@@ -2970,10 +2969,14 @@ const App = {
   selectLogTitle(id, makeSeasonal){
     const item=S.library.find(i=>i.id===id);
     if(!item) return;
-    if(makeSeasonal && item.categoryId==='backlog') item.categoryId='seasonal';
-    normalizeSeasonalLibraryItems();
+    const currentCat=getCategory(S.currentTask.categoryId);
+    if(currentCat.id==='seasonal' && makeSeasonal && item.categoryId==='backlog'){
+      item.categoryId='seasonal';
+      if(item.status==='completed') item.status='active';
+      persistLibrary();
+    }
     S.entryDraft.title=cleanTitle(item.title);
-    persistLibrary();
+    S.entryDraft.libraryId=item.id;
     render();
   },
 
@@ -2984,10 +2987,11 @@ const App = {
 
     const qty=Math.max(1,Number(S.entryDraft.qty)||1);
     const cat=getCategory(S.currentTask.categoryId);
-    let match=findLibraryMatch(cat.id,title);
+    let match=S.entryDraft.libraryId ? S.library.find(i=>i.id===S.entryDraft.libraryId) : null;
+    if(!match) match=findLibraryMatch(cat.id,title);
     let isNew=false;
     if(!match && cat.id==='seasonal'){
-      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
+      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && i.status!=='completed' && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
       if(match && match.categoryId==='backlog'){
         match.categoryId='seasonal';
         match.status=match.status==='completed' ? 'active' : match.status;
@@ -3015,7 +3019,7 @@ const App = {
 
     S.logDraft.entries=S.logDraft.entries||[];
     S.logDraft.entries.push({title,qty,libraryId:match.id,isNew});
-    S.entryDraft={title:'',qty:1};
+    S.entryDraft={title:'',qty:1,libraryId:null};
     render();
 
   },
