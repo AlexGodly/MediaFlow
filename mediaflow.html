@@ -377,16 +377,45 @@ const STATE_KEY = 'mf_state_v2';
 const LEGACY_KEYS = ['mf_categories','mf_library','mf_sessions','mf_settings','mf_currentTask','mf_sessionActive'];
 let saveQueue = Promise.resolve();
 let lastSaveFailed = false;
+let STORAGE_MODE = null; // 'cloud' (window.storage) | 'local' (localStorage) | 'memory' (nothing works)
+
+async function detectStorageMode(){
+  if(typeof window !== 'undefined' && window.storage && typeof window.storage.set === 'function'){
+    try{
+      await window.storage.set('__mf_probe__', '1', false);
+      const r = await window.storage.get('__mf_probe__', false);
+      if(r && r.value === '1') return 'cloud';
+    }catch(e){ /* fall through to local */ }
+  }
+  try{
+    localStorage.setItem('__mf_probe__','1');
+    const ok = localStorage.getItem('__mf_probe__')==='1';
+    localStorage.removeItem('__mf_probe__');
+    if(ok) return 'local';
+  }catch(e){ /* private browsing / disabled storage */ }
+  return 'memory';
+}
+
+let memoryStore = {};
 
 async function rawGet(key){
   try{
-    const r = await window.storage.get(key, false);
-    if(!r || r.value === undefined || r.value === null) return undefined;
-    return JSON.parse(r.value);
+    if(STORAGE_MODE==='cloud'){
+      const r = await window.storage.get(key, false);
+      if(!r || r.value === undefined || r.value === null) return undefined;
+      return JSON.parse(r.value);
+    }
+    if(STORAGE_MODE==='local'){
+      const v = localStorage.getItem(key);
+      return v===null ? undefined : JSON.parse(v);
+    }
+    return memoryStore[key];
   }catch(e){ return undefined; }
 }
 async function rawSet(key, value){
-  return window.storage.set(key, JSON.stringify(value), false);
+  if(STORAGE_MODE==='cloud') return window.storage.set(key, JSON.stringify(value), false);
+  if(STORAGE_MODE==='local') return localStorage.setItem(key, JSON.stringify(value));
+  memoryStore[key] = value; return true;
 }
 
 function snapshot(){
@@ -422,7 +451,17 @@ function showSaveError(){
 }
 function hideSaveError(){ const bar=document.getElementById('save-error-bar'); if(bar) bar.remove(); }
 
+function showMemoryModeNotice(){
+  if(document.getElementById('memory-mode-bar')) return;
+  const bar = document.createElement('div');
+  bar.id='memory-mode-bar';
+  bar.style.cssText='position:fixed;top:0;left:0;right:0;background:#E8A94A;color:#1c1305;font-weight:700;font-size:12.5px;text-align:center;padding:8px;z-index:999;';
+  bar.textContent = "This browser is blocking all local storage (private/incognito mode, or storage disabled) — nothing will be saved between refreshes right now.";
+  document.body.appendChild(bar);
+}
+
 async function loadAll(){
+  STORAGE_MODE = await detectStorageMode();
   let data = await rawGet(STATE_KEY);
   if(!data){
     // migrate from the old per-key layout, if present, so existing progress isn't lost
@@ -771,6 +810,9 @@ function renderShell(){
       <div class="sidebar-foot">
         <div class="k">Day streak</div>
         <div class="v">${computeDayStreak()} 🔥</div>
+        <div style="font-size:10.5px; color:var(--text-mute); margin-top:10px;">
+          ${STORAGE_MODE==='cloud'?'● Saved to your Claude storage':STORAGE_MODE==='local'?'● Saved in this browser':'● Not saving — see banner above'}
+        </div>
       </div>
     </div>
     <div class="main">
@@ -1745,6 +1787,7 @@ function render(){
 async function init(){
   await loadAll();
   renderShell();
+  if(STORAGE_MODE==='memory') showMemoryModeNotice();
 }
 init();
 
