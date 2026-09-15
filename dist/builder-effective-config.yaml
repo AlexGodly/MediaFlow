@@ -1,0 +1,27 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.mediaflow.app
+productName: MediaFlow
+files:
+  - filter:
+      - main.js
+      - preload.js
+      - index.html
+      - style.css
+      - script.js
+      - assets/**/*
+win:
+  target:
+    - portable
+    - nsis
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+compression: maximum
+electronVersion: 33.4.11
