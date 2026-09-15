@@ -27,8 +27,8 @@ x64:
     - assets/**/*
 nsis:
   script: |-
-    !include "C:\Users\Alex\Downloads\MediaFlow_project (1)\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
-    !addincludedir "C:\Users\Alex\Downloads\MediaFlow_project (1)\node_modules\app-builder-lib\templates\nsis\include"
+    !include "C:\Users\Alex\Downloads\MediaFlow_project (2)\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
+    !addincludedir "C:\Users\Alex\Downloads\MediaFlow_project (2)\node_modules\app-builder-lib\templates\nsis\include"
     !macro _isUpdated _a _b _t _f
       ${StdUtils.TestParameter} $R9 "updated"
       StrCmp "$R9" "true" `${_t}` `${_f}`
@@ -101,8 +101,8 @@ nsis:
     !macroend
 
     !addplugindir /x86-unicode "C:\Users\Alex\AppData\Local\electron-builder\Cache\nsis\nsis-resources-3.4.1\plugins\x86-unicode"
-    !include "C:\Users\Alex\AppData\Local\Temp\t-B1cUZ4\1-messages.nsh"
-    !include "C:\Users\Alex\AppData\Local\Temp\t-B1cUZ4\2-messages.nsh"
+    !include "C:\Users\Alex\AppData\Local\Temp\t-yimLWF\1-messages.nsh"
+    !include "C:\Users\Alex\AppData\Local\Temp\t-yimLWF\2-messages.nsh"
 
     Var newStartMenuLink
     Var oldStartMenuLink
