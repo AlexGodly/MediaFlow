@@ -82,7 +82,6 @@ html[data-theme="amoled"] .sidebar{background:#000;}
 .filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px;}
 .filter-row .field{min-width:150px;flex:1;}
 .priority-click{cursor:pointer;transition:transform .12s,background .12s;} .priority-click:hover{transform:translateY(-1px);background:var(--panel-raised)!important;}
-.offline-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:#E8A94A22;color:var(--flow);border:1px solid #E8A94A44;}
 .sync-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:#3FC7A622;color:var(--healthy);border:1px solid #3FC7A644;}
 @media(max-width:860px){.profile-stat-hero{align-items:flex-start}.chart-svg{min-width:480px}.sidebar-resizer{display:none;}}
 
@@ -593,6 +592,7 @@ small.hint{display:block; color:var(--text-mute); font-size:11.5px; margin-top:5
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 900px 700px at 50% 0%,#1A2036 0%,var(--bg) 62%)}
 .auth-card{width:min(430px,100%);background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
 .auth-brand{display:flex;align-items:center;gap:11px;margin-bottom:24px}.auth-brand .brand-mark{width:38px;height:38px}.auth-brand-name{font-family:var(--font-display);font-size:24px;font-weight:600}.auth-title{font-family:var(--font-display);font-size:28px;margin-bottom:6px}.auth-sub{color:var(--text-dim);font-size:13px;line-height:1.55;margin-bottom:22px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#10141F;padding:4px;border-radius:10px;margin-bottom:18px}.auth-tab{border:0;background:transparent;color:var(--text-mute);padding:9px;border-radius:7px;font-weight:800;cursor:pointer}.auth-tab.active{background:var(--panel-raised);color:var(--text)}.auth-error{background:rgba(232,96,122,.11);border:1px solid rgba(232,96,122,.35);color:#ff9bad;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-success{background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.3);color:#72e2c2;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-foot{font-size:11px;color:var(--text-mute);line-height:1.5;margin-top:16px}.account-menu{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);margin-top:10px}.account-menu-email{font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.cloud-badge{font-size:10px;font-weight:800;color:var(--healthy);background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.22);padding:3px 7px;border-radius:99px}.setup-code{display:block;background:#0c1018;border:1px solid var(--border-soft);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:var(--text-dim);white-space:pre-wrap;word-break:break-all}
+.big-stat{font-family:var(--font-display);font-size:34px;font-weight:650;letter-spacing:-.03em;margin:4px 0 2px;}
 </style>
 
 </head>
@@ -623,18 +623,12 @@ function renderAuthScreen(mode='login',message='',isError=false){
  AUTH_MODE=mode;
  if(!SUPABASE_CONFIGURED){document.getElementById('app').innerHTML=`<div class="auth-screen"><div class="auth-card"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Media rotation, your way.</div></div></div><div class="auth-title">Cloud accounts need setup</div><div class="auth-sub">This build is account-ready, but it needs your Supabase project URL and publishable key before users can sign up or log in.</div><div class="setup-code">SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'\nSUPABASE_PUBLISHABLE_KEY = 'sb_publishable_...'</div><div class="auth-foot">Use only the publishable/anon key in this browser app. Never expose a service-role or secret key.</div></div></div>`;return;}
  const title=mode==='signup'?'Create your MediaFlow account':'Welcome back',desc=mode==='signup'?'Create an account and keep your MediaFlow library, history, settings and progress synced everywhere.':'Log in to continue to your personal MediaFlow workspace.';
- document.getElementById('app').innerHTML=`<div class="auth-screen"><div class="auth-card"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Media rotation, your way.</div></div></div><div class="auth-title">${title}</div><div class="auth-sub">${desc}</div><div class="auth-tabs"><button class="auth-tab ${mode==='login'?'active':''}" onclick="window.MediaFlowAuth.show('login')">Log in</button><button class="auth-tab ${mode==='signup'?'active':''}" onclick="window.MediaFlowAuth.show('signup')">Sign up</button></div>${message?`<div class="${isError?'auth-error':'auth-success'}">${escapeHtml(message)}</div>`:''}<form onsubmit="return window.MediaFlowAuth.submit(event)"><div class="field"><label class="field-label">Email</label><input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></div><div class="field"><label class="field-label">Password</label><input id="auth-password" type="password" autocomplete="${mode==='login'?'current-password':'new-password'}" minlength="6" required placeholder="At least 6 characters"></div>${mode==='signup'?`<div class="field"><label class="field-label">Confirm password</label><input id="auth-confirm" type="password" autocomplete="new-password" minlength="6" required placeholder="Repeat your password"></div>`:''}<button class="btn btn-primary btn-block" type="submit">${mode==='signup'?'Create account':'Log in'}</button></form>${mode==='login'?'<button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="window.MediaFlowAuth.reset()">Forgot password?</button>':''}<button class="btn btn-block" style="margin-top:10px" onclick="window.MediaFlowAuth.offline()">Use offline mode</button><div class="auth-foot">Your account uses Supabase Auth. MediaFlow stores your app state in a private cloud row protected by Row Level Security.</div></div></div>`;
+ document.getElementById('app').innerHTML=`<div class="auth-screen"><div class="auth-card"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Media rotation, your way.</div></div></div><div class="auth-title">${title}</div><div class="auth-sub">${desc}</div><div class="auth-tabs"><button class="auth-tab ${mode==='login'?'active':''}" onclick="window.MediaFlowAuth.show('login')">Log in</button><button class="auth-tab ${mode==='signup'?'active':''}" onclick="window.MediaFlowAuth.show('signup')">Sign up</button></div>${message?`<div class="${isError?'auth-error':'auth-success'}">${escapeHtml(message)}</div>`:''}<form onsubmit="return window.MediaFlowAuth.submit(event)"><div class="field"><label class="field-label">Email</label><input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></div><div class="field"><label class="field-label">Password</label><input id="auth-password" type="password" autocomplete="${mode==='login'?'current-password':'new-password'}" minlength="6" required placeholder="At least 6 characters"></div>${mode==='signup'?`<div class="field"><label class="field-label">Confirm password</label><input id="auth-confirm" type="password" autocomplete="new-password" minlength="6" required placeholder="Repeat your password"></div>`:''}<button class="btn btn-primary btn-block" type="submit">${mode==='signup'?'Create account':'Log in'}</button></form>${mode==='login'?'<button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="window.MediaFlowAuth.reset()">Forgot password?</button>':''}<div class="auth-foot">Your account uses Supabase Auth. MediaFlow stores your app state in a private cloud row protected by Row Level Security.</div></div></div>`;
 }
 function friendlyAuthError(err){return String(err?.message||err||'Authentication failed.').replace('Invalid login credentials','Incorrect email or password.').replace('User already registered','That email is already registered. Try logging in.');}
 async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
 async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
-async function startOfflineMode(){
-  AUTH_USER=null; AUTH_READY=true; OFFLINE_ACTIVE=true; STORAGE_MODE='local'; S.offlineMode=true; await loadAll(); renderShell(); showOfflineNotice();
-}
-function showOfflineNotice(){
-  let bar=document.getElementById('offline-mode-bar'); if(!bar){bar=document.createElement('div');bar.id='offline-mode-bar';bar.style.cssText='position:fixed;top:0;left:0;right:0;background:#E8A94A;color:#1c1305;font-weight:800;font-size:12px;text-align:center;padding:8px;z-index:998;';document.body.appendChild(bar);} bar.textContent=AUTH_USER?'Offline — changes are saved locally and will sync automatically when internet returns.':'Offline mode — data is stored locally on this device. You can migrate it to a cloud account from Profile settings.';
-}
-async function signOut(){if(AUTH_USER&&supabase)await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;S.offlineMode=false;renderAuthScreen('login','You have been logged out.');}
+async function signOut(){if(AUTH_USER&&supabase)await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
 function getDisplayName(){const name=String(AUTH_USER?.user_metadata?.display_name||'').trim();return name||String(AUTH_USER?.email||'').trim()||'Account';}
 function profileInitials(){const display=getDisplayName();const parts=display.split(/\s+/).filter(Boolean);if(parts.length>1)return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();return display.slice(0,1).toUpperCase()||'?';}
 function getAvatarUrl(){return String(S.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();}
@@ -732,7 +726,7 @@ async function removeAvatar(){
    alert(friendlyAuthError(err));
  }
 }
-window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut,offline:startOfflineMode};
+window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut};
 window.MediaFlowProfile={updateName:updateAccountName,updateEmail:updateAccountEmail,updatePassword:updateAccountPassword,chooseAvatar:chooseProfilePicture,saveAvatar:saveProfilePicture,removeAvatar};
 
 const UNITS = {
@@ -879,45 +873,22 @@ let saveQueue = Promise.resolve();
 
 let lastSaveFailed = false;
 
-let STORAGE_MODE = null; // cloud | local | memory
-let OFFLINE_ACTIVE = false;
-const CLOUD_CACHE_KEY='mf_cloud_cache_v1', PENDING_SYNC_KEY='mf_pending_cloud_sync_v1';
-async function detectStorageMode(){
-  if(supabase&&AUTH_USER&&navigator.onLine!==false)return 'cloud';
-  try{localStorage.setItem('__mf_probe__','1');const ok=localStorage.getItem('__mf_probe__')==='1';localStorage.removeItem('__mf_probe__');if(ok)return 'local';}catch(e){}
-  return 'memory';
-}
+let STORAGE_MODE = 'cloud';
+const CLOUD_CACHE_KEY='mf_cloud_cache_v1';
 let memoryStore={};
 async function localRawGet(key){try{const v=localStorage.getItem(key);return v===null?undefined:JSON.parse(v);}catch(e){return undefined;}}
 function localSetRaw(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}
 async function rawGet(key){
-  try{
-    if(STORAGE_MODE==='cloud'){
-      const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();
-      if(error)throw error;
-      if(data?.state_data)localSetRaw(CLOUD_CACHE_KEY,data.state_data);
-      return data?.state_data??undefined;
-    }
-    if(STORAGE_MODE==='local'){const v=await localRawGet(key);if(v!==undefined)return v;if(AUTH_USER)return localRawGet(CLOUD_CACHE_KEY);return v;}
-    return memoryStore[key];
-  }catch(e){
-    console.warn('MediaFlow cloud read failed, using cached/offline data',e);
-    OFFLINE_ACTIVE=true;
-    const cached=await localRawGet(CLOUD_CACHE_KEY);
-    if(cached)return cached;
-    return await localRawGet(key);
-  }
+  if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
+  const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();
+  if(error)throw error;
+  return data?.state_data??undefined;
 }
 async function rawSet(key,value){
-  if(STORAGE_MODE==='cloud'){
-    const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(error)throw error;
-    localSetRaw(CLOUD_CACHE_KEY,value);
-    try{localStorage.removeItem(PENDING_SYNC_KEY);}catch(e){}
-    return true;
-  }
-  if(STORAGE_MODE==='local'){localSetRaw(key,value);if(AUTH_USER)localSetRaw(PENDING_SYNC_KEY,true);return true;}
-  memoryStore[key]=value;return true;
+  if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
+  const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error)throw error;
+  return true;
 }
 function mergeStates(a,b){
   if(!a)return b||{}; if(!b)return a;
@@ -929,20 +900,6 @@ function mergeStates(a,b){
   out.categories=a.categories||b.categories; out.settings=Object.assign({},b.settings||{},a.settings||{}); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
   return out;
 }
-async function syncOfflineToCloud(){
-  if(!AUTH_USER||!supabase||!navigator.onLine)return false;
-  const pending=await localRawGet(PENDING_SYNC_KEY); const local=await localRawGet(STATE_KEY);
-  if(!pending||!local)return false;
-  try{
-    const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle(); if(error)throw error;
-    const merged=mergeStates(local,data?.state_data||{});
-    await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:merged,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    localSetRaw(CLOUD_CACHE_KEY,merged); localSetRaw(STATE_KEY,merged); localStorage.removeItem(PENDING_SYNC_KEY);
-    OFFLINE_ACTIVE=false; if(S.categories){S.categories=merged.categories;S.library=sanitizeLibrary(merged.library||[]);S.sessions=merged.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,merged.settings||{});S.currentTask=merged.currentTask||null;S.sessionActive=!!merged.sessionActive;S.profilePicture=merged.profilePicture||'';}
-    showToast('Offline changes synced to cloud ✓'); render(); return true;
-  }catch(e){console.warn('Offline sync waiting for connection',e);return false;}
-}
-
 function snapshot(){
 
   return {
@@ -1051,10 +1008,8 @@ function sanitizeLibrary(list){
 }
 
 async function loadAll(){
- STORAGE_MODE=await detectStorageMode(); OFFLINE_ACTIVE=(STORAGE_MODE==='local' && !!AUTH_USER); let data=await rawGet(STATE_KEY);
- if(!data&&STORAGE_MODE==='cloud'){const local=await localRawGet(STATE_KEY);if(local){const useLocal=window.confirm('MediaFlow found existing data in this browser. Upload it to your account so it is available everywhere?\n\nChoose Cancel to start this account with a fresh cloud state.');if(useLocal)data=local;}}
- if(!data&&STORAGE_MODE!=='cloud'){const [categories,library,sessions,settings,currentTask,sessionActive]=await Promise.all(LEGACY_KEYS.map(localRawGet));if(categories||library||sessions||settings)data={categories,library,sessions,settings,currentTask,sessionActive};}
- data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;
+ STORAGE_MODE='cloud'; let data=await rawGet(STATE_KEY);
+ data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
@@ -1738,7 +1693,7 @@ function renderShell(){
 
       </div>
 
-      <div class="sidebar-foot"><div class="account-menu"><button class="account-avatar-btn" onclick="App.openProfile()" title="Open profile settings">${renderAccountAvatar()}</button><button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><span class="${STORAGE_MODE==='cloud'?'cloud-badge':'offline-badge'}">${STORAGE_MODE==='cloud'?'CLOUD':'OFFLINE'}</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
+      <div class="sidebar-foot"><div class="account-menu"><button class="account-avatar-btn" onclick="App.openProfile()" title="Open profile settings">${renderAccountAvatar()}</button><button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><span class="cloud-badge">CLOUD</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
         <div class="k">Day streak</div>
 
@@ -1746,7 +1701,7 @@ function renderShell(){
 
         <div style="font-size:10.5px; color:var(--text-mute); margin-top:10px;">
 
-          ${STORAGE_MODE==='cloud'?'● Saved to cloud storage':STORAGE_MODE==='local'?'● Saved in this browser':'● Not saving — see banner above'}
+          ● Saved to cloud storage
 
         </div>
 
@@ -2707,7 +2662,7 @@ function renderProfile(){
         <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updateName()">Save name</button></div>
       </div>
 
-      ${AUTH_USER?`<div class="section-label">EMAIL</div>
+      <div class="section-label">EMAIL</div>
       <div class="card profile-section">
         <div class="field"><label class="field-label">Email address</label><input id="profile-email" type="email" autocomplete="email" value="${email}"></div>
         <div class="profile-note">Changing your email may require confirmation from the new address before it becomes active.</div>
@@ -2721,14 +2676,13 @@ function renderProfile(){
           <div class="field"><label class="field-label">Confirm new password</label><input id="profile-password-confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repeat password"></div>
         </div>
         <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updatePassword()">Change password</button></div>
-      </div>`:`<div class="card profile-section"><div style="font-weight:700;">Local offline profile</div><div class="profile-note">Email, password and cloud account details are intentionally empty in offline mode. Only your name and profile picture are used here.</div></div>`}
+      </div>
 
       <div class="section-label">ACCOUNT</div>
       <div class="card">
-        <div style="font-weight:700;">${AUTH_USER?'Cloud account':'Local offline workspace'}</div>
-        <div class="profile-note">${AUTH_USER?'Your MediaFlow library, history, settings and progress are synced to this Supabase account. Signing out does not delete your cloud data.':'This workspace is stored locally on this device until you migrate it to a cloud account.'}</div>
+        <div style="font-weight:700;">Cloud account</div>
+        <div class="profile-note">Your MediaFlow library, history, settings and progress are synced to this Supabase account. Signing out does not delete your cloud data.</div>
       </div>
-      ${!AUTH_USER?`<div class="section-label">CLOUD MIGRATION</div><div class="card"><b>Migrate to cloud</b><div class="profile-note">Create a cloud account and move this offline workspace into it.</div><button class="btn btn-primary" style="margin-top:10px" onclick="App.migrateOffline()">Migrate to cloud</button></div>`:''}
     </div>`;
 }
 
@@ -4038,18 +3992,10 @@ function autoFitSidebarToProfile(){
 }
 loadSidebarWidth();
 
-// Network recovery: immediately sync pending offline changes for cloud accounts.
-window.addEventListener('online',async()=>{
-  if(AUTH_USER && !APP_STARTING){
-    await syncOfflineToCloud();
-    if(STORAGE_MODE==='local'){STORAGE_MODE='cloud';await loadAll();render();}
-  }
-});
-window.addEventListener('offline',()=>{ if(AUTH_USER){OFFLINE_ACTIVE=true;STORAGE_MODE='local';showOfflineNotice();} });
 
 
 /* ============================================================
-   V14 FEATURES: OFFLINE, BACKUPS, THEMES, STOPWATCH, MAL LINK, STATS
+   V16 FEATURES: BACKUPS, THEMES, STOPWATCH, MAL LINK, STATS
    ============================================================ */
 const BACKUP_DB='MediaFlowBackupDB';
 let backupFolderHandle=null, backupTimer=null;
@@ -4059,15 +4005,7 @@ function applyTheme(theme){
   if(S.settings)S.settings.theme=t;
   try{localStorage.setItem('mf_theme',t);}catch(e){}
 }
-function initTheme(){
-  let theme='dark';
-  try{theme=S.settings?.theme||localStorage.getItem('mf_theme')||'dark';}catch(e){}
-  try{applyTheme(theme);}catch(e){
-    console.warn('MediaFlow: theme initialization failed',e);
-    document.documentElement.dataset.theme='dark';
-    if(S.settings)S.settings.theme='dark';
-  }
-}
+function initTheme(){try{applyTheme(S.settings?.theme||localStorage.getItem('mf_theme')||'dark');}catch(e){applyTheme('dark');}}
 function backupSnapshot(){return JSON.parse(JSON.stringify(snapshot()));}
 async function openBackupFolder(){
   if(!window.showDirectoryPicker){alert('Automatic file backups need a Chromium-based desktop browser with File System Access support.');return;}
@@ -4104,17 +4042,6 @@ function emptyLibraryAdvanced(){
   if(!choice||choice==='3')return;
   if(choice==='1'||choice==='2'){if(!confirm(`Remove all ${S.library.length} library titles? Consumption history will remain.`))return;S.library=[];if(choice==='2'){S.currentTask=null;S.sessionActive=false;}saveState().then(()=>{render();showToast('Library emptied');});}
 }
-async function migrateOfflineToCloud(){
-  if(AUTH_USER){showToast('You are already using a cloud account.');return;}
-  if(!supabase){alert('Cloud setup is unavailable.');return;}
-  const email=prompt('Enter the email for your new MediaFlow cloud account:');if(!email)return;
-  const password=prompt('Choose a password (minimum 6 characters):');if(!password||password.length<6){alert('Password must be at least 6 characters.');return;}
-  try{
-    const local=await localRawGet(STATE_KEY)||snapshot();const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:String(local.profileName||'').trim()||null},emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;
-    if(data.session){AUTH_USER=data.user;STORAGE_MODE='cloud';const cloud=mergeStates(local,{});await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:cloud,updated_at:new Date().toISOString()},{onConflict:'user_id'});localSetRaw(CLOUD_CACHE_KEY,cloud);localSetRaw(STATE_KEY,cloud);localStorage.removeItem(PENDING_SYNC_KEY);S.offlineMode=false;showToast('Offline data migrated to cloud ✓');await loadAll();render();}
-    else alert('Account created. Confirm the email, then log in. Your offline data remains safely on this device until migration completes.');
-  }catch(e){alert(friendlyAuthError(e));}
-}
 async function malSync(){
   const username=(S.malLink?.username||'').trim();if(!username){alert('Enter your MyAnimeList username first.');return;}
   const mode=S.malLink.mode||'anime';const types=mode==='both'?['anime','manga']:[mode];showImportProgress('MAL sync','Starting…');
@@ -4124,15 +4051,34 @@ async function malSync(){
     normalizeSeasonalLibraryItems();await persistLibrary();finishImportProgress(true,`MAL sync complete`,`Added ${added}, updated ${updated}, processed ${total} titles.`);render();
   }catch(e){console.error(e);finishImportProgress(false,'MAL sync failed',e.message||String(e));}
 }
-function renderProfileStatHero(){const url=getAvatarUrl();return `<div class="profile-stat-hero"><div class="profile-stat-avatar">${url?`<img src="${escapeHtml(url)}" alt="Profile picture">`:escapeHtml(profileInitials())}</div><div><div style="font-family:var(--font-display);font-size:30px;font-weight:600;">${escapeHtml(getDisplayName())}</div><div style="color:var(--text-dim);font-size:13px;margin-top:5px;">${AUTH_USER?.email||'Offline local account'}</div><div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;"><span class="pill">${S.library.length} titles</span><span class="pill">${S.sessions.length} sessions</span><span class="pill">${fmtMinutes(totalsForSessions(S.sessions).minutes)} consumed</span></div></div></div>`;}
+function renderProfileStatHero(){const url=getAvatarUrl();return `<div class="profile-stat-hero"><div class="profile-stat-avatar">${url?`<img src="${escapeHtml(url)}" alt="Profile picture">`:escapeHtml(profileInitials())}</div><div><div style="font-family:var(--font-display);font-size:30px;font-weight:600;">${escapeHtml(getDisplayName())}</div><div style="color:var(--text-dim);font-size:13px;margin-top:5px;">${escapeHtml(AUTH_USER?.email||'')}</div><div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;"><span class="pill">${S.library.length} titles</span><span class="pill">${S.sessions.length} sessions</span><span class="pill">${fmtMinutes(totalsForSessions(S.sessions).minutes)} consumed</span></div></div></div>`;}
 function svgBarChart(data,labelFn,valueFn){const max=Math.max(1,...data.map(valueFn));const w=760,h=220,p=30,gap=8,bw=Math.max(8,(w-p*2-gap*(data.length-1))/Math.max(1,data.length));return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img"><line x1="${p}" y1="${h-p}" x2="${w-p}" y2="${h-p}" stroke="currentColor" opacity=".25"/>${data.map((d,i)=>{const v=valueFn(d),bh=(h-p*2)*v/max,x=p+i*(bw+gap),y=h-p-bh;return `<g><rect class="chart-bar" x="${x}" y="${y}" width="${bw}" height="${Math.max(2,bh)}" rx="4" fill="var(--flow)"/><text x="${x+bw/2}" y="${h-10}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">${escapeHtml(labelFn(d))}</text><text x="${x+bw/2}" y="${Math.max(12,y-5)}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".8">${Math.round(v)}</text></g>`}).join('')}</svg>`;}
 function weeklyStatsData(){const out=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);out.push({date:iso,label:d.toLocaleDateString(undefined,{weekday:'short'}),minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(s.minutes||0),0),tasks:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').length});}return out;}
 function renderStatsV14(){
- const today=totalsForSessions(todaysSessions()),week=totalsForSessions(sessionsInRange(7)),month=totalsForSessions(sessionsInRange(30)),life=totalsForSessions(S.sessions),cats=S.categories.filter(c=>c.enabled),data=weeklyStatsData();
- const totalUnits=life.episodes+life.chapters+life.movies+life.issues;const avg=data.reduce((a,d)=>a+d.minutes,0)/7;const activeTitles=S.library.filter(i=>i.status==='active').length,completed=S.library.filter(i=>i.status==='completed').length;
- const catData=cats.map(c=>({c,m:sessionsInRange(30).filter(s=>s.categoryId===c.id&&s.status!=='skipped').reduce((a,s)=>a+s.minutes,0)}));
+ const life=totalsForSessions(S.sessions), today=totalsForSessions(todaysSessions()), week=totalsForSessions(sessionsInRange(7)), month=totalsForSessions(sessionsInRange(30));
+ const enabledCats=S.categories.filter(c=>c.enabled), last7=weeklyStatsData();
+ const last30=[]; for(let i=29;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);last30.push({date:iso,label:d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0),tasks:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').length});}
+ const last90=[]; for(let i=89;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);last90.push({date:iso,label:i%7===0?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'',minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0)});}
+ const catData=enabledCats.map(c=>({c,m:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0),tasks:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').length})).sort((a,b)=>b.m-a.m);
+ const statusData=['planned','active','paused','completed','dropped'].map(k=>({label:k[0].toUpperCase()+k.slice(1),value:S.library.filter(i=>i.status===k).length}));
+ const priorityData=['high','medium','low'].map(k=>({label:k[0].toUpperCase()+k.slice(1),value:S.library.filter(i=>i.priority===k).length}));
+ const mediaMap={}; S.sessions.forEach(s=>{if(s.status==='skipped')return;const cat=S.categories.find(c=>c.id===s.categoryId);const type=cat?.type||'other';mediaMap[type]=(mediaMap[type]||0)+(Number(s.minutes)||0);});
+ const mediaData=Object.entries(mediaMap).map(([label,value])=>({label,value}));
+ const totalUnits=life.episodes+life.chapters+life.movies+life.issues;
+ const avgDaily7=Math.round(last7.reduce((a,d)=>a+d.minutes,0)/7), avgSession=S.sessions.length?Math.round(life.minutes/S.sessions.length):0;
+ const longestDay=Math.max(...last30.map(d=>d.minutes),0), mostActiveDay=last30.find(d=>d.minutes===longestDay)?.date;
+ const mostActiveDayLabel=mostActiveDay?new Date(mostActiveDay+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}):'—';
  const maxCat=Math.max(1,...catData.map(x=>x.m));
- return `<div class="view-head"><div><div class="view-title">Statistics</div><div class="view-desc">Your consumption, measured from every angle.</div></div></div>${renderProfileStatHero()}<div class="grid-3" style="margin-bottom:24px;">${statCard('Today',today)}${statCard('This week',week)}${statCard('This month',month)}</div><div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">7-DAY MINUTES</div>${svgBarChart(data,d=>d.label,d=>d.minutes)}</div><div class="card"><div class="section-label">7-DAY TASKS</div>${svgBarChart(data,d=>d.label,d=>d.tasks)}</div></div><div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">30-DAY CATEGORY MIX</div>${catData.map(x=>`<div class="bal-bar-row"><div class="bal-bar-label">${x.c.icon} ${escapeHtml(x.c.name)}</div><div class="bal-bar-track"><div class="bal-bar-fill" style="width:${Math.round(x.m/maxCat*100)}%;background:${x.c.color};"></div></div><div class="bal-bar-val">${fmtMinutes(x.m)}</div></div>`).join('')||'<div class="empty-state">No data yet.</div>'}</div><div class="card"><div class="section-label">LIBRARY HEALTH</div><div class="record-list"><div class="record-row"><span class="k">Library titles</span><span class="v">${S.library.length}</span></div><div class="record-row"><span class="k">Active titles</span><span class="v">${activeTitles}</span></div><div class="record-row"><span class="k">Completed titles</span><span class="v">${completed}</span></div><div class="record-row"><span class="k">Total units logged</span><span class="v">${totalUnits}</span></div><div class="record-row"><span class="k">Average daily minutes (7d)</span><span class="v">${fmtMinutes(Math.round(avg))}</span></div><div class="record-row"><span class="k">Current day streak</span><span class="v">${computeDayStreak()} 🔥</span></div></div></div></div><div class="card"><div class="section-label">RECORDS & ADVANCED METRICS</div><div class="grid-3"><div class="stat-box"><div class="lbl">Total lifetime</div><div class="num">${fmtMinutes(life.minutes)}</div></div><div class="stat-box"><div class="lbl">Sessions</div><div class="num">${S.sessions.length}</div></div><div class="stat-box"><div class="lbl">Avg. session</div><div class="num">${fmtMinutes(S.sessions.length?Math.round(life.minutes/S.sessions.length):0)}</div></div></div></div>`;
+ const bars=(data,val)=>svgBarChart(data,d=>d.label,d=>d[val]);
+ const compactList=(data,unit='')=>data.length?data.map(x=>`<div class="record-row"><span class="k">${escapeHtml(x.label)}</span><span class="v">${Math.round(x.value)}${unit}</span></div>`).join(''):'<div class="empty-state">No data yet.</div>';
+ return `<div class="view-head"><div><div class="view-title">Statistics</div><div class="view-desc">Your consumption, measured from every angle.</div></div></div>${renderProfileStatHero()}
+ <div class="grid-3" style="margin-bottom:24px;">${statCard('Today',today)}${statCard('This week',week)}${statCard('This month',month)}</div>
+ <div class="grid-3" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIFETIME</div><div class="big-stat">${fmtMinutes(life.minutes)}</div><div class="hint">Total time consumed</div></div><div class="card"><div class="section-label">UNITS</div><div class="big-stat">${totalUnits.toLocaleString()}</div><div class="hint">Episodes, chapters, movies & issues</div></div><div class="card"><div class="section-label">STREAK</div><div class="big-stat">${computeDayStreak()} 🔥</div><div class="hint">Current consecutive days</div></div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">7-DAY MINUTES</div>${bars(last7,'minutes')}</div><div class="card"><div class="section-label">7-DAY SESSIONS</div>${bars(last7,'tasks')}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">30-DAY DAILY MINUTES</div>${svgBarChart(last30,d=>d.label,d=>d.minutes)}</div><div class="card"><div class="section-label">90-DAY ACTIVITY</div>${svgBarChart(last90,d=>d.label,d=>d.minutes)}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">30-DAY CATEGORY MIX</div>${catData.map(x=>`<div class="bal-bar-row"><div class="bal-bar-label">${x.c.icon} ${escapeHtml(x.c.name)}</div><div class="bal-bar-track"><div class="bal-bar-fill" style="width:${Math.round(x.m/maxCat*100)}%;background:${x.c.color};"></div></div><div class="bal-bar-val">${fmtMinutes(x.m)}</div></div>`).join('')||'<div class="empty-state">No data yet.</div>'}</div><div class="card"><div class="section-label">MEDIA TYPE MIX</div>${compactList(mediaData.map(x=>({label:x.label,value:x.value})))}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIBRARY STATUS</div>${compactList(statusData)}</div><div class="card"><div class="section-label">PRIORITY DISTRIBUTION</div>${compactList(priorityData)}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIBRARY HEALTH</div><div class="record-list"><div class="record-row"><span class="k">Library titles</span><span class="v">${S.library.length}</span></div><div class="record-row"><span class="k">Active titles</span><span class="v">${S.library.filter(i=>i.status==='active').length}</span></div><div class="record-row"><span class="k">Completed titles</span><span class="v">${S.library.filter(i=>i.status==='completed').length}</span></div><div class="record-row"><span class="k">Total units logged</span><span class="v">${totalUnits.toLocaleString()}</span></div></div></div><div class="card"><div class="section-label">ADVANCED METRICS</div><div class="record-list"><div class="record-row"><span class="k">Average daily minutes (7d)</span><span class="v">${fmtMinutes(avgDaily7)}</span></div><div class="record-row"><span class="k">Average session</span><span class="v">${fmtMinutes(avgSession)}</span></div><div class="record-row"><span class="k">Most active day</span><span class="v">${escapeHtml(mostActiveDayLabel)}</span></div><div class="record-row"><span class="k">Peak day minutes</span><span class="v">${fmtMinutes(longestDay)}</span></div><div class="record-row"><span class="k">Lifetime sessions</span><span class="v">${S.sessions.length}</span></div></div></div></div>`;
 }
 renderStats=renderStatsV14;
 
@@ -4142,24 +4088,20 @@ renderSettings=function(){
   const themeCard=`<div class="section-label">APPEARANCE</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">UI look</label><select onchange="App.setTheme(this.value)"><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="amoled" ${S.settings.theme==='amoled'?'selected':''}>AMOLED</option></select><small class="hint">Choose the overall MediaFlow interface style.</small></div></div>`;
   const backupCard=`<div class="section-label">AUTOMATIC BACKUPS</div><div class="card" style="margin-bottom:22px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><div><b>Automatic local JSON backup</b><div class="profile-note">Choose a folder on this computer. MediaFlow can periodically write a backup while the app is open. Browsers cannot write to arbitrary paths while the app is closed.</div></div><button class="toggle ${S.settings.backup?.enabled?'on':''}" onclick="App.toggleBackup()"></button></div><div class="field-row" style="margin-top:14px;"><div class="field"><label class="field-label">Backup every</label><select onchange="App.updateBackup('interval',this.value)"><option value="5" ${Number(S.settings.backup?.interval)===5?'selected':''}>5 minutes</option><option value="15" ${Number(S.settings.backup?.interval)===15?'selected':''}>15 minutes</option><option value="30" ${Number(S.settings.backup?.interval)===30?'selected':''}>30 minutes</option><option value="60" ${Number(S.settings.backup?.interval)===60?'selected':''}>1 hour</option><option value="360" ${Number(S.settings.backup?.interval)===360?'selected':''}>6 hours</option><option value="1440" ${Number(S.settings.backup?.interval)===1440?'selected':''}>Daily</option></select></div><div class="field"><label class="field-label">File mode</label><select onchange="App.updateBackup('mode',this.value)"><option value="single" ${S.settings.backup?.mode==='single'?'selected':''}>One file (overwrite)</option><option value="multiple" ${S.settings.backup?.mode==='multiple'?'selected':''}>Multiple files</option></select></div></div><div class="field"><label class="field-label">Single-file name</label><input value="${escapeHtml(S.settings.backup?.fileName||'mediaflow-backup.json')}" onchange="App.updateBackup('fileName',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="App.chooseBackupFolder()">Choose backup folder</button><button class="btn btn-ghost" onclick="App.backupNow()">Back up now</button></div><small class="hint">Folder permission is stored in this browser when supported. Multiple-file mode creates a timestamped JSON file each time.</small></div>`;
   const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
-  const offlineCard=(!AUTH_USER)?`<div class="section-label">CLOUD MIGRATION</div><div class="card" style="margin-bottom:22px;"><b>Offline local account</b><div class="profile-note">This workspace is local-only. Your email and password are intentionally empty. Create a cloud account to migrate this library, history, settings and profile to the cloud.</div><button class="btn btn-primary" style="margin-top:12px" onclick="App.migrateOffline()">Migrate to cloud</button></div>`:'';
+  const offlineCard='';
   const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
   const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
   return html;
 };
 
-// Profile: add migration action to the existing profile page for local/offline users.
-Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,migrateOffline:migrateOfflineToCloud,emptyLibraryAdvanced,choosePriority,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
+Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,emptyLibraryAdvanced,choosePriority,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
 
-// Make offline profile state explicit and avoid cloud-only identity fields.
-const _oldGetDisplayName=getDisplayName;
-function getDisplayName(){if(!AUTH_USER){const n=String(S.profileName||'').trim();return n||'Offline user';}return _oldGetDisplayName();}
 
 // Add profile name to state and keep it local/cloud.
 const _oldSnapshot=snapshot;
 snapshot=function(){const x=_oldSnapshot();x.profileName=String(S.profileName||'').trim();return x;};
 const _oldLoadAll=loadAll;
-loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.offlineMode=!!(!AUTH_USER&&STORAGE_MODE==='local');initTheme();await restoreBackupFolder();restartBackupTimer();};
+loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});initTheme();await restoreBackupFolder();restartBackupTimer();};
 
 /* ============================================================
 
@@ -4190,20 +4132,7 @@ function render(){
 
 }
 
-let APP_STARTING=false;
-async function startAuthenticatedApp(){
-  if(APP_STARTING) return;
-  APP_STARTING=true;
-  try{
-    AUTH_READY=true;
-    S.offlineMode=false;
-    await loadAll();
-    renderShell();
-    if(STORAGE_MODE==='memory')showMemoryModeNotice();
-    if(OFFLINE_ACTIVE)showOfflineNotice();
-    if(navigator.onLine)await syncOfflineToCloud();
-  }finally{APP_STARTING=false;}
-}
+async function startAuthenticatedApp(){AUTH_READY=true;await loadAll();renderShell();}
 async function init(){if(!supabase){renderAuthScreen('login');return;}try{const {data}=await supabase.auth.getSession();AUTH_USER=data?.session?.user||null;if(AUTH_USER)await startAuthenticatedApp();else renderAuthScreen('login');supabase.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if(next&&!AUTH_READY){AUTH_USER=next;await startAuthenticatedApp();}else if(!next&&AUTH_READY){AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login');}});}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 init();
 
