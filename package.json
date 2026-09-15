@@ -1,0 +1,17 @@
+{
+  "name": "mediaflow",
+  "productName": "MediaFlow",
+  "version": "6.0.0",
+  "description": "consumption rotation app",
+  "author": "Alex Godly <Alex Godly>",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
