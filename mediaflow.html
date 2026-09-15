@@ -2066,9 +2066,9 @@ function renderLibrary(){
 
         <div class="pill" style="text-transform:capitalize;">${i.priority} priority</div>
 
-        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); App.openLibraryModal('${i.id}')">Edit</button>
+        <button type="button" class="btn btn-sm btn-ghost" onclick="event.preventDefault(); event.stopPropagation(); App.openLibraryModal('${i.id}')">Edit</button>
 
-        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); App.deleteLibraryItem('${i.id}')">Delete</button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="event.preventDefault(); event.stopPropagation(); App.deleteLibraryItem('${i.id}')">Delete</button>
 
       </div>`;
 
@@ -2847,11 +2847,16 @@ function libraryModalHtml(d){
 
     <div class="field"><label class="field-label">Tags (comma separated)</label><input type="text" id="l-tags" value="${(d.tags||[]).join(', ')}"></div>
 
-    <div class="modal-actions">
+    <div class="modal-actions" style="justify-content:space-between;">
 
-      <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <div>
+        ${!isNew ? `<button type="button" class="btn btn-danger" onclick="event.preventDefault(); event.stopPropagation(); App.deleteLibraryItem('${d.id}')">Delete title</button>` : ''}
+      </div>
 
-      <button class="btn btn-primary" onclick="App.saveLibraryModal('${d.id||''}')">Save title</button>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn btn-ghost" onclick="event.preventDefault(); App.closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="event.preventDefault(); App.saveLibraryModal('${d.id||''}')">Save title</button>
+      </div>
 
     </div>
 
@@ -3112,12 +3117,26 @@ const App = {
   },
 
   async deleteLibraryItem(id){
-    if(!confirm('Delete this title from your library?')) return;
-    const before=S.library.length;
-    S.library=S.library.filter(i=>i && i.id!==id);
-    if(S.library.length===before) return;
-    S.libPage=0;
+    const item=S.library.find(i=>i && i.id===id);
+    if(!item) return;
+
+    const title=cleanTitle(item.title)||'this title';
+    const confirmed=window.confirm(`Delete "${title}" from your library?\n\nThis removes the library entry and cannot be undone. Your existing history/session logs will remain.`);
+    if(!confirmed) return;
+
+    const index=S.library.findIndex(i=>i && i.id===id);
+    if(index<0) return;
+
+    S.library.splice(index,1);
+    if(S.modal && S.modal.type==='library' && S.modal.data && S.modal.data.id===id){
+      S.modal=null;
+    }
+
+    // Save the already-mutated state, then redraw only after the save is queued.
     await persistLibrary();
+
+    const maxPage=Math.max(0,Math.ceil(S.library.length/50)-1);
+    S.libPage=clamp(S.libPage||0,0,maxPage);
     render();
   },
 
