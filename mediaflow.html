@@ -645,7 +645,7 @@ async function updateAccountPassword(){
  if(password!==confirm){alert('Passwords do not match.');return;}
  try{const {error}=await supabase.auth.updateUser({password});if(error)throw error;a.value='';b.value='';alert('Password updated successfully.');}catch(err){alert(friendlyAuthError(err));}
 }
-async function readAndStoreAvatar(file){
+async function readAndStoreAvatar(file,autoSave=false){
  if(!file)return;
  if(!file.type.startsWith('image/')){alert('Please choose an image file.');return;}
  const reader=new FileReader();
@@ -677,6 +677,22 @@ async function readAndStoreAvatar(file){
  };
  reader.readAsDataURL(file);
 }
+async function saveProfilePicture(){
+  const btn=document.getElementById('save-profile-picture');
+  const original=btn?.textContent||'Save picture';
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  try{
+    lastSaveFailed=false;
+    await saveState();
+    if(lastSaveFailed) throw new Error('Could not save your profile picture to cloud storage.');
+    if(btn){btn.disabled=false;btn.textContent='Saved ✓';setTimeout(()=>{if(btn&&document.body.contains(btn))btn.textContent=original;},1400);}
+  }catch(err){
+    if(btn){btn.disabled=false;btn.textContent=original;}
+    alert(friendlyAuthError(err));
+  }
+}
+function chooseProfilePicture(file){ return readAndStoreAvatar(file,false); }
+
 async function removeAvatar(){
  const previous=S.profilePicture||'';
  try{
@@ -690,7 +706,7 @@ async function removeAvatar(){
  }
 }
 window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut};
-window.MediaFlowProfile={updateName:updateAccountName,updateEmail:updateAccountEmail,updatePassword:updateAccountPassword,removeAvatar};
+window.MediaFlowProfile={updateName:updateAccountName,updateEmail:updateAccountEmail,updatePassword:updateAccountPassword,chooseAvatar:chooseProfilePicture,saveAvatar:saveProfilePicture,removeAvatar};
 
 const UNITS = {
 
@@ -2574,10 +2590,11 @@ function renderProfile(){
       <div class="card profile-section">
         <div class="profile-avatar-wrap">
           <button class="account-avatar-btn" style="width:88px;height:88px;" onclick="document.getElementById('profile-picture-input')?.click()" title="Change profile picture">${renderProfileAvatar()}</button>
-          <div><div style="font-weight:700;">Your profile picture</div><div class="profile-note">Images are resized to 256px and stored with your Supabase account profile.</div></div>
+          <div><div style="font-weight:700;">Your profile picture</div><div class="profile-note">Images are resized and prepared for cloud storage. Choose a picture, then click Save picture.</div></div>
         </div>
         <div class="profile-avatar-actions">
-          <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input id="profile-picture-input" type="file" accept="image/*" style="display:none" onchange="readAndStoreAvatar(this.files[0])"></label>
+          <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input id="profile-picture-input" type="file" accept="image/*" style="display:none" onchange="window.MediaFlowProfile.chooseAvatar(this.files[0])"></label>
+          <button id="save-profile-picture" class="btn btn-primary" onclick="window.MediaFlowProfile.saveAvatar()" ${getAvatarUrl()?'':'disabled'}>Save picture</button>
           ${getAvatarUrl()?'<button class="btn btn-danger" onclick="window.MediaFlowProfile.removeAvatar()">Remove picture</button>':''}
         </div>
       </div>
