@@ -1054,7 +1054,7 @@ async function loadAll(){
  STORAGE_MODE=await detectStorageMode(); OFFLINE_ACTIVE=(STORAGE_MODE==='local' && !!AUTH_USER); let data=await rawGet(STATE_KEY);
  if(!data&&STORAGE_MODE==='cloud'){const local=await localRawGet(STATE_KEY);if(local){const useLocal=window.confirm('MediaFlow found existing data in this browser. Upload it to your account so it is available everywhere?\n\nChoose Cancel to start this account with a fresh cloud state.');if(useLocal)data=local;}}
  if(!data&&STORAGE_MODE!=='cloud'){const [categories,library,sessions,settings,currentTask,sessionActive]=await Promise.all(LEGACY_KEYS.map(localRawGet));if(categories||library||sessions||settings)data={categories,library,sessions,settings,currentTask,sessionActive};}
- data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
+ data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
@@ -4040,7 +4040,10 @@ loadSidebarWidth();
 
 // Network recovery: immediately sync pending offline changes for cloud accounts.
 window.addEventListener('online',async()=>{
-  if(AUTH_USER){await syncOfflineToCloud(); if(STORAGE_MODE==='local'){STORAGE_MODE='cloud';await loadAll();render();}}
+  if(AUTH_USER && !APP_STARTING){
+    await syncOfflineToCloud();
+    if(STORAGE_MODE==='local'){STORAGE_MODE='cloud';await loadAll();render();}
+  }
 });
 window.addEventListener('offline',()=>{ if(AUTH_USER){OFFLINE_ACTIVE=true;STORAGE_MODE='local';showOfflineNotice();} });
 
@@ -4056,7 +4059,15 @@ function applyTheme(theme){
   if(S.settings)S.settings.theme=t;
   try{localStorage.setItem('mf_theme',t);}catch(e){}
 }
-function initTheme(){try{applyTheme(S.settings?.theme||localStorage.getItem('mf_theme')||'dark');}catch(e){applyTheme('dark');}}
+function initTheme(){
+  let theme='dark';
+  try{theme=S.settings?.theme||localStorage.getItem('mf_theme')||'dark';}catch(e){}
+  try{applyTheme(theme);}catch(e){
+    console.warn('MediaFlow: theme initialization failed',e);
+    document.documentElement.dataset.theme='dark';
+    if(S.settings)S.settings.theme='dark';
+  }
+}
 function backupSnapshot(){return JSON.parse(JSON.stringify(snapshot()));}
 async function openBackupFolder(){
   if(!window.showDirectoryPicker){alert('Automatic file backups need a Chromium-based desktop browser with File System Access support.');return;}
@@ -4179,7 +4190,20 @@ function render(){
 
 }
 
-async function startAuthenticatedApp(){AUTH_READY=true;S.offlineMode=false;await loadAll();renderShell();if(STORAGE_MODE==='memory')showMemoryModeNotice();if(OFFLINE_ACTIVE)showOfflineNotice();if(navigator.onLine)await syncOfflineToCloud();}
+let APP_STARTING=false;
+async function startAuthenticatedApp(){
+  if(APP_STARTING) return;
+  APP_STARTING=true;
+  try{
+    AUTH_READY=true;
+    S.offlineMode=false;
+    await loadAll();
+    renderShell();
+    if(STORAGE_MODE==='memory')showMemoryModeNotice();
+    if(OFFLINE_ACTIVE)showOfflineNotice();
+    if(navigator.onLine)await syncOfflineToCloud();
+  }finally{APP_STARTING=false;}
+}
 async function init(){if(!supabase){renderAuthScreen('login');return;}try{const {data}=await supabase.auth.getSession();AUTH_USER=data?.session?.user||null;if(AUTH_USER)await startAuthenticatedApp();else renderAuthScreen('login');supabase.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if(next&&!AUTH_READY){AUTH_USER=next;await startAuthenticatedApp();}else if(!next&&AUTH_READY){AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login');}});}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 init();
 
