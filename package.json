@@ -1,8 +1,8 @@
 {
   "name": "mediaflow",
   "productName": "MediaFlow",
-  "version": "6.0.0",
-  "description": "consumption rotation app",
+  "version": "8.0.0",
+  "description": "MediaFlow",
   "author": "Alex Godly <Alex Godly>",
   "main": "main.js",
   "private": true,
