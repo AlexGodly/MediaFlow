@@ -1896,7 +1896,10 @@ function renderReasonDetail(cat){
 
 function renderLogForm(t, cat){
 
-  const libOptions = S.library.filter(i=>i.categoryId===cat.id && i.status!=='dropped');
+  // Backlog logging stays scoped to Anime Backlog. Seasonal logging can pick from both.
+  const libOptions = cat.id==='seasonal'
+    ? S.library.filter(i=>i && ['seasonal','backlog'].includes(i.categoryId) && i.status!=='dropped' && i.status!=='completed')
+    : S.library.filter(i=>i && i.categoryId===cat.id && i.status!=='dropped' && i.status!=='completed');
 
   const entries = S.logDraft.entries||[];
 
@@ -1920,11 +1923,7 @@ function renderLogForm(t, cat){
 
     </div>
 
-    <datalist id="lib-suggest">
-
-      ${libOptions.map(i=>`<option value="${escapeHtml(i.title)}">${i.total? i.progress+'/'+i.total : ''}</option>`).join('')}
-
-    </datalist>
+    <div id="log-suggestions" class="log-suggestions"></div>
 
      ${entries.length===0 ? `<small class="hint">Add one or more — e.g. "One Piece" ×1, "Detective Conan" ×3. Matches in your Library get suggested as you type.</small>` : ` 
 
