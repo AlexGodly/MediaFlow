@@ -361,6 +361,7 @@ let S = {
   modal: null,          // {type:'category'|'library', data:{...}} or null
   logging: false,       // is the inline log form open on the hero
   logDraft: {},
+  entryDraft: {title:'', qty:1},
   histFilters: {category:'all', type:'all', range:'all'},
   showReasonDetail: false,
 };
@@ -630,10 +631,29 @@ function skipTask(){
 }
 function openLogForm(){
   const t = S.currentTask;
-  S.logDraft = { amount: t.targetMid, minutes: Math.round(t.targetMid * getCategory(t.categoryId).minutesPerUnit), note:'' };
+  S.logDraft = {
+    amount: t.targetMid,
+    minutes: Math.round(t.targetMid * getCategory(t.categoryId).minutesPerUnit),
+    note:'',
+    entries: [],           // [{title, qty, libraryId|null}]
+    updateLibrary: true,
+  };
+  S.entryDraft = { title:'', qty:1 };
   S.logging = true; render();
 }
 function cancelLogForm(){ S.logging=false; render(); }
+
+function findLibraryMatch(categoryId, title){
+  const t = title.trim().toLowerCase();
+  return S.library.find(i=>i.categoryId===categoryId && i.title.trim().toLowerCase()===t) || null;
+}
+function entriesNote(entries){
+  return entries.map(e=> e.qty>1 ? `${e.title} ×${e.qty}` : e.title).join(', ');
+}
+function entriesTotal(entries){
+  return entries.reduce((s,e)=>s+(Number(e.qty)||0),0);
+}
+
 function submitLog(){
   const t = S.currentTask;
   const cat = getCategory(t.categoryId);
@@ -643,16 +663,38 @@ function submitLog(){
   if(amount<=0) status='skipped';
   else if(amount<t.targetMid) status='partial';
   else if(amount>t.targetMid) status='over';
+
+  const entries = S.logDraft.entries||[];
+  const autoNote = entriesNote(entries);
+  const extra = (S.logDraft.note||'').trim();
+  const note = [autoNote, extra].filter(Boolean).join(' — ');
+
   const sess = {
     id: uid(), timestamp: Date.now(), date: todayISO(),
     categoryId: cat.id, targetAmount: t.targetMid, actualAmount: amount,
-    minutes, note: (S.logDraft.note||'').trim(), status, unit: cat.unit,
+    minutes, note, status, unit: cat.unit,
   };
-  S.sessions.push(sess); persistSessions();
+  S.sessions.push(sess);
+
+  if(S.logDraft.updateLibrary){
+    entries.forEach(e=>{
+      const item = e.libraryId ? S.library.find(i=>i.id===e.libraryId) : findLibraryMatch(cat.id, e.title);
+      if(item){
+        item.progress = (item.progress||0) + (Number(e.qty)||0);
+        if(item.total) item.progress = Math.min(item.progress, item.total);
+        if(item.total && item.progress>=item.total && item.status!=='dropped') item.status='completed';
+        else if(item.status==='planned') item.status='active';
+      }
+    });
+    persistLibrary();
+  }
+
+  persistSessions();
   S.currentTask = generateTask([cat.id]);
   S.logging = false;
   persistTask(); render();
 }
+
 
 /* ============================================================
    DERIVED / STATS HELPERS
@@ -883,7 +925,38 @@ function renderReasonDetail(cat){
 }
 
 function renderLogForm(t, cat){
+  const libOptions = S.library.filter(i=>i.categoryId===cat.id && i.status!=='dropped');
+  const entries = S.logDraft.entries||[];
+  const total = entriesTotal(entries);
   return `<div class="log-form">
+    <label class="field-label">Titles consumed</label>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <input type="text" id="entry-title" list="lib-suggest" placeholder="Type a title, or pick from your library"
+        value="${escapeHtml(S.entryDraft.title)}" oninput="App.updateEntryDraft('title', this.value)"
+        onkeydown="if(event.key==='Enter'){event.preventDefault(); App.addLogEntry();}" style="flex:1;">
+      <input type="number" id="entry-qty" min="1" value="${S.entryDraft.qty}" oninput="App.updateEntryDraft('qty', this.value)" style="width:74px;">
+      <button class="btn btn-sm" onclick="App.addLogEntry()">+ Add</button>
+    </div>
+    <datalist id="lib-suggest">
+      ${libOptions.map(i=>`<option value="${escapeHtml(i.title)}">${i.total? i.progress+'/'+i.total : ''}</option>`).join('')}
+    </datalist>
+    ${entries.length===0 ? `<small class="hint">Add one or more — e.g. "One Piece" ×1, "Detective Conan" ×3. Matches in your Library get suggested as you type.</small>` : `
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
+      ${entries.map((e,idx)=>{
+        const matched = e.libraryId || findLibraryMatch(cat.id, e.title);
+        return `<span class="pill" style="gap:7px;">${matched?'📚 ':''}${escapeHtml(e.title)}${e.qty>1?' ×'+e.qty:''}
+          <button class="link-btn" style="color:var(--overused); text-decoration:none;" onclick="App.removeLogEntry(${idx})">✕</button></span>`;
+      }).join('')}
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <small class="hint" style="margin:0;">Total from titles: <b style="color:var(--text);">${total}</b> ${unitLabel(t.unit,total)}</small>
+      <button class="link-btn" onclick="App.syncAmountFromEntries()">Use as amount</button>
+    </div>
+    <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim); margin-bottom:10px;">
+      <input type="checkbox" ${S.logDraft.updateLibrary?'checked':''} onchange="App.toggleUpdateLibrary(this.checked)">
+      Also bump progress on matched Library titles
+    </label>`}
+
     <div class="field-row">
       <div class="field">
         <label class="field-label">Actual amount (${unitLabel(t.unit,2)})</label>
@@ -896,8 +969,8 @@ function renderLogForm(t, cat){
       </div>
     </div>
     <div class="field">
-      <label class="field-label">Note (optional — e.g. which titles)</label>
-      <input type="text" id="log-note" placeholder="One Piece ×1, Conan ×3" value="${escapeHtml(S.logDraft.note||'')}" oninput="App.updateLogDraft('note', this.value)">
+      <label class="field-label">Anything else to note? (optional)</label>
+      <input type="text" id="log-note" placeholder="e.g. binged the season finale" value="${escapeHtml(S.logDraft.note||'')}" oninput="App.updateLogDraft('note', this.value)">
     </div>
     <div class="hero-actions">
       <button class="btn btn-primary" onclick="App.submitLog()">Save &amp; get next task</button>
@@ -1372,6 +1445,26 @@ const App = {
   startSession, endSession, rotateTask, skipTask, openLogForm, cancelLogForm, submitLog,
   toggleReasonDetail(){ S.showReasonDetail=!S.showReasonDetail; render(); },
   updateLogDraft(k,v){ S.logDraft[k]=v; },
+  updateEntryDraft(k,v){ S.entryDraft[k]=v; },
+  addLogEntry(){
+    const title = (S.entryDraft.title||'').trim();
+    if(!title) return;
+    const qty = Math.max(1, Number(S.entryDraft.qty)||1);
+    const cat = getCategory(S.currentTask.categoryId);
+    const match = findLibraryMatch(cat.id, title);
+    S.logDraft.entries = S.logDraft.entries || [];
+    S.logDraft.entries.push({title, qty, libraryId: match ? match.id : null});
+    S.entryDraft = {title:'', qty:1};
+    render();
+  },
+  removeLogEntry(idx){
+    S.logDraft.entries.splice(idx,1); render();
+  },
+  syncAmountFromEntries(){
+    S.logDraft.amount = entriesTotal(S.logDraft.entries||[]);
+    render();
+  },
+  toggleUpdateLibrary(v){ S.logDraft.updateLibrary = v; },
 
   setHistFilter(k,v){ S.histFilters[k]=v; render(); },
   setLibFilter(k,v){ S.histFilters[k]=v; render(); },
