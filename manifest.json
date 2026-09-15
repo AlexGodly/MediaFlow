@@ -1,0 +1,13 @@
+{
+  "name": "MediaFlow",
+  "short_name": "MediaFlow",
+  "description": "A media rotation and consumption scheduler — the app picks the category, you pick the title.",
+  "start_url": "./mediaflow.html",
+  "display": "standalone",
+  "background_color": "#0E111A",
+  "theme_color": "#0E111A",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
