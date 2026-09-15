@@ -65,6 +65,26 @@
 }
 
 *{box-sizing:border-box;}
+html[data-theme="light"]{--bg:#F5F6F8;--panel:#FFFFFF;--panel-raised:#EEF1F5;--border:#D7DCE5;--border-soft:#E4E7ED;--text:#171A21;--text-dim:#596274;--text-mute:#7B8496;}
+html[data-theme="light"] body{background:radial-gradient(ellipse 1200px 800px at 10% -10%, #FFFFFF 0%, var(--bg) 60%);}
+html[data-theme="light"] .sidebar{background:linear-gradient(180deg,#FFFFFF 0%,#F3F5F8 100%);}
+html[data-theme="amoled"]{--bg:#000000;--panel:#050505;--panel-raised:#0A0A0A;--border:#202020;--border-soft:#151515;--text:#F5F5F5;--text-dim:#A0A0A0;--text-mute:#666;--flow:#E8A94A;}
+html[data-theme="amoled"] body{background:#000;}
+html[data-theme="amoled"] .sidebar{background:#000;}
+.stopwatch-card{margin-top:22px;}
+.stopwatch-display{font-family:var(--font-display);font-size:42px;letter-spacing:.04em;text-align:center;margin:8px 0 16px;}
+.chart-wrap{overflow:auto;}
+.chart-svg{width:100%;min-width:560px;height:220px;display:block;}
+.chart-bar{transition:opacity .15s;} .chart-bar:hover{opacity:.78;}
+.profile-stat-hero{display:flex;align-items:center;gap:20px;padding:24px;border-radius:var(--radius-l);background:linear-gradient(135deg,var(--panel-raised),var(--panel));border:1px solid var(--border-soft);margin-bottom:24px;}
+.profile-stat-avatar{width:104px;height:104px;border-radius:50%;overflow:hidden;border:2px solid var(--flow);display:grid;place-items:center;font-size:32px;font-weight:800;background:var(--panel);flex-shrink:0;}
+.profile-stat-avatar img{width:100%;height:100%;object-fit:cover;}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px;}
+.filter-row .field{min-width:150px;flex:1;}
+.priority-click{cursor:pointer;transition:transform .12s,background .12s;} .priority-click:hover{transform:translateY(-1px);background:var(--panel-raised)!important;}
+.sync-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:#3FC7A622;color:var(--healthy);border:1px solid #3FC7A644;}
+@media(max-width:860px){.profile-stat-hero{align-items:flex-start}.chart-svg{min-width:480px}.sidebar-resizer{display:none;}}
+
 
 html,body{margin:0;padding:0;}
 
@@ -572,6 +592,16 @@ small.hint{display:block; color:var(--text-mute); font-size:11.5px; margin-top:5
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 900px 700px at 50% 0%,#1A2036 0%,var(--bg) 62%)}
 .auth-card{width:min(430px,100%);background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
 .auth-brand{display:flex;align-items:center;gap:11px;margin-bottom:24px}.auth-brand .brand-mark{width:38px;height:38px}.auth-brand-name{font-family:var(--font-display);font-size:24px;font-weight:600}.auth-title{font-family:var(--font-display);font-size:28px;margin-bottom:6px}.auth-sub{color:var(--text-dim);font-size:13px;line-height:1.55;margin-bottom:22px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#10141F;padding:4px;border-radius:10px;margin-bottom:18px}.auth-tab{border:0;background:transparent;color:var(--text-mute);padding:9px;border-radius:7px;font-weight:800;cursor:pointer}.auth-tab.active{background:var(--panel-raised);color:var(--text)}.auth-error{background:rgba(232,96,122,.11);border:1px solid rgba(232,96,122,.35);color:#ff9bad;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-success{background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.3);color:#72e2c2;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-foot{font-size:11px;color:var(--text-mute);line-height:1.5;margin-top:16px}.account-menu{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);margin-top:10px}.account-menu-email{font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.cloud-badge{font-size:10px;font-weight:800;color:var(--healthy);background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.22);padding:3px 7px;border-radius:99px}.setup-code{display:block;background:#0c1018;border:1px solid var(--border-soft);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:var(--text-dim);white-space:pre-wrap;word-break:break-all}
+.big-stat{font-family:var(--font-display);font-size:34px;font-weight:650;letter-spacing:-.03em;margin:4px 0 2px;}
+/* V17 LIGHT MODE HARDENING */
+html[data-theme="light"] body{color:var(--text);background:linear-gradient(180deg,#f8f9fb,#eef1f5)!important;}
+html[data-theme="light"] .sidebar{background:linear-gradient(180deg,#fff,#f1f3f6)!important;border-color:#d7dce5!important;}
+html[data-theme="light"] .topbar,html[data-theme="light"] .card,html[data-theme="light"] .hero,html[data-theme="light"] .modal,html[data-theme="light"] .log-form,html[data-theme="light"] .new-entry-box{background:#fff!important;color:#171a21;border-color:#d7dce5!important;}
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{background:#fff!important;color:#171a21!important;border-color:#cbd2dc!important;}
+html[data-theme="light"] .btn:not(.btn-primary):not(.btn-danger){background:#fff!important;color:#303744!important;border-color:#cbd2dc!important;}
+html[data-theme="light"] .nav-item{color:#596274!important;}
+html[data-theme="light"] .nav-item.active{background:#e7ebf0!important;color:#171a21!important;}
+html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687386!important;}
 </style>
 
 </head>
@@ -607,7 +637,7 @@ function renderAuthScreen(mode='login',message='',isError=false){
 function friendlyAuthError(err){return String(err?.message||err||'Authentication failed.').replace('Invalid login credentials','Incorrect email or password.').replace('User already registered','That email is already registered. Try logging in.');}
 async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
 async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
-async function signOut(){if(!supabase)return;await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
+async function signOut(){if(AUTH_USER&&supabase)await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
 function getDisplayName(){const name=String(AUTH_USER?.user_metadata?.display_name||'').trim();return name||String(AUTH_USER?.email||'').trim()||'Account';}
 function profileInitials(){const display=getDisplayName();const parts=display.split(/\s+/).filter(Boolean);if(parts.length>1)return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();return display.slice(0,1).toUpperCase()||'?';}
 function getAvatarUrl(){return String(S.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();}
@@ -766,6 +796,8 @@ const DEFAULT_SETTINGS = {
 
   seasonalFreshCount: 0,
   exactTitleRecommendations: false,
+  theme: 'dark',
+  backup: {enabled:false, interval:60, mode:'single', folderName:'', fileName:'mediaflow-backup.json'},
 
 };
 
@@ -822,6 +854,9 @@ let S = {
   profileReturnView: 'dashboard',
 
   profilePicture: '',
+  offlineMode: false,
+  stopwatch: {running:false, startedAt:0, elapsed:0},
+  malLink: {username:'', mode:'anime'},
 
 };
 
@@ -847,14 +882,33 @@ let saveQueue = Promise.resolve();
 
 let lastSaveFailed = false;
 
-let STORAGE_MODE = null; // 'cloud' (window.storage) | 'local' (localStorage) | 'memory' (nothing works)
-
-async function detectStorageMode(){if(supabase&&AUTH_USER)return 'cloud';try{localStorage.setItem('__mf_probe__','1');const ok=localStorage.getItem('__mf_probe__')==='1';localStorage.removeItem('__mf_probe__');if(ok)return 'local';}catch(e){}return 'memory';}
+let STORAGE_MODE = 'cloud';
+const CLOUD_CACHE_KEY='mf_cloud_cache_v1';
 let memoryStore={};
 async function localRawGet(key){try{const v=localStorage.getItem(key);return v===null?undefined:JSON.parse(v);}catch(e){return undefined;}}
-async function rawGet(key){try{if(STORAGE_MODE==='cloud'){const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();if(error)throw error;return data?.state_data??undefined;}if(STORAGE_MODE==='local')return localRawGet(key);return memoryStore[key];}catch(e){console.error('MediaFlow cloud read failed',e);return undefined;}}
-async function rawSet(key,value){if(STORAGE_MODE==='cloud'){const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;return true;}if(STORAGE_MODE==='local')return localStorage.setItem(key,JSON.stringify(value));memoryStore[key]=value;return true;}
-
+function localSetRaw(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}
+async function rawGet(key){
+  if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
+  const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();
+  if(error)throw error;
+  return data?.state_data??undefined;
+}
+async function rawSet(key,value){
+  if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
+  const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error)throw error;
+  return true;
+}
+function mergeStates(a,b){
+  if(!a)return b||{}; if(!b)return a;
+  const out=Object.assign({},a,b);
+  const amap=new Map((a.library||[]).map(x=>[x.id,x])); const bmap=new Map((b.library||[]).map(x=>[x.id,x]));
+  const byTitle=new Map(); [...(a.library||[]),...(b.library||[])].forEach(x=>{const k=cleanTitle(x.title).toLowerCase()+'::'+x.categoryId; if(!byTitle.has(k))byTitle.set(k,x); else{const y=byTitle.get(k); y.progress=Math.max(Number(y.progress)||0,Number(x.progress)||0); if(x.total!=null)y.total=x.total; if(x.status==='completed')y.status='completed'; if(x.priority==='high')y.priority='high';}});
+  out.library=[...byTitle.values()];
+  const sessions=new Map(); [...(a.sessions||[]),...(b.sessions||[])].forEach(x=>sessions.set(x.id||uid(),x)); out.sessions=[...sessions.values()].sort((x,y)=>(x.timestamp||0)-(y.timestamp||0));
+  out.categories=a.categories||b.categories; out.settings=Object.assign({},b.settings||{},a.settings||{}); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
+  return out;
+}
 function snapshot(){
 
   return {
@@ -864,6 +918,8 @@ function snapshot(){
     settings: S.settings, currentTask: S.currentTask, sessionActive: S.sessionActive,
 
     profilePicture: S.profilePicture || '',
+    stopwatch: S.stopwatch || {running:false,startedAt:0,elapsed:0},
+    malLink: S.malLink || {username:'',mode:'anime'},
 
     savedAt: Date.now(),
 
@@ -961,9 +1017,7 @@ function sanitizeLibrary(list){
 }
 
 async function loadAll(){
- STORAGE_MODE=await detectStorageMode();let data=await rawGet(STATE_KEY);
- if(!data&&STORAGE_MODE==='cloud'){const local=await localRawGet(STATE_KEY);if(local){const useLocal=window.confirm('MediaFlow found existing data in this browser. Upload it to your account so it is available everywhere?\n\nChoose Cancel to start this account with a fresh cloud state.');if(useLocal)data=local;}}
- if(!data&&STORAGE_MODE!=='cloud'){const [categories,library,sessions,settings,currentTask,sessionActive]=await Promise.all(LEGACY_KEYS.map(localRawGet));if(categories||library||sessions||settings)data={categories,library,sessions,settings,currentTask,sessionActive};}
+ STORAGE_MODE='cloud'; let data=await rawGet(STATE_KEY);
  data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
 }
 
@@ -1340,6 +1394,8 @@ function openLogForm(){
 
   S.logDraft = {
 
+    categoryId: t.categoryId,
+
     amount: t.targetMid,
 
     minutes: Math.round(t.targetMid * getCategory(t.categoryId).minutesPerUnit),
@@ -1656,9 +1712,13 @@ function renderShell(){
 
         <div style="font-size:10.5px; color:var(--text-mute); margin-top:10px;">
 
-          ${STORAGE_MODE==='cloud'?'● Saved to cloud storage':STORAGE_MODE==='local'?'● Saved in this browser':'● Not saving — see banner above'}
+          ● Saved to cloud storage
+
+          
+
 
         </div>
+
 
       </div>
 
@@ -1920,6 +1980,7 @@ function renderDashboard(){
     </div>
 
     ${heroHtml}
+    ${stopwatchHtml()}
 
     <div style="display:flex; align-items:center; justify-content:space-between;">
 
@@ -2159,6 +2220,8 @@ function renderLibrary(){
     if(catFilter!=='all') items = items.filter(i=>i.categoryId===catFilter);
 
     if(statusFilter!=='all') items = items.filter(i=>i.status===statusFilter);
+    const priorityFilter = S.histFilters.libPriority || 'all';
+    if(priorityFilter!=='all') items = items.filter(i=>i.priority===priorityFilter);
 
     if(q) items = items.filter(i=>cleanTitle(i.title).toLowerCase().includes(q));
 
@@ -2192,7 +2255,7 @@ function renderLibrary(){
 
         <div class="pill" style="text-transform:capitalize;">${i.status}</div>
 
-        <div class="pill" style="text-transform:capitalize;">${i.priority} priority</div>
+        <button type="button" class="pill priority-click" style="text-transform:capitalize;border:0;color:inherit;" onclick="event.preventDefault();event.stopPropagation();App.choosePriority('${i.id}')">${i.priority} priority</button>
 
         <button type="button" class="btn btn-sm btn-ghost" onclick="event.preventDefault(); event.stopPropagation(); App.openLibraryModal('${i.id}')">Edit</button>
 
@@ -2228,6 +2291,7 @@ function renderLibrary(){
       <div><div class="view-title">Library</div><div class="view-desc">Track your titles. The scheduler still only picks the category — this is just for your own progress.</div></div>
 
       <button class="btn btn-primary" onclick="App.openLibraryModal()">+ Add title</button>
+      <button class="btn btn-danger" onclick="App.emptyLibraryAdvanced()">Empty library</button>
 
     </div>
 
@@ -2256,6 +2320,14 @@ function renderLibrary(){
           <option value="all">All statuses</option>
 
           ${['planned','active','paused','completed','dropped'].map(s=>`<option value="${s}" ${S.histFilters.libStatus===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+
+        </select>
+
+        <select onchange="App.setLibFilter('libPriority', this.value)">
+
+          <option value="all">All priorities</option>
+
+          ${['high','medium','low'].map(s=>`<option value="${s}" ${S.histFilters.libPriority===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
 
         </select>
 
@@ -2581,6 +2653,20 @@ function statCard(label, t){
 
    ============================================================ */
 
+async function deleteCloudAccount(){
+  if(!AUTH_USER||!supabase){alert('No cloud account is currently signed in.');return;}
+  const email=AUTH_USER.email||'';
+  if(!confirm(`Delete your MediaFlow account${email?` (${email})`:''}?\n\nThis permanently deletes the account and MediaFlow cloud data.`))return;
+  if(prompt('Type DELETE to permanently confirm account deletion.','')!=='DELETE'){alert('Account deletion cancelled.');return;}
+  try{
+    const {error}=await supabase.rpc('delete_my_account');
+    if(error)throw error;
+    AUTH_USER=null; AUTH_READY=false;
+    try{localStorage.removeItem(STATE_KEY);}catch(e){}
+    renderAuthScreen('login','Your account and MediaFlow cloud data were deleted.');
+  }catch(e){console.error(e);alert('Account deletion was not completed. Add the delete_my_account Supabase RPC function first. Your account was not deleted.');}
+}
+
 function renderProfile(){
   const email=escapeHtml(AUTH_USER?.email||'');
   return `
@@ -2601,7 +2687,7 @@ function renderProfile(){
 
       <div class="section-label">NAME</div>
       <div class="card profile-section">
-        <div class="field"><label class="field-label">Display name</label><input id="profile-name" type="text" autocomplete="name" maxlength="80" value="${escapeHtml(AUTH_USER?.user_metadata?.display_name||'')}" placeholder="Your name"></div>
+        <div class="field"><label class="field-label">Display name</label><input id="profile-name" type="text" autocomplete="name" maxlength="80" value="${escapeHtml(AUTH_USER?String(AUTH_USER?.user_metadata?.display_name||''):String(S.profileName||''))}" placeholder="Your name"></div>
         <div class="profile-note">If you leave your name empty, MediaFlow will show your account email instead.</div>
         <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updateName()">Save name</button></div>
       </div>
@@ -2626,6 +2712,8 @@ function renderProfile(){
       <div class="card">
         <div style="font-weight:700;">Cloud account</div>
         <div class="profile-note">Your MediaFlow library, history, settings and progress are synced to this Supabase account. Signing out does not delete your cloud data.</div>
+        <button class="btn btn-danger" style="margin-top:14px;" onclick="App.deleteCloudAccount()">Delete account</button>
+        <div class="profile-note" style="margin-top:8px;">Permanently deletes your cloud account and MediaFlow data after confirmation.</div>
       </div>
     </div>`;
 }
@@ -3177,11 +3265,12 @@ const App = {
   },
 
   syncAmountFromEntries(){
-
-    S.logDraft.amount = entriesTotal(S.logDraft.entries||[]);
-
+    const entries=S.logDraft.entries||[];
+    const amount=entriesTotal(entries);
+    S.logDraft.amount=amount;
+    const cat=getCategory(S.logDraft.categoryId||S.currentTask?.categoryId||'');
+    if(cat) S.logDraft.minutes=Math.round(amount*(Number(cat.minutesPerUnit)||0));
     render();
-
   },
 
   toggleUpdateLibrary(v){ S.logDraft.updateLibrary = v; },
@@ -3824,14 +3913,19 @@ function showImportProgress(title, total){
     </div>`;
 }
 function updateImportProgress(done,total,added,updated,skipped,phase){
-  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  const d=Number.isFinite(Number(done))?Number(done):0;
+  const t=Number.isFinite(Number(total))?Number(total):0;
+  const aNum=Number.isFinite(Number(added))?Number(added):0;
+  const uNum=Number.isFinite(Number(updated))?Number(updated):0;
+  const sNum=Number.isFinite(Number(skipped))?Number(skipped):0;
+  const pct=t>0?Math.min(100,Math.round(d/t*100)):0;
   const fill=document.getElementById('import-progress-fill'); if(fill) fill.style.width=pct+'%';
-  const count=document.getElementById('import-progress-count'); if(count) count.textContent=`${done.toLocaleString()} / ${total.toLocaleString()}`;
+  const count=document.getElementById('import-progress-count'); if(count) count.textContent=t>0?`${d.toLocaleString()} / ${t.toLocaleString()}`:`${d.toLocaleString()} processed`;
   const pctEl=document.getElementById('import-progress-pct'); if(pctEl) pctEl.textContent=pct+'%';
   const sub=document.getElementById('import-progress-sub'); if(sub) sub.textContent=phase||'Importing...';
-  const a=document.getElementById('import-added'); if(a) a.textContent=added.toLocaleString();
-  const u=document.getElementById('import-updated'); if(u) u.textContent=updated.toLocaleString();
-  const s=document.getElementById('import-skipped'); if(s) s.textContent=skipped.toLocaleString();
+  const a=document.getElementById('import-added'); if(a) a.textContent=aNum.toLocaleString();
+  const u=document.getElementById('import-updated'); if(u) u.textContent=uNum.toLocaleString();
+  const s=document.getElementById('import-skipped'); if(s) s.textContent=sNum.toLocaleString();
 }
 function closeImportProgress(){
   const el=document.getElementById('mediaflow-import-progress'); if(el) el.remove();
@@ -3936,6 +4030,182 @@ function autoFitSidebarToProfile(){
 }
 loadSidebarWidth();
 
+
+
+
+/* ============================================================
+   V16 FEATURES: BACKUPS, THEMES, STOPWATCH, MAL LINK, STATS
+   ============================================================ */
+const BACKUP_DB='MediaFlowBackupDB';
+let backupFolderHandle=null, backupTimer=null;
+function applyTheme(theme){
+  const t=['dark','light','amoled'].includes(theme)?theme:'dark';
+  document.documentElement.dataset.theme=t;
+  if(S.settings)S.settings.theme=t;
+  try{localStorage.setItem('mf_theme',t);}catch(e){}
+}
+function initTheme(){try{applyTheme(S.settings?.theme||localStorage.getItem('mf_theme')||'dark');}catch(e){applyTheme('dark');}}
+function backupSnapshot(){return JSON.parse(JSON.stringify(snapshot()));}
+async function openBackupFolder(){
+  if(!window.showDirectoryPicker){alert('Automatic file backups need a Chromium-based desktop browser with File System Access support.');return;}
+  try{backupFolderHandle=await window.showDirectoryPicker({mode:'readwrite'}); await saveBackupNow(true); await configureBackupPersistence(); render();}
+  catch(e){if(e?.name!=='AbortError')alert('Could not access that folder.');}
+}
+function idbOpen(){return new Promise((resolve,reject)=>{const r=indexedDB.open(BACKUP_DB,1);r.onupgradeneeded=()=>r.result.createObjectStore('handles');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+async function configureBackupPersistence(){if(!backupFolderHandle)return;try{const db=await idbOpen();const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put(backupFolderHandle,'folder');await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});db.close();}catch(e){}}
+async function restoreBackupFolder(){try{const db=await idbOpen();const tx=db.transaction('handles','readonly');const r=tx.objectStore('handles').get('folder');const h=await new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});db.close();if(h){const p=await h.queryPermission({mode:'readwrite'});if(p==='granted')backupFolderHandle=h;}}catch(e){}}
+function backupFilename(){const d=new Date();const z=n=>String(n).padStart(2,'0');return `mediaflow-backup-${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.json`;}
+async function saveBackupNow(manual=false){
+  if(!S.settings?.backup?.enabled && !manual)return;
+  if(!backupFolderHandle){if(manual)await openBackupFolder();return;}
+  try{
+    const filename=S.settings.backup.mode==='single'?(S.settings.backup.fileName||'mediaflow-backup.json'):backupFilename();
+    const fh=await backupFolderHandle.getFileHandle(filename,{create:true});const w=await fh.createWritable();await w.write(JSON.stringify(backupSnapshot(),null,2));await w.close();
+    S.settings.backup.lastBackup=Date.now(); if(!manual) await persistSettings();
+    if(manual)showToast('Backup saved ✓');
+  }catch(e){console.warn('Backup failed',e);if(manual)alert('Backup could not be written. Re-select the backup folder if needed.');}
+}
+function restartBackupTimer(){clearInterval(backupTimer);backupTimer=null;if(!S.settings?.backup?.enabled)return;const ms=Math.max(1,Number(S.settings.backup.interval)||60)*60000;backupTimer=setInterval(()=>saveBackupNow(false),ms);}
+function showToast(msg){let t=document.getElementById('mf-toast');if(!t){t=document.createElement('div');t.id='mf-toast';t.style.cssText='position:fixed;right:18px;bottom:18px;background:var(--panel-raised);color:var(--text);border:1px solid var(--border);padding:10px 14px;border-radius:10px;z-index:2000;box-shadow:0 12px 30px #0005;font-size:12px;font-weight:700;';document.body.appendChild(t);}t.textContent=msg;clearTimeout(window.__mfToast);window.__mfToast=setTimeout(()=>t.remove(),2200);}
+function stopwatchTick(){if(!S.stopwatch)return;const el=document.getElementById('stopwatch-display');if(!el)return;const elapsed=S.stopwatch.running?(S.stopwatch.elapsed+(Date.now()-S.stopwatch.startedAt)):S.stopwatch.elapsed;el.textContent=fmtStopwatch(elapsed);}
+function fmtStopwatch(ms){const sec=Math.floor(ms/1000);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function stopwatchStart(){if(S.stopwatch.running)return;S.stopwatch.running=true;S.stopwatch.startedAt=Date.now();persistTask();render();window.__sw=setInterval(stopwatchTick,250);}
+function stopwatchPause(){if(!S.stopwatch.running)return;S.stopwatch.elapsed+=Date.now()-S.stopwatch.startedAt;S.stopwatch.running=false;S.stopwatch.startedAt=0;persistTask();render();clearInterval(window.__sw);}
+function stopwatchReset(){S.stopwatch={running:false,startedAt:0,elapsed:0};persistTask();render();clearInterval(window.__sw);}
+function stopwatchUseMinutes(){const ms=S.stopwatch.running?(S.stopwatch.elapsed+Date.now()-S.stopwatch.startedAt):S.stopwatch.elapsed;S.logDraft.minutes=Math.max(0,Math.round(ms/60000));render();}
+function stopwatchHtml(){const ms=S.stopwatch?.running?(S.stopwatch.elapsed+Date.now()-S.stopwatch.startedAt):(S.stopwatch?.elapsed||0);return `<div class="card stopwatch-card"><div class="section-label">STOPWATCH</div><div class="stopwatch-display" id="stopwatch-display">${fmtStopwatch(ms)}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" onclick="App.stopwatchStart()">${S.stopwatch?.running?'Running…':'Start'}</button><button class="btn" onclick="App.stopwatchPause()">Pause</button><button class="btn btn-ghost" onclick="App.stopwatchReset()">Reset</button>${S.logging?'<button class="btn" onclick="App.stopwatchUseMinutes()">Use for minutes</button>':''}</div><small class="hint" style="display:block;text-align:center;margin-top:9px;">Use it while watching or reading, then copy the measured duration into your log.</small></div>`;}
+function priorityLabel(p){return (p||'medium')[0].toUpperCase()+(p||'medium').slice(1);}
+function choosePriority(id){const item=S.library.find(i=>i.id===id);if(!item)return;const next=prompt(`Priority for ${cleanTitle(item.title)}\n\nType: low, medium, or high`,item.priority||'medium');if(!next)return;const v=next.toLowerCase().trim();if(!['low','medium','high'].includes(v)){alert('Please enter low, medium, or high.');return;}item.priority=v;persistLibrary();render();}
+function emptyLibraryAdvanced(){
+  const choice=prompt('Empty library — advanced options:\n\n1 = Remove all library titles, keep history and current task\n2 = Remove all library titles and clear the current task too\n3 = Cancel\n\nEnter 1, 2, or 3.','1');
+  if(!choice||choice==='3')return;
+  if(choice==='1'||choice==='2'){if(!confirm(`Remove all ${S.library.length} library titles? Consumption history will remain.`))return;S.library=[];if(choice==='2'){S.currentTask=null;S.sessionActive=false;}saveState().then(()=>{render();showToast('Library emptied');});}
+}
+async function malFetchPage(username,type,page){
+  const candidates=[
+    `https://api.jikan.moe/v4/users/${encodeURIComponent(username)}/${type}list?page=${page}&limit=300`,
+    `https://api.jikan.moe/v4/users/${encodeURIComponent(username)}/${type}list/full?page=${page}`
+  ];
+  let lastErr=null;
+  for(const url of candidates){
+    for(let attempt=0;attempt<5;attempt++){
+      try{
+        const r=await fetch(url,{headers:{Accept:'application/json'}});
+        if(r.ok)return await r.json();
+        lastErr=new Error(`MAL ${type} sync failed (${r.status})`);
+        if(![408,429,500,502,503,504].includes(r.status))throw lastErr;
+        const ra=Number(r.headers.get('Retry-After'))||0;
+        await new Promise(resolve=>setTimeout(resolve,ra>0?ra*1000:Math.min(15000,1200*2**attempt)));
+      }catch(e){
+        lastErr=e;
+        if(attempt<4)await new Promise(resolve=>setTimeout(resolve,Math.min(15000,1200*2**attempt)));
+      }
+    }
+  }
+  throw lastErr||new Error(`MAL ${type} sync failed`);
+}
+async function malSync(){
+  const username=(S.malLink?.username||'').trim();
+  if(!username){alert('Enter your MyAnimeList username first.');return;}
+  const mode=S.malLink.mode||'anime', types=mode==='both'?['anime','manga']:[mode];
+  showImportProgress('MAL sync',0);
+  updateImportProgress(0,0,0,0,0,'Starting…');
+  let total=0,added=0,updated=0;
+  try{
+    for(const type of types){
+      let page=1,hasNext=true;
+      while(hasNext){
+        updateImportProgress(1,`Fetching ${type} page ${page}…`);
+        const j=await malFetchPage(username,type,page), rows=Array.isArray(j.data)?j.data:[];
+        const apiTotal=Number(j.pagination?.items?.total)||0;
+        const knownTotal=Number.isFinite(apiTotal)&&apiTotal>0?apiTotal:0;
+        const pageDoneBefore=total;
+        for(let offset=0;offset<rows.length;offset+=20){
+          const batch=rows.slice(offset,offset+20);
+          for(const row of batch){
+            const d=row.node||row||{}, my=row.list_status||row.listStatus||{}, title=cleanTitle(d.title);
+            if(!title)continue;
+            const catId=type==='manga'?'manga':(d.airing?'seasonal':'backlog');
+            const prog=Number(my.num_episodes_watched??my.num_chapters_read??0)||0;
+            const tot=Number(d.num_episodes??d.num_chapters??0)||null;
+            let item=S.library.find(i=>cleanTitle(i.title).toLowerCase()===title.toLowerCase()&&['backlog','seasonal','manga'].includes(i.categoryId));
+            if(!item){
+              item={id:uid(),title,categoryId:catId,progress:prog,total:tot,status:my.status==='completed'?'completed':(my.status==='watching'||my.status==='reading'?'active':'planned'),priority:'medium',estimatedMinutes:null,tags:['MAL'],source:'mal'};
+              S.library.push(item);added++;
+            }else{
+              item.progress=Math.max(Number(item.progress)||0,prog);
+              if(tot)item.total=tot;
+              if(catId==='seasonal'&&item.status!=='completed')item.categoryId='seasonal';
+              item.tags=[...new Set([...(item.tags||[]),'MAL'])]; item.source='mal'; updated++;
+            }
+          }
+          total+=batch.length;
+          const progressTotal=knownTotal>0?knownTotal:Math.max(total,1);
+          const progressDone=knownTotal>0?Math.min(total,knownTotal):total;
+          updateImportProgress(progressDone,progressTotal,added,updated,0,`Processed ${total.toLocaleString()} ${type} titles…`);
+          await yieldToBrowser();
+        }
+        hasNext=!!j.pagination?.has_next; page++;
+        await new Promise(resolve=>setTimeout(resolve,750));
+      }
+    }
+    normalizeSeasonalLibraryItems(); await persistLibrary();
+    finishImportProgress(true,'MAL sync complete',`Added ${added}, updated ${updated}, processed ${total} titles.`); render();
+  }catch(e){console.error(e);finishImportProgress(false,'MAL sync failed',e.message||String(e));}
+}
+
+function renderProfileStatHero(){const url=getAvatarUrl();return `<div class="profile-stat-hero"><div class="profile-stat-avatar">${url?`<img src="${escapeHtml(url)}" alt="Profile picture">`:escapeHtml(profileInitials())}</div><div><div style="font-family:var(--font-display);font-size:30px;font-weight:600;">${escapeHtml(getDisplayName())}</div><div style="color:var(--text-dim);font-size:13px;margin-top:5px;">${escapeHtml(AUTH_USER?.email||'')}</div><div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;"><span class="pill">${S.library.length} titles</span><span class="pill">${S.sessions.length} sessions</span><span class="pill">${fmtMinutes(totalsForSessions(S.sessions).minutes)} consumed</span></div></div></div>`;}
+function svgBarChart(data,labelFn,valueFn){const max=Math.max(1,...data.map(valueFn));const w=760,h=220,p=30,gap=8,bw=Math.max(8,(w-p*2-gap*(data.length-1))/Math.max(1,data.length));return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img"><line x1="${p}" y1="${h-p}" x2="${w-p}" y2="${h-p}" stroke="currentColor" opacity=".25"/>${data.map((d,i)=>{const v=valueFn(d),bh=(h-p*2)*v/max,x=p+i*(bw+gap),y=h-p-bh;return `<g><rect class="chart-bar" x="${x}" y="${y}" width="${bw}" height="${Math.max(2,bh)}" rx="4" fill="var(--flow)"/><text x="${x+bw/2}" y="${h-10}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">${escapeHtml(labelFn(d))}</text><text x="${x+bw/2}" y="${Math.max(12,y-5)}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".8">${Math.round(v)}</text></g>`}).join('')}</svg>`;}
+function weeklyStatsData(){const out=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);out.push({date:iso,label:d.toLocaleDateString(undefined,{weekday:'short'}),minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(s.minutes||0),0),tasks:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').length});}return out;}
+function renderStatsV14(){
+ const life=totalsForSessions(S.sessions), today=totalsForSessions(todaysSessions()), week=totalsForSessions(sessionsInRange(7)), month=totalsForSessions(sessionsInRange(30));
+ const enabledCats=S.categories.filter(c=>c.enabled), last7=weeklyStatsData();
+ const last30=[]; for(let i=29;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);last30.push({date:iso,label:d.toLocaleDateString(undefined,{month:'short',day:'numeric'}),minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0),tasks:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').length});}
+ const last90=[]; for(let i=89;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);last90.push({date:iso,label:i%7===0?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):'',minutes:S.sessions.filter(s=>s.date===iso&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0)});}
+ const catData=enabledCats.map(c=>({c,m:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0),tasks:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').length})).sort((a,b)=>b.m-a.m);
+ const statusData=['planned','active','paused','completed','dropped'].map(k=>({label:k[0].toUpperCase()+k.slice(1),value:S.library.filter(i=>i.status===k).length}));
+ const priorityData=['high','medium','low'].map(k=>({label:k[0].toUpperCase()+k.slice(1),value:S.library.filter(i=>i.priority===k).length}));
+ const mediaMap={}; S.sessions.forEach(s=>{if(s.status==='skipped')return;const cat=S.categories.find(c=>c.id===s.categoryId);const type=cat?.type||'other';mediaMap[type]=(mediaMap[type]||0)+(Number(s.minutes)||0);});
+ const mediaData=Object.entries(mediaMap).map(([label,value])=>({label,value}));
+ const totalUnits=life.episodes+life.chapters+life.movies+life.issues;
+ const avgDaily7=Math.round(last7.reduce((a,d)=>a+d.minutes,0)/7), avgSession=S.sessions.length?Math.round(life.minutes/S.sessions.length):0;
+ const longestDay=Math.max(...last30.map(d=>d.minutes),0), mostActiveDay=last30.find(d=>d.minutes===longestDay)?.date;
+ const mostActiveDayLabel=mostActiveDay?new Date(mostActiveDay+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}):'—';
+ const maxCat=Math.max(1,...catData.map(x=>x.m));
+ const bars=(data,val)=>svgBarChart(data,d=>d.label,d=>d[val]);
+ const compactList=(data,unit='')=>data.length?data.map(x=>`<div class="record-row"><span class="k">${escapeHtml(x.label)}</span><span class="v">${Math.round(x.value)}${unit}</span></div>`).join(''):'<div class="empty-state">No data yet.</div>';
+ return `<div class="view-head"><div><div class="view-title">Statistics</div><div class="view-desc">Your consumption, measured from every angle.</div></div></div>${renderProfileStatHero()}
+ <div class="grid-3" style="margin-bottom:24px;">${statCard('Today',today)}${statCard('This week',week)}${statCard('This month',month)}</div>
+ <div class="grid-3" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIFETIME</div><div class="big-stat">${fmtMinutes(life.minutes)}</div><div class="hint">Total time consumed</div></div><div class="card"><div class="section-label">UNITS</div><div class="big-stat">${totalUnits.toLocaleString()}</div><div class="hint">Episodes, chapters, movies & issues</div></div><div class="card"><div class="section-label">STREAK</div><div class="big-stat">${computeDayStreak()} 🔥</div><div class="hint">Current consecutive days</div></div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">7-DAY MINUTES</div>${bars(last7,'minutes')}</div><div class="card"><div class="section-label">7-DAY SESSIONS</div>${bars(last7,'tasks')}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">30-DAY DAILY MINUTES</div>${svgBarChart(last30,d=>d.label,d=>d.minutes)}</div><div class="card"><div class="section-label">90-DAY ACTIVITY</div>${svgBarChart(last90,d=>d.label,d=>d.minutes)}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">30-DAY CATEGORY MIX</div>${catData.map(x=>`<div class="bal-bar-row"><div class="bal-bar-label">${x.c.icon} ${escapeHtml(x.c.name)}</div><div class="bal-bar-track"><div class="bal-bar-fill" style="width:${Math.round(x.m/maxCat*100)}%;background:${x.c.color};"></div></div><div class="bal-bar-val">${fmtMinutes(x.m)}</div></div>`).join('')||'<div class="empty-state">No data yet.</div>'}</div><div class="card"><div class="section-label">MEDIA TYPE MIX</div>${compactList(mediaData.map(x=>({label:x.label,value:x.value})))}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIBRARY STATUS</div>${compactList(statusData)}</div><div class="card"><div class="section-label">PRIORITY DISTRIBUTION</div>${compactList(priorityData)}</div></div>
+ <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIBRARY HEALTH</div><div class="record-list"><div class="record-row"><span class="k">Library titles</span><span class="v">${S.library.length}</span></div><div class="record-row"><span class="k">Active titles</span><span class="v">${S.library.filter(i=>i.status==='active').length}</span></div><div class="record-row"><span class="k">Completed titles</span><span class="v">${S.library.filter(i=>i.status==='completed').length}</span></div><div class="record-row"><span class="k">Total units logged</span><span class="v">${totalUnits.toLocaleString()}</span></div></div></div><div class="card"><div class="section-label">ADVANCED METRICS</div><div class="record-list"><div class="record-row"><span class="k">Average daily minutes (7d)</span><span class="v">${fmtMinutes(avgDaily7)}</span></div><div class="record-row"><span class="k">Average session</span><span class="v">${fmtMinutes(avgSession)}</span></div><div class="record-row"><span class="k">Most active day</span><span class="v">${escapeHtml(mostActiveDayLabel)}</span></div><div class="record-row"><span class="k">Peak day minutes</span><span class="v">${fmtMinutes(longestDay)}</span></div><div class="record-row"><span class="k">Lifetime sessions</span><span class="v">${S.sessions.length}</span></div></div></div></div>`;
+}
+renderStats=renderStatsV14;
+
+const _oldRenderSettings=renderSettings;
+renderSettings=function(){
+  let html=_oldRenderSettings();
+  const themeCard=`<div class="section-label">APPEARANCE</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">UI look</label><select onchange="App.setTheme(this.value)"><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="amoled" ${S.settings.theme==='amoled'?'selected':''}>AMOLED</option></select><small class="hint">Choose the overall MediaFlow interface style.</small></div></div>`;
+  const backupCard=`<div class="section-label">AUTOMATIC BACKUPS</div><div class="card" style="margin-bottom:22px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><div><b>Automatic local JSON backup</b><div class="profile-note">Choose a folder on this computer. MediaFlow can periodically write a backup while the app is open. Browsers cannot write to arbitrary paths while the app is closed.</div></div><button class="toggle ${S.settings.backup?.enabled?'on':''}" onclick="App.toggleBackup()"></button></div><div class="field-row" style="margin-top:14px;"><div class="field"><label class="field-label">Backup every</label><select onchange="App.updateBackup('interval',this.value)"><option value="5" ${Number(S.settings.backup?.interval)===5?'selected':''}>5 minutes</option><option value="15" ${Number(S.settings.backup?.interval)===15?'selected':''}>15 minutes</option><option value="30" ${Number(S.settings.backup?.interval)===30?'selected':''}>30 minutes</option><option value="60" ${Number(S.settings.backup?.interval)===60?'selected':''}>1 hour</option><option value="360" ${Number(S.settings.backup?.interval)===360?'selected':''}>6 hours</option><option value="1440" ${Number(S.settings.backup?.interval)===1440?'selected':''}>Daily</option></select></div><div class="field"><label class="field-label">File mode</label><select onchange="App.updateBackup('mode',this.value)"><option value="single" ${S.settings.backup?.mode==='single'?'selected':''}>One file (overwrite)</option><option value="multiple" ${S.settings.backup?.mode==='multiple'?'selected':''}>Multiple files</option></select></div></div><div class="field"><label class="field-label">Single-file name</label><input value="${escapeHtml(S.settings.backup?.fileName||'mediaflow-backup.json')}" onchange="App.updateBackup('fileName',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="App.chooseBackupFolder()">Choose backup folder</button><button class="btn btn-ghost" onclick="App.backupNow()">Back up now</button></div><small class="hint">Folder permission is stored in this browser when supported. Multiple-file mode creates a timestamped JSON file each time.</small></div>`;
+  const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
+  const offlineCard='';
+  const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
+  const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
+  return html;
+};
+
+Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,emptyLibraryAdvanced,deleteCloudAccount,choosePriority,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
+
+
+// Add profile name to state and keep it local/cloud.
+const _oldSnapshot=snapshot;
+snapshot=function(){const x=_oldSnapshot();x.profileName=String(S.profileName||'').trim();return x;};
+const _oldLoadAll=loadAll;
+loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
+
 /* ============================================================
 
    RENDER LOOP + INIT
@@ -3965,7 +4235,7 @@ function render(){
 
 }
 
-async function startAuthenticatedApp(){AUTH_READY=true;await loadAll();renderShell();if(STORAGE_MODE==='memory')showMemoryModeNotice();}
+async function startAuthenticatedApp(){AUTH_READY=true;await loadAll();renderShell();}
 async function init(){if(!supabase){renderAuthScreen('login');return;}try{const {data}=await supabase.auth.getSession();AUTH_USER=data?.session?.user||null;if(AUTH_USER)await startAuthenticatedApp();else renderAuthScreen('login');supabase.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if(next&&!AUTH_READY){AUTH_USER=next;await startAuthenticatedApp();}else if(!next&&AUTH_READY){AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login');}});}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 init();
 
