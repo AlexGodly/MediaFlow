@@ -8,13 +8,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow by Alex Godly</title>
+<title>MediaFlow · Cloud + Offline v14</title>
 
 <meta name="theme-color" content="#0E111A">
 
 <link rel="manifest" href="manifest.json">
 
-<link rel="icon" href="https://i.ibb.co/Q36KRkjt/icon.jpg" type="image/svg+xml">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1460,16 +1460,10 @@ function normalizeSeasonalLibraryItems(){
 function logTitleCandidates(query){
   const q=String(query||'').trim().toLowerCase();
   if(!q) return [];
-  const currentCatId=S.currentTask?.categoryId;
   return S.library.filter(i=>{
-    if(!i || !['seasonal','backlog'].includes(i.categoryId)) return false;
-    if(i.status==='dropped' || i.status==='completed') return false;
-    // Backlog logging searches only the backlog, exactly as normal.
-    // Seasonal logging searches both Seasonal and Backlog so a backlog title
-    // can be promoted to Seasonal for the duration of its seasonal run.
-    if(currentCatId==='backlog' && i.categoryId!=='backlog') return false;
+    if(!i || i.status==='dropped' || i.status==='completed') return false;
     return cleanTitle(i.title).toLowerCase().includes(q);
-  }).slice(0,8);
+  }).slice(0,10);
 }
 
 function renderLogSuggestions(){
@@ -1477,11 +1471,12 @@ function renderLogSuggestions(){
   if(!box) return;
   const candidates=logTitleCandidates(S.entryDraft.title);
   if(!candidates.length){ box.innerHTML=''; return; }
-  const currentCat=getCategory(S.currentTask.categoryId);
   box.innerHTML=`<div class="log-suggestion-list">${candidates.map(i=>{
-    const isSeasonal=i.categoryId==='seasonal';
-    const action=(currentCat.id==='seasonal' && !isSeasonal) ? `<button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}',true)">Use & switch to Seasonal</button>` : `<button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}',false)">Use ${isSeasonal?'Seasonal':'Backlog'}</button>`;
-    return `<div class="log-suggestion"><div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${isSeasonal?'🔴 Seasonal':'🟢 Backlog'} · ${i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown'}</small></div>${action}</div>`;
+    const c=getCategory(i.categoryId);
+    const icon=c?.icon||'📚';
+    const name=c?.name||'Library';
+    const progress=i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown';
+    return `<div class="log-suggestion"><div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${icon} ${escapeHtml(name)} · ${progress}</small></div><button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}')">Use</button></div>`;
   }).join('')}</div>`;
 }
 
@@ -2004,10 +1999,11 @@ function renderReasonDetail(cat){
 
 function renderLogForm(t, cat){
 
-  // Backlog logging stays scoped to Anime Backlog. Seasonal logging can pick from both.
-  const libOptions = cat.id==='seasonal'
-    ? S.library.filter(i=>i && ['seasonal','backlog'].includes(i.categoryId) && i.status!=='dropped' && i.status!=='completed')
-    : S.library.filter(i=>i && i.categoryId===cat.id && i.status!=='dropped' && i.status!=='completed');
+  // Logging can pick from the entire Library. The current task still determines
+  // the session category, while the selected Library entry determines which
+  // title's progress gets updated. This lets you log Manga, Manhwa, TV, Movies,
+  // Anime, and custom categories from the same form.
+  const libOptions = S.library.filter(i=>i && i.status!=='dropped' && i.status!=='completed');
 
   const entries = S.logDraft.entries||[];
 
@@ -2019,7 +2015,7 @@ function renderLogForm(t, cat){
 
     <div style="display:flex; gap:8px; margin-bottom:8px;">
 
-      <input type="text" id="entry-title" list="lib-suggest" placeholder="Type a title, or pick from your library"
+      <input type="text" id="entry-title" placeholder="Type a title, or pick from your library"
 
         value="${escapeHtml(S.entryDraft.title)}" oninput="App.updateEntryDraft('title', this.value)"
 
@@ -3164,18 +3160,9 @@ const App = {
 
   updateEntryDraft(k,v){ S.entryDraft[k]=v; if(k==='title') renderLogSuggestions(); },
 
-  selectLogTitle(id, makeSeasonal){
+  selectLogTitle(id){
     const item=S.library.find(i=>i.id===id);
     if(!item || item.status==='completed' || item.status==='dropped') return;
-    const currentCat=getCategory(S.currentTask.categoryId);
-
-    // Only a Seasonal logging task may promote a backlog entry.
-    if(currentCat.id==='seasonal' && makeSeasonal && item.categoryId==='backlog'){
-      item.categoryId='seasonal';
-      persistLibrary();
-    }
-
-    // Backlog logging never changes the selected entry's category.
     S.entryDraft.title=cleanTitle(item.title);
     S.entryDraft.libraryId=item.id;
     render();
@@ -3190,14 +3177,14 @@ const App = {
     const cat=getCategory(S.currentTask.categoryId);
     let match=S.entryDraft.libraryId ? S.library.find(i=>i.id===S.entryDraft.libraryId) : null;
     if(!match) match=findLibraryMatch(cat.id,title);
-    let isNew=false;
-    if(!match && cat.id==='seasonal'){
-      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && i.status!=='completed' && i.status!=='dropped' && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
-      if(match && match.categoryId==='backlog'){
-        match.categoryId='seasonal';
-        persistLibrary();
-      }
+    // If the title exists in another category, use that Library entry instead
+    // of creating a duplicate. This is especially important for Manga, TV,
+    // Movies, Manhwa, Comics, and custom categories.
+    if(!match){
+      const normalized=cleanTitle(title).toLowerCase();
+      match=S.library.find(i=>i && i.status!=='completed' && i.status!=='dropped' && cleanTitle(i.title).toLowerCase()===normalized) || null;
     }
+    let isNew=false;
 
     if(!match){
       match={
