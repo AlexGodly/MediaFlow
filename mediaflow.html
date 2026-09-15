@@ -1341,13 +1341,15 @@ function normalizeSeasonalLibraryItems(){
   if(!seasonal || !backlog) return false;
   let changed=false;
   S.library.forEach(item=>{
-    if(item.categoryId!==seasonal.id) return;
+    if(!item || item.categoryId!==seasonal.id) return;
     const completeByProgress=item.total!=null && Number(item.total)>0 && Number(item.progress||0)>=Number(item.total);
     const completeByStatus=item.status==='completed';
     if(completeByProgress || completeByStatus){
+      // Completion is represented by the Anime Backlog category.
+      // Do not add/remove/modify tags as part of this transition.
       item.categoryId=backlog.id;
       item.status='completed';
-      item.progress=item.total!=null ? Math.max(Number(item.progress)||0,Number(item.total)||0) : item.progress;
+      if(item.total!=null) item.progress=Math.max(Number(item.progress)||0,Number(item.total)||0);
       changed=true;
     }
   });
@@ -1357,9 +1359,14 @@ function normalizeSeasonalLibraryItems(){
 function logTitleCandidates(query){
   const q=String(query||'').trim().toLowerCase();
   if(!q) return [];
+  const currentCatId=S.currentTask?.categoryId;
   return S.library.filter(i=>{
     if(!i || !['seasonal','backlog'].includes(i.categoryId)) return false;
     if(i.status==='dropped' || i.status==='completed') return false;
+    // Backlog logging searches only the backlog, exactly as normal.
+    // Seasonal logging searches both Seasonal and Backlog so a backlog title
+    // can be promoted to Seasonal for the duration of its seasonal run.
+    if(currentCatId==='backlog' && i.categoryId!=='backlog') return false;
     return cleanTitle(i.title).toLowerCase().includes(q);
   }).slice(0,8);
 }
@@ -2968,13 +2975,16 @@ const App = {
 
   selectLogTitle(id, makeSeasonal){
     const item=S.library.find(i=>i.id===id);
-    if(!item) return;
+    if(!item || item.status==='completed' || item.status==='dropped') return;
     const currentCat=getCategory(S.currentTask.categoryId);
+
+    // Only a Seasonal logging task may promote a backlog entry.
     if(currentCat.id==='seasonal' && makeSeasonal && item.categoryId==='backlog'){
       item.categoryId='seasonal';
-      if(item.status==='completed') item.status='active';
       persistLibrary();
     }
+
+    // Backlog logging never changes the selected entry's category.
     S.entryDraft.title=cleanTitle(item.title);
     S.entryDraft.libraryId=item.id;
     render();
@@ -2991,10 +3001,9 @@ const App = {
     if(!match) match=findLibraryMatch(cat.id,title);
     let isNew=false;
     if(!match && cat.id==='seasonal'){
-      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && i.status!=='completed' && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
+      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && i.status!=='completed' && i.status!=='dropped' && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
       if(match && match.categoryId==='backlog'){
         match.categoryId='seasonal';
-        match.status=match.status==='completed' ? 'active' : match.status;
         persistLibrary();
       }
     }
