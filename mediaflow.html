@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow</title>
+<title>MediaFlow · Cloud Accounts</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -550,6 +550,10 @@ input[type=checkbox]{width:16px; height:16px; accent-color:var(--flow);}
 
 small.hint{display:block; color:var(--text-mute); font-size:11.5px; margin-top:5px;}
 
+
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 900px 700px at 50% 0%,#1A2036 0%,var(--bg) 62%)}
+.auth-card{width:min(430px,100%);background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.auth-brand{display:flex;align-items:center;gap:11px;margin-bottom:24px}.auth-brand .brand-mark{width:38px;height:38px}.auth-brand-name{font-family:var(--font-display);font-size:24px;font-weight:600}.auth-title{font-family:var(--font-display);font-size:28px;margin-bottom:6px}.auth-sub{color:var(--text-dim);font-size:13px;line-height:1.55;margin-bottom:22px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#10141F;padding:4px;border-radius:10px;margin-bottom:18px}.auth-tab{border:0;background:transparent;color:var(--text-mute);padding:9px;border-radius:7px;font-weight:800;cursor:pointer}.auth-tab.active{background:var(--panel-raised);color:var(--text)}.auth-error{background:rgba(232,96,122,.11);border:1px solid rgba(232,96,122,.35);color:#ff9bad;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-success{background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.3);color:#72e2c2;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:14px}.auth-foot{font-size:11px;color:var(--text-mute);line-height:1.5;margin-top:16px}.account-menu{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);margin-top:10px}.account-menu-email{font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.cloud-badge{font-size:10px;font-weight:800;color:var(--healthy);background:rgba(63,199,166,.10);border:1px solid rgba(63,199,166,.22);padding:3px 7px;border-radius:99px}.setup-code{display:block;background:#0c1018;border:1px solid var(--border-soft);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:var(--text-dim);white-space:pre-wrap;word-break:break-all}
 </style>
 
 </head>
@@ -569,6 +573,23 @@ small.hint{display:block; color:var(--text-mute); font-size:11.5px; margin-top:5
    CONSTANTS
 
    ============================================================ */
+
+const SUPABASE_URL='YOUR_SUPABASE_URL';
+const SUPABASE_PUBLISHABLE_KEY='YOUR_SUPABASE_PUBLISHABLE_KEY';
+const SUPABASE_CONFIGURED=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('YOUR_')&&!!SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
+let supabase=null,AUTH_USER=null,AUTH_READY=false,AUTH_MODE='login';
+if(SUPABASE_CONFIGURED&&window.supabase?.createClient)supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+function renderAuthScreen(mode='login',message='',isError=false){
+ AUTH_MODE=mode;
+ if(!SUPABASE_CONFIGURED){document.getElementById('app').innerHTML=`<div class="auth-screen"><div class="auth-card"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Media rotation, your way.</div></div></div><div class="auth-title">Cloud accounts need setup</div><div class="auth-sub">This build is account-ready, but it needs your Supabase project URL and publishable key before users can sign up or log in.</div><div class="setup-code">SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'\nSUPABASE_PUBLISHABLE_KEY = 'sb_publishable_...'</div><div class="auth-foot">Use only the publishable/anon key in this browser app. Never expose a service-role or secret key.</div></div></div>`;return;}
+ const title=mode==='signup'?'Create your MediaFlow account':'Welcome back',desc=mode==='signup'?'Create an account and keep your MediaFlow library, history, settings and progress synced everywhere.':'Log in to continue to your personal MediaFlow workspace.';
+ document.getElementById('app').innerHTML=`<div class="auth-screen"><div class="auth-card"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Media rotation, your way.</div></div></div><div class="auth-title">${title}</div><div class="auth-sub">${desc}</div><div class="auth-tabs"><button class="auth-tab ${mode==='login'?'active':''}" onclick="window.MediaFlowAuth.show('login')">Log in</button><button class="auth-tab ${mode==='signup'?'active':''}" onclick="window.MediaFlowAuth.show('signup')">Sign up</button></div>${message?`<div class="${isError?'auth-error':'auth-success'}">${escapeHtml(message)}</div>`:''}<form onsubmit="return window.MediaFlowAuth.submit(event)"><div class="field"><label class="field-label">Email</label><input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></div><div class="field"><label class="field-label">Password</label><input id="auth-password" type="password" autocomplete="${mode==='login'?'current-password':'new-password'}" minlength="6" required placeholder="At least 6 characters"></div>${mode==='signup'?`<div class="field"><label class="field-label">Confirm password</label><input id="auth-confirm" type="password" autocomplete="new-password" minlength="6" required placeholder="Repeat your password"></div>`:''}<button class="btn btn-primary btn-block" type="submit">${mode==='signup'?'Create account':'Log in'}</button></form>${mode==='login'?'<button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="window.MediaFlowAuth.reset()">Forgot password?</button>':''}<div class="auth-foot">Your account uses Supabase Auth. MediaFlow stores your app state in a private cloud row protected by Row Level Security.</div></div></div>`;
+}
+function friendlyAuthError(err){return String(err?.message||err||'Authentication failed.').replace('Invalid login credentials','Incorrect email or password.').replace('User already registered','That email is already registered. Try logging in.');}
+async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:location.href}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
+async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:location.href});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
+async function signOut(){if(!supabase)return;await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
+window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut};
 
 const UNITS = {
 
@@ -707,77 +728,11 @@ let lastSaveFailed = false;
 
 let STORAGE_MODE = null; // 'cloud' (window.storage) | 'local' (localStorage) | 'memory' (nothing works)
 
-async function detectStorageMode(){
-
-  if(typeof window !== 'undefined' && window.storage && typeof window.storage.set === 'function'){
-
-    try{
-
-      await window.storage.set('__mf_probe__', '1', false);
-
-      const r = await window.storage.get('__mf_probe__', false);
-
-      if(r && r.value === '1') return 'cloud';
-
-    }catch(e){ /* fall through to local */ }
-
-  }
-
-  try{
-
-    localStorage.setItem('__mf_probe__','1');
-
-    const ok = localStorage.getItem('__mf_probe__')==='1';
-
-    localStorage.removeItem('__mf_probe__');
-
-    if(ok) return 'local';
-
-  }catch(e){ /* private browsing / disabled storage */ }
-
-  return 'memory';
-
-}
-
-let memoryStore = {};
-
-async function rawGet(key){
-
-  try{
-
-    if(STORAGE_MODE==='cloud'){
-
-      const r = await window.storage.get(key, false);
-
-      if(!r || r.value === undefined || r.value === null) return undefined;
-
-      return JSON.parse(r.value);
-
-    }
-
-    if(STORAGE_MODE==='local'){
-
-      const v = localStorage.getItem(key);
-
-      return v===null ? undefined : JSON.parse(v);
-
-    }
-
-    return memoryStore[key];
-
-  }catch(e){ return undefined; }
-
-}
-
-async function rawSet(key, value){
-
-  if(STORAGE_MODE==='cloud') return window.storage.set(key, JSON.stringify(value), false);
-
-  if(STORAGE_MODE==='local') return localStorage.setItem(key, JSON.stringify(value));
-
-  memoryStore[key] = value; return true;
-
-}
+async function detectStorageMode(){if(supabase&&AUTH_USER)return 'cloud';try{localStorage.setItem('__mf_probe__','1');const ok=localStorage.getItem('__mf_probe__')==='1';localStorage.removeItem('__mf_probe__');if(ok)return 'local';}catch(e){}return 'memory';}
+let memoryStore={};
+async function localRawGet(key){try{const v=localStorage.getItem(key);return v===null?undefined:JSON.parse(v);}catch(e){return undefined;}}
+async function rawGet(key){try{if(STORAGE_MODE==='cloud'){const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();if(error)throw error;return data?.state_data??undefined;}if(STORAGE_MODE==='local')return localRawGet(key);return memoryStore[key];}catch(e){console.error('MediaFlow cloud read failed',e);return undefined;}}
+async function rawSet(key,value){if(STORAGE_MODE==='cloud'){const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;return true;}if(STORAGE_MODE==='local')return localStorage.setItem(key,JSON.stringify(value));memoryStore[key]=value;return true;}
 
 function snapshot(){
 
@@ -883,43 +838,10 @@ function sanitizeLibrary(list){
 }
 
 async function loadAll(){
-
-  STORAGE_MODE = await detectStorageMode();
-
-  let data = await rawGet(STATE_KEY);
-
-  if(!data){
-
-    // migrate from the old per-key layout, if present, so existing progress isn't lost
-
-    const [categories, library, sessions, settings, currentTask, sessionActive] = await Promise.all(LEGACY_KEYS.map(rawGet));
-
-    if(categories || library || sessions || settings){
-
-      data = {categories, library, sessions, settings, currentTask, sessionActive};
-
-    }
-
-  }
-
-  data = data || {};
-
-  S.categories = data.categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-
-  S.library = sanitizeLibrary(data.library || []);
-
-  S.sessions = data.sessions || [];
-
-  S.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings || {});
-
-  S.currentTask = data.currentTask || null;
-
-  S.sessionActive = !!data.sessionActive;
-
-  S.loading = false;
-
-  await saveState(); // write back immediately under the new consolidated key
-
+ STORAGE_MODE=await detectStorageMode();let data=await rawGet(STATE_KEY);
+ if(!data&&STORAGE_MODE==='cloud'){const local=await localRawGet(STATE_KEY);if(local){const useLocal=window.confirm('MediaFlow found existing data in this browser. Upload it to your account so it is available everywhere?\n\nChoose Cancel to start this account with a fresh cloud state.');if(useLocal)data=local;}}
+ if(!data&&STORAGE_MODE!=='cloud'){const [categories,library,sessions,settings,currentTask,sessionActive]=await Promise.all(LEGACY_KEYS.map(localRawGet));if(categories||library||sessions||settings)data={categories,library,sessions,settings,currentTask,sessionActive};}
+ data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.loading=false;await saveState();
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
@@ -1598,7 +1520,7 @@ function renderShell(){
 
       </div>
 
-      <div class="sidebar-foot">
+      <div class="sidebar-foot"><div class="account-menu"><span class="cloud-badge">CLOUD</span><span class="account-menu-email">${escapeHtml(AUTH_USER?.email||'')}</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
         <div class="k">Day streak</div>
 
@@ -3775,16 +3697,8 @@ function render(){
 
 }
 
-async function init(){
-
-  await loadAll();
-
-  renderShell();
-
-  if(STORAGE_MODE==='memory') showMemoryModeNotice();
-
-}
-
+async function startAuthenticatedApp(){AUTH_READY=true;await loadAll();renderShell();if(STORAGE_MODE==='memory')showMemoryModeNotice();}
+async function init(){if(!supabase){renderAuthScreen('login');return;}try{const {data}=await supabase.auth.getSession();AUTH_USER=data?.session?.user||null;if(AUTH_USER)await startAuthenticatedApp();else renderAuthScreen('login');supabase.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if(next&&!AUTH_READY){AUTH_USER=next;await startAuthenticatedApp();}else if(!next&&AUTH_READY){AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login');}});}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 init();
 
 // Only meaningful once this file is hosted at a real URL alongside sw.js/manifest.json
