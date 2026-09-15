@@ -367,13 +367,44 @@ let S = {
    ============================================================ */
 async function storageGet(key, fallback){
   try{
-    const r = await window.storage.get(key, false);
-    if(!r || r.value === undefined || r.value === null) return fallback;
-    return JSON.parse(r.value);
-  }catch(e){ return fallback; }
+    // Standalone HTML files do not have the artifact-only window.storage API.
+    // Use browser localStorage so progress survives refreshes and reopening the file.
+    const raw = localStorage.getItem('mediaflow:' + key);
+    if(raw !== null) return JSON.parse(raw);
+  }catch(e){
+    console.error('localStorage get failed', key, e);
+  }
+
+  // Keep compatibility with environments that provide window.storage.
+  try{
+    if(window.storage && typeof window.storage.get === 'function'){
+      const r = await window.storage.get(key, false);
+      if(r && r.value !== undefined && r.value !== null) return JSON.parse(r.value);
+    }
+  }catch(e){
+    console.error('storage get failed', key, e);
+  }
+
+  return fallback;
 }
 async function storageSet(key, value){
-  try{ await window.storage.set(key, JSON.stringify(value), false); }catch(e){ console.error('storage set failed', key, e); }
+  const serialized = JSON.stringify(value);
+
+  try{
+    localStorage.setItem('mediaflow:' + key, serialized);
+    return;
+  }catch(e){
+    console.error('localStorage set failed', key, e);
+  }
+
+  // Fallback for artifact environments where localStorage is unavailable.
+  try{
+    if(window.storage && typeof window.storage.set === 'function'){
+      await window.storage.set(key, serialized, false);
+    }
+  }catch(e){
+    console.error('storage set failed', key, e);
+  }
 }
 
 async function loadAll(){
