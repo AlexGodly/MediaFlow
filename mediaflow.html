@@ -357,6 +357,10 @@ input[type=checkbox]{width:16px; height:16px; accent-color:var(--flow);}
 .lib-filters{display:flex; gap:8px; flex-wrap:wrap;}
 
 .lib-filters select{width:auto; padding:8px 10px; font-size:13px;}
+.lib-search{min-width:220px; flex:1 1 220px;}
+.lib-pagination{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:14px 0 0;}
+.lib-pagination .page-num{min-width:36px;}
+.lib-pagination .page-current{border-color:var(--flow); background:rgba(232,169,74,.10); color:var(--text);}
 
 .item-row{display:grid; grid-template-columns:auto 1fr auto auto auto auto; gap:14px; align-items:center; padding:13px 6px; border-bottom:1px solid var(--border-soft);}
 
@@ -850,6 +854,31 @@ function showMemoryModeNotice(){
 
 }
 
+function sanitizeLibrary(list){
+  const out=[];
+  const seen=new Map();
+  for(const raw of (Array.isArray(list)?list:[])){
+    if(!raw || typeof raw!=='object') continue;
+    const title=cleanTitle(raw.title);
+    if(!title) continue;
+    const item=Object.assign({
+      id:uid(), categoryId:S.categories?.[0]?.id || 'backlog', progress:0, total:null,
+      status:'planned', priority:'medium', estimatedMinutes:null, tags:[]
+    }, raw, {title, id:raw.id || uid()});
+    const key=(item.categoryId||'')+'::'+title.toLowerCase();
+    if(seen.has(key)){
+      const existing=seen.get(key);
+      existing.progress=Math.max(Number(existing.progress)||0, Number(item.progress)||0);
+      if(item.total) existing.total=item.total;
+      if(item.status) existing.status=item.status;
+      if(item.tags?.length) existing.tags=[...new Set([...(existing.tags||[]),...item.tags])];
+    }else{
+      seen.set(key,item); out.push(item);
+    }
+  }
+  return out;
+}
+
 async function loadAll(){
 
   STORAGE_MODE = await detectStorageMode();
@@ -874,7 +903,7 @@ async function loadAll(){
 
   S.categories = data.categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
 
-  S.library = data.library || [];
+  S.library = sanitizeLibrary(data.library || []);
 
   S.sessions = data.sessions || [];
 
@@ -957,6 +986,13 @@ function unitLabel(unitKey, count){
 function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function cleanTitle(value){
+  return String(value ?? '')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1')
+    .replace(/^\s*<!\[CDATA\[\s*/i, '')
+    .replace(/\s*\]\]>\s*$/i, '')
+    .trim();
+}
 
 function daysSince(ts){ if(!ts) return Infinity; return (Date.now()-ts)/86400000; }
 
@@ -1996,9 +2032,9 @@ function renderLibrary(){
 
     if(statusFilter!=='all') items = items.filter(i=>i.status===statusFilter);
 
-    if(q) items = items.filter(i=>i.title.toLowerCase().includes(q));
+    if(q) items = items.filter(i=>cleanTitle(i.title).toLowerCase().includes(q));
 
-    items = items.slice().sort((a,b)=>b.priority.localeCompare(a.priority) || a.title.localeCompare(b.title));
+    items = items.slice().sort((a,b)=>(b.priority||'medium').localeCompare(a.priority||'medium') || cleanTitle(a.title).localeCompare(cleanTitle(b.title)));
 
     const PAGE = 50;
 
@@ -2020,7 +2056,7 @@ function renderLibrary(){
 
         <div>
 
-          <div class="item-title">${escapeHtml(i.title)} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
+          <div class="item-title">${escapeHtml(cleanTitle(i.title))} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
 
           <div class="item-sub">${escapeHtml(cat.name)} ${i.total? '· '+i.progress+' / '+i.total+' '+unitLabel(cat.unit,i.total) : (i.progress? '· '+i.progress+' '+unitLabel(cat.unit,i.progress):'')} ${(i.tags&&i.tags.length)? '· '+i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(''):''}</div>
 
@@ -2030,26 +2066,29 @@ function renderLibrary(){
 
         <div class="pill" style="text-transform:capitalize;">${i.priority} priority</div>
 
-        <button class="btn btn-sm btn-ghost" onclick="App.openLibraryModal('${i.id}')">Edit</button>
+        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); App.openLibraryModal('${i.id}')">Edit</button>
 
-        <button class="btn btn-sm btn-danger" onclick="App.deleteLibraryItem('${i.id}')">Delete</button>
+        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); App.deleteLibraryItem('${i.id}')">Delete</button>
 
       </div>`;
 
     }).join('') || `<div class="empty-state">No items match this filter.</div>`;
 
     if(totalItems>PAGE){
-
-      pagerHtml = `<div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-top:14px;">
-
+      const pageCount=maxPage+1;
+      const pageButtons=[];
+      let startPage=Math.max(0,S.libPage-2);
+      if(startPage+4>maxPage) startPage=Math.max(0,maxPage-4);
+      const endPage=Math.min(maxPage,startPage+4);
+      for(let p=startPage;p<=endPage;p++){
+        pageButtons.push(`<button class="btn btn-sm page-num ${p===S.libPage?'page-current':''}" onclick="App.setLibPage(${p})">${p+1}</button>`);
+      }
+      pagerHtml = `<div class="lib-pagination">
         <button class="btn btn-sm" ${S.libPage<=0?'disabled':''} onclick="App.setLibPage(${S.libPage-1})">← Prev</button>
-
-        <small class="hint" style="margin:0;">Page ${S.libPage+1} of ${maxPage+1} · ${totalItems} titles</small>
-
+        ${pageButtons.join('')}
         <button class="btn btn-sm" ${S.libPage>=maxPage?'disabled':''} onclick="App.setLibPage(${S.libPage+1})">Next →</button>
-
+        <small class="hint" style="margin:0 0 0 4px;">Page ${S.libPage+1} of ${pageCount} · ${totalItems} titles</small>
       </div>`;
-
     }
 
   }
@@ -2074,7 +2113,7 @@ function renderLibrary(){
 
       <div class="lib-filters">
 
-        <input type="text" placeholder="Search titles…" value="${escapeHtml(S.histFilters.libSearch||'')}" style="width:180px;" oninput="App.setLibFilter('libSearch', this.value, true)">
+        <input type="text" placeholder="Search titles…" value="${escapeHtml(S.histFilters.libSearch||'')}" class="lib-search" oninput="App.setLibFilter('libSearch', this.value, true)">
 
         <select onchange="App.setLibFilter('libCategory', this.value)">
 
@@ -2096,8 +2135,8 @@ function renderLibrary(){
 
     </div>
 
+    ${pagerHtml}
     <div class="card">${itemsHtml}</div>
-
     ${pagerHtml}
 
   `;
@@ -2920,7 +2959,25 @@ const App = {
 
   setHistFilter(k,v){ S.histFilters[k]=v; render(); },
 
-  setLibFilter(k,v){ S.histFilters[k]=v; render(); },
+  setLibFilter(k,v,live){
+    S.histFilters[k]=v;
+    if(k==='libSearch' && live){
+      const input=document.activeElement;
+      const pos=input && input.selectionStart!=null ? input.selectionStart : String(v).length;
+      render();
+      const next=document.querySelector('.lib-search');
+      if(next){ next.focus(); try{ next.setSelectionRange(pos,pos); }catch(e){} }
+      return;
+    }
+    if(k==='libSearch') S.libPage=0;
+    render();
+  },
+  setLibPage(page){
+    S.libPage=Math.max(0, Number(page)||0);
+    render();
+    const anchor=document.querySelector('.lib-search');
+    if(anchor && document.activeElement!==anchor){}
+  },
 
   setIntensity(k){
 
@@ -3028,7 +3085,7 @@ const App = {
 
       id: id || uid(),
 
-      title: document.getElementById('l-title').value.trim() || 'Untitled',
+      title: cleanTitle(document.getElementById('l-title').value) || 'Untitled',
 
       categoryId: document.getElementById('l-category').value,
 
@@ -3054,14 +3111,14 @@ const App = {
 
   },
 
-  deleteLibraryItem(id){
-
+  async deleteLibraryItem(id){
     if(!confirm('Delete this title from your library?')) return;
-
-    S.library = S.library.filter(i=>i.id!==id);
-
-    persistLibrary(); render();
-
+    const before=S.library.length;
+    S.library=S.library.filter(i=>i && i.id!==id);
+    if(S.library.length===before) return;
+    S.libPage=0;
+    await persistLibrary();
+    render();
   },
 
   closeModal(){ S.modal=null; render(); },
@@ -3174,7 +3231,7 @@ const App = {
 
         if(data.categories) S.categories = data.categories;
 
-        if(data.library) S.library = data.library;
+        if(data.library) S.library = sanitizeLibrary(data.library);
 
         if(data.sessions) S.sessions = data.sessions;
 
@@ -3216,7 +3273,7 @@ const App = {
         const statusMap={'Watching':'active','Reading':'active','Completed':'completed','On-Hold':'paused','Dropped':'dropped','Plan to Watch':'planned','Plan to Read':'planned'};
         const getTag=(block,name)=>{
           const x=block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`,'i'));
-          return x?x[1].replace(/<!\\[CDATA\\[|\\]\\]>/g,'').trim():'';
+          return x?cleanTitle(x[1]):'';
         };
 
         showImportProgress(`Importing MyAnimeList ${isManga?'manga':'anime'}`,blocks.length);
@@ -3247,7 +3304,7 @@ const App = {
             }
             if(!S.categories.find(c=>c.id===categoryId)) categoryId=isManga?'manga':'backlog';
 
-            const existing=S.library.find(i=>i.title.toLowerCase()===title.toLowerCase()&&i.categoryId===categoryId);
+            const existing=S.library.find(i=>cleanTitle(i.title).toLowerCase()===title.toLowerCase()&&i.categoryId===categoryId);
             if(existing){
               existing.progress=progress;
               if(total) existing.total=total;
@@ -3354,7 +3411,7 @@ const App = {
             processed++;
             if(!row||!row[iTitle]){skipped++;continue;}
 
-            const title=row[iTitle].trim();
+            const title=cleanTitle(row[iTitle]);
             if(!title){skipped++;continue;}
 
             const progress=iProgress>=0?Number(row[iProgress])||0:0;
@@ -3368,7 +3425,7 @@ const App = {
             const categoryId=S.categories.find(c=>c.enabled)?.id||S.categories[0]?.id;
             if(!categoryId){skipped++;continue;}
 
-            const existing=S.library.find(i=>i.title.toLowerCase()===title.toLowerCase());
+            const existing=S.library.find(i=>cleanTitle(i.title).toLowerCase()===title.toLowerCase());
             if(existing){
               existing.progress=progress;
               if(total) existing.total=total;
