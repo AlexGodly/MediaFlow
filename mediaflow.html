@@ -544,6 +544,8 @@ input[type=checkbox]{width:16px; height:16px; accent-color:var(--flow);}
 
 .reason-explain{margin-top:14px; padding:12px 14px; background:var(--panel-raised); border:1px solid var(--border-soft); border-radius:10px; font-size:12.5px; color:var(--text-dim); line-height:1.6;}
 
+.log-suggestion-list{border:1px solid var(--border);border-radius:10px;background:var(--panel-2);margin:-2px 0 10px;overflow:hidden}.log-suggestion{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-bottom:1px solid var(--border)}.log-suggestion:last-child{border-bottom:0}.log-suggestion small{display:block;color:var(--text-mute);margin-top:2px}.log-suggestion .btn{white-space:nowrap}
+
 .link-btn{background:none; border:none; color:var(--text-mute); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline; padding:0;}
 
 small.hint{display:block; color:var(--text-mute); font-size:11.5px; margin-top:5px;}
@@ -625,6 +627,7 @@ const DEFAULT_SETTINGS = {
   randomness: 0.28,      // jitter fraction
 
   seasonalFreshCount: 0,
+  exactTitleRecommendations: false,
 
 };
 
@@ -1168,6 +1171,27 @@ function suggestedAmount(cat){
 
 }
 
+function scoreLibraryTitle(item, cat){
+  if(!item || item.categoryId!==cat.id) return -Infinity;
+  if(item.status==='completed' || item.status==='dropped') return -Infinity;
+  const total = Number(item.total);
+  const progress = Number(item.progress)||0;
+  const completion = total>0 ? Math.min(1,progress/total) : 0;
+  const remaining = total>0 ? Math.max(0,total-progress) : 10;
+  const priorityBonus = ({high:18,medium:8,low:0}[item.priority]||0);
+  const activeBonus = item.status==='active' ? 12 : item.status==='planned' ? 5 : 0;
+  const unfinishedBonus = total>0 ? Math.min(20, remaining*2) : 6;
+  const seasonalBonus = cat.seasonal ? 10 : 0;
+  const jitter = Math.random()*8;
+  return priorityBonus + activeBonus + unfinishedBonus + seasonalBonus - completion*10 + jitter;
+}
+
+function pickLibraryTitle(cat){
+  const pool=S.library.filter(i=>i && i.categoryId===cat.id && i.status!=='completed' && i.status!=='dropped');
+  if(!pool.length) return null;
+  return pool.slice().sort((a,b)=>scoreLibraryTitle(b,cat)-scoreLibraryTitle(a,cat))[0] || null;
+}
+
 function generateTask(excludeIds){
 
   const scored = computeScores(excludeIds);
@@ -1177,12 +1201,15 @@ function generateTask(excludeIds){
   const pick = weightedPick(scored);
 
   const {low, high} = suggestedAmount(pick.cat);
+  const recommendedTitle = S.settings.exactTitleRecommendations ? pickLibraryTitle(pick.cat) : null;
 
   return {
 
     id: uid(),
 
     categoryId: pick.cat.id,
+    libraryId: recommendedTitle ? recommendedTitle.id : null,
+    title: recommendedTitle ? cleanTitle(recommendedTitle.title) : null,
 
     low, high,
 
@@ -1306,6 +1333,49 @@ function entriesTotal(entries){
 
   return entries.reduce((s,e)=>s+(Number(e.qty)||0),0);
 
+}
+
+function normalizeSeasonalLibraryItems(){
+  const seasonal=S.categories.find(c=>c.id==='seasonal');
+  const backlog=S.categories.find(c=>c.id==='backlog');
+  if(!seasonal || !backlog) return false;
+  let changed=false;
+  S.library.forEach(item=>{
+    if(item.categoryId!==seasonal.id) return;
+    const completeByProgress=item.total!=null && Number(item.total)>0 && Number(item.progress||0)>=Number(item.total);
+    const completeByStatus=item.status==='completed';
+    if(completeByProgress || completeByStatus){
+      item.categoryId=backlog.id;
+      item.status='completed';
+      item.progress=item.total!=null ? Math.max(Number(item.progress)||0,Number(item.total)||0) : item.progress;
+      item.tags=Array.from(new Set([...(item.tags||[]),'backlog']));
+      changed=true;
+    }
+  });
+  return changed;
+}
+
+function logTitleCandidates(query){
+  const q=String(query||'').trim().toLowerCase();
+  if(!q) return [];
+  return S.library.filter(i=>{
+    if(!i || !['seasonal','backlog'].includes(i.categoryId)) return false;
+    if(i.status==='dropped') return false;
+    return cleanTitle(i.title).toLowerCase().includes(q);
+  }).slice(0,8);
+}
+
+function renderLogSuggestions(){
+  const box=document.getElementById('log-suggestions');
+  if(!box) return;
+  const candidates=logTitleCandidates(S.entryDraft.title);
+  if(!candidates.length){ box.innerHTML=''; return; }
+  const currentCat=getCategory(S.currentTask.categoryId);
+  box.innerHTML=`<div class="log-suggestion-list">${candidates.map(i=>{
+    const isSeasonal=i.categoryId==='seasonal';
+    const action=(currentCat.id==='seasonal' && !isSeasonal) ? `<button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}',true)">Use & switch to Seasonal</button>` : `<button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}',false)">Use ${isSeasonal?'Seasonal':'Backlog'}</button>`;
+    return `<div class="log-suggestion"><div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${isSeasonal?'🔴 Seasonal':'🟢 Backlog'} · ${i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown'}</small></div>${action}</div>`;
+  }).join('')}</div>`;
 }
 
 function submitLog(){
@@ -1682,7 +1752,7 @@ function renderDashboard(){
 
         <div class="hero-amount">Consume <b>${amountStr}</b></div>
 
-        <div class="hero-note">You choose the titles — pick whatever you're in the mood for.</div>
+        ${S.settings.exactTitleRecommendations ? (t.title ? `<div class="hero-note">MediaFlow recommends: <b>${escapeHtml(t.title)}</b></div>` : `<div class="hero-note">No eligible title found in this category. Add one to your Library.</div>`) : `<div class="hero-note">You choose the titles — pick whatever you're in the mood for.</div>`}
 
         <div class="hero-reasons">
 
@@ -2519,6 +2589,19 @@ function renderSettings(){
 
         </div>
 
+        <div class="section-label">TITLE RECOMMENDATIONS</div>
+
+        <div class="card" style="margin-bottom:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+            <div>
+              <div style="font-weight:700;">Let MediaFlow choose the exact title</div>
+              <small class="hint">When enabled, the scheduler uses your Library and its scoring signals to recommend a specific title inside the category it selected. You can still skip or rotate.</small>
+            </div>
+            <button class="toggle ${st.exactTitleRecommendations?'on':''}" onclick="App.toggleExactTitleRecommendations()" aria-label="Toggle exact title recommendations"></button>
+          </div>
+          <div style="margin-top:10px; color:var(--text-mute); font-size:12px;">${st.exactTitleRecommendations?'ON — MediaFlow picks category + amount + title.':'OFF — MediaFlow picks category + amount; you pick the title.'}</div>
+        </div>
+
         <div class="section-label">SCHEDULER TUNING</div>
 
         <div class="card" style="margin-bottom:22px;">
@@ -2880,7 +2963,16 @@ const App = {
 
   updateLogDraft(k,v){ S.logDraft[k]=v; },
 
-  updateEntryDraft(k,v){ S.entryDraft[k]=v; },
+  updateEntryDraft(k,v){ S.entryDraft[k]=v; if(k==='title') renderLogSuggestions(); },
+
+  selectLogTitle(id, makeSeasonal){
+    const item=S.library.find(i=>i.id===id);
+    if(!item) return;
+    if(makeSeasonal && item.categoryId==='backlog') item.categoryId='seasonal';
+    S.entryDraft.title=cleanTitle(item.title);
+    persistLibrary();
+    render();
+  },
 
   addLogEntry(){
 
@@ -2891,6 +2983,14 @@ const App = {
     const cat=getCategory(S.currentTask.categoryId);
     let match=findLibraryMatch(cat.id,title);
     let isNew=false;
+    if(!match && cat.id==='seasonal'){
+      match=S.library.find(i=>['seasonal','backlog'].includes(i.categoryId) && cleanTitle(i.title).toLowerCase()===title.toLowerCase()) || null;
+      if(match && match.categoryId==='backlog'){
+        match.categoryId='seasonal';
+        match.status=match.status==='completed' ? 'active' : match.status;
+        persistLibrary();
+      }
+    }
 
     if(!match){
       match={
@@ -2948,6 +3048,7 @@ const App = {
       item.tags=String(value||'').split(',').map(t=>t.trim()).filter(Boolean);
     }
 
+    normalizeSeasonalLibraryItems();
     persistLibrary();
 
   },
@@ -2992,6 +3093,18 @@ const App = {
 
     persistSettings(); render();
 
+  },
+
+  toggleExactTitleRecommendations(){
+    S.settings.exactTitleRecommendations=!S.settings.exactTitleRecommendations;
+    if(S.sessionActive && S.currentTask){
+      const cat=getCategory(S.currentTask.categoryId);
+      const picked=S.settings.exactTitleRecommendations ? pickLibraryTitle(cat) : null;
+      S.currentTask.libraryId=picked?picked.id:null;
+      S.currentTask.title=picked?cleanTitle(picked.title):null;
+      persistTask();
+    }
+    persistSettings(); render();
   },
 
   updateSetting(key, val){
@@ -3227,45 +3340,40 @@ const App = {
   },
 
   exportJSON(){
-
-    const blob = new Blob([JSON.stringify({categories:S.categories, library:S.library, sessions:S.sessions, settings:S.settings, exportedAt:new Date().toISOString()}, null, 2)], {type:'application/json'});
-
-    triggerDownload(blob, `mediaflow-backup-${todayISO()}.json`);
-
+    showDataProgress('Exporting MediaFlow backup', 'Preparing your data...', 15);
+    setTimeout(()=>{
+      try{
+        const payload={categories:S.categories, library:S.library, sessions:S.sessions, settings:S.settings, exportedAt:new Date().toISOString()};
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+        updateDataProgress(70,'Creating download...');
+        triggerDownload(blob,`mediaflow-backup-${todayISO()}.json`);
+        finishDataProgress(true,'Export successful','Your MediaFlow backup was downloaded.');
+      }catch(e){ console.error(e); finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.'); }
+    },40);
   },
 
   importJSON(file){
-
     if(!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = ()=>{
-
+    showDataProgress('Importing MediaFlow backup','Reading backup file...',10);
+    const reader=new FileReader();
+    reader.onprogress=e=>{ if(e.lengthComputable) updateDataProgress(Math.round((e.loaded/e.total)*60),'Reading backup...'); };
+    reader.onload=async ()=>{
       try{
-
-        const data = JSON.parse(reader.result);
-
-        if(!confirm('This will replace your current MediaFlow data with the imported backup. Continue?')) return;
-
-        if(data.categories) S.categories = data.categories;
-
-        if(data.library) S.library = sanitizeLibrary(data.library);
-
-        if(data.sessions) S.sessions = data.sessions;
-
-        if(data.settings) S.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings);
-
-        persistCategories(); persistLibrary(); persistSessions(); persistSettings();
-
+        const data=JSON.parse(reader.result);
+        if(!confirm('This will replace your current MediaFlow data with the imported backup. Continue?')){ closeDataProgress(); return; }
+        updateDataProgress(70,'Applying imported data...');
+        if(data.categories) S.categories=data.categories;
+        if(data.library) S.library=sanitizeLibrary(data.library);
+        if(data.sessions) S.sessions=data.sessions;
+        if(data.settings) S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings);
+        normalizeSeasonalLibraryItems();
+        await saveState();
         render();
-
-      }catch(e){ alert('Could not read that file — is it a valid MediaFlow JSON backup?'); }
-
+        finishDataProgress(true,'Import successful','Your MediaFlow backup was imported successfully.');
+      }catch(e){ console.error(e); finishDataProgress(false,'Import failed','Could not read that file. Make sure it is a valid MediaFlow JSON backup.'); }
     };
-
+    reader.onerror=()=>finishDataProgress(false,'Import failed','The file could not be read.');
     reader.readAsText(file);
-
   },
 
   importMalXml(file){
@@ -3285,7 +3393,7 @@ const App = {
         while((m=re.exec(text))!==null) blocks.push(m[1]);
 
         if(blocks.length===0){
-          alert('No entries found in that file — make sure it is a MAL list export XML.');
+          finishImportProgress(false,'Import failed','No entries found. Make sure this is a MAL list export XML.');
           return;
         }
 
@@ -3346,9 +3454,8 @@ const App = {
           await yieldToBrowser();
         }
 
-        closeImportProgress();
+        finishImportProgress(true,'Import successful',`MyAnimeList: ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
         render();
-        alert(`Imported from MyAnimeList: ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
       }catch(e){
         console.error('MAL import failed',e);
         closeImportProgress();
@@ -3466,13 +3573,11 @@ const App = {
         }
 
         await saveState();
-        closeImportProgress();
+        finishImportProgress(true,`Import successful`,`Imported ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
         render();
-        alert(`Imported ${added} added, ${updated} updated${skipped?', '+skipped+' skipped':''}.`);
       }catch(e){
         console.error('CSV import failed',e);
-        closeImportProgress();
-        alert("Couldn't parse that CSV file.");
+        finishImportProgress(false,'Import failed',"Couldn't parse that CSV file.");
       }
     };
     reader.readAsText(file);
@@ -3555,6 +3660,27 @@ function parseCsvText(text){
 }
 
 
+function showDataProgress(title, subtitle, pct){
+  let el=document.getElementById('mediaflow-data-progress');
+  if(!el){el=document.createElement('div');el.id='mediaflow-data-progress';document.body.appendChild(el);}
+  el.className='import-overlay';
+  el.innerHTML=`<div class="import-card"><div class="import-title" id="data-progress-title">${escapeHtml(title)}</div><div class="import-sub" id="data-progress-sub">${escapeHtml(subtitle||'Working...')}</div><div class="import-track"><div class="import-fill" id="data-progress-fill" style="width:${pct||0}%"></div></div><div class="import-meta"><span>MediaFlow data</span><span id="data-progress-pct">${pct||0}%</span></div></div>`;
+}
+function updateDataProgress(pct,subtitle){
+  const p=Math.max(0,Math.min(100,Number(pct)||0));
+  const fill=document.getElementById('data-progress-fill');if(fill)fill.style.width=p+'%';
+  const pe=document.getElementById('data-progress-pct');if(pe)pe.textContent=p+'%';
+  const sub=document.getElementById('data-progress-sub');if(sub&&subtitle)sub.textContent=subtitle;
+}
+function finishDataProgress(success,title,subtitle){
+  const el=document.getElementById('mediaflow-data-progress');if(!el)return;
+  const t=document.getElementById('data-progress-title');if(t)t.textContent=(success?'✓ ':'✕ ')+title;
+  const sub=document.getElementById('data-progress-sub');if(sub)sub.textContent=subtitle||'';
+  updateDataProgress(100,subtitle);
+  setTimeout(()=>el.remove(),1200);
+}
+function closeDataProgress(){const el=document.getElementById('mediaflow-data-progress');if(el)el.remove();}
+
 function showImportProgress(title, total){
   let el=document.getElementById('mediaflow-import-progress');
   if(!el){ el=document.createElement('div'); el.id='mediaflow-import-progress'; document.body.appendChild(el); }
@@ -3584,6 +3710,15 @@ function updateImportProgress(done,total,added,updated,skipped,phase){
 }
 function closeImportProgress(){
   const el=document.getElementById('mediaflow-import-progress'); if(el) el.remove();
+}
+function finishImportProgress(success,title,message){
+  const el=document.getElementById('mediaflow-import-progress');
+  if(!el) return;
+  const sub=document.getElementById('import-progress-sub'); if(sub) sub.textContent=message||'';
+  const pct=document.getElementById('import-progress-pct'); if(pct) pct.textContent='100%';
+  const fill=document.getElementById('import-progress-fill'); if(fill) fill.style.width='100%';
+  const heading=el.querySelector('.import-title'); if(heading) heading.textContent=(success?'✓ ':'✕ ')+title;
+  setTimeout(()=>el.remove(),1200);
 }
 function yieldToBrowser(){
   return new Promise(resolve=>setTimeout(resolve,0));
