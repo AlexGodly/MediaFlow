@@ -1,8 +1,8 @@
 {
   "name": "mediaflow",
   "productName": "MediaFlow",
-  "version": "8.0.0",
-  "description": "MediaFlow",
+  "version": "13.0.0",
+  "description": "MediaFlow by Alex Godly",
   "author": "Alex Godly <Alex Godly>",
   "main": "main.js",
   "private": true,
