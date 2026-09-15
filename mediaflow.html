@@ -8,13 +8,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow · Cloud + Offline v14</title>
+<title>MediaFlow by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
 <link rel="manifest" href="manifest.json">
 
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="https://i.ibb.co/Q36KRkjt/icon.jpg" type="image/svg+xml">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -3909,14 +3909,19 @@ function showImportProgress(title, total){
     </div>`;
 }
 function updateImportProgress(done,total,added,updated,skipped,phase){
-  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  const d=Number.isFinite(Number(done))?Number(done):0;
+  const t=Number.isFinite(Number(total))?Number(total):0;
+  const aNum=Number.isFinite(Number(added))?Number(added):0;
+  const uNum=Number.isFinite(Number(updated))?Number(updated):0;
+  const sNum=Number.isFinite(Number(skipped))?Number(skipped):0;
+  const pct=t>0?Math.min(100,Math.round(d/t*100)):0;
   const fill=document.getElementById('import-progress-fill'); if(fill) fill.style.width=pct+'%';
-  const count=document.getElementById('import-progress-count'); if(count) count.textContent=`${done.toLocaleString()} / ${total.toLocaleString()}`;
+  const count=document.getElementById('import-progress-count'); if(count) count.textContent=t>0?`${d.toLocaleString()} / ${t.toLocaleString()}`:`${d.toLocaleString()} processed`;
   const pctEl=document.getElementById('import-progress-pct'); if(pctEl) pctEl.textContent=pct+'%';
   const sub=document.getElementById('import-progress-sub'); if(sub) sub.textContent=phase||'Importing...';
-  const a=document.getElementById('import-added'); if(a) a.textContent=added.toLocaleString();
-  const u=document.getElementById('import-updated'); if(u) u.textContent=updated.toLocaleString();
-  const s=document.getElementById('import-skipped'); if(s) s.textContent=skipped.toLocaleString();
+  const a=document.getElementById('import-added'); if(a) a.textContent=aNum.toLocaleString();
+  const u=document.getElementById('import-updated'); if(u) u.textContent=uNum.toLocaleString();
+  const s=document.getElementById('import-skipped'); if(s) s.textContent=sNum.toLocaleString();
 }
 function closeImportProgress(){
   const el=document.getElementById('mediaflow-import-progress'); if(el) el.remove();
@@ -4099,7 +4104,8 @@ async function malSync(){
   const username=(S.malLink?.username||'').trim();
   if(!username){alert('Enter your MyAnimeList username first.');return;}
   const mode=S.malLink.mode||'anime', types=mode==='both'?['anime','manga']:[mode];
-  showImportProgress('MAL sync','Starting…');
+  showImportProgress('MAL sync',0);
+  updateImportProgress(0,0,0,0,0,'Starting…');
   let total=0,added=0,updated=0;
   try{
     for(const type of types){
@@ -4107,6 +4113,9 @@ async function malSync(){
       while(hasNext){
         updateImportProgress(1,`Fetching ${type} page ${page}…`);
         const j=await malFetchPage(username,type,page), rows=Array.isArray(j.data)?j.data:[];
+        const apiTotal=Number(j.pagination?.items?.total)||0;
+        const knownTotal=Number.isFinite(apiTotal)&&apiTotal>0?apiTotal:0;
+        const pageDoneBefore=total;
         for(let offset=0;offset<rows.length;offset+=20){
           const batch=rows.slice(offset,offset+20);
           for(const row of batch){
@@ -4127,7 +4136,9 @@ async function malSync(){
             }
           }
           total+=batch.length;
-          updateImportProgress(Math.min(99,Math.max(2,(page-1)*4+Math.round((offset+batch.length)/Math.max(1,rows.length)*4))),`Processed ${total} ${type} titles…`);
+          const progressTotal=knownTotal>0?knownTotal:Math.max(total,1);
+          const progressDone=knownTotal>0?Math.min(total,knownTotal):total;
+          updateImportProgress(progressDone,progressTotal,added,updated,0,`Processed ${total.toLocaleString()} ${type} titles…`);
           await yieldToBrowser();
         }
         hasNext=!!j.pagination?.has_next; page++;
