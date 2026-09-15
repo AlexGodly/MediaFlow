@@ -161,9 +161,9 @@ input,select,textarea{font-family:inherit;}
 .sidebar-foot .k{font-size:11px; color:var(--text-mute); text-transform:uppercase; letter-spacing:.06em;}
 
 .sidebar-foot .v{font-family:var(--font-display); font-size:22px; margin-top:2px;}
-.sidebar-resizer{position:absolute;top:0;right:-5px;width:10px;height:100%;cursor:col-resize;z-index:100;touch-action:none;user-select:none;-webkit-user-select:none;}
-.sidebar-resizer::after{content:'';position:absolute;top:0;bottom:0;left:3px;width:2px;background:transparent;transition:background .15s;}
-.sidebar:hover .sidebar-resizer::after{background:var(--border-soft);}
+.sidebar-resizer{position:absolute;top:0;right:-7px;width:14px;height:100%;cursor:col-resize;z-index:100;touch-action:none;user-select:none;-webkit-user-select:none;background:transparent;}
+.sidebar-resizer::after{content:'';position:absolute;top:0;bottom:0;left:6px;width:2px;background:transparent;transition:background .15s;}
+.sidebar:hover .sidebar-resizer::after,.sidebar-resizer:focus-visible::after{background:var(--flow);}
 body.sidebar-resizing{cursor:col-resize;user-select:none;}
 body.sidebar-resizing *{cursor:col-resize !important;user-select:none !important;-webkit-user-select:none !important;}
 body.sidebar-resizing{overflow:hidden;}
@@ -613,16 +613,30 @@ function profileInitials(){const display=getDisplayName();const parts=display.sp
 function getAvatarUrl(){return String(AUTH_USER?.user_metadata?.avatar_url||'').trim();}
 function renderAccountAvatar(){const url=getAvatarUrl();return url?`<img class="account-avatar" src="${escapeHtml(url)}" alt="Profile picture">`:`<span class="account-avatar">${escapeHtml(profileInitials())}</span>`;}
 function renderProfileAvatar(){const url=getAvatarUrl();return url?`<div class="profile-avatar"><img src="${escapeHtml(url)}" alt="Profile picture"></div>`:`<div class="profile-avatar">${escapeHtml(profileInitials())}</div>`;}
+async function refreshAuthUser(){
+ try{const {data,error}=await supabase.auth.getUser();if(error)throw error;if(data?.user)AUTH_USER=data.user;}catch(err){console.error('MediaFlow: could not refresh auth user',err);}
+}
 async function updateAccountName(){
  const input=document.getElementById('profile-name');
  const name=input?.value.trim()||'';
- try{const {data,error}=await supabase.auth.updateUser({data:{display_name:name}});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();alert(name?'Name updated successfully.':'Name removed. Your email will be shown instead.');}catch(err){alert(friendlyAuthError(err));}
+ const btn=input?.closest('.card')?.querySelector('button.btn-primary');
+ if(btn){btn.disabled=true;btn.textContent='Saving…';}
+ try{
+   const {error}=await supabase.auth.updateUser({data:{display_name:name||null}});
+   if(error)throw error;
+   await refreshAuthUser();
+   render();
+   alert(name?'Name updated successfully.':'Name removed. Your email will be shown instead.');
+ }catch(err){
+   if(btn){btn.disabled=false;btn.textContent='Save name';}
+   alert(friendlyAuthError(err));
+ }
 }
 async function updateAccountEmail(){
  const input=document.getElementById('profile-email'); const email=input?.value.trim();
  if(!email||!email.includes('@')){alert('Enter a valid email address.');return;}
  if(email===String(AUTH_USER?.email||'').trim()){alert('That is already your current email.');return;}
- try{const {data,error}=await supabase.auth.updateUser({email});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();alert('Email update requested. Check your email and follow the confirmation link if Supabase requires confirmation.');}catch(err){alert(friendlyAuthError(err));}
+ try{const {error}=await supabase.auth.updateUser({email});if(error)throw error;await refreshAuthUser();render();alert('Email update requested. Check your email and follow the confirmation link if Supabase requires confirmation.');}catch(err){alert(friendlyAuthError(err));}
 }
 async function updateAccountPassword(){
  const a=document.getElementById('profile-password'); const b=document.getElementById('profile-password-confirm');
@@ -649,9 +663,10 @@ function readAndStoreAvatar(file){
  reader.readAsDataURL(file);
 }
 async function removeAvatar(){
- try{const {data,error}=await supabase.auth.updateUser({data:{avatar_url:null}});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();}catch(err){alert(friendlyAuthError(err));}
+ try{const {error}=await supabase.auth.updateUser({data:{avatar_url:null}});if(error)throw error;await refreshAuthUser();render();}catch(err){alert(friendlyAuthError(err));}
 }
 window.MediaFlowAuth={show:renderAuthScreen,submit:authSubmit,reset:resetPassword,logout:signOut};
+window.MediaFlowProfile={updateName:updateAccountName,updateEmail:updateAccountEmail,updatePassword:updateAccountPassword,removeAvatar};
 
 const UNITS = {
 
@@ -1561,7 +1576,7 @@ function renderShell(){
    app.innerHTML = ` 
 
     <div class="sidebar">
-      <div class="sidebar-resizer" onpointerdown="beginSidebarResize(event)" title="Drag to resize sidebar" aria-label="Resize sidebar"></div>
+      <div class="sidebar-resizer" title="Drag to resize sidebar" aria-label="Resize sidebar" role="separator" aria-orientation="vertical" tabindex="0"></div>
 
       <div class="brand">
 
@@ -2535,7 +2550,7 @@ function renderProfile(){
         </div>
         <div class="profile-avatar-actions">
           <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input id="profile-picture-input" type="file" accept="image/*" style="display:none" onchange="readAndStoreAvatar(this.files[0])"></label>
-          ${getAvatarUrl()?'<button class="btn btn-danger" onclick="removeAvatar()">Remove picture</button>':''}
+          ${getAvatarUrl()?'<button class="btn btn-danger" onclick="window.MediaFlowProfile.removeAvatar()">Remove picture</button>':''}
         </div>
       </div>
 
@@ -2543,14 +2558,14 @@ function renderProfile(){
       <div class="card profile-section">
         <div class="field"><label class="field-label">Display name</label><input id="profile-name" type="text" autocomplete="name" maxlength="80" value="${escapeHtml(AUTH_USER?.user_metadata?.display_name||'')}" placeholder="Your name"></div>
         <div class="profile-note">If you leave your name empty, MediaFlow will show your account email instead.</div>
-        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountName()">Save name</button></div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updateName()">Save name</button></div>
       </div>
 
       <div class="section-label">EMAIL</div>
       <div class="card profile-section">
         <div class="field"><label class="field-label">Email address</label><input id="profile-email" type="email" autocomplete="email" value="${email}"></div>
         <div class="profile-note">Changing your email may require confirmation from the new address before it becomes active.</div>
-        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountEmail()">Change email</button></div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updateEmail()">Change email</button></div>
       </div>
 
       <div class="section-label">PASSWORD</div>
@@ -2559,7 +2574,7 @@ function renderProfile(){
           <div class="field"><label class="field-label">New password</label><input id="profile-password" type="password" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"></div>
           <div class="field"><label class="field-label">Confirm new password</label><input id="profile-password-confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repeat password"></div>
         </div>
-        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountPassword()">Change password</button></div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="window.MediaFlowProfile.updatePassword()">Change password</button></div>
       </div>
 
       <div class="section-label">ACCOUNT</div>
@@ -3845,6 +3860,35 @@ function endSidebarResize(e){
     try{if(e?.pointerId!=null && state.handle.releasePointerCapture)state.handle.releasePointerCapture(e.pointerId);}catch(err){}
   }
 }
+window.beginSidebarResize=beginSidebarResize;
+window.onSidebarResize=onSidebarResize;
+window.endSidebarResize=endSidebarResize;
+function bindSidebarResizer(){
+  const handle=document.querySelector('.sidebar-resizer');
+  if(!handle||handle.dataset.bound==='1')return;
+  handle.dataset.bound='1';
+  handle.addEventListener('pointerdown',beginSidebarResize);
+  handle.addEventListener('dblclick',()=>applySidebarWidth(236));
+  handle.addEventListener('keydown',e=>{
+    if(window.innerWidth<=860)return;
+    const current=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'))||236;
+    if(e.key==='ArrowLeft'){e.preventDefault();applySidebarWidth(current-12);}
+    if(e.key==='ArrowRight'){e.preventDefault();applySidebarWidth(current+12);}
+    if(e.key==='Home'){e.preventDefault();applySidebarWidth(SIDEBAR_MIN);}
+    if(e.key==='End'){e.preventDefault();applySidebarWidth(SIDEBAR_MAX);}
+  });
+}
+function autoFitSidebarToProfile(){
+  if(window.innerWidth<=860)return;
+  const sidebar=document.querySelector('.sidebar');
+  const name=document.querySelector('.account-menu-email');
+  if(!sidebar||!name)return;
+  const text=String(name.textContent||'').trim();
+  // Fit normal names/emails while keeping the sidebar compact. Long emails are capped.
+  const target=Math.max(236,Math.min(SIDEBAR_MAX,Math.ceil(text.length*7.1+154)));
+  const current=sidebar.getBoundingClientRect().width;
+  if(current<target)applySidebarWidth(target);
+}
 loadSidebarWidth();
 
 /* ============================================================
@@ -3855,7 +3899,9 @@ loadSidebarWidth();
 
 function render(){
 
-  if(!document.querySelector('.sidebar')) { renderShell(); return; }
+  if(!document.querySelector('.sidebar')) { renderShell(); bindSidebarResizer(); autoFitSidebarToProfile(); return; }
+
+  bindSidebarResizer();
 
   // update sidebar active states + streak without full rebuild for smoothness
 
@@ -3866,6 +3912,7 @@ function render(){
   if(accountName)accountName.textContent=getDisplayName();
   const accountAvatarBtn=document.querySelector('.account-menu .account-avatar-btn');
   if(accountAvatarBtn)accountAvatarBtn.innerHTML=renderAccountAvatar();
+  autoFitSidebarToProfile();
 
   renderView();
 
