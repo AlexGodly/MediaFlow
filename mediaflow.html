@@ -161,12 +161,15 @@ input,select,textarea{font-family:inherit;}
 .sidebar-foot .k{font-size:11px; color:var(--text-mute); text-transform:uppercase; letter-spacing:.06em;}
 
 .sidebar-foot .v{font-family:var(--font-display); font-size:22px; margin-top:2px;}
-.sidebar-resizer{position:absolute;top:0;right:-4px;width:8px;height:100%;cursor:col-resize;z-index:20;}
+.sidebar-resizer{position:absolute;top:0;right:-5px;width:10px;height:100%;cursor:col-resize;z-index:100;touch-action:none;user-select:none;-webkit-user-select:none;}
 .sidebar-resizer::after{content:'';position:absolute;top:0;bottom:0;left:3px;width:2px;background:transparent;transition:background .15s;}
 .sidebar:hover .sidebar-resizer::after{background:var(--border-soft);}
 body.sidebar-resizing{cursor:col-resize;user-select:none;}
-body.sidebar-resizing *{cursor:col-resize !important;user-select:none !important;}
+body.sidebar-resizing *{cursor:col-resize !important;user-select:none !important;-webkit-user-select:none !important;}
+body.sidebar-resizing{overflow:hidden;}
 .account-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--panel);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--text-dim);}
+.account-avatar-btn{border:0;padding:0;background:transparent;cursor:pointer;border-radius:50%;display:grid;place-items:center;flex-shrink:0;}
+.account-avatar-btn:focus-visible{outline:2px solid var(--flow);outline-offset:2px;}
 .account-profile-btn{border:0;background:transparent;color:var(--text-dim);padding:0;min-width:0;flex:1;text-align:left;cursor:pointer;font:inherit;}
 .account-profile-btn:hover .account-menu-email{color:var(--text);}
 .profile-avatar-wrap{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
@@ -605,10 +608,16 @@ function friendlyAuthError(err){return String(err?.message||err||'Authentication
 async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
 async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
 async function signOut(){if(!supabase)return;await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
-function profileInitials(){const email=String(AUTH_USER?.email||'').trim();return email?email.slice(0,1).toUpperCase():'?';}
+function getDisplayName(){const name=String(AUTH_USER?.user_metadata?.display_name||'').trim();return name||String(AUTH_USER?.email||'').trim()||'Account';}
+function profileInitials(){const display=getDisplayName();const parts=display.split(/\s+/).filter(Boolean);if(parts.length>1)return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();return display.slice(0,1).toUpperCase()||'?';}
 function getAvatarUrl(){return String(AUTH_USER?.user_metadata?.avatar_url||'').trim();}
 function renderAccountAvatar(){const url=getAvatarUrl();return url?`<img class="account-avatar" src="${escapeHtml(url)}" alt="Profile picture">`:`<span class="account-avatar">${escapeHtml(profileInitials())}</span>`;}
 function renderProfileAvatar(){const url=getAvatarUrl();return url?`<div class="profile-avatar"><img src="${escapeHtml(url)}" alt="Profile picture"></div>`:`<div class="profile-avatar">${escapeHtml(profileInitials())}</div>`;}
+async function updateAccountName(){
+ const input=document.getElementById('profile-name');
+ const name=input?.value.trim()||'';
+ try{const {data,error}=await supabase.auth.updateUser({data:{display_name:name}});if(error)throw error;AUTH_USER=data.user||AUTH_USER;render();alert(name?'Name updated successfully.':'Name removed. Your email will be shown instead.');}catch(err){alert(friendlyAuthError(err));}
+}
 async function updateAccountEmail(){
  const input=document.getElementById('profile-email'); const email=input?.value.trim();
  if(!email||!email.includes('@')){alert('Enter a valid email address.');return;}
@@ -1523,6 +1532,8 @@ const ICONS = {
 
   stats:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>`,
 
+  profile:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`,
+
   settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
 
 };
@@ -1537,6 +1548,8 @@ const NAV_ITEMS = [
 
   {id:'stats', label:'Statistics'},
 
+  {id:'profile', label:'Profile settings'},
+
   {id:'settings', label:'Settings'},
 
 ];
@@ -1548,7 +1561,7 @@ function renderShell(){
    app.innerHTML = ` 
 
     <div class="sidebar">
-      <div class="sidebar-resizer" onmousedown="beginSidebarResize(event)" title="Drag to resize sidebar"></div>
+      <div class="sidebar-resizer" onpointerdown="beginSidebarResize(event)" title="Drag to resize sidebar" aria-label="Resize sidebar"></div>
 
       <div class="brand">
 
@@ -1576,7 +1589,7 @@ function renderShell(){
 
       </div>
 
-      <div class="sidebar-foot"><div class="account-menu">${renderAccountAvatar()}<button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(AUTH_USER?.email||'')}</span></button><span class="cloud-badge">CLOUD</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
+      <div class="sidebar-foot"><div class="account-menu"><button class="account-avatar-btn" onclick="App.openProfile()" title="Open profile settings">${renderAccountAvatar()}</button><button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><span class="cloud-badge">CLOUD</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
         <div class="k">Day streak</div>
 
@@ -2517,13 +2530,20 @@ function renderProfile(){
       <div class="section-label">PROFILE PICTURE</div>
       <div class="card profile-section">
         <div class="profile-avatar-wrap">
-          ${renderProfileAvatar()}
+          <button class="account-avatar-btn" style="width:88px;height:88px;" onclick="document.getElementById('profile-picture-input')?.click()" title="Change profile picture">${renderProfileAvatar()}</button>
           <div><div style="font-weight:700;">Your profile picture</div><div class="profile-note">Images are resized to 256px and stored with your Supabase account profile.</div></div>
         </div>
         <div class="profile-avatar-actions">
-          <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input type="file" accept="image/*" style="display:none" onchange="readAndStoreAvatar(this.files[0])"></label>
+          <label class="btn btn-primary" style="cursor:pointer;">Choose picture<input id="profile-picture-input" type="file" accept="image/*" style="display:none" onchange="readAndStoreAvatar(this.files[0])"></label>
           ${getAvatarUrl()?'<button class="btn btn-danger" onclick="removeAvatar()">Remove picture</button>':''}
         </div>
+      </div>
+
+      <div class="section-label">NAME</div>
+      <div class="card profile-section">
+        <div class="field"><label class="field-label">Display name</label><input id="profile-name" type="text" autocomplete="name" maxlength="80" value="${escapeHtml(AUTH_USER?.user_metadata?.display_name||'')}" placeholder="Your name"></div>
+        <div class="profile-note">If you leave your name empty, MediaFlow will show your account email instead.</div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="updateAccountName()">Save name</button></div>
       </div>
 
       <div class="section-label">EMAIL</div>
@@ -3800,14 +3820,31 @@ let sidebarResizeState=null;
 function beginSidebarResize(e){
   if(window.innerWidth<=860)return;
   e.preventDefault();
-  const sidebar=document.querySelector('.sidebar');if(!sidebar)return;
-  sidebarResizeState={startX:e.clientX,startWidth:sidebar.getBoundingClientRect().width};
+  e.stopPropagation();
+  const handle=e.currentTarget||document.querySelector('.sidebar-resizer');
+  const sidebar=document.querySelector('.sidebar');
+  if(!sidebar)return;
+  sidebarResizeState={startX:e.clientX,startWidth:sidebar.getBoundingClientRect().width,handle};
   document.body.classList.add('sidebar-resizing');
-  window.addEventListener('mousemove',onSidebarResize);
-  window.addEventListener('mouseup',endSidebarResize,{once:true});
+  if(handle?.setPointerCapture && e.pointerId!=null){try{handle.setPointerCapture(e.pointerId);}catch(err){}}
+  handle?.addEventListener('pointermove',onSidebarResize);
+  handle?.addEventListener('pointerup',endSidebarResize,{once:true});
+  handle?.addEventListener('pointercancel',endSidebarResize,{once:true});
 }
-function onSidebarResize(e){if(!sidebarResizeState)return;applySidebarWidth(sidebarResizeState.startWidth+(e.clientX-sidebarResizeState.startX));}
-function endSidebarResize(){sidebarResizeState=null;document.body.classList.remove('sidebar-resizing');window.removeEventListener('mousemove',onSidebarResize);}
+function onSidebarResize(e){
+  if(!sidebarResizeState)return;
+  e.preventDefault();
+  applySidebarWidth(sidebarResizeState.startWidth+(e.clientX-sidebarResizeState.startX));
+}
+function endSidebarResize(e){
+  const state=sidebarResizeState;
+  sidebarResizeState=null;
+  document.body.classList.remove('sidebar-resizing');
+  if(state?.handle){
+    state.handle.removeEventListener('pointermove',onSidebarResize);
+    try{if(e?.pointerId!=null && state.handle.releasePointerCapture)state.handle.releasePointerCapture(e.pointerId);}catch(err){}
+  }
+}
 loadSidebarWidth();
 
 /* ============================================================
@@ -3825,6 +3862,10 @@ function render(){
   document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));
 
   document.querySelectorAll('.mtab').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));
+  const accountName=document.querySelector('.account-menu-email');
+  if(accountName)accountName.textContent=getDisplayName();
+  const accountAvatarBtn=document.querySelector('.account-menu .account-avatar-btn');
+  if(accountAvatarBtn)accountAvatarBtn.innerHTML=renderAccountAvatar();
 
   renderView();
 
