@@ -1436,6 +1436,8 @@ function submitLog(){
 
     });
 
+    // Seasonal titles that become completed must immediately move to the Anime Backlog.
+    normalizeSeasonalLibraryItems();
     persistLibrary();
 
   }
@@ -2969,6 +2971,7 @@ const App = {
     const item=S.library.find(i=>i.id===id);
     if(!item) return;
     if(makeSeasonal && item.categoryId==='backlog') item.categoryId='seasonal';
+    normalizeSeasonalLibraryItems();
     S.entryDraft.title=cleanTitle(item.title);
     persistLibrary();
     render();
@@ -3225,6 +3228,8 @@ const App = {
 
     if(idx>=0) S.library[idx] = data; else S.library.push(data);
 
+    // Completed seasonal titles are always normalized into the Anime Backlog.
+    normalizeSeasonalLibraryItems();
     persistLibrary(); S.modal=null; render();
 
   },
