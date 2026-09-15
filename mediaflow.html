@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MediaFlow</title>
+<meta name="theme-color" content="#0E111A">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -364,74 +367,86 @@ let S = {
 
 /* ============================================================
    STORAGE
+   All app data lives under ONE key so every save is a single atomic
+   write — this avoids the race where a quick refresh lands between
+   several in-flight writes and loses data. Every mutation calls
+   saveState() and AWAITS it before anything else can run.
    ============================================================ */
-async function storageGet(key, fallback){
-  try{
-    // Standalone HTML files do not have the artifact-only window.storage API.
-    // Use browser localStorage so progress survives refreshes and reopening the file.
-    const raw = localStorage.getItem('mediaflow:' + key);
-    if(raw !== null) return JSON.parse(raw);
-  }catch(e){
-    console.error('localStorage get failed', key, e);
-  }
+const STATE_KEY = 'mf_state_v2';
+const LEGACY_KEYS = ['mf_categories','mf_library','mf_sessions','mf_settings','mf_currentTask','mf_sessionActive'];
+let saveQueue = Promise.resolve();
+let lastSaveFailed = false;
 
-  // Keep compatibility with environments that provide window.storage.
+async function rawGet(key){
   try{
-    if(window.storage && typeof window.storage.get === 'function'){
-      const r = await window.storage.get(key, false);
-      if(r && r.value !== undefined && r.value !== null) return JSON.parse(r.value);
-    }
-  }catch(e){
-    console.error('storage get failed', key, e);
-  }
-
-  return fallback;
+    const r = await window.storage.get(key, false);
+    if(!r || r.value === undefined || r.value === null) return undefined;
+    return JSON.parse(r.value);
+  }catch(e){ return undefined; }
 }
-async function storageSet(key, value){
-  const serialized = JSON.stringify(value);
+async function rawSet(key, value){
+  return window.storage.set(key, JSON.stringify(value), false);
+}
 
-  try{
-    localStorage.setItem('mediaflow:' + key, serialized);
-    return;
-  }catch(e){
-    console.error('localStorage set failed', key, e);
-  }
+function snapshot(){
+  return {
+    categories: S.categories, library: S.library, sessions: S.sessions,
+    settings: S.settings, currentTask: S.currentTask, sessionActive: S.sessionActive,
+    savedAt: Date.now(),
+  };
+}
 
-  // Fallback for artifact environments where localStorage is unavailable.
-  try{
-    if(window.storage && typeof window.storage.set === 'function'){
-      await window.storage.set(key, serialized, false);
+// Serialize saves so two rapid actions never race each other; always await the tail.
+function saveState(){
+  saveQueue = saveQueue.then(async ()=>{
+    try{
+      await rawSet(STATE_KEY, snapshot());
+      if(lastSaveFailed){ lastSaveFailed=false; hideSaveError(); }
+    }catch(e){
+      console.error('MediaFlow: save failed', e);
+      lastSaveFailed = true; showSaveError();
     }
-  }catch(e){
-    console.error('storage set failed', key, e);
+  });
+  return saveQueue;
+}
+function showSaveError(){
+  let bar = document.getElementById('save-error-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id='save-error-bar';
+    bar.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#E8607A;color:#1a0a0d;font-weight:700;font-size:13px;text-align:center;padding:9px;z-index:999;';
+    bar.textContent = "Couldn't save — your last action may not persist. Check your connection.";
+    document.body.appendChild(bar);
   }
 }
+function hideSaveError(){ const bar=document.getElementById('save-error-bar'); if(bar) bar.remove(); }
 
 async function loadAll(){
-  const [categories, library, sessions, settings, currentTask, sessionActive] = await Promise.all([
-    storageGet('mf_categories', null),
-    storageGet('mf_library', []),
-    storageGet('mf_sessions', []),
-    storageGet('mf_settings', null),
-    storageGet('mf_currentTask', null),
-    storageGet('mf_sessionActive', false),
-  ]);
-  S.categories = categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-  S.library = library || [];
-  S.sessions = sessions || [];
-  S.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
-  S.currentTask = currentTask;
-  S.sessionActive = !!sessionActive;
+  let data = await rawGet(STATE_KEY);
+  if(!data){
+    // migrate from the old per-key layout, if present, so existing progress isn't lost
+    const [categories, library, sessions, settings, currentTask, sessionActive] = await Promise.all(LEGACY_KEYS.map(rawGet));
+    if(categories || library || sessions || settings){
+      data = {categories, library, sessions, settings, currentTask, sessionActive};
+    }
+  }
+  data = data || {};
+  S.categories = data.categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  S.library = data.library || [];
+  S.sessions = data.sessions || [];
+  S.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings || {});
+  S.currentTask = data.currentTask || null;
+  S.sessionActive = !!data.sessionActive;
   S.loading = false;
-  if(!categories) storageSet('mf_categories', S.categories);
-  if(!settings) storageSet('mf_settings', S.settings);
+  await saveState(); // write back immediately under the new consolidated key
 }
 
-function persistCategories(){ storageSet('mf_categories', S.categories); }
-function persistLibrary(){ storageSet('mf_library', S.library); }
-function persistSessions(){ storageSet('mf_sessions', S.sessions); }
-function persistSettings(){ storageSet('mf_settings', S.settings); }
-function persistTask(){ storageSet('mf_currentTask', S.currentTask); storageSet('mf_sessionActive', S.sessionActive); }
+// All mutations funnel through these — each persists the FULL state in one write.
+function persistCategories(){ return saveState(); }
+function persistLibrary(){ return saveState(); }
+function persistSessions(){ return saveState(); }
+function persistSettings(){ return saveState(); }
+function persistTask(){ return saveState(); }
 
 /* ============================================================
    UTIL
@@ -853,7 +868,10 @@ function renderDashboard(){
 
     ${heroHtml}
 
-    <div class="section-label">TODAY'S BALANCE</div>
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div class="section-label">TODAY'S BALANCE</div>
+      ${S.sessions.length? `<button class="link-btn" onclick="App.undoLastEntry()">↺ Undo last entry</button>` : ''}
+    </div>
     <div class="card">${balanceHtml}</div>
   `;
 }
@@ -926,7 +944,7 @@ function renderLibrary(){
       return `<div class="item-row">
         <div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
         <div>
-          <div class="item-title">${escapeHtml(i.title)}</div>
+          <div class="item-title">${escapeHtml(i.title)} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
           <div class="item-sub">${escapeHtml(cat.name)} ${i.total? '· '+i.progress+' / '+i.total+' '+unitLabel(cat.unit,i.total) : (i.progress? '· '+i.progress+' '+unitLabel(cat.unit,i.progress):'')} ${(i.tags&&i.tags.length)? '· '+i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(''):''}</div>
         </div>
         <div class="pill" style="text-transform:capitalize;">${i.status}</div>
@@ -988,13 +1006,20 @@ function renderHistory(){
         <div class="hist-amt">${s.actualAmount} ${unitLabel(s.unit,s.actualAmount)} · ${fmtMinutes(s.minutes)} · target ${s.targetAmount}</div>
         ${s.note? `<div class="hist-note">"${escapeHtml(s.note)}"</div>`:''}
       </div>
-      <div class="hist-status"><span class="status-badge status-${s.status==='skipped'?'overused':s.status==='partial'?'due':s.status==='over'?'neglected':'healthy'}">${labelMap[s.status]}</span></div>
+      <div class="hist-status" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+        <span class="status-badge status-${s.status==='skipped'?'overused':s.status==='partial'?'due':s.status==='over'?'neglected':'healthy'}">${labelMap[s.status]}</span>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-sm btn-ghost" onclick="App.openSessionModal('${s.id}')">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="App.deleteSession('${s.id}')">Delete</button>
+        </div>
+      </div>
     </div>`;
   }).join('') || `<div class="empty-state"><div class="em-icon">🕓</div><div class="em-title">No sessions yet</div><div>Complete a task from the dashboard to see it here.</div></div>`;
 
   return `
     <div class="view-head">
-      <div><div class="view-title">History</div><div class="view-desc">Every logged task, in one place.</div></div>
+      <div><div class="view-title">History</div><div class="view-desc">Every logged task — edit or delete anything, the scheduler recalculates from what's actually here.</div></div>
+      ${S.sessions.length? `<button class="btn btn-sm" onclick="App.undoLastEntry()">↺ Undo last entry</button>` : ''}
     </div>
     <div class="lib-toolbar">
       <div class="lib-filters">
@@ -1177,6 +1202,24 @@ function renderSettings(){
           </div>
         </div>
 
+        <div class="section-label">CONNECTIONS — MAL &amp; SIMKL</div>
+        <div class="card" style="margin-bottom:22px;">
+          <div style="font-size:13px; color:var(--text-dim); line-height:1.6; margin-bottom:14px;">
+            Live two-way sync would need MAL/SIMKL's OAuth login, which needs a real registered redirect URL and a server to hold the connection — this app runs entirely in your browser with no backend, so that isn't available here. What works instead: export your list from MAL or SIMKL and import it below to populate your Library with titles and progress. Every imported item is tagged with its source and you can re-import any time to refresh progress — the scheduler still only ever works at the category level, this just keeps your Library accurate.
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div>
+              <button class="btn" onclick="document.getElementById('mal-file').click()">Import MyAnimeList export (.xml)</button>
+              <input type="file" id="mal-file" accept=".xml,text/xml" style="display:none" onchange="App.importMalXml(this.files[0])">
+            </div>
+            <div>
+              <button class="btn" onclick="document.getElementById('simkl-file').click()">Import SIMKL / CSV export</button>
+              <input type="file" id="simkl-file" accept=".csv,text/csv" style="display:none" onchange="App.importCsv(this.files[0])">
+            </div>
+          </div>
+          <small class="hint">MAL: Profile → List → Export, choose Anime or Manga, download the .xml. SIMKL/other trackers: export or download your list as CSV — MediaFlow reads columns named roughly "title", "episodes/chapters/progress", "total/episodes", and "status" and maps the rest to sensible defaults.</small>
+        </div>
+
         <div class="section-label">DATA</div>
         <div class="card">
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -1185,7 +1228,6 @@ function renderSettings(){
             <input type="file" id="import-file" accept="application/json" style="display:none" onchange="App.importJSON(this.files[0])">
             <button class="btn btn-danger" onclick="App.resetAll()">Reset all data</button>
           </div>
-          <small class="hint">AniList / MAL CSV import maps titles into your Library once you export from those services — bring the CSV in via Import for now; direct API sync is on the roadmap.</small>
         </div>
       </div>
 
@@ -1213,7 +1255,9 @@ function sliderField(label, key, min, max, val, hint, isFloat){
 function renderModal(){
   let el = document.getElementById('modal-root');
   if(!S.modal){ if(el) el.remove(); return; }
-  const html = S.modal.type==='category' ? categoryModalHtml(S.modal.data) : libraryModalHtml(S.modal.data);
+  const html = S.modal.type==='category' ? categoryModalHtml(S.modal.data)
+    : S.modal.type==='session' ? sessionModalHtml(S.modal.data)
+    : libraryModalHtml(S.modal.data);
   const wrap = document.createElement('div');
   wrap.id = 'modal-root';
   wrap.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this) App.closeModal()"><div class="modal">${html}</div></div>`;
@@ -1259,6 +1303,35 @@ function categoryModalHtml(d){
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="App.saveCategoryModal('${d.id||''}')">Save category</button>
+    </div>
+  `;
+}
+function sessionModalHtml(d){
+  const cat = getCategory(d.categoryId);
+  return `
+    <div class="modal-title">Edit logged entry</div>
+    <div class="field"><label class="field-label">Category</label>
+      <select id="s-category">${S.categories.map(c=>`<option value="${c.id}" ${d.categoryId===c.id?'selected':''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Date</label><input type="text" id="s-date" value="${d.date}" placeholder="YYYY-MM-DD"></div>
+      <div class="field"><label class="field-label">Status</label>
+        <select id="s-status">
+          ${['complete','partial','over','skipped'].map(s=>`<option value="${s}" ${d.status===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Target amount</label><input type="number" min="0" id="s-target" value="${d.targetAmount}"></div>
+      <div class="field"><label class="field-label">Actual amount</label><input type="number" min="0" id="s-actual" value="${d.actualAmount}"></div>
+    </div>
+    <div class="field"><label class="field-label">Minutes</label><input type="number" min="0" id="s-minutes" value="${d.minutes}"></div>
+    <div class="field"><label class="field-label">Note</label><input type="text" id="s-note" value="${escapeHtml(d.note||'')}"></div>
+    <small class="hint">Editing history updates the scheduler's picture of your recent consumption immediately — recency, saturation and streaks are recalculated from this log the next time a task is generated.</small>
+    <div class="modal-actions">
+      <button class="btn btn-danger" style="margin-right:auto;" onclick="App.deleteSessionFromModal('${d.id}')">Delete entry</button>
+      <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="App.saveSessionModal('${d.id}')">Save</button>
     </div>
   `;
 }
@@ -1378,6 +1451,49 @@ const App = {
   },
   closeModal(){ S.modal=null; render(); },
 
+  openSessionModal(id){
+    const sess = S.sessions.find(s=>s.id===id); if(!sess) return;
+    S.modal = {type:'session', data: Object.assign({}, sess)}; render();
+  },
+  saveSessionModal(id){
+    const idx = S.sessions.findIndex(s=>s.id===id); if(idx<0) return;
+    const orig = S.sessions[idx];
+    const updated = Object.assign({}, orig, {
+      categoryId: document.getElementById('s-category').value,
+      date: document.getElementById('s-date').value.trim() || orig.date,
+      status: document.getElementById('s-status').value,
+      targetAmount: Math.max(0, Number(document.getElementById('s-target').value)||0),
+      actualAmount: Math.max(0, Number(document.getElementById('s-actual').value)||0),
+      minutes: Math.max(0, Number(document.getElementById('s-minutes').value)||0),
+      note: document.getElementById('s-note').value.trim(),
+    });
+    updated.unit = getCategory(updated.categoryId).unit;
+    S.sessions[idx] = updated;
+    persistSessions(); S.modal=null; render();
+  },
+  deleteSessionFromModal(id){
+    if(!confirm('Delete this history entry? The scheduler will recalculate as if it never happened.')) return;
+    S.sessions = S.sessions.filter(s=>s.id!==id);
+    persistSessions(); S.modal=null; render();
+  },
+  deleteSession(id){
+    if(!confirm('Delete this history entry?')) return;
+    S.sessions = S.sessions.filter(s=>s.id!==id);
+    persistSessions(); render();
+  },
+  undoLastEntry(){
+    if(S.sessions.length===0) return;
+    const latest = S.sessions.reduce((a,b)=> a.timestamp>b.timestamp ? a : b);
+    if(!confirm(`Undo your last logged entry (${getCategory(latest.categoryId).name}, ${latest.actualAmount} ${latest.unit})? It will be removed from history and given back to you as the next task.`)) return;
+    S.sessions = S.sessions.filter(s=>s.id!==latest.id);
+    // hand it back as the current task so nothing is lost
+    const cat = getCategory(latest.categoryId);
+    const {low, high} = suggestedAmount(cat);
+    S.currentTask = { id: uid(), categoryId: cat.id, low, high, targetMid: latest.targetAmount || cat.target, unit: cat.unit, createdAt: Date.now(), reasons: ['Restored from undo'] };
+    S.sessionActive = true; S.logging = false;
+    persistSessions(); persistTask(); render();
+  },
+
   exportJSON(){
     const blob = new Blob([JSON.stringify({categories:S.categories, library:S.library, sessions:S.sessions, settings:S.settings, exportedAt:new Date().toISOString()}, null, 2)], {type:'application/json'});
     triggerDownload(blob, `mediaflow-backup-${todayISO()}.json`);
@@ -1399,6 +1515,82 @@ const App = {
     };
     reader.readAsText(file);
   },
+  importMalXml(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const doc = new DOMParser().parseFromString(reader.result, 'text/xml');
+        if(doc.querySelector('parsererror')) throw new Error('bad xml');
+        const isManga = !!doc.querySelector('manga');
+        const nodes = Array.from(doc.querySelectorAll(isManga ? 'manga' : 'anime'));
+        if(nodes.length===0){ alert('No entries found in that file — make sure it is a MAL list export XML.'); return; }
+        const statusMap = {'Watching':'active','Reading':'active','Completed':'completed','On-Hold':'paused','Dropped':'dropped','Plan to Watch':'planned','Plan to Read':'planned'};
+        let added=0, updated=0;
+        nodes.forEach(n=>{
+          const text = sel=> n.querySelector(sel) ? n.querySelector(sel).textContent.trim() : '';
+          const title = isManga ? text('manga_title') : text('series_title');
+          if(!title) return;
+          const seriesType = (text('series_type')||'').toLowerCase();
+          const progress = Number(isManga ? text('my_read_chapters') : text('my_watched_episodes')) || 0;
+          const total = Number(isManga ? text('series_chapters') : text('series_episodes')) || null;
+          const malStatus = text('my_status');
+          const status = statusMap[malStatus] || 'planned';
+          let categoryId = isManga ? 'manga' : 'backlog';
+          if(isManga && /manhwa|manhua/.test(seriesType)) categoryId = 'manhwa';
+          if(!isManga){
+            if(seriesType==='movie') categoryId='animemovies';
+            else if(seriesType==='tv' && /currently airing/i.test(text('series_status')||'')) categoryId='seasonal';
+          }
+          if(!S.categories.find(c=>c.id===categoryId)) categoryId = isManga?'manga':'backlog';
+          const existing = S.library.find(i=>i.title.toLowerCase()===title.toLowerCase() && i.categoryId===categoryId);
+          if(existing){
+            existing.progress = progress; if(total) existing.total = total; existing.status = status; existing.source='mal';
+            updated++;
+          } else {
+            S.library.push({id:uid(), title, categoryId, progress, total, status, priority:'medium', estimatedMinutes:null, tags:['MAL'], source:'mal'});
+            added++;
+          }
+        });
+        persistLibrary(); render();
+        alert(`Imported from MyAnimeList: ${added} added, ${updated} updated.`);
+      }catch(e){ alert("Couldn't parse that file as a MAL export XML."); }
+    };
+    reader.readAsText(file);
+  },
+  importCsv(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const rows = parseCsvText(reader.result);
+        if(rows.length<2){ alert('That CSV looks empty.'); return; }
+        const header = rows[0].map(h=>h.trim().toLowerCase());
+        const find = (...names)=> header.findIndex(h=>names.some(n=>h.includes(n)));
+        const iTitle = find('title','name');
+        const iProgress = find('progress','watched','read','chapters_read','episodes_watched');
+        const iTotal = find('total','episodes','chapters');
+        const iStatus = find('status');
+        if(iTitle<0){ alert('Could not find a "title" column in that CSV.'); return; }
+        let added=0, updated=0;
+        for(let r=1;r<rows.length;r++){
+          const row = rows[r]; if(!row || !row[iTitle]) continue;
+          const title = row[iTitle].trim(); if(!title) continue;
+          const progress = iProgress>=0 ? Number(row[iProgress])||0 : 0;
+          const total = iTotal>=0 && row[iTotal] ? Number(row[iTotal])||null : null;
+          const rawStatus = iStatus>=0 ? row[iStatus].trim().toLowerCase() : '';
+          const status = /complet/.test(rawStatus)?'completed': /watch|read|active|progress/.test(rawStatus)?'active': /hold|pause/.test(rawStatus)?'paused': /drop/.test(rawStatus)?'dropped':'planned';
+          const categoryId = S.categories.find(c=>c.enabled)?.id || S.categories[0].id;
+          const existing = S.library.find(i=>i.title.toLowerCase()===title.toLowerCase());
+          if(existing){ existing.progress=progress; if(total) existing.total=total; existing.status=status; existing.source='simkl'; updated++; }
+          else { S.library.push({id:uid(), title, categoryId, progress, total, status, priority:'medium', estimatedMinutes:null, tags:['imported'], source:'simkl'}); added++; }
+        }
+        persistLibrary(); render();
+        alert(`Imported ${added} added, ${updated} updated. Double-check categories in Library — CSV imports can't always tell anime from TV from movies, so titles land in your first enabled category by default.`);
+      }catch(e){ alert("Couldn't parse that CSV file."); }
+    };
+    reader.readAsText(file);
+  },
   exportCSV(){
     const header = ['date','time','category','target','actual','unit','minutes','status','note'];
     const rows = S.sessions.slice().sort((a,b)=>a.timestamp-b.timestamp).map(s=>{
@@ -1406,7 +1598,7 @@ const App = {
       const d = new Date(s.timestamp);
       return [s.date, d.toLocaleTimeString(), cat.name, s.targetAmount, s.actualAmount, s.unit, s.minutes, s.status, (s.note||'').replace(/,/g,';')];
     });
-    const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('\\n');
+    const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('\n');
     triggerDownload(new Blob([csv],{type:'text/csv'}), `mediaflow-history-${todayISO()}.csv`);
   },
   resetAll(){
@@ -1420,6 +1612,24 @@ const App = {
 };
 window.App = App;
 
+function parseCsvText(text){
+  const rows = []; let row=[]; let field=''; let inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else inQuotes=false; }
+      else field+=c;
+    } else {
+      if(c==='"') inQuotes=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c==='\r'){ /* skip */ }
+      else field+=c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(f=>f&&f.trim()));
+}
 function triggerDownload(blob, filename){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1444,6 +1654,18 @@ async function init(){
   renderShell();
 }
 init();
+
+// Only meaningful once this file is hosted at a real URL alongside sw.js/manifest.json
+// (e.g. GitHub Pages) — installs MediaFlow as an app icon on Android/iOS home screens.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* not hosted with a SW — fine, app still works */ });
+  });
+}
+
+window.addEventListener('beforeunload', function(e){
+  if(saveQueue){ /* saves are queued+awaited on every action already; this is a last-resort nudge */ }
+});
 
 })();
 </script>
