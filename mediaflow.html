@@ -602,7 +602,7 @@ html[data-theme="light"] .btn:not(.btn-primary):not(.btn-danger){background:#fff
 html[data-theme="light"] .nav-item{color:#596274!important;}
 html[data-theme="light"] .nav-item.active{background:#e7ebf0!important;color:#171a21!important;}
 html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687386!important;}
-.health-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}.balance-row{gap:12px}.balance-row .status-badge{white-space:nowrap}@media(max-width:760px){.balance-row{flex-wrap:wrap}.balance-row .bal-name{min-width:140px}.balance-row .bal-amt{margin-left:auto}}
+.health-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}.health-action{grid-column:2 / -1;color:var(--text-mute);font-size:11px;line-height:1.45;padding-top:2px}.balance-row{gap:12px}.balance-row .status-badge{white-space:nowrap}@media(max-width:760px){.balance-row{flex-wrap:wrap}.balance-row .bal-name{min-width:140px}.balance-row .bal-amt{margin-left:auto}}
 </style>
 
 </head>
@@ -849,6 +849,8 @@ let S = {
   entryDraft: {title:'', qty:1},
 
   histFilters: {category:'all', type:'all', range:'all'},
+  histPage: 0,
+  histPageSize: 50,
 
   showReasonDetail: false,
 
@@ -1563,6 +1565,30 @@ function submitLog(){
 
    ============================================================ */
 
+function categoryHealthGuidance(cat, status){
+  if(status==='overused'){
+    return `Take a break from ${cat.name}. Focus on categories marked Due or Neglected, and let this category cool down before consuming more.`;
+  }
+  if(status==='neglected'){
+    const amount = suggestedAmount(cat);
+    const mid = Math.max(1, Math.round((amount.low + amount.high) / 2));
+    return `Prioritize ${cat.name}. Do about ${mid} ${unitLabel(cat.unit, mid)} next, then rotate and let the status recalculate.`;
+  }
+  if(status==='due'){
+    const amount = suggestedAmount(cat);
+    const mid = Math.max(1, Math.round((amount.low + amount.high) / 2));
+    return `Give ${cat.name} attention next. Aim for about ${mid} ${unitLabel(cat.unit, mid)}, then rotate to another category.`;
+  }
+  return `Keep ${cat.name} in your normal rotation. No special correction is needed.`;
+}
+
+function categoryStatusActionSummary(cat, todayStatus, overallStatus){
+  const todayGuide = categoryHealthGuidance(cat, todayStatus);
+  const overallGuide = categoryHealthGuidance(cat, overallStatus);
+  if(todayStatus===overallStatus) return todayGuide;
+  return `Today: ${todayGuide} Overall: ${overallGuide}`;
+}
+
 function categoryStatus(cat){
 
   const last = lastSessionFor(cat.id);
@@ -1951,6 +1977,8 @@ function renderDashboard(){
           <div class="status-badge status-${todayStatus}" title="Based on recent 72-hour consumption">Today: ${labelMap[todayStatus]}</div>
 
           <div class="status-badge status-${overallStatus}" title="Based on all recorded consumption from the first ever log to the last ever log">Overall: ${labelMap[overallStatus]}</div>
+
+          <div class="health-action">${escapeHtml(categoryStatusActionSummary(cat, todayStatus, overallStatus))}</div>
 
         </div>`;
 
@@ -2380,6 +2408,8 @@ function renderHistory(){
 
   const f = S.histFilters;
 
+  // History can grow very large over time. Keep the DOM small by rendering
+  // only one page at a time instead of creating a row for every session.
   let list = S.sessions.slice().sort((a,b)=>b.timestamp-a.timestamp);
 
   if(f.category && f.category!=='all') list = list.filter(s=>s.categoryId===f.category);
@@ -2392,15 +2422,19 @@ function renderHistory(){
 
   else if(f.range==='month') list = list.filter(s=>s.timestamp>=hoursAgo(24*30));
 
-  const rows = list.map(s=>{
+  const pageSize = Math.max(25, Number(S.histPageSize)||50);
+  const pageCount = Math.max(1, Math.ceil(list.length/pageSize));
+  S.histPage = clamp(Number(S.histPage)||0, 0, pageCount-1);
+  const startIndex = S.histPage * pageSize;
+  const pageItems = list.slice(startIndex, startIndex + pageSize);
+
+  const rows = pageItems.map(s=>{
 
     const cat = getCategory(s.categoryId);
 
     const d = new Date(s.timestamp);
 
     const labelMap = {complete:'Complete', partial:'Partial', over:'Over', skipped:'Skipped'};
-
-    const colorMap = {complete:'healthy', partial:'due', over:'neglect', skipped:'overused'};
 
     return `<div class="hist-row">
 
@@ -2436,7 +2470,13 @@ function renderHistory(){
 
   }).join('') || `<div class="empty-state"><div class="em-icon">🕓</div><div class="em-title">No sessions yet</div><div>Complete a task from the dashboard to see it here.</div></div>`;
 
-   return ` 
+  const pagerHtml = list.length > pageSize ? `<div class="lib-pagination">
+    <button class="btn btn-sm" ${S.histPage<=0?'disabled':''} onclick="App.setHistPage(${S.histPage-1})">← Previous</button>
+    <span>Page ${S.histPage+1} of ${pageCount} · ${list.length.toLocaleString()} entries</span>
+    <button class="btn btn-sm" ${S.histPage>=pageCount-1?'disabled':''} onclick="App.setHistPage(${S.histPage+1})">Next →</button>
+  </div>` : (list.length ? `<div class="health-note">${list.length.toLocaleString()} history ${list.length===1?'entry':'entries'}. Large histories are paginated to keep this view responsive.</div>` : '');
+
+   return `
 
     <div class="view-head">
 
@@ -2486,7 +2526,9 @@ function renderHistory(){
 
     </div>
 
+    ${pagerHtml}
     <div class="card">${rows}</div>
+    ${pagerHtml}
 
   `;
 
@@ -2960,6 +3002,8 @@ function renderModal(){
 
     : S.modal.type==='session' ? sessionModalHtml(S.modal.data)
 
+    : S.modal.type==='libraryDelete' ? libraryDeleteModalHtml(S.modal.data)
+
     : libraryModalHtml(S.modal.data);
 
   const wrap = document.createElement('div');
@@ -2970,6 +3014,21 @@ function renderModal(){
 
   document.body.appendChild(wrap);
 
+}
+
+function libraryDeleteModalHtml(d){
+  const title = cleanTitle(d?.title) || 'this title';
+  const id = escapeHtml(d?.id || '');
+  return `<div class="modal-title">Delete library title?</div>
+    <div style="color:var(--text-dim); line-height:1.6; font-size:13px; margin-bottom:18px;">
+      You are about to remove <b>${escapeHtml(title)}</b> from your Library.
+      <br><br>Your existing history/session logs will remain.
+      This action cannot be undone.
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="App.confirmDeleteLibrary('${id}')">Delete title</button>
+    </div>`;
 }
 
 function categoryModalHtml(d){
@@ -3293,7 +3352,9 @@ const App = {
 
   toggleUpdateLibrary(v){ S.logDraft.updateLibrary = v; },
 
-  setHistFilter(k,v){ S.histFilters[k]=v; render(); },
+  setHistFilter(k,v){ S.histFilters[k]=v; S.histPage=0; render(); },
+
+  setHistPage(page){ S.histPage=Math.max(0, Number(page)||0); render(); },
 
   setLibFilter(k,v,live){
     S.histFilters[k]=v;
@@ -3461,28 +3522,26 @@ const App = {
 
   },
 
-  async deleteLibraryItem(id){
+  deleteLibraryItem(id){
     const item=S.library.find(i=>i && i.id===id);
     if(!item) return;
+    S.modal={type:'libraryDelete', data:{id:item.id, title:cleanTitle(item.title)||'this title'}};
+    render();
+  },
 
-    const title=cleanTitle(item.title)||'this title';
-    const confirmed=window.confirm(`Delete "${title}" from your library?\n\nThis removes the library entry and cannot be undone. Your existing history/session logs will remain.`);
-    if(!confirmed) return;
-
+  async confirmDeleteLibrary(id){
     const index=S.library.findIndex(i=>i && i.id===id);
-    if(index<0) return;
+    if(index<0){ S.modal=null; render(); return; }
 
     S.library.splice(index,1);
-    if(S.modal && S.modal.type==='library' && S.modal.data && S.modal.data.id===id){
-      S.modal=null;
-    }
+    if(S.modal && S.modal.type==='libraryDelete') S.modal=null;
 
-    // Save the already-mutated state, then redraw only after the save is queued.
     await persistLibrary();
 
     const maxPage=Math.max(0,Math.ceil(S.library.length/50)-1);
     S.libPage=clamp(S.libPage||0,0,maxPage);
     render();
+    showToast('Library title deleted');
   },
 
   closeModal(){ S.modal=null; render(); },
@@ -3532,6 +3591,7 @@ const App = {
     if(!confirm('Delete this history entry? The scheduler will recalculate as if it never happened.')) return;
 
     S.sessions = S.sessions.filter(s=>s.id!==id);
+    S.histPage=0;
 
     persistSessions(); S.modal=null; render();
 
@@ -3542,6 +3602,7 @@ const App = {
     if(!confirm('Delete this history entry?')) return;
 
     S.sessions = S.sessions.filter(s=>s.id!==id);
+    S.histPage=0;
 
     persistSessions(); render();
 
