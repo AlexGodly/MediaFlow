@@ -620,6 +620,11 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .health-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}.health-action{grid-column:2 / -1;color:var(--text-mute);font-size:11px;line-height:1.45;padding-top:2px}.balance-row{gap:12px}.balance-row .status-badge{white-space:nowrap}@media(max-width:760px){.balance-row{flex-wrap:wrap}.balance-row .bal-name{min-width:140px}.balance-row .bal-amt{margin-left:auto}}
 </style>
 
+
+<style>
+.library-cover-wrap{width:38px;height:52px;position:relative;display:flex;align-items:center;justify-content:center}.library-cover{width:38px;height:52px;object-fit:cover;border-radius:7px;border:1px solid var(--border)}.library-cover-fallback{width:38px;height:38px}.aging-badge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:9px;text-transform:none}.heatmap-wrap{overflow:auto}.heatmap-grid{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:12px;gap:4px;min-width:max-content;padding:4px}.heat-cell{width:12px;height:12px;border-radius:3px;background:var(--border-soft)}.heat-1{background:color-mix(in srgb,var(--flow) 25%,var(--panel))}.heat-2{background:color-mix(in srgb,var(--flow) 45%,var(--panel))}.heat-3{background:color-mix(in srgb,var(--flow) 70%,var(--panel))}.heat-4{background:var(--flow)}.heatmap-legend{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-mute);margin-top:8px}.heatmap-legend .heat-cell{width:11px;height:11px}.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}.score-grid>div{display:flex;justify-content:space-between;padding:7px 9px;background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:8px;font-size:11px}.score-grid strong{font-family:var(--font-display)}.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.recap-grid>div{padding:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised)}.recap-grid b{display:block;font-family:var(--font-display);font-size:18px}.recap-grid small{color:var(--text-mute);font-size:10px}.completion-timeline{display:grid;gap:0}.timeline-item{position:relative;padding:12px 12px 12px 28px;border-left:1px solid var(--border);margin-left:7px}.timeline-dot{position:absolute;left:-5px;top:17px;width:9px;height:9px;border-radius:50%}.timeline-date{font-size:10px;color:var(--text-mute)}.timeline-title{font-weight:700;font-size:13px;margin-top:3px}.timeline-cat{font-size:10px;color:var(--text-dim);margin-top:3px}.on-this-day{margin:-8px 0 20px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel);color:var(--text-dim);font-size:11px}.on-this-day b{color:var(--text)}
+@media(max-width:700px){.recap-grid{grid-template-columns:1fr 1fr}.score-grid{grid-template-columns:1fr}.library-cover-wrap{width:34px}.library-cover{width:34px;height:48px}}
+</style>
 </head>
 
 <body>
@@ -813,6 +818,7 @@ const DEFAULT_SETTINGS = {
   seasonalFreshCount: 0,
   exactTitleRecommendations: false,
   theme: 'dark',
+  tmdbApiKey: '',
   backup: {enabled:false, interval:60, mode:'single', folderName:'', fileName:'mediaflow-backup.json'},
   leveling: {
     enabled: true,
@@ -884,6 +890,8 @@ let S = {
   stopwatch: {running:false, startedAt:0, elapsed:0},
   malLink: {username:'', mode:'anime'},
   xpLedger: {libraryAdditions:{}},
+  completionTimeline: [],
+  statsRecapMonth: '',
 
 };
 
@@ -949,6 +957,7 @@ function snapshot(){
     stopwatch: S.stopwatch || {running:false,startedAt:0,elapsed:0},
     malLink: S.malLink || {username:'',mode:'anime'},
     xpLedger: S.xpLedger || {libraryAdditions:{}},
+    completionTimeline: S.completionTimeline || [],
 
     savedAt: Date.now(),
 
@@ -1029,7 +1038,7 @@ function sanitizeLibrary(list){
     if(!title) continue;
     const item=Object.assign({
       id:uid(), categoryId:S.categories?.[0]?.id || 'backlog', progress:0, total:null,
-      status:'planned', priority:'medium', estimatedMinutes:null, tags:[]
+      status:'planned', priority:'medium', estimatedMinutes:null, tags:[], createdAt:Date.now(), coverUrl:'', completedAt:null
     }, raw, {title, id:raw.id || uid()});
     const key=(item.categoryId||'')+'::'+title.toLowerCase();
     if(seen.has(key)){
@@ -1548,6 +1557,7 @@ function submitLog(){
     categoryId: cat.id, targetAmount: t.targetMid, actualAmount: amount,
 
     minutes, note, status, unit: cat.unit, xp: xpCalc.xp, healthStatus,
+    titles: entries.map(e=>({title:cleanTitle(e.title),libraryId:e.libraryId||null,qty:Number(e.qty)||0})),
 
   };
 
@@ -1565,7 +1575,7 @@ function submitLog(){
 
         if(item.total) item.progress = Math.min(item.progress, item.total);
 
-        if(item.total && item.progress>=item.total && item.status!=='dropped') item.status='completed';
+        if(item.total && item.progress>=item.total && item.status!=='dropped'){ item.status='completed'; item.completedAt=item.completedAt||Date.now(); S.completionTimeline=S.completionTimeline||[]; if(!S.completionTimeline.some(x=>x.libraryId===item.id)){ S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt}); } }
 
         else if(item.status==='planned') item.status='active';
 
@@ -2405,15 +2415,19 @@ function renderLibrary(){
 
       const cat = getCategory(i.categoryId);
 
+      const cover = i.coverUrl ? `<img class="library-cover" src="${escapeHtml(i.coverUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
+      const lastTitleSession = [...S.sessions].reverse().find(ss=>ss.titles?.some(tt=>tt.libraryId===i.id || cleanTitle(tt.title).toLowerCase()===cleanTitle(i.title).toLowerCase()));
+      const ageMs = lastTitleSession ? Math.max(0,Date.now()-lastTitleSession.timestamp) : Math.max(0,Date.now()-(Number(i.createdAt)||Date.now()));
+      const ageDays = Math.floor(ageMs/86400000);
+      const ageLabel = lastTitleSession ? (ageDays===0?'Touched today':`${ageDays}d untouched`) : (ageDays===0?'Added today':`Never consumed · ${ageDays}d old`);
+      const aging = cat.id==='backlog' ? `<span class="aging-badge status-${ageDays>=30?'neglected':ageDays>=7?'due':'healthy'}" title="Time since this backlog item was last consumed">${escapeHtml(ageLabel)}</span>` : '';
       return `<div class="item-row">
-
-        <div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
-
+        <div class="library-cover-wrap">${cover}<div class="bal-icon library-cover-fallback" style="background:${cat.color}22; color:${cat.color};${cover?'display:none;':''}">${cat.icon}</div></div>
         <div>
 
           <div class="item-title">${escapeHtml(cleanTitle(i.title))} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
 
-          <div class="item-sub">${escapeHtml(cat.name)} ${i.total? '· '+i.progress+' / '+i.total+' '+unitLabel(cat.unit,i.total) : (i.progress? '· '+i.progress+' '+unitLabel(cat.unit,i.progress):'')} ${(i.tags&&i.tags.length)? '· '+i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(''):''}</div>
+          <div class="item-sub">${escapeHtml(cat.name)} ${aging} ${i.total? '· '+i.progress+' / '+i.total+' '+unitLabel(cat.unit,i.total) : (i.progress? '· '+i.progress+' '+unitLabel(cat.unit,i.progress):'')} ${(i.tags&&i.tags.length)? '· '+i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(''):''}</div>
 
         </div>
 
@@ -2919,6 +2933,8 @@ function resetSettingsSection(section){
     S.settings.theme=DEFAULT_SETTINGS.theme;
   }else if(section==='backups'){
     S.settings.backup=cloneDefaults(DEFAULT_SETTINGS.backup);
+  }else if(section==='mediaArt'){
+    S.settings.tmdbApiKey=DEFAULT_SETTINGS.tmdbApiKey;
   }else if(section==='mal'){
     S.malLink={username:'',mode:'anime'};
   }
@@ -3493,12 +3509,13 @@ const App = {
         priority:'medium',
         estimatedMinutes:null,
         tags:['manual'],
-        source:'manual'
+        source:'manual', createdAt:Date.now(), coverUrl:'', completedAt:null
       };
       S.library.push(match);
       isNew=true;
       awardLibraryAdditionXP(match.id);
       persistLibrary();
+      setTimeout(()=>fetchCoverArtForItem(match.id),0);
     }
 
     S.logDraft.entries=S.logDraft.entries||[];
@@ -3734,16 +3751,22 @@ const App = {
       estimatedMinutes: document.getElementById('l-est').value ? Number(document.getElementById('l-est').value) : null,
 
       tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),
+      createdAt: id ? (S.library.find(i=>i.id===id)?.createdAt||Date.now()) : Date.now(),
+      coverUrl: id ? (S.library.find(i=>i.id===id)?.coverUrl||'') : '',
+      completedAt: id ? (S.library.find(i=>i.id===id)?.completedAt||null) : null,
 
     };
 
     const idx = S.library.findIndex(i=>i.id===id);
 
+    if(data.status==='completed' && !data.completedAt) data.completedAt=Date.now();
+    if(data.status==='completed'){ S.completionTimeline=S.completionTimeline||[]; if(!S.completionTimeline.some(x=>x.libraryId===data.id)){ S.completionTimeline.push({libraryId:data.id,title:data.title,categoryId:data.categoryId,completedAt:data.completedAt}); } }
     if(idx>=0) S.library[idx] = data; else { S.library.push(data); awardLibraryAdditionXP(data.id); }
 
     // Completed seasonal titles are always normalized into the Anime Backlog.
     normalizeSeasonalLibraryItems();
     persistLibrary(); S.modal=null; render();
+    setTimeout(()=>fetchCoverArtForItem(data.id),0);
 
   },
 
@@ -4505,6 +4528,78 @@ function renderStatsV14(){
 }
 renderStats=renderStatsV14;
 
+
+/* ============================================================
+   V28 ANALYTICS / COVER / TIMELINE HELPERS
+   ============================================================ */
+function dayKeyLocal(d){ const x=new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; }
+function buildDailyActivity(days){
+  const map=new Map();
+  const cutoff=Date.now()-days*86400000;
+  for(const s of S.sessions){ if(s.timestamp<cutoff||s.status==='skipped') continue; const k=s.date||dayKeyLocal(s.timestamp); let v=map.get(k); if(!v)v={minutes:0,sessions:0}; v.minutes+=Number(s.minutes)||0; v.sessions++; map.set(k,v); }
+  return map;
+}
+function renderConsumptionHeatmap(){
+  const year=new Date().getFullYear(), start=new Date(year,0,1), map=buildDailyActivity(366);
+  const janDow=start.getDay(); const lead=(janDow+6)%7; const max=Math.max(1,...[...map.values()].map(v=>v.minutes)); const daysInYear=(new Date(year,11,31).getDate()===31)?((new Date(year,1,29).getDate()===29)?366:365):365;
+  const cells=[];
+  for(let i=0;i<lead;i++) cells.push('<div class="heat-cell heat-empty"></div>');
+  for(let i=0;i<daysInYear;i++){const d=new Date(year,0,1);d.setDate(d.getDate()+i);const k=dayKeyLocal(d);const m=map.get(k)?.minutes||0;cells.push(`<div class="heat-cell heat-${m===0?0:Math.min(4,Math.ceil(m/Math.max(1,Math.max(...[...map.values()].map(v=>v.minutes),1))*4))}" title="${escapeHtml(d.toLocaleDateString(undefined,{month:'short',day:'numeric'}))}: ${m} min"></div>`);}
+  return `<div class="heatmap-wrap"><div class="heatmap-grid">${cells.join('')}</div><div class="heatmap-legend"><span>Less</span>${[0,1,2,3,4].map(x=>`<i class="heat-cell heat-${x}"></i>`).join('')}<span>More</span></div></div>`;
+}
+function renderCompletionTimeline(){
+  const map=new Map();
+  for(const x of (S.completionTimeline||[])){ if(x?.completedAt) map.set(x.libraryId||(`${x.title}::${x.completedAt}`),x); }
+  for(const i of S.library.filter(i=>i.status==='completed'&&i.completedAt)){ if(!map.has(i.id))map.set(i.id,{libraryId:i.id,title:cleanTitle(i.title),categoryId:i.categoryId,completedAt:i.completedAt}); }
+  const arr=[...map.values()].sort((a,b)=>Number(b.completedAt)-Number(a.completedAt));
+  if(!arr.length) return '<div class="empty-state">No completed titles have a recorded completion date yet.</div>';
+  return `<div class="completion-timeline">${arr.map(x=>{const c=getCategory(x.categoryId);return `<div class="timeline-item"><div class="timeline-dot" style="background:${c?.color||'var(--flow)'}"></div><div class="timeline-date">${new Date(Number(x.completedAt)).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div><div class="timeline-title">${escapeHtml(cleanTitle(x.title))}</div><div class="timeline-cat">${c?.icon||'•'} ${escapeHtml(c?.name||'Unknown')}</div></div>`}).join('')}</div>`;
+}
+function renderMonthlyRecap(){
+  const now=new Date(), key=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const selected=S.statsRecapMonth||key; const [y,m]=selected.split('-').map(Number); const start=new Date(y,m-1,1).getTime(), end=new Date(y,m,1).getTime();
+  const ss=S.sessions.filter(s=>s.timestamp>=start&&s.timestamp<end&&s.status!=='skipped'); const mins=ss.reduce((a,s)=>a+(Number(s.minutes)||0),0);
+  const byCat={}; ss.forEach(s=>byCat[s.categoryId]=(byCat[s.categoryId]||0)+(Number(s.minutes)||0)); const top=Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+  const finished=S.library.filter(i=>i.status==='completed'&&Number(i.completedAt)>=start&&Number(i.completedAt)<end).length;
+  const days=[...new Set(ss.map(s=>s.date))].sort(); let longest=0,run=0,prev=null; for(const d of days){const cur=new Date(d+'T12:00:00'); if(prev&&Math.round((cur-prev)/86400000)===1)run++; else run=1; longest=Math.max(longest,run); prev=cur;}
+  return `<div class="card" style="margin-bottom:24px;"><div class="section-label">MONTHLY RECAP</div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;"><select onchange="App.setRecapMonth(this.value)" style="max-width:190px;">${Array.from({length:12},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-i,1);const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;return `<option value="${k}" ${k===selected?'selected':''}>${d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</option>`}).join('')}</select></div><div class="recap-grid"><div><b>${fmtMinutes(mins)}</b><small>spent</small></div><div><b>${top?escapeHtml(getCategory(top[0])?.name||'—'):'—'}</b><small>top category · ${top?fmtMinutes(top[1]):'0m'}</small></div><div><b>${finished}</b><small>titles finished</small></div><div><b>${longest}</b><small>longest active-day streak</small></div></div></div>`;
+}
+function renderOnThisDay(){
+  const now=new Date(); const matches=[]; for(const s of S.sessions){const d=new Date(s.timestamp); const years=now.getFullYear()-d.getFullYear(); if(years<1||d.getMonth()!==now.getMonth()||d.getDate()!==now.getDate())continue; for(const t of (s.titles||[])){ if(t.title) matches.push({years,title:t.title}); }}
+  if(!matches.length)return ''; const x=matches.sort((a,b)=>a.years-b.years)[0]; return `<div class="on-this-day">On this day · ${x.years} year${x.years===1?'':'s'} ago you logged <b>${escapeHtml(x.title)}</b>.</div>`;
+}
+function renderSchedulerWhy(){
+  if(!S.currentTask)return ''; const cat=getCategory(S.currentTask.categoryId); if(!cat)return ''; const scored=computeScores([...(S.currentTask.categoryId?[S.currentTask.categoryId]:[])]); const all=computeScores([]); const x=all.find(z=>z.cat.id===cat.id); if(!x)return '';
+  const d=x.debug; const rows=[['Base weight',d.weightScore],['Neglect bonus',d.neglectBonus],['Seasonal bonus',d.seasonalBonus],['Repetition penalty',-d.repetitionPenalty],['Consecutive penalty',-d.consecutivePenalty],['Saturation penalty',-d.saturationPenalty]];
+  return `<div class="reason-explain reason-breakdown"><b>Why this pick?</b><div class="score-grid">${rows.map(([k,v])=>`<div><span>${k}</span><strong>${v>=0?'+':''}${Math.round(v)}</strong></div>`).join('')}</div><small>Final score also includes controlled randomness. This breakdown is the scheduler's actual scoring inputs before the random jitter.</small></div>`;
+}
+async function fetchCoverArtForItem(id){
+  const item=S.library.find(i=>i.id===id); if(!item||item.coverUrl)return;
+  const cat=getCategory(item.categoryId); if(!cat)return; const title=cleanTitle(item.title); let url='';
+  try{
+    if(cat.unit==='episodes' || cat.seasonal || cat.id==='backlog' || cat.id==='otheranim' || cat.id==='animemovies'){
+      const q=`query($search:String!){Media(search:$search,type:ANIME){coverImage{large} title{romaji english}}}`;
+      const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{search:title}})}); const j=await r.json(); url=j?.data?.Media?.coverImage?.large||'';
+    } else if(cat.id==='manga' || cat.id==='manhwa'){
+      const q=`query($search:String!){Media(search:$search,type:MANGA){coverImage{large} title{romaji english}}}`;
+      const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{search:title}})}); const j=await r.json(); url=j?.data?.Media?.coverImage?.large||'';
+    } else if(cat.unit==='movies' || cat.type==='video'){
+      const key=String(S.settings.tmdbApiKey||'').trim(); if(key){ const endpoint=cat.unit==='movies'?`https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(key)}&query=${encodeURIComponent(title)}`:`https://api.themoviedb.org/3/search/tv?api_key=${encodeURIComponent(key)}&query=${encodeURIComponent(title)}`; const r=await fetch(endpoint); const j=await r.json(); const path=j?.results?.[0]?.poster_path; if(path)url='https://image.tmdb.org/t/p/w342'+path; }
+    } else {
+      const r=await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=1`); const j=await r.json(); const c=j?.docs?.[0]?.cover_i; if(c)url=`https://covers.openlibrary.org/b/id/${c}-M.jpg`;
+    }
+  }catch(e){ console.debug('Cover lookup failed',e); }
+  if(url){item.coverUrl=url; await persistLibrary(); if(S.view==='library')render();}
+}
+
+
+renderReasonDetail=function(cat){ return renderSchedulerWhy(); };
+const _renderDashboardV28=renderDashboard;
+renderDashboard=function(){
+  let h=_renderDashboardV28();
+  const otd=renderOnThisDay(); const pos=h.indexOf('<div class="today-strip">'); return otd&&pos>0?h.slice(0,pos)+otd+h.slice(pos):h;
+};
+
 const _oldRenderSettings=renderSettings;
 renderSettings=function(){
   let html=_oldRenderSettings();
@@ -4513,9 +4608,23 @@ renderSettings=function(){
   const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
   const offlineCard='';
   const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
-  const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
+  const mediaApiCard=`<div class="section-label settings-section-head"><span>MEDIA ART</span>${defaultButton('mediaArt')}</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">TMDb API key (optional)</label><input type="password" value="${escapeHtml(S.settings.tmdbApiKey||'')}" placeholder="Paste a free TMDb API key for movie/TV covers" onchange="App.updateSetting('tmdbApiKey',this.value)"><small class="hint">Anime and manga covers use AniList automatically. Movie/TV covers use TMDb when a key is provided.</small></div></div>`;
+const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
   return html;
 };
+
+
+const _renderStatsV27Base=renderStats;
+renderStats=function(){
+  let h=_renderStatsV27Base();
+  const level=mediaFlowLevelInfo();
+  const levelCard=`<div class="card" style="margin:0 0 24px;"><div class="section-label">LEVELING PROGRESS</div><div style="display:flex;justify-content:space-between;gap:18px;align-items:end;flex-wrap:wrap;"><div><div style="font-family:var(--font-display);font-size:30px;font-weight:700;">Level ${level.level}</div><div class="hint">${level.xp.toLocaleString()} lifetime XP</div></div><div style="min-width:260px;flex:1;max-width:620px;"><div class="xp-track" style="height:8px;"><div class="xp-fill" style="width:${level.pct}%"></div></div><div class="xp-line" style="margin-top:7px;"><span>${level.current.toLocaleString()} / ${level.needed.toLocaleString()} XP</span><span>${level.pct}%</span></div></div></div></div>`;
+  const heat=`<div class="card" style="margin-bottom:24px;"><div class="section-label">CONSUMPTION HEATMAP · ${new Date().getFullYear()}</div>${renderConsumptionHeatmap()}<div class="hint" style="margin-top:10px;">Each square is one day. Intensity is based on minutes logged that day.</div></div>`;
+  const recap=renderMonthlyRecap();
+  const timeline=`<div class="card" style="margin-bottom:24px;"><div class="section-label">TITLE COMPLETION TIMELINE</div>${renderCompletionTimeline()}</div>`;
+  h=h.replace('<div class="grid-3" style="margin-bottom:24px;">', levelCard+heat+recap+'<div class="grid-3" style="margin-bottom:24px;">'); const pos=h.lastIndexOf('</div>'); return pos>0?h.slice(0,pos)+timeline+h.slice(pos):h+timeline;
+};
+Object.assign(App,{setRecapMonth(v){S.statsRecapMonth=v;render();}});
 
 Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,emptyLibraryAdvanced,confirmEmptyLibrary,deleteCloudAccount,choosePriority,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
 
@@ -4524,7 +4633,8 @@ Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);pers
 const _oldSnapshot=snapshot;
 snapshot=function(){const x=_oldSnapshot();x.profileName=String(S.profileName||'').trim();return x;};
 const _oldLoadAll=loadAll;
-loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.xpLedger=Object.assign({libraryAdditions:{}},d?.xpLedger||{});S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
+loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.xpLedger=Object.assign({libraryAdditions:{}},d?.xpLedger||{});
+S.completionTimeline=Array.isArray(d?.completionTimeline)?d.completionTimeline:[];S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
 
 /* ============================================================
 
