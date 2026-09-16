@@ -180,7 +180,7 @@ input,select,textarea{font-family:inherit;}
 
 .sidebar-foot .k{font-size:11px; color:var(--text-mute); text-transform:uppercase; letter-spacing:.06em;}
 
-.sidebar-foot .v{font-family:var(--font-display); font-size:22px; margin-top:2px;}
+.sidebar-foot .v{font-family:var(--font-display); font-size:22px; margin-top:2px;}.sidebar-foot .level-block{margin-top:14px;padding:11px 10px;border:1px solid var(--border-soft);background:var(--panel);border-radius:12px;} .sidebar-foot .level-head{display:flex;align-items:center;justify-content:space-between;gap:8px;} .sidebar-foot .level-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-mute);} .sidebar-foot .level-num{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--flow);} .sidebar-foot .xp-line{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--text-dim);margin-top:3px;} .sidebar-foot .xp-track{height:5px;margin-top:8px;background:var(--border);border-radius:99px;overflow:hidden;} .sidebar-foot .xp-fill{height:100%;background:linear-gradient(90deg,var(--flow-dim),var(--flow));border-radius:99px;transition:width .3s ease;} .sidebar-foot .level-next{font-size:10px;color:var(--text-mute);margin-top:6px;}
 .sidebar-resizer{position:absolute;top:0;right:-7px;width:14px;height:100%;cursor:col-resize;z-index:100;touch-action:none;user-select:none;-webkit-user-select:none;background:transparent;}
 .sidebar-resizer::after{content:'';position:absolute;top:0;bottom:0;left:6px;width:2px;background:transparent;transition:background .15s;}
 .sidebar:hover .sidebar-resizer::after,.sidebar-resizer:focus-visible::after{background:var(--flow);}
@@ -1735,6 +1735,37 @@ const NAV_ITEMS = [
 
 ];
 
+function mediaFlowXP(){
+  // XP is derived from history, so it cannot drift out of sync with your logs.
+  // Skipped sessions give no XP. Minutes are the main source, with a small
+  // unit bonus so the type of media consumed also matters.
+  const unitBonus={episodes:10,movies:30,chapters:3,issues:6};
+  return S.sessions.reduce((total,s)=>{
+    if(!s || s.status==='skipped') return total;
+    const minutes=Math.max(0,Number(s.minutes)||0);
+    const amount=Math.max(0,Number(s.actualAmount)||0);
+    const bonus=unitBonus[s.unit]||5;
+    return total + Math.round(minutes + amount*bonus);
+  },0);
+}
+function mediaFlowLevelInfo(){
+  const xp=mediaFlowXP();
+  let level=1, spent=0, need=100;
+  while(xp>=spent+need){ spent+=need; level++; need=Math.round(100*Math.pow(level,1.35)); }
+  const into=xp-spent;
+  const pct=need?Math.min(100,Math.round(into/need*100)):100;
+  return {xp,level,current:into,needed:need,pct,totalToNext:spent+need};
+}
+function renderLevelBlock(){
+  const l=mediaFlowLevelInfo();
+  return `<div class="level-block" title="XP is earned from completed consumption in your history. More minutes and more consumed units give more XP.">
+    <div class="level-head"><span class="level-title">Leveling</span><span class="level-num">Lv. ${l.level}</span></div>
+    <div class="xp-line"><span>${l.xp.toLocaleString()} XP total</span><span>${l.current.toLocaleString()} / ${l.needed.toLocaleString()}</span></div>
+    <div class="xp-track"><div class="xp-fill" style="width:${l.pct}%"></div></div>
+    <div class="level-next">${l.needed-l.current > 0 ? `${(l.needed-l.current).toLocaleString()} XP to Level ${l.level+1}` : `Ready for Level ${l.level+1}`}</div>
+  </div>`;
+}
+
 function renderShell(){
 
   const app = document.getElementById('app');
@@ -1772,7 +1803,9 @@ function renderShell(){
 
       <div class="sidebar-foot"><div class="account-menu"><button class="account-avatar-btn" onclick="App.openProfile()" title="Open profile settings">${renderAccountAvatar()}</button><button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><span class="cloud-badge">CLOUD</span><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
-        <div class="k">Day streak</div>
+        ${renderLevelBlock()}
+
+        <div class="k" style="margin-top:14px;">Day streak</div>
 
         <div class="v">${computeDayStreak()} 🔥</div>
 
