@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediaFlow by Alex Godly</title>
+<meta name="theme-color" content="#0E111A">
+<link rel="icon" href="https://i.ibb.co/fd1nWwnT/icon.png" type="image/png">
+
+<style>
+:root {
+  --bg:#0E111A;
+  --panel:#161B29;
+  --panel2:#18181c;
+  --text:#EDEFF6;
+  --muted:#a1a1aa;
+  --border:#2A3149;
+  --accent:#f5f5f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{overflow:hidden}
+button{font:inherit}
+.app{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+.glow{position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.035);filter:blur(80px);pointer-events:none}
+.shell{width:min(760px,100%);position:relative;z-index:1}
+.brand{text-align:center;margin-bottom:34px}
+.logo{width:54px;height:54px;border-radius:15px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:var(--panel2);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:cover}
+h1{font-size:30px;line-height:1.1;margin:0 0 9px;font-weight:750;letter-spacing:-.7px}
+.sub{margin:0;color:var(--muted);font-size:14px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.option{appearance:none;border:1px solid var(--border);background:rgba(17,17,20,.92);color:var(--text);border-radius:18px;padding:25px;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.option:hover{transform:translateY(-2px);border-color:#3f3f46;background:#161619;box-shadow:0 14px 35px rgba(0,0,0,.25)}
+.option:active{transform:translateY(0)}
+.icon{width:44px;height:44px;border-radius:12px;background:#1f1f23;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:20px}
+.title{font-size:18px;font-weight:700;margin-bottom:7px}
+.desc{font-size:13px;line-height:1.55;color:var(--muted);min-height:40px}
+.badge{display:inline-flex;margin-top:18px;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.5px;background:#1d1d21;color:#bcbcc4;border:1px solid var(--border)}
+.footer{text-align:center;margin-top:25px;color:#71717a;font-size:11px}
+@media(max-width:620px){.options{grid-template-columns:1fr}.brand{margin-bottom:25px}h1{font-size:26px}.option{padding:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="glow"></div>
+  <main class="shell">
+    <section class="brand">
+      <div class="logo">
+        <img src="https://i.ibb.co/fd1nWwnT/icon.png" alt="MediaFlow" onerror="this.style.display='none'">
+      </div>
+      <h1>MediaFlow</h1>
+      <p class="sub">Choose how you want to use MediaFlow</p>
+    </section>
+
+    <section class="options">
+      <button class="option" id="offline" type="button">
+        <div class="icon">◉</div>
+        <div class="title">Offline</div>
+        <div class="desc">Use MediaFlow locally on this device. No account or cloud database required.</div>
+        <span class="badge">LOCAL DEVICE</span>
+      </button>
+
+      <button class="option" id="online" type="button">
+        <div class="icon">☁</div>
+        <div class="title">Online</div>
+        <div class="desc">Use the connected version with your account and cloud-saved MediaFlow data.</div>
+        <span class="badge">CLOUD</span>
+      </button>
+    </section>
+
+    <div class="footer">Your choice can be changed by returning to this screen.</div>
+  </main>
+</div>
+
+<script>
+const OFFLINE_FILE = "MediaFlow_v36_offline.html";
+const ONLINE_FILE = "MediaFlow_v36_cloud.html";
+
+function go(file) {
+  window.location.href = file;
+}
+
+document.getElementById("offline").addEventListener("click", () => go(OFFLINE_FILE));
+document.getElementById("online").addEventListener("click", () => go(ONLINE_FILE));
+</script>
+</body>
+</html>
