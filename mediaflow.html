@@ -875,6 +875,7 @@ let S = {
   offlineMode: false,
   stopwatch: {running:false, startedAt:0, elapsed:0},
   malLink: {username:'', mode:'anime'},
+  xpLedger: {libraryAdditions:{}},
 
 };
 
@@ -924,6 +925,7 @@ function mergeStates(a,b){
   const byTitle=new Map(); [...(a.library||[]),...(b.library||[])].forEach(x=>{const k=cleanTitle(x.title).toLowerCase()+'::'+x.categoryId; if(!byTitle.has(k))byTitle.set(k,x); else{const y=byTitle.get(k); y.progress=Math.max(Number(y.progress)||0,Number(x.progress)||0); if(x.total!=null)y.total=x.total; if(x.status==='completed')y.status='completed'; if(x.priority==='high')y.priority='high';}});
   out.library=[...byTitle.values()];
   const sessions=new Map(); [...(a.sessions||[]),...(b.sessions||[])].forEach(x=>sessions.set(x.id||uid(),x)); out.sessions=[...sessions.values()].sort((x,y)=>(x.timestamp||0)-(y.timestamp||0));
+  out.xpLedger=Object.assign({libraryAdditions:{}},b.xpLedger||{},a.xpLedger||{}); out.xpLedger.libraryAdditions=Object.assign({},b.xpLedger?.libraryAdditions||{},a.xpLedger?.libraryAdditions||{});
   out.categories=a.categories||b.categories; out.settings=Object.assign({},b.settings||{},a.settings||{}); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
   return out;
 }
@@ -938,6 +940,7 @@ function snapshot(){
     profilePicture: S.profilePicture || '',
     stopwatch: S.stopwatch || {running:false,startedAt:0,elapsed:0},
     malLink: S.malLink || {username:'',mode:'anime'},
+    xpLedger: S.xpLedger || {libraryAdditions:{}},
 
     savedAt: Date.now(),
 
@@ -1392,7 +1395,7 @@ function skipTask(){
 
     categoryId: cat.id, targetAmount: S.currentTask.targetMid, actualAmount: 0,
 
-    minutes: 0, note: '', status: 'skipped', unit: cat.unit,
+    minutes: 0, note: '', status: 'skipped', unit: cat.unit, xp: 0, healthStatus: categoryStatus(cat).status,
 
   };
 
@@ -1524,13 +1527,15 @@ function submitLog(){
 
   const note = [autoNote, extra].filter(Boolean).join(' — ');
 
+  const healthStatus = categoryStatus(cat).status;
+  const xpCalc = calculateConsumptionXP(cat, amount, minutes, healthStatus);
   const sess = {
 
     id: uid(), timestamp: Date.now(), date: todayISO(),
 
     categoryId: cat.id, targetAmount: t.targetMid, actualAmount: amount,
 
-    minutes, note, status, unit: cat.unit,
+    minutes, note, status, unit: cat.unit, xp: xpCalc.xp, healthStatus,
 
   };
 
@@ -1735,18 +1740,46 @@ const NAV_ITEMS = [
 
 ];
 
+function xpUnitBonus(unit){ return ({episodes:10,movies:30,chapters:3,issues:6}[unit]||5); }
+function xpRotationMultiplier(status){ return ({neglected:2.0,due:1.5,healthy:1.0,overused:0.5}[status]||1); }
+function xpRotationLabel(status){ return ({neglected:'Neglected bonus',due:'Due bonus',healthy:'Normal rotation',overused:'Overuse reduction'}[status]||'Normal rotation'); }
+function libraryAdditionXP(){ return 25; }
+function titleCompletionXP(item, qty){
+  if(!item || item.total==null) return 0;
+  const before=Number(item.progress)||0, after=Math.min(Number(item.total)||0,before+Math.max(0,Number(qty)||0));
+  return before < Number(item.total) && after >= Number(item.total) ? 50 : 0;
+}
+function calculateConsumptionXP(cat, amount, minutes, status){
+  if(!cat || status==='skipped' || amount<=0 || minutes<=0) return {base:0,multiplier:xpRotationMultiplier(status),xp:0,label:xpRotationLabel(status),unitBonus:0};
+  const base=Math.max(0,Math.round(minutes)) + Math.max(0,Math.round(amount))*xpUnitBonus(cat.unit);
+  const multiplier=xpRotationMultiplier(status);
+  return {base,multiplier,xp:Math.max(0,Math.round(base*multiplier)),label:xpRotationLabel(status),unitBonus:xpUnitBonus(cat.unit)};
+}
+function estimateCurrentLogXP(){
+  const cat=getCategory(S.currentTask?.categoryId||S.logDraft?.categoryId||'');
+  const amount=Math.max(0,Number(S.logDraft?.amount)||0), minutes=Math.max(0,Number(S.logDraft?.minutes)||0);
+  const status=cat?.id ? categoryStatus(cat).status : 'healthy';
+  return calculateConsumptionXP(cat,amount,minutes,status);
+}
+function awardLibraryAdditionXP(id){
+  if(!id) return 0;
+  S.xpLedger=S.xpLedger||{libraryAdditions:{}};
+  S.xpLedger.libraryAdditions=S.xpLedger.libraryAdditions||{};
+  if(S.xpLedger.libraryAdditions[id]) return 0;
+  const xp=libraryAdditionXP(); S.xpLedger.libraryAdditions[id]=xp; return xp;
+}
+function libraryXPTotal(){ return Object.values(S.xpLedger?.libraryAdditions||{}).reduce((a,v)=>a+(Number(v)||0),0); }
+function sessionStoredXP(s){
+  if(!s || s.status==='skipped') return 0;
+  if(Number.isFinite(Number(s.xp))) return Math.max(0,Number(s.xp));
+  // Legacy history from before the leveling system still contributes XP,
+  // but is not retroactively given a rotation bonus because its original
+  // category health at the time of logging was not recorded.
+  const cat=getCategory(s.categoryId);
+  return calculateConsumptionXP(cat,Number(s.actualAmount)||0,Number(s.minutes)||0,'healthy').xp;
+}
 function mediaFlowXP(){
-  // XP is derived from history, so it cannot drift out of sync with your logs.
-  // Skipped sessions give no XP. Minutes are the main source, with a small
-  // unit bonus so the type of media consumed also matters.
-  const unitBonus={episodes:10,movies:30,chapters:3,issues:6};
-  return S.sessions.reduce((total,s)=>{
-    if(!s || s.status==='skipped') return total;
-    const minutes=Math.max(0,Number(s.minutes)||0);
-    const amount=Math.max(0,Number(s.actualAmount)||0);
-    const bonus=unitBonus[s.unit]||5;
-    return total + Math.round(minutes + amount*bonus);
-  },0);
+  return S.sessions.reduce((total,s)=>total+sessionStoredXP(s),0) + libraryXPTotal();
 }
 function mediaFlowLevelInfo(){
   const xp=mediaFlowXP();
@@ -1756,9 +1789,14 @@ function mediaFlowLevelInfo(){
   const pct=need?Math.min(100,Math.round(into/need*100)):100;
   return {xp,level,current:into,needed:need,pct,totalToNext:spent+need};
 }
+function refreshXPPreview(){
+  const el=document.getElementById('xp-preview'); if(!el) return;
+  const x=estimateCurrentLogXP();
+  el.innerHTML=`<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small>${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation multiplier</small>`;
+}
 function renderLevelBlock(){
   const l=mediaFlowLevelInfo();
-  return `<div class="level-block" title="XP is earned from completed consumption in your history. More minutes and more consumed units give more XP.">
+  return `<div class="level-block" title="XP comes from logged consumption and Library additions. Rotation-aware bonuses reward giving neglected or due categories attention.">
     <div class="level-head"><span class="level-title">Leveling</span><span class="level-num">Lv. ${l.level}</span></div>
     <div class="xp-line"><span>${l.xp.toLocaleString()} XP total</span><span>${l.current.toLocaleString()} / ${l.needed.toLocaleString()}</span></div>
     <div class="xp-track"><div class="xp-fill" style="width:${l.pct}%"></div></div>
@@ -2242,6 +2280,8 @@ function renderLogForm(t, cat){
 
     </div>
 
+    <div id="xp-preview" style="margin:10px 0 14px;padding:11px 13px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:10px;color:var(--flow);line-height:1.45;">${(()=>{const x=estimateCurrentLogXP();return `<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small style="color:var(--text-mute)">${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation multiplier</small>`})()}</div>
+
     <div class="field">
 
       <label class="field-label">Anything else to note? (optional)</label>
@@ -2495,6 +2535,7 @@ function renderHistory(){
         <div class="hist-cat">${escapeHtml(cat.name)}</div>
 
         <div class="hist-amt">${s.actualAmount} ${unitLabel(s.unit,s.actualAmount)} · ${fmtMinutes(s.minutes)} · target ${s.targetAmount}</div>
+        ${s.status!=='skipped'?`<div class="hist-xp" style="margin-top:4px;font-size:11px;color:var(--flow);font-weight:800;">+${Math.round(sessionStoredXP(s)).toLocaleString()} XP · ${escapeHtml(xpRotationLabel(s.healthStatus||'healthy'))}</div>`:''}
 
         ${s.note? `<div class="hist-note">"${escapeHtml(s.note)}"</div>`:''}
 
@@ -3319,7 +3360,7 @@ const App = {
 
   toggleReasonDetail(){ S.showReasonDetail=!S.showReasonDetail; render(); },
 
-  updateLogDraft(k,v){ S.logDraft[k]=v; },
+  updateLogDraft(k,v){ S.logDraft[k]=v; if(k==='amount'||k==='minutes') refreshXPPreview(); },
 
   updateEntryDraft(k,v){ S.entryDraft[k]=v; if(k==='title') renderLogSuggestions(); },
 
@@ -3364,6 +3405,7 @@ const App = {
       };
       S.library.push(match);
       isNew=true;
+      awardLibraryAdditionXP(match.id);
       persistLibrary();
     }
 
@@ -3583,7 +3625,7 @@ const App = {
 
     const idx = S.library.findIndex(i=>i.id===id);
 
-    if(idx>=0) S.library[idx] = data; else S.library.push(data);
+    if(idx>=0) S.library[idx] = data; else { S.library.push(data); awardLibraryAdditionXP(data.id); }
 
     // Completed seasonal titles are always normalized into the Anime Backlog.
     normalizeSeasonalLibraryItems();
@@ -3648,6 +3690,10 @@ const App = {
     });
 
     updated.unit = getCategory(updated.categoryId).unit;
+    const editCat=getCategory(updated.categoryId);
+    const editHealth=categoryStatus(editCat).status;
+    updated.healthStatus=editHealth;
+    updated.xp=calculateConsumptionXP(editCat,updated.actualAmount,updated.minutes,editHealth).xp;
 
     S.sessions[idx] = updated;
 
@@ -4332,7 +4378,9 @@ function renderStatsV14(){
  const maxCat=Math.max(1,...catData.map(x=>x.m));
  const bars=(data,val)=>svgBarChart(data,d=>d.label,d=>d[val]);
  const compactList=(data,unit='')=>data.length?data.map(x=>`<div class="record-row"><span class="k">${escapeHtml(x.label)}</span><span class="v">${Math.round(x.value)}${unit}</span></div>`).join(''):'<div class="empty-state">No data yet.</div>';
+ const level=mediaFlowLevelInfo();
  return `<div class="view-head"><div><div class="view-title">Statistics</div><div class="view-desc">Your consumption, measured from every angle.</div></div></div>${renderProfileStatHero()}
+ <div class="card" style="margin:0 0 24px;"><div class="section-label">LEVELING</div><div style="display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;"><div><div style="font-family:var(--font-display);font-size:34px;font-weight:700;">Level ${level.level}</div><div class="hint">${level.xp.toLocaleString()} lifetime XP · ${level.needed-level.current===0?'Ready':(level.needed-level.current).toLocaleString()+' XP to next level'}</div></div><div style="min-width:260px;flex:1;max-width:520px;"><div class="xp-track" style="height:8px;"><div class="xp-fill" style="width:${level.pct}%"></div></div><div class="xp-line" style="margin-top:7px;"><span>${level.current.toLocaleString()} / ${level.needed.toLocaleString()} XP</span><span>${level.pct}%</span></div></div></div><div class="hint" style="margin-top:12px;">XP = time + media units, with rotation bonuses: Neglected ×2.0, Due ×1.5, Healthy ×1.0, Overused ×0.5. Adding a new Library title awards ${libraryAdditionXP()} XP.</div><div class="record-list" style="margin-top:10px;"><div class="record-row"><span class="k">Consumption XP</span><span class="v">${S.sessions.reduce((a,s)=>a+sessionStoredXP(s),0).toLocaleString()}</span></div><div class="record-row"><span class="k">Library XP</span><span class="v">${libraryXPTotal().toLocaleString()}</span></div></div></div></div>
  <div class="grid-3" style="margin-bottom:24px;">${statCard('Today',today)}${statCard('This week',week)}${statCard('This month',month)}</div>
  <div class="grid-3" style="margin-bottom:24px;"><div class="card"><div class="section-label">LIFETIME</div><div class="big-stat">${fmtMinutes(life.minutes)}</div><div class="hint">Total time consumed</div></div><div class="card"><div class="section-label">UNITS</div><div class="big-stat">${totalUnits.toLocaleString()}</div><div class="hint">Episodes, chapters, movies & issues</div></div><div class="card"><div class="section-label">STREAK</div><div class="big-stat">${computeDayStreak()} 🔥</div><div class="hint">Current consecutive days</div></div></div>
  <div class="two-col" style="margin-bottom:24px;"><div class="card"><div class="section-label">7-DAY MINUTES</div>${bars(last7,'minutes')}</div><div class="card"><div class="section-label">7-DAY SESSIONS</div>${bars(last7,'tasks')}</div></div>
@@ -4362,7 +4410,7 @@ Object.assign(App,{setTheme(theme){S.settings.theme=theme;applyTheme(theme);pers
 const _oldSnapshot=snapshot;
 snapshot=function(){const x=_oldSnapshot();x.profileName=String(S.profileName||'').trim();return x;};
 const _oldLoadAll=loadAll;
-loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
+loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.xpLedger=Object.assign({libraryAdditions:{}},d?.xpLedger||{});S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
 
 /* ============================================================
 
