@@ -81,7 +81,7 @@ html[data-theme="amoled"] .sidebar{background:#000;}
 .profile-stat-avatar img{width:100%;height:100%;object-fit:cover;}
 .filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px;}
 .filter-row .field{min-width:150px;flex:1;}
-.priority-choice{width:100%;display:flex;align-items:center;gap:11px;padding:12px 13px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:11px;color:var(--text);cursor:pointer;text-align:left;transition:border-color .12s ease,background .12s ease,transform .12s ease;} .priority-choice:hover{border-color:var(--flow);transform:translateY(-1px);} .priority-choice.selected{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 22%,transparent);} .priority-choice-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--panel);font-weight:900;color:var(--flow);} .priority-choice small{display:block;color:var(--text-mute);font-size:11px;line-height:1.35;margin-top:2px;} .priority-choice-check{width:20px;text-align:center;color:var(--flow);font-weight:900;} .priority-click{cursor:pointer;transition:transform .12s,background .12s;} .priority-click:hover{transform:translateY(-1px);background:var(--panel-raised)!important;}
+.priority-choice{width:100%;display:flex;align-items:center;gap:11px;padding:12px 13px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:11px;color:var(--text);cursor:pointer;text-align:left;transition:border-color .12s ease,background .12s ease,transform .12s ease;} .priority-choice:hover{border-color:var(--flow);transform:translateY(-1px);} .priority-choice.selected{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 22%,transparent);} .priority-choice-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--panel);font-weight:900;color:var(--flow);font-size:15px;line-height:1;} .priority-choice small{display:block;color:var(--text-mute);font-size:11px;line-height:1.35;margin-top:2px;} .priority-choice-check{width:20px;text-align:center;color:var(--flow);font-weight:900;} .priority-click{cursor:pointer;transition:transform .12s,background .12s;} .priority-click:hover{transform:translateY(-1px);background:var(--panel-raised)!important;}
 .status-click,.category-click{cursor:pointer;transition:transform .12s,background .12s,border-color .12s;} .status-click:hover,.category-click:hover{transform:translateY(-1px);background:var(--panel-raised)!important;border-color:var(--flow)!important;} .choice-list{display:grid;gap:8px;max-height:52vh;overflow:auto;padding-right:2px}.status-choice,.category-choice{width:100%;display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:11px;color:var(--text);cursor:pointer;text-align:left;transition:border-color .12s ease,background .12s ease,transform .12s ease}.status-choice:hover,.category-choice:hover{border-color:var(--flow);transform:translateY(-1px)}.status-choice.selected,.category-choice.selected{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 22%,transparent)} .choice-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--panel);font-weight:900}.choice-check{width:20px;text-align:center;color:var(--flow);font-weight:900}.stats-level-card{position:relative;overflow:hidden}.stats-level-card:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--flow-dim),var(--flow));opacity:.9}.stats-level-meta{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-top:9px;font-size:11px;color:var(--text-dim)}.stats-level-percent{font-family:var(--font-display);font-weight:700;color:var(--flow)}.stats-level-track{height:8px;background:var(--border);border:1px solid var(--border-soft);border-radius:99px;overflow:hidden;margin-top:9px;box-shadow:inset 0 1px 2px rgba(0,0,0,.16)}.stats-level-fill{height:100%;background:linear-gradient(90deg,var(--flow-dim),var(--flow));border-radius:99px;min-width:0;transition:width .35s ease}.stats-level-caption{display:flex;justify-content:space-between;gap:12px;margin-top:7px;font-size:10px;color:var(--text-mute)}
 .sync-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:#3FC7A622;color:var(--healthy);border:1px solid #3FC7A644;}
 @media(max-width:860px){.profile-stat-hero{align-items:flex-start}.chart-svg{min-width:480px}.sidebar-resizer{display:none;}}
@@ -623,8 +623,8 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 
 
 <style>
-.library-cover-wrap{width:38px;height:52px;position:relative;display:flex;align-items:center;justify-content:center}.library-cover{width:38px;height:52px;object-fit:cover;border-radius:7px;border:1px solid var(--border)}.library-cover-fallback{width:38px;height:38px}.aging-badge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:9px;text-transform:none}.heatmap-wrap{overflow:auto}.heatmap-grid{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:12px;gap:4px;min-width:max-content;padding:4px}.heat-cell{width:12px;height:12px;border-radius:3px;background:var(--border-soft)}.heat-1{background:color-mix(in srgb,var(--flow) 25%,var(--panel))}.heat-2{background:color-mix(in srgb,var(--flow) 45%,var(--panel))}.heat-3{background:color-mix(in srgb,var(--flow) 70%,var(--panel))}.heat-4{background:var(--flow)}.heatmap-legend{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-mute);margin-top:8px}.heatmap-legend .heat-cell{width:11px;height:11px}.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}.score-grid>div{display:flex;justify-content:space-between;padding:7px 9px;background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:8px;font-size:11px}.score-grid strong{font-family:var(--font-display)}.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.recap-grid>div{padding:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised)}.recap-grid b{display:block;font-family:var(--font-display);font-size:18px}.recap-grid small{color:var(--text-mute);font-size:10px}.completion-timeline{display:grid;gap:0}.timeline-item{position:relative;padding:12px 12px 12px 28px;border-left:1px solid var(--border);margin-left:7px}.timeline-dot{position:absolute;left:-5px;top:17px;width:9px;height:9px;border-radius:50%}.timeline-date{font-size:10px;color:var(--text-mute)}.timeline-title{font-weight:700;font-size:13px;margin-top:3px}.timeline-cat{font-size:10px;color:var(--text-dim);margin-top:3px}.on-this-day{margin:-8px 0 20px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel);color:var(--text-dim);font-size:11px}.on-this-day b{color:var(--text)}
-@media(max-width:700px){.recap-grid{grid-template-columns:1fr 1fr}.score-grid{grid-template-columns:1fr}.library-cover-wrap{width:34px}.library-cover{width:34px;height:48px}}
+.aging-badge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:9px;text-transform:none}.heatmap-wrap{overflow:auto}.heatmap-grid{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:12px;gap:4px;min-width:max-content;padding:4px}.heat-cell{width:12px;height:12px;border-radius:3px;background:var(--border-soft)}.heat-1{background:color-mix(in srgb,var(--flow) 25%,var(--panel))}.heat-2{background:color-mix(in srgb,var(--flow) 45%,var(--panel))}.heat-3{background:color-mix(in srgb,var(--flow) 70%,var(--panel))}.heat-4{background:var(--flow)}.heatmap-legend{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-mute);margin-top:8px}.heatmap-legend .heat-cell{width:11px;height:11px}.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}.score-grid>div{display:flex;justify-content:space-between;padding:7px 9px;background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:8px;font-size:11px}.score-grid strong{font-family:var(--font-display)}.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.recap-grid>div{padding:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised)}.recap-grid b{display:block;font-family:var(--font-display);font-size:18px}.recap-grid small{color:var(--text-mute);font-size:10px}.completion-timeline{display:grid;gap:0}.timeline-item{position:relative;padding:12px 12px 12px 28px;border-left:1px solid var(--border);margin-left:7px}.timeline-dot{position:absolute;left:-5px;top:17px;width:9px;height:9px;border-radius:50%}.timeline-date{font-size:10px;color:var(--text-mute)}.timeline-title{font-weight:700;font-size:13px;margin-top:3px}.timeline-cat{font-size:10px;color:var(--text-dim);margin-top:3px}.on-this-day{margin:-8px 0 20px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel);color:var(--text-dim);font-size:11px}.on-this-day b{color:var(--text)}
+@media(max-width:700px){.recap-grid{grid-template-columns:1fr 1fr}.score-grid{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -819,7 +819,6 @@ const DEFAULT_SETTINGS = {
   seasonalFreshCount: 0,
   exactTitleRecommendations: false,
   theme: 'dark',
-  tmdbApiKey: '',
   backup: {enabled:false, interval:60, mode:'single', folderName:'', fileName:'mediaflow-backup.json'},
   leveling: {
     enabled: true,
@@ -1039,7 +1038,7 @@ function sanitizeLibrary(list){
     if(!title) continue;
     const item=Object.assign({
       id:uid(), categoryId:S.categories?.[0]?.id || 'backlog', progress:0, total:null,
-      status:'planned', priority:'medium', estimatedMinutes:null, tags:[], createdAt:Date.now(), coverUrl:'', completedAt:null
+      status:'planned', priority:'medium', estimatedMinutes:null, tags:[], createdAt:Date.now(), completedAt:null
     }, raw, {title, id:raw.id || uid()});
     const key=(item.categoryId||'')+'::'+title.toLowerCase();
     if(seen.has(key)){
@@ -1591,7 +1590,6 @@ function submitLog(){
   }
 
   persistSessions();
-  if(match && !match.coverUrl) setTimeout(()=>fetchCoverArtForItem(match.id),0);
 
   S.currentTask = generateTask([cat.id]);
 
@@ -2417,14 +2415,13 @@ function renderLibrary(){
 
       const cat = getCategory(i.categoryId);
 
-      const cover = i.coverUrl ? `<img class="library-cover" src="${escapeHtml(i.coverUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
       const lastTitleSession = [...S.sessions].reverse().find(ss=>ss.titles?.some(tt=>tt.libraryId===i.id || cleanTitle(tt.title).toLowerCase()===cleanTitle(i.title).toLowerCase()));
       const ageMs = lastTitleSession ? Math.max(0,Date.now()-lastTitleSession.timestamp) : Math.max(0,Date.now()-(Number(i.createdAt)||Date.now()));
       const ageDays = Math.floor(ageMs/86400000);
       const ageLabel = lastTitleSession ? (ageDays===0?'Touched today':`${ageDays}d untouched`) : (ageDays===0?'Added today':`Never consumed · ${ageDays}d old`);
       const aging = cat.id==='backlog' ? `<span class="aging-badge status-${ageDays>=30?'neglected':ageDays>=7?'due':'healthy'}" title="Time since this backlog item was last consumed">${escapeHtml(ageLabel)}</span>` : '';
       return `<div class="item-row">
-        <div class="library-cover-wrap">${cover}<div class="bal-icon library-cover-fallback" style="background:${cat.color}22; color:${cat.color};${cover?'display:none;':''}">${cat.icon}</div></div>
+        <div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
         <div>
 
           <div class="item-title">${escapeHtml(cleanTitle(i.title))} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
@@ -2935,8 +2932,6 @@ function resetSettingsSection(section){
     S.settings.theme=DEFAULT_SETTINGS.theme;
   }else if(section==='backups'){
     S.settings.backup=cloneDefaults(DEFAULT_SETTINGS.backup);
-  }else if(section==='mediaArt'){
-    S.settings.tmdbApiKey=DEFAULT_SETTINGS.tmdbApiKey;
   }else if(section==='mal'){
     S.malLink={username:'',mode:'anime'};
   }
@@ -3206,6 +3201,10 @@ function renderModal(){
     : S.modal.type==='emptyLibrary' ? emptyLibraryModalHtml(S.modal.data)
 
     : S.modal.type==='priority' ? priorityModalHtml(S.modal.data)
+
+    : S.modal.type==='libraryStatus' ? libraryStatusModalHtml(S.modal.data)
+
+    : S.modal.type==='libraryCategory' ? libraryCategoryModalHtml(S.modal.data)
 
     : libraryModalHtml(S.modal.data);
 
@@ -3513,13 +3512,12 @@ const App = {
         priority:'medium',
         estimatedMinutes:null,
         tags:['manual'],
-        source:'manual', createdAt:Date.now(), coverUrl:'', completedAt:null
+        source:'manual', createdAt:Date.now(), completedAt:null
       };
       S.library.push(match);
       isNew=true;
       awardLibraryAdditionXP(match.id);
       persistLibrary();
-      setTimeout(()=>fetchCoverArtForItem(match.id),0);
     }
 
     S.logDraft.entries=S.logDraft.entries||[];
@@ -3756,13 +3754,11 @@ const App = {
 
       tags: tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),
       createdAt: id ? (S.library.find(i=>i.id===id)?.createdAt||Date.now()) : Date.now(),
-      coverUrl: id ? (S.library.find(i=>i.id===id)?.coverUrl||'') : '',
       completedAt: id ? (S.library.find(i=>i.id===id)?.completedAt||null) : null,
 
     };
 
     const existingBefore = id ? S.library.find(i=>i.id===id) : null;
-    if(existingBefore && (cleanTitle(existingBefore.title)!==data.title || existingBefore.categoryId!==data.categoryId)) data.coverUrl='';
     const idx = S.library.findIndex(i=>i.id===id);
 
     if(data.status==='completed' && !data.completedAt) data.completedAt=Date.now();
@@ -3772,7 +3768,6 @@ const App = {
     // Completed seasonal titles are always normalized into the Anime Backlog.
     normalizeSeasonalLibraryItems();
     persistLibrary(); S.modal=null; render();
-    setTimeout(()=>fetchCoverArtForItem(data.id),0);
 
   },
 
@@ -4416,9 +4411,9 @@ function choosePriority(id){const item=S.library.find(i=>i.id===id);if(!item)ret
 function priorityModalHtml(d){
   const current=d?.priority||'medium';
   const options=[
-    {id:'low',label:'Low',icon:'↓',desc:'A lower-priority title. The scheduler will generally give it less weight.'},
-    {id:'medium',label:'Medium',icon:'•',desc:'The normal priority level used by default.'},
-    {id:'high',label:'High',icon:'↑',desc:'A title you want the scheduler to pay more attention to.'}
+    {id:'low',label:'Low',icon:'▼',desc:'A lower-priority title. The scheduler will generally give it less weight.'},
+    {id:'medium',label:'Medium',icon:'●',desc:'The normal priority level used by default.'},
+    {id:'high',label:'High',icon:'▲',desc:'A title you want the scheduler to pay more attention to.'}
   ];
   return `<div class="priority-modal">
     <div class="modal-title">Set priority</div>
@@ -4611,35 +4606,6 @@ function renderSchedulerWhy(){
   const d=x.debug; const rows=[['Base weight',d.weightScore],['Neglect bonus',d.neglectBonus],['Seasonal bonus',d.seasonalBonus],['Repetition penalty',-d.repetitionPenalty],['Consecutive penalty',-d.consecutivePenalty],['Saturation penalty',-d.saturationPenalty]];
   return `<div class="reason-explain reason-breakdown"><b>Why this pick?</b><div class="score-grid">${rows.map(([k,v])=>`<div><span>${k}</span><strong>${v>=0?'+':''}${Math.round(v)}</strong></div>`).join('')}</div><small>Final score also includes controlled randomness. This breakdown is the scheduler's actual scoring inputs before the random jitter.</small></div>`;
 }
-async function fetchCoverArtForItem(id){
-  const item=S.library.find(i=>i.id===id); if(!item||item.coverUrl)return;
-  item._coverLookupAt=Date.now();
-  const cat=getCategory(item.categoryId); if(!cat)return; const title=cleanTitle(item.title); let url='';
-  try{
-    if(cat.unit==='episodes' || cat.seasonal || cat.id==='backlog' || cat.id==='otheranim' || cat.id==='animemovies'){
-      const q=`query($search:String!){Media(search:$search,type:ANIME){coverImage{large} title{romaji english}}}`;
-      const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{search:title}})}); const j=await r.json(); url=j?.data?.Media?.coverImage?.large||'';
-    } else if(cat.id==='manga' || cat.id==='manhwa'){
-      const q=`query($search:String!){Media(search:$search,type:MANGA){coverImage{large} title{romaji english}}}`;
-      const r=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,variables:{search:title}})}); const j=await r.json(); url=j?.data?.Media?.coverImage?.large||'';
-    } else if(cat.unit==='movies' || cat.type==='video'){
-      const key=String(S.settings.tmdbApiKey||'').trim(); if(key){ const endpoint=cat.unit==='movies'?`https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(key)}&query=${encodeURIComponent(title)}`:`https://api.themoviedb.org/3/search/tv?api_key=${encodeURIComponent(key)}&query=${encodeURIComponent(title)}`; const r=await fetch(endpoint); const j=await r.json(); const path=j?.results?.[0]?.poster_path; if(path)url='https://image.tmdb.org/t/p/w342'+path; }
-    } else {
-      const r=await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=1`); const j=await r.json(); const c=j?.docs?.[0]?.cover_i; if(c)url=`https://covers.openlibrary.org/b/id/${c}-M.jpg`;
-    }
-  }catch(e){ console.debug('Cover lookup failed',e); }
-  if(url){item.coverUrl=url; await persistLibrary(); if(S.view==='library')render();}
-}
-
-
-async function backfillMissingCoverArt(){
-  const pending=S.library.filter(i=>i&&!i.coverUrl).slice(0,120);
-  for(const item of pending){
-    await fetchCoverArtForItem(item.id);
-    await new Promise(r=>setTimeout(r,350));
-  }
-}
-
 renderReasonDetail=function(cat){ return renderSchedulerWhy(); };
 const _renderDashboardV28=renderDashboard;
 renderDashboard=function(){
@@ -4655,7 +4621,6 @@ renderSettings=function(){
   const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
   const offlineCard='';
   const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
-  const mediaApiCard=`<div class="section-label settings-section-head"><span>MEDIA ART</span>${defaultButton('mediaArt')}</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">TMDb API key (optional)</label><input type="password" value="${escapeHtml(S.settings.tmdbApiKey||'')}" placeholder="Paste a free TMDb API key for movie/TV covers" onchange="App.updateSetting('tmdbApiKey',this.value)"><small class="hint">Anime and manga covers use AniList automatically. Movie/TV covers use TMDb when a key is provided.</small></div></div>`;
 const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
   return html;
 };
@@ -4671,7 +4636,7 @@ renderStats=function(){
 };
 Object.assign(App,{setRecapMonth(v){S.statsRecapMonth=v;render();}});
 
-Object.assign(App,{setPriorityChoice(id,value){const item=S.library.find(i=>i && i.id===id);if(!item || !['low','medium','high'].includes(value)) return;item.priority=value;S.modal=null;persistLibrary();render();},setLibraryStatus(id,value){const item=S.library.find(i=>i&&i.id===id);if(!item||!['planned','active','paused','completed','dropped'].includes(value))return;item.status=value;if(value==='completed'){item.completedAt=item.completedAt||Date.now();S.completionTimeline=S.completionTimeline||[];if(!S.completionTimeline.some(x=>x.libraryId===item.id))S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt});}else if(value!=='completed'){item.completedAt=null;S.completionTimeline=(S.completionTimeline||[]).filter(x=>x.libraryId!==item.id);}normalizeSeasonalLibraryItems();S.modal=null;persistLibrary();render();if(value!=='completed')setTimeout(()=>fetchCoverArtForItem(item.id),0);},setLibraryCategory(id,value){const item=S.library.find(i=>i&&i.id===id);if(!item||!S.categories.some(c=>c.id===value))return;const old=item.categoryId;item.categoryId=value;if(old!==value)item.coverUrl='';normalizeSeasonalLibraryItems();S.modal=null;persistLibrary();render();setTimeout(()=>fetchCoverArtForItem(item.id),0);},setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,emptyLibraryAdvanced,confirmEmptyLibrary,deleteCloudAccount,choosePriority,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
+Object.assign(App,{setPriorityChoice(id,value){const item=S.library.find(i=>i && i.id===id);if(!item || !['low','medium','high'].includes(value)) return;item.priority=value;S.modal=null;persistLibrary();render();},setLibraryStatus(id,value){const item=S.library.find(i=>i&&i.id===id);if(!item||!['planned','active','paused','completed','dropped'].includes(value))return;item.status=value;if(value==='completed'){item.completedAt=item.completedAt||Date.now();S.completionTimeline=S.completionTimeline||[];if(!S.completionTimeline.some(x=>x.libraryId===item.id))S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt});}else if(value!=='completed'){item.completedAt=null;S.completionTimeline=(S.completionTimeline||[]).filter(x=>x.libraryId!==item.id);}normalizeSeasonalLibraryItems();S.modal=null;persistLibrary();render();},setLibraryCategory(id,value){const item=S.library.find(i=>i&&i.id===id);if(!item||!S.categories.some(c=>c.id===value))return;const old=item.categoryId;item.categoryId=value;normalizeSeasonalLibraryItems();S.modal=null;persistLibrary();render();},setTheme(theme){S.settings.theme=theme;applyTheme(theme);persistSettings();render();},toggleBackup(){S.settings.backup.enabled=!S.settings.backup.enabled;persistSettings();restartBackupTimer();render();},updateBackup(k,v){S.settings.backup=S.settings.backup||{};S.settings.backup[k]=k==='interval'?Number(v):v;persistSettings();restartBackupTimer();render();},chooseBackupFolder:openBackupFolder,backupNow:()=>saveBackupNow(true),setMalLink(k,v){S.malLink=S.malLink||{username:'',mode:'anime'};S.malLink[k]=v;persistTask();},syncMAL:malSync,emptyLibraryAdvanced,confirmEmptyLibrary,deleteCloudAccount,choosePriority,chooseStatusForLibrary,chooseCategoryForLibrary,stopwatchStart,stopwatchPause,stopwatchReset,stopwatchUseMinutes});
 
 
 // Add profile name to state and keep it local/cloud.
@@ -4679,7 +4644,7 @@ const _oldSnapshot=snapshot;
 snapshot=function(){const x=_oldSnapshot();x.profileName=String(S.profileName||'').trim();return x;};
 const _oldLoadAll=loadAll;
 loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.xpLedger=Object.assign({libraryAdditions:{}},d?.xpLedger||{});
-S.completionTimeline=Array.isArray(d?.completionTimeline)?d.completionTimeline:[];S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});initTheme();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);setTimeout(()=>backfillMissingCoverArt(),500);};
+S.completionTimeline=Array.isArray(d?.completionTimeline)?d.completionTimeline:[];S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});S.library.forEach(i=>{if(i&&Object.prototype.hasOwnProperty.call(i,'coverUrl'))delete i.coverUrl;});initTheme();persistLibrary();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
 
 /* ============================================================
 
