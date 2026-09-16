@@ -1,0 +1,17 @@
+{
+  "name": "mediaflow-offline",
+  "productName": "MediaFlow Offline",
+  "version": "36.0.0 Offline",
+  "description": "MediaFlow Offline by Alex Godly",
+  "author": "Alex Godly <Alex Godly>",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
