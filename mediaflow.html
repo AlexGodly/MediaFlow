@@ -224,7 +224,7 @@ body.sidebar-resizing{overflow:hidden;}
 
 .hairline{border-top:1px solid var(--border-soft);}
 
-.section-label{font-size:12px; font-weight:700; color:var(--text-mute); letter-spacing:.04em; margin-bottom:10px;}
+.settings-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.settings-section-head .btn{font-size:10px;padding:5px 8px}.section-label{font-size:12px; font-weight:700; color:var(--text-mute); letter-spacing:.04em; margin-bottom:10px;}
 
 .btn{
 
@@ -814,6 +814,14 @@ const DEFAULT_SETTINGS = {
   exactTitleRecommendations: false,
   theme: 'dark',
   backup: {enabled:false, interval:60, mode:'single', folderName:'', fileName:'mediaflow-backup.json'},
+  leveling: {
+    enabled: true,
+    minuteXP: 1,
+    unitXP: {episodes:10, chapters:3, issues:6, movies:30},
+    rotationMultiplier: {neglected:2.0, due:1.5, healthy:1.0, overused:0.5},
+    libraryAdditionXP: 25,
+    completionXP: 50
+  },
 
 };
 
@@ -1039,7 +1047,11 @@ function sanitizeLibrary(list){
 
 async function loadAll(){
  STORAGE_MODE='cloud'; let data=await rawGet(STATE_KEY);
- data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
+ data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});
+S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
+S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
+S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
+S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
@@ -1741,17 +1753,26 @@ const NAV_ITEMS = [
 ];
 
 function xpUnitBonus(unit){ return ({episodes:10,movies:30,chapters:3,issues:6}[unit]||5); }
-function xpRotationMultiplier(status){ return ({neglected:2.0,due:1.5,healthy:1.0,overused:0.5}[status]||1); }
+function levelingSettings(){
+  const d=DEFAULT_SETTINGS.leveling;
+  const l=Object.assign({},d,S.settings?.leveling||{});
+  l.unitXP=Object.assign({},d.unitXP,S.settings?.leveling?.unitXP||{});
+  l.rotationMultiplier=Object.assign({},d.rotationMultiplier,S.settings?.leveling?.rotationMultiplier||{});
+  return l;
+}
+function xpRotationMultiplier(status){ return Number(levelingSettings().rotationMultiplier?.[status])||1; }
 function xpRotationLabel(status){ return ({neglected:'Neglected bonus',due:'Due bonus',healthy:'Normal rotation',overused:'Overuse reduction'}[status]||'Normal rotation'); }
-function libraryAdditionXP(){ return 25; }
+function xpUnitBonus(unit){ return Number(levelingSettings().unitXP?.[unit])||0; }
+function libraryAdditionXP(){ return Math.max(0,Math.round(Number(levelingSettings().libraryAdditionXP)||0)); }
 function titleCompletionXP(item, qty){
   if(!item || item.total==null) return 0;
   const before=Number(item.progress)||0, after=Math.min(Number(item.total)||0,before+Math.max(0,Number(qty)||0));
-  return before < Number(item.total) && after >= Number(item.total) ? 50 : 0;
+  return before < Number(item.total) && after >= Number(item.total) ? Math.max(0,Math.round(Number(levelingSettings().completionXP)||0)) : 0;
 }
 function calculateConsumptionXP(cat, amount, minutes, status){
-  if(!cat || status==='skipped' || amount<=0 || minutes<=0) return {base:0,multiplier:xpRotationMultiplier(status),xp:0,label:xpRotationLabel(status),unitBonus:0};
-  const base=Math.max(0,Math.round(minutes)) + Math.max(0,Math.round(amount))*xpUnitBonus(cat.unit);
+  if(!levelingSettings().enabled || !cat || status==='skipped' || amount<=0 || minutes<=0) return {base:0,multiplier:xpRotationMultiplier(status),xp:0,label:xpRotationLabel(status),unitBonus:0};
+  const minuteBase=Math.max(0,Math.round(minutes))*Math.max(0,Number(levelingSettings().minuteXP)||0);
+  const base=minuteBase + Math.max(0,Math.round(amount))*xpUnitBonus(cat.unit);
   const multiplier=xpRotationMultiplier(status);
   return {base,multiplier,xp:Math.max(0,Math.round(base*multiplier)),label:xpRotationLabel(status),unitBonus:xpUnitBonus(cat.unit)};
 }
@@ -2882,6 +2903,42 @@ function renderProfile(){
 
    ============================================================ */
 
+function cloneDefaults(value){ return JSON.parse(JSON.stringify(value)); }
+function resetSettingsSection(section){
+  if(section==='daily'){
+    S.settings.dailyMinutes=DEFAULT_SETTINGS.dailyMinutes;
+    S.settings.tasksPerDay=DEFAULT_SETTINGS.tasksPerDay;
+    S.settings.intensity=DEFAULT_SETTINGS.intensity;
+  }else if(section==='titles'){
+    S.settings.exactTitleRecommendations=DEFAULT_SETTINGS.exactTitleRecommendations;
+  }else if(section==='scheduler'){
+    ['neglectRate','neglectCap','repetitionPenalty','consecutivePenalty','saturationWeight','seasonalBonus','randomness','seasonalFreshCount'].forEach(k=>S.settings[k]=DEFAULT_SETTINGS[k]);
+  }else if(section==='leveling'){
+    S.settings.leveling=cloneDefaults(DEFAULT_SETTINGS.leveling);
+  }else if(section==='appearance'){
+    S.settings.theme=DEFAULT_SETTINGS.theme;
+  }else if(section==='backups'){
+    S.settings.backup=cloneDefaults(DEFAULT_SETTINGS.backup);
+  }else if(section==='mal'){
+    S.malLink={username:'',mode:'anime'};
+  }
+  persistSettings();
+  render();
+  showToast('Section restored to defaults');
+}
+function resetAllSettings(){
+  S.settings=cloneDefaults(DEFAULT_SETTINGS);
+  S.malLink={username:'',mode:'anime'};
+  persistSettings();
+  restartBackupTimer();
+  applyTheme(S.settings.theme);
+  render();
+  showToast('All settings restored to defaults');
+}
+function defaultButton(section){
+  return `<button class="btn btn-sm btn-ghost" onclick="App.resetSettingsSection('${section}')" title="Restore this section's defaults">Default</button>`;
+}
+
 function renderSettings(){
 
   const st = S.settings;
@@ -2904,13 +2961,13 @@ function renderSettings(){
 
    return ` 
 
-    <div class="view-head"><div><div class="view-title">Settings</div><div class="view-desc">Tune the rotation to fit your life.</div></div></div>
+    <div class="view-head"><div><div class="view-title">Settings</div><div class="view-desc">Tune the rotation to fit your life.</div></div><button class="btn btn-ghost" onclick="App.resetAllSettings()">Restore all defaults</button></div>
 
     <div class="two-col" style="align-items:start;">
 
       <div>
 
-        <div class="section-label">DAILY GOAL</div>
+        <div class="section-label settings-section-head"><span>DAILY GOAL</span>${defaultButton('daily')}</div>
 
         <div class="card" style="margin-bottom:22px;">
 
@@ -2948,7 +3005,7 @@ function renderSettings(){
 
         </div>
 
-        <div class="section-label">TITLE RECOMMENDATIONS</div>
+        <div class="section-label settings-section-head"><span>TITLE RECOMMENDATIONS</span>${defaultButton('titles')}</div>
 
         <div class="card" style="margin-bottom:22px;">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
@@ -2961,7 +3018,7 @@ function renderSettings(){
           <div style="margin-top:10px; color:var(--text-mute); font-size:12px;">${st.exactTitleRecommendations?'ON — MediaFlow picks category + amount + title.':'OFF — MediaFlow picks category + amount; you pick the title.'}</div>
         </div>
 
-        <div class="section-label">SCHEDULER TUNING</div>
+        <div class="section-label settings-section-head"><span>SCHEDULER TUNING</span>${defaultButton('scheduler')}</div>
 
         <div class="card" style="margin-bottom:22px;">
 
@@ -2987,7 +3044,42 @@ function renderSettings(){
 
         </div>
 
-        <div class="section-label">CONNECTIONS — MAL &amp; SIMKL</div>
+        <div class="section-label settings-section-head"><span>LEVELING &amp; XP</span>${defaultButton('leveling')}</div>
+
+        <div class="card" style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+            <div>
+              <div style="font-weight:700;">XP leveling system</div>
+              <small class="hint">Control how much XP you earn from time, media units, Library additions, completions, and rotation health.</small>
+            </div>
+            <button class="toggle ${st.leveling?.enabled!==false?'on':''}" onclick="App.updateLeveling('enabled', ${st.leveling?.enabled!==false?'false':'true'})"></button>
+          </div>
+          <div class="field-row" style="margin-top:16px;">
+            <div class="field"><label class="field-label">XP per minute</label><input type="number" min="0" step="0.1" value="${st.leveling?.minuteXP??1}" onchange="App.updateLeveling('minuteXP',this.value)"></div>
+            <div class="field"><label class="field-label">New Library title XP</label><input type="number" min="0" value="${st.leveling?.libraryAdditionXP??25}" onchange="App.updateLeveling('libraryAdditionXP',this.value)"></div>
+          </div>
+          <div class="field"><label class="field-label">Completion bonus XP</label><input type="number" min="0" value="${st.leveling?.completionXP??50}" onchange="App.updateLeveling('completionXP',this.value)"></div>
+          <div style="font-weight:700;font-size:12px;margin:14px 0 8px;">UNIT XP</div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Episode</label><input type="number" min="0" value="${st.leveling?.unitXP?.episodes??10}" onchange="App.updateLevelingUnit('episodes',this.value)"></div>
+            <div class="field"><label class="field-label">Chapter</label><input type="number" min="0" value="${st.leveling?.unitXP?.chapters??3}" onchange="App.updateLevelingUnit('chapters',this.value)"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Issue</label><input type="number" min="0" value="${st.leveling?.unitXP?.issues??6}" onchange="App.updateLevelingUnit('issues',this.value)"></div>
+            <div class="field"><label class="field-label">Movie</label><input type="number" min="0" value="${st.leveling?.unitXP?.movies??30}" onchange="App.updateLevelingUnit('movies',this.value)"></div>
+          </div>
+          <div style="font-weight:700;font-size:12px;margin:14px 0 8px;">ROTATION XP MULTIPLIERS</div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Neglected</label><input type="number" min="0" step="0.1" value="${st.leveling?.rotationMultiplier?.neglected??2}" onchange="App.updateLevelingRotation('neglected',this.value)"></div>
+            <div class="field"><label class="field-label">Due</label><input type="number" min="0" step="0.1" value="${st.leveling?.rotationMultiplier?.due??1.5}" onchange="App.updateLevelingRotation('due',this.value)"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Healthy</label><input type="number" min="0" step="0.1" value="${st.leveling?.rotationMultiplier?.healthy??1}" onchange="App.updateLevelingRotation('healthy',this.value)"></div>
+            <div class="field"><label class="field-label">Overused</label><input type="number" min="0" step="0.1" value="${st.leveling?.rotationMultiplier?.overused??0.5}" onchange="App.updateLevelingRotation('overused',this.value)"></div>
+          </div>
+        </div>
+
+        <div class="section-label settings-section-head"><span>CONNECTIONS — MAL &amp; SIMKL</span>${defaultButton('mal')}</div>
 
         <div class="card" style="margin-bottom:22px;">
 
@@ -3509,6 +3601,9 @@ const App = {
     persistSettings(); render();
   },
 
+  resetSettingsSection(section){ resetSettingsSection(section); },
+  resetAllSettings(){ resetAllSettings(); },
+
   updateSetting(key, val){
 
     const num = Number(val);
@@ -3517,6 +3612,25 @@ const App = {
 
     persistSettings(); render();
 
+  },
+
+  updateLeveling(key,val){
+    S.settings.leveling=S.settings.leveling||cloneDefaults(DEFAULT_SETTINGS.leveling);
+    if(key==='enabled') S.settings.leveling.enabled=!!val;
+    else S.settings.leveling[key]=Math.max(0,Number(val)||0);
+    persistSettings(); render();
+  },
+  updateLevelingUnit(key,val){
+    S.settings.leveling=S.settings.leveling||cloneDefaults(DEFAULT_SETTINGS.leveling);
+    S.settings.leveling.unitXP=S.settings.leveling.unitXP||{};
+    S.settings.leveling.unitXP[key]=Math.max(0,Number(val)||0);
+    persistSettings(); render();
+  },
+  updateLevelingRotation(key,val){
+    S.settings.leveling=S.settings.leveling||cloneDefaults(DEFAULT_SETTINGS.leveling);
+    S.settings.leveling.rotationMultiplier=S.settings.leveling.rotationMultiplier||{};
+    S.settings.leveling.rotationMultiplier[key]=Math.max(0,Number(val)||0);
+    persistSettings(); render();
   },
 
   toggleCategory(id){
@@ -4394,8 +4508,8 @@ renderStats=renderStatsV14;
 const _oldRenderSettings=renderSettings;
 renderSettings=function(){
   let html=_oldRenderSettings();
-  const themeCard=`<div class="section-label">APPEARANCE</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">UI look</label><select onchange="App.setTheme(this.value)"><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="amoled" ${S.settings.theme==='amoled'?'selected':''}>AMOLED</option></select><small class="hint">Choose the overall MediaFlow interface style.</small></div></div>`;
-  const backupCard=`<div class="section-label">AUTOMATIC BACKUPS</div><div class="card" style="margin-bottom:22px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><div><b>Automatic local JSON backup</b><div class="profile-note">Choose a folder on this computer. MediaFlow can periodically write a backup while the app is open. Browsers cannot write to arbitrary paths while the app is closed.</div></div><button class="toggle ${S.settings.backup?.enabled?'on':''}" onclick="App.toggleBackup()"></button></div><div class="field-row" style="margin-top:14px;"><div class="field"><label class="field-label">Backup every</label><select onchange="App.updateBackup('interval',this.value)"><option value="5" ${Number(S.settings.backup?.interval)===5?'selected':''}>5 minutes</option><option value="15" ${Number(S.settings.backup?.interval)===15?'selected':''}>15 minutes</option><option value="30" ${Number(S.settings.backup?.interval)===30?'selected':''}>30 minutes</option><option value="60" ${Number(S.settings.backup?.interval)===60?'selected':''}>1 hour</option><option value="360" ${Number(S.settings.backup?.interval)===360?'selected':''}>6 hours</option><option value="1440" ${Number(S.settings.backup?.interval)===1440?'selected':''}>Daily</option></select></div><div class="field"><label class="field-label">File mode</label><select onchange="App.updateBackup('mode',this.value)"><option value="single" ${S.settings.backup?.mode==='single'?'selected':''}>One file (overwrite)</option><option value="multiple" ${S.settings.backup?.mode==='multiple'?'selected':''}>Multiple files</option></select></div></div><div class="field"><label class="field-label">Single-file name</label><input value="${escapeHtml(S.settings.backup?.fileName||'mediaflow-backup.json')}" onchange="App.updateBackup('fileName',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="App.chooseBackupFolder()">Choose backup folder</button><button class="btn btn-ghost" onclick="App.backupNow()">Back up now</button></div><small class="hint">Folder permission is stored in this browser when supported. Multiple-file mode creates a timestamped JSON file each time.</small></div>`;
+  const themeCard=`<div class="section-label settings-section-head"><span>APPEARANCE</span>${defaultButton('appearance')}</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">UI look</label><select onchange="App.setTheme(this.value)"><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="amoled" ${S.settings.theme==='amoled'?'selected':''}>AMOLED</option></select><small class="hint">Choose the overall MediaFlow interface style.</small></div></div>`;
+  const backupCard=`<div class="section-label settings-section-head"><span>AUTOMATIC BACKUPS</span>${defaultButton('backups')}</div><div class="card" style="margin-bottom:22px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><div><b>Automatic local JSON backup</b><div class="profile-note">Choose a folder on this computer. MediaFlow can periodically write a backup while the app is open. Browsers cannot write to arbitrary paths while the app is closed.</div></div><button class="toggle ${S.settings.backup?.enabled?'on':''}" onclick="App.toggleBackup()"></button></div><div class="field-row" style="margin-top:14px;"><div class="field"><label class="field-label">Backup every</label><select onchange="App.updateBackup('interval',this.value)"><option value="5" ${Number(S.settings.backup?.interval)===5?'selected':''}>5 minutes</option><option value="15" ${Number(S.settings.backup?.interval)===15?'selected':''}>15 minutes</option><option value="30" ${Number(S.settings.backup?.interval)===30?'selected':''}>30 minutes</option><option value="60" ${Number(S.settings.backup?.interval)===60?'selected':''}>1 hour</option><option value="360" ${Number(S.settings.backup?.interval)===360?'selected':''}>6 hours</option><option value="1440" ${Number(S.settings.backup?.interval)===1440?'selected':''}>Daily</option></select></div><div class="field"><label class="field-label">File mode</label><select onchange="App.updateBackup('mode',this.value)"><option value="single" ${S.settings.backup?.mode==='single'?'selected':''}>One file (overwrite)</option><option value="multiple" ${S.settings.backup?.mode==='multiple'?'selected':''}>Multiple files</option></select></div></div><div class="field"><label class="field-label">Single-file name</label><input value="${escapeHtml(S.settings.backup?.fileName||'mediaflow-backup.json')}" onchange="App.updateBackup('fileName',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="App.chooseBackupFolder()">Choose backup folder</button><button class="btn btn-ghost" onclick="App.backupNow()">Back up now</button></div><small class="hint">Folder permission is stored in this browser when supported. Multiple-file mode creates a timestamped JSON file each time.</small></div>`;
   const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
   const offlineCard='';
   const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
