@@ -922,17 +922,80 @@ const CLOUD_CACHE_KEY='mf_cloud_cache_v1';
 let memoryStore={};
 async function localRawGet(key){try{const v=localStorage.getItem(key);return v===null?undefined:JSON.parse(v);}catch(e){return undefined;}}
 function localSetRaw(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}
+async function encodeCloudState(value){
+  // Large MediaFlow histories can make the single JSONB row expensive to update.
+  // Compress the state in browsers that support CompressionStream before sending it.
+  const json=JSON.stringify(value);
+  try{
+    if(typeof CompressionStream==='function' && typeof TextEncoder!=='undefined'){
+      const cs=new CompressionStream('gzip');
+      const writer=cs.writable.getWriter();
+      writer.write(new TextEncoder().encode(json));
+      writer.close();
+      const buf=await new Response(cs.readable).arrayBuffer();
+      let binary='';
+      const bytes=new Uint8Array(buf);
+      const chunk=0x8000;
+      for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
+      return {__mediaflowCompressed:'gzip',data:btoa(binary)};
+    }
+  }catch(e){
+    console.warn('MediaFlow: compression unavailable, saving normally.',e);
+  }
+  return value;
+}
+
+async function decodeCloudState(value){
+  if(!value || value.__mediaflowCompressed!=='gzip') return value;
+  try{
+    if(typeof DecompressionStream!=='function' || typeof TextDecoder==='undefined') throw new Error('DecompressionStream unavailable');
+    const binary=atob(value.data||'');
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const ds=new DecompressionStream('gzip');
+    const writer=ds.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    const text=await new Response(ds.readable).text();
+    return JSON.parse(text);
+  }catch(e){
+    throw new Error('MediaFlow cloud data could not be decompressed. Try another Chromium-based browser or restore from a JSON backup.');
+  }
+}
+
 async function rawGet(key){
   if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
   const {data,error}=await supabase.from('mediaflow_states').select('state_data').eq('user_id',AUTH_USER.id).maybeSingle();
   if(error)throw error;
-  return data?.state_data??undefined;
+  return await decodeCloudState(data?.state_data??undefined);
 }
+
 async function rawSet(key,value){
   if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
-  const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error)throw error;
-  return true;
+  const payload=await encodeCloudState(value);
+  // Keep a local copy as a safety net while the cloud write is in flight.
+  try{ localSetRaw(CLOUD_CACHE_KEY,value); }catch(_){}
+
+  let lastError=null;
+  const delays=[0,450,1000,2000,4000];
+  for(let attempt=0;attempt<delays.length;attempt++){
+    if(delays[attempt]) await new Promise(r=>setTimeout(r,delays[attempt]));
+    try{
+      const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+      if(!error) return true;
+      lastError=error;
+      const code=String(error?.code||'');
+      if(code!=='57014' && !/timeout|canceling statement/i.test(String(error?.message||''))) throw error;
+      if(attempt<delays.length-1) console.warn(`MediaFlow: cloud save timed out, retrying (${attempt+1}/${delays.length-1})...`);
+    }catch(e){
+      lastError=e;
+      const code=String(e?.code||'');
+      const timeout=code==='57014' || /timeout|canceling statement/i.test(String(e?.message||''));
+      if(!timeout || attempt===delays.length-1) throw e;
+      console.warn(`MediaFlow: cloud save timed out, retrying (${attempt+1}/${delays.length-1})...`);
+    }
+  }
+  throw lastError||new Error('MediaFlow cloud save failed.');
 }
 function mergeStates(a,b){
   if(!a)return b||{}; if(!b)return a;
@@ -968,27 +1031,19 @@ function snapshot(){
 // Serialize saves so two rapid actions never race each other; always await the tail.
 
 function saveState(){
-
+  // Serialize saves so concurrent UI actions cannot overwrite each other.
+  // Each queued save snapshots only when its turn begins, so a burst of actions
+  // always ends with the newest state rather than a pile of stale uploads.
   saveQueue = saveQueue.then(async ()=>{
-
     try{
-
       await rawSet(STATE_KEY, snapshot());
-
       if(lastSaveFailed){ lastSaveFailed=false; hideSaveError(); }
-
     }catch(e){
-
       console.error('MediaFlow: save failed', e);
-
       lastSaveFailed = true; showSaveError();
-
     }
-
   });
-
   return saveQueue;
-
 }
 
 function showSaveError(){
@@ -1003,7 +1058,7 @@ function showSaveError(){
 
     bar.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#E8607A;color:#1a0a0d;font-weight:700;font-size:13px;text-align:center;padding:9px;z-index:999;';
 
-    bar.textContent = "Couldn't save — your last action may not persist. Check your connection.";
+    bar.textContent = "Cloud save is taking longer than expected. MediaFlow is retrying automatically; your data is also kept locally until the cloud save succeeds.";
 
     document.body.appendChild(bar);
 
@@ -1060,7 +1115,7 @@ async function loadAll(){
 S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
 S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
 S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
-S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;await saveState();
+S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
