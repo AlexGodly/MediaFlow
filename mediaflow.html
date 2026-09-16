@@ -1589,13 +1589,27 @@ function categoryStatus(cat){
 
 function overallCategoryStatus(cat){
 
-  // Rolling 30-day health gives an overall view without letting old history dominate.
-  const last = lastSessionFor(cat.id);
-  const dSince = daysSince(last?last.timestamp:null);
-  const min30 = minutesSince(cat.id,30*24);
-  const expected30d = cat.target*cat.minutesPerUnit*2.2*(30/3);
-  const ratio = expected30d>0 ? min30/expected30d : 0;
+  // Overall health uses the category's entire recorded history:
+  // from its first ever non-skipped log through its last ever log.
+  const sessions = S.sessions
+    .filter(s=>s && s.categoryId===cat.id && s.status!=='skipped' && Number(s.minutes)>0)
+    .sort((a,b)=>new Date(a.timestamp||a.date)-new Date(b.timestamp||b.date));
 
+  if(!sessions.length) return 'healthy';
+
+  const first = sessions[0];
+  const last = sessions[sessions.length-1];
+  const firstTime = new Date(first.timestamp||first.date).getTime();
+  const lastTime = new Date(last.timestamp||last.date).getTime();
+  const spanDays = Math.max(3,(lastTime-firstTime)/(24*60*60*1000));
+  const totalMinutes = sessions.reduce((sum,s)=>sum+(Number(s.minutes)||0),0);
+  const expectedPerDay = (cat.target*cat.minutesPerUnit*2.2)/3;
+  const expectedOverall = expectedPerDay*spanDays;
+  const ratio = expectedOverall>0 ? totalMinutes/expectedOverall : 0;
+
+  // Recency still matters for whether the category is currently due/neglected,
+  // while the consumption ratio itself covers the full lifetime of the category.
+  const dSince = daysSince(last.timestamp||last.date);
   if(dSince>=6) return 'neglected';
   if(ratio>=1.6) return 'overused';
   if(dSince>=2.2) return 'due';
@@ -1936,14 +1950,14 @@ function renderDashboard(){
 
           <div class="status-badge status-${todayStatus}" title="Based on recent 72-hour consumption">Today: ${labelMap[todayStatus]}</div>
 
-          <div class="status-badge status-${overallStatus}" title="Based on the rolling 30-day balance">Overall: ${labelMap[overallStatus]}</div>
+          <div class="status-badge status-${overallStatus}" title="Based on all recorded consumption from the first ever log to the last ever log">Overall: ${labelMap[overallStatus]}</div>
 
         </div>`;
 
       }).join('')}
 
     </div>
-    <div class="health-note">Today status reflects the last 72 hours. Overall status uses a rolling 30-day balance.</div>`;
+    <div class="health-note">Today status reflects the last 72 hours. Overall status uses all recorded consumption from the first ever log to the last ever log.</div>`;
 
    return ` 
 
