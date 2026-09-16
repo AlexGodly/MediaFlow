@@ -8,13 +8,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow by Alex Godly</title>
+<title>MediaFlow · Cloud + Offline v14</title>
 
 <meta name="theme-color" content="#0E111A">
 
 <link rel="manifest" href="manifest.json">
 
-<link rel="icon" href="https://i.ibb.co/fd1nWwnT/icon.png" type="image/svg+xml">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -602,6 +602,7 @@ html[data-theme="light"] .btn:not(.btn-primary):not(.btn-danger){background:#fff
 html[data-theme="light"] .nav-item{color:#596274!important;}
 html[data-theme="light"] .nav-item.active{background:#e7ebf0!important;color:#171a21!important;}
 html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687386!important;}
+.health-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}.balance-row{gap:12px}.balance-row .status-badge{white-space:nowrap}@media(max-width:760px){.balance-row{flex-wrap:wrap}.balance-row .bal-name{min-width:140px}.balance-row .bal-amt{margin-left:auto}}
 </style>
 
 </head>
@@ -1586,6 +1587,21 @@ function categoryStatus(cat){
 
 }
 
+function overallCategoryStatus(cat){
+
+  // Rolling 30-day health gives an overall view without letting old history dominate.
+  const last = lastSessionFor(cat.id);
+  const dSince = daysSince(last?last.timestamp:null);
+  const min30 = minutesSince(cat.id,30*24);
+  const expected30d = cat.target*cat.minutesPerUnit*2.2*(30/3);
+  const ratio = expected30d>0 ? min30/expected30d : 0;
+
+  if(dSince>=6) return 'neglected';
+  if(ratio>=1.6) return 'overused';
+  if(dSince>=2.2) return 'due';
+  return 'healthy';
+}
+
 function saturationLevel(cat){
 
   const min72 = minutesSince(cat.id,72);
@@ -1904,7 +1920,9 @@ function renderDashboard(){
 
         const amt = today.filter(s=>s.categoryId===cat.id && s.status!=='skipped').reduce((a,s)=>a+s.actualAmount,0);
 
-        const status = categoryStatus(cat);
+        const todayStatus = categoryStatus(cat);
+
+        const overallStatus = overallCategoryStatus(cat);
 
         const labelMap = {healthy:'Healthy', neglected:'Neglected', overused:'Overused', due:'Due'};
 
@@ -1916,13 +1934,16 @@ function renderDashboard(){
 
           <div class="bal-amt">${amt} ${unitLabel(cat.unit,amt)} today</div>
 
-          <div class="status-badge status-${status}">${labelMap[status]}</div>
+          <div class="status-badge status-${todayStatus}" title="Based on recent 72-hour consumption">Today: ${labelMap[todayStatus]}</div>
+
+          <div class="status-badge status-${overallStatus}" title="Based on the rolling 30-day balance">Overall: ${labelMap[overallStatus]}</div>
 
         </div>`;
 
       }).join('')}
 
-    </div>`;
+    </div>
+    <div class="health-note">Today status reflects the last 72 hours. Overall status uses a rolling 30-day balance.</div>`;
 
    return ` 
 
