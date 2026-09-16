@@ -2,7 +2,7 @@
 
 MediaFlow Offline by Alex Godly
 
-**Version:** 36.0.0 Offline  
+**Version:** 36.0.0  
 **Author:** Alex Godly  
 **Company:** Alex Godly
 

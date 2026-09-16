@@ -1,7 +1,7 @@
 {
   "name": "mediaflow-offline",
   "productName": "MediaFlow Offline",
-  "version": "36.0.0 Offline",
+  "version": "36.0.0",
   "description": "MediaFlow Offline by Alex Godly",
   "author": "Alex Godly <Alex Godly>",
   "main": "main.js",
