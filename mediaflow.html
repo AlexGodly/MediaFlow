@@ -1251,124 +1251,142 @@ function recentTaskWindow(n){
 
 }
 
+function schedulerConsumptionSessions(){
+  return S.sessions.filter(s=>s && s.status!=='skipped' && ((Number(s.minutes)||0)>0 || (Number(s.actualAmount)||0)>0));
+}
+
+function categoryBalance(cat){
+  const enabled=S.categories.filter(c=>c.enabled);
+  const weightTotal=enabled.reduce((a,c)=>a+Math.max(0.25,Number(c.weight)||1),0) || 1;
+  const desiredShare=Math.max(0.25,Number(cat.weight)||1)/weightTotal;
+  const all=schedulerConsumptionSessions();
+  const now=Date.now();
+
+  // Recent behavior matters most, but lifetime history remains a real signal.
+  const windows=[
+    {days:3, weight:.35, minMinutes:60},
+    {days:7, weight:.25, minMinutes:120},
+    {days:30, weight:.20, minMinutes:240},
+    {days:null, weight:.20, minMinutes:1}
+  ];
+
+  let ratioSum=0, usedWeight=0;
+  const detail={};
+  for(const w of windows){
+    const rows=w.days==null ? all : all.filter(x=>Number(x.timestamp)>=now-w.days*86400000);
+    const totalMinutes=rows.reduce((a,x)=>a+Math.max(0,Number(x.minutes)||0),0);
+    const catMinutes=rows.filter(x=>x.categoryId===cat.id).reduce((a,x)=>a+Math.max(0,Number(x.minutes)||0),0);
+    const key=w.days==null?'lifetime':`${w.days}d`;
+    const actualShare=totalMinutes>0 ? catMinutes/totalMinutes : 0;
+    const ratio=desiredShare>0 ? actualShare/desiredShare : 1;
+    detail[key]={totalMinutes,catMinutes,actualShare,ratio};
+    if(totalMinutes>=w.minMinutes){ ratioSum+=Math.min(6,ratio)*w.weight; usedWeight+=w.weight; }
+  }
+
+  const consumptionRatio=usedWeight>0 ? ratioSum/usedWeight : 1;
+  const last=lastSessionFor(cat.id);
+  const daysIdle=daysSince(last?last.timestamp:null);
+  return {desiredShare,consumptionRatio,daysIdle,detail};
+}
+
 function computeScores(excludeIds){
-
   excludeIds = excludeIds || [];
-
   const st = S.settings;
-
   let pool = S.categories.filter(c=>c.enabled && !excludeIds.includes(c.id));
-
   if(pool.length===0) pool = S.categories.filter(c=>c.enabled);
-
   const recentWindow = recentTaskWindow(6);
 
-  const lastTask = recentTaskWindow(1)[0];
-
-  // consecutive streak of the most recent category
-
   let streakCatId = null, streakLen = 0;
-
   const chron = [...S.sessions].sort((a,b)=>b.timestamp-a.timestamp);
-
   if(chron.length){
-
     streakCatId = chron[0].categoryId;
-
     for(const s of chron){ if(s.categoryId===streakCatId) streakLen++; else break; }
-
   }
 
   return pool.map(cat=>{
-
     const last = lastSessionFor(cat.id);
-
     const dSince = daysSince(last ? last.timestamp : null);
-
     const neglectBonus = last ? Math.min(st.neglectCap, dSince*st.neglectRate) : st.neglectCap;
-
     const occurrences = recentWindow.filter(s=>s.categoryId===cat.id).length;
-
     const repetitionPenalty = occurrences * st.repetitionPenalty;
-
     const consecutivePenalty = (streakCatId===cat.id) ? streakLen*st.consecutivePenalty : 0;
 
-    const expectedDailyMinutes = cat.target * cat.minutesPerUnit;
-
-    const min24 = minutesSince(cat.id, 24);
-
-    const satRatio = expectedDailyMinutes>0 ? min24/expectedDailyMinutes : 0;
-
-    const saturationPenalty = satRatio>1 ? Math.min(60,(satRatio-1)*st.saturationWeight) : 0;
+    const balance=categoryBalance(cat);
+    // Ratio 1 = on balance. Above 1 = category owns too much consumption time.
+    // Below 1 = underrepresented. Cap both sides so one binge never permanently locks a category out.
+    const overRatio=Math.max(0,balance.consumptionRatio-1);
+    const underRatio=Math.max(0,1-balance.consumptionRatio);
+    const saturationPenalty=Math.min(70,overRatio*st.saturationWeight*2.2);
+    const balanceBonus=Math.min(28,underRatio*st.neglectCap*.55);
 
     const seasonalBonus = cat.seasonal ? (st.seasonalBonus + st.seasonalFreshCount*4) : 0;
-
     const weightScore = cat.weight * 8;
-
-    const raw = weightScore + neglectBonus + seasonalBonus - repetitionPenalty - consecutivePenalty - saturationPenalty;
-
+    const raw = weightScore + neglectBonus + balanceBonus + seasonalBonus - repetitionPenalty - consecutivePenalty - saturationPenalty;
     const floored = Math.max(raw, 1.5);
-
     const jitter = floored * (Math.random()*st.randomness*2 - st.randomness);
-
     const final = Math.max(floored + jitter, 0.5);
 
     const reasons = [];
-
     if(!last) reasons.push({t:'Never consumed yet', w: st.neglectCap});
-
     else if(dSince>=1) reasons.push({t:`Neglected for ${Math.floor(dSince)}d`, w: neglectBonus});
-
+    if(balance.consumptionRatio>=1.35) reasons.push({t:'Overrepresented across your consumption history — cooling off',w:-saturationPenalty});
+    else if(balance.consumptionRatio<=.70 && last) reasons.push({t:'Underrepresented in your overall consumption — catching up',w:balanceBonus});
     if(cat.seasonal && st.seasonalFreshCount>0) reasons.push({t:`${st.seasonalFreshCount} seasonal title(s) have fresh episodes`, w: seasonalBonus});
-
     else if(cat.seasonal) reasons.push({t:'Time-sensitive — airing now', w: seasonalBonus});
-
-    if(saturationPenalty>4) reasons.push({t:'Recently overused — cooling off', w:-saturationPenalty});
-
     if(repetitionPenalty+consecutivePenalty>4) reasons.push({t:'Appeared often in recent tasks', w: -(repetitionPenalty+consecutivePenalty)});
-
-    if(satRatio<0.15 && last) reasons.push({t:'Low recent saturation', w: 6});
-
     reasons.sort((a,b)=>Math.abs(b.w)-Math.abs(a.w));
 
-    return {cat, score: final, reasons: reasons.slice(0,3), debug:{neglectBonus,repetitionPenalty,consecutivePenalty,saturationPenalty,seasonalBonus,weightScore}};
-
+    return {cat, score: final, reasons: reasons.slice(0,3), debug:{neglectBonus,repetitionPenalty,consecutivePenalty,saturationPenalty,seasonalBonus,weightScore,balanceBonus,balanceRatio:balance.consumptionRatio}};
   });
-
 }
 
 function weightedPick(scored){
-
   const total = scored.reduce((s,x)=>s+x.score,0);
-
   let r = Math.random()*total;
-
   for(const x of scored){
-
     r -= x.score;
-
     if(r<=0) return x;
-
   }
-
   return scored[scored.length-1];
-
 }
 
 function suggestedAmount(cat){
+  const t=Math.max(1,Number(cat.target)||1);
+  const balance=categoryBalance(cat);
+  const ratio=balance.consumptionRatio;
+  const idle=balance.daysIdle;
 
-  const t = cat.target;
+  // Amount is self-correcting too: overconsumed categories shrink, neglected ones grow.
+  // Recent windows dominate, lifetime history prevents a long binge from being forgotten overnight.
+  let mult=1;
+  if(ratio>=2.5) mult*=.50;
+  else if(ratio>=1.8) mult*=.62;
+  else if(ratio>=1.35) mult*=.78;
+  else if(ratio<=.45) mult*=1.35;
+  else if(ratio<=.70) mult*=1.18;
 
-  if(t<=2) return {low:t, high:t};
+  // Time since last consumption adds a gradual catch-up boost with diminishing returns.
+  if(Number.isFinite(idle)){
+    if(idle>=60) mult*=1.65;
+    else if(idle>=30) mult*=1.50;
+    else if(idle>=14) mult*=1.32;
+    else if(idle>=7) mult*=1.18;
+  }else{
+    mult*=1.5;
+  }
 
-  const low = Math.max(1, Math.round(t*0.7));
+  // Keep correction gradual. MediaFlow should rebalance over rotations, not create giant debt sessions.
+  mult=clamp(mult,.45,2.0);
+  const center=Math.max(1,Math.round(t*mult));
+  let low,high;
+  if(center<=2){ low=center; high=center; }
+  else{
+    low=Math.max(1,Math.round(center*.85));
+    high=Math.max(low,Math.round(center*1.15));
+  }
 
-  let high = Math.round(t*1.3);
-
-  if(high<=low) high = low+1;
-
-  return {low, high};
-
+  const direction=mult<.9?'reduced':mult>1.1?'increased':'normal';
+  return {low,high,multiplier:mult,direction,balanceRatio:ratio,daysIdle:idle};
 }
 
 function scoreLibraryTitle(item, cat){
@@ -1392,38 +1410,34 @@ function pickLibraryTitle(cat){
   return pool.slice().sort((a,b)=>scoreLibraryTitle(b,cat)-scoreLibraryTitle(a,cat))[0] || null;
 }
 
+
 function generateTask(excludeIds){
-
   const scored = computeScores(excludeIds);
-
   if(scored.length===0) return null;
-
   const pick = weightedPick(scored);
-
-  const {low, high} = suggestedAmount(pick.cat);
+  const amount = suggestedAmount(pick.cat);
+  const {low, high} = amount;
   const recommendedTitle = S.settings.exactTitleRecommendations ? pickLibraryTitle(pick.cat) : null;
-
+  const amountReason=amount.direction==='reduced'
+    ? 'Session size reduced because this category is overrepresented in your consumption'
+    : amount.direction==='increased'
+      ? 'Session size increased to gradually catch this category up'
+      : 'Session size is near its normal target';
   return {
-
     id: uid(),
-
     categoryId: pick.cat.id,
     libraryId: recommendedTitle ? recommendedTitle.id : null,
     title: recommendedTitle ? cleanTitle(recommendedTitle.title) : null,
-
     low, high,
-
     targetMid: Math.round((low+high)/2) || pick.cat.target,
-
     unit: pick.cat.unit,
-
     createdAt: Date.now(),
-
-    reasons: pick.reasons.map(r=>r.t),
-
+    reasons: [...pick.reasons.map(r=>r.t),amountReason].slice(0,4),
+    amountMultiplier: amount.multiplier,
+    balanceRatio: amount.balanceRatio
   };
-
 }
+
 
 /* ============================================================
 
@@ -2404,13 +2418,16 @@ function renderLibrary(){
 
   const overviewRows = cats.map(cat=>{
 
-    const items = S.library.filter(i=>i.categoryId===cat.id && i.total);
+    const items = S.library.filter(i=>i.categoryId===cat.id);
 
-    const done = items.reduce((a,i)=>a+Math.min(i.progress,i.total),0);
-
-    const total = items.reduce((a,i)=>a+i.total,0);
-
-    const pct = total>0 ? Math.round(done/total*100) : 0;
+    // Always count consumed/read progress, even when a title has no known total.
+    const done = items.reduce((a,i)=>a+Math.max(0,Number(i.progress)||0),0);
+    const knownItems = items.filter(i=>i.total!=null && Number(i.total)>0);
+    const knownDone = knownItems.reduce((a,i)=>a+Math.min(Math.max(0,Number(i.progress)||0),Number(i.total)||0),0);
+    const total = knownItems.reduce((a,i)=>a+(Number(i.total)||0),0);
+    const hasUnknownTotal = items.some(i=>i.total==null || Number(i.total)<=0);
+    const pct = total>0 && !hasUnknownTotal ? Math.round(knownDone/total*100) : 0;
+    const progressText = items.length===0 ? '0 / -' : (hasUnknownTotal || total<=0 ? `${done} / -` : `${done} / ${total} (${pct}%)`);
 
     return `<div class="overview-row">
 
@@ -2418,7 +2435,7 @@ function renderLibrary(){
 
       <div class="ov-track"><div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:linear-gradient(90deg, ${cat.color}88, ${cat.color});"></div></div></div>
 
-      <div class="ov-num">${total>0 ? `${done} / ${total} (${pct}%)` : '—'}</div>
+      <div class="ov-num">${progressText}</div>
 
     </div>`;
 
@@ -3151,39 +3168,14 @@ function renderSettings(){
           </div>
         </div>
 
-        <div class="section-label settings-section-head"><span>CONNECTIONS — MAL &amp; SIMKL</span>${defaultButton('mal')}</div>
+        <div class="section-label settings-section-head"><span>IMPORT / EXPORT — MEDIA SERVICES</span>${defaultButton('mal')}</div>
 
         <div class="card" style="margin-bottom:22px;">
-
-          <div style="font-size:13px; color:var(--text-dim); line-height:1.6; margin-bottom:14px;">
-
-            Live two-way sync would need MAL/SIMKL's OAuth login, which needs a real registered redirect URL and a server to hold the connection — this app runs entirely in your browser with no backend, so that isn't available here. What works instead: export your list from MAL or SIMKL and import it below to populate your Library with titles and progress. Every imported item is tagged with its source and you can re-import any time to refresh progress — the scheduler still only ever works at the category level, this just keeps your Library accurate.
-
-          </div>
-
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-
-            <div>
-
-              <button class="btn" onclick="document.getElementById('mal-file').click()">Import MyAnimeList export (.xml)</button>
-
-              <input type="file" id="mal-file" accept=".xml,text/xml" style="display:none" onchange="App.importMalXml(this.files[0])">
-
-            </div>
-
-            <div>
-
-              <button class="btn" onclick="document.getElementById('simkl-file').click()">Import Simkl JSON backup</button>
-
-              <input type="file" id="simkl-file" accept=".json,application/json" style="display:none" onchange="App.importSimklJson(this.files[0])">
-
-            </div>
-
-          </div>
-
-          <small class="hint">MAL: Profile → List → Export, choose Anime or Manga, download the .xml. Simkl: download your free JSON backup and import the .json file directly. MediaFlow maps anime, TV, movies, statuses, progress, ratings, external IDs and timestamped watch history when present.</small>
-
-        </div>
+<div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;">Import library exports from other tracking services or export your MediaFlow Library into exchange files for those services. MediaFlow merges matching titles and preserves progress, status, ratings, dates and external IDs when the source contains them.</div>
+<div class="field-row"><div class="field"><label class="field-label">Service / format</label><select id="exchange-service">${mfExchangeServiceOptions()}</select></div><div class="field"><label class="field-label">Import</label><button class="btn" onclick="App.pickExchangeImport()">Choose export file</button><input id="exchange-file" type="file" accept=".json,.csv,.xml,.txt,application/json,text/csv,text/xml,application/xml" style="display:none" onchange="App.prepareExchangeImport(this.files[0])"></div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-primary" onclick="App.exportExchange()">Export for selected service</button><button class="btn" onclick="document.getElementById('mal-file').click()">Quick MAL XML import</button><input type="file" id="mal-file" accept=".xml,text/xml" style="display:none" onchange="App.prepareLegacyImport('mal',this.files[0])"><button class="btn" onclick="document.getElementById('simkl-file').click()">Quick Simkl JSON import</button><input type="file" id="simkl-file" accept=".json,application/json" style="display:none" onchange="App.prepareLegacyImport('simkl',this.files[0])"></div>
+<small class="hint">AniList · AniSearch · AniWatch · BetaSeries · Criticker · Crunchyroll · EpisodeCalendar · HiAnime · IMDb · Letterboxd · LiveChart · Kitsu · MoviesFad · MyAnimeList · MAL-XML · Netflix · PrimeWire · SeriesFad · Stremio · trakt · TV Time · Tviso · Twee · CSV · JSON. Different services expose different fields, so MediaFlow imports what is actually present instead of inventing missing data.</small>
+</div>
 
         <div class="section-label">DATA</div>
 
@@ -3195,7 +3187,7 @@ function renderSettings(){
 
             <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON backup</button>
 
-            <input type="file" id="import-file" accept="application/json" style="display:none" onchange="App.importJSON(this.files[0])">
+            <input type="file" id="import-file" accept="application/json" style="display:none" onchange="App.prepareBackupImport(this.files[0])">
 
             <button class="btn btn-danger" onclick="App.resetAll()">Reset all data</button>
 
@@ -3265,6 +3257,7 @@ function renderModal(){
 
     : S.modal.type==='libraryCategory' ? libraryCategoryModalHtml(S.modal.data)
 
+    : S.modal.type==='importConfirm' ? mfImportConfirmModalHtml(S.modal.data)
     : libraryModalHtml(S.modal.data);
 
   const wrap = document.createElement('div');
@@ -3965,7 +3958,7 @@ const App = {
     reader.onload=async ()=>{
       try{
         const data=JSON.parse(reader.result);
-        if(!confirm('This will replace your current MediaFlow data with the imported backup. Continue?')){ closeDataProgress(); return; }
+        
         updateDataProgress(70,'Applying imported data...');
         if(data.categories) S.categories=data.categories;
         if(data.library) S.library=sanitizeLibrary(data.library);
@@ -4705,6 +4698,33 @@ const _oldLoadAll=loadAll;
 loadAll=async function(){await _oldLoadAll();const d=await rawGet(STATE_KEY);S.profileName=String(d?.profileName||'').trim();S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0},d?.stopwatch||{});S.malLink=Object.assign({username:'',mode:'anime'},d?.malLink||{});S.xpLedger=Object.assign({libraryAdditions:{}},d?.xpLedger||{});
 S.completionTimeline=Array.isArray(d?.completionTimeline)?d.completionTimeline:[];S.xpLedger.libraryAdditions=Object.assign({},d?.xpLedger?.libraryAdditions||{});S.library.forEach(i=>{if(i&&Object.prototype.hasOwnProperty.call(i,'coverUrl'))delete i.coverUrl;});initTheme();persistLibrary();await restoreBackupFolder();restartBackupTimer();clearInterval(window.__sw);window.__sw=null;if(S.stopwatch.running)window.__sw=setInterval(stopwatchTick,250);};
 
+
+/* v40: Multi-service exchange hub + custom import confirmation */
+const MF_EXCHANGE_SERVICES=[['anilist','AniList'],['anisearch','AniSearch'],['aniwatch','AniWatch'],['betaseries','BetaSeries'],['criticker','Criticker'],['crunchyroll','Crunchyroll'],['episodecalendar','EpisodeCalendar'],['hianime','HiAnime'],['imdb','IMDb'],['letterboxd','Letterboxd'],['livechart','LiveChart'],['kitsu','Kitsu'],['moviesfad','MoviesFad'],['mal','MyAnimeList'],['malxml','MAL-XML'],['netflix','Netflix'],['primewire','PrimeWire'],['seriesfad','SeriesFad'],['stremio','Stremio'],['trakt','trakt'],['tvtime','TV Time'],['tviso','Tviso'],['twee','Twee'],['csv','Import .csv file'],['json','Import .json file']];
+function mfExchangeServiceOptions(){return MF_EXCHANGE_SERVICES.map(([id,n])=>`<option value="${id}">${n}</option>`).join('')}
+function mfServiceName(id){return MF_EXCHANGE_SERVICES.find(x=>x[0]===id)?.[1]||id||'External service'}
+function mfImportConfirmModalHtml(d){const backup=d?.mode==='backup';return `<div class="priority-modal"><div class="modal-title">Confirm import</div><div style="color:var(--text-dim);font-size:13px;line-height:1.6;margin-bottom:14px">Import <b>${escapeHtml(d?.fileName||'file')}</b> from <b>${escapeHtml(d?.serviceName||'external data')}</b>?</div><div class="card" style="padding:13px;margin:0;background:var(--panel-2)"><div style="font-size:12px;line-height:1.55;color:var(--text-dim)">${backup?'This full MediaFlow backup will replace your current categories, Library, History and Settings.':'Recognized titles will be merged into your Library. Matching entries are updated before new titles are created. Missing fields are not fabricated.'}</div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="App.cancelPendingImport()">Cancel</button><button class="btn btn-primary" onclick="App.confirmPendingImport()">${backup?'Replace & import':'Import data'}</button></div></div>`}
+function mfPendingImport(kind,service,file){if(!file)return;S.pendingImport={kind,service,file};S.modal={type:'importConfirm',data:{mode:kind==='backup'?'backup':'merge',fileName:file.name,serviceName:kind==='backup'?'MediaFlow backup':mfServiceName(service)}};render()}
+function mfCancelPendingImport(){S.pendingImport=null;S.modal=null;render()}
+async function mfConfirmPendingImport(){const x=S.pendingImport;if(!x)return;S.pendingImport=null;S.modal=null;render();if(x.kind==='backup')return App.importJSON(x.file);if(x.kind==='legacy-mal')return App.importMalXml(x.file);if(x.kind==='legacy-simkl')return App.importSimklJson(x.file);return mfImportExchangeFile(x.service,x.file)}
+function mfPickExchangeImport(){document.getElementById('exchange-file')?.click()}
+function mfPrepareExchangeImport(file){if(file)mfPendingImport('exchange',document.getElementById('exchange-service')?.value||'json',file)}
+function mfPrepareLegacyImport(service,file){if(file)mfPendingImport(service==='mal'?'legacy-mal':'legacy-simkl',service,file)}
+function mfPrepareBackupImport(file){if(file)mfPendingImport('backup','mediaflow',file)}
+function mfCsvParse(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'){if(q&&n==='"'){cell+='"';i++}else q=!q}else if(c===','&&!q){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x.trim()))rows.push(row);row=[]}else cell+=c}if(cell||row.length){row.push(cell);if(row.some(x=>x.trim()))rows.push(row)}if(!rows.length)return[];const h=rows[0].map(x=>x.trim().toLowerCase().replace(/^\ufeff/,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''));return rows.slice(1).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??'').trim()]))) }
+function mfFirst(o,keys){for(const k of keys)if(o&&o[k]!=null&&String(o[k]).trim()!=='')return o[k];return null}
+function mfNormStatus(v){v=String(v||'').toLowerCase().replace(/[ _-]+/g,'');if(/completed|complete|watched|finished/.test(v))return'completed';if(/watching|reading|current|inprogress/.test(v))return'active';if(/hold|paused/.test(v))return'paused';if(/drop/.test(v))return'dropped';return'planned'}
+function mfGuessCategory(o,service){const raw=String(mfFirst(o,['media_type','type','kind','format','category','list_type','content_type','__group'])||'').toLowerCase();if(/manga|manhwa|manhua|chapter/.test(raw))return/manhwa|manhua/.test(raw)?'manhwa':'manga';if(/anime/.test(raw)||['anilist','anisearch','aniwatch','hianime','livechart','kitsu','mal','malxml','crunchyroll'].includes(service))return/movie|film/.test(raw)?'animemovies':'backlog';if(/movie|film/.test(raw)||['letterboxd','criticker','moviesfad'].includes(service))return'movies';if(/comic|issue/.test(raw))return'comics';if(/animation|cartoon/.test(raw))return'otheranim';return'tv'}
+function mfFlattenJson(data){if(Array.isArray(data))return data;const out=[];for(const k of ['anime','shows','movies','items','entries','library','watchlist','history','data','results'])if(Array.isArray(data?.[k]))for(const x of data[k])out.push(Object.assign({__group:k},x));return out.length?out:[data]}
+function mfXmlRecords(text){const doc=new DOMParser().parseFromString(text,'text/xml');if(doc.querySelector('parsererror'))throw new Error('The XML file could not be parsed.');return[...doc.querySelectorAll('anime,manga,item,entry,movie,show,series')].map(n=>{const o={};for(const el of n.children)o[el.tagName.toLowerCase()]=el.textContent?.trim()||'';return o})}
+function mfNormalizeRecord(rec,service){const nested=rec?.show||rec?.movie||rec?.media||rec?.anime||rec?.item||{};const o=Object.assign({},nested,rec),title=cleanTitle(String(mfFirst(o,['title','name','series_title','anime_title','movie_title','original_title','primary_title'])||''));if(!title)return null;const progress=Number(mfFirst(o,['progress','watched_episodes','watched_episodes_count','episodes_watched','episode','my_watched_episodes','chapters_read','my_read_chapters','watched'])||0)||0;let total=Number(mfFirst(o,['total','total_episodes','total_episodes_count','episodes_total','series_episodes','chapters_total','series_chapters'])||0)||null;const categoryId=mfGuessCategory(o,service);if(categoryId==='movies'||categoryId==='animemovies')total=total||1;const ids=o.ids||{};return{title,categoryId,progress,total,status:mfNormStatus(mfFirst(o,['status','list_status','my_status','state'])),rating:Number(mfFirst(o,['rating','user_rating','your_rating','score','my_score'])||0)||null,year:Number(mfFirst(o,['year','release_year','title_year'])||0)||null,externalIds:{simkl:ids.simkl||o.simkl_id||null,mal:ids.mal||o.mal_id||o.series_animedb_id||null,anilist:ids.anilist||o.anilist_id||null,tmdb:ids.tmdb||o.tmdb_id||null,imdb:ids.imdb||o.imdb_id||o.const||null,trakt:ids.trakt||o.trakt_id||null,kitsu:o.kitsu_id||null}}}
+function mfMergeExchangeRecords(records,service){let added=0,updated=0,skipped=0;for(const raw of records){const r=mfNormalizeRecord(raw,service);if(!r){skipped++;continue}let item=S.library.find(i=>Object.entries(r.externalIds).some(([k,v])=>v&&i.externalIds?.[k]&&String(v)===String(i.externalIds[k])));if(!item)item=S.library.find(i=>cleanTitle(i.title).toLowerCase()===r.title.toLowerCase()&&(!r.year||!i.year||Number(i.year)===Number(r.year)));if(item){item.progress=Math.max(Number(item.progress)||0,r.progress);if(r.total)item.total=r.total;item.status=r.status;item.rating=r.rating??item.rating;item.year=r.year||item.year;item.externalIds=Object.assign({},item.externalIds||{},r.externalIds);item.source=service;item.tags=[...new Set([...(item.tags||[]),mfServiceName(service)])];updated++}else{S.library.push({id:uid(),title:r.title,categoryId:S.categories.some(c=>c.id===r.categoryId)?r.categoryId:'tv',progress:r.progress,total:r.total,status:r.status,priority:'medium',estimatedMinutes:null,tags:[mfServiceName(service)],source:service,year:r.year,rating:r.rating,externalIds:r.externalIds,createdAt:Date.now(),completedAt:r.status==='completed'?Date.now():null});added++}}normalizeSeasonalLibraryItems();return{added,updated,skipped}}
+async function mfImportExchangeFile(service,file){showImportProgress(`Importing ${mfServiceName(service)}`,1);try{const text=await file.text(),name=file.name.toLowerCase();let records;if(name.endsWith('.xml')||/^\s*</.test(text))records=mfXmlRecords(text);else if(name.endsWith('.csv')||(!name.endsWith('.json')&&text.includes(',')))records=mfCsvParse(text);else records=mfFlattenJson(JSON.parse(text));if(!records.length)throw new Error('No recognizable media records were found.');mfBegin(`${mfServiceName(service)} import`,file.name);const r=mfMergeExchangeRecords(records,service);mfCommit(`${mfServiceName(service)} import`,`${r.added} added, ${r.updated} updated`);updateImportProgress(records.length,records.length,r.added,r.updated,r.skipped,'Saving imported data…');await saveState();finishImportProgress(true,`${mfServiceName(service)} import complete`,`${r.added.toLocaleString()} titles added, ${r.updated.toLocaleString()} updated${r.skipped?`, ${r.skipped.toLocaleString()} skipped`:''}.`);render()}catch(e){console.error(e);finishImportProgress(false,'Import failed',e.message||'MediaFlow could not understand this export file.')}}
+function mfCsvEscape(v){v=v==null?'':String(v);return/[",\n\r]/.test(v)?`"${v.replace(/"/g,'""')}"`:v}
+function mfExchangeRows(){return S.library.map(i=>{const c=getCategory(i.categoryId);return{title:cleanTitle(i.title),media_type:c?.id||i.categoryId,status:i.status,progress:Number(i.progress)||0,total:i.total??'',rating:i.rating??'',year:i.year??'',mal_id:i.externalIds?.mal??'',anilist_id:i.externalIds?.anilist??'',imdb_id:i.externalIds?.imdb??'',tmdb_id:i.externalIds?.tmdb??'',trakt_id:i.externalIds?.trakt??'',simkl_id:i.externalIds?.simkl??''}})}
+function mfMalXmlExport(){const rows=mfExchangeRows().filter(r=>['seasonal','backlog','animemovies'].includes(r.media_type)),sm={active:'Watching',completed:'Completed',paused:'On-Hold',dropped:'Dropped',planned:'Plan to Watch'};return`<?xml version="1.0" encoding="UTF-8"?>\n<myanimelist>\n${rows.map(r=>`<anime><series_animedb_id>${r.mal_id||0}</series_animedb_id><series_title><![CDATA[${r.title.replace(/]]>/g,']]]]><![CDATA[>')}]]></series_title><series_type>${r.media_type==='animemovies'?'Movie':'TV'}</series_type><series_episodes>${r.total||0}</series_episodes><my_watched_episodes>${r.progress}</my_watched_episodes><my_status>${sm[r.status]||'Plan to Watch'}</my_status><my_score>${r.rating||0}</my_score></anime>`).join('\n')}\n</myanimelist>`}
+function mfExportExchange(){const service=document.getElementById('exchange-service')?.value||'json',rows=mfExchangeRows();let blob,name;if(['mal','malxml','aniwatch','hianime','livechart'].includes(service)){blob=new Blob([mfMalXmlExport()],{type:'application/xml'});name=`mediaflow-${service}-${todayISO()}.xml`}else if(['json','anilist','anisearch','kitsu','stremio','trakt'].includes(service)){blob=new Blob([JSON.stringify({source:'MediaFlow',target:mfServiceName(service),exportedAt:new Date().toISOString(),items:rows},null,2)],{type:'application/json'});name=`mediaflow-${service}-${todayISO()}.json`}else{const h=Object.keys(rows[0]||{title:'',media_type:'',status:'',progress:'',total:'',rating:'',year:''}),csv=[h.join(','),...rows.map(r=>h.map(k=>mfCsvEscape(r[k])).join(','))].join('\r\n');blob=new Blob([csv],{type:'text/csv'});name=`mediaflow-${service}-${todayISO()}.csv`}triggerDownload(blob,name);showDataProgress(`Exporting for ${mfServiceName(service)}`,'Creating exchange file...',70);setTimeout(()=>finishDataProgress(true,'Export complete',`${rows.length.toLocaleString()} Library titles exported for ${mfServiceName(service)}.`),100)}
+Object.assign(App,{pickExchangeImport:mfPickExchangeImport,prepareExchangeImport:mfPrepareExchangeImport,prepareLegacyImport:mfPrepareLegacyImport,prepareBackupImport:mfPrepareBackupImport,cancelPendingImport:mfCancelPendingImport,confirmPendingImport:mfConfirmPendingImport,exportExchange:mfExportExchange});
 
 /* ============================================================
    v37: Simkl JSON + bulk library tools + activity + undo/redo
