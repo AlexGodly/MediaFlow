@@ -2,7 +2,7 @@
 
 MediaFlow by Alex Godly
 
-**Version:** 37  
+**Version:** 37.0.0  
 **Author:** Alex Godly  
 **Company:** Alex Godly
 

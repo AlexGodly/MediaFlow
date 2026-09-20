@@ -1,7 +1,7 @@
 {
   "name": "mediaflow",
   "productName": "MediaFlow",
-  "version": "37",
+  "version": "37.0.0",
   "description": "MediaFlow by Alex Godly",
   "author": "Alex Godly <Alex Godly>",
   "main": "main.js",
