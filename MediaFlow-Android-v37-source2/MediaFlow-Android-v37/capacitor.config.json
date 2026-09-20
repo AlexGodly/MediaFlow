@@ -1,0 +1,12 @@
+{
+  "appId": "com.alexgodly.mediaflow",
+  "appName": "MediaFlow",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
