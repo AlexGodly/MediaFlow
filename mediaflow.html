@@ -1816,6 +1816,8 @@ const ICONS = {
 
   history:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
 
+  libraryhistory:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/><path d="M12 7v5l4 2"/></svg>`,
+
   stats:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>`,
 
   profile:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`,
@@ -1829,6 +1831,8 @@ const NAV_ITEMS = [
   {id:'dashboard', label:'Dashboard'},
 
   {id:'library', label:'Library'},
+
+  {id:'libraryhistory', label:'Library History'},
 
   {id:'history', label:'History'},
 
@@ -2023,6 +2027,8 @@ function renderView(){
   if(S.view==='dashboard') html = renderDashboard();
 
   else if(S.view==='library') html = renderLibrary();
+
+  else if(S.view==='libraryhistory') html = renderLibraryHistory();
 
   else if(S.view==='history') html = renderHistory();
 
@@ -4734,6 +4740,12 @@ function mfExportExchange(){const service=document.getElementById('exchange-serv
 Object.assign(App,{pickExchangeImport:mfPickExchangeImport,prepareExchangeImport:mfPrepareExchangeImport,prepareLegacyImport:mfPrepareLegacyImport,prepareBackupImport:mfPrepareBackupImport,cancelPendingImport:mfCancelPendingImport,confirmPendingImport:mfConfirmPendingImport,exportExchange:mfExportExchange});
 
 /* ============================================================
+   v42: Dedicated Library History tab
+   - Library activity log moved out of Library
+   - Undo/Redo controls moved to Library History
+   ============================================================ */
+
+/* ============================================================
    v37: Simkl JSON + bulk library tools + activity + undo/redo
    ============================================================ */
 S.librarySelection=S.librarySelection||{};
@@ -4760,7 +4772,13 @@ function mfBatchDelete(){const ids=mfSelectedIds();if(!ids.length)return;mfBegin
 function mfClearCategory(id){const cat=S.categories.find(c=>c.id===id);if(!cat)return;const n=S.library.filter(i=>i.categoryId===id).length;if(!n){showToast('That category is already empty');return;}mfBegin('Clear category',cat.name+' · '+n+' titles');S.library=S.library.filter(i=>i.categoryId!==id);mfCommit('Clear category',cat.name+' · '+n+' titles');render();showToast(cat.name+' cleared');}
 function mfLifetime(){const completed=new Set((S.library||[]).filter(i=>i.status==='completed').map(i=>i.id));let episodes=0,chapters=0,issues=0,movies=0,minutes=0;for(const s of S.sessions||[]){if(s.status==='skipped')continue;const n=Math.max(0,Number(s.actualAmount)||0);minutes+=Math.max(0,Number(s.minutes)||0);if(s.unit==='episodes')episodes+=n;else if(s.unit==='chapters')chapters+=n;else if(s.unit==='issues')issues+=n;else if(s.unit==='movies')movies+=n;}return {completed:completed.size,episodes,chapters,issues,movies,minutes};}
 function mfAchievementsHtml(){const a=mfLifetime();return `<div class="card" style="margin-bottom:24px"><div class="section-label">LIFETIME ACHIEVEMENTS</div><div class="mf-achievements"><div class="mf-achievement"><b>${a.completed.toLocaleString()}</b><small>Completed titles</small></div><div class="mf-achievement"><b>${a.episodes.toLocaleString()}</b><small>Episodes watched</small></div><div class="mf-achievement"><b>${a.movies.toLocaleString()}</b><small>Movies completed / logged</small></div><div class="mf-achievement"><b>${a.chapters.toLocaleString()}</b><small>Chapters read</small></div><div class="mf-achievement"><b>${a.issues.toLocaleString()}</b><small>Issues read</small></div><div class="mf-achievement"><b>${Math.round(a.minutes).toLocaleString()}</b><small>Minutes consumed</small></div></div></div>`;}
-function mfActivityHtml(){const rows=(S.activityLog||[]).slice(0,100).map(x=>`<div class="mf-activity-row"><div class="mf-activity-time">${new Date(x.timestamp).toLocaleString()}</div><div><b>${escapeHtml(x.action)}</b>${x.detail?`<div class="hint">${escapeHtml(x.detail)}</div>`:''}</div></div>`).join('')||'<div class="empty-state">No library activity recorded yet.</div>';return `<div class="card" style="margin-top:22px"><div class="section-label">LIBRARY ACTIVITY LOG</div><div class="mf-activity">${rows}</div></div>`;}
+function mfActivityHtml(){const rows=(S.activityLog||[]).slice(0,1000).map(x=>`<div class="mf-activity-row"><div class="mf-activity-time">${new Date(x.timestamp).toLocaleString()}</div><div><b>${escapeHtml(x.action)}</b>${x.detail?`<div class="hint">${escapeHtml(x.detail)}</div>`:''}</div></div>`).join('')||'<div class="empty-state">No library activity recorded yet.</div>';return `<div class="card"><div class="section-label">LIBRARY CHANGE LOG</div><div class="mf-activity" style="max-height:none">${rows}</div></div>`;}
+function renderLibraryHistory(){
+  const undoCount=(S.undoStack||[]).length, redoCount=(S.redoStack||[]).length;
+  return `<div class="view-head"><div><h1>Library History</h1><p>Review library changes and restore tracked operations.</p></div></div>
+  <div class="mf-batchbar" style="margin-bottom:18px"><div class="mf-undo-group"><button class="btn btn-sm" onclick="App.undoChange()" ${undoCount?'':'disabled'}>↶ Undo</button><button class="btn btn-sm" onclick="App.redoChange()" ${redoCount?'':'disabled'}>↷ Redo</button></div><span class="hint">${undoCount} undo step${undoCount===1?'':'s'} · ${redoCount} redo step${redoCount===1?'':'s'}</span></div>
+  ${mfActivityHtml()}`;
+}
 function mfBatchBar(){const n=mfSelectedIds().length;return `<div class="mf-batchbar"><label style="display:flex;gap:7px;align-items:center"><input class="mf-select" type="checkbox" onchange="App.selectVisibleLibrary(this.checked)"> Select visible</label><b>${n} selected</b><div class="spacer"></div><select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${S.categories.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select><button class="btn btn-sm" onclick="App.clearLibrarySelection()">Clear selection</button><button class="btn btn-sm btn-danger" ${n?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button></div>`;}
 function mfEnhanceLibraryDom(){if(S.view!=='library')return;document.querySelectorAll('.item-row').forEach(row=>{if(row.querySelector('[data-mf-select]'))return;const del=[...row.querySelectorAll('button')].find(b=>(b.getAttribute('onclick')||'').includes('deleteLibraryItem'));const m=(del?.getAttribute('onclick')||'').match(/deleteLibraryItem\('([^']+)'\)/);if(!m)return;const id=m[1],cb=document.createElement('input');cb.type='checkbox';cb.className='mf-select';cb.dataset.mfSelect=id;cb.checked=!!S.librarySelection?.[id];cb.addEventListener('change',()=>mfToggleSelect(id,cb.checked));row.insertBefore(cb,row.firstChild);});const count=document.querySelector('.mf-batchbar b');if(count)count.textContent=mfSelectedIds().length+' selected';}
 
@@ -4771,11 +4789,11 @@ if(processed%250===0){updateImportProgress(processed,total,added,updated,0,`Proc
 }normalizeSeasonalLibraryItems();mfCommit('Simkl JSON import',`${added} added, ${updated} updated, ${historyAdded} history groups`);updateImportProgress(total,total,added,updated,0,'Saving imported data…');await saveState();finishImportProgress(true,'Simkl import successful',`${added.toLocaleString()} titles added, ${updated.toLocaleString()} updated, ${historyAdded.toLocaleString()} timestamped history groups imported.`);render();}catch(e){console.error(e);if(S.undoStack?.length&&S.undoStack[S.undoStack.length-1]?.action==='Simkl JSON import'){const x=S.undoStack.pop();mfRestoreCore(x.before);}finishImportProgress(false,'Simkl import failed',e.message||'Could not read this Simkl JSON backup.');}}
 
 const mfBaseRenderLibrary=renderLibrary;
-renderLibrary=function(){let h=mfBaseRenderLibrary();h=h.replace('<div class="section-label">OVERVIEW',mfBatchBar()+'<div class="section-label">OVERVIEW');const catTools=`<div class="card" style="margin-bottom:22px"><div class="section-label">CATEGORY MAINTENANCE</div><div style="display:flex;gap:8px;flex-wrap:wrap">${S.categories.map(c=>`<button class="btn btn-sm" onclick="App.clearCategoryLibrary('${c.id}')">Clear ${c.icon} ${escapeHtml(c.name)}</button>`).join('')}</div><div class="hint" style="margin-top:9px">Clears titles only from the chosen category. History stays intact and the action can be undone.</div></div>`;const end=h.lastIndexOf('</div>');if(end>0)h=h.slice(0,end)+catTools+mfActivityHtml()+h.slice(end);return h;};
+renderLibrary=function(){let h=mfBaseRenderLibrary();h=h.replace('<div class="section-label">OVERVIEW',mfBatchBar()+'<div class="section-label">OVERVIEW');const catTools=`<div class="card" style="margin-bottom:22px"><div class="section-label">CATEGORY MAINTENANCE</div><div style="display:flex;gap:8px;flex-wrap:wrap">${S.categories.map(c=>`<button class="btn btn-sm" onclick="App.clearCategoryLibrary('${c.id}')">Clear ${c.icon} ${escapeHtml(c.name)}</button>`).join('')}</div><div class="hint" style="margin-top:9px">Clears titles only from the chosen category. History stays intact and the action can be undone from Library History.</div></div>`;const end=h.lastIndexOf('</div>');if(end>0)h=h.slice(0,end)+catTools+h.slice(end);return h;};
 const mfBaseRenderStats=renderStats;
 renderStats=function(){let h=mfBaseRenderStats();const needle='<div class="view-head">';const p=h.indexOf('</div>',h.indexOf(needle));return p>=0?h.slice(0,p+6)+mfAchievementsHtml()+h.slice(p+6):mfAchievementsHtml()+h;};
 const mfBaseRenderHistory=renderHistory;
-renderHistory=function(){let h=mfBaseRenderHistory();h=h.replace(/\$\{S\.sessions\.length[^}]+\}/g,'');h=h.replace('<div class="lib-toolbar">',`<div class="mf-batchbar"><div class="mf-undo-group"><button class="btn btn-sm" onclick="App.undoChange()" ${(S.undoStack||[]).length?'':'disabled'}>↶ Undo</button><button class="btn btn-sm" onclick="App.redoChange()" ${(S.redoStack||[]).length?'':'disabled'}>↷ Redo</button></div><span class="hint">Undo/redo restores both History and associated Library progress for tracked v37 actions.</span></div><div class="lib-toolbar">`);return h;};
+renderHistory=function(){let h=mfBaseRenderHistory();h=h.replace(/\$\{S\.sessions\.length[^}]+\}/g,'');return h;};
 const mfBaseRenderView=renderView;renderView=function(){mfBaseRenderView();setTimeout(mfEnhanceLibraryDom,0);};
 
 Object.assign(App,{importSimklJson:mfImportSimklJson,toggleLibrarySelect:mfToggleSelect,selectVisibleLibrary:mfSelectVisible,clearLibrarySelection:mfClearSelection,batchLibraryStatus:mfBatchStatus,batchLibraryPriority:mfBatchPriority,batchLibraryCategory:mfBatchCategory,batchDeleteLibrary:mfBatchDelete,clearCategoryLibrary:mfClearCategory,undoChange:mfUndo,redoChange:mfRedo});
