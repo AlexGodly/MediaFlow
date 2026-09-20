@@ -1,14 +1,96 @@
 # MediaFlow
 
-**A media consumption rotation system that helps you decide what type of media to consume next — without deciding the actual title for you.**
+**A media consumption rotation system that helps you decide what type of media to consume next — without taking control of the actual title away from you.**
 
-MediaFlow is a personal media library, consumption tracker, and intelligent rotation scheduler built around a simple idea:
+MediaFlow is a personal media library, consumption tracker, intelligent rotation scheduler, statistics dashboard, and progression system created by **Alex Godly**.
 
-> **The app decides what kind of media I should consume next. I decide what I actually want to watch or read.**
+Its central idea is simple:
 
-Instead of becoming another watchlist with hundreds or thousands of titles sitting untouched, MediaFlow tries to help you actually make progress through your library while maintaining variety.
+> **MediaFlow decides what type of media comes next. You decide what you actually want to watch or read.**
 
-It supports anime, seasonal anime, TV series, movies, anime movies, manga, manhwa/manhua, Western comics, other animation, and custom categories.
+Instead of becoming another watchlist with thousands of titles sitting untouched, MediaFlow uses your real consumption history to maintain variety, surface neglected categories, reduce overuse, track progress, and gradually move you through your entire media library.
+
+---
+
+# MediaFlow v46 — Progression & Cloud Recovery
+
+v46 is a reliability-focused release built around one principle:
+
+> **Your MediaFlow data should always produce a consistent scheduler, XP total, level, statistics state, and cloud state — including after an import or recovery.**
+
+The underlying scheduler and intended XP earning rules remain intact. v46 strengthens how those systems are recalculated, synchronized, restored, and displayed.
+
+## What v46 adds
+
+### Calculate XP Now
+
+The **Leveling & XP** settings now include **Calculate XP now**.
+
+This is a manual recovery/reconciliation tool that forces MediaFlow to process the current Library and consumption history, refresh progression data, and update XP/level displays.
+
+It is designed for situations such as:
+
+* importing an older backup;
+* restoring a large library and history;
+* recovering sessions whose historical XP was not stored correctly;
+* forcing the Menu and Statistics progression displays to refresh;
+* validating progression after data restoration.
+
+The operation uses a dedicated progress popup so large MediaFlow datasets can visibly move through the recovery process rather than appearing frozen.
+
+### Sync Now
+
+Cloud settings now include **Sync now**.
+
+This performs an explicit synchronization pass instead of requiring the user to wait for normal background cloud persistence.
+
+The sync workflow refreshes the current MediaFlow state, reconciles relevant progression data, refreshes scheduler-dependent state, and synchronizes the resulting state with the connected cloud account.
+
+A dedicated progress popup communicates the stages of the operation.
+
+### XP Recovery for Imported History
+
+Older or damaged data can contain legitimate consumption sessions without usable stored XP.
+
+v46 improves progression recovery so those sessions can contribute to progression again where their consumption data is sufficient to calculate XP.
+
+Existing valid stored session XP is preserved rather than arbitrarily replaced.
+
+This is particularly important for large backups where the Library and History survived but progression metadata did not.
+
+### Progression Reconciliation After Import
+
+Importing MediaFlow data now has a clearer progression recovery path:
+
+**Import data → normalize/reconcile progression → calculate level → refresh UI → persist corrected state.**
+
+XP and level are not intended to become disconnected from the restored MediaFlow data.
+
+The Menu/sidebar and Statistics views use the same progression source so they remain consistent.
+
+### More Complete Backups
+
+v46 expands progression-aware backup behavior so future backups preserve the state needed to restore MediaFlow more faithfully.
+
+The goal is not merely to restore titles. A MediaFlow backup should preserve the user's broader MediaFlow journey, including the information needed for progression recovery.
+
+### Cloud-State Safety
+
+v46 strengthens the cloud workflow around synchronization and recovery.
+
+Cloud state should be hydrated and reconciled deliberately rather than allowing an empty/default browser state to become the authoritative state during initialization.
+
+Manual synchronization is also available when the user wants an explicit full sync.
+
+### Scheduler Refresh After Data Changes
+
+The scheduler remains the established MediaFlow balancing scheduler.
+
+v46 does **not** replace its scoring model.
+
+Instead, v46 makes sure scheduler-dependent state is refreshed after major data changes such as imports, recovery operations, and explicit synchronization.
+
+The scheduler continues to account for signals such as category weight, neglect, recent consumption, repetition, consecutive usage, saturation, seasonal priority, controlled randomness, and category availability.
 
 ---
 
@@ -16,119 +98,44 @@ It supports anime, seasonal anime, TV series, movies, anime movies, manga, manhw
 
 I consume a lot of different kinds of media.
 
-The problem wasn't finding things to watch or read.
+The problem wasn't finding things to watch or read. The problem was deciding **what to consume next**.
 
-The problem was deciding **what to consume next**.
+When a library becomes large, it is easy to watch the same kind of content repeatedly, ignore other categories for weeks, spend more time choosing than consuming, keep adding titles without progressing through existing ones, and eventually become overwhelmed by the backlog.
 
-When your library becomes large, you can easily end up:
+Traditional watchlist applications are useful for tracking titles, but that is not the exact problem MediaFlow is designed to solve.
 
-* watching the same type of content repeatedly;
-* ignoring another category for weeks or months;
-* spending more time choosing something than actually consuming it;
-* constantly adding titles without finishing existing ones;
-* forgetting where you left off;
-* abandoning parts of your backlog;
-* getting bored because you keep consuming similar content;
-* feeling overwhelmed by a massive library.
+Instead of saying:
 
-Traditional watchlist applications are useful for tracking titles, but they generally don't solve this particular problem.
+> Watch this exact anime next.
 
-I didn't want an algorithm to tell me:
+MediaFlow can say:
 
-> Watch *this exact anime* next.
-
-I wanted something that could instead tell me:
-
-> 🎯 **NEXT TASK: SEASONAL ANIME**
+> 🎯 **NEXT TASK: SEASONAL ANIME**  
 > Watch 4 episodes from any seasonal anime.
 
-I can then choose whatever I feel like watching.
+You remain free to decide which eligible titles satisfy that task.
 
-For example:
-
-* One Piece — 1 episode
-* Detective Conan — 3 episodes
-
-After logging those four episodes, MediaFlow may rotate me to something completely different:
-
-> 🎯 **NEXT TASK: MANGA**
-> Read 20 chapters.
-
-The scheduler controls the **rotation**.
-
-I keep control over the **content**.
-
-That became MediaFlow.
+The scheduler controls the **rotation**. You control the **content**.
 
 ---
 
-# What Problem Does It Solve?
+# Supported Media
 
-MediaFlow sits somewhere between a media tracker, backlog manager, habit system, and rotation scheduler.
+Default categories include:
 
-Its purpose is to reduce **decision fatigue** while preventing one type of media from dominating everything else.
+| Category | Default Unit |
+| --- | --- |
+| 🔴 Seasonal Anime | Episodes |
+| 🟢 Anime Backlog | Episodes |
+| 📺 TV Series | Episodes |
+| 🎨 Other Animation | Episodes |
+| 🎥 Movies | Movies |
+| 🎞️ Anime Movies | Movies |
+| 📖 Manga | Chapters |
+| 📚 Manhwa / Manhua | Chapters |
+| 📰 Western Comics | Issues |
 
-Instead of asking:
-
-> "What should I watch?"
-
-you only need to answer:
-
-> "What title from this category do I feel like consuming?"
-
-MediaFlow handles the first decision.
-
-You handle the second.
-
-The system also keeps track of categories that have been neglected, recently overused, or are due for attention.
-
-The goal isn't to consume everything as quickly as possible.
-
-The goal is to create a sustainable flow through your entire media library.
-
----
-
-# Core Philosophy
-
-MediaFlow follows four main principles.
-
-### 1. Choose the category, not the title
-
-MediaFlow's scheduler primarily decides the type of media you should consume.
-
-You retain freedom over the actual title.
-
-### 2. Rotate instead of bingeing one category forever
-
-Recent activity affects future recommendations so that the same category doesn't constantly dominate the rotation.
-
-### 3. Give neglected media another chance
-
-Categories you haven't consumed for a while gradually become more important to the scheduler.
-
-### 4. Track progress without turning entertainment into work
-
-Statistics, XP, levels, streaks, history, and achievements provide progression while the actual choice of what to watch or read remains yours.
-
----
-
-# Default Media Categories
-
-MediaFlow includes:
-
-| Category           | Default Unit |
-| ------------------ | ------------ |
-| 🔴 Seasonal Anime  | Episodes     |
-| 🟢 Anime Backlog   | Episodes     |
-| 📺 TV Series       | Episodes     |
-| 🎨 Other Animation | Episodes     |
-| 🎥 Movies          | Movies       |
-| 🎞️ Anime Movies   | Movies       |
-| 📖 Manga           | Chapters     |
-| 📚 Manhwa / Manhua | Chapters     |
-| 📰 Western Comics  | Issues       |
-
-Categories can be enabled, disabled, edited, weighted, or supplemented with custom categories.
+Custom categories can also be created.
 
 ---
 
@@ -136,477 +143,275 @@ Categories can be enabled, disabled, edited, weighted, or supplemented with cust
 
 The scheduler is the core of MediaFlow.
 
-It considers multiple signals instead of simply selecting categories randomly.
+It uses multiple signals rather than blindly choosing a random category. These include category weight, time since last consumption, neglect, recent consumption, repetition, consecutive usage, saturation, seasonal priority, randomness, and availability.
 
-These include:
+Category health can be represented as **Healthy**, **Due**, **Neglected**, or **Overused**.
 
-* category weight;
-* time since the category was last consumed;
-* neglect;
-* recent consumption;
-* repetition;
-* consecutive category usage;
-* saturation;
-* seasonal priority;
-* randomness;
-* category availability.
+MediaFlow uses multiple consumption windows to compare actual category usage against the balance implied by category weights. Recent repetition and consecutive-category behavior can reduce a category's score, while neglected or under-consumed categories can gain priority.
 
-Categories can be classified as:
+Controlled randomness prevents the system from becoming completely predictable.
 
-**Healthy** — the category is being consumed at a reasonable rate.
-
-**Due** — it hasn't received attention recently and should begin moving up the rotation.
-
-**Neglected** — it has been ignored long enough that MediaFlow should prioritize it.
-
-**Overused** — you've consumed a lot of it recently and should probably rotate elsewhere.
-
-MediaFlow can also explain why a category has its current status and what action would help balance the rotation.
+The result is designed to sit between pure randomness and a rigid schedule.
 
 ---
 
 # Task Generation
 
-MediaFlow generates consumption tasks such as:
+MediaFlow generates category-level consumption tasks such as:
 
-> **Seasonal Anime**
-> Watch 4 episodes.
+> **Seasonal Anime — 4 episodes**
 
-or:
+> **Manga — 20 chapters**
 
-> **Manga**
-> Read 20 chapters.
+> **Movies — 1 movie**
 
-or:
+Suggested quantities can adapt while preserving the category's configured target behavior.
 
-> **Movies**
-> Watch 1 movie.
+Users can complete a task using whichever eligible titles they want.
 
-Tasks contain a category and suggested consumption amount.
+**Give me something else** rotates away from the current category for the next selection rather than permanently blacklisting it.
 
-You can complete the task using whichever eligible titles you want.
+**Skip** abandons the current task.
 
-You can also rotate or skip tasks when necessary.
+---
+
+# Optional Exact-Title Recommendations
+
+MediaFlow's default philosophy is category-first recommendation.
+
+An optional setting allows MediaFlow to choose the exact Library title as well.
+
+When enabled, title scoring can consider factors such as priority, status, progress, completion ratio, seasonal relevance, eligibility, and controlled randomness.
+
+When disabled, MediaFlow chooses the category and amount while the user chooses the title.
 
 ---
 
 # Library Management
 
-MediaFlow contains its own media library.
-
-Titles can store information such as:
+Library titles can store information including:
 
 * title;
 * category;
 * status;
 * priority;
 * progress;
-* total episodes/chapters/issues;
-* rating;
+* total episodes, chapters, issues, or equivalent units;
+* personal rating;
+* cover URL and cover source;
+* estimated minutes;
+* tags;
 * source;
-* external IDs;
-* timestamps and imported metadata where available.
+* external IDs and imported metadata where available.
 
-Library statuses support different stages such as planned, active, paused/dropped states, and completed titles.
+Statuses include stages such as **Planned**, **Active**, **Paused**, **Completed**, and **Dropped**.
 
-Progress is displayed as consumed progress against the known total where available.
+The Library supports search, filters, pagination, editing, deletion, bulk selection, batch status/priority/category changes, and category clearing.
 
----
-
-# Bulk Library Management
-
-The latest MediaFlow library supports multi-selection.
-
-You can select multiple titles and perform batch operations including:
-
-* change status;
-* change priority;
-* move titles to another category;
-* delete multiple titles;
-* select visible titles;
-* clear the current selection.
-
-Entire individual categories can also be emptied without deleting the rest of the library.
-
-This makes managing very large imported libraries significantly easier.
+Deleting a Library entry does not automatically erase historical consumption logs.
 
 ---
 
-# Consumption Logging
+# Seasonal & Backlog Workflow
 
-After completing a task, MediaFlow records the activity.
+Seasonal Anime and Anime Backlog have dedicated behavior.
 
-Logs can contain information including:
+Backlog logging searches backlog titles.
+
+Seasonal logging can work with Seasonal and Backlog titles, allowing an appropriate backlog title to be promoted into Seasonal when selected.
+
+When a seasonal title reaches its final known episode, MediaFlow can move it back to Anime Backlog while preserving completed progress and status information.
+
+Completed titles are excluded from normal logging suggestions.
+
+---
+
+# Consumption Logging & History
+
+A MediaFlow session can record:
 
 * category;
 * amount consumed;
-* selected title;
+* selected title or titles;
 * minutes;
 * timestamp;
-* completion information.
+* completion information;
+* notes;
+* XP information where applicable.
 
-These sessions feed back into the scheduler.
+Consumption history feeds back into the scheduler, Statistics, streaks, category health, XP, and lifetime summaries.
 
-That means MediaFlow's future rotation changes based on what you've actually been consuming.
+Logging can automatically update Library progress.
 
----
-
-# History
-
-MediaFlow maintains a history of consumption activity.
-
-Instead of your progress disappearing after a task is completed, previous sessions can be reviewed later.
-
-The history contributes to:
-
-* statistics;
-* category health;
-* XP;
-* streaks;
-* consumption trends;
-* historical summaries.
+Typed titles that do not yet exist can be created as Library entries during the logging workflow.
 
 ---
 
-# Activity Log
+# XP & Leveling
 
-MediaFlow v37 also introduces a broader library activity log.
+MediaFlow includes a configurable XP and leveling system.
 
-It records important library operations such as:
+XP is tied to the MediaFlow data rather than being treated as an unrelated decorative counter.
 
-* titles added;
-* titles edited;
-* titles deleted;
-* status changes;
-* category changes;
-* priority changes;
-* batch operations;
-* imports;
-* consumption logs;
-* undo operations;
-* redo operations.
+Consumption XP can use:
 
-This provides a clearer record of what has happened to the library itself, not only what media was consumed.
+* time consumed;
+* media units consumed;
+* the unit type;
+* category rotation health.
 
----
+Default unit bonuses distinguish episodes, chapters, issues, and movies.
 
-# Undo & Redo
+Rotation health can modify consumption XP so neglected or due categories can be rewarded differently from already overused categories.
 
-Major library operations can be undone.
+Additional progression can come from supported Library actions such as title additions and title completion.
 
-MediaFlow keeps snapshots of important library state before changes and allows supported operations to be reversed.
+Level is derived from lifetime XP using MediaFlow's level curve. The Menu/sidebar and Statistics should therefore represent the same underlying progression.
 
-Redo allows an undone operation to be applied again.
+## Imported progression
 
-Undo and redo operations are themselves represented in the activity history.
+v46 specifically improves imported progression.
 
-This is particularly useful when working with large libraries or batch editing many titles at once.
+Valid stored XP is preserved. Historical sessions with missing or unusable XP can be reconstructed where the underlying log contains enough consumption information.
+
+The recovery process is designed to be repeatable without simply awarding the same historical event again every time an import or calculation is performed.
+
+The **Calculate XP now** control gives the user an explicit way to force this reconciliation.
 
 ---
 
 # Statistics
 
-MediaFlow turns consumption history into useful statistics instead of only storing raw logs.
+MediaFlow turns consumption history into a broader view of media activity.
 
-Statistics include information around:
+Statistics cover areas such as:
 
 * total consumption;
-* time spent;
+* total time;
 * category activity;
-* weekly activity;
+* weekly and monthly activity;
 * historical trends;
 * category balance;
 * completion activity;
 * consumption heatmaps;
 * monthly recaps;
 * completion timelines;
-* "On This Day" history;
-* lifetime activity.
+* On This Day history;
+* lifetime activity;
+* XP and level progression;
+* streaks.
 
-The purpose of statistics isn't only to show numbers.
-
-They help explain how your media habits change over time.
-
----
-
-# XP & Leveling
-
-MediaFlow includes a configurable leveling system.
-
-XP can be earned through media consumption and library progress.
-
-Different units can award different amounts of XP, including:
-
-* episodes;
-* chapters;
-* issues;
-* movies;
-* completed titles.
-
-The scheduler's category health can also influence XP through rotation multipliers.
-
-For example, consuming something from a neglected category can be rewarded differently from continuing to consume an already overused category.
-
-The leveling system can therefore reward both **consumption** and **healthy rotation**.
+v46 emphasizes consistency between the progression shown in Statistics and the progression shown in the main interface.
 
 ---
 
-# Lifetime Achievements
+# Lifetime Activity & Achievements
 
-MediaFlow v37 adds lifetime counters for your overall MediaFlow journey.
+MediaFlow tracks lifetime activity across the Library and History, including values such as completed titles, episodes watched, chapters read, comic issues read, movies watched, and total consumption time.
 
-These include accumulated values such as:
-
-* completed titles;
-* episodes watched;
-* chapters read;
-* comic issues read;
-* movies watched;
-* total consumption time.
-
-These values are calculated across the library and consumption history rather than representing only the current session.
+Lifetime achievements provide another representation of long-term MediaFlow progress.
 
 ---
 
-# Day Streak
+# Imports
 
-MediaFlow tracks consecutive days of activity.
+MediaFlow supports multiple ways to populate a large Library.
 
-The streak provides a lightweight way to see how consistently you're making progress through your library.
+## MyAnimeList
 
----
+MyAnimeList XML data can be imported, and supported MAL synchronization workflows can update anime/manga data page by page.
 
-# Stopwatch
+## Simkl
 
-A built-in stopwatch can track how long you're actively consuming media.
+Simkl JSON backups can provide supported anime, television, movie, status, progress, rating, external-ID, and timestamped history information where that information exists in the source backup.
 
-You can:
+## CSV
 
-* start;
-* pause;
-* reset;
-* use the recorded time when logging a session.
+Supported CSV workflows can be used for Library data, and History can be exported to CSV.
 
-This is especially useful for media where runtime isn't predictable, such as manga or comics.
+## MediaFlow JSON
 
----
+MediaFlow's own JSON backup format is the most complete restoration format because it can preserve MediaFlow-specific Library, History, settings, progression-related, and application-state information.
 
-# MyAnimeList Import
+v46 improves the progression recovery path after these backups are imported.
 
-MediaFlow supports importing a MyAnimeList XML export.
-
-This allows an existing anime or manga collection to populate the MediaFlow library instead of requiring every title to be entered manually.
-
-Imported information can be used to update existing titles as well as create new ones.
+MediaFlow follows an update-before-create philosophy where possible and does not intentionally fabricate source data that was never available.
 
 ---
 
-# Simkl Import
+# Cloud Accounts & Synchronization
 
-MediaFlow v37 supports importing a **Simkl JSON backup**.
+The cloud build uses **Supabase Auth** for account access and private per-user MediaFlow state.
 
-MediaFlow can process Simkl data for:
+Cloud-capable state includes the Library, History, settings, profile-related information, progression-related state, and other MediaFlow application data.
 
-* anime;
-* TV shows;
-* movies;
-* statuses;
-* progress;
-* ratings;
-* external IDs;
-* timestamped watch history when available.
+Later MediaFlow versions introduced queued/merged cloud persistence and compression-oriented handling for large states.
 
-This allows the free periodic Simkl backup file to act as an import source without requiring a live Simkl connection.
+v46 adds an explicit **Sync now** workflow for manual full synchronization and strengthens recovery behavior around cloud initialization.
 
----
+The objective is simple:
 
-# Import Philosophy
+> A valid cloud MediaFlow state should not be silently replaced by an empty/default browser state during login or hydration.
 
-MediaFlow does not need to replace services such as MyAnimeList or Simkl.
-
-They can remain the services that hold or synchronize your traditional lists.
-
-MediaFlow uses imported data to solve a different problem:
-
-**What part of my media library should receive my attention next?**
-
----
-
-# Cloud Accounts
-
-MediaFlow supports accounts backed by Supabase.
-
-An account allows MediaFlow state such as the following to be stored in the cloud:
-
-* library;
-* consumption history;
-* settings;
-* progress;
-* profile information.
-
-This allows the same MediaFlow workspace to be accessed across devices.
-
-Cloud state also uses a local safety copy while writes are being processed.
-
----
-
-# Account & Profile
-
-Users can manage account information from inside MediaFlow.
-
-Profile functionality includes support for:
-
-* display name;
-* email;
-* password;
-* profile picture;
-* account management;
-* account deletion.
+Normal cloud saving remains automatic. **Sync now** exists when an explicit reconciliation/synchronization pass is wanted.
 
 ---
 
 # Backups
 
-Media libraries can represent hundreds or thousands of hours of tracking, so protecting the data matters.
+Media libraries can represent thousands of titles and many years of consumption history, so backup integrity matters.
 
-MediaFlow includes backup functionality for preserving application state.
+MediaFlow supports manual and automatic local backups where the browser APIs allow them.
 
-Backup-related functionality includes:
+Backup options include configurable intervals and folder-based backup workflows using supported browser file-system APIs.
 
-* manual backups;
-* configurable backup behavior;
-* backup snapshots;
-* restoration;
-* local backup persistence where supported.
+v46 makes progression preservation and recovery a more explicit part of the backup/import lifecycle.
 
 ---
 
-# Appearance
+# Cover Art
 
-MediaFlow supports multiple visual themes, including:
+MediaFlow v45 rebuilt automatic cover searching into a multi-provider system.
 
-* Dark;
-* Light;
-* AMOLED.
+Supported provider paths include Jikan for anime/manga, TVmaze for television, Open Library for supported reading material, and fallback providers where applicable.
 
-The interface uses a responsive card-based layout designed around a media dashboard rather than a traditional spreadsheet-style tracker.
+Search results can present multiple possible matches so the user can choose the correct title.
 
-The desktop sidebar can also be resized.
+Covers are stored as external URLs rather than embedding large Base64 images into the MediaFlow state.
 
----
-
-# Customization
-
-A major goal of MediaFlow is to avoid forcing everyone into the same consumption habits.
-
-Settings expose controls for areas such as:
-
-* daily consumption target;
-* tasks per day;
-* intensity;
-* category targets;
-* category weights;
-* category enable/disable state;
-* neglect behavior;
-* repetition penalties;
-* consecutive repetition penalties;
-* saturation;
-* seasonal bonuses;
-* scheduler randomness;
-* leveling;
-* XP values;
-* rotation XP multipliers;
-* appearance;
-* backups.
-
-Sections can be restored to their defaults without necessarily resetting the entire application.
+Manual cover URLs remain supported.
 
 ---
 
-# Why Not Just Use a Random Picker?
+# Activity History, Undo & Redo
 
-Because completely random selection doesn't understand your consumption history.
+MediaFlow includes broader Library activity tracking for important operations such as additions, edits, deletions, status/category/priority changes, batch operations, imports, consumption logs, undo operations, and redo operations.
 
-Imagine you have watched anime for several days while ignoring manga.
-
-A purely random picker might continue selecting anime.
-
-MediaFlow can take the imbalance into account.
-
-At the same time, the scheduler includes controlled randomness so the rotation doesn't become completely predictable.
-
-The result is intended to sit between:
-
-**pure randomness**
-
-and
-
-**rigid scheduling**.
+Supported Library operations can be undone and redone using saved state snapshots.
 
 ---
 
-# Why Not Recommend Exact Titles?
+# Stopwatch
 
-Because sometimes you already know what you feel like watching.
+A built-in stopwatch can be started, paused, reset, and used to populate logging minutes.
 
-If an application says:
-
-> Watch *Anime X*.
-
-but you're not in the mood for it, the recommendation becomes another obstacle.
-
-MediaFlow instead says:
-
-> Watch some **Anime Backlog**.
-
-Now you can choose whichever backlog anime fits your mood.
-
-It reduces decision fatigue without removing choice.
+This is especially useful for media where runtime is not predictable.
 
 ---
 
-# Example Workflow
+# Appearance & Customization
 
-Suppose your library contains:
+MediaFlow supports **Dark**, **Light**, and **AMOLED** themes.
 
-* 150 anime;
-* 40 seasonal anime;
-* 80 TV shows;
-* 300 manga;
-* 50 movies;
-* 25 anime movies;
-* 60 manhwa;
-* 40 comics.
+Settings expose controls for areas including daily targets, tasks per day, intensity, category targets and weights, enabled categories, scheduler tuning, seasonal behavior, randomness, leveling, XP values, rotation XP multipliers, appearance, and backups.
 
-You open MediaFlow.
-
-It generates:
-
-> 🔴 **Seasonal Anime — 4 episodes**
-
-You watch four episodes across whichever seasonal shows you want and log them.
-
-MediaFlow records the activity and updates the scheduler.
-
-Your next task might become:
-
-> 📖 **Manga — 20 chapters**
-
-Later:
-
-> 🎥 **Movies — 1 movie**
-
-Then:
-
-> 🟢 **Anime Backlog — 5 episodes**
-
-Over time, every part of the library gets opportunities to return to the rotation.
+The application uses a responsive dashboard-oriented interface and remains largely self-contained.
 
 ---
 
 # Technology
 
-MediaFlow is primarily a browser-based application built with:
+MediaFlow is primarily built with:
 
 * HTML;
 * CSS;
@@ -615,54 +420,40 @@ MediaFlow is primarily a browser-based application built with:
 * browser storage APIs;
 * Progressive Web App support.
 
-The application has intentionally remained lightweight and largely self-contained.
+The project intentionally remains lightweight and can be deployed as a static browser application when its required configuration is provided.
 
 ---
 
-# Running MediaFlow
-
-MediaFlow is a browser application.
-
-For the cloud version, Supabase configuration is required for authentication and cloud persistence.
-
-The application can also be deployed as a static web application once the required configuration and supporting files are provided.
-
----
-
-# Privacy & Data
+# Privacy & Security
 
 Cloud builds use Supabase authentication and per-user MediaFlow state.
 
-When self-hosting MediaFlow, you control the Supabase project used by the application.
+Browser builds should contain only the appropriate public/publishable Supabase client credentials.
 
-Never expose a Supabase service-role or other secret server credential in the client application. Browser builds should only contain the appropriate public/publishable client credentials.
+**Never place a Supabase service-role key or other server secret inside the client HTML.**
+
+When self-hosting MediaFlow, the owner controls the Supabase project used by the application.
 
 ---
 
 # Project Evolution
 
-MediaFlow began as a relatively simple media rotation tool.
+MediaFlow evolved from a category rotation tool into a complete personal media-consumption system.
 
-Over time it evolved into a much larger personal media system with:
+Major milestones include:
 
-* cloud accounts;
-* profiles;
-* library management;
-* progress tracking;
-* intelligent scheduling;
-* category health;
-* statistics;
-* themes;
-* backups;
-* MAL importing;
-* Simkl importing;
-* XP and leveling;
-* achievements;
-* bulk editing;
-* activity history;
-* undo/redo.
+* **v6** — seasonal logging and custom suggestions;
+* **v7** — Supabase cloud accounts and cross-device state;
+* **v9–v11** — history controls, backup-state improvements, and cloud-era refinements;
+* **v14** — expanded Library filters and priority controls;
+* **v17–v18** — MAL retry improvements, stopwatch, theme hardening, account deletion, and MAL progress fixes;
+* **v20** — cloud save queue, merging, and compression-oriented architecture;
+* **v37** — Simkl JSON import, bulk Library operations, category clearing, activity history, undo/redo, and lifetime achievements;
+* **v44** — personal ratings, cover metadata, and cover-related progression;
+* **v45** — rebuilt multi-provider automatic cover-art system and Final Edition packaging;
+* **v46** — XP recovery, progression reconciliation, manual Calculate XP Now, manual Sync Now, import recovery, cloud-state safety, and scheduler/progression refresh hardening.
 
-The central idea, however, has remained the same:
+Despite the expansion, the original philosophy remains:
 
 > **MediaFlow decides what type of media comes next. You decide the title.**
 
@@ -670,9 +461,13 @@ The central idea, however, has remained the same:
 
 # Current Release
 
-**MediaFlow v37**
+## MediaFlow v46 — Progression & Cloud Recovery
 
-The current release expands MediaFlow's large-library workflow with Simkl JSON importing, bulk library operations, category clearing, library activity history, undo/redo, and lifetime achievements.
+v46 focuses on protecting and rebuilding the relationship between the user's actual MediaFlow data and the systems derived from it.
+
+The release improves XP recovery from historical logs, progression reconciliation after imports, Menu/Statistics consistency, progression-aware backups, explicit cloud synchronization, explicit XP recalculation, and scheduler refresh behavior after major state changes.
+
+The scheduler's established balancing model and the intended normal XP earning rules remain part of the same MediaFlow system rather than being replaced by a new algorithm.
 
 ---
 
@@ -680,17 +475,16 @@ The current release expands MediaFlow's large-library workflow with Simkl JSON i
 
 Created by **Alex Godly**.
 
-MediaFlow started as a solution to my own media backlog and decision-fatigue problem and gradually grew into a complete media rotation and consumption management system.
+MediaFlow started as a solution to my own media-backlog and decision-fatigue problem and gradually grew into a complete media rotation and consumption management system.
 
 ---
 
 # License
 
-No license is specified here yet.
+No license is specified yet.
 
-If this repository is intended to be open source, add a `LICENSE` file and update this section with the chosen license.
+If the repository is intended to be open source, add a `LICENSE` file and update this section with the selected license.
 
 ---
 
 **MediaFlow — consume everything, without having to decide everything.**
-
