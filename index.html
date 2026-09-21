@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow vby Alex Godly</title>
+<title>MediaFlow by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -289,7 +289,7 @@ input[type=text],input[type=number],select,textarea{
 input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--flow-dim);}
 
 /* ============================================================
-   MediaFlow v57 — Designed Dropdown System
+   MediaFlow v63 — Designed Dropdown System
    Every native select in MediaFlow receives the same polished,
    theme-aware control treatment without changing its behavior.
    ============================================================ */
@@ -653,6 +653,37 @@ input[type=checkbox]{width:16px; height:16px; accent-color:var(--flow);}
 
   .view-title{font-size:22px;}
 
+  /* v63: fixed mobile navigation + Statistics responsiveness */
+  .mobile-tabbar{justify-content:stretch;gap:2px;overflow:visible;}
+  .mtab{flex:1 1 0;min-width:0;padding:6px 2px;font-size:9px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+  .mtab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mtab svg{width:18px;height:18px;}
+  .mobile-more-wrap{position:relative;flex:1 1 0;min-width:0;display:flex;}
+  .mobile-more-wrap>.mtab{width:100%;}
+  .mobile-more-menu{position:absolute;right:2px;bottom:calc(100% + 10px);width:min(260px,calc(100vw - 20px));padding:8px;background:var(--panel-raised);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.38);display:grid;gap:4px;z-index:80;}
+  .mobile-more-menu.hide{display:none!important;}
+  .mobile-more-item{display:flex;align-items:center;gap:11px;width:100%;padding:12px;border:0;border-radius:10px;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;}
+  .mobile-more-item.active,.mobile-more-item:hover{background:var(--panel);color:var(--flow);}
+  .mobile-more-item svg{width:19px;height:19px;flex:0 0 19px;}
+  .stats-level-progress-track,.stats-level-track{min-width:0!important;max-width:100%!important;width:100%;}
+  .chart-svg{min-width:0!important;width:100%!important;height:auto;min-height:180px;}
+  .record-row{gap:12px;align-items:flex-start;}
+  .record-row .k{min-width:0;flex:1;}
+  .record-row .v{min-width:0;max-width:58%;text-align:right;overflow-wrap:anywhere;}
+  .bal-bar-row{grid-template-columns:minmax(0,1fr)!important;gap:6px!important;}
+  .bal-bar-label,.bal-bar-val{min-width:0;overflow-wrap:anywhere;}
+  .bal-bar-val{text-align:left!important;}
+
+}
+
+@media (max-width: 560px){
+  .main{padding-left:12px;padding-right:12px;padding-bottom:94px;}
+  .grid-3{grid-template-columns:1fr;}
+  .card,.stat-box{min-width:0;max-width:100%;overflow:hidden;}
+  .profile-stat-hero{min-width:0;flex-direction:column;}
+  .stats-level-meta,.stats-level-caption{flex-wrap:wrap;}
+  .record-row{flex-direction:column;gap:4px;}
+  .record-row .v{max-width:100%;text-align:left;}
 }
 
 .hide{display:none !important;}
@@ -747,7 +778,162 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 @media(max-width:900px){.v50-title-feature .v50-cover{width:104px;height:147px}.v50-onthisday .v50-cover{width:84px;height:119px}.library-cover-thumb{width:58px!important;height:82px!important}.library-view-cards .library-cover-thumb{width:104px!important;height:147px!important}}
 @media(max-width:700px){.v50-title-feature{align-items:flex-start;gap:14px;padding:12px}.v50-title-feature .v50-cover{width:96px;height:136px}.v50-title-feature b{font-size:16px}.v50-onthisday{align-items:flex-start}.v50-onthisday .v50-cover{width:80px;height:113px}.v50-timeline-row .v50-cover{width:70px;height:99px}.library-cover-thumb{width:60px!important;height:85px!important}.library-view-cards .library-cover-thumb{width:96px!important;height:136px!important}.mf-batchbar{overflow-x:auto}.log-suggestion{gap:8px}.v50-log-title .v50-cover{width:52px;height:74px}}
 @media(max-width:430px){.v50-title-feature .v50-cover{width:88px;height:124px}.v50-onthisday .v50-cover{width:74px;height:105px}.v50-timeline-row .v50-cover{width:64px;height:91px}.library-cover-thumb{width:56px!important;height:79px!important}.library-view-cards .library-cover-thumb{width:88px!important;height:124px!important}}
+
+/* MediaFlow v63 — responsive searchable Batch Log */
+.batch-log-list{display:flex;flex-direction:column;gap:10px}.batch-log-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,.8fr) auto;gap:12px;align-items:end;margin:0;padding:14px;overflow:visible}.batch-title-field,.batch-number-fields .field{margin:0}.batch-number-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.batch-search-wrap{position:relative}.batch-suggestions{position:relative;z-index:8}.batch-selected-title{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:7px;font-size:12px;color:var(--text-dim)}.batch-selected-title span{color:var(--text-mute)}.batch-counts-note{grid-column:1/-1}.batch-log-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.batch-log-actions .hint{margin-left:auto}.batch-search-empty{padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:5px;color:var(--text-mute);font-size:12px;background:var(--panel-raised)}
+@media(max-width:900px){.batch-log-row{grid-template-columns:minmax(0,1fr) auto}.batch-title-field{grid-column:1/-1}.batch-number-fields{grid-column:1/2}.batch-remove{grid-column:2/3}.batch-log-meta .field-row{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.batch-log-row{display:flex;flex-direction:column;align-items:stretch;padding:12px;gap:10px}.batch-number-fields{display:grid;grid-template-columns:1fr 1fr;width:100%}.batch-remove{width:100%}.batch-log-meta .field-row{display:block}.batch-log-actions{display:grid;grid-template-columns:1fr 1fr}.batch-log-actions .btn{width:100%}.batch-log-actions .btn-primary{grid-column:1/-1;grid-row:1}.batch-log-actions .hint{grid-column:1/-1;margin:2px 0 0;text-align:center}.batch-log-row input,.batch-log-meta input{width:100%;min-width:0}.batch-suggestions .log-suggestion{align-items:center;min-height:72px}.batch-suggestions .v50-log-title .v50-cover{width:42px;height:60px}}
 </style>
+
+<style id="v64-mobile-nav-classic-design">
+/* MediaFlow v64 — Classic Mobile Bottom Menu Design
+   Keeps v63's responsive navigation logic and More overflow menu, while
+   restoring the pre-v63 bottom-bar visual styling. */
+@media (max-width:860px){
+  .mobile-tabbar{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:50;
+    background:#12162299;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-top:1px solid var(--border-soft);
+    padding:8px 6px calc(env(safe-area-inset-bottom) + 8px) 6px;
+    justify-content:space-around;
+    gap:0;
+    overflow:visible;
+  }
+  .mobile-tabbar>.mtab,
+  .mobile-more-wrap{
+    flex:1 1 0;
+    min-width:0;
+  }
+  .mtab{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    color:var(--text-mute);
+    font-size:10px;
+    font-weight:700;
+    padding:5px 8px;
+    border-radius:9px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mtab.active{color:var(--flow);}
+  .mtab svg{width:19px;height:19px;}
+  .mtab span{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mobile-more-wrap{position:relative;display:flex;}
+  .mobile-more-wrap>.mtab{width:100%;}
+}
+</style>
+
+
+<style id="v65-mobile-nav-screenshot-design">
+/* MediaFlow v65 — Screenshot-matched mobile navigation
+   Visual-only refinement. v63/v64 navigation safety and More fallback remain. */
+@media (max-width:860px){
+  .main{padding-bottom:112px;}
+
+  .mobile-tabbar{
+    display:flex;
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:50;
+    align-items:stretch;
+    justify-content:space-around;
+    gap:0;
+    padding:10px 2px calc(env(safe-area-inset-bottom) + 10px);
+    background:color-mix(in srgb,var(--bg) 94%,transparent);
+    border-top:1px solid var(--border-soft);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    overflow:visible;
+  }
+
+  .mobile-tabbar>.mtab,
+  .mobile-more-wrap{
+    flex:1 1 0;
+    min-width:0;
+  }
+
+  .mtab{
+    appearance:none;
+    -webkit-appearance:none;
+    border:0;
+    outline:0;
+    background:transparent!important;
+    box-shadow:none!important;
+    min-height:72px;
+    padding:4px 1px 2px;
+    border-radius:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    color:var(--text-mute);
+    font-size:11px;
+    line-height:1;
+    font-weight:700;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .mtab:hover,.mtab:focus,.mtab:active{background:transparent!important;}
+  .mtab.active{color:var(--flow);}
+
+  .mtab svg{
+    width:27px;
+    height:27px;
+    stroke-width:1.8;
+    flex:0 0 auto;
+  }
+
+  .mtab span{
+    display:block;
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align:center;
+  }
+
+  .mobile-more-wrap{
+    position:relative;
+    display:flex;
+    align-items:stretch;
+  }
+  .mobile-more-wrap>.mtab{width:100%;height:100%;}
+
+  .mobile-more-menu{
+    right:6px;
+    bottom:calc(100% + 12px);
+  }
+}
+
+@media (max-width:430px){
+  .main{padding-bottom:104px;}
+  .mtab{min-height:66px;font-size:9.5px;gap:5px;}
+  .mtab svg{width:24px;height:24px;}
+}
+</style>
+
 </head>
 
 <body>
@@ -1027,6 +1213,7 @@ let S = {
   logDraft: {},
 
   entryDraft: {title:'', qty:1},
+  batchDraft: {rows:[], note:'', date:''},
 
   histFilters: {category:'all', type:'all', range:'all'},
   histPage: 0,
@@ -1061,18 +1248,18 @@ let S = {
    ============================================================ */
 
 /* ============================================================
-   MediaFlow v57 — Cloud Library History Persistence
+   MediaFlow v63 — Cloud Library History Persistence
    Library History (activityLog) is now part of the canonical cloud
    snapshot and cloud/local merge path, so it follows the account
    across devices instead of starting empty on each browser.
    ============================================================ */
 /* ============================================================
-   MediaFlow v57 — Library History XP Visibility
+   MediaFlow v63 — Library History XP Visibility
    Library History entries now store the XP earned by the exact
    tracked Library transaction and render it beside the action.
    ============================================================ */
 /* ============================================================
-   MediaFlow v57 — Library History Integrity & Large-Library Fix
+   MediaFlow v63 — Library History Integrity & Large-Library Fix
    - exact Library IDs for new history events
    - no substring title guessing
    - safe exact-match migration for legacy history
@@ -1777,82 +1964,84 @@ function renderLogSuggestions(){
 }
 
 function submitLog(){
+  const t=S.currentTask;
+  const assignedCat=getCategory(t.categoryId);
+  const enteredAmount=clamp(Number(S.logDraft.amount)||0,0,999999);
+  const totalMinutes=clamp(Number(S.logDraft.minutes)||0,0,999999);
+  const entries=S.logDraft.entries||[];
+  const extra=(S.logDraft.note||'').trim();
+  const timestamp=Date.now(), sessionGroupId=uid();
 
-  const t = S.currentTask;
-
-  const cat = getCategory(t.categoryId);
-
-  const amount = clamp(Number(S.logDraft.amount)||0, 0, 999999);
-
-  const minutes = clamp(Number(S.logDraft.minutes)||0, 0, 999999);
-
-  let status = 'complete';
-
-  if(amount<=0) status='skipped';
-
-  else if(amount<t.targetMid) status='partial';
-
-  else if(amount>t.targetMid) status='over';
-
-  const entries = S.logDraft.entries||[];
-
-  const autoNote = entriesNote(entries);
-
-  const extra = (S.logDraft.note||'').trim();
-
-  const note = [autoNote, extra].filter(Boolean).join(' — ');
-
-  const healthStatus = categoryStatus(cat).status;
-  const xpCalc = calculateConsumptionXP(cat, amount, minutes, healthStatus);
-  const sess = {
-
-    id: uid(), timestamp: Date.now(), date: todayISO(),
-
-    categoryId: cat.id, targetAmount: t.targetMid, actualAmount: amount,
-
-    minutes, note, status, unit: cat.unit, xp: xpCalc.xp, healthStatus,
-    titles: entries.map(e=>({title:cleanTitle(e.title),libraryId:e.libraryId||null,qty:Number(e.qty)||0})),
-
-  };
-
-  S.sessions.push(sess);
-
-  if(S.logDraft.updateLibrary){
-
+  // v61: actual consumption and recommendation outcome are separate concepts.
+  const groups=new Map();
+  if(entries.length){
     entries.forEach(e=>{
-
-      const item = e.libraryId ? S.library.find(i=>i.id===e.libraryId) : findLibraryMatch(cat.id, e.title);
-
-      if(item){
-
-        item.progress = (item.progress||0) + (Number(e.qty)||0);
-
-        if(item.total) item.progress = Math.min(item.progress, item.total);
-
-        if(item.total && item.progress>=item.total && item.status!=='dropped'){ item.status='completed'; item.completedAt=item.completedAt||Date.now(); S.completionTimeline=S.completionTimeline||[]; if(!S.completionTimeline.some(x=>x.libraryId===item.id)){ S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt}); } }
-
-        else if(item.status==='planned') item.status='active';
-
-      }
-
+      const item=e.libraryId?S.library.find(i=>i.id===e.libraryId):null;
+      const actualCat=(item&&getCategory(item.categoryId))||assignedCat;
+      const qty=Math.max(0,Number(e.qty)||0);
+      if(!groups.has(actualCat.id)) groups.set(actualCat.id,{cat:actualCat,entries:[],amount:0,weight:0});
+      const g=groups.get(actualCat.id); g.entries.push(e); g.amount+=qty;
+      g.weight+=qty*Math.max(1,Number(actualCat.minutesPerUnit)||1);
     });
-
-    // Seasonal titles that become completed must immediately move to the Anime Backlog.
-    normalizeSeasonalLibraryItems();
-    persistLibrary();
-
+  }else if(enteredAmount>0){
+    groups.set(assignedCat.id,{cat:assignedCat,entries:[],amount:enteredAmount,weight:Math.max(1,enteredAmount*Math.max(1,Number(assignedCat.minutesPerUnit)||1))});
   }
 
+  const grouped=[...groups.values()], totalWeight=grouped.reduce((n,g)=>n+g.weight,0)||1;
+  let minutesLeft=totalMinutes;
+  grouped.forEach((g,index)=>{
+    const actualCat=g.cat, isAssigned=actualCat.id===assignedCat.id;
+    const groupMinutes=index===grouped.length-1?minutesLeft:Math.min(minutesLeft,Math.round(totalMinutes*(g.weight/totalWeight)));
+    minutesLeft=Math.max(0,minutesLeft-groupMinutes);
+    let status='logged';
+    if(isAssigned){
+      if(g.amount<t.targetMid) status='partial';
+      else if(g.amount>t.targetMid) status='over';
+      else status='complete';
+    }
+    const healthStatus=categoryStatus(actualCat).status;
+    const xpCalc=calculateConsumptionXP(actualCat,g.amount,groupMinutes,healthStatus);
+    const note=[entriesNote(g.entries),extra].filter(Boolean).join(' — ');
+    S.sessions.push({
+      id:uid(),timestamp,date:todayISO(),categoryId:actualCat.id,
+      assignedCategoryId:assignedCat.id,assignedTargetAmount:t.targetMid,sessionGroupId,
+      followedAssignedCategory:isAssigned,targetAmount:isAssigned?t.targetMid:g.amount,
+      actualAmount:g.amount,minutes:groupMinutes,note,status,unit:actualCat.unit,
+      xp:xpCalc.xp,healthStatus,source:'recommendation',
+      titles:g.entries.map(e=>({title:cleanTitle(e.title),libraryId:e.libraryId||null,qty:Number(e.qty)||0}))
+    });
+  });
+
+  // If none of the actual consumption belonged to the recommended category,
+  // preserve the recommendation itself as Skipped without adding fake consumption.
+  if(!grouped.some(g=>g.cat.id===assignedCat.id && g.amount>0)){
+    S.sessions.push({id:uid(),timestamp,date:todayISO(),categoryId:assignedCat.id,
+      assignedCategoryId:assignedCat.id,assignedTargetAmount:t.targetMid,sessionGroupId,
+      followedAssignedCategory:false,targetAmount:t.targetMid,actualAmount:0,minutes:0,
+      note:'Recommendation not followed',status:'skipped',unit:assignedCat.unit,xp:0,
+      healthStatus:categoryStatus(assignedCat).status,source:'recommendation',titles:[]});
+  }
+
+  if(S.logDraft.updateLibrary){
+    entries.forEach(e=>{
+      const item=e.libraryId?S.library.find(i=>i.id===e.libraryId):findLibraryMatch(assignedCat.id,e.title);
+      if(item){
+        item.progress=(item.progress||0)+(Number(e.qty)||0);
+        if(item.total) item.progress=Math.min(item.progress,item.total);
+        if(item.total&&item.progress>=item.total&&item.status!=='dropped'){
+          item.status='completed'; item.completedAt=item.completedAt||Date.now();
+          S.completionTimeline=S.completionTimeline||[];
+          if(!S.completionTimeline.some(x=>x.libraryId===item.id)) S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt});
+        }else if(item.status==='planned') item.status='active';
+      }
+    });
+    normalizeSeasonalLibraryItems(); persistLibrary();
+  }
   persistSessions();
-
-  S.currentTask = generateTask([cat.id]);
-
-  S.logging = false;
-
-  persistTask(); render();
-
+  const consumedCategoryIds=grouped.filter(g=>g.amount>0).map(g=>g.cat.id);
+  S.currentTask=generateTask(consumedCategoryIds.length?consumedCategoryIds:[assignedCat.id]);
+  S.logging=false; persistTask(); render();
 }
-
 
 
 /* ============================================================
@@ -1994,9 +2183,13 @@ const ICONS = {
 
   libraryhistory:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/><path d="M12 7v5l4 2"/></svg>`,
 
+  batch:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M18 16v6M15 19h6"/></svg>`,
+
   stats:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>`,
 
   profile:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`,
+
+  more:`<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>`,
 
   settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
 
@@ -2011,6 +2204,8 @@ const NAV_ITEMS = [
   {id:'libraryhistory', label:'Library History'},
 
   {id:'history', label:'History'},
+
+  {id:'batch', label:'Batch Log'},
 
   {id:'stats', label:'Statistics'},
 
@@ -2093,6 +2288,36 @@ function renderLevelBlock(){
   </div>`;
 }
 
+const MOBILE_PRIMARY_NAV=['dashboard','library','history','batch','stats'];
+const MOBILE_MORE_NAV=['libraryhistory','profile','settings'];
+function renderMobileTabs(){
+  const primary=MOBILE_PRIMARY_NAV.map(id=>NAV_ITEMS.find(n=>n.id===id)).filter(Boolean);
+  const extra=MOBILE_MORE_NAV.map(id=>NAV_ITEMS.find(n=>n.id===id)).filter(Boolean);
+  const moreActive=extra.some(n=>n.id===S.view);
+  return `${primary.map(n=>`<button type="button" class="mtab ${S.view===n.id?'active':''}" onclick="App.mobileNav('${n.id}')" aria-label="${escapeHtml(n.label)}">${ICONS[n.id]}<span>${escapeHtml(n.label)}</span></button>`).join('')}
+    <div class="mobile-more-wrap">
+      <button type="button" class="mtab ${moreActive?'active':''}" onclick="App.toggleMobileMore(event)" aria-label="More pages" aria-expanded="false">${ICONS.more}<span>More</span></button>
+      <div id="mobile-more-menu" class="mobile-more-menu hide">
+        ${extra.map(n=>`<button type="button" class="mobile-more-item ${S.view===n.id?'active':''}" onclick="App.mobileNav('${n.id}')">${ICONS[n.id]}<span>${escapeHtml(n.label)}</span></button>`).join('')}
+      </div>
+    </div>`;
+}
+function toggleMobileMore(ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const menu=document.getElementById('mobile-more-menu');
+  if(!menu)return;
+  const willOpen=menu.classList.contains('hide');
+  menu.classList.toggle('hide',!willOpen);
+  const btn=menu.parentElement?.querySelector('.mtab');
+  if(btn)btn.setAttribute('aria-expanded',willOpen?'true':'false');
+}
+function mobileNav(view){
+  const menu=document.getElementById('mobile-more-menu');
+  if(menu)menu.classList.add('hide');
+  S.view=view; render();
+  try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){window.scrollTo(0,0);}
+}
+
 function renderShell(){
 
   const app = document.getElementById('app');
@@ -2153,15 +2378,7 @@ function renderShell(){
     </div>
 
     <div class="mobile-tabbar">
-
-       ${NAV_ITEMS.map(n=>` 
-
-        <div class="mtab ${S.view===n.id?'active':''}" onclick="App.setView('${n.id}')">
-
-          ${ICONS[n.id]}<span>${n.label.split(' ')[0]}</span>
-
-        </div>`).join('')}
-
+      ${renderMobileTabs()}
     </div>
 
   `;
@@ -2207,6 +2424,8 @@ function renderView(){
   else if(S.view==='libraryhistory') html = renderLibraryHistory();
 
   else if(S.view==='history') html = renderHistory();
+
+  else if(S.view==='batch') html = renderBatchLog();
 
   else if(S.view==='stats') html = renderStats();
 
@@ -2601,7 +2820,7 @@ function renderLogForm(t, cat){
 
 
 /* ============================================================
-   MediaFlow v57 — Large Library Performance Engine
+   MediaFlow v63 — Large Library Performance Engine
    ============================================================ */
 const V53_LIB={
   libraryRef:null, libraryLen:-1, libraryToken:0,
@@ -2888,6 +3107,121 @@ function renderLibrary(){
 }
 
 /* ============================================================
+   VIEW: BATCH LOG — v61
+   ============================================================ */
+function ensureBatchDraft(){
+  if(!S.batchDraft||!Array.isArray(S.batchDraft.rows)) S.batchDraft={rows:[],note:'',date:todayISO()};
+  if(!S.batchDraft.date) S.batchDraft.date=todayISO();
+}
+function addBatchRow(){
+  ensureBatchDraft();
+  S.batchDraft.rows.push({libraryId:'',query:'',qty:1,minutes:0}); render();
+}
+function removeBatchRow(i){ ensureBatchDraft(); S.batchDraft.rows.splice(i,1); render(); }
+function batchTitleCandidates(query){
+  const q=String(query||'').trim().toLocaleLowerCase();
+  if(!q) return [];
+  return S.library.filter(item=>{
+    if(!item || item.status==='dropped') return false;
+    return cleanTitle(item.title).toLocaleLowerCase().includes(q);
+  }).slice(0,10);
+}
+function updateBatchSearch(i,value){
+  ensureBatchDraft(); const r=S.batchDraft.rows[i]; if(!r)return;
+  r.query=String(value||'');
+  if(r.libraryId){
+    const selected=S.library.find(x=>x.id===r.libraryId);
+    if(!selected || cleanTitle(selected.title)!==r.query) r.libraryId='';
+  }
+  renderBatchSuggestions(i);
+}
+function renderBatchSuggestions(i){
+  const box=document.getElementById(`batch-suggestions-${i}`); if(!box)return;
+  ensureBatchDraft(); const r=S.batchDraft.rows[i]; if(!r)return;
+  const candidates=batchTitleCandidates(r.query);
+  if(!String(r.query||'').trim() || r.libraryId){ box.innerHTML=''; return; }
+  if(!candidates.length){ box.innerHTML='<div class="batch-search-empty">No matching Library titles.</div>'; return; }
+  box.innerHTML=`<div class="log-suggestion-list">${candidates.map(item=>{
+    const cat=getCategory(item.categoryId), progress=item.total!=null?`${item.progress||0}/${item.total}`:'progress unknown';
+    return `<div class="log-suggestion"><div class="v50-log-title">${typeof v50Cover==='function'?v50Cover(item):''}<div><b>${escapeHtml(cleanTitle(item.title))}</b><small>${cat?.icon||'📚'} ${escapeHtml(cat?.name||'Library')} · ${progress}</small></div></div><button class="btn btn-sm btn-ghost" type="button" onclick="App.selectBatchTitle(${i},'${item.id}')">Use</button></div>`;
+  }).join('')}</div>`;
+}
+function selectBatchTitle(i,id){
+  ensureBatchDraft(); const r=S.batchDraft.rows[i], item=S.library.find(x=>x.id===id); if(!r||!item)return;
+  const cat=getCategory(item.categoryId);
+  r.libraryId=item.id; r.query=cleanTitle(item.title); r.qty=Math.max(1,Number(r.qty)||1);
+  if(cat) r.minutes=Math.round(r.qty*(Number(cat.minutesPerUnit)||0));
+  render();
+  setTimeout(()=>document.getElementById(`batch-qty-${i}`)?.focus({preventScroll:true}),0);
+}
+function updateBatchRow(i,key,value){
+  ensureBatchDraft(); const r=S.batchDraft.rows[i]; if(!r)return;
+  if(key==='qty'){
+    r.qty=Math.max(0,Number(value)||0); const item=S.library.find(x=>x.id===r.libraryId); const cat=item&&getCategory(item.categoryId);
+    if(item&&cat) r.minutes=Math.round(r.qty*(Number(cat.minutesPerUnit)||0));
+  }else if(key==='minutes') r.minutes=Math.max(0,Number(value)||0);
+  // Do not full-render while editing numeric fields: keeps mobile keyboard/focus stable.
+  const total=document.getElementById('batch-total-summary');
+  if(total){ const mins=S.batchDraft.rows.reduce((n,x)=>n+(Number(x.minutes)||0),0); total.textContent=`${S.batchDraft.rows.length} rows · ${fmtMinutes(mins)}`; }
+}
+function clearBatchLog(){ S.batchDraft={rows:[],note:'',date:todayISO()}; render(); }
+function submitBatchLog(){
+  ensureBatchDraft();
+  const valid=S.batchDraft.rows.filter(r=>r.libraryId&&Number(r.qty)>0);
+  if(!valid.length){ showToast('Add at least one Library title with an amount.'); return; }
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(S.batchDraft.date||'')?S.batchDraft.date:todayISO();
+  const timestamp=(date===todayISO())?Date.now():(new Date(date+'T12:00:00')).getTime();
+  const groupId=uid(), note=String(S.batchDraft.note||'').trim();
+  valid.forEach(r=>{
+    const item=S.library.find(x=>x.id===r.libraryId); if(!item)return;
+    const cat=getCategory(item.categoryId), qty=Math.max(0,Number(r.qty)||0), minutes=Math.max(0,Number(r.minutes)||0);
+    const healthStatus=categoryStatus(cat).status, xpCalc=calculateConsumptionXP(cat,qty,minutes,healthStatus);
+    S.sessions.push({id:uid(),timestamp,date,categoryId:cat.id,targetAmount:qty,actualAmount:qty,minutes,
+      note,status:'logged',unit:cat.unit,xp:xpCalc.xp,healthStatus,source:'batch',batchGroupId:groupId,
+      titles:[{title:cleanTitle(item.title),libraryId:item.id,qty}]});
+    item.progress=(Number(item.progress)||0)+qty;
+    if(item.total) item.progress=Math.min(item.progress,Number(item.total)||0);
+    if(item.total&&item.progress>=item.total&&item.status!=='dropped'){
+      item.status='completed'; item.completedAt=item.completedAt||timestamp; S.completionTimeline=S.completionTimeline||[];
+      if(!S.completionTimeline.some(x=>x.libraryId===item.id)) S.completionTimeline.push({libraryId:item.id,title:cleanTitle(item.title),categoryId:item.categoryId,completedAt:item.completedAt});
+    }else if(item.status==='planned') item.status='active';
+  });
+  normalizeSeasonalLibraryItems(); persistLibrary(); persistSessions();
+  S.batchDraft={rows:[],note:'',date:todayISO()};
+  // Actual batch consumption is already in S.sessions, so all scheduler balance/health calculations see it.
+  persistTask(); showToast(`Batch logged ${valid.length} ${valid.length===1?'title':'titles'} ✓`); S.view='history'; render();
+}
+function renderBatchLog(){
+  ensureBatchDraft();
+  const rows=S.batchDraft.rows.map((r,i)=>{
+    const item=S.library.find(x=>x.id===r.libraryId), cat=item&&getCategory(item.categoryId);
+    const query=r.query!=null?r.query:(item?cleanTitle(item.title):'');
+    return `<div class="card batch-log-row">
+      <div class="batch-title-field field">
+        <label class="field-label">Title</label>
+        <div class="batch-search-wrap">
+          <input id="batch-title-${i}" type="text" autocomplete="off" value="${escapeHtml(query)}" placeholder="Type to search your entire Library…" oninput="App.updateBatchSearch(${i},this.value)" onfocus="App.renderBatchSuggestions(${i})">
+          <div id="batch-suggestions-${i}" class="batch-suggestions"></div>
+        </div>
+        ${item&&cat?`<div class="batch-selected-title">${cat.icon} <b>${escapeHtml(cleanTitle(item.title))}</b><span>${escapeHtml(cat.name)}${item.total!=null?` · ${Number(item.progress)||0}/${item.total}`:''}</span></div>`:`<small class="hint">Search across every category, then select the title you consumed.</small>`}
+      </div>
+      <div class="batch-number-fields">
+        <div class="field"><label class="field-label">Amount ${cat?`(${escapeHtml(unitLabel(cat.unit,2))})`:''}</label><input id="batch-qty-${i}" type="number" min="0" inputmode="decimal" value="${r.qty}" oninput="App.updateBatchRow(${i},'qty',this.value)"></div>
+        <div class="field"><label class="field-label">Minutes</label><input type="number" min="0" inputmode="numeric" value="${r.minutes}" oninput="App.updateBatchRow(${i},'minutes',this.value)"></div>
+      </div>
+      <button class="btn btn-danger batch-remove" onclick="App.removeBatchRow(${i})">Remove</button>
+      ${cat?`<small class="hint batch-counts-note">${cat.icon} ${escapeHtml(cat.name)} · Updates Library progress and counts toward scheduler balance, health, Statistics and XP.</small>`:''}
+    </div>`;
+  }).join('');
+  const totalMinutes=S.batchDraft.rows.reduce((n,r)=>n+(Number(r.minutes)||0),0);
+  return `<div class="view-head"><div><div class="view-title">Batch Log</div><div class="view-desc">Search your entire Library and record multiple titles at once. Every title has its own amount and time and updates its Library progress.</div></div></div>
+    <div class="card batch-log-meta"><div class="field-row"><div class="field"><label class="field-label">Consumption date</label><input type="date" value="${escapeHtml(S.batchDraft.date||todayISO())}" onchange="S.batchDraft.date=this.value"></div><div class="field"><label class="field-label">Batch note (optional)</label><input type="text" value="${escapeHtml(S.batchDraft.note||'')}" placeholder="What did you consume?" onchange="S.batchDraft.note=this.value"></div></div>
+    <div class="health-note">Batch entries use <b>Logged</b>. Their actual categories, amounts and minutes still fully count throughout MediaFlow.</div></div>
+    <div class="batch-log-list">${rows||`<div class="empty-state card"><div class="em-icon">🧾</div><div class="em-title">No batch rows yet</div><div>Add a title, search your Library, and select what you consumed.</div></div>`}</div>
+    <div class="batch-log-actions"><button class="btn" onclick="App.addBatchRow()">+ Add title</button><button class="btn btn-primary" ${S.batchDraft.rows.length?'':'disabled'} onclick="App.submitBatchLog()">Log batch</button>${S.batchDraft.rows.length?`<button class="btn btn-ghost" onclick="App.clearBatchLog()">Clear</button>`:''}<span id="batch-total-summary" class="hint">${S.batchDraft.rows.length} rows · ${fmtMinutes(totalMinutes)}</span></div>`;
+}
+
+/* ============================================================
 
    VIEW: HISTORY
 
@@ -2923,7 +3257,7 @@ function renderHistory(){
 
     const d = new Date(s.timestamp);
 
-    const labelMap = {complete:'Complete', partial:'Partial', over:'Over', skipped:'Skipped'};
+    const labelMap = {complete:'Complete', partial:'Partial', over:'Over', skipped:'Skipped', logged:'Logged'};
 
     return `<div class="hist-row">
 
@@ -2935,7 +3269,7 @@ function renderHistory(){
 
         <div class="hist-cat">${escapeHtml(cat.name)}</div>
 
-        <div class="hist-amt">${s.actualAmount} ${unitLabel(s.unit,s.actualAmount)} · ${fmtMinutes(s.minutes)} · target ${s.targetAmount}</div>
+        <div class="hist-amt">${s.actualAmount} ${unitLabel(s.unit,s.actualAmount)} · ${fmtMinutes(s.minutes)}${s.status==='logged'?'':` · target ${s.targetAmount}`}</div>${s.source==='batch'?`<div class="hist-note" style="margin-top:4px">Batch Log</div>`:''}${s.assignedCategoryId&&s.assignedCategoryId!==s.categoryId?`<div class="hist-note" style="margin-top:4px">Recommended: ${escapeHtml(getCategory(s.assignedCategoryId)?.name||'Unknown')}</div>`:''}
         ${s.status!=='skipped'?`<div class="hist-xp" style="margin-top:4px;font-size:11px;color:var(--flow);font-weight:800;">+${Math.round(sessionStoredXP(s)).toLocaleString()} XP · ${escapeHtml(xpRotationLabel(s.healthStatus||'healthy'))}</div>`:''}
 
         ${s.note? `<div class="hist-note">"${escapeHtml(s.note)}"</div>`:''}
@@ -2944,7 +3278,7 @@ function renderHistory(){
 
       <div class="hist-status" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
 
-        <span class="status-badge status-${s.status==='skipped'?'overused':s.status==='partial'?'due':s.status==='over'?'neglected':'healthy'}">${labelMap[s.status]}</span>
+        <span class="status-badge status-${s.status==='skipped'?'overused':s.status==='partial'?'due':s.status==='over'?'neglected':'healthy'}">${labelMap[s.status]||'Logged'}</span>
 
         <div style="display:flex; gap:4px;">
 
@@ -3712,7 +4046,7 @@ function sessionModalHtml(d){
 
         <select id="s-status">
 
-          ${['complete','partial','over','skipped'].map(s=>`<option value="${s}" ${d.status===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
+          ${['complete','partial','over','skipped','logged'].map(s=>`<option value="${s}" ${d.status===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}
 
         </select>
 
@@ -3818,10 +4152,12 @@ function libraryModalHtml(d){
 const App = {
 
   setView(v){ S.view=v; render(); },
+  mobileNav, toggleMobileMore,
   openProfile(){ S.profileReturnView=S.view==='profile'?'dashboard':S.view; S.view='profile'; render(); },
   backFromProfile(){ S.view=S.profileReturnView||'dashboard'; render(); },
 
   startSession, endSession, rotateTask, skipTask, openLogForm, cancelLogForm, submitLog,
+  addBatchRow, removeBatchRow, updateBatchRow, updateBatchSearch, renderBatchSuggestions, selectBatchTitle, clearBatchLog, submitBatchLog,
 
   toggleReasonDetail(){ S.showReasonDetail=!S.showReasonDetail; render(); },
 
@@ -5100,7 +5436,7 @@ const mfLoad=loadAll;loadAll=async function(){await mfLoad();const d=await rawGe
    ============================================================ */
 
 /* ============================================================
-   MediaFlow v57 — 50 Theme Collection
+   MediaFlow v63 — 50 Theme Collection
    Exactly 50 selectable themes: 49 distinct built-in palettes
    plus the existing fully customizable theme.
    ============================================================ */
@@ -5427,8 +5763,9 @@ libraryXPTotal=function(){return v44OldLibraryXPTotal()+Object.values(S.xpLedger
 
 /* Stopwatch: add the entered H:M:S to the current elapsed value. */
 function stopwatchAddTime(){if(S.stopwatch.running)return;const h=Math.max(0,Math.min(999,Number(document.getElementById('sw-hours')?.value)||0)),m=Math.max(0,Math.min(59,Number(document.getElementById('sw-minutes')?.value)||0)),sec=Math.max(0,Math.min(59,Number(document.getElementById('sw-seconds')?.value)||0));const add=Math.round((h*3600+m*60+sec)*1000);if(!add){showToast('Enter a time to add.');return;}S.stopwatch.elapsed=Math.max(0,Number(S.stopwatch.elapsed)||0)+add;S.stopwatch.resetValue=S.stopwatch.elapsed;S.stopwatch.startedAt=0;persistTask();render();showToast(`Added ${fmtStopwatch(add)} · ${fmtStopwatch(S.stopwatch.elapsed)} total ✓`);}
+function stopwatchMinusTime(){if(S.stopwatch.running)return;const h=Math.max(0,Math.min(999,Number(document.getElementById('sw-hours')?.value)||0)),m=Math.max(0,Math.min(59,Number(document.getElementById('sw-minutes')?.value)||0)),sec=Math.max(0,Math.min(59,Number(document.getElementById('sw-seconds')?.value)||0));const subtract=Math.round((h*3600+m*60+sec)*1000);if(!subtract){showToast('Enter a time to subtract.');return;}const before=Math.max(0,Number(S.stopwatch.elapsed)||0);S.stopwatch.elapsed=Math.max(0,before-subtract);S.stopwatch.resetValue=S.stopwatch.elapsed;S.stopwatch.startedAt=0;persistTask();render();showToast(`Subtracted ${fmtStopwatch(Math.min(subtract,before))} · ${fmtStopwatch(S.stopwatch.elapsed)} total ✓`);}
 const v44OldStopwatchHtml=stopwatchHtml;
-stopwatchHtml=function(){let h=v44OldStopwatchHtml();const sw=S.stopwatch||{};return h.replace('>Set time</button></div>',`>Set time</button><button class="btn" onclick="App.stopwatchAddTime()" ${sw.running?'disabled':''}>Add time</button></div>`).replace('Set any starting time, press Start, and the stopwatch continues upward from there.','Set a starting time or add the entered time repeatedly, then press Start to continue upward.');};
+stopwatchHtml=function(){let h=v44OldStopwatchHtml();const sw=S.stopwatch||{};return h.replace('>Set time</button></div>',`>Set time</button><button class="btn" onclick="App.stopwatchAddTime()" ${sw.running?'disabled':''}>Add time</button><button class="btn" onclick="App.stopwatchMinusTime()" ${sw.running?'disabled':''}>Minus time</button></div>`).replace('Set any starting time, press Start, and the stopwatch continues upward from there.','Set, add, or subtract any time to build the exact starting value you want, then press Start to continue upward.');};
 
 /* Rating + cover controls in title editor. */
 const v44OldLibraryModalHtml=libraryModalHtml;
@@ -5479,7 +5816,7 @@ renderStats=function(){let h=v44StatsBase();const rated=S.library.filter(i=>Numb
 const v44LibraryBase=renderLibrary;
 renderLibrary=function(){let h=v44LibraryBase();for(const i of S.library){const titleEsc=escapeHtml(cleanTitle(i.title));const needle=`<div class="item-title">${titleEsc} `;if(!h.includes(needle))continue;const art=i.coverUrl?`<img class="library-cover-thumb" src="${escapeHtml(i.coverUrl)}" alt="" onerror="this.style.display='none'">`:'';if(art)h=h.replace(`<div class="bal-icon" style="background:${getCategory(i.categoryId)?.color}22; color:${getCategory(i.categoryId)?.color};">${getCategory(i.categoryId)?.icon}</div>`,art+`<div class="bal-icon" style="background:${getCategory(i.categoryId)?.color}22; color:${getCategory(i.categoryId)?.color};">${getCategory(i.categoryId)?.icon}</div>`);if(Number(i.rating)>0)h=h.replace(needle,`<div class="item-title">${titleEsc} <span class="v44-rating">★ ${Number(i.rating).toFixed(1)}</span> `);}return h;};
 
-Object.assign(App,{stopwatchAddTime,previewLibraryCover:v44PreviewCover,findLibraryCover:v44FindCover,clearLibraryCover(){const i=document.getElementById('l-cover');if(i){i.value='';delete i.dataset.auto;}v44PreviewCover('');},setTimelinePage(p){S.timelinePage=Math.max(0,Number(p)||0);render();}});
+Object.assign(App,{stopwatchAddTime,stopwatchMinusTime,previewLibraryCover:v44PreviewCover,findLibraryCover:v44FindCover,clearLibraryCover(){const i=document.getElementById('l-cover');if(i){i.value='';delete i.dataset.auto;}v44PreviewCover('');},setTimelinePage(p){S.timelinePage=Math.max(0,Number(p)||0);render();}});
 
 
 /* ============================================================
@@ -5614,7 +5951,7 @@ App.exportJSON=function(){
     updateDataProgress(65,'Packing Library, History and progression…');
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v50-backup-${todayISO()}.json`);
-    finishDataProgress(true,'Export successful','Complete MediaFlow v57 backup created.');
+    finishDataProgress(true,'Export successful','Complete MediaFlow v63 backup created.');
   }catch(e){console.error(e);finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.');}},40);
 };
 
@@ -5738,7 +6075,7 @@ function render(){
 
   document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));
 
-  document.querySelectorAll('.mtab').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));
+  const mobileBar=document.querySelector('.mobile-tabbar'); if(mobileBar) mobileBar.innerHTML=renderMobileTabs();
   const accountName=document.querySelector('.account-menu-email');
   if(accountName)accountName.textContent=getDisplayName();
   const accountAvatarBtn=document.querySelector('.account-menu .account-avatar-btn');
@@ -5786,18 +6123,18 @@ setTimeout(async()=>{
       const r=v50MigrateLibraryHistoryLinks();
       if(r.linked>0) await saveState();
       if(S.view==='libraryhistory') render();
-      console.info(`MediaFlow v57: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
+      console.info(`MediaFlow v63: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
     }
-  }catch(e){console.warn('MediaFlow v57 Library History migration skipped:',e);}
+  }catch(e){console.warn('MediaFlow v63 Library History migration skipped:',e);}
 },0);
 
 
-/* MediaFlow v57
+/* MediaFlow v63
    Global dropdown styling is CSS-driven, so all current and future native
    <select> controls automatically inherit the designed theme-aware UI. */
 
 
-/* MediaFlow v57 — Large Library Performance Update
+/* MediaFlow v63 — Large Library Performance Update
    - debounced Library search
    - cached normalized title index
    - cached filter/sort results
@@ -5806,15 +6143,62 @@ setTimeout(async()=>{
    - reduced offscreen row painting */
 
 
-/* MediaFlow v57 — Library Search Focus Hotfix
+/* MediaFlow v63 — Library Search Focus Hotfix
    Debounced search now restores focus and caret after the Library DOM refresh,
    allowing uninterrupted typing while retaining v53 performance optimizations. */
 
-/* MediaFlow v57 — Platform Theme Collection
+/* MediaFlow v63 — Platform Theme Collection
 Separate MediaFlow and Platform theme selectors. Platform themes are MediaFlow palette interpretations inspired by the named services; no third-party logos/assets/layouts are copied. */
-/* MediaFlow v57 — v56 Loading Hotfix + Profile Picture URL
+/* MediaFlow v63 — v56 Loading Hotfix + Profile Picture URL
    Rebuilt from the stable v55 base. The URL-avatar feature is isolated to the
    Profile Settings action and performs no image/network work during app startup. */
+/* MediaFlow v63 — Stopwatch Full Time Adjustment
+   Adds Minus time alongside Set time and Add time. Entered H/M/S can be
+   repeatedly added or subtracted, never going below 00:00:00. The resulting
+   value becomes the reset/start value and can be started normally. */
+/* MediaFlow v63 — Actual Consumption Category Integrity
+   Logging titles from categories different from the scheduler recommendation now
+   credits History, category balance, health, XP and the next rotation to the
+   categories actually consumed. The originally assigned category is preserved
+   as metadata instead of being falsely credited as completed. Mixed-category
+   logs are split into category-correct linked session records. */
+
+/* MediaFlow v63 — Batch Logging & Recommendation Status Refinement
+   Batch Log records multiple Library titles with independent amounts/minutes and
+   feeds the same sessions-based scheduler, health, statistics, XP and progress
+   systems. Recommendation statuses now describe recommendation fulfillment only:
+   Complete / Partial / Over / Skipped. Off-category and batch consumption uses
+   Logged, while a fully missed recommendation receives a zero-consumption Skipped
+   record so it is never falsely credited. */
+
+/* MediaFlow v63 — Dedicated Batch Logging
+   Adds a visible Batch Log navigation page with multi-title rows, automatic
+   Library category detection, independent amount/minutes, date and note,
+   Logged status for non-recommendation consumption, Library progress and
+   completion updates, XP, History, Statistics, and scheduler balance/health
+   integration. Recommendation statuses remain Complete/Partial/Over/Skipped. */
+
+/* MediaFlow v63 — Searchable Responsive Batch Logging
+   Batch Log now uses type-to-search Library title selection across all categories,
+   responsive phone/tablet cards with no horizontal row scrolling, and explicitly
+   updates each selected title's Library progress on submission. */
+
+/* MediaFlow v63 — Mobile Navigation & Statistics Responsiveness
+   Replaces the overcrowded mobile tab bar with five always-visible primary tabs
+   plus a More menu for Library History, Profile and Settings. Statistics charts,
+   cards, progress tracks and record rows now shrink/wrap cleanly on phones and
+   tablets without pushing Settings off-screen or requiring horizontal scrolling. */
+/* MediaFlow v64 — Classic Mobile Bottom Menu Design
+   Preserves every v63 responsiveness/navigation fix while restoring the
+   original pre-v63 visual design for the mobile bottom menu. The More fallback
+   remains available when all destination tabs cannot fit safely. */
+
+/* MediaFlow v65 — Mobile Bottom Navigation Visual Restoration
+   Restyles the mobile bottom navigation to match the supplied reference:
+   large outline icons above full labels on a clean flat bottom bar, with the
+   active destination highlighted by the current theme accent. The v63
+   responsive navigation logic and More fallback remain intact. */
+
 </script>
 
 </body>
