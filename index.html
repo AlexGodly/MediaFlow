@@ -289,7 +289,7 @@ input[type=text],input[type=number],select,textarea{
 input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--flow-dim);}
 
 /* ============================================================
-   MediaFlow v52 — Designed Dropdown System
+   MediaFlow v54 — Designed Dropdown System
    Every native select in MediaFlow receives the same polished,
    theme-aware control treatment without changing its behavior.
    ============================================================ */
@@ -722,6 +722,10 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .mf-activity-xp{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:800;color:var(--text)}
 .mf-activity-xp strong{font-size:13px}
 
+
+/* v53 — large Library paint optimization */
+.item-row{content-visibility:auto;contain-intrinsic-size:72px;}
+
 </style>
 
 
@@ -1028,18 +1032,18 @@ let S = {
    ============================================================ */
 
 /* ============================================================
-   MediaFlow v52 — Cloud Library History Persistence
+   MediaFlow v54 — Cloud Library History Persistence
    Library History (activityLog) is now part of the canonical cloud
    snapshot and cloud/local merge path, so it follows the account
    across devices instead of starting empty on each browser.
    ============================================================ */
 /* ============================================================
-   MediaFlow v52 — Library History XP Visibility
+   MediaFlow v54 — Library History XP Visibility
    Library History entries now store the XP earned by the exact
    tracked Library transaction and render it beside the action.
    ============================================================ */
 /* ============================================================
-   MediaFlow v52 — Library History Integrity & Large-Library Fix
+   MediaFlow v54 — Library History Integrity & Large-Library Fix
    - exact Library IDs for new history events
    - no substring title guessing
    - safe exact-match migration for legacy history
@@ -1267,14 +1271,14 @@ async function loadAll(){
 S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
 S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
 S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
-S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.activityLog=Array.isArray(data.activityLog)?data.activityLog:[];S.migrations=(data.migrations&&typeof data.migrations==='object')?data.migrations:{};S.loading=false;
+S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.activityLog=Array.isArray(data.activityLog)?data.activityLog:[];S.migrations=(data.migrations&&typeof data.migrations==='object')?data.migrations:{};v53InvalidateLibraryCache();v53InvalidateSessionCache();S.loading=false;
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
 
 function persistCategories(){ return saveState(); }
 
-function persistLibrary(){ return saveState(); }
+function persistLibrary(){ v53InvalidateLibraryCache(); return saveState(); }
 
 function persistSessions(){ return saveState(); }
 
@@ -2566,40 +2570,154 @@ function renderLogForm(t, cat){
 
    ============================================================ */
 
+
+/* ============================================================
+   MediaFlow v54 — Large Library Performance Engine
+   ============================================================ */
+const V53_LIB={
+  libraryRef:null, libraryLen:-1, libraryToken:0,
+  searchIndex:[], overview:null,
+  sessionRef:null, sessionLen:-1, sessionTail:'', lastTouched:new Map(),
+  filterKey:'', filtered:[]
+};
+let V53_LIB_SEARCH_TIMER=null;
+
+function v53InvalidateLibraryCache(){
+  V53_LIB.libraryRef=null;
+  V53_LIB.libraryLen=-1;
+  V53_LIB.libraryToken++;
+  V53_LIB.searchIndex=[];
+  V53_LIB.overview=null;
+  V53_LIB.filterKey='';
+  V53_LIB.filtered=[];
+}
+function v53InvalidateSessionCache(){
+  V53_LIB.sessionRef=null;
+  V53_LIB.sessionLen=-1;
+  V53_LIB.sessionTail='';
+  V53_LIB.lastTouched=new Map();
+}
+function v53EnsureLibraryIndex(){
+  if(V53_LIB.libraryRef===S.library && V53_LIB.libraryLen===S.library.length && V53_LIB.searchIndex.length===S.library.length) return;
+  V53_LIB.libraryRef=S.library;
+  V53_LIB.libraryLen=S.library.length;
+  V53_LIB.searchIndex=S.library.map((item,index)=>({
+    item,index,
+    title:cleanTitle(item.title),
+    search:cleanTitle(item.title).toLocaleLowerCase()
+  }));
+  V53_LIB.overview=null;
+  V53_LIB.filterKey='';
+  V53_LIB.filtered=[];
+}
+function v53LibraryOverview(){
+  v53EnsureLibraryIndex();
+  if(V53_LIB.overview)return V53_LIB.overview;
+  const byCat=new Map(S.categories.map(c=>[c.id,{items:0,done:0,knownDone:0,total:0,unknown:false}]));
+  let totalDone=0,totalAll=0;
+  for(const i of S.library){
+    let x=byCat.get(i.categoryId);
+    if(!x){x={items:0,done:0,knownDone:0,total:0,unknown:false};byCat.set(i.categoryId,x);}
+    const progress=Math.max(0,Number(i.progress)||0);
+    const total=Number(i.total)||0;
+    x.items++; x.done+=progress;
+    if(total>0){
+      x.knownDone+=Math.min(progress,total);
+      x.total+=total;
+      totalDone+=Math.min(progress,total);
+      totalAll+=total;
+    }else x.unknown=true;
+  }
+  V53_LIB.overview={byCat,totalDone,totalAll,overallPct:totalAll>0?Math.round(totalDone/totalAll*100):0};
+  return V53_LIB.overview;
+}
+function v53EnsureLastTouchedIndex(){
+  const tail=S.sessions.length ? `${S.sessions[S.sessions.length-1]?.id||''}:${S.sessions[S.sessions.length-1]?.timestamp||0}` : '';
+  if(V53_LIB.sessionRef===S.sessions && V53_LIB.sessionLen===S.sessions.length && V53_LIB.sessionTail===tail)return;
+  const map=new Map();
+  // Newest wins. Index by stable Library ID first, with normalized title as a legacy fallback.
+  for(let n=S.sessions.length-1;n>=0;n--){
+    const ss=S.sessions[n];
+    const ts=Number(ss?.timestamp)||0;
+    for(const t of (ss?.titles||[])){
+      if(t?.libraryId && !map.has('id:'+t.libraryId))map.set('id:'+t.libraryId,ts);
+      const title=cleanTitle(t?.title||'').toLocaleLowerCase();
+      if(title && !map.has('title:'+title))map.set('title:'+title,ts);
+    }
+  }
+  V53_LIB.sessionRef=S.sessions;
+  V53_LIB.sessionLen=S.sessions.length;
+  V53_LIB.sessionTail=tail;
+  V53_LIB.lastTouched=map;
+}
+function v53LastTouched(item){
+  v53EnsureLastTouchedIndex();
+  return V53_LIB.lastTouched.get('id:'+item.id) ||
+         V53_LIB.lastTouched.get('title:'+cleanTitle(item.title).toLocaleLowerCase()) || 0;
+}
+function v53FilteredLibrary(catFilter,statusFilter,priorityFilter,q){
+  v53EnsureLibraryIndex();
+  const nq=String(q||'').trim().toLocaleLowerCase();
+  const key=[V53_LIB.libraryToken,S.library.length,catFilter,statusFilter,priorityFilter,nq].join('|');
+  if(V53_LIB.filterKey===key)return V53_LIB.filtered;
+  let rows=V53_LIB.searchIndex;
+  if(catFilter!=='all')rows=rows.filter(x=>x.item.categoryId===catFilter);
+  if(statusFilter!=='all')rows=rows.filter(x=>x.item.status===statusFilter);
+  if(priorityFilter!=='all')rows=rows.filter(x=>x.item.priority===priorityFilter);
+  if(nq)rows=rows.filter(x=>x.search.includes(nq));
+  const rank={high:0,medium:1,low:2};
+  rows=rows.slice().sort((a,b)=>
+    (rank[a.item.priority]??1)-(rank[b.item.priority]??1) ||
+    a.title.localeCompare(b.title)
+  );
+  V53_LIB.filterKey=key;
+  V53_LIB.filtered=rows.map(x=>x.item);
+  return V53_LIB.filtered;
+}
+function v53DebouncedLibrarySearch(value){
+  S.histFilters.libSearch=value;
+  S.libPage=0;
+  clearTimeout(V53_LIB_SEARCH_TIMER);
+  V53_LIB_SEARCH_TIMER=setTimeout(()=>{
+    if(S.view!=='library')return;
+
+    // render() replaces the Library DOM, including the search input.
+    // Remember whether the user is actively typing and restore the new
+    // input's focus/caret immediately after the debounced refresh.
+    const active=document.activeElement;
+    const wasTyping=!!(active && active.classList && active.classList.contains('lib-search'));
+    const caret=wasTyping && active.selectionStart!=null ? active.selectionStart : String(S.histFilters.libSearch||'').length;
+    const end=wasTyping && active.selectionEnd!=null ? active.selectionEnd : caret;
+
+    render();
+
+    if(wasTyping){
+      const next=document.querySelector('.lib-search');
+      if(next){
+        next.focus({preventScroll:true});
+        try{ next.setSelectionRange(Math.min(caret,next.value.length),Math.min(end,next.value.length)); }catch(e){}
+      }
+    }
+  },180);
+}
+
 function renderLibrary(){
 
   const cats = S.categories;
+  const ov=v53LibraryOverview();
 
   const overviewRows = cats.map(cat=>{
-
-    const items = S.library.filter(i=>i.categoryId===cat.id);
-
-    // Always count consumed/read progress, even when a title has no known total.
-    const done = items.reduce((a,i)=>a+Math.max(0,Number(i.progress)||0),0);
-    const knownItems = items.filter(i=>i.total!=null && Number(i.total)>0);
-    const knownDone = knownItems.reduce((a,i)=>a+Math.min(Math.max(0,Number(i.progress)||0),Number(i.total)||0),0);
-    const total = knownItems.reduce((a,i)=>a+(Number(i.total)||0),0);
-    const hasUnknownTotal = items.some(i=>i.total==null || Number(i.total)<=0);
-    const pct = total>0 && !hasUnknownTotal ? Math.round(knownDone/total*100) : 0;
-    const progressText = items.length===0 ? '0 / -' : (hasUnknownTotal || total<=0 ? `${done} / -` : `${done} / ${total} (${pct}%)`);
-
+    const x=ov.byCat.get(cat.id)||{items:0,done:0,knownDone:0,total:0,unknown:false};
+    const pct=x.total>0 && !x.unknown ? Math.round(x.knownDone/x.total*100) : 0;
+    const progressText=x.items===0?'0 / -':(x.unknown||x.total<=0?`${x.done} / -`:`${x.done} / ${x.total} (${pct}%)`);
     return `<div class="overview-row">
-
       <div class="ov-name"><span>${cat.icon}</span> ${escapeHtml(cat.name)}</div>
-
       <div class="ov-track"><div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:linear-gradient(90deg, ${cat.color}88, ${cat.color});"></div></div></div>
-
       <div class="ov-num">${progressText}</div>
-
     </div>`;
-
   }).join('');
 
-  const totalDone = S.library.filter(i=>i.total).reduce((a,i)=>a+Math.min(i.progress,i.total),0);
-
-  const totalAll = S.library.filter(i=>i.total).reduce((a,i)=>a+i.total,0);
-
-  const overallPct = totalAll>0 ? Math.round(totalDone/totalAll*100) : 0;
+  const overallPct=ov.overallPct;
 
   let itemsHtml, pagerHtml='';
 
@@ -2617,19 +2735,9 @@ function renderLibrary(){
 
     const statusFilter = S.histFilters.libStatus || 'all';
 
-    const q = (S.histFilters.libSearch||'').trim().toLowerCase();
-
-    let items = S.library;
-
-    if(catFilter!=='all') items = items.filter(i=>i.categoryId===catFilter);
-
-    if(statusFilter!=='all') items = items.filter(i=>i.status===statusFilter);
+    const q = (S.histFilters.libSearch||'').trim();
     const priorityFilter = S.histFilters.libPriority || 'all';
-    if(priorityFilter!=='all') items = items.filter(i=>i.priority===priorityFilter);
-
-    if(q) items = items.filter(i=>cleanTitle(i.title).toLowerCase().includes(q));
-
-    items = items.slice().sort((a,b)=>(b.priority||'medium').localeCompare(a.priority||'medium') || cleanTitle(a.title).localeCompare(cleanTitle(b.title)));
+    const items = v53FilteredLibrary(catFilter,statusFilter,priorityFilter,q);
 
     const PAGE = 50;
 
@@ -2645,10 +2753,10 @@ function renderLibrary(){
 
       const cat = getCategory(i.categoryId);
 
-      const lastTitleSession = [...S.sessions].reverse().find(ss=>ss.titles?.some(tt=>tt.libraryId===i.id || cleanTitle(tt.title).toLowerCase()===cleanTitle(i.title).toLowerCase()));
-      const ageMs = lastTitleSession ? Math.max(0,Date.now()-lastTitleSession.timestamp) : Math.max(0,Date.now()-(Number(i.createdAt)||Date.now()));
+      const lastTouchedTs=v53LastTouched(i);
+      const ageMs = lastTouchedTs ? Math.max(0,Date.now()-lastTouchedTs) : Math.max(0,Date.now()-(Number(i.createdAt)||Date.now()));
       const ageDays = Math.floor(ageMs/86400000);
-      const ageLabel = lastTitleSession ? (ageDays===0?'Touched today':`${ageDays}d untouched`) : (ageDays===0?'Added today':`Never consumed · ${ageDays}d old`);
+      const ageLabel = lastTouchedTs ? (ageDays===0?'Touched today':`${ageDays}d untouched`) : (ageDays===0?'Added today':`Never consumed · ${ageDays}d old`);
       const aging = cat.id==='backlog' ? `<span class="aging-badge status-${ageDays>=30?'neglected':ageDays>=7?'due':'healthy'}" title="Time since this backlog item was last consumed">${escapeHtml(ageLabel)}</span>` : '';
       return `<div class="item-row">
         <div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
@@ -2712,7 +2820,7 @@ function renderLibrary(){
 
       <div class="lib-filters">
 
-        <input type="text" placeholder="Search titles…" value="${escapeHtml(S.histFilters.libSearch||'')}" class="lib-search" oninput="App.setLibFilter('libSearch', this.value, true)">
+        <input type="text" placeholder="Search titles…" value="${escapeHtml(S.histFilters.libSearch||'')}" class="lib-search" oninput="App.searchLibrary(this.value)">
 
         <select onchange="App.setLibFilter('libCategory', this.value)">
 
@@ -3785,17 +3893,10 @@ const App = {
 
   setHistPage(page){ S.histPage=Math.max(0, Number(page)||0); render(); },
 
+  searchLibrary(v){ v53DebouncedLibrarySearch(v); },
   setLibFilter(k,v,live){
     S.histFilters[k]=v;
-    if(k==='libSearch' && live){
-      const input=document.activeElement;
-      const pos=input && input.selectionStart!=null ? input.selectionStart : String(v).length;
-      render();
-      const next=document.querySelector('.lib-search');
-      if(next){ next.focus(); try{ next.setSelectionRange(pos,pos); }catch(e){} }
-      return;
-    }
-    if(k==='libSearch') S.libPage=0;
+    S.libPage=0;
     render();
   },
   setLibPage(page){
@@ -4960,7 +5061,7 @@ const mfLoad=loadAll;loadAll=async function(){await mfLoad();const d=await rawGe
    ============================================================ */
 
 /* ============================================================
-   MediaFlow v52 — 50 Theme Collection
+   MediaFlow v54 — 50 Theme Collection
    Exactly 50 selectable themes: 49 distinct built-in palettes
    plus the existing fully customizable theme.
    ============================================================ */
@@ -5420,7 +5521,7 @@ App.exportJSON=function(){
     updateDataProgress(65,'Packing Library, History and progression…');
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v50-backup-${todayISO()}.json`);
-    finishDataProgress(true,'Export successful','Complete MediaFlow v52 backup created.');
+    finishDataProgress(true,'Export successful','Complete MediaFlow v54 backup created.');
   }catch(e){console.error(e);finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.');}},40);
 };
 
@@ -5592,15 +5693,29 @@ setTimeout(async()=>{
       const r=v50MigrateLibraryHistoryLinks();
       if(r.linked>0) await saveState();
       if(S.view==='libraryhistory') render();
-      console.info(`MediaFlow v52: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
+      console.info(`MediaFlow v54: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
     }
-  }catch(e){console.warn('MediaFlow v52 Library History migration skipped:',e);}
+  }catch(e){console.warn('MediaFlow v54 Library History migration skipped:',e);}
 },0);
 
 
-/* MediaFlow v52
+/* MediaFlow v54
    Global dropdown styling is CSS-driven, so all current and future native
    <select> controls automatically inherit the designed theme-aware UI. */
+
+
+/* MediaFlow v54 — Large Library Performance Update
+   - debounced Library search
+   - cached normalized title index
+   - cached filter/sort results
+   - one-pass Library overview aggregation
+   - one-pass History last-touched index
+   - reduced offscreen row painting */
+
+
+/* MediaFlow v54 — Library Search Focus Hotfix
+   Debounced search now restores focus and caret after the Library DOM refresh,
+   allowing uninterrupted typing while retaining v53 performance optimizations. */
 
 </script>
 
