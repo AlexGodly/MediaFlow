@@ -288,6 +288,88 @@ input[type=text],input[type=number],select,textarea{
 
 input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--flow-dim);}
 
+/* ============================================================
+   MediaFlow v52 — Designed Dropdown System
+   Every native select in MediaFlow receives the same polished,
+   theme-aware control treatment without changing its behavior.
+   ============================================================ */
+select{
+  -webkit-appearance:none;
+  appearance:none;
+  min-height:42px;
+  padding:10px 42px 10px 13px !important;
+  border:1px solid var(--border) !important;
+  border-radius:10px;
+  color:var(--text) !important;
+  background-color:var(--panel-raised) !important;
+  background-image:
+    linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),
+    linear-gradient(135deg,var(--text-dim) 50%,transparent 50%),
+    linear-gradient(to right,var(--border-soft),var(--border-soft)) !important;
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%,
+    calc(100% - 37px) 50% !important;
+  background-size:5px 5px,5px 5px,1px 20px !important;
+  background-repeat:no-repeat !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.025),0 5px 16px rgba(0,0,0,.10);
+  font:inherit;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.25;
+  cursor:pointer;
+  transition:border-color .16s ease,box-shadow .16s ease,transform .12s ease,background-color .16s ease;
+}
+select:hover{
+  border-color:var(--flow-dim) !important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--flow) 14%,transparent),0 7px 20px rgba(0,0,0,.13);
+}
+select:focus,select:focus-visible{
+  outline:none;
+  border-color:var(--flow) !important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 20%,transparent),0 7px 20px rgba(0,0,0,.14);
+}
+select:active{transform:translateY(1px);}
+select:disabled{
+  cursor:not-allowed;
+  opacity:.52;
+  box-shadow:none;
+}
+select option,select optgroup{
+  color:var(--text);
+  background:var(--panel-raised);
+  font-weight:600;
+}
+select option:checked{background:var(--panel);}
+select[multiple]{
+  min-height:120px;
+  padding:8px !important;
+  background-image:none !important;
+}
+select[multiple] option{
+  padding:8px 10px;
+  border-radius:7px;
+  margin:2px 0;
+}
+.lib-filters select,.mf-batchbar select{
+  min-height:38px;
+  padding-top:8px !important;
+  padding-bottom:8px !important;
+}
+@media(max-width:640px){
+  select{
+    min-height:44px;
+    font-size:14px;
+    padding-left:12px !important;
+    padding-right:40px !important;
+  }
+  .lib-filters select,.mf-batchbar select{
+    min-height:42px;
+    max-width:100%;
+  }
+}
+
+
 label.field-label{display:block; font-size:12px; font-weight:700; color:var(--text-dim); margin-bottom:6px;}
 
 .field{margin-bottom:14px;}
@@ -635,12 +717,32 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .library-view-cards .library-cover-thumb{width:58px;height:82px}.v44-rating-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}.v44-rating-grid>div{padding:12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised)}.v44-rating-grid b{display:block;font-family:var(--font-display);font-size:22px}
 
 .v45-cover-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.v45-cover-choice{display:flex;gap:10px;align-items:center;text-align:left;background:var(--panel2,#151a28);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:9px;cursor:pointer;min-width:0}.v45-cover-choice:hover{border-color:var(--accent)}.v45-cover-choice img{width:54px;height:78px;object-fit:cover;border-radius:7px;flex:0 0 auto}.v45-cover-choice span{min-width:0}.v45-cover-choice b,.v45-cover-choice small{display:block}.v45-cover-choice b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v45-cover-choice small{color:var(--muted);margin-top:4px}@media(max-width:560px){.v45-cover-grid{grid-template-columns:1fr}}
+
+/* v50 — XP earned is visible on every Library History entry that awarded XP. */
+.mf-activity-xp{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:800;color:var(--text)}
+.mf-activity-xp strong{font-size:13px}
+
 </style>
 
 
 <style>
 .aging-badge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:9px;text-transform:none}.heatmap-wrap{overflow:auto}.heatmap-grid{display:grid;grid-template-rows:repeat(7,12px);grid-auto-flow:column;grid-auto-columns:12px;gap:4px;min-width:max-content;padding:4px}.heat-cell{width:12px;height:12px;border-radius:3px;background:var(--border-soft)}.heat-1{background:color-mix(in srgb,var(--flow) 25%,var(--panel))}.heat-2{background:color-mix(in srgb,var(--flow) 45%,var(--panel))}.heat-3{background:color-mix(in srgb,var(--flow) 70%,var(--panel))}.heat-4{background:var(--flow)}.heatmap-legend{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-mute);margin-top:8px}.heatmap-legend .heat-cell{width:11px;height:11px}.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}.score-grid>div{display:flex;justify-content:space-between;padding:7px 9px;background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:8px;font-size:11px}.score-grid strong{font-family:var(--font-display)}.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.recap-grid>div{padding:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised)}.recap-grid b{display:block;font-family:var(--font-display);font-size:18px}.recap-grid small{color:var(--text-mute);font-size:10px}.completion-timeline{display:grid;gap:0}.timeline-item{position:relative;padding:12px 12px 12px 28px;border-left:1px solid var(--border);margin-left:7px}.timeline-dot{position:absolute;left:-5px;top:17px;width:9px;height:9px;border-radius:50%}.timeline-date{font-size:10px;color:var(--text-mute)}.timeline-title{font-weight:700;font-size:13px;margin-top:3px}.timeline-cat{font-size:10px;color:var(--text-dim);margin-top:3px}.on-this-day{margin:-8px 0 20px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel);color:var(--text-dim);font-size:11px}.on-this-day b{color:var(--text)}
 @media(max-width:700px){.recap-grid{grid-template-columns:1fr 1fr}.score-grid{grid-template-columns:1fr}}
+</style>
+
+<style id="mediaflow-v50-cover-ui">
+/* v50 — cover-forward responsive title presentation */
+.v50-cover{display:block;object-fit:cover;background:var(--panel-raised);border:1px solid var(--border-soft);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.v50-title-feature{display:flex;align-items:center;gap:18px;margin-top:14px;padding:14px;border:1px solid var(--border-soft);border-radius:16px;background:var(--panel-raised)}
+.v50-title-feature .v50-cover{width:112px;height:158px;border-radius:12px;flex:0 0 auto}.v50-title-feature b{font-size:18px;line-height:1.25}
+.v50-onthisday{display:flex;align-items:center;gap:16px}.v50-onthisday .v50-cover{width:92px;height:130px;border-radius:11px;flex:0 0 auto}.v50-onthisday-copy{min-width:0;font-size:13px;line-height:1.55}.v50-onthisday-copy b{display:block;font-size:17px;color:var(--text);margin:3px 0}
+.v50-timeline-row{display:flex;gap:15px;align-items:center}.v50-timeline-row .v50-cover{width:76px;height:108px;border-radius:9px;flex:0 0 auto}.v50-timeline-copy{min-width:0}.v50-timeline-copy .timeline-title{font-size:15px}
+.log-suggestion{min-height:82px}.v50-log-title{display:flex;align-items:center;gap:12px;min-width:0}.v50-log-title .v50-cover{width:48px;height:68px;border-radius:7px;flex:0 0 auto}.v50-log-title>div{min-width:0}.v50-log-title b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.library-cover-thumb{width:64px!important;height:90px!important;border-radius:9px!important;box-shadow:0 6px 18px rgba(0,0,0,.16)}
+.library-view-cards .library-cover-thumb{width:118px!important;height:166px!important;border-radius:12px!important}.library-view-cards .library-item{min-height:190px}
+@media(max-width:900px){.v50-title-feature .v50-cover{width:104px;height:147px}.v50-onthisday .v50-cover{width:84px;height:119px}.library-cover-thumb{width:58px!important;height:82px!important}.library-view-cards .library-cover-thumb{width:104px!important;height:147px!important}}
+@media(max-width:700px){.v50-title-feature{align-items:flex-start;gap:14px;padding:12px}.v50-title-feature .v50-cover{width:96px;height:136px}.v50-title-feature b{font-size:16px}.v50-onthisday{align-items:flex-start}.v50-onthisday .v50-cover{width:80px;height:113px}.v50-timeline-row .v50-cover{width:70px;height:99px}.library-cover-thumb{width:60px!important;height:85px!important}.library-view-cards .library-cover-thumb{width:96px!important;height:136px!important}.mf-batchbar{overflow-x:auto}.log-suggestion{gap:8px}.v50-log-title .v50-cover{width:52px;height:74px}}
+@media(max-width:430px){.v50-title-feature .v50-cover{width:88px;height:124px}.v50-onthisday .v50-cover{width:74px;height:105px}.v50-timeline-row .v50-cover{width:64px;height:91px}.library-cover-thumb{width:56px!important;height:79px!important}.library-view-cards .library-cover-thumb{width:88px!important;height:124px!important}}
 </style>
 </head>
 
@@ -925,6 +1027,25 @@ let S = {
 
    ============================================================ */
 
+/* ============================================================
+   MediaFlow v52 — Cloud Library History Persistence
+   Library History (activityLog) is now part of the canonical cloud
+   snapshot and cloud/local merge path, so it follows the account
+   across devices instead of starting empty on each browser.
+   ============================================================ */
+/* ============================================================
+   MediaFlow v52 — Library History XP Visibility
+   Library History entries now store the XP earned by the exact
+   tracked Library transaction and render it beside the action.
+   ============================================================ */
+/* ============================================================
+   MediaFlow v52 — Library History Integrity & Large-Library Fix
+   - exact Library IDs for new history events
+   - no substring title guessing
+   - safe exact-match migration for legacy history
+   - one-pass lookup maps for large libraries
+   - XP history preserved without re-awarding
+   ============================================================ */
 const STATE_KEY = 'mf_state_v2';
 
 const LEGACY_KEYS = ['mf_categories','mf_library','mf_sessions','mf_settings','mf_currentTask','mf_sessionActive'];
@@ -1021,6 +1142,17 @@ function mergeStates(a,b){
   out.library=[...byTitle.values()];
   const sessions=new Map(); [...(a.sessions||[]),...(b.sessions||[])].forEach(x=>sessions.set(x.id||uid(),x)); out.sessions=[...sessions.values()].sort((x,y)=>(x.timestamp||0)-(y.timestamp||0));
   out.xpLedger=Object.assign({libraryAdditions:{}},b.xpLedger||{},a.xpLedger||{}); out.xpLedger.libraryAdditions=Object.assign({},b.xpLedger?.libraryAdditions||{},a.xpLedger?.libraryAdditions||{});
+  // v50: merge Library History from both sides by stable activity id.
+  // Newest events win ordering and the existing 1000-event cap is preserved.
+  const activityById=new Map();
+  [...(b.activityLog||[]),...(a.activityLog||[])].forEach(x=>{
+    if(!x||typeof x!=='object')return;
+    const k=x.id||`${x.timestamp||0}::${x.action||''}::${x.detail||''}`;
+    const prev=activityById.get(k);
+    if(!prev || Number(x.timestamp||0)>=Number(prev.timestamp||0)) activityById.set(k,x);
+  });
+  out.activityLog=[...activityById.values()].sort((x,y)=>Number(y.timestamp||0)-Number(x.timestamp||0)).slice(0,1000);
+  out.migrations=Object.assign({},b.migrations||{},a.migrations||{});
   out.categories=a.categories||b.categories; out.settings=Object.assign({},b.settings||{},a.settings||{}); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
   return out;
 }
@@ -1037,6 +1169,10 @@ function snapshot(){
     malLink: S.malLink || {username:'',mode:'anime'},
     xpLedger: S.xpLedger || {libraryAdditions:{}},
     completionTimeline: S.completionTimeline || [],
+    // v50: Library History is account data, not device-only UI state.
+    // Persist it in the same atomic cloud snapshot as Library + consumption History.
+    activityLog: Array.isArray(S.activityLog) ? S.activityLog.slice(0,1000) : [],
+    migrations: S.migrations || {},
 
     savedAt: Date.now(),
 
@@ -1131,7 +1267,7 @@ async function loadAll(){
 S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
 S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
 S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
-S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.loading=false;
+S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});S.currentTask=data.currentTask||null;S.sessionActive=!!data.sessionActive;S.profilePicture=String(data.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();S.activityLog=Array.isArray(data.activityLog)?data.activityLog:[];S.migrations=(data.migrations&&typeof data.migrations==='object')?data.migrations:{};S.loading=false;
 }
 
 // All mutations funnel through these — each persists the FULL state in one write.
@@ -4721,7 +4857,7 @@ S.completionTimeline=Array.isArray(d?.completionTimeline)?d.completionTimeline:[
 
 
 /* v40: Multi-service exchange hub + custom import confirmation */
-const MF_EXCHANGE_SERVICES=[['anilist','AniList'],['anisearch','AniSearch'],['aniwatch','AniWatch'],['betaseries','BetaSeries'],['criticker','Criticker'],['crunchyroll','Crunchyroll'],['episodecalendar','EpisodeCalendar'],['hianime','HiAnime'],['imdb','IMDb'],['letterboxd','Letterboxd'],['livechart','LiveChart'],['kitsu','Kitsu'],['moviesfad','MoviesFad'],['mal','MyAnimeList'],['malxml','MAL-XML'],['netflix','Netflix'],['primewire','PrimeWire'],['seriesfad','SeriesFad'],['stremio','Stremio'],['trakt','trakt'],['tvtime','TV Time'],['tviso','Tviso'],['twee','Twee'],['csv','Import .csv file'],['json','Import .json file']];
+const MF_EXCHANGE_SERVICES=[['anilist','AniList'],['anisearch','AniSearch'],['aniwatch','AniWatch'],['betaseries','BetaSeries'],['criticker','Criticker'],['crunchyroll','Crunchyroll'],['episodecalendar','EpisodeCalendar'],['hianime','HiAnime'],['imdb','IMDb'],['letterboxd','Letterboxd'],['livechart','LiveChart'],['kitsu','Kitsu'],['moviesfad','MoviesFad'],['simkl','Simkl'],['mal','MyAnimeList'],['malxml','MAL-XML'],['netflix','Netflix'],['primewire','PrimeWire'],['seriesfad','SeriesFad'],['stremio','Stremio'],['trakt','trakt'],['tvtime','TV Time'],['tviso','Tviso'],['twee','Twee'],['csv','Import .csv file'],['json','Import .json file']];
 function mfExchangeServiceOptions(){return MF_EXCHANGE_SERVICES.map(([id,n])=>`<option value="${id}">${n}</option>`).join('')}
 function mfServiceName(id){return MF_EXCHANGE_SERVICES.find(x=>x[0]===id)?.[1]||id||'External service'}
 function mfImportConfirmModalHtml(d){const backup=d?.mode==='backup';return `<div class="priority-modal"><div class="modal-title">Confirm import</div><div style="color:var(--text-dim);font-size:13px;line-height:1.6;margin-bottom:14px">Import <b>${escapeHtml(d?.fileName||'file')}</b> from <b>${escapeHtml(d?.serviceName||'external data')}</b>?</div><div class="card" style="padding:13px;margin:0;background:var(--panel-2)"><div style="font-size:12px;line-height:1.55;color:var(--text-dim)">${backup?'This full MediaFlow backup will replace your current categories, Library, History and Settings.':'Recognized titles will be merged into your Library. Matching entries are updated before new titles are created. Missing fields are not fabricated.'}</div></div><div class="modal-actions"><button class="btn btn-ghost" onclick="App.cancelPendingImport()">Cancel</button><button class="btn btn-primary" onclick="App.confirmPendingImport()">${backup?'Replace & import':'Import data'}</button></div></div>`}
@@ -4823,9 +4959,14 @@ const mfLoad=loadAll;loadAll=async function(){await mfLoad();const d=await rawGe
    v43: Library controls, themes, richer activity, balance insight
    ============================================================ */
 
+/* ============================================================
+   MediaFlow v52 — 50 Theme Collection
+   Exactly 50 selectable themes: 49 distinct built-in palettes
+   plus the existing fully customizable theme.
+   ============================================================ */
 /* Additional built-in themes + user-custom theme */
-const V43_THEMES=['dark','light','amoled','midnight','ocean','forest','sunset','purple','rose','coffee','nord','cyber','slate','custom'];
-const V43_THEME_LABELS={dark:'Dark',light:'Light',amoled:'AMOLED',midnight:'Midnight Blue',ocean:'Ocean',forest:'Forest',sunset:'Sunset',purple:'Purple',rose:'Rose',coffee:'Coffee',nord:'Nord',cyber:'Cyber',slate:'Slate',custom:'Custom'};
+const V43_THEMES=['dark','light','amoled','midnight','ocean','forest','sunset','purple','rose','coffee','nord','cyber','slate','crimson','sakura','arctic','desert','emerald','volcano','lavender','gold','matrix','dracula','solarized','peach','mint','monochrome','cobalt','cherry','toxic','galaxy','coral','bronze','iceberg','bubblegum','terminal','paper','wine','sky','obsidian','retro','autumn','aqua','ivory','neon','moss','blueprint','candy','storm','custom'];
+const V43_THEME_LABELS={'dark':'Dark','light':'Light','amoled':'AMOLED','midnight':'Midnight Blue','ocean':'Ocean','forest':'Forest','sunset':'Sunset','purple':'Purple','rose':'Rose','coffee':'Coffee','nord':'Nord','cyber':'Cyber','slate':'Slate','crimson':'Crimson Noir','sakura':'Sakura','arctic':'Arctic Ice','desert':'Desert Sand','emerald':'Emerald City','volcano':'Volcano','lavender':'Lavender Dream','gold':'Royal Gold','matrix':'Matrix','dracula':'Dracula','solarized':'Solarized','peach':'Peach Cream','mint':'Mint Paper','monochrome':'Monochrome','cobalt':'Cobalt','cherry':'Cherry Cola','toxic':'Toxic Lime','galaxy':'Galaxy','coral':'Coral Reef','bronze':'Bronze Age','iceberg':'Iceberg','bubblegum':'Bubblegum','terminal':'Terminal','paper':'Paper','wine':'Wine Cellar','sky':'Day Sky','obsidian':'Obsidian','retro':'Retro Arcade','autumn':'Autumn','aqua':'Aqua Glass','ivory':'Ivory','neon':'Neon Nights','moss':'Moss','blueprint':'Blueprint','candy':'Candy Pop','storm':'Storm','custom':'Custom'};
 S.settings=S.settings||{};
 S.settings.customTheme=S.settings.customTheme||{bg:'#0E111A',panel:'#161B2A',raised:'#1C2334',border:'#2B3448',text:'#F4F6FB',muted:'#8D98AD',accent:'#E8A94A'};
 S.settings.libraryView=S.settings.libraryView||'list';
@@ -4842,6 +4983,78 @@ html[data-theme="coffee"]{--bg:#17120f;--panel:#241c17;--panel-raised:#30251e;--
 html[data-theme="nord"]{--bg:#242933;--panel:#2e3440;--panel-raised:#3b4252;--border:#4c566a;--border-soft:#404858;--text:#eceff4;--text-dim:#d8dee9;--text-mute:#8892a5;--flow:#88c0d0}
 html[data-theme="cyber"]{--bg:#080b10;--panel:#10151d;--panel-raised:#151d28;--border:#26394a;--border-soft:#1b2b39;--text:#eafffb;--text-dim:#9bcfc8;--text-mute:#608d88;--flow:#35f2c1}
 html[data-theme="slate"]{--bg:#11151b;--panel:#19202a;--panel-raised:#212b37;--border:#344252;--border-soft:#283543;--text:#f3f6fa;--text-dim:#b7c1cd;--text-mute:#7f8b99;--flow:#8fb3d9}
+html[data-theme="crimson"]{--bg:#120609;--panel:#210b10;--panel-raised:#321019;--border:#5b1d2b;--border-soft:#41141f;--text:#fff1f3;--text-dim:#e3a9b3;--text-mute:#a76572;--flow:#ff345f;--flow-dim:color-mix(in srgb,#ff345f 58%,#120609)}
+html[data-theme="sakura"]{--bg:#fff4f7;--panel:#fffafd;--panel-raised:#ffe8f0;--border:#eab8ca;--border-soft:#f5cfdd;--text:#442b36;--text-dim:#80586a;--text-mute:#ad7c91;--flow:#e96f9d;--flow-dim:color-mix(in srgb,#e96f9d 58%,#fff4f7)}
+html[data-theme="arctic"]{--bg:#eaf8ff;--panel:#f8fdff;--panel-raised:#dff3ff;--border:#9bcce3;--border-soft:#c4e5f3;--text:#102d3c;--text-dim:#416779;--text-mute:#6e95a7;--flow:#008fc7;--flow-dim:color-mix(in srgb,#008fc7 58%,#eaf8ff)}
+html[data-theme="desert"]{--bg:#f3e2c2;--panel:#fff1d7;--panel-raised:#ead0a5;--border:#b98e58;--border-soft:#d5b27f;--text:#3e2c1b;--text-dim:#77583a;--text-mute:#a07e5a;--flow:#c76b29;--flow-dim:color-mix(in srgb,#c76b29 58%,#f3e2c2)}
+html[data-theme="emerald"]{--bg:#061711;--panel:#0b251b;--panel-raised:#103426;--border:#235d45;--border-soft:#184833;--text:#effff7;--text-dim:#a9dbc4;--text-mute:#6da88d;--flow:#2ee59d;--flow-dim:color-mix(in srgb,#2ee59d 58%,#061711)}
+html[data-theme="volcano"]{--bg:#120807;--panel:#24100c;--panel-raised:#36160f;--border:#6b2b1b;--border-soft:#4b2017;--text:#fff2e9;--text-dim:#e5b09b;--text-mute:#a86f5a;--flow:#ff5b21;--flow-dim:color-mix(in srgb,#ff5b21 58%,#120807)}
+html[data-theme="lavender"]{--bg:#f3efff;--panel:#fbf9ff;--panel-raised:#e9e0ff;--border:#b8a4e5;--border-soft:#d3c5f3;--text:#2d2345;--text-dim:#675687;--text-mute:#9480b7;--flow:#7c52d9;--flow-dim:color-mix(in srgb,#7c52d9 58%,#f3efff)}
+html[data-theme="gold"]{--bg:#100d05;--panel:#211a08;--panel-raised:#32270b;--border:#665017;--border-soft:#4a3a10;--text:#fff8dd;--text-dim:#dfcb83;--text-mute:#9e8849;--flow:#f5c542;--flow-dim:color-mix(in srgb,#f5c542 58%,#100d05)}
+html[data-theme="matrix"]{--bg:#000500;--panel:#001000;--panel-raised:#001a04;--border:#0b4a17;--border-soft:#06330f;--text:#caffca;--text-dim:#6fe87d;--text-mute:#329c44;--flow:#00ff41;--flow-dim:color-mix(in srgb,#00ff41 58%,#000500)}
+html[data-theme="dracula"]{--bg:#17141f;--panel:#211d2b;--panel-raised:#2b2638;--border:#514666;--border-soft:#3d354d;--text:#f8f8f2;--text-dim:#c7bed7;--text-mute:#81758f;--flow:#ff79c6;--flow-dim:color-mix(in srgb,#ff79c6 58%,#17141f)}
+html[data-theme="solarized"]{--bg:#002b36;--panel:#073642;--panel-raised:#0b4652;--border:#315b63;--border-soft:#17434d;--text:#fdf6e3;--text-dim:#b7c5bd;--text-mute:#7d9895;--flow:#b58900;--flow-dim:color-mix(in srgb,#b58900 58%,#002b36)}
+html[data-theme="peach"]{--bg:#fff1e8;--panel:#fff9f4;--panel-raised:#ffe1d1;--border:#efb69a;--border-soft:#f6cdb8;--text:#4b2d24;--text-dim:#87594b;--text-mute:#b27d6a;--flow:#ef7f5b;--flow-dim:color-mix(in srgb,#ef7f5b 58%,#fff1e8)}
+html[data-theme="mint"]{--bg:#edfff8;--panel:#f9fffc;--panel-raised:#d9f7eb;--border:#9ed8c2;--border-soft:#c0ead9;--text:#173b30;--text-dim:#477566;--text-mute:#75a594;--flow:#1ca87a;--flow-dim:color-mix(in srgb,#1ca87a 58%,#edfff8)}
+html[data-theme="monochrome"]{--bg:#111111;--panel:#1b1b1b;--panel-raised:#292929;--border:#4a4a4a;--border-soft:#353535;--text:#f4f4f4;--text-dim:#bcbcbc;--text-mute:#7d7d7d;--flow:#ffffff;--flow-dim:color-mix(in srgb,#ffffff 58%,#111111)}
+html[data-theme="cobalt"]{--bg:#071229;--panel:#0b1c3d;--panel-raised:#102954;--border:#254c82;--border-soft:#183867;--text:#eef5ff;--text-dim:#abc5ed;--text-mute:#718fb9;--flow:#3b82f6;--flow-dim:color-mix(in srgb,#3b82f6 58%,#071229)}
+html[data-theme="cherry"]{--bg:#16080d;--panel:#2a0d16;--panel-raised:#3c1220;--border:#6d2739;--border-soft:#511b2b;--text:#fff0f4;--text-dim:#e7a5b7;--text-mute:#a96378;--flow:#e3265f;--flow-dim:color-mix(in srgb,#e3265f 58%,#16080d)}
+html[data-theme="toxic"]{--bg:#0a0d03;--panel:#151b05;--panel-raised:#202909;--border:#465a12;--border-soft:#34430d;--text:#f5ffd8;--text-dim:#c7e57a;--text-mute:#8fa840;--flow:#b6ff2e;--flow-dim:color-mix(in srgb,#b6ff2e 58%,#0a0d03)}
+html[data-theme="galaxy"]{--bg:#080719;--panel:#12102b;--panel-raised:#1d1740;--border:#42396e;--border-soft:#30285a;--text:#f4f0ff;--text-dim:#bcb0e7;--text-mute:#8173b2;--flow:#8c6cff;--flow-dim:color-mix(in srgb,#8c6cff 58%,#080719)}
+html[data-theme="coral"]{--bg:#10202a;--panel:#17313b;--panel-raised:#1e424b;--border:#397079;--border-soft:#2a5861;--text:#f2ffff;--text-dim:#b7d9da;--text-mute:#7aa9aa;--flow:#ff786d;--flow-dim:color-mix(in srgb,#ff786d 58%,#10202a)}
+html[data-theme="bronze"]{--bg:#17100a;--panel:#271a10;--panel-raised:#382417;--border:#62442b;--border-soft:#4a321f;--text:#fff3e4;--text-dim:#d8b894;--text-mute:#9b7957;--flow:#cd7f32;--flow-dim:color-mix(in srgb,#cd7f32 58%,#17100a)}
+html[data-theme="iceberg"]{--bg:#08171d;--panel:#10252d;--panel-raised:#173540;--border:#315b67;--border-soft:#244954;--text:#effcff;--text-dim:#acd8e3;--text-mute:#719fac;--flow:#74d7ef;--flow-dim:color-mix(in srgb,#74d7ef 58%,#08171d)}
+html[data-theme="bubblegum"]{--bg:#fff0fb;--panel:#fff8fd;--panel-raised:#fbdcf3;--border:#e8a6d2;--border-soft:#f1c5e3;--text:#4d2944;--text-dim:#89587c;--text-mute:#b97da9;--flow:#ff58b0;--flow-dim:color-mix(in srgb,#ff58b0 58%,#fff0fb)}
+html[data-theme="terminal"]{--bg:#050805;--panel:#0a100a;--panel-raised:#101910;--border:#244024;--border-soft:#193019;--text:#e6ffe6;--text-dim:#9dd39d;--text-mute:#5f9960;--flow:#64ff64;--flow-dim:color-mix(in srgb,#64ff64 58%,#050805)}
+html[data-theme="paper"]{--bg:#eee9dd;--panel:#faf7ef;--panel-raised:#e5ded0;--border:#c4b9a6;--border-soft:#d5cbbc;--text:#2e2b27;--text-dim:#625d55;--text-mute:#8e867a;--flow:#4b6b88;--flow-dim:color-mix(in srgb,#4b6b88 58%,#eee9dd)}
+html[data-theme="wine"]{--bg:#14090e;--panel:#251019;--panel-raised:#351722;--border:#623047;--border-soft:#492235;--text:#fff1f6;--text-dim:#d9aab9;--text-mute:#9a6879;--flow:#b94a70;--flow-dim:color-mix(in srgb,#b94a70 58%,#14090e)}
+html[data-theme="sky"]{--bg:#dff3ff;--panel:#f7fcff;--panel-raised:#cbeaff;--border:#8bc6ea;--border-soft:#acd9f3;--text:#18364a;--text-dim:#47748f;--text-mute:#719bb2;--flow:#168ad0;--flow-dim:color-mix(in srgb,#168ad0 58%,#dff3ff)}
+html[data-theme="obsidian"]{--bg:#07090c;--panel:#0d1117;--panel-raised:#151b23;--border:#2d3744;--border-soft:#202935;--text:#f1f4f8;--text-dim:#aeb9c7;--text-mute:#6f7c8b;--flow:#8aa4c2;--flow-dim:color-mix(in srgb,#8aa4c2 58%,#07090c)}
+html[data-theme="retro"]{--bg:#160d24;--panel:#25143a;--panel-raised:#361c50;--border:#613579;--border-soft:#48285f;--text:#fff4d6;--text-dim:#e7bf76;--text-mute:#a47b47;--flow:#ff9f1c;--flow-dim:color-mix(in srgb,#ff9f1c 58%,#160d24)}
+html[data-theme="autumn"]{--bg:#1a1008;--panel:#2a1a0d;--panel-raised:#3a2512;--border:#684422;--border-soft:#4e3319;--text:#fff4df;--text-dim:#d9b786;--text-mute:#9e774c;--flow:#e07a2d;--flow-dim:color-mix(in srgb,#e07a2d 58%,#1a1008)}
+html[data-theme="aqua"]{--bg:#06191b;--panel:#0b282b;--panel-raised:#10383c;--border:#28636a;--border-soft:#1b4b50;--text:#efffff;--text-dim:#a8dfe2;--text-mute:#6da9ad;--flow:#25d6d9;--flow-dim:color-mix(in srgb,#25d6d9 58%,#06191b)}
+html[data-theme="ivory"]{--bg:#f7f2e5;--panel:#fffdf7;--panel-raised:#ece4d2;--border:#c8bda6;--border-soft:#dbd1bd;--text:#302c24;--text-dim:#665e50;--text-mute:#918674;--flow:#9a7438;--flow-dim:color-mix(in srgb,#9a7438 58%,#f7f2e5)}
+html[data-theme="neon"]{--bg:#090611;--panel:#130b20;--panel-raised:#1d1030;--border:#462260;--border-soft:#321846;--text:#fff2ff;--text-dim:#d4a6e9;--text-mute:#9565ad;--flow:#ff35e1;--flow-dim:color-mix(in srgb,#ff35e1 58%,#090611)}
+html[data-theme="moss"]{--bg:#10150a;--panel:#1a2210;--panel-raised:#253017;--border:#465d2c;--border-soft:#344621;--text:#f5fae9;--text-dim:#c0cf9d;--text-mute:#87996a;--flow:#86a94f;--flow-dim:color-mix(in srgb,#86a94f 58%,#10150a)}
+html[data-theme="blueprint"]{--bg:#06182b;--panel:#0a2744;--panel-raised:#0e365c;--border:#285b86;--border-soft:#1b4770;--text:#eef8ff;--text-dim:#a7c9e7;--text-mute:#6d9bc2;--flow:#48a9ff;--flow-dim:color-mix(in srgb,#48a9ff 58%,#06182b)}
+html[data-theme="candy"]{--bg:#fff4ea;--panel:#fffafd;--panel-raised:#ffe3ef;--border:#f1b2ce;--border-soft:#f7cada;--text:#412c42;--text-dim:#795a7b;--text-mute:#a77ca7;--flow:#ff4f9a;--flow-dim:color-mix(in srgb,#ff4f9a 58%,#fff4ea)}
+html[data-theme="storm"]{--bg:#0d1118;--panel:#171d27;--panel-raised:#222b38;--border:#414e61;--border-soft:#303b4b;--text:#f0f4f9;--text-dim:#b3becd;--text-mute:#778596;--flow:#6e8eaf;--flow-dim:color-mix(in srgb,#6e8eaf 58%,#0d1118)}
+html[data-theme="crimson"] body{background:radial-gradient(circle at 15% 0%,#5a1025 0%,var(--bg) 48%);}
+html[data-theme="sakura"] body{background:linear-gradient(145deg,#fff8fb 0%,var(--bg) 58%);}
+html[data-theme="arctic"] body{background:radial-gradient(circle at 85% 0%,#ffffff 0%,var(--bg) 52%);}
+html[data-theme="desert"] body{background:linear-gradient(160deg,#f8e7c7 0%,var(--bg) 62%);}
+html[data-theme="emerald"] body{background:radial-gradient(circle at 15% 0%,#124c36 0%,var(--bg) 50%);}
+html[data-theme="volcano"] body{background:radial-gradient(circle at 50% -20%,#702310 0%,var(--bg) 52%);}
+html[data-theme="lavender"] body{background:linear-gradient(145deg,#fffaff 0%,var(--bg) 60%);}
+html[data-theme="gold"] body{background:radial-gradient(circle at 50% -20%,#4a3908 0%,var(--bg) 52%);}
+html[data-theme="matrix"] body{background:linear-gradient(180deg,#001500 0%,var(--bg) 48%);}
+html[data-theme="dracula"] body{background:radial-gradient(circle at 80% 0%,#35264d 0%,var(--bg) 52%);}
+html[data-theme="solarized"] body{background:linear-gradient(160deg,#073642 0%,var(--bg) 58%);}
+html[data-theme="peach"] body{background:linear-gradient(150deg,#fff9f4 0%,var(--bg) 60%);}
+html[data-theme="mint"] body{background:linear-gradient(150deg,#fbfffd 0%,var(--bg) 60%);}
+html[data-theme="monochrome"] body{background:linear-gradient(160deg,#242424 0%,var(--bg) 55%);}
+html[data-theme="cobalt"] body{background:radial-gradient(circle at 20% 0%,#173d80 0%,var(--bg) 52%);}
+html[data-theme="cherry"] body{background:radial-gradient(circle at 20% 0%,#5a1530 0%,var(--bg) 52%);}
+html[data-theme="toxic"] body{background:radial-gradient(circle at 50% -20%,#273a06 0%,var(--bg) 50%);}
+html[data-theme="galaxy"] body{background:radial-gradient(circle at 75% 0%,#37235f 0%,var(--bg) 52%);}
+html[data-theme="coral"] body{background:radial-gradient(circle at 15% 0%,#22555c 0%,var(--bg) 52%);}
+html[data-theme="bronze"] body{background:linear-gradient(155deg,#382313 0%,var(--bg) 56%);}
+html[data-theme="iceberg"] body{background:radial-gradient(circle at 75% 0%,#174b5c 0%,var(--bg) 52%);}
+html[data-theme="bubblegum"] body{background:linear-gradient(145deg,#fffaff 0%,var(--bg) 60%);}
+html[data-theme="terminal"] body{background:linear-gradient(180deg,#0d1a0d 0%,var(--bg) 48%);}
+html[data-theme="paper"] body{background:linear-gradient(145deg,#faf7ef 0%,var(--bg) 62%);}
+html[data-theme="wine"] body{background:radial-gradient(circle at 15% 0%,#4b1b31 0%,var(--bg) 52%);}
+html[data-theme="sky"] body{background:linear-gradient(180deg,#f7fcff 0%,var(--bg) 64%);}
+html[data-theme="obsidian"] body{background:radial-gradient(circle at 50% -20%,#1d2733 0%,var(--bg) 48%);}
+html[data-theme="retro"] body{background:radial-gradient(circle at 80% 0%,#4c2366 0%,var(--bg) 54%);}
+html[data-theme="autumn"] body{background:linear-gradient(155deg,#4b2b10 0%,var(--bg) 58%);}
+html[data-theme="aqua"] body{background:radial-gradient(circle at 15% 0%,#14545a 0%,var(--bg) 52%);}
+html[data-theme="ivory"] body{background:linear-gradient(145deg,#fffdf7 0%,var(--bg) 62%);}
+html[data-theme="neon"] body{background:radial-gradient(circle at 80% 0%,#48105c 0%,var(--bg) 52%);}
+html[data-theme="moss"] body{background:linear-gradient(155deg,#293718 0%,var(--bg) 58%);}
+html[data-theme="blueprint"] body{background:linear-gradient(145deg,#123e67 0%,var(--bg) 58%);}
+html[data-theme="candy"] body{background:linear-gradient(145deg,#fffafd 0%,var(--bg) 62%);}
+html[data-theme="storm"] body{background:radial-gradient(circle at 50% -20%,#334154 0%,var(--bg) 52%);}
 html[data-theme="custom"]{--bg:var(--mf-custom-bg);--panel:var(--mf-custom-panel);--panel-raised:var(--mf-custom-raised);--border:var(--mf-custom-border);--border-soft:var(--mf-custom-border);--text:var(--mf-custom-text);--text-dim:var(--mf-custom-muted);--text-mute:var(--mf-custom-muted);--flow:var(--mf-custom-accent)}
 .v43-view-switch{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.v43-view-switch .active{border-color:var(--flow);color:var(--text)}
 .library-view-compact .item-row{padding:7px 10px;gap:8px}.library-view-compact .item-sub{font-size:10px}.library-view-compact .bal-icon{width:28px;height:28px}
@@ -4874,7 +5087,7 @@ renderLibrary=function(){let h=v43OriginalLibrary();const mode=S.settings.librar
 /* Category maintenance now lives in Settings */
 const v43SettingsBase=renderSettings;
 renderSettings=function(){let html=v43SettingsBase();const maintenance=`<div class="section-label">CATEGORY MAINTENANCE</div><div class="card" style="margin-bottom:22px"><div style="display:flex;gap:8px;flex-wrap:wrap">${S.categories.map(c=>`<button class="btn btn-sm" onclick="App.clearCategoryLibrary('${c.id}')">Clear ${c.icon} ${escapeHtml(c.name)}</button>`).join('')}</div><div class="hint" style="margin-top:9px">Clears titles only from the chosen category. Consumption history stays intact and the change can be undone from Library History.</div></div>`;
-  const c=S.settings.customTheme||{};const themeOptions=V43_THEMES.map(t=>`<option value="${t}" ${S.settings.theme===t?'selected':''}>${V43_THEME_LABELS[t]}</option>`).join('');const custom=`<div class="section-label">THEMES & CUSTOMIZATION</div><div class="card" style="margin-bottom:22px"><div class="field"><label class="field-label">Theme</label><select onchange="App.setTheme(this.value)">${themeOptions}</select><small class="hint">13 built-in themes plus a fully customizable theme.</small></div><div class="v43-custom-grid">${[['bg','Background'],['panel','Panels'],['raised','Raised surfaces'],['border','Borders'],['text','Text'],['muted','Muted text'],['accent','Accent']].map(([k,l])=>`<div class="field v43-color-field"><label class="field-label">${l}</label><input type="color" value="${escapeHtml(c[k]||'#111111')}" onchange="App.setCustomTheme('${k}',this.value)"></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" onclick="App.setTheme('custom')">Use custom theme</button><button class="btn btn-ghost" onclick="App.resetCustomTheme()">Reset custom colors</button></div></div>`;
+  const c=S.settings.customTheme||{};const themeOptions=V43_THEMES.map(t=>`<option value="${t}" ${S.settings.theme===t?'selected':''}>${V43_THEME_LABELS[t]}</option>`).join('');const custom=`<div class="section-label">THEMES & CUSTOMIZATION</div><div class="card" style="margin-bottom:22px"><div class="field"><label class="field-label">Theme</label><select onchange="App.setTheme(this.value)">${themeOptions}</select><small class="hint">50 total themes: 49 distinct built-in themes plus a fully customizable theme.</small></div><div class="v43-custom-grid">${[['bg','Background'],['panel','Panels'],['raised','Raised surfaces'],['border','Borders'],['text','Text'],['muted','Muted text'],['accent','Accent']].map(([k,l])=>`<div class="field v43-color-field"><label class="field-label">${l}</label><input type="color" value="${escapeHtml(c[k]||'#111111')}" onchange="App.setCustomTheme('${k}',this.value)"></div>`).join('')}</div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" onclick="App.setTheme('custom')">Use custom theme</button><button class="btn btn-ghost" onclick="App.resetCustomTheme()">Reset custom colors</button></div></div>`;
   /* Remove the old 3-theme appearance card to avoid duplicate controls. */
   html=html.replace(/<div class="section-label settings-section-head"><span>APPEARANCE<\/span>[\s\S]*?<\/div><\/div>(?=<div class="section-label settings-section-head"><span>AUTOMATIC BACKUPS)/,'');
   const data=html.indexOf('<div class="section-label">DATA</div>');return data>=0?html.slice(0,data)+custom+maintenance+html.slice(data):html+custom+maintenance;
@@ -4882,9 +5095,114 @@ renderSettings=function(){let html=v43SettingsBase();const maintenance=`<div cla
 
 /* Richer activity entries. Existing entries remain readable. */
 function v43DiffSnapshot(before,after){const b=new Map((before?.library||[]).map(i=>[i.id,i])),a=new Map((after?.library||[]).map(i=>[i.id,i]));const ids=new Set([...b.keys(),...a.keys()]),changes=[];for(const id of ids){const x=b.get(id),y=a.get(id);if(!x&&y)changes.push({id,title:cleanTitle(y.title),kind:'added'});else if(x&&!y)changes.push({id,title:cleanTitle(x.title),kind:'deleted'});else if(x&&y){const fields=[];for(const k of ['title','categoryId','status','priority','progress','total','rating'])if(JSON.stringify(x[k]??null)!==JSON.stringify(y[k]??null))fields.push(`${k}: ${x[k]??'—'} → ${y[k]??'—'}`);if(fields.length)changes.push({id,title:cleanTitle(y.title),kind:'changed',fields});}if(changes.length>=25)break;}return changes;}
-mfActivity=function(action,detail){S.activityLog=S.activityLog||[];const tx=(S.undoStack||[])[S.undoStack.length-1];const changes=tx?.before&&tx?.after?v43DiffSnapshot(tx.before,tx.after):[];S.activityLog.unshift({id:uid(),timestamp:Date.now(),action:String(action||'Change'),detail:String(detail||''),changes,titleIds:changes.map(x=>x.id)});if(S.activityLog.length>1000)S.activityLog.length=1000;};
-function v43FindLogTitles(x){const ids=(x.titleIds||[]).filter(id=>S.library.some(i=>i.id===id));if(ids.length)return ids;const d=String(x.detail||'').toLowerCase();const hit=S.library.find(i=>d.includes(cleanTitle(i.title).toLowerCase()));return hit?[hit.id]:[];}
-function v43ActivityHtml(){const rows=(S.activityLog||[]).slice(0,1000).map(x=>{const ids=v43FindLogTitles(x);const change=(x.changes||[]).map(c=>`<div>• <b>${escapeHtml(c.title)}</b> ${escapeHtml(c.kind)}${c.fields?.length?`<div>${c.fields.map(escapeHtml).join('<br>')}</div>`:''}</div>`).join('');return `<div class="mf-activity-row"><div class="mf-activity-time">${new Date(x.timestamp).toLocaleString()}</div><div><b>${escapeHtml(x.action)}</b>${x.detail?`<div class="v43-log-detail">${escapeHtml(x.detail)}</div>`:''}${change?`<div class="v43-log-detail">${change}</div>`:''}${ids.length?`<div class="v43-log-actions">${ids.slice(0,5).map(id=>{const i=S.library.find(z=>z.id===id);return i?`<button class="btn btn-sm btn-ghost" onclick="App.openLibraryModal('${id}')">Edit ${escapeHtml(cleanTitle(i.title))}</button>`:''}).join('')}</div>`:''}</div></div>`}).join('')||'<div class="empty-state">No library activity recorded yet.</div>';return `<div class="card"><div class="section-label">LIBRARY CHANGE LOG</div><div class="mf-activity" style="max-height:none">${rows}</div></div>`;}
+function v50SnapshotXP(x){
+  if(!x)return null;
+  const sessions=Array.isArray(x.sessions)?x.sessions:[];
+  const ledger=x.xpLedger||{};
+  const sum=o=>Object.values(o||{}).reduce((a,v)=>a+(Number(v)||0),0);
+  const sessionXP=sessions.reduce((a,s)=>{
+    if(!s||s.status==='skipped')return a;
+    if(Number.isFinite(Number(s.xp)))return a+Math.max(0,Number(s.xp));
+    const cat=getCategory(s.categoryId);
+    return a+calculateConsumptionXP(cat,Number(s.actualAmount)||0,Number(s.minutes)||0,'healthy').xp;
+  },0);
+  return sessionXP+sum(ledger.libraryAdditions)+sum(ledger.libraryEdits)+sum(ledger.manualCovers);
+}
+mfActivity=function(action,detail){
+  S.activityLog=S.activityLog||[];
+  const tx=(S.undoStack||[])[S.undoStack.length-1];
+  const changes=tx?.before&&tx?.after?v43DiffSnapshot(tx.before,tx.after):[];
+  let xpEarned=0;
+  if(tx?.before&&tx?.after){
+    const beforeXP=v50SnapshotXP(tx.before), afterXP=v50SnapshotXP(tx.after);
+    if(beforeXP!=null&&afterXP!=null)xpEarned=Math.max(0,Math.round(afterXP-beforeXP));
+  }
+  const exactIds=[...new Set(changes.map(x=>x.id).filter(Boolean))];
+  const titleSnapshot=exactIds.length===1?cleanTitle(S.library.find(i=>i.id===exactIds[0])?.title||changes[0]?.title||detail||''):'';
+  S.activityLog.unshift({id:uid(),timestamp:Date.now(),action:String(action||'Change'),detail:String(detail||''),changes,titleIds:exactIds,titleSnapshot,xpEarned});
+  if(S.activityLog.length>1000)S.activityLog.length=1000;
+};
+function v50NormalizeHistoryTitle(v){
+  return cleanTitle(String(v||'')).trim().toLocaleLowerCase();
+}
+function v50LibraryLookup(){
+  const byId=new Map(), byTitle=new Map();
+  for(const item of (S.library||[])){
+    if(!item?.id)continue;
+    byId.set(item.id,item);
+    const key=v50NormalizeHistoryTitle(item.title);
+    if(!key)continue;
+    const list=byTitle.get(key)||[];
+    list.push(item.id);
+    byTitle.set(key,list);
+  }
+  return {byId,byTitle};
+}
+function v50LegacyHistoryTitle(x){
+  const candidates=[];
+  if(x?.titleSnapshot)candidates.push(x.titleSnapshot);
+  if(x?.title)candidates.push(x.title);
+  for(const c of (x?.changes||[])) if(c?.title)candidates.push(c.title);
+  // Old transactions commonly stored the affected title directly as detail.
+  if(x?.detail)candidates.push(x.detail);
+  return [...new Set(candidates.map(v=>String(v||'').trim()).filter(Boolean))];
+}
+function v43FindLogTitles(x,lookup){
+  lookup=lookup||v50LibraryLookup();
+  // Modern records: IDs are authoritative. Never fall back to text if an ID exists.
+  const stored=[...(x?.titleIds||[]),...(x?.libraryIds||[])].filter(Boolean);
+  if(stored.length)return [...new Set(stored)].filter(id=>lookup.byId.has(id));
+
+  // Legacy records: exact normalized title only, and only when unique.
+  // No includes()/substring matching: "Ai" can never match "Sendokai Champions".
+  const hits=[];
+  for(const title of v50LegacyHistoryTitle(x)){
+    const ids=lookup.byTitle.get(v50NormalizeHistoryTitle(title))||[];
+    if(ids.length===1)hits.push(ids[0]);
+  }
+  return [...new Set(hits)];
+}
+function v50MigrateLibraryHistoryLinks(){
+  if(!Array.isArray(S.activityLog)||!S.activityLog.length)return {linked:0,ambiguous:0};
+  const lookup=v50LibraryLookup();
+  let linked=0, ambiguous=0;
+  for(const x of S.activityLog){
+    if(!x||typeof x!=='object')continue;
+    const existing=[...(x.titleIds||[]),...(x.libraryIds||[])].filter(id=>lookup.byId.has(id));
+    if(existing.length){
+      x.titleIds=[...new Set(existing)];
+      if(!x.titleSnapshot && x.titleIds.length===1)x.titleSnapshot=cleanTitle(lookup.byId.get(x.titleIds[0])?.title||'');
+      continue;
+    }
+    const matches=[];
+    for(const title of v50LegacyHistoryTitle(x)){
+      const ids=lookup.byTitle.get(v50NormalizeHistoryTitle(title))||[];
+      if(ids.length===1)matches.push(ids[0]);
+      else if(ids.length>1)ambiguous++;
+    }
+    const unique=[...new Set(matches)];
+    if(unique.length===1){
+      x.titleIds=unique;
+      x.titleSnapshot=cleanTitle(lookup.byId.get(unique[0])?.title||'');
+      x.linkMigratedV50=true;
+      linked++;
+    }
+  }
+  S.migrations=S.migrations||{};
+  S.migrations.libraryHistoryExactIdsV50={done:true,at:Date.now(),linked};
+  return {linked,ambiguous};
+}
+function v43ActivityHtml(){
+  const lookup=v50LibraryLookup();
+  const rows=(S.activityLog||[]).slice(0,1000).map(x=>{
+    const ids=v43FindLogTitles(x,lookup);
+    const change=(x.changes||[]).map(c=>`<div>• <b>${escapeHtml(c.title)}</b> ${escapeHtml(c.kind)}${c.fields?.length?`<div>${c.fields.map(escapeHtml).join('<br>')}</div>`:''}</div>`).join('');
+    const earned=Math.max(0,Number(x.xpEarned)||0);
+    const xp=earned?`<div class="mf-activity-xp" title="XP earned by this Library action"><strong>+${earned.toLocaleString()} XP</strong> earned</div>`:'';
+    return `<div class="mf-activity-row"><div class="mf-activity-time">${new Date(x.timestamp).toLocaleString()}</div><div><b>${escapeHtml(x.action)}</b>${x.detail?`<div class="v43-log-detail">${escapeHtml(x.detail)}</div>`:''}${xp}${change?`<div class="v43-log-detail">${change}</div>`:''}${ids.length?`<div class="v43-log-actions">${ids.slice(0,5).map(id=>{const i=S.library.find(z=>z.id===id);return i?`<button class="btn btn-sm btn-ghost" onclick="App.openLibraryModal('${id}')">Edit ${escapeHtml(cleanTitle(i.title))}</button>`:''}).join('')}</div>`:''}</div></div>`;
+  }).join('')||'<div class="empty-state">No library activity recorded yet.</div>';
+  return `<div class="card"><div class="section-label">LIBRARY CHANGE LOG</div><div class="mf-activity" style="max-height:none">${rows}</div></div>`;
+}
 mfActivityHtml=v43ActivityHtml;
 
 /* Log imports and exports that are not already represented by a library transaction. */
@@ -5096,13 +5414,13 @@ async function v46SyncNow(){
 
 // Full backups now include every progression-bearing field, not only the four v45 arrays.
 App.exportJSON=function(){
-  showDataProgress('Exporting MediaFlow backup','Preparing complete v46 state…',15);
+  showDataProgress('Exporting MediaFlow backup','Preparing complete v50 state…',15);
   setTimeout(()=>{try{
     const payload=Object.assign({},snapshot(),{mediaFlowVersion:46,exportedAt:new Date().toISOString(),progression:mediaFlowLevelInfo()});
     updateDataProgress(65,'Packing Library, History and progression…');
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v46-backup-${todayISO()}.json`);
-    finishDataProgress(true,'Export successful','Complete MediaFlow v46 backup created.');
+    updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v50-backup-${todayISO()}.json`);
+    finishDataProgress(true,'Export successful','Complete MediaFlow v52 backup created.');
   }catch(e){console.error(e);finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.');}},40);
 };
 
@@ -5136,6 +5454,79 @@ renderSettings=function(){
   return h;
 };
 Object.assign(App,{calculateXPNow:v46CalculateXPNow,syncNow:v46SyncNow});
+
+/* ============================================================
+   v50 — Cover-forward UI + Simkl export
+   ============================================================ */
+function v50FindLibraryItem(libraryId,title){
+  if(libraryId){const byId=(S.library||[]).find(i=>i.id===libraryId);if(byId)return byId;}
+  const q=cleanTitle(title||'').toLowerCase();
+  return q?(S.library||[]).find(i=>cleanTitle(i.title).toLowerCase()===q):null;
+}
+function v50Cover(item,cls=''){return item?.coverUrl?`<img class="v50-cover ${cls}" src="${escapeHtml(item.coverUrl)}" alt="${escapeHtml(cleanTitle(item.title||''))} cover" loading="lazy" onerror="this.style.display='none'">`:'';}
+
+// Make logging search results visual when a Library title has artwork.
+renderLogSuggestions=function(){
+  const box=document.getElementById('log-suggestions'); if(!box)return;
+  const candidates=logTitleCandidates(S.entryDraft.title); if(!candidates.length){box.innerHTML='';return;}
+  box.innerHTML=`<div class="log-suggestion-list">${candidates.map(i=>{const c=getCategory(i.categoryId),progress=i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown';return `<div class="log-suggestion"><div class="v50-log-title">${v50Cover(i)}<div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${c?.icon||'📚'} ${escapeHtml(c?.name||'Library')} · ${progress}</small></div></div><button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}')">Use</button></div>`}).join('')}</div>`;
+};
+
+// Cover-aware exact-title recommendation on the dashboard.
+const v50DashboardBase=renderDashboard;
+renderDashboard=function(){
+  let h=v50DashboardBase(); const t=S.currentTask;
+  if(!t?.title || !S.settings.exactTitleRecommendations)return h;
+  const item=v50FindLibraryItem(t.libraryId,t.title); if(!item?.coverUrl)return h;
+  const plain=`<div class="hero-note">MediaFlow recommends: <b>${escapeHtml(t.title)}</b></div>`;
+  const rich=`<div class="hero-note v50-title-feature">${v50Cover(item)}<div><small>MediaFlow recommends</small><br><b>${escapeHtml(t.title)}</b></div></div>`;
+  return h.replace(plain,rich);
+};
+
+renderOnThisDay=function(){
+  const now=new Date(),matches=[];
+  for(const s of S.sessions){const d=new Date(s.timestamp),years=now.getFullYear()-d.getFullYear();if(years<1||d.getMonth()!==now.getMonth()||d.getDate()!==now.getDate())continue;for(const t of(s.titles||[])){if(t.title)matches.push({years,title:t.title,libraryId:t.libraryId});}}
+  if(!matches.length)return '';
+  const x=matches.sort((a,b)=>a.years-b.years)[0],item=v50FindLibraryItem(x.libraryId,x.title),cover=v50Cover(item);
+  return `<div class="on-this-day ${cover?'v50-onthisday':''}">${cover}<div class="v50-onthisday-copy">On this day · ${x.years} year${x.years===1?'':'s'} ago you logged <b>${escapeHtml(x.title)}</b>${item?`<small>${escapeHtml(getCategory(item.categoryId)?.name||'Library')}</small>`:''}</div></div>`;
+};
+
+renderCompletionTimeline=function(){
+  const map=new Map();
+  for(const x of(S.completionTimeline||[])){if(x?.completedAt)map.set(x.libraryId||(`${x.title}::${x.completedAt}`),x);}
+  for(const i of S.library){if(i?.status==='completed'&&i.completedAt&&!map.has(i.id))map.set(i.id,{libraryId:i.id,title:i.title,categoryId:i.categoryId,completedAt:i.completedAt});}
+  const arr=[...map.values()].sort((a,b)=>Number(b.completedAt)-Number(a.completedAt)); if(!arr.length)return '<div class="empty-state">No completed titles yet.</div>';
+  const size=25,max=Math.max(0,Math.ceil(arr.length/size)-1);S.timelinePage=clamp(Number(S.timelinePage)||0,0,max);const page=arr.slice(S.timelinePage*size,S.timelinePage*size+size);
+  const rows=`<div class="completion-timeline">${page.map(x=>{const c=getCategory(x.categoryId),item=v50FindLibraryItem(x.libraryId,x.title);return `<div class="timeline-item"><div class="timeline-dot" style="background:${c?.color||'var(--flow)'}"></div><div class="v50-timeline-row">${v50Cover(item)}<div class="v50-timeline-copy"><div class="timeline-date">${new Date(Number(x.completedAt)).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div><div class="timeline-title">${escapeHtml(cleanTitle(x.title))}</div><div class="timeline-cat">${c?.icon||'•'} ${escapeHtml(c?.name||'Unknown')}</div></div></div></div>`}).join('')}</div>`;
+  if(max===0)return rows;return rows+`<div class="v44-timeline-pager"><button class="btn btn-sm" ${S.timelinePage<=0?'disabled':''} onclick="App.setTimelinePage(${S.timelinePage-1})">← Prev</button><span class="hint">Page ${S.timelinePage+1} of ${max+1} · ${arr.length} completed titles</span><button class="btn btn-sm" ${S.timelinePage>=max?'disabled':''} onclick="App.setTimelinePage(${S.timelinePage+1})">Next →</button></div>`;
+};
+
+function v50SimklStatus(status){return ({active:'watching',planned:'plantowatch',completed:'completed',paused:'hold',dropped:'dropped'})[status]||'plantowatch';}
+function v50SimklExport(){
+  const out={source:'MediaFlow',exported_at:new Date().toISOString(),anime:[],shows:[],movies:[]};
+  for(const i of(S.library||[])){
+    const c=getCategory(i.categoryId),ids=i.externalIds||{},media={title:cleanTitle(i.title),year:i.year||null,ids:{simkl:ids.simkl??null,mal:ids.mal??null,anilist:ids.anilist??null,tmdb:ids.tmdb??null,imdb:ids.imdb??null}};
+    const rec={status:v50SimklStatus(i.status),watched_episodes_count:Number(i.progress)||0,total_episodes_count:i.total==null?null:Number(i.total)||0,user_rating:Number(i.rating)||0,added_to_watchlist_at:i.createdAt?new Date(Number(i.createdAt)).toISOString():null,last_watched_at:i.completedAt?new Date(Number(i.completedAt)).toISOString():null};
+    if(i.categoryId==='movies'){out.movies.push(Object.assign({movie:media},rec));}
+    else if(i.categoryId==='tv'||i.categoryId==='otheranimation'){out.shows.push(Object.assign({show:media},rec));}
+    else if(['seasonal','backlog','animemovies'].includes(i.categoryId)){out.anime.push(Object.assign({show:media,anime_type:i.categoryId==='animemovies'?'movie':'tv'},rec));}
+  }
+  return out;
+}
+const v50ExportExchangeBase=mfExportExchange;
+mfExportExchange=function(){
+  const service=document.getElementById('exchange-service')?.value||'json';
+  if(service!=='simkl')return v50ExportExchangeBase();
+  const data=v50SimklExport(),count=data.anime.length+data.shows.length+data.movies.length;
+  showDataProgress('Exporting for Simkl','Building Simkl-compatible JSON…',55);
+  triggerDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),`mediaflow-simkl-${todayISO()}.json`);
+  setTimeout(()=>finishDataProgress(true,'Export complete',`${count.toLocaleString()} supported Library titles exported for Simkl.`),100);
+};
+App.exportExchange=mfExportExchange;
+
+// v50 settings copy now advertises Simkl as an export target too.
+const v50SettingsBase=renderSettings;
+renderSettings=function(){let h=v50SettingsBase();return h.replace('AniList · AniSearch · AniWatch', 'AniList · AniSearch · AniWatch · Simkl');};
 
 /* ============================================================
 
@@ -5191,6 +5582,25 @@ window.addEventListener('beforeunload', function(e){
 });
 
 })();
+
+
+/* v50 one-time Library History integrity migration.
+   Exact IDs only. Ambiguous/unsafe legacy entries are left unlinked. */
+setTimeout(async()=>{
+  try{
+    if(!S.migrations?.libraryHistoryExactIdsV50?.done){
+      const r=v50MigrateLibraryHistoryLinks();
+      if(r.linked>0) await saveState();
+      if(S.view==='libraryhistory') render();
+      console.info(`MediaFlow v52: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
+    }
+  }catch(e){console.warn('MediaFlow v52 Library History migration skipped:',e);}
+},0);
+
+
+/* MediaFlow v52
+   Global dropdown styling is CSS-driven, so all current and future native
+   <select> controls automatically inherit the designed theme-aware UI. */
 
 </script>
 
