@@ -934,6 +934,54 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 }
 </style>
 
+<style id="v69-library-tools-css">.v66-cat-filter{position:relative;min-width:170px}.v66-cat-filter>summary{list-style:none;cursor:pointer;white-space:nowrap}.v66-cat-filter>summary::-webkit-details-marker{display:none}.v66-cat-panel{position:absolute;z-index:90;top:calc(100% + 7px);left:0;width:min(340px,calc(100vw - 28px));max-height:360px;overflow:auto;padding:10px;background:var(--panel-raised);border:1px solid var(--border);border-radius:12px;box-shadow:0 18px 48px rgba(0,0,0,.4)}.v66-cat-head{display:flex;justify-content:space-between;align-items:center;padding:3px 5px 8px}.v66-cat-option{display:flex;align-items:center;gap:9px;padding:9px 7px;border-radius:8px}.v66-cat-option input{width:auto}.v66-note{font-size:11.5px;line-height:1.55;color:var(--text-mute);margin-top:7px}@media(max-width:600px){.v66-cat-filter{width:100%}.v66-cat-filter>summary{width:100%;text-align:center}}</style>
+<style id="v73-settings-responsive-fix">
+/* MediaFlow v73 — Settings responsiveness */
+.settings-section-head{min-width:0;gap:10px;flex-wrap:wrap;}
+.settings-section-head>span{min-width:0;overflow-wrap:anywhere;}
+.cat-manage-row{min-width:0;}
+.cat-manage-row .name{min-width:0;overflow-wrap:anywhere;}
+.cat-manage-row .meta{overflow-wrap:anywhere;}
+.cat-drag-handle{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:18px;line-height:1;}
+.cat-drag-handle:active{cursor:grabbing;}
+.cat-manage-row.v73-dragging{opacity:.58;outline:1px dashed var(--flow);outline-offset:3px;}
+@media (max-width:1100px){
+  .view-head{gap:12px;flex-wrap:wrap;}
+  .view-head>div{min-width:0;}
+  .two-col{grid-template-columns:minmax(0,1fr);}
+  .cat-manage-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;}
+  .cat-manage-row>.hero-icon{grid-column:1;grid-row:1;}
+  .cat-manage-row>.name{grid-column:2;grid-row:1;}
+  .cat-manage-row>.cat-order-controls{grid-column:3;grid-row:1;}
+  .cat-manage-row>.toggle{grid-column:1;grid-row:2;justify-self:start;}
+  .cat-manage-row>.cat-edit-btn{grid-column:2;grid-row:2;justify-self:start;}
+  .cat-manage-row>.cat-delete-btn{grid-column:3;grid-row:2;justify-self:end;}
+}
+@media (max-width:600px){
+  .view-head{align-items:flex-start;}
+  .view-head>button{width:100%;}
+  .intensity-row{display:grid;grid-template-columns:1fr;gap:8px;}
+  .settings-toggle-row{align-items:flex-start!important;flex-wrap:wrap;}
+  .settings-toggle-row>div:first-child{flex:1 1 220px;min-width:0;}
+  .settings-toggle-row>.toggle{margin-left:auto;}
+  .cat-manage-row{grid-template-columns:38px minmax(0,1fr);padding:13px 0;gap:8px 10px;}
+  .cat-manage-row>.hero-icon{grid-column:1;grid-row:1;}
+  .cat-manage-row>.name{grid-column:2;grid-row:1;}
+  .cat-manage-row>.cat-order-controls{grid-column:1 / -1;grid-row:2;justify-content:flex-start!important;}
+  .cat-manage-row>.toggle{grid-column:1;grid-row:3;}
+  .cat-manage-row>.cat-edit-btn{grid-column:2;grid-row:3;justify-self:start;}
+  .cat-manage-row>.cat-delete-btn{grid-column:2;grid-row:3;justify-self:end;}
+  .cat-manage-row .btn{max-width:100%;}
+  .card{overflow-wrap:anywhere;}
+  .card button:not(.toggle){white-space:normal;}
+  #exchange-service{width:100%;max-width:100%;}
+}
+@media (max-width:380px){
+  .main{padding-left:9px;padding-right:9px;}
+  .card{padding-left:12px;padding-right:12px;}
+  .cat-manage-row>.cat-edit-btn,.cat-manage-row>.cat-delete-btn{font-size:11px;padding-left:8px;padding-right:8px;}
+}
+</style>
 </head>
 
 <body>
@@ -1192,6 +1240,8 @@ let S = {
 
   categories: null,
 
+  categoryOrder: [],
+
   library: null,
 
   sessions: null,
@@ -1373,14 +1423,14 @@ function mergeStates(a,b){
   });
   out.activityLog=[...activityById.values()].sort((x,y)=>Number(y.timestamp||0)-Number(x.timestamp||0)).slice(0,1000);
   out.migrations=Object.assign({},b.migrations||{},a.migrations||{});
-  out.categories=a.categories||b.categories; out.settings=Object.assign({},b.settings||{},a.settings||{}); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
+  out.categories=a.categories||b.categories; out.categoryOrder=a.categoryOrder||a.settings?.categoryOrder||b.categoryOrder||b.settings?.categoryOrder||[]; out.settings=Object.assign({},b.settings||{},a.settings||{}); if(out.categoryOrder.length) out.settings.categoryOrder=out.categoryOrder.slice(); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
   return out;
 }
 function snapshot(){
 
   return {
 
-    categories: S.categories, library: S.library, sessions: S.sessions,
+    categories: S.categories, categoryOrder: v74SyncCategoryOrder().slice(), library: S.library, sessions: S.sessions,
 
     settings: S.settings, currentTask: S.currentTask, sessionActive: S.sessionActive,
 
@@ -1481,9 +1531,26 @@ function sanitizeLibrary(list){
   return out;
 }
 
+/* MediaFlow v74 — persistent category ordering */
+function v74SyncCategoryOrder(){
+  S.categoryOrder=(S.categories||[]).map(c=>c.id);
+  return S.categoryOrder;
+}
+function v74ApplyCategoryOrder(order){
+  if(!Array.isArray(S.categories) || !Array.isArray(order) || !order.length) return;
+  const rank=new Map(order.map((id,i)=>[id,i]));
+  const original=new Map(S.categories.map((c,i)=>[c.id,i]));
+  S.categories=S.categories.slice().sort((a,b)=>{
+    const ar=rank.has(a.id)?rank.get(a.id):Number.MAX_SAFE_INTEGER;
+    const br=rank.has(b.id)?rank.get(b.id):Number.MAX_SAFE_INTEGER;
+    return ar-br || (original.get(a.id)||0)-(original.get(b.id)||0);
+  });
+  v74SyncCategoryOrder();
+}
+
 async function loadAll(){
  STORAGE_MODE='cloud'; let data=await rawGet(STATE_KEY);
- data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});
+ data=data||{};S.categories=data.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));v74ApplyCategoryOrder(data.categoryOrder||data.settings?.categoryOrder||[]);S.library=sanitizeLibrary(data.library||[]);S.sessions=data.sessions||[];S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings||{});
 S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
 S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
 S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
@@ -1492,7 +1559,7 @@ S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.levelin
 
 // All mutations funnel through these — each persists the FULL state in one write.
 
-function persistCategories(){ return saveState(); }
+function persistCategories(){ v74SyncCategoryOrder(); S.settings=S.settings||{}; S.settings.categoryOrder=S.categoryOrder.slice(); return saveState(); }
 
 function persistLibrary(){ v53InvalidateLibraryCache(); return saveState(); }
 
@@ -1920,24 +1987,9 @@ function entriesTotal(entries){
 }
 
 function normalizeSeasonalLibraryItems(){
-  const seasonal=S.categories.find(c=>c.id==='seasonal');
-  const backlog=S.categories.find(c=>c.id==='backlog');
-  if(!seasonal || !backlog) return false;
-  let changed=false;
-  S.library.forEach(item=>{
-    if(!item || item.categoryId!==seasonal.id) return;
-    const completeByProgress=item.total!=null && Number(item.total)>0 && Number(item.progress||0)>=Number(item.total);
-    const completeByStatus=item.status==='completed';
-    if(completeByProgress || completeByStatus){
-      // Completion is represented by the Anime Backlog category.
-      // Do not add/remove/modify tags as part of this transition.
-      item.categoryId=backlog.id;
-      item.status='completed';
-      if(item.total!=null) item.progress=Math.max(Number(item.progress)||0,Number(item.total)||0);
-      changed=true;
-    }
-  });
-  return changed;
+  // v72: Seasonal Anime titles stay in Seasonal Anime when completed.
+  // Category changes are now always explicit/manual.
+  return false;
 }
 
 function logTitleCandidates(query){
@@ -2904,23 +2956,28 @@ function v53LastTouched(item){
          V53_LIB.lastTouched.get('title:'+cleanTitle(item.title).toLocaleLowerCase()) || 0;
 }
 function v53FilteredLibrary(catFilter,statusFilter,priorityFilter,q){
-  v53EnsureLibraryIndex();
-  const nq=String(q||'').trim().toLocaleLowerCase();
-  const key=[V53_LIB.libraryToken,S.library.length,catFilter,statusFilter,priorityFilter,nq].join('|');
-  if(V53_LIB.filterKey===key)return V53_LIB.filtered;
-  let rows=V53_LIB.searchIndex;
-  if(catFilter!=='all')rows=rows.filter(x=>x.item.categoryId===catFilter);
-  if(statusFilter!=='all')rows=rows.filter(x=>x.item.status===statusFilter);
-  if(priorityFilter!=='all')rows=rows.filter(x=>x.item.priority===priorityFilter);
-  if(nq)rows=rows.filter(x=>x.search.includes(nq));
-  const rank={high:0,medium:1,low:2};
-  rows=rows.slice().sort((a,b)=>
-    (rank[a.item.priority]??1)-(rank[b.item.priority]??1) ||
-    a.title.localeCompare(b.title)
-  );
-  V53_LIB.filterKey=key;
-  V53_LIB.filtered=rows.map(x=>x.item);
-  return V53_LIB.filtered;
+ v53EnsureLibraryIndex();const nq=String(q||'').trim().toLocaleLowerCase(),cats=Array.isArray(S.histFilters?.libCategories)?S.histFilters.libCategories:[],sort=S.histFilters?.libSort||'priority';
+ const key=[V53_LIB.libraryToken,S.library.length,catFilter,cats.slice().sort().join(','),statusFilter,priorityFilter,nq,sort].join('|');if(V53_LIB.filterKey===key)return V53_LIB.filtered;
+ let rows=V53_LIB.searchIndex;if(cats.length)rows=rows.filter(x=>cats.includes(x.item.categoryId));else if(catFilter!=='all')rows=rows.filter(x=>x.item.categoryId===catFilter);
+ if(statusFilter!=='all')rows=rows.filter(x=>x.item.status===statusFilter);if(priorityFilter!=='all')rows=rows.filter(x=>x.item.priority===priorityFilter);if(nq)rows=rows.filter(x=>x.search.includes(nq));
+ const rank={low:0,medium:1,high:2};
+ const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0;};
+ const cmpTitle=(a,b)=>a.title.localeCompare(b.title,undefined,{numeric:true,sensitivity:'base'});
+ rows=rows.slice().sort((a,b)=>{
+   let d=0;
+   if(sort==='title-asc') return cmpTitle(a,b);
+   if(sort==='title-desc') return cmpTitle(b,a);
+   if(sort==='priority-asc') d=(rank[a.item.priority]??1)-(rank[b.item.priority]??1);
+   else if(sort==='priority-desc'||sort==='priority') d=(rank[b.item.priority]??1)-(rank[a.item.priority]??1);
+   else if(sort==='rating-asc') d=num(a.item.rating)-num(b.item.rating);
+   else if(sort==='rating-desc') d=num(b.item.rating)-num(a.item.rating);
+   else if(sort==='progress-asc') d=num(a.item.progress)-num(b.item.progress);
+   else if(sort==='progress-desc') d=num(b.item.progress)-num(a.item.progress);
+   else if(sort==='total-asc') d=num(a.item.total)-num(b.item.total);
+   else if(sort==='total-desc') d=num(b.item.total)-num(a.item.total);
+   return d||cmpTitle(a,b);
+ });
+ V53_LIB.filterKey=key;V53_LIB.filtered=rows.map(x=>x.item);return V53_LIB.filtered;
 }
 function v53DebouncedLibrarySearch(value){
   S.histFilters.libSearch=value;
@@ -2949,7 +3006,59 @@ function v53DebouncedLibrarySearch(value){
   },180);
 }
 
+
+/* MediaFlow v70 — expanded Library display ordering */
+function v69KnownTotal(item){const n=Number(item?.total);return Number.isFinite(n)&&n>0?n:0;}
+function v69RepairCompleted(ids){
+  const wanted=ids?new Set(ids):null; let changed=0;
+  for(const item of S.library){
+    if(wanted&&!wanted.has(item.id))continue;
+    const total=v69KnownTotal(item);
+    if(item.status==='completed'&&total>0&&Number(item.progress)!==total){
+      item.progress=total; item.completedAt=item.completedAt||Date.now(); changed++;
+    }
+  }
+  if(changed)v53InvalidateLibraryCache();
+  return changed;
+}
+async function v69RepairAllCompleted(){
+  const changed=v69RepairCompleted();
+  if(!changed){showToast('All completed titles with known totals are already correct.');return;}
+  await persistLibrary(); render(); showToast(`${changed} completed title${changed===1?'':'s'} repaired ✓`);
+}
+async function v69RepairSelectedCompleted(){
+  const ids=mfSelectedIds();
+  if(!ids.length){showToast('Select one or more Library titles first.');return;}
+  const changed=v69RepairCompleted(ids);
+  if(!changed){showToast('No selected completed titles needed repair.');return;}
+  await persistLibrary(); render(); showToast(`${changed} selected title${changed===1?'':'s'} repaired ✓`);
+}
+function v69ToggleLibraryCategory(id,on){
+  S.histFilters=S.histFilters||{};
+  const set=new Set(Array.isArray(S.histFilters.libCategories)?S.histFilters.libCategories:[]);
+  if(on)set.add(id);else set.delete(id);
+  S.histFilters.libCategories=[...set];
+  S.histFilters.libCategory='all';
+  S.libPage=0;
+  v53InvalidateLibraryCache();
+  render();
+}
+function v69ClearLibraryCategories(){
+  S.histFilters=S.histFilters||{};
+  S.histFilters.libCategories=[]; S.histFilters.libCategory='all'; S.libPage=0;
+  v53InvalidateLibraryCache(); render();
+}
+function v69SetLibrarySort(v){
+  S.histFilters=S.histFilters||{};
+  const allowed=['priority','priority-desc','priority-asc','title-asc','title-desc','rating-desc','rating-asc','progress-desc','progress-asc','total-desc','total-asc'];
+  S.histFilters.libSort=allowed.includes(v)?v:'priority-desc';
+  S.libPage=0; v53InvalidateLibraryCache(); render();
+}
 function renderLibrary(){
+
+  // v69: self-heal Completed titles whenever Library is rendered.
+  const v69AutoFixed=v69RepairCompleted();
+  if(v69AutoFixed) persistLibrary();
 
   const cats = S.categories;
   const ov=v53LibraryOverview();
@@ -3006,11 +3115,16 @@ function renderLibrary(){
       const ageDays = Math.floor(ageMs/86400000);
       const ageLabel = lastTouchedTs ? (ageDays===0?'Touched today':`${ageDays}d untouched`) : (ageDays===0?'Added today':`Never consumed · ${ageDays}d old`);
       const aging = cat.id==='backlog' ? `<span class="aging-badge status-${ageDays>=30?'neglected':ageDays>=7?'due':'healthy'}" title="Time since this backlog item was last consumed">${escapeHtml(ageLabel)}</span>` : '';
-      return `<div class="item-row">
-        <div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
+      // v71: bind cover/rating directly to THIS library item.
+      // Never inject artwork later by searching/replacing rendered HTML: rows can share
+      // category markup, so global replacement can attach one title's cover to another.
+      const v71Cover=i.coverUrl?`<img class="library-cover-thumb" data-library-id="${escapeHtml(i.id)}" src="${escapeHtml(i.coverUrl)}" alt="${escapeHtml(cleanTitle(i.title))} cover" loading="lazy" onerror="this.style.display='none'">`:'';
+      const v71Rating=Number(i.rating)>0?` <span class="v44-rating">★ ${Number(i.rating).toFixed(1)}</span>`:'';
+      return `<div class="item-row" data-library-id="${escapeHtml(i.id)}">
+        ${v71Cover}<div class="bal-icon" style="background:${cat.color}22; color:${cat.color};">${cat.icon}</div>
         <div>
 
-          <div class="item-title">${escapeHtml(cleanTitle(i.title))} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
+          <div class="item-title">${escapeHtml(cleanTitle(i.title))}${v71Rating} ${i.source==='mal'?'<span class="tag">MAL</span>':i.source==='simkl'?'<span class="tag">Imported</span>':''}</div>
 
           <div class="item-sub"><button type="button" class="pill category-click" style="text-transform:none;border:1px solid var(--border-soft);color:inherit;background:transparent;padding:2px 7px;" onclick="event.preventDefault();event.stopPropagation();App.chooseCategoryForLibrary('${i.id}')">${cat.icon} ${escapeHtml(cat.name)}</button> ${aging} ${i.total? '· '+i.progress+' / '+i.total+' '+unitLabel(cat.unit,i.total) : (i.progress? '· '+i.progress+' '+unitLabel(cat.unit,i.progress):'')} ${(i.tags&&i.tags.length)? '· '+i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(''):''}</div>
 
@@ -3058,6 +3172,12 @@ function renderLibrary(){
 
     </div>
 
+    <div class="card" style="margin-bottom:18px;padding:12px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <b style="margin-right:4px;">Library tools</b>
+      <button class="btn btn-sm" ${mfSelectedIds().length?'':'disabled'} onclick="App.v69RepairSelectedCompleted()">✓ Fix completed progress for selected</button>
+      <span class="hint">Select titles below, then repair Completed titles with known totals.</span>
+    </div>
+
     <div class="section-label">OVERVIEW · ${overallPct}% of tracked library cleared</div>
 
     <div class="card" style="margin-bottom:26px;">${overviewRows}</div>
@@ -3070,13 +3190,18 @@ function renderLibrary(){
 
         <input type="text" placeholder="Search titles…" value="${escapeHtml(S.histFilters.libSearch||'')}" class="lib-search" oninput="App.searchLibrary(this.value)">
 
-        <select onchange="App.setLibFilter('libCategory', this.value)">
-
-          <option value="all">All categories</option>
-
-          ${cats.map(c=>`<option value="${c.id}" ${S.histFilters.libCategory===c.id?'selected':''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}
-
-        </select>
+        <details class="v66-cat-filter"><summary class="btn">${Array.isArray(S.histFilters.libCategories)&&S.histFilters.libCategories.length?`${S.histFilters.libCategories.length} categories selected`:'All categories'} ▾</summary><div class="v66-cat-panel"><div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" onclick="event.preventDefault();App.v69ClearLibraryCategories()">All</button></div>${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" ${Array.isArray(S.histFilters.libCategories)&&S.histFilters.libCategories.includes(c.id)?'checked':''} onchange="App.v69ToggleLibraryCategory('${c.id}',this.checked)"><span>${c.icon} ${escapeHtml(c.name)}</span></label>`).join('')}</div></details><select onchange="App.v69SetLibrarySort(this.value)" aria-label="Library display order">
+<option value="priority-desc" ${['priority','priority-desc'].includes(S.histFilters.libSort||'priority')?'selected':''}>Priority: High → Low</option>
+<option value="priority-asc" ${S.histFilters.libSort==='priority-asc'?'selected':''}>Priority: Low → High</option>
+<option value="title-asc" ${S.histFilters.libSort==='title-asc'?'selected':''}>Title: A → Z</option>
+<option value="title-desc" ${S.histFilters.libSort==='title-desc'?'selected':''}>Title: Z → A</option>
+<option value="rating-desc" ${S.histFilters.libSort==='rating-desc'?'selected':''}>Rating: High → Low</option>
+<option value="rating-asc" ${S.histFilters.libSort==='rating-asc'?'selected':''}>Rating: Low → High</option>
+<option value="progress-desc" ${S.histFilters.libSort==='progress-desc'?'selected':''}>Progress watched/read: Most → Least</option>
+<option value="progress-asc" ${S.histFilters.libSort==='progress-asc'?'selected':''}>Progress watched/read: Least → Most</option>
+<option value="total-desc" ${S.histFilters.libSort==='total-desc'?'selected':''}>Total episodes/chapters: Most → Least</option>
+<option value="total-asc" ${S.histFilters.libSort==='total-asc'?'selected':''}>Total episodes/chapters: Least → Most</option>
+</select>
 
         <select onchange="App.setLibFilter('libStatus', this.value)">
 
@@ -3663,29 +3788,94 @@ function defaultButton(section){
   return `<button class="btn btn-sm btn-ghost" onclick="App.resetSettingsSection('${section}')" title="Restore this section's defaults">Default</button>`;
 }
 
+/* v74: ↑/↓ and drag ordering now persist an explicit categoryOrder to cloud. */
+function v72MoveCategory(id, direction){
+  const idx=S.categories.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  const next=idx+Number(direction||0);
+  if(next<0 || next>=S.categories.length) return;
+  [S.categories[idx],S.categories[next]]=[S.categories[next],S.categories[idx]];
+  persistCategories();
+  render();
+}
+
+let V73_CAT_DRAG=null;
+function v73CategoryDragStart(ev,id){
+  if(!ev || ev.button>0) return;
+  const row=ev.currentTarget?.closest('.cat-manage-row');
+  if(!row) return;
+  ev.preventDefault();
+  V73_CAT_DRAG={id,row,pointerId:ev.pointerId};
+  row.classList.add('v73-dragging');
+  try{ev.currentTarget.setPointerCapture(ev.pointerId);}catch(_){ }
+  document.addEventListener('pointermove',v73CategoryDragMove,{passive:false});
+  document.addEventListener('pointerup',v73CategoryDragEnd,{once:true});
+  document.addEventListener('pointercancel',v73CategoryDragEnd,{once:true});
+}
+function v73CategoryDragMove(ev){
+  if(!V73_CAT_DRAG || ev.pointerId!==V73_CAT_DRAG.pointerId) return;
+  ev.preventDefault();
+  const el=document.elementFromPoint(ev.clientX,ev.clientY);
+  const target=el?.closest?.('.cat-manage-row');
+  const row=V73_CAT_DRAG.row;
+  if(!target || target===row || target.parentElement!==row.parentElement) return;
+  const r=target.getBoundingClientRect();
+  target.parentElement.insertBefore(row,ev.clientY < r.top+r.height/2 ? target : target.nextSibling);
+}
+function v73CategoryDragEnd(ev){
+  if(!V73_CAT_DRAG || (ev?.pointerId!=null && ev.pointerId!==V73_CAT_DRAG.pointerId)) return;
+  document.removeEventListener('pointermove',v73CategoryDragMove);
+  const row=V73_CAT_DRAG.row;
+  row?.classList.remove('v73-dragging');
+  const parent=row?.parentElement;
+  if(parent){
+    const ids=[...parent.querySelectorAll(':scope > .cat-manage-row[data-category-id]')].map(x=>x.dataset.categoryId);
+    if(ids.length===S.categories.length){
+      const byId=new Map(S.categories.map(c=>[c.id,c]));
+      S.categories=ids.map(id=>byId.get(id)).filter(Boolean);
+      persistCategories();
+    }
+  }
+  V73_CAT_DRAG=null;
+  render();
+}
+
 function renderSettings(){
 
   const st = S.settings;
 
    const catRows = S.categories.map(c=>` 
 
-    <div class="cat-manage-row">
+    <div class="cat-manage-row" data-category-id="${c.id}">
 
       <div class="hero-icon" style="width:36px;height:36px;font-size:17px;background:${c.color}22; color:${c.color};">${c.icon}</div>
 
       <div class="name">${escapeHtml(c.name)}<div class="meta">${c.target} ${unitLabel(c.unit,c.target)} target · weight ${c.weight} ${c.seasonal?'· seasonal':''}</div></div>
 
+      <div class="cat-order-controls" style="display:flex;gap:5px;align-items:center;">
+        <button type="button" class="btn btn-sm btn-ghost cat-drag-handle" title="Drag to reorder" aria-label="Drag ${escapeHtml(c.name)} to reorder" onpointerdown="App.v73CategoryDragStart(event,'${c.id}')">☰</button>
+        <button class="btn btn-sm btn-ghost" onclick="App.v72MoveCategory('${c.id}',-1)" ${S.categories[0]?.id===c.id?'disabled':''} title="Move category up" aria-label="Move ${escapeHtml(c.name)} up">↑</button>
+        <button class="btn btn-sm btn-ghost" onclick="App.v72MoveCategory('${c.id}',1)" ${S.categories[S.categories.length-1]?.id===c.id?'disabled':''} title="Move category down" aria-label="Move ${escapeHtml(c.name)} down">↓</button>
+      </div>
+
       <button class="toggle ${c.enabled?'on':''}" onclick="App.toggleCategory('${c.id}')"></button>
 
-      <button class="btn btn-sm btn-ghost" onclick="App.openCategoryModal('${c.id}')">Edit</button>
+      <button class="btn btn-sm btn-ghost cat-edit-btn" onclick="App.openCategoryModal('${c.id}')">Edit</button>
 
-      <button class="btn btn-sm btn-danger" onclick="App.deleteCategory('${c.id}')">Delete</button>
+      <button class="btn btn-sm btn-danger cat-delete-btn" onclick="App.deleteCategory('${c.id}')">Delete</button>
 
     </div>`).join('');
 
    return ` 
 
     <div class="view-head"><div><div class="view-title">Settings</div><div class="view-desc">Tune the rotation to fit your life.</div></div><button class="btn btn-ghost" onclick="App.resetAllSettings()">Restore all defaults</button></div>
+
+    <div class="section-label">🛠 LIBRARY INTEGRITY</div>
+    <div class="card" style="margin-bottom:22px;border:1px solid var(--flow);">
+      <div style="font-weight:800;font-size:15px;">Repair Completed title progress</div>
+      <div class="v66-note">Scans the whole Library. A Completed title with a known total is set to full progress, for example 0 / 1 → 1 / 1 or 8 / 12 → 12 / 12. Titles with no known total are ignored.</div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="App.v69RepairAllCompleted()">Scan & fix whole Library</button>
+    </div>
 
     <div class="two-col" style="align-items:start;">
 
@@ -3732,7 +3922,7 @@ function renderSettings(){
         <div class="section-label settings-section-head"><span>TITLE RECOMMENDATIONS</span>${defaultButton('titles')}</div>
 
         <div class="card" style="margin-bottom:22px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+          <div class="settings-toggle-row" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
             <div>
               <div style="font-weight:700;">Let MediaFlow choose the exact title</div>
               <small class="hint">When enabled, the scheduler uses your Library and its scoring signals to recommend a specific title inside the category it selected. You can still skip or rotate.</small>
@@ -3771,7 +3961,7 @@ function renderSettings(){
         <div class="section-label settings-section-head"><span>LEVELING &amp; XP</span>${defaultButton('leveling')}</div>
 
         <div class="card" style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div class="settings-toggle-row" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
             <div>
               <div style="font-weight:700;">XP leveling system</div>
               <small class="hint">Control how much XP you earn from time, media units, Library additions, completions, and rotation health.</small>
@@ -4150,6 +4340,13 @@ function libraryModalHtml(d){
    ============================================================ */
 
 const App = {
+  v72MoveCategory,
+  v73CategoryDragStart,
+  v69RepairAllCompleted,
+  v69RepairSelectedCompleted,
+  v69ToggleLibraryCategory,
+  v69ClearLibraryCategories,
+  v69SetLibrarySort,
 
   setView(v){ S.view=v; render(); },
   mobileNav, toggleMobileMore,
@@ -5382,7 +5579,7 @@ function mfCommit(action,detail){const x=S.undoStack[S.undoStack.length-1];if(x&
 async function mfUndo(){const x=(S.undoStack||[]).pop();if(!x){showToast('Nothing to undo');return;}x.after=x.after||mfCoreSnapshot();S.redoStack=S.redoStack||[];S.redoStack.push(x);mfRestoreCore(x.before);mfActivity('Undo',x.action+(x.detail?' · '+x.detail:''));await saveState();render();showToast('Undid '+x.action);}
 async function mfRedo(){const x=(S.redoStack||[]).pop();if(!x){showToast('Nothing to redo');return;}S.undoStack=S.undoStack||[];S.undoStack.push(x);mfRestoreCore(x.after);mfActivity('Redo',x.action+(x.detail?' · '+x.detail:''));await saveState();render();showToast('Redid '+x.action);}
 function mfSelectedIds(){return Object.keys(S.librarySelection||{}).filter(id=>S.librarySelection[id]&&S.library.some(i=>i.id===id));}
-function mfToggleSelect(id,on){S.librarySelection=S.librarySelection||{};S.librarySelection[id]=!!on;mfEnhanceLibraryDom();}
+function mfToggleSelect(id,on){S.librarySelection=S.librarySelection||{};S.librarySelection[id]=!!on;render();}
 function mfSelectVisible(on){document.querySelectorAll('.item-row [data-mf-select]').forEach(cb=>{cb.checked=!!on;S.librarySelection[cb.dataset.mfSelect]=!!on;});mfEnhanceLibraryDom();}
 function mfClearSelection(){S.librarySelection={};render();}
 function mfBatchStatus(v){const ids=mfSelectedIds();if(!ids.length)return;mfBegin('Batch status',ids.length+' titles → '+v);ids.forEach(id=>{const i=S.library.find(x=>x.id===id);if(i){i.status=v;if(v==='completed'){i.completedAt=i.completedAt||Date.now();}else i.completedAt=null;}});normalizeSeasonalLibraryItems();mfCommit('Batch status',ids.length+' titles → '+v);render();}
@@ -5399,7 +5596,7 @@ function renderLibraryHistory(){
   <div class="mf-batchbar" style="margin-bottom:18px"><div class="mf-undo-group"><button class="btn btn-sm" onclick="App.undoChange()" ${undoCount?'':'disabled'}>↶ Undo</button><button class="btn btn-sm" onclick="App.redoChange()" ${redoCount?'':'disabled'}>↷ Redo</button></div><span class="hint">${undoCount} undo step${undoCount===1?'':'s'} · ${redoCount} redo step${redoCount===1?'':'s'}</span></div>
   ${mfActivityHtml()}`;
 }
-function mfBatchBar(){const n=mfSelectedIds().length;return `<div class="mf-batchbar"><label style="display:flex;gap:7px;align-items:center"><input class="mf-select" type="checkbox" onchange="App.selectVisibleLibrary(this.checked)"> Select visible</label><b>${n} selected</b><div class="spacer"></div><select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${S.categories.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select><button class="btn btn-sm" onclick="App.clearLibrarySelection()">Clear selection</button><button class="btn btn-sm btn-danger" ${n?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button></div>`;}
+function mfBatchBar(){const n=mfSelectedIds().length;return `<div class="mf-batchbar"><label style="display:flex;gap:7px;align-items:center"><input class="mf-select" type="checkbox" onchange="App.selectVisibleLibrary(this.checked)"> Select visible</label><b>${n} selected</b><div class="spacer"></div><select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${S.categories.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select><button class="btn btn-sm" onclick="App.clearLibrarySelection()">Clear selection</button><button class="btn btn-sm" ${n?'':'disabled'} onclick="App.v69RepairSelectedCompleted()">Fix completed progress</button><button class="btn btn-sm btn-danger" ${n?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button></div>`;}
 function mfEnhanceLibraryDom(){if(S.view!=='library')return;document.querySelectorAll('.item-row').forEach(row=>{if(row.querySelector('[data-mf-select]'))return;const del=[...row.querySelectorAll('button')].find(b=>(b.getAttribute('onclick')||'').includes('deleteLibraryItem'));const m=(del?.getAttribute('onclick')||'').match(/deleteLibraryItem\('([^']+)'\)/);if(!m)return;const id=m[1],cb=document.createElement('input');cb.type='checkbox';cb.className='mf-select';cb.dataset.mfSelect=id;cb.checked=!!S.librarySelection?.[id];cb.addEventListener('change',()=>mfToggleSelect(id,cb.checked));row.insertBefore(cb,row.firstChild);});const count=document.querySelector('.mf-batchbar b');if(count)count.textContent=mfSelectedIds().length+' selected';}
 
 async function mfImportSimklJson(file){if(!file)return;showImportProgress('Importing Simkl JSON',1);try{const data=JSON.parse(await file.text());if(!data||(!Array.isArray(data.anime)&&!Array.isArray(data.shows)&&!Array.isArray(data.movies)))throw new Error('This does not look like a Simkl JSON backup.');mfBegin('Simkl JSON import',file.name||'backup');const statusMap={watching:'active',plantowatch:'planned',completed:'completed',hold:'paused',onhold:'paused',dropped:'dropped'};let added=0,updated=0,historyAdded=0,processed=0;const groups=[['anime',data.anime||[]],['shows',data.shows||[]],['movies',data.movies||[]]],total=groups.reduce((a,g)=>a+g[1].length,0)||1;const seenSessions=new Set((S.sessions||[]).map(s=>s.importKey).filter(Boolean));for(const [kind,list] of groups){for(const rec of list){processed++;const media=rec.show||rec.movie||{};const title=cleanTitle(media.title||'');if(!title)continue;let catId;if(kind==='shows')catId='tv';else if(kind==='movies')catId='movies';else if(String(rec.anime_type||'').toLowerCase()==='movie')catId='animemovies';else catId=(Number(rec.not_aired_episodes_count)||0)>0?'seasonal':'backlog';if(!S.categories.some(c=>c.id===catId))catId=S.categories[0]?.id;if(!catId)continue;const ids=media.ids||{};const ext={simkl:ids.simkl??null,mal:ids.mal??null,anilist:ids.anilist??null,tmdb:ids.tmdb??ids.tmdbtv??null,imdb:ids.imdb??null};let item=S.library.find(i=>i.externalIds?.simkl&&ext.simkl&&String(i.externalIds.simkl)===String(ext.simkl));if(!item)item=S.library.find(i=>cleanTitle(i.title).toLowerCase()===title.toLowerCase()&&((i.year||null)===(media.year||null)||!i.year||!media.year));const progress=Math.max(0,Number(rec.watched_episodes_count)||0);const totalUnits=Number(rec.total_episodes_count)>0?Number(rec.total_episodes_count):(kind==='movies'?1:null);const status=statusMap[String(rec.status||'').toLowerCase()]||'planned';if(item){item.title=title;item.categoryId=catId;item.progress=Math.max(Number(item.progress)||0,progress);if(totalUnits)item.total=totalUnits;item.status=status;item.source='simkl';item.externalIds=Object.assign({},item.externalIds||{},ext);item.year=media.year||item.year||null;item.rating=rec.user_rating??item.rating??null;item.simklAddedAt=rec.added_to_watchlist_at||item.simklAddedAt||null;updated++;}else{item={id:uid(),title,categoryId:catId,progress,total:totalUnits,status,priority:'medium',estimatedMinutes:Number(media.runtime)||null,tags:['simkl'],source:'simkl',createdAt:rec.added_to_watchlist_at?Date.parse(rec.added_to_watchlist_at):Date.now(),completedAt:status==='completed'?(rec.last_watched_at?Date.parse(rec.last_watched_at):Date.now()):null,externalIds:ext,year:media.year||null,rating:rec.user_rating??null,simklAddedAt:rec.added_to_watchlist_at||null};S.library.push(item);awardLibraryAdditionXP(item.id);added++;}
@@ -5604,12 +5801,12 @@ function v43SetCustomTheme(k,v){if(!/^#[0-9a-f]{6}$/i.test(v))return;S.settings.
 function v43ResetCustomTheme(){S.settings.customTheme={bg:'#0E111A',panel:'#161B2A',raised:'#1C2334',border:'#2B3448',text:'#F4F6FB',muted:'#8D98AD',accent:'#E8A94A'};S.settings.theme='custom';applyTheme('custom');persistSettings();render();}
 
 /* Library selection + view modes */
-function v43FilteredLibraryIds(){let items=S.library.slice();const f=S.histFilters||{},q=(f.libSearch||'').trim().toLowerCase();if(f.libCategory&&f.libCategory!=='all')items=items.filter(i=>i.categoryId===f.libCategory);if(f.libStatus&&f.libStatus!=='all')items=items.filter(i=>i.status===f.libStatus);if(f.libPriority&&f.libPriority!=='all')items=items.filter(i=>i.priority===f.libPriority);if(q)items=items.filter(i=>cleanTitle(i.title).toLowerCase().includes(q));return items.map(i=>i.id);}
+function v43FilteredLibraryIds(){const f=S.histFilters||{};return v53FilteredLibrary(f.libCategory||'all',f.libStatus||'all',f.libPriority||'all',(f.libSearch||'').trim()).map(i=>i.id);}
 function v43SelectAll(){S.librarySelection=S.librarySelection||{};v43FilteredLibraryIds().forEach(id=>S.librarySelection[id]=true);render();}
 function v43DeselectAll(){S.librarySelection={};render();}
 function v43SetLibraryView(v){if(!['list','compact','cards'].includes(v))return;S.settings.libraryView=v;persistSettings();render();}
 const v43OriginalLibrary=mfBaseRenderLibrary;
-renderLibrary=function(){let h=v43OriginalLibrary();const mode=S.settings.libraryView||'list';const controls=`<div class="mf-batchbar"><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn btn-sm" onclick="App.selectVisibleLibrary(true)">Select visible</button><button class="btn btn-sm" onclick="App.selectAllLibrary()">Select all matching</button><button class="btn btn-sm" onclick="App.deselectAllLibrary()">Deselect all</button></div><b>${mfSelectedIds().length} selected</b><div class="spacer"></div><select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${S.categories.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select><button class="btn btn-sm btn-danger" ${mfSelectedIds().length?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button></div>`;
+renderLibrary=function(){let h=v43OriginalLibrary();const mode=S.settings.libraryView||'list';const controls=`<div class="mf-batchbar"><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn btn-sm" onclick="App.selectVisibleLibrary(true)">Select visible</button><button class="btn btn-sm" onclick="App.selectAllLibrary()">Select all matching</button><button class="btn btn-sm" onclick="App.deselectAllLibrary()">Deselect all</button><button class="btn btn-sm" ${mfSelectedIds().length?'':'disabled'} onclick="App.fixSelectedCompletedProgress()">Fix completed progress</button></div><b>${mfSelectedIds().length} selected</b><div class="spacer"></div><select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${S.categories.map(c=>`<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select><button class="btn btn-sm" ${mfSelectedIds().length?'':'disabled'} onclick="App.v69RepairSelectedCompleted()">Fix completed progress</button><button class="btn btn-sm btn-danger" ${mfSelectedIds().length?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button></div>`;
   const view=`<div class="v43-view-switch" style="margin:0 0 12px"><span class="hint">Display:</span>${[['list','List'],['compact','Compact'],['cards','Cards']].map(([v,l])=>`<button class="btn btn-sm ${mode===v?'active':''}" onclick="App.setLibraryView('${v}')">${l}</button>`).join('')}</div>`;
   h=h.replace('<div class="section-label">OVERVIEW',controls+'<div class="section-label">OVERVIEW');h=h.replace('<div class="lib-toolbar">',view+'<div class="lib-toolbar">');return `<div class="library-view-${mode}">${h}</div>`;
 };
@@ -5812,9 +6009,9 @@ renderSettings=function(){let h=v44SettingsBase();const fields=`<div class="fiel
 const v44StatsBase=renderStats;
 renderStats=function(){let h=v44StatsBase();const rated=S.library.filter(i=>Number(i.rating)>0),avg=rated.length?rated.reduce((a,i)=>a+Number(i.rating),0)/rated.length:0,high=rated.filter(i=>Number(i.rating)>=8).length,perfect=rated.filter(i=>Number(i.rating)>=9.5).length;const dist=[];for(let n=10;n>=1;n--)dist.push({n,count:rated.filter(i=>Math.ceil(Number(i.rating))===n).length});const max=Math.max(1,...dist.map(x=>x.count));const card=`<div class="card" style="margin-bottom:24px"><div class="section-label">RATINGS</div><div class="v44-rating-grid"><div><b>${rated.length}</b><small class="hint">Rated titles</small></div><div><b>${rated.length?avg.toFixed(2):'—'}</b><small class="hint">Average rating / 10</small></div><div><b>${high}</b><small class="hint">Rated 8+</small></div><div><b>${perfect}</b><small class="hint">Rated 9.5+</small></div></div><div style="margin-top:16px">${dist.map(x=>`<div class="bal-bar-row"><div class="bal-bar-label">${x.n}/10</div><div class="bal-bar-track"><div class="bal-bar-fill" style="width:${Math.round(x.count/max*100)}%;background:var(--flow)"></div></div><div class="bal-bar-val">${x.count}</div></div>`).join('')}</div></div>`;const marker='<div class="card" style="margin-bottom:24px;"><div class="section-label">TITLE COMPLETION TIMELINE</div>';const p=h.indexOf(marker);return p>=0?h.slice(0,p)+card+h.slice(p):h+card;};
 
-/* Add covers + ratings to Library rows without changing the existing filtering/pagination logic. */
-const v44LibraryBase=renderLibrary;
-renderLibrary=function(){let h=v44LibraryBase();for(const i of S.library){const titleEsc=escapeHtml(cleanTitle(i.title));const needle=`<div class="item-title">${titleEsc} `;if(!h.includes(needle))continue;const art=i.coverUrl?`<img class="library-cover-thumb" src="${escapeHtml(i.coverUrl)}" alt="" onerror="this.style.display='none'">`:'';if(art)h=h.replace(`<div class="bal-icon" style="background:${getCategory(i.categoryId)?.color}22; color:${getCategory(i.categoryId)?.color};">${getCategory(i.categoryId)?.icon}</div>`,art+`<div class="bal-icon" style="background:${getCategory(i.categoryId)?.color}22; color:${getCategory(i.categoryId)?.color};">${getCategory(i.categoryId)?.icon}</div>`);if(Number(i.rating)>0)h=h.replace(needle,`<div class="item-title">${titleEsc} <span class="v44-rating">★ ${Number(i.rating).toFixed(1)}</span> `);}return h;};
+/* v71: covers and ratings are rendered natively inside each Library row above.
+   The old global HTML replacement injector was removed because it could match another
+   row with identical category markup and visually assign the wrong title's cover. */
 
 Object.assign(App,{stopwatchAddTime,stopwatchMinusTime,previewLibraryCover:v44PreviewCover,findLibraryCover:v44FindCover,clearLibraryCover(){const i=document.getElementById('l-cover');if(i){i.value='';delete i.dataset.auto;}v44PreviewCover('');},setTimelinePage(p){S.timelinePage=Math.max(0,Number(p)||0);render();}});
 
@@ -5891,6 +6088,7 @@ async function v46RefreshSchedulerProgress(){
 function v46ApplyState(d){
   d=d||{};
   S.categories=d.categories||S.categories||JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  v74ApplyCategoryOrder(d.categoryOrder||d.settings?.categoryOrder||[]);
   S.library=sanitizeLibrary(d.library||[]);
   S.sessions=Array.isArray(d.sessions)?d.sessions:[];
   S.settings=Object.assign({},DEFAULT_SETTINGS,d.settings||{});
@@ -6198,6 +6396,7 @@ Separate MediaFlow and Platform theme selectors. Platform themes are MediaFlow p
    large outline icons above full labels on a clean flat bottom bar, with the
    active destination highlighted by the current theme accent. The v63
    responsive navigation logic and More fallback remain intact. */
+
 
 </script>
 
