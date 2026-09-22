@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow by Alex Godly</title>
+<title>MediaFlow v63 by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -761,8 +761,6 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 /* v82 — visible per-title repeat consumption */
 .v82-repeat-badge{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 7px;border:1px solid color-mix(in srgb,var(--flow) 45%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--flow) 12%,transparent);color:var(--flow);font-size:10px;font-weight:800;vertical-align:middle;white-space:nowrap}
 .v82-repeat-panel{margin:14px 0;padding:14px;border:1px solid color-mix(in srgb,var(--flow) 35%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--flow) 6%,var(--panel-raised))}.v82-repeat-head{font-size:10px;font-weight:800;letter-spacing:.11em;color:var(--flow);margin-bottom:10px}.v82-repeat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}.v82-repeat-grid>div{padding:10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel)}.v82-repeat-grid b{display:block;font-family:var(--font-display);font-size:20px}.v82-repeat-grid small{display:block;color:var(--text-mute);margin-top:2px}.v82-repeat-current{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 0;font-size:12px}.v82-repeat-current span{color:var(--text-dim);text-align:right}@media(max-width:560px){.v82-repeat-current{align-items:flex-start;flex-direction:column;gap:4px}.v82-repeat-current span{text-align:left}}
-/* v83 — editable manual repeat history */
-.v83-repeat-edit{margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft)}.v83-repeat-edit-title{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--text-dim);margin-bottom:8px}.v83-repeat-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.v83-repeat-source{margin-top:9px;font-size:10px;color:var(--text-mute);line-height:1.5}.v83-repeat-source b{color:var(--text-dim)}@media(max-width:560px){.v83-repeat-edit-grid{grid-template-columns:1fr}}
 </style>
 
 
@@ -5764,34 +5762,28 @@ function mfBatchDelete(){const ids=mfSelectedIds();if(!ids.length)return;mfBegin
 function mfClearCategory(id){const cat=S.categories.find(c=>c.id===id);if(!cat)return;const n=S.library.filter(i=>i.categoryId===id).length;if(!n){showToast('That category is already empty');return;}mfBegin('Clear category',cat.name+' · '+n+' titles');S.library=S.library.filter(i=>i.categoryId!==id);mfCommit('Clear category',cat.name+' · '+n+' titles');render();showToast(cat.name+' cleared');}
 /* MediaFlow v81 — Repeat Consumption (Rewatch / Reread) */
 function v81RepeatTotals(){
-  const byTitle=new Map(); let sessions=0,minutes=0,episodes=0,chapters=0,issues=0,movies=0;
+  let episodes=0,chapters=0,issues=0,movies=0,minutes=0,sessions=0;
+  const byTitle=new Map();
   for(const sess of (S.sessions||[])){
+    if(sess?.status==='skipped') continue;
     let sessionHadRepeat=false;
     for(const t of (sess.titles||[])){
       if(!t?.repeat) continue;
       sessionHadRepeat=true;
+      const qty=Math.max(0,Number(t.qty)||0);
       const item=t.libraryId?S.library.find(i=>i.id===t.libraryId):null;
-      const key=item?.id||t.libraryId; if(!key) continue;
-      const unit=getCategory(item?.categoryId||sess.categoryId)?.unit||sess.unit||'units';
-      const amount=Math.max(0,Number(t.qty)||0);
-      const rec=byTitle.get(key)||{title:cleanTitle(t.title),amount:0,loggedAmount:0,manualAmount:0,unit,total:Number(item?.total)||0,completedRepeats:0};
-      rec.loggedAmount+=amount; rec.amount+=amount; rec.total=Number(item?.total)||rec.total||0; rec.unit=unit;
+      const cat=item?getCategory(item.categoryId):getCategory(sess.categoryId);
+      const unit=cat?.unit||sess.unit;
+      if(unit==='episodes') episodes+=qty; else if(unit==='chapters') chapters+=qty; else if(unit==='issues') issues+=qty; else if(unit==='movies') movies+=qty;
+      const key=t.libraryId||cleanTitle(t.title).toLowerCase();
+      const rec=byTitle.get(key)||{title:cleanTitle(t.title),amount:0,unit,total:Number(item?.total)||0,completedRepeats:0};
+      rec.amount+=qty; rec.unit=unit; rec.total=Number(item?.total)||rec.total;
+      rec.completedRepeats=rec.total>0?Math.floor(rec.amount/rec.total):0;
       byTitle.set(key,rec);
-      if(unit==='episodes')episodes+=amount; else if(unit==='chapters')chapters+=amount; else if(unit==='issues')issues+=amount; else if(unit==='movies')movies+=amount;
     }
     if(sessionHadRepeat){ sessions++; minutes+=Math.max(0,Number(sess.minutes)||0); }
   }
-  // v83: manual past repeats live on the Library title. They count as lifetime repeat
-  // consumption, but deliberately create no History session, XP, minutes, streak, or scheduler activity.
-  for(const item of (S.library||[])){
-    const manual=Math.max(0,Math.floor(Number(item.manualRepeatAmount)||0)); if(!manual) continue;
-    const unit=getCategory(item.categoryId)?.unit||'units';
-    const rec=byTitle.get(item.id)||{title:cleanTitle(item.title),amount:0,loggedAmount:0,manualAmount:0,unit,total:Number(item.total)||0,completedRepeats:0};
-    rec.manualAmount=manual; rec.amount=(Number(rec.loggedAmount)||0)+manual; rec.total=Number(item.total)||0; rec.unit=unit; byTitle.set(item.id,rec);
-    if(unit==='episodes')episodes+=manual; else if(unit==='chapters')chapters+=manual; else if(unit==='issues')issues+=manual; else if(unit==='movies')movies+=manual;
-  }
-  for(const rec of byTitle.values()) rec.completedRepeats=rec.total>0?Math.floor(rec.amount/rec.total):0;
-  return {byTitle,sessions,minutes,episodes,chapters,issues,movies};
+  return {episodes,chapters,issues,movies,minutes,sessions,byTitle};
 }
 function v81RepeatLabel(item){
   const r=v81RepeatTotals().byTitle.get(item.id); if(!r||!r.amount)return '';
@@ -5819,15 +5811,14 @@ function v82RepeatSummary(item,r){
   return `${action}: ${r.amount.toLocaleString()} ${unit} · total unknown`;
 }
 function v82RepeatDetailHtml(item){
-  const r=v81RepeatTotals().byTitle.get(item.id)||{amount:0,loggedAmount:0,manualAmount:Math.max(0,Number(item.manualRepeatAmount)||0),unit:getCategory(item.categoryId)?.unit||'units',total:Number(item.total)||0,completedRepeats:0};
-  const reading=getCategory(item.categoryId)?.type==='reading';
+  if(!item?.id) return '';
+  const r=v81RepeatTotals().byTitle.get(item.id);
+  if(!r||!r.amount) return `<div class="v82-repeat-panel"><div class="v82-repeat-head">↻ REWATCH / REREAD</div><div class="hint">No repeat consumption logged for this title yet.</div></div>`;
+  const cat=getCategory(item.categoryId),reading=cat?.type==='reading';
   const noun=reading?'Rereads':'Rewatches',verb=reading?'reread':'rewatched';
-  const total=Math.max(0,Number(item.total)||0),full=total>0?Math.floor(r.amount/total):0,current=total>0?r.amount%total:r.amount;
+  const total=Math.max(0,Number(r.total)||0),full=total>0?Math.floor(r.amount/total):0,current=total>0?(r.amount%total):r.amount;
   const currentText=total>0?(current===0&&full>0?`Re${reading?'read':'watch'} #${full} complete`:`${current.toLocaleString()} / ${total.toLocaleString()} toward ${reading?'reread':'rewatch'} #${full+1}`):`${r.amount.toLocaleString()} ${unitLabel(r.unit,r.amount)} ${verb} · title total unknown`;
-  const manual=Math.max(0,Math.floor(Number(item.manualRepeatAmount)||0));
-  const manualFull=total>0?Math.floor(manual/total):0,manualExtra=total>0?manual%total:manual;
-  const editFields=total>0?`<div class="v83-repeat-edit-grid"><div class="field"><label class="field-label">Manual full ${reading?'rereads':'rewatches'}</label><input type="number" id="l-repeat-full" min="0" step="1" value="${manualFull}"></div><div class="field"><label class="field-label">Extra ${escapeHtml(unitLabel(r.unit,2))}</label><input type="number" id="l-repeat-extra" min="0" max="${Math.max(0,total-1)}" step="1" value="${manualExtra}"></div></div>`:`<div class="field"><label class="field-label">Manual ${escapeHtml(unitLabel(r.unit,2))} ${verb}</label><input type="number" id="l-repeat-extra" min="0" step="1" value="${manualExtra}"></div>`;
-  return `<div class="v82-repeat-panel"><div class="v82-repeat-head">↻ REWATCH / REREAD</div><div class="v82-repeat-grid"><div><b>${full.toLocaleString()}</b><small>Full ${noun.toLowerCase()}</small></div><div><b>${r.amount.toLocaleString()}</b><small>${escapeHtml(unitLabel(r.unit,r.amount))} ${verb}</small></div></div><div class="v82-repeat-current"><b>Current repeat</b><span>${escapeHtml(currentText)}</span></div><div class="v83-repeat-source"><b>Logged in MediaFlow:</b> ${(Number(r.loggedAmount)||0).toLocaleString()} · <b>Manual past repeats:</b> ${manual.toLocaleString()} ${escapeHtml(unitLabel(r.unit,manual))}</div><div class="v83-repeat-edit"><div class="v83-repeat-edit-title">EDIT PAST REPEAT HISTORY</div>${editFields}<small class="hint">Use this for rewatches/rereads from before MediaFlow or corrections. Manual values affect repeat totals only. They do not create History sessions, XP, time, streaks, or scheduler activity.</small></div></div>`;
+  return `<div class="v82-repeat-panel"><div class="v82-repeat-head">↻ REWATCH / REREAD</div><div class="v82-repeat-grid"><div><b>${full.toLocaleString()}</b><small>Full ${noun.toLowerCase()}</small></div><div><b>${r.amount.toLocaleString()}</b><small>${escapeHtml(unitLabel(r.unit,r.amount))} ${verb}</small></div></div><div class="v82-repeat-current"><b>Current repeat</b><span>${escapeHtml(currentText)}</span></div><small class="hint">Repeat consumption comes from History and does not change this title's main Library progress.</small></div>`;
 }
 
 function mfLifetime(){const completed=new Set((S.library||[]).filter(i=>i.status==='completed').map(i=>i.id));let episodes=0,chapters=0,issues=0,movies=0,minutes=0;for(const s of S.sessions||[]){if(s.status==='skipped')continue;const n=Math.max(0,Number(s.actualAmount)||0);minutes+=Math.max(0,Number(s.minutes)||0);if(s.unit==='episodes')episodes+=n;else if(s.unit==='chapters')chapters+=n;else if(s.unit==='issues')issues+=n;else if(s.unit==='movies')movies+=n;}return {completed:completed.size,episodes,chapters,issues,movies,minutes};}
@@ -6210,7 +6201,6 @@ stopwatchHtml=function(){let h=v44OldStopwatchHtml();const sw=S.stopwatch||{};re
 /* Rating + cover controls in title editor. */
 const v44OldLibraryModalHtml=libraryModalHtml;
 libraryModalHtml=function(d){let h=v44OldLibraryModalHtml(d);const rating=Number(d.rating)||0,cover=String(d.coverUrl||'');const extra=`<div class="field-row"><div class="field"><label class="field-label">Rating (0–10)</label><input type="number" id="l-rating" min="0" max="10" step="0.1" value="${rating||''}" placeholder="Not rated"></div></div><div class="field"><label class="field-label">Cover art</label><div class="v44-cover-row"><img id="l-cover-preview" class="v44-cover-preview" src="${escapeHtml(cover)}" alt="Cover preview" onerror="this.style.visibility='hidden'" ${cover?'':'style="visibility:hidden"'}><div class="v44-cover-fields"><input type="url" id="l-cover" value="${escapeHtml(cover)}" placeholder="Paste an image URL" oninput="App.previewLibraryCover(this.value)"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn btn-sm" onclick="App.findLibraryCover()">Find cover automatically</button><button type="button" class="btn btn-sm btn-ghost" onclick="App.clearLibraryCover()">Remove cover</button></div><small class="hint">Manual cover art earns the configurable manual-cover XP bonus once per title. Automatic retrieval does not earn that bonus.</small></div></div></div>`;return h.replace('<div class="field"><label class="field-label">Estimated minutes',extra+'<div class="field"><label class="field-label">Estimated minutes');};
-// v83: manual past repeat values are editable in the same per-title repeat panel.
 // v82: show per-title repeat history inside the Library title editor.
 const v82OldLibraryModalHtml=libraryModalHtml;
 libraryModalHtml=function(d){
@@ -6249,7 +6239,7 @@ function coverPickerModalHtml(d){const rows=(d.results||[]).map((r,i)=>`<button 
 App.chooseLibraryCover=function(i){const picker=document.getElementById('v45-cover-picker'),r=picker?._results?.[i];if(!r)return;const input=document.getElementById('l-cover');if(input){input.value=r.url;input.dataset.auto='1';v44PreviewCover(r.url);}picker.remove();showToast('Cover selected ✓');};
 
 /* Replace title save so rating/cover persist and title edits award XP. */
-App.saveLibraryModal=function(id){const old=id?S.library.find(i=>i.id===id):null;mfBegin(id?'Edit title':'Add title',old?cleanTitle(old.title):'');const tagsRaw=document.getElementById('l-tags').value;const coverInput=document.getElementById('l-cover');const cover=String(coverInput?.value||'').trim();const data={id:id||uid(),title:cleanTitle(document.getElementById('l-title').value)||'Untitled',categoryId:document.getElementById('l-category').value,progress:Math.max(0,Number(document.getElementById('l-progress').value)||0),total:document.getElementById('l-total').value?Math.max(0,Number(document.getElementById('l-total').value)):null,status:document.getElementById('l-status').value,priority:document.getElementById('l-priority').value,estimatedMinutes:document.getElementById('l-est').value?Number(document.getElementById('l-est').value):null,tags:tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),rating:Math.max(0,Math.min(10,Number(document.getElementById('l-rating')?.value)||0))||null,coverUrl:cover||'',coverSource:cover?(coverInput?.dataset?.auto==='1'?'auto':'manual'):'',manualRepeatAmount:(()=>{const total=document.getElementById('l-total').value?Math.max(0,Number(document.getElementById('l-total').value)||0):0;const full=Math.max(0,Math.floor(Number(document.getElementById('l-repeat-full')?.value)||0));let extra=Math.max(0,Math.floor(Number(document.getElementById('l-repeat-extra')?.value)||0));if(total>0)extra=Math.min(extra,Math.max(0,total-1));return total>0?full*total+extra:extra;})(),createdAt:id?(old?.createdAt||Date.now()):Date.now(),completedAt:id?(old?.completedAt||null):null};if(data.status==='completed'&&!data.completedAt)data.completedAt=Date.now();if(data.status==='completed'){S.completionTimeline=S.completionTimeline||[];if(!S.completionTimeline.some(x=>x.libraryId===data.id))S.completionTimeline.push({libraryId:data.id,title:data.title,categoryId:data.categoryId,completedAt:data.completedAt});}const idx=S.library.findIndex(i=>i.id===id);let earned=0;if(idx>=0){S.library[idx]=data;earned+=v44AwardEditXP(data.id);if(data.coverSource==='manual'&&data.coverUrl&&data.coverUrl!==old?.coverUrl)earned+=v44AwardManualCoverXP(data.id);}else{S.library.push(data);earned+=awardLibraryAdditionXP(data.id);if(data.coverSource==='manual'&&data.coverUrl)earned+=v44AwardManualCoverXP(data.id);}normalizeSeasonalLibraryItems();S.modal=null;mfCommit(id?'Edit title':'Add title',data.title);persistLibrary();render();if(earned)showToast(`Saved · +${earned} XP`);};
+App.saveLibraryModal=function(id){const old=id?S.library.find(i=>i.id===id):null;mfBegin(id?'Edit title':'Add title',old?cleanTitle(old.title):'');const tagsRaw=document.getElementById('l-tags').value;const coverInput=document.getElementById('l-cover');const cover=String(coverInput?.value||'').trim();const data={id:id||uid(),title:cleanTitle(document.getElementById('l-title').value)||'Untitled',categoryId:document.getElementById('l-category').value,progress:Math.max(0,Number(document.getElementById('l-progress').value)||0),total:document.getElementById('l-total').value?Math.max(0,Number(document.getElementById('l-total').value)):null,status:document.getElementById('l-status').value,priority:document.getElementById('l-priority').value,estimatedMinutes:document.getElementById('l-est').value?Number(document.getElementById('l-est').value):null,tags:tagsRaw.split(',').map(t=>t.trim()).filter(Boolean),rating:Math.max(0,Math.min(10,Number(document.getElementById('l-rating')?.value)||0))||null,coverUrl:cover||'',coverSource:cover?(coverInput?.dataset?.auto==='1'?'auto':'manual'):'',createdAt:id?(old?.createdAt||Date.now()):Date.now(),completedAt:id?(old?.completedAt||null):null};if(data.status==='completed'&&!data.completedAt)data.completedAt=Date.now();if(data.status==='completed'){S.completionTimeline=S.completionTimeline||[];if(!S.completionTimeline.some(x=>x.libraryId===data.id))S.completionTimeline.push({libraryId:data.id,title:data.title,categoryId:data.categoryId,completedAt:data.completedAt});}const idx=S.library.findIndex(i=>i.id===id);let earned=0;if(idx>=0){S.library[idx]=data;earned+=v44AwardEditXP(data.id);if(data.coverSource==='manual'&&data.coverUrl&&data.coverUrl!==old?.coverUrl)earned+=v44AwardManualCoverXP(data.id);}else{S.library.push(data);earned+=awardLibraryAdditionXP(data.id);if(data.coverSource==='manual'&&data.coverUrl)earned+=v44AwardManualCoverXP(data.id);}normalizeSeasonalLibraryItems();S.modal=null;mfCommit(id?'Edit title':'Add title',data.title);persistLibrary();render();if(earned)showToast(`Saved · +${earned} XP`);};
 
 /* Completion timeline pagination. */
 renderCompletionTimeline=function(){const map=new Map();for(const x of(S.completionTimeline||[])){if(x?.completedAt)map.set(x.libraryId||(`${x.title}::${x.completedAt}`),x);}for(const i of S.library){if(i?.status==='completed'&&i.completedAt&&!map.has(i.id))map.set(i.id,{libraryId:i.id,title:i.title,categoryId:i.categoryId,completedAt:i.completedAt});}const arr=[...map.values()].sort((a,b)=>Number(b.completedAt)-Number(a.completedAt));if(!arr.length)return '<div class="empty-state">No completed titles yet.</div>';const size=25,max=Math.max(0,Math.ceil(arr.length/size)-1);S.timelinePage=clamp(Number(S.timelinePage)||0,0,max);const page=arr.slice(S.timelinePage*size,S.timelinePage*size+size);const rows=`<div class="completion-timeline">${page.map(x=>{const c=getCategory(x.categoryId);return `<div class="timeline-item"><div class="timeline-dot" style="background:${c?.color||'var(--flow)'}"></div><div class="timeline-date">${new Date(Number(x.completedAt)).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div><div class="timeline-title">${escapeHtml(cleanTitle(x.title))}</div><div class="timeline-cat">${c?.icon||'•'} ${escapeHtml(c?.name||'Unknown')}</div></div>`}).join('')}</div>`;if(max===0)return rows;return rows+`<div class="v44-timeline-pager"><button class="btn btn-sm" ${S.timelinePage<=0?'disabled':''} onclick="App.setTimelinePage(${S.timelinePage-1})">← Prev</button><span class="hint">Page ${S.timelinePage+1} of ${max+1} · ${arr.length} completed titles</span><button class="btn btn-sm" ${S.timelinePage>=max?'disabled':''} onclick="App.setTimelinePage(${S.timelinePage+1})">Next →</button></div>`;};
