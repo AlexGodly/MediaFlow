@@ -982,6 +982,38 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
   .cat-manage-row>.cat-edit-btn,.cat-manage-row>.cat-delete-btn{font-size:11px;padding-left:8px;padding-right:8px;}
 }
 </style>
+
+<style id="v75-category-layout-fix">
+/* MediaFlow v75 — keep category names readable at every desktop/window width. */
+.cat-manage-row > .name{
+  min-width:0;
+  overflow-wrap:normal !important;
+  word-break:normal !important;
+  hyphens:none;
+  line-height:1.3;
+}
+.cat-manage-row > .name .meta{
+  overflow-wrap:normal !important;
+  word-break:normal !important;
+  line-height:1.35;
+}
+@media (min-width:601px) and (max-width:1100px){
+  .cat-manage-row{
+    grid-template-columns:36px minmax(150px,1fr) auto !important;
+  }
+  .cat-manage-row > .name{min-width:150px;}
+}
+@media (max-width:600px){
+  .cat-manage-row{
+    grid-template-columns:38px minmax(0,1fr) !important;
+  }
+  .cat-manage-row > .name{
+    width:100%;
+    min-width:0;
+  }
+}
+</style>
+
 </head>
 
 <body>
