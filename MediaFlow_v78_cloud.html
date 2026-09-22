@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow by Alex Godly</title>
+<title>MediaFlow v63 by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -1014,6 +1014,26 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 }
 </style>
 
+<style id="v77-category-settings-fix">
+/* MediaFlow v77 — full-width category management and stable category modal. */
+.settings-categories-full{margin-bottom:22px;}
+.settings-categories-full .card{overflow:visible;}
+@media (min-width:901px){
+  .settings-categories-full .cat-manage-row{
+    display:grid !important;
+    grid-template-columns:44px minmax(260px,1fr) auto auto auto auto !important;
+    align-items:center;gap:12px;
+  }
+  .settings-categories-full .cat-manage-row>.hero-icon,
+  .settings-categories-full .cat-manage-row>.name,
+  .settings-categories-full .cat-manage-row>.cat-order-controls,
+  .settings-categories-full .cat-manage-row>.toggle,
+  .settings-categories-full .cat-manage-row>.cat-edit-btn,
+  .settings-categories-full .cat-manage-row>.cat-delete-btn{grid-column:auto !important;grid-row:auto !important;}
+  .settings-categories-full .cat-manage-row>.name{min-width:260px !important;}
+}
+</style>
+
 <style id="v76-on-this-day-multi">
 /* MediaFlow v76 — On This Day now represents the whole matching day. */
 .v76-otd{display:block;cursor:pointer;padding:0;overflow:hidden}
@@ -1037,6 +1057,15 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 @media(max-width:430px){.v76-otd-summary .v50-cover{width:74px;height:105px}.v76-otd-copy b{font-size:16px}}
 </style>
 
+
+<style id="v78-category-delete-modal-css">
+/* MediaFlow v78 — designed category deletion confirmation */
+.category-delete-modal .modal-actions{margin-top:22px;}
+@media(max-width:520px){
+  .category-delete-modal .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .category-delete-modal .modal-actions .btn{width:100%;justify-content:center;}
+}
+</style>
 </head>
 
 <body>
@@ -3932,6 +3961,14 @@ function renderSettings(){
       <button class="btn btn-primary" style="margin-top:12px" onclick="App.v69RepairAllCompleted()">Scan & fix whole Library</button>
     </div>
 
+    <div class="settings-categories-full">
+      <div class="section-label">CATEGORIES</div>
+      <div class="card">
+        ${catRows}
+        <button class="btn btn-block" style="margin-top:14px;" onclick="App.openCategoryModal()">+ Add category</button>
+      </div>
+    </div>
+
     <div class="two-col" style="align-items:start;">
 
       <div>
@@ -4077,20 +4114,6 @@ function renderSettings(){
 
       </div>
 
-      <div>
-
-        <div class="section-label">CATEGORIES</div>
-
-        <div class="card">
-
-          ${catRows}
-
-          <button class="btn btn-block" style="margin-top:14px;" onclick="App.openCategoryModal()">+ Add category</button>
-
-        </div>
-
-      </div>
-
     </div>
 
   `;
@@ -4122,12 +4145,16 @@ function renderModal(){
   let el = document.getElementById('modal-root');
 
   if(!S.modal){ if(el) el.remove(); return; }
+  // v77: there must only ever be one modal root. Replacing it prevents stacked popups.
+  if(el) el.remove();
 
   const html = S.modal.type==='category' ? categoryModalHtml(S.modal.data)
 
     : S.modal.type==='session' ? sessionModalHtml(S.modal.data)
 
     : S.modal.type==='libraryDelete' ? libraryDeleteModalHtml(S.modal.data)
+
+    : S.modal.type==='categoryDelete' ? categoryDeleteModalHtml(S.modal.data)
 
     : S.modal.type==='emptyLibrary' ? emptyLibraryModalHtml(S.modal.data)
 
@@ -4164,6 +4191,26 @@ function libraryDeleteModalHtml(d){
       <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
       <button class="btn btn-danger" onclick="App.confirmDeleteLibrary('${id}')">Delete title</button>
     </div>`;
+}
+
+function categoryDeleteModalHtml(d){
+  const name = String(d?.name || 'this category');
+  const id = escapeHtml(d?.id || '');
+  const icon = d?.icon || '🗂️';
+  const assigned = S.library.filter(item=>item.categoryId===d?.id).length;
+  return `<div class="category-delete-modal">
+    <div style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px;margin-bottom:16px;">${icon}</div>
+    <div class="modal-title" style="margin-bottom:8px;">Delete category?</div>
+    <div style="color:var(--text-dim);line-height:1.65;font-size:13px;">
+      You are about to delete <b style="color:var(--text);">${escapeHtml(name)}</b>.
+      ${assigned?`<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--panel-raised);border:1px solid var(--border-soft);"><b>${assigned}</b> Library title${assigned===1?' is':'s are'} currently assigned to this category.</div>`:''}
+      <div style="margin-top:12px;">Past history is kept, but entries that reference this category may show it as removed. This action cannot be undone.</div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="App.confirmDeleteCategory('${id}',this)">Delete category</button>
+    </div>
+  </div>`;
 }
 
 function emptyLibraryModalHtml(d){
@@ -4261,7 +4308,7 @@ function categoryModalHtml(d){
 
       <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
 
-      <button class="btn btn-primary" onclick="App.saveCategoryModal('${d.id||''}')">Save category</button>
+      <button type="button" class="btn btn-primary" onclick="App.saveCategoryModal('${d.id||''}',this)">Save category</button>
 
     </div>
 
@@ -4603,12 +4650,27 @@ const App = {
 
   },
 
-  pickIcon(ic){ document.getElementById('m-icon').value = ic; S.modal.data.icon = ic; renderModal(); },
+  pickIcon(ic){
+    const input=document.getElementById('m-icon'); if(input) input.value=ic;
+    if(S.modal?.type==='category') S.modal.data.icon=ic;
+    document.querySelectorAll('#modal-root [data-icon-swatch]').forEach(el=>{
+      el.style.borderColor=(el.textContent.trim()===ic)?'var(--flow)':'var(--border-soft)';
+    });
+  },
 
-  pickColor(c){ document.getElementById('m-color').value = c; S.modal.data.color = c; renderModal(); },
+  pickColor(c){
+    const input=document.getElementById('m-color'); if(input) input.value=c;
+    if(S.modal?.type==='category') S.modal.data.color=c;
+    document.querySelectorAll('#modal-root [data-color-swatch]').forEach(el=>{
+      el.style.borderColor=(el.style.background===c || el.style.backgroundColor===c)?'#fff':'transparent';
+    });
+  },
 
-  saveCategoryModal(id){
+  saveCategoryModal(id,button){
 
+    // v77: guard against accidental double submission while the cloud save starts.
+    if(button?.dataset?.saving==='1') return;
+    if(button){button.dataset.saving='1';button.disabled=true;}
     const data = {
 
       id: id || uid(),
@@ -4648,13 +4710,22 @@ const App = {
   },
 
   deleteCategory(id){
+    const c=S.categories.find(c=>c.id===id); if(!c) return;
+    S.modal={type:'categoryDelete',data:{id:c.id,name:c.name,icon:c.icon}};
+    render();
+  },
 
-    if(!confirm('Delete this category? Past history stays but will show as removed.')) return;
-
-    S.categories = S.categories.filter(c=>c.id!==id);
-
-    persistCategories(); render();
-
+  async confirmDeleteCategory(id,button){
+    if(button?.dataset?.deleting==='1') return;
+    if(button){button.dataset.deleting='1';button.disabled=true;}
+    const c=S.categories.find(c=>c.id===id);
+    if(!c){S.modal=null;render();return;}
+    S.categories=S.categories.filter(c=>c.id!==id);
+    if(Array.isArray(S.categoryOrder)) S.categoryOrder=S.categoryOrder.filter(cid=>cid!==id);
+    S.modal=null;
+    await persistCategories();
+    render();
+    showToast(`${c.name} deleted`);
   },
 
   openLibraryModal(id){

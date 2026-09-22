@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>MediaFlow by Alex Godly</title>
+<title>MediaFlow v63 by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
 
@@ -1011,6 +1011,26 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
     width:100%;
     min-width:0;
   }
+}
+</style>
+
+<style id="v77-category-settings-fix">
+/* MediaFlow v77 — full-width category management and stable category modal. */
+.settings-categories-full{margin-bottom:22px;}
+.settings-categories-full .card{overflow:visible;}
+@media (min-width:901px){
+  .settings-categories-full .cat-manage-row{
+    display:grid !important;
+    grid-template-columns:44px minmax(260px,1fr) auto auto auto auto !important;
+    align-items:center;gap:12px;
+  }
+  .settings-categories-full .cat-manage-row>.hero-icon,
+  .settings-categories-full .cat-manage-row>.name,
+  .settings-categories-full .cat-manage-row>.cat-order-controls,
+  .settings-categories-full .cat-manage-row>.toggle,
+  .settings-categories-full .cat-manage-row>.cat-edit-btn,
+  .settings-categories-full .cat-manage-row>.cat-delete-btn{grid-column:auto !important;grid-row:auto !important;}
+  .settings-categories-full .cat-manage-row>.name{min-width:260px !important;}
 }
 </style>
 
@@ -3932,6 +3952,14 @@ function renderSettings(){
       <button class="btn btn-primary" style="margin-top:12px" onclick="App.v69RepairAllCompleted()">Scan & fix whole Library</button>
     </div>
 
+    <div class="settings-categories-full">
+      <div class="section-label">CATEGORIES</div>
+      <div class="card">
+        ${catRows}
+        <button class="btn btn-block" style="margin-top:14px;" onclick="App.openCategoryModal()">+ Add category</button>
+      </div>
+    </div>
+
     <div class="two-col" style="align-items:start;">
 
       <div>
@@ -4077,20 +4105,6 @@ function renderSettings(){
 
       </div>
 
-      <div>
-
-        <div class="section-label">CATEGORIES</div>
-
-        <div class="card">
-
-          ${catRows}
-
-          <button class="btn btn-block" style="margin-top:14px;" onclick="App.openCategoryModal()">+ Add category</button>
-
-        </div>
-
-      </div>
-
     </div>
 
   `;
@@ -4122,6 +4136,8 @@ function renderModal(){
   let el = document.getElementById('modal-root');
 
   if(!S.modal){ if(el) el.remove(); return; }
+  // v77: there must only ever be one modal root. Replacing it prevents stacked popups.
+  if(el) el.remove();
 
   const html = S.modal.type==='category' ? categoryModalHtml(S.modal.data)
 
@@ -4261,7 +4277,7 @@ function categoryModalHtml(d){
 
       <button class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
 
-      <button class="btn btn-primary" onclick="App.saveCategoryModal('${d.id||''}')">Save category</button>
+      <button type="button" class="btn btn-primary" onclick="App.saveCategoryModal('${d.id||''}',this)">Save category</button>
 
     </div>
 
@@ -4603,12 +4619,27 @@ const App = {
 
   },
 
-  pickIcon(ic){ document.getElementById('m-icon').value = ic; S.modal.data.icon = ic; renderModal(); },
+  pickIcon(ic){
+    const input=document.getElementById('m-icon'); if(input) input.value=ic;
+    if(S.modal?.type==='category') S.modal.data.icon=ic;
+    document.querySelectorAll('#modal-root [data-icon-swatch]').forEach(el=>{
+      el.style.borderColor=(el.textContent.trim()===ic)?'var(--flow)':'var(--border-soft)';
+    });
+  },
 
-  pickColor(c){ document.getElementById('m-color').value = c; S.modal.data.color = c; renderModal(); },
+  pickColor(c){
+    const input=document.getElementById('m-color'); if(input) input.value=c;
+    if(S.modal?.type==='category') S.modal.data.color=c;
+    document.querySelectorAll('#modal-root [data-color-swatch]').forEach(el=>{
+      el.style.borderColor=(el.style.background===c || el.style.backgroundColor===c)?'#fff':'transparent';
+    });
+  },
 
-  saveCategoryModal(id){
+  saveCategoryModal(id,button){
 
+    // v77: guard against accidental double submission while the cloud save starts.
+    if(button?.dataset?.saving==='1') return;
+    if(button){button.dataset.saving='1';button.disabled=true;}
     const data = {
 
       id: id || uid(),
