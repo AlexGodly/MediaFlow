@@ -1,0 +1,15 @@
+{
+  "name": "MediaFlow by Alex Godly",
+  "short_name": "MediaFlow",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0E111A",
+  "theme_color": "#0E111A",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/fd1nWwnT/icon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
