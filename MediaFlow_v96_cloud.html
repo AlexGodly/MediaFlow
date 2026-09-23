@@ -1091,6 +1091,13 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 
 </style>
 <!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
+
+<style>
+/* MediaFlow v91 — Import Category Mapping */
+.v91-map-list{display:grid;gap:10px;margin-top:14px;max-height:48vh;overflow:auto;padding-right:3px}.v91-map-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(190px,1.35fr);gap:12px;align-items:center;padding:12px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:11px}.v91-map-type b{display:block}.v91-map-type small{display:block;color:var(--text-mute);margin-top:3px}.v91-map-arrow{color:var(--flow);font-weight:800;margin-right:5px}@media(max-width:600px){.v91-map-row{grid-template-columns:1fr;gap:8px}}
+.v92-map-required{color:var(--danger,#ef4444);font-size:11px;font-weight:700;margin-top:4px}.v92-map-invalid{outline:2px solid var(--danger,#ef4444);outline-offset:2px}
+</style>
+<!-- MediaFlow v92: fixed mapping CSS placement + mandatory manual import mapping -->
 </head>
 
 <body>
@@ -4243,8 +4250,8 @@ function renderSettings(){
 
         <div class="card" style="margin-bottom:22px;">
 <div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;">Import library exports from other tracking services or export your MediaFlow Library into exchange files for those services. MediaFlow merges matching titles and preserves progress, status, ratings, dates and external IDs when the source contains them.</div>
-<div class="field-row"><div class="field"><label class="field-label">Service / format</label><select id="exchange-service">${mfExchangeServiceOptions()}</select></div><div class="field"><label class="field-label">Import</label><button class="btn" onclick="App.pickExchangeImport()">Choose export file</button><input id="exchange-file" type="file" accept=".json,.csv,.xml,.txt,application/json,text/csv,text/xml,application/xml" style="display:none" onchange="App.prepareExchangeImport(this.files[0])"></div></div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-primary" onclick="App.exportExchange()">Export for selected service</button><button class="btn" onclick="document.getElementById('mal-file').click()">Quick MAL XML import</button><input type="file" id="mal-file" accept=".xml,text/xml" style="display:none" onchange="App.prepareLegacyImport('mal',this.files[0])"><button class="btn" onclick="document.getElementById('simkl-file').click()">Quick Simkl JSON import</button><input type="file" id="simkl-file" accept=".json,application/json" style="display:none" onchange="App.prepareLegacyImport('simkl',this.files[0])"></div>
+<div class="field-row"><div class="field"><label class="field-label">Service / format</label><select id="exchange-service">${mfExchangeServiceOptions()}</select></div><div class="field"><label class="field-label">Import</label><button class="btn" onclick="App.pickExchangeImport()">Choose export file</button><input id="exchange-file" type="file" accept=".json,.csv,.xml,.txt,application/json,text/csv,text/xml,application/xml" style="display:none"></div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-primary" onclick="App.exportExchange()">Export for selected service</button><button class="btn" onclick="document.getElementById('mal-file').click()">Quick MAL XML import</button><input type="file" id="mal-file" accept=".xml,text/xml" style="display:none"><button class="btn" onclick="document.getElementById('simkl-file').click()">Quick Simkl JSON import</button><input type="file" id="simkl-file" accept=".json,application/json" style="display:none"></div>
 <small class="hint">AniList · AniSearch · AniWatch · BetaSeries · Criticker · Crunchyroll · EpisodeCalendar · HiAnime · IMDb · Letterboxd · LiveChart · Kitsu · MoviesFad · MyAnimeList · MAL-XML · Netflix · PrimeWire · SeriesFad · Stremio · trakt · TV Time · Tviso · Twee · CSV · JSON. Different services expose different fields, so MediaFlow imports what is actually present instead of inventing missing data.</small>
 </div>
 
@@ -4318,6 +4325,7 @@ function renderModal(){
 
     : S.modal.type==='libraryCategory' ? libraryCategoryModalHtml(S.modal.data)
 
+    : S.modal.type==='importMapping' ? v91MappingModalHtml(S.modal.data)
     : S.modal.type==='importConfirm' ? mfImportConfirmModalHtml(S.modal.data)
     : S.modal.type==='coverPicker' ? coverPickerModalHtml(S.modal.data)
     : libraryModalHtml(S.modal.data);
@@ -5053,23 +5061,14 @@ const App = {
   },
 
   exportJSON(){
-    showDataProgress('Exporting complete MediaFlow backup', 'Preparing all portable app data...', 15);
+    showDataProgress('Exporting MediaFlow backup', 'Preparing your data...', 15);
     setTimeout(()=>{
       try{
-        const now=new Date();
-        const pad=n=>String(n).padStart(2,'0');
-        const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-        // v98: snapshot() is MediaFlow's canonical persisted account state.
-        // Export that complete portable state instead of a hand-picked subset.
-        const payload=Object.assign({},snapshot(),{
-          backupFormat:'MediaFlow_Full_Backup',
-          backupVersion:98,
-          exportedAt:now.toISOString()
-        });
+        const payload={categories:S.categories, library:S.library, sessions:S.sessions, settings:S.settings, exportedAt:new Date().toISOString()};
         const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-        updateDataProgress(70,'Creating complete backup download...');
-        triggerDownload(blob,`MediaFlow_Backup_${stamp}.json`);
-        finishDataProgress(true,'Export successful','Your complete MediaFlow backup was downloaded.');
+        updateDataProgress(70,'Creating download...');
+        triggerDownload(blob,`mediaflow-backup-${todayISO()}.json`);
+        finishDataProgress(true,'Export successful','Your MediaFlow backup was downloaded.');
       }catch(e){ console.error(e); finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.'); }
     },40);
   },
@@ -5085,32 +5084,10 @@ const App = {
         
         updateDataProgress(70,'Applying imported data...');
         if(data.categories) S.categories=data.categories;
-        if(Array.isArray(data.categoryOrder)){
-          S.categoryOrder=data.categoryOrder.slice();
-          v74ApplyCategoryOrder(S.categoryOrder);
-        }
         if(data.library) S.library=sanitizeLibrary(data.library);
         if(data.sessions) S.sessions=data.sessions;
-        if(data.settings){
-          S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings);
-          S.settings.backup=Object.assign({},DEFAULT_SETTINGS.backup,data.settings?.backup||{});
-          S.settings.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,data.settings?.leveling||{});
-          S.settings.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,data.settings?.leveling?.unitXP||{});
-          S.settings.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,data.settings?.leveling?.rotationMultiplier||{});
-        }
-        // v98 full-backup fields. Old backups remain compatible because each field is optional.
-        if(Object.prototype.hasOwnProperty.call(data,'currentTask')) S.currentTask=data.currentTask||null;
-        if(Object.prototype.hasOwnProperty.call(data,'sessionActive')) S.sessionActive=!!data.sessionActive;
-        if(Object.prototype.hasOwnProperty.call(data,'profilePicture')) S.profilePicture=String(data.profilePicture||'').trim();
-        if(data.stopwatch&&typeof data.stopwatch==='object') S.stopwatch=Object.assign({running:false,startedAt:0,elapsed:0,resetValue:0},data.stopwatch);
-        if(data.malLink&&typeof data.malLink==='object') S.malLink=Object.assign({username:'',mode:'anime'},data.malLink);
-        if(data.xpLedger&&typeof data.xpLedger==='object') S.xpLedger=Object.assign({libraryAdditions:{}},data.xpLedger);
-        if(Array.isArray(data.completionTimeline)) S.completionTimeline=data.completionTimeline;
-        if(Array.isArray(data.activityLog)) S.activityLog=data.activityLog.slice(0,1000);
-        if(data.migrations&&typeof data.migrations==='object') S.migrations=data.migrations;
+        if(data.settings) S.settings=Object.assign({},DEFAULT_SETTINGS,data.settings);
         normalizeSeasonalLibraryItems();
-        v53InvalidateLibraryCache();
-        v53InvalidateSessionCache();
         await saveState();
         render();
         finishDataProgress(true,'Import successful','Your MediaFlow backup was imported successfully.');
@@ -6537,27 +6514,15 @@ async function v46SyncNow(){
   }catch(e){ console.error(e); finishDataProgress(false,'Sync failed',String(e?.message||e)); }
 }
 
-// MediaFlow v99 — canonical full backup export.
-// This is the final exportJSON override used at runtime, so the requested filename
-// cannot be replaced by the older v50 compatibility override.
+// Full backups now include every progression-bearing field, not only the four v45 arrays.
 App.exportJSON=function(){
-  showDataProgress('Exporting MediaFlow backup','Preparing complete MediaFlow state…',15);
+  showDataProgress('Exporting MediaFlow backup','Preparing complete v50 state…',15);
   setTimeout(()=>{try{
-    const now=new Date();
-    const pad=n=>String(n).padStart(2,'0');
-    const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-    const payload=Object.assign({},snapshot(),{
-      backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:99,
-      mediaFlowVersion:99,
-      exportedAt:now.toISOString(),
-      progression:mediaFlowLevelInfo()
-    });
-    updateDataProgress(65,'Packing complete MediaFlow state…');
+    const payload=Object.assign({},snapshot(),{mediaFlowVersion:46,exportedAt:new Date().toISOString(),progression:mediaFlowLevelInfo()});
+    updateDataProgress(65,'Packing Library, History and progression…');
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    updateDataProgress(88,'Creating download…');
-    triggerDownload(blob,`MediaFlow_Backup_${stamp}.json`);
-    finishDataProgress(true,'Export successful',`Complete backup created: MediaFlow_Backup_${stamp}.json`);
+    updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v50-backup-${todayISO()}.json`);
+    finishDataProgress(true,'Export successful','Complete MediaFlow v63 backup created.');
   }catch(e){console.error(e);finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.');}},40);
 };
 
@@ -6668,7 +6633,7 @@ renderSettings=function(){let h=v50SettingsBase();return h.replace('AniList · A
 
 function render(){
 
-  if(!document.querySelector('.sidebar')) { renderShell(); bindSidebarResizer(); autoFitSidebarToProfile(); return; }
+  if(!document.querySelector('.sidebar')) { renderShell(); bindSidebarResizer(); autoFitSidebarToProfile(); /* v95: continue so pending modals (including importMapping) render immediately */ }
 
   bindSidebarResizer();
 
@@ -6852,6 +6817,156 @@ renderOnThisDay=function(){
 };
 
 
+
+/* ============================================================
+   MediaFlow v91 — Import Category Mapping
+   Every detected imported media type is explicitly mapped to a
+   current MediaFlow category ID before any Library merge occurs.
+   ============================================================ */
+const V91_TYPE_LABELS={anime:'Anime',anime_movie:'Anime Movie',manga:'Manga',manhwa:'Manhwa / Manhua',tv:'TV / Series',movie:'Movie',comics:'Comics / Issues',other_animation:'Other Animation',unknown:'Other / Unknown'};
+function v91TypeLabel(t){return V91_TYPE_LABELS[t]||String(t||'Unknown')}
+function v91ImportedType(raw,service){
+  const nested=raw?.show||raw?.movie||raw?.media||raw?.anime||raw?.item||{};
+  const o=Object.assign({},nested,raw), group=String(o.__group||'').toLowerCase();
+  const kind=String(mfFirst(o,['media_type','type','kind','format','category','list_type','content_type','series_type'])||'').toLowerCase();
+  const all=`${group} ${kind}`;
+  if(/manhwa|manhua/.test(all)) return 'manhwa';
+  if(/manga|chapter/.test(all)) return 'manga';
+  if(/comic|issue/.test(all)) return 'comics';
+  if(/anime/.test(all)) return /movie|film/.test(all)?'anime_movie':'anime';
+  if(/animation|cartoon/.test(all)) return 'other_animation';
+  if(/movie|film/.test(all)) return ['mal','malxml','anilist','anisearch','aniwatch','hianime','livechart','kitsu','crunchyroll'].includes(service)?'anime_movie':'movie';
+  if(/show|series|tv/.test(all)) return 'tv';
+  if(group==='movies') return 'movie';
+  if(group==='shows') return 'tv';
+  if(group==='anime') return 'anime';
+  if(['mal','malxml','anilist','anisearch','aniwatch','hianime','livechart','kitsu','crunchyroll'].includes(service)) return 'anime';
+  if(['letterboxd','criticker','moviesfad'].includes(service)) return 'movie';
+  return 'unknown';
+}
+function v91DefaultCategory(type){
+  const preferred={anime:['backlog','seasonal'],anime_movie:['animemovies','backlog'],manga:['manga'],manhwa:['manhwa','manga'],tv:['tv'],movie:['movies'],comics:['comics'],other_animation:['otheranim','tv'],unknown:['tv']};
+  for(const id of preferred[type]||[]) if(S.categories.some(c=>c.id===id)) return id;
+  const wantUnit={anime:'episodes',anime_movie:'movies',manga:'chapters',manhwa:'chapters',tv:'episodes',movie:'movies',comics:'issues',other_animation:'episodes'}[type];
+  return S.categories.find(c=>!wantUnit||c.unit===wantUnit)?.id||S.categories[0]?.id||'__skip__';
+}
+function v91CategoryOptions(selected){
+  return `<option value="__unassigned__"${!selected||selected==='__unassigned__'?' selected':''} disabled>Select a destination category…</option><option value="__skip__"${selected==='__skip__'?' selected':''}>Do not import this type</option>`+S.categories.map(c=>`<option value="${escapeHtml(c.id)}"${c.id===selected?' selected':''}>${escapeHtml(c.icon||'📚')} ${escapeHtml(c.name)}</option>`).join('');
+}
+function v91MappingModalHtml(d){
+  const p=S.pendingImport, counts=p?.typeCounts||{}, types=Object.keys(counts);
+  return `<div class="priority-modal"><div class="modal-title">Choose import destinations</div><div style="color:var(--text-dim);font-size:13px;line-height:1.6">MediaFlow found <b>${Number(p?.records?.length||0).toLocaleString()}</b> records in <b>${escapeHtml(d?.fileName||'file')}</b>. You must manually assign every detected media type before the import can start.</div><div class="card" style="padding:11px 13px;margin:13px 0 0;background:var(--panel-2);font-size:11.5px;line-height:1.55;color:var(--text-dim)">No destination is selected automatically. Choose a category for every detected media type (or explicitly choose Do not import this type). Your selection is stored by internal category ID, so renamed or same-named categories remain distinct.</div><div class="v91-map-list">${types.map(t=>`<div class="v91-map-row"><div class="v91-map-type"><b>${escapeHtml(v91TypeLabel(t))}</b><small>${Number(counts[t]||0).toLocaleString()} detected title${counts[t]===1?'':'s'}</small></div><label><span class="v91-map-arrow">→</span><select data-v91-type="${escapeHtml(t)}" onchange="App.setImportMapping('${escapeHtml(t)}',this.value)">${v91CategoryOptions(p.mapping?.[t])}</select><div class="v92-map-required">Required — choose a destination</div></label></div>`).join('')}</div><div class="modal-actions"><button class="btn btn-ghost" onclick="App.cancelPendingImport()">Cancel</button><button class="btn btn-primary" onclick="App.confirmPendingImport()">Import with mapping</button></div></div>`;
+}
+const _v91OldImportConfirmHtml=mfImportConfirmModalHtml;
+mfImportConfirmModalHtml=function(d){return d?.v91Mapping?v91MappingModalHtml(d):_v91OldImportConfirmHtml(d)};
+function v91XmlRecords(text){
+  const doc=new DOMParser().parseFromString(text,'text/xml');
+  if(doc.querySelector('parsererror')) throw new Error('The XML file could not be parsed.');
+  return [...doc.querySelectorAll('anime,manga,item,entry,movie,show,series')].map(n=>{const o={__group:n.tagName.toLowerCase()};for(const el of n.children)o[el.tagName.toLowerCase()]=el.textContent?.trim()||'';return o});
+}
+mfXmlRecords=v91XmlRecords;
+async function v91ReadImportRecords(service,file){
+  const text=await file.text(),name=String(file.name||'').toLowerCase();
+  let records;
+  if(name.endsWith('.xml')||/^\s*</.test(text)) records=mfXmlRecords(text);
+  else if(name.endsWith('.csv')||(!name.endsWith('.json')&&text.includes(','))) records=mfCsvParse(text);
+  else records=mfFlattenJson(JSON.parse(text));
+  if(!records.length) throw new Error('No recognizable media records were found.');
+  return records;
+}
+async function v91PrepareMappedImport(kind,service,file){
+  if(!file)return;
+  showDataProgress('Reading import file','Detecting media types…',30);
+  try{
+    const records=await v91ReadImportRecords(service,file),typeCounts={};
+    for(const r of records){const t=v91ImportedType(r,service);typeCounts[t]=(typeCounts[t]||0)+1;}
+    const mapping={};for(const t of Object.keys(typeCounts))mapping[t]='__unassigned__';
+    S.pendingImport={kind,service,file,records,typeCounts,mapping};
+    closeDataProgress();
+    S.modal={type:'importMapping',data:{mode:'merge',v91Mapping:true,fileName:file.name,serviceName:mfServiceName(service)}};
+    render();
+    // v95: force the mapping modal onto the DOM even if the surrounding view was rebuilt.
+    if(S.modal?.type==='importMapping') renderModal();
+  }catch(e){console.error(e);finishDataProgress(false,'Import failed',e.message||'MediaFlow could not understand this export file.');}
+}
+function v91SetImportMapping(type,categoryId){if(!S.pendingImport?.mapping)return;S.pendingImport.mapping[type]=categoryId;const el=document.querySelector(`[data-v91-type="${CSS.escape(type)}"]`);if(el){el.classList.remove('v92-map-invalid');const note=el.parentElement?.querySelector('.v92-map-required');if(note)note.textContent=categoryId==='__skip__'?'This media type will be skipped':'Destination assigned';}}
+function v91NormalizeRecord(rec,service,mapping){
+  const r=mfNormalizeRecord(rec,service);if(!r)return null;
+  const importType=v91ImportedType(rec,service),dest=mapping?.[importType];
+  if(dest==='__skip__')return {skip:true,importType};
+  if(dest&&S.categories.some(c=>c.id===dest))r.categoryId=dest;
+  r.importType=importType;return r;
+}
+function v91MergeExchangeRecords(records,service,mapping){
+  let added=0,updated=0,skipped=0;
+  for(const raw of records){
+    const r=v91NormalizeRecord(raw,service,mapping);if(!r||r.skip){skipped++;continue;}
+    let item=S.library.find(i=>Object.entries(r.externalIds||{}).some(([k,v])=>v&&i.externalIds?.[k]&&String(v)===String(i.externalIds[k])));
+    // Title fallback is destination-aware so two custom lists can safely contain the same title.
+    if(!item)item=S.library.find(i=>i.categoryId===r.categoryId&&cleanTitle(i.title).toLowerCase()===r.title.toLowerCase()&&(!r.year||!i.year||Number(i.year)===Number(r.year)));
+    if(item){
+      item.categoryId=r.categoryId;item.progress=Math.max(Number(item.progress)||0,r.progress);if(r.total)item.total=r.total;item.status=r.status;item.rating=r.rating??item.rating;item.year=r.year||item.year;item.externalIds=Object.assign({},item.externalIds||{},r.externalIds);item.source=service;item.tags=[...new Set([...(item.tags||[]),mfServiceName(service)])];item.modifiedAt=Date.now();updated++;
+    }else{
+      S.library.push({id:uid(),title:r.title,categoryId:r.categoryId,progress:r.progress,total:r.total,status:r.status,priority:'medium',estimatedMinutes:null,tags:[mfServiceName(service)],source:service,year:r.year,rating:r.rating,externalIds:r.externalIds,createdAt:Date.now(),modifiedAt:Date.now(),completedAt:r.status==='completed'?Date.now():null});added++;
+    }
+  }
+  normalizeSeasonalLibraryItems();return{added,updated,skipped};
+}
+async function v91RunMappedImport(x){
+  showImportProgress(`Importing ${mfServiceName(x.service)}`,x.records.length);
+  try{
+    mfBegin(`${mfServiceName(x.service)} import`,x.file.name);
+    const r=v91MergeExchangeRecords(x.records,x.service,x.mapping);
+    mfCommit(`${mfServiceName(x.service)} import`,`${r.added} added, ${r.updated} updated`);
+    updateImportProgress(x.records.length,x.records.length,r.added,r.updated,r.skipped,'Saving imported data…');await saveState();
+    finishImportProgress(true,`${mfServiceName(x.service)} import complete`,`${r.added.toLocaleString()} titles added, ${r.updated.toLocaleString()} updated${r.skipped?`, ${r.skipped.toLocaleString()} skipped`:''}.`);render();
+  }catch(e){console.error(e);finishImportProgress(false,'Import failed',e.message||'MediaFlow could not understand this export file.');}
+}
+async function v91ConfirmPendingImport(){
+  const x=S.pendingImport;if(!x)return;
+  if(x.records&&x.mapping){const missing=Object.keys(x.typeCounts||{}).filter(t=>!x.mapping[t]||x.mapping[t]==='__unassigned__');if(missing.length){for(const t of missing){const el=document.querySelector(`[data-v91-type="${CSS.escape(t)}"]`);if(el){el.classList.add('v92-map-invalid');const note=el.parentElement?.querySelector('.v92-map-required');if(note)note.textContent='Required — choose a destination';}}toast(`Assign a destination for ${missing.length} media type${missing.length===1?'':'s'} before importing.`,'warn');return;}}
+  S.pendingImport=null;S.modal=null;render();
+  if(x.kind==='backup')return App.importJSON(x.file);
+  if(x.records&&x.mapping)return v91RunMappedImport(x);
+  return mfImportExchangeFile(x.service,x.file);
+}
+function v91PrepareExchangeImport(file){if(file)return v91PrepareMappedImport('exchange',document.getElementById('exchange-service')?.value||'json',file)}
+function v91PrepareLegacyImport(service,file){if(file)return v91PrepareMappedImport(service==='mal'?'legacy-mal':'legacy-simkl',service,file)}
+Object.assign(App,{prepareExchangeImport:v91PrepareExchangeImport,prepareLegacyImport:v91PrepareLegacyImport,confirmPendingImport:v91ConfirmPendingImport,setImportMapping:v91SetImportMapping});
+
+// v94: visible import controls call these dedicated mapping entry points directly.
+function v94PrepareExchangeImport(file){if(!file)return;return v91PrepareMappedImport('exchange',document.getElementById('exchange-service')?.value||'json',file);}
+function v94PrepareLegacyImport(service,file){if(!file)return;return v91PrepareMappedImport(service==='mal'?'legacy-mal':'legacy-simkl',service,file);}
+Object.assign(App,{v94PrepareExchangeImport,v94PrepareLegacyImport});
+
+// MediaFlow v96 — resilient external import file routing.
+// Use one document-level change listener instead of fragile inline onchange handlers.
+// The Settings view can be rebuilt repeatedly; delegation survives those rebuilds.
+document.addEventListener('change', function v96ImportFileChange(event){
+  const input=event.target;
+  if(!(input instanceof HTMLInputElement) || input.type!=='file') return;
+  const file=input.files && input.files[0];
+  if(!file) return;
+
+  if(input.id==='exchange-file'){
+    const service=document.getElementById('exchange-service')?.value||'json';
+    v91PrepareMappedImport('exchange',service,file);
+    input.value='';
+    return;
+  }
+  if(input.id==='mal-file'){
+    v91PrepareMappedImport('legacy-mal','mal',file);
+    input.value='';
+    return;
+  }
+  if(input.id==='simkl-file'){
+    v91PrepareMappedImport('legacy-simkl','simkl',file);
+    input.value='';
+    return;
+  }
+}, true);
+
+
 </script>
 
 <!-- MediaFlow v84: merge-safe cloud metadata persistence -->
@@ -6859,7 +6974,11 @@ renderOnThisDay=function(){
 
 
 <!-- MediaFlow v87: Library-style logging filters + pagination -->
-<!-- MediaFlow v99: fixed final runtime export override + MediaFlow_Backup local timestamp filename -->
+<!-- MediaFlow v91: explicit import media-type to category mapping -->
+<!-- MediaFlow v93: render mandatory category mapping modal before external imports -->
+<!-- MediaFlow v94: dedicated importMapping route + direct visible import entry points -->
+<!-- MediaFlow v95: ensure file selection immediately renders mandatory import mapping -->
+<!-- MediaFlow v96: delegated file selection routing for mandatory import mapping -->
 </body>
 
 </html>

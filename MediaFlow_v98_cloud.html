@@ -6537,27 +6537,15 @@ async function v46SyncNow(){
   }catch(e){ console.error(e); finishDataProgress(false,'Sync failed',String(e?.message||e)); }
 }
 
-// MediaFlow v99 — canonical full backup export.
-// This is the final exportJSON override used at runtime, so the requested filename
-// cannot be replaced by the older v50 compatibility override.
+// Full backups now include every progression-bearing field, not only the four v45 arrays.
 App.exportJSON=function(){
-  showDataProgress('Exporting MediaFlow backup','Preparing complete MediaFlow state…',15);
+  showDataProgress('Exporting MediaFlow backup','Preparing complete v50 state…',15);
   setTimeout(()=>{try{
-    const now=new Date();
-    const pad=n=>String(n).padStart(2,'0');
-    const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-    const payload=Object.assign({},snapshot(),{
-      backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:99,
-      mediaFlowVersion:99,
-      exportedAt:now.toISOString(),
-      progression:mediaFlowLevelInfo()
-    });
-    updateDataProgress(65,'Packing complete MediaFlow state…');
+    const payload=Object.assign({},snapshot(),{mediaFlowVersion:46,exportedAt:new Date().toISOString(),progression:mediaFlowLevelInfo()});
+    updateDataProgress(65,'Packing Library, History and progression…');
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    updateDataProgress(88,'Creating download…');
-    triggerDownload(blob,`MediaFlow_Backup_${stamp}.json`);
-    finishDataProgress(true,'Export successful',`Complete backup created: MediaFlow_Backup_${stamp}.json`);
+    updateDataProgress(88,'Creating download…'); triggerDownload(blob,`mediaflow-v50-backup-${todayISO()}.json`);
+    finishDataProgress(true,'Export successful','Complete MediaFlow v63 backup created.');
   }catch(e){console.error(e);finishDataProgress(false,'Export failed','MediaFlow could not create the backup file.');}},40);
 };
 
@@ -6859,7 +6847,7 @@ renderOnThisDay=function(){
 
 
 <!-- MediaFlow v87: Library-style logging filters + pagination -->
-<!-- MediaFlow v99: fixed final runtime export override + MediaFlow_Backup local timestamp filename -->
+<!-- MediaFlow v98: complete portable JSON backup + timestamped MediaFlow_Backup filename -->
 </body>
 
 </html>
