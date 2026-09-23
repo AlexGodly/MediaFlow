@@ -1090,7 +1090,6 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .v87-log-tools select{min-width:155px;flex:1}.v87-log-tools .v66-cat-filter{flex:1;min-width:180px}.v87-log-tools .v66-cat-filter>summary{width:100%;box-sizing:border-box}.v87-log-count{width:100%;color:var(--text-mute);font-size:12px;padding-top:2px}.v87-log-clear{margin-left:auto}@media(max-width:700px){.v87-log-tools>*{flex:1 1 calc(50% - 8px)!important}.v87-log-count{flex-basis:100%!important}.v87-log-clear{margin-left:0}}@media(max-width:480px){.v87-log-tools>*{flex-basis:100%!important}}
 
 </style>
-<!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
 </head>
 
 <body>
@@ -1815,25 +1814,12 @@ function sessionsInRange(days){
 
    ============================================================ */
 
-// v90: Treat all category records created by one logging submission as one logical
-// consumption event for recency/repetition calculations. Older sessions that do
-// not have sessionGroupId remain individual logical events for compatibility.
-function schedulerLogicalEvents(){
-  const rows=schedulerConsumptionSessions().slice().sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
-  const groups=new Map();
-  for(const s of rows){
-    const key=s.sessionGroupId ? `group:${s.sessionGroupId}` : `session:${s.id||uid()}`;
-    if(!groups.has(key)) groups.set(key,{key,timestamp:Number(s.timestamp)||0,categoryIds:new Set(),sessions:[]});
-    const g=groups.get(key);
-    g.timestamp=Math.max(g.timestamp,Number(s.timestamp)||0);
-    if(s.categoryId) g.categoryIds.add(s.categoryId);
-    g.sessions.push(s);
-  }
-  return [...groups.values()].sort((a,b)=>b.timestamp-a.timestamp);
-}
-
 function recentTaskWindow(n){
-  return schedulerLogicalEvents().slice(0,n);
+
+  const sorted = [...S.sessions].sort((a,b)=>b.timestamp-a.timestamp);
+
+  return sorted.slice(0,n);
+
 }
 
 function schedulerConsumptionSessions(){
@@ -1880,27 +1866,21 @@ function computeScores(excludeIds){
   let pool = S.categories.filter(c=>c.enabled && !excludeIds.includes(c.id));
   if(pool.length===0) pool = S.categories.filter(c=>c.enabled);
   const recentWindow = recentTaskWindow(6);
-  const logicalChron = schedulerLogicalEvents();
+
+  let streakCatId = null, streakLen = 0;
+  const chron = [...S.sessions].sort((a,b)=>b.timestamp-a.timestamp);
+  if(chron.length){
+    streakCatId = chron[0].categoryId;
+    for(const s of chron){ if(s.categoryId===streakCatId) streakLen++; else break; }
+  }
 
   return pool.map(cat=>{
     const last = lastSessionFor(cat.id);
     const dSince = daysSince(last ? last.timestamp : null);
     const neglectBonus = last ? Math.min(st.neglectCap, dSince*st.neglectRate) : st.neglectCap;
-
-    // v90: a category can count at most once per user logging action, even when
-    // that action produced several category-specific session rows.
-    const occurrences = recentWindow.filter(e=>e.categoryIds.has(cat.id)).length;
+    const occurrences = recentWindow.filter(s=>s.categoryId===cat.id).length;
     const repetitionPenalty = occurrences * st.repetitionPenalty;
-
-    // Consecutive use is also measured in logical logging actions. A mixed log
-    // therefore says “these categories were consumed together”, not that they
-    // were consumed as several arbitrary back-to-back sessions.
-    let logicalStreakLen=0;
-    for(const e of logicalChron){
-      if(e.categoryIds.has(cat.id)) logicalStreakLen++;
-      else break;
-    }
-    const consecutivePenalty = logicalStreakLen * st.consecutivePenalty;
+    const consecutivePenalty = (streakCatId===cat.id) ? streakLen*st.consecutivePenalty : 0;
 
     const balance=categoryBalance(cat);
     // Ratio 1 = on balance. Above 1 = category owns too much consumption time.

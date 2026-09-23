@@ -1090,7 +1090,6 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .v87-log-tools select{min-width:155px;flex:1}.v87-log-tools .v66-cat-filter{flex:1;min-width:180px}.v87-log-tools .v66-cat-filter>summary{width:100%;box-sizing:border-box}.v87-log-count{width:100%;color:var(--text-mute);font-size:12px;padding-top:2px}.v87-log-clear{margin-left:auto}@media(max-width:700px){.v87-log-tools>*{flex:1 1 calc(50% - 8px)!important}.v87-log-count{flex-basis:100%!important}.v87-log-clear{margin-left:0}}@media(max-width:480px){.v87-log-tools>*{flex-basis:100%!important}}
 
 </style>
-<!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
 </head>
 
 <body>
@@ -1099,7 +1098,6 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* MediaFlow v89: functional logging filters with direct event binding */
 
 (function(){
 
@@ -1815,25 +1813,12 @@ function sessionsInRange(days){
 
    ============================================================ */
 
-// v90: Treat all category records created by one logging submission as one logical
-// consumption event for recency/repetition calculations. Older sessions that do
-// not have sessionGroupId remain individual logical events for compatibility.
-function schedulerLogicalEvents(){
-  const rows=schedulerConsumptionSessions().slice().sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
-  const groups=new Map();
-  for(const s of rows){
-    const key=s.sessionGroupId ? `group:${s.sessionGroupId}` : `session:${s.id||uid()}`;
-    if(!groups.has(key)) groups.set(key,{key,timestamp:Number(s.timestamp)||0,categoryIds:new Set(),sessions:[]});
-    const g=groups.get(key);
-    g.timestamp=Math.max(g.timestamp,Number(s.timestamp)||0);
-    if(s.categoryId) g.categoryIds.add(s.categoryId);
-    g.sessions.push(s);
-  }
-  return [...groups.values()].sort((a,b)=>b.timestamp-a.timestamp);
-}
-
 function recentTaskWindow(n){
-  return schedulerLogicalEvents().slice(0,n);
+
+  const sorted = [...S.sessions].sort((a,b)=>b.timestamp-a.timestamp);
+
+  return sorted.slice(0,n);
+
 }
 
 function schedulerConsumptionSessions(){
@@ -1880,27 +1865,21 @@ function computeScores(excludeIds){
   let pool = S.categories.filter(c=>c.enabled && !excludeIds.includes(c.id));
   if(pool.length===0) pool = S.categories.filter(c=>c.enabled);
   const recentWindow = recentTaskWindow(6);
-  const logicalChron = schedulerLogicalEvents();
+
+  let streakCatId = null, streakLen = 0;
+  const chron = [...S.sessions].sort((a,b)=>b.timestamp-a.timestamp);
+  if(chron.length){
+    streakCatId = chron[0].categoryId;
+    for(const s of chron){ if(s.categoryId===streakCatId) streakLen++; else break; }
+  }
 
   return pool.map(cat=>{
     const last = lastSessionFor(cat.id);
     const dSince = daysSince(last ? last.timestamp : null);
     const neglectBonus = last ? Math.min(st.neglectCap, dSince*st.neglectRate) : st.neglectCap;
-
-    // v90: a category can count at most once per user logging action, even when
-    // that action produced several category-specific session rows.
-    const occurrences = recentWindow.filter(e=>e.categoryIds.has(cat.id)).length;
+    const occurrences = recentWindow.filter(s=>s.categoryId===cat.id).length;
     const repetitionPenalty = occurrences * st.repetitionPenalty;
-
-    // Consecutive use is also measured in logical logging actions. A mixed log
-    // therefore says “these categories were consumed together”, not that they
-    // were consumed as several arbitrary back-to-back sessions.
-    let logicalStreakLen=0;
-    for(const e of logicalChron){
-      if(e.categoryIds.has(cat.id)) logicalStreakLen++;
-      else break;
-    }
-    const consecutivePenalty = logicalStreakLen * st.consecutivePenalty;
+    const consecutivePenalty = (streakCatId===cat.id) ? streakLen*st.consecutivePenalty : 0;
 
     const balance=categoryBalance(cat);
     // Ratio 1 = on balance. Above 1 = category owns too much consumption time.
@@ -2148,29 +2127,29 @@ function normalizeSeasonalLibraryItems(){
   return false;
 }
 
-const V89_LOG={page:0,pageSize:20,categories:[],status:'all',priority:'all',sort:'relevance'};
-function v89ResetLogPage(){ V89_LOG.page=0; }
+const V87_LOG={page:0,pageSize:10,categories:[],status:'all',priority:'all',sort:'relevance'};
+function v87ResetLogPage(){ V87_LOG.page=0; }
 function logTitleCandidates(query){
   const q=String(query||'').trim().toLowerCase();
   if(!q) return [];
   let rows=S.library.filter(i=>i && cleanTitle(i.title).toLowerCase().includes(q));
-  if(V89_LOG.categories.length) rows=rows.filter(i=>V89_LOG.categories.includes(String(i.categoryId||'')));
-  if(V89_LOG.status!=='all') rows=rows.filter(i=>String(i.status||'planned').toLowerCase()===V89_LOG.status);
-  if(V89_LOG.priority!=='all') rows=rows.filter(i=>String(i.priority||'medium').toLowerCase()===V89_LOG.priority);
+  if(V87_LOG.categories.length) rows=rows.filter(i=>V87_LOG.categories.includes(i.categoryId));
+  if(V87_LOG.status!=='all') rows=rows.filter(i=>i.status===V87_LOG.status);
+  if(V87_LOG.priority!=='all') rows=rows.filter(i=>(i.priority||'medium')===V87_LOG.priority);
   const rank={low:0,medium:1,high:2}, num=v=>Number.isFinite(Number(v))?Number(v):0;
   const cmpTitle=(a,b)=>cleanTitle(a.title).localeCompare(cleanTitle(b.title),undefined,{numeric:true,sensitivity:'base'});
   rows=rows.slice().sort((a,b)=>{
     let d=0;
-    if(V89_LOG.sort==='title-asc') return cmpTitle(a,b);
-    if(V89_LOG.sort==='title-desc') return cmpTitle(b,a);
-    if(V89_LOG.sort==='priority-desc') d=(rank[b.priority]??1)-(rank[a.priority]??1);
-    else if(V89_LOG.sort==='priority-asc') d=(rank[a.priority]??1)-(rank[b.priority]??1);
-    else if(V89_LOG.sort==='rating-desc') d=num(b.rating)-num(a.rating);
-    else if(V89_LOG.sort==='rating-asc') d=num(a.rating)-num(b.rating);
-    else if(V89_LOG.sort==='progress-desc') d=num(b.progress)-num(a.progress);
-    else if(V89_LOG.sort==='progress-asc') d=num(a.progress)-num(b.progress);
-    else if(V89_LOG.sort==='total-desc') d=num(b.total)-num(a.total);
-    else if(V89_LOG.sort==='total-asc') d=num(a.total)-num(b.total);
+    if(V87_LOG.sort==='title-asc') return cmpTitle(a,b);
+    if(V87_LOG.sort==='title-desc') return cmpTitle(b,a);
+    if(V87_LOG.sort==='priority-desc') d=(rank[b.priority]??1)-(rank[a.priority]??1);
+    else if(V87_LOG.sort==='priority-asc') d=(rank[a.priority]??1)-(rank[b.priority]??1);
+    else if(V87_LOG.sort==='rating-desc') d=num(b.rating)-num(a.rating);
+    else if(V87_LOG.sort==='rating-asc') d=num(a.rating)-num(b.rating);
+    else if(V87_LOG.sort==='progress-desc') d=num(b.progress)-num(a.progress);
+    else if(V87_LOG.sort==='progress-asc') d=num(a.progress)-num(b.progress);
+    else if(V87_LOG.sort==='total-desc') d=num(b.total)-num(a.total);
+    else if(V87_LOG.sort==='total-asc') d=num(a.total)-num(b.total);
     else {
       const at=cleanTitle(a.title).toLowerCase(), bt=cleanTitle(b.title).toLowerCase();
       const ar=at===q?0:at.startsWith(q)?1:2, br=bt===q?0:bt.startsWith(q)?1:2;
@@ -2180,51 +2159,37 @@ function logTitleCandidates(query){
   });
   return rows;
 }
-function v89LogPage(p){ V89_LOG.page=Math.max(0,Number(p)||0); renderLogSuggestions(); }
-function v89LogFilter(k,v){ V89_LOG[k]=v; V89_LOG.page=0; renderLogSuggestions(); }
-function v89ToggleLogCategory(id,on){
-  const set=new Set(V89_LOG.categories||[]); if(on)set.add(id);else set.delete(id); V89_LOG.categories=[...set]; V89_LOG.page=0; renderLogSuggestions();
+function v87LogPage(p){ V87_LOG.page=Math.max(0,Number(p)||0); renderLogSuggestions(); }
+function v87LogFilter(k,v){ V87_LOG[k]=v; V87_LOG.page=0; renderLogSuggestions(); }
+function v87ToggleLogCategory(id,on){
+  const set=new Set(V87_LOG.categories||[]); if(on)set.add(id);else set.delete(id); V87_LOG.categories=[...set]; V87_LOG.page=0; renderLogSuggestions();
 }
-function v89ClearLogCategories(){V89_LOG.categories=[];V89_LOG.page=0;renderLogSuggestions();}
-function v89ClearLogFilters(){V89_LOG.categories=[];V89_LOG.status='all';V89_LOG.priority='all';V89_LOG.sort='relevance';V89_LOG.page=0;renderLogSuggestions();}
-function v89LogTools(candidates,pages){
+function v87ClearLogCategories(){V87_LOG.categories=[];V87_LOG.page=0;renderLogSuggestions();}
+function v87ClearLogFilters(){V87_LOG.categories=[];V87_LOG.status='all';V87_LOG.priority='all';V87_LOG.sort='relevance';V87_LOG.page=0;renderLogSuggestions();}
+function v87LogTools(candidates,pages){
   const cats=(S.categories||[]).filter(c=>c&&c.id);
-  const catLabel=V89_LOG.categories.length?`${V89_LOG.categories.length} categories selected`:'All categories';
-  return `<div class="v87-log-tools v89-log-tools" data-v89-log-tools="1">
-    <details class="v66-cat-filter"><summary class="btn">${catLabel} ▾</summary><div class="v66-cat-panel"><div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" data-v89-action="all-categories">All</button></div>${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" data-v89-category="${escapeHtml(String(c.id))}" ${V89_LOG.categories.includes(String(c.id))?'checked':''}><span>${escapeHtml(c.icon||'📚')} ${escapeHtml(c.name)}</span></label>`).join('')}</div></details>
-    <select data-v89-filter="sort" aria-label="Logging title display order"><option value="relevance" ${V89_LOG.sort==='relevance'?'selected':''}>Best match</option><option value="priority-desc" ${V89_LOG.sort==='priority-desc'?'selected':''}>Priority: High → Low</option><option value="priority-asc" ${V89_LOG.sort==='priority-asc'?'selected':''}>Priority: Low → High</option><option value="title-asc" ${V89_LOG.sort==='title-asc'?'selected':''}>Title: A → Z</option><option value="title-desc" ${V89_LOG.sort==='title-desc'?'selected':''}>Title: Z → A</option><option value="rating-desc" ${V89_LOG.sort==='rating-desc'?'selected':''}>Rating: High → Low</option><option value="rating-asc" ${V89_LOG.sort==='rating-asc'?'selected':''}>Rating: Low → High</option><option value="progress-desc" ${V89_LOG.sort==='progress-desc'?'selected':''}>Progress: Most → Least</option><option value="progress-asc" ${V89_LOG.sort==='progress-asc'?'selected':''}>Progress: Least → Most</option><option value="total-desc" ${V89_LOG.sort==='total-desc'?'selected':''}>Total: Most → Least</option><option value="total-asc" ${V89_LOG.sort==='total-asc'?'selected':''}>Total: Least → Most</option></select>
-    <select data-v89-filter="status" aria-label="Logging title status"><option value="all" ${V89_LOG.status==='all'?'selected':''}>All statuses</option>${['planned','active','paused','completed','dropped'].map(x=>`<option value="${x}" ${V89_LOG.status===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>
-    <select data-v89-filter="priority" aria-label="Logging title priority"><option value="all" ${V89_LOG.priority==='all'?'selected':''}>All priorities</option>${['high','medium','low'].map(x=>`<option value="${x}" ${V89_LOG.priority===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>
-    <button type="button" class="btn btn-sm btn-ghost v87-log-clear" data-v89-action="clear">Clear filters</button>
-    <span class="v87-log-count">${candidates.length.toLocaleString()} match${candidates.length===1?'':'es'} · Page ${V89_LOG.page+1}/${pages}</span>
+  const catLabel=V87_LOG.categories.length?`${V87_LOG.categories.length} categories selected`:'All categories';
+  return `<div class="v87-log-tools">
+    <details class="v66-cat-filter"><summary class="btn">${catLabel} ▾</summary><div class="v66-cat-panel"><div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" onclick="event.preventDefault();v87ClearLogCategories()">All</button></div>${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" ${V87_LOG.categories.includes(c.id)?'checked':''} onchange="v87ToggleLogCategory('${c.id}',this.checked)"><span>${escapeHtml(c.icon||'📚')} ${escapeHtml(c.name)}</span></label>`).join('')}</div></details>
+    <select onchange="v87LogFilter('sort',this.value)" aria-label="Logging title display order"><option value="relevance" ${V87_LOG.sort==='relevance'?'selected':''}>Best match</option><option value="priority-desc" ${V87_LOG.sort==='priority-desc'?'selected':''}>Priority: High → Low</option><option value="priority-asc" ${V87_LOG.sort==='priority-asc'?'selected':''}>Priority: Low → High</option><option value="title-asc" ${V87_LOG.sort==='title-asc'?'selected':''}>Title: A → Z</option><option value="title-desc" ${V87_LOG.sort==='title-desc'?'selected':''}>Title: Z → A</option><option value="rating-desc" ${V87_LOG.sort==='rating-desc'?'selected':''}>Rating: High → Low</option><option value="rating-asc" ${V87_LOG.sort==='rating-asc'?'selected':''}>Rating: Low → High</option><option value="progress-desc" ${V87_LOG.sort==='progress-desc'?'selected':''}>Progress watched/read: Most → Least</option><option value="progress-asc" ${V87_LOG.sort==='progress-asc'?'selected':''}>Progress watched/read: Least → Most</option><option value="total-desc" ${V87_LOG.sort==='total-desc'?'selected':''}>Total episodes/chapters: Most → Least</option><option value="total-asc" ${V87_LOG.sort==='total-asc'?'selected':''}>Total episodes/chapters: Least → Most</option></select>
+    <select onchange="v87LogFilter('status',this.value)"><option value="all">All statuses</option>${['planned','active','paused','completed','dropped'].map(x=>`<option value="${x}" ${V87_LOG.status===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>
+    <select onchange="v87LogFilter('priority',this.value)"><option value="all">All priorities</option>${['high','medium','low'].map(x=>`<option value="${x}" ${V87_LOG.priority===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>
+    <button type="button" class="btn btn-sm btn-ghost v87-log-clear" onclick="v87ClearLogFilters()">Clear filters</button>
+    <span class="v87-log-count">${candidates.length.toLocaleString()} match${candidates.length===1?'':'es'} · Page ${V87_LOG.page+1}/${pages}</span>
   </div>`;
-}
-function v89BindLogFilterEvents(box){
-  if(!box) return;
-  box.querySelectorAll('[data-v89-filter]').forEach(el=>el.addEventListener('change',()=>{
-    const key=el.dataset.v89Filter;
-    V89_LOG[key]=String(el.value||'all').toLowerCase(); V89_LOG.page=0; renderLogSuggestions();
-  }));
-  box.querySelectorAll('[data-v89-category]').forEach(el=>el.addEventListener('change',()=>{
-    const id=String(el.dataset.v89Category||''); const set=new Set(V89_LOG.categories||[]);
-    if(el.checked)set.add(id);else set.delete(id); V89_LOG.categories=[...set]; V89_LOG.page=0; renderLogSuggestions();
-  }));
-  box.querySelectorAll('[data-v89-action="all-categories"]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();V89_LOG.categories=[];V89_LOG.page=0;renderLogSuggestions();}));
-  box.querySelectorAll('[data-v89-action="clear"]').forEach(el=>el.addEventListener('click',()=>{V89_LOG.categories=[];V89_LOG.status='all';V89_LOG.priority='all';V89_LOG.sort='relevance';V89_LOG.page=0;renderLogSuggestions();}));
 }
 function renderLogSuggestions(){
   const box=document.getElementById('log-suggestions'); if(!box)return;
   const q=String(S.entryDraft.title||'').trim(); if(!q){box.innerHTML='';return;}
-  const candidates=logTitleCandidates(q),pages=Math.max(1,Math.ceil(candidates.length/V89_LOG.pageSize));
-  V89_LOG.page=Math.max(0,Math.min(V89_LOG.page,pages-1));
-  const rows=candidates.slice(V89_LOG.page*V89_LOG.pageSize,(V89_LOG.page+1)*V89_LOG.pageSize);
-  const tools=v89LogTools(candidates,pages);
-  if(!rows.length){box.innerHTML=tools+'<div class="v86-log-empty">No matching Library titles with these filters.</div>';v89BindLogFilterEvents(box);return;}
+  const candidates=logTitleCandidates(q),pages=Math.max(1,Math.ceil(candidates.length/V87_LOG.pageSize));
+  V87_LOG.page=Math.max(0,Math.min(V87_LOG.page,pages-1));
+  const rows=candidates.slice(V87_LOG.page*V87_LOG.pageSize,(V87_LOG.page+1)*V87_LOG.pageSize);
+  const tools=v87LogTools(candidates,pages);
+  if(!rows.length){box.innerHTML=tools+'<div class="v86-log-empty">No matching Library titles with these filters.</div>';return;}
   const list=`<div class="log-suggestion-list">${rows.map(i=>{const c=getCategory(i.categoryId),progress=i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown';const repeat=(i.status==='completed'||(Number(i.total)>0&&Number(i.progress)>=Number(i.total)))?' · ↻ Rewatch/Reread':'';const cover=i.coverUrl?`<img class="v86-log-cover" src="${escapeHtml(i.coverUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';return `<div class="log-suggestion"><div class="v86-log-result">${cover}<div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${c?.icon||'📚'} ${escapeHtml(c?.name||'Library')} · ${escapeHtml(i.status||'planned')} · ${escapeHtml(i.priority||'medium')} priority · ${progress}${repeat}</small></div></div><button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${i.id}')">Use</button></div>`}).join('')}</div>`;
-  const nums=[],from=Math.max(0,Math.min(V89_LOG.page-2,pages-5)),to=Math.min(pages,from+5);for(let n=from;n<to;n++)nums.push(`<button type="button" class="btn btn-sm ${n===V89_LOG.page?'active':''}" onclick="v89LogPage(${n})">${n+1}</button>`);
-  const pager=pages>1?`<div class="v86-log-pager"><button type="button" class="btn btn-sm" ${V89_LOG.page===0?'disabled':''} onclick="v89LogPage(${V89_LOG.page-1})">← Prev</button>${nums.join('')}<button type="button" class="btn btn-sm" ${V89_LOG.page===pages-1?'disabled':''} onclick="v89LogPage(${V89_LOG.page+1})">Next →</button></div>`:'';
+  const nums=[],from=Math.max(0,Math.min(V87_LOG.page-2,pages-5)),to=Math.min(pages,from+5);for(let n=from;n<to;n++)nums.push(`<button type="button" class="btn btn-sm ${n===V87_LOG.page?'active':''}" onclick="v87LogPage(${n})">${n+1}</button>`);
+  const pager=pages>1?`<div class="v86-log-pager"><button type="button" class="btn btn-sm" ${V87_LOG.page===0?'disabled':''} onclick="v87LogPage(${V87_LOG.page-1})">← Prev</button>${nums.join('')}<button type="button" class="btn btn-sm" ${V87_LOG.page===pages-1?'disabled':''} onclick="v87LogPage(${V87_LOG.page+1})">Next →</button></div>`:'';
   box.innerHTML=tools+list+pager;
-  v89BindLogFilterEvents(box);
 }
 function submitLog(){
   const t=S.currentTask;
