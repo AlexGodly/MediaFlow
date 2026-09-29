@@ -1079,7 +1079,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="162">
+<meta name="mediaflow-version" content="164">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1133,6 +1133,8 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v160: Reliable Dynamic Cover source fallback + CORS-safe visual theme fallback -->
 <!-- MediaFlow v161: About tab + customizable navigation + complete-data persistence audit -->
 <!-- MediaFlow v162: Library Cover + Image URL theme collections + contrast-safe adaptive themes -->
+<!-- MediaFlow v163: Configurable Dynamic Cover Theme rotation interval + copy cleanup -->
+<!-- MediaFlow v164: Simkl Full Style Theme -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -2415,6 +2417,486 @@ html[data-v146-dynamic-active="1"][data-v162-cover-mode="image"][data-v160-cover
 html[data-v146-dynamic-active="1"][data-v162-cover-mode="library"] .card,
 html[data-v146-dynamic-active="1"][data-v162-cover-mode="image"] .card{
   box-shadow:0 10px 32px color-mix(in srgb,var(--v159-primary) 3%,transparent)!important;
+}
+</style>
+
+
+<style id="mf-v164-simkl-full-style">
+/* ============================================================
+   MediaFlow v164 — Simkl Full Style
+   ------------------------------------------------------------
+   A MediaFlow-native full-style interpretation of Simkl's dark,
+   media-dashboard identity: compact global header, deep blue-black
+   surfaces, bright green primary actions, cool-blue secondary accents,
+   dense library rows and cover-forward cards.
+   ============================================================ */
+
+html[data-theme="fullstyle-simkl"]{
+  --bg:#0b1016;
+  --panel:#111820;
+  --panel-raised:#18222d;
+  --border:#263442;
+  --border-soft:#1c2834;
+  --text:#f3f7fa;
+  --text-dim:#bac6d0;
+  --text-mute:#758596;
+  --flow:#56c271;
+  --flow-dim:#285c39;
+  --healthy:#56c271;
+  --neglect:#55a8ff;
+  --overused:#ef6671;
+  --due:#55a8ff;
+
+  --v164-simkl-green:#56c271;
+  --v164-simkl-blue:#55a8ff;
+  --v164-simkl-cyan:#58d6da;
+  --v164-simkl-ink:#0b1016;
+  --v164-simkl-surface:#111820;
+
+  --radius-s:6px;
+  --radius-m:10px;
+  --radius-l:14px;
+  --font-display:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-body:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+  --v107-accent2:#55a8ff;
+  --v107-radius:7px;
+  --v107-radius-lg:12px;
+  --v107-cover-radius:7px;
+  --v107-header-size:78px;
+  --v107-content:1320px;
+  --v107-shadow:0 14px 36px rgba(0,0,0,.22);
+  --v107-letter:0;
+  --v107-nav-weight:750;
+
+  color-scheme:dark;
+}
+
+html[data-theme="fullstyle-simkl"] body{
+  background:
+    radial-gradient(900px 540px at 85% -10%,rgba(85,168,255,.08),transparent 65%),
+    radial-gradient(760px 520px at -15% 18%,rgba(86,194,113,.06),transparent 62%),
+    #0b1016!important;
+  color:var(--text)!important;
+  font-family:var(--font-body)!important;
+}
+
+html[data-theme="fullstyle-simkl"] ::selection{
+  background:var(--v164-simkl-green)!important;
+  color:#07100a!important;
+}
+
+html[data-theme="fullstyle-simkl"] ::-webkit-scrollbar-thumb{
+  background:#314252!important;
+  border-radius:999px!important;
+}
+
+/* ---------- Desktop global-header layout ---------- */
+@media (min-width:861px){
+  html[data-theme="fullstyle-simkl"] #app{
+    display:block!important;
+    min-height:100vh!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .sidebar{
+    position:sticky!important;
+    top:0!important;
+    left:0!important;
+    width:100%!important;
+    height:68px!important;
+    min-height:68px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    gap:14px!important;
+    padding:0 22px!important;
+    box-sizing:border-box!important;
+    background:rgba(10,15,21,.97)!important;
+    border:0!important;
+    border-bottom:1px solid #1e2b36!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.18)!important;
+    backdrop-filter:blur(14px)!important;
+    z-index:100!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .sidebar-resizer{
+    display:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .brand{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    padding:0!important;
+    margin:0!important;
+    flex:0 0 auto!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .brand-mark{
+    width:31px!important;
+    height:31px!important;
+    border-radius:8px!important;
+    background:
+      linear-gradient(135deg,var(--v164-simkl-green) 0 52%,var(--v164-simkl-blue) 52% 100%)!important;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.06),
+      0 8px 24px rgba(86,194,113,.14)!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .brand-name{
+    color:#fff!important;
+    font-size:18px!important;
+    font-weight:900!important;
+    letter-spacing:-.025em!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .brand-sub{
+    display:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav{
+    min-width:0!important;
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    gap:3px!important;
+    margin:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none!important;
+    white-space:nowrap!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav::-webkit-scrollbar{
+    display:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav-item{
+    flex:0 0 auto!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:6px!important;
+    padding:8px 10px!important;
+    border:0!important;
+    border-radius:7px!important;
+    background:transparent!important;
+    color:#8f9eac!important;
+    font-size:11px!important;
+    font-weight:750!important;
+    transition:background .15s ease,color .15s ease!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav-item svg{
+    width:15px!important;
+    height:15px!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav-item:hover{
+    background:#151f29!important;
+    color:#e8eef3!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .nav-item.active{
+    background:linear-gradient(135deg,rgba(86,194,113,.14),rgba(85,168,255,.08))!important;
+    color:var(--v164-simkl-green)!important;
+    box-shadow:inset 0 0 0 1px rgba(86,194,113,.14)!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .sidebar-foot{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    margin:0!important;
+    padding:0!important;
+    flex:0 0 auto!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .sidebar-foot>.k,
+  html[data-theme="fullstyle-simkl"] .sidebar-foot>.v,
+  html[data-theme="fullstyle-simkl"] .sidebar-foot>div[style*="font-size:10.5px"],
+  html[data-theme="fullstyle-simkl"] .sidebar-foot>.level-block{
+    display:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .account-menu{
+    margin:0!important;
+    padding:5px 7px!important;
+    border:1px solid #263442!important;
+    border-radius:9px!important;
+    background:#111820!important;
+    box-shadow:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .main{
+    margin:0!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:28px 22px 70px!important;
+    background:transparent!important;
+    box-sizing:border-box!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .main>.container,
+  html[data-theme="fullstyle-simkl"] .container{
+    width:min(100%,1320px)!important;
+    max-width:1320px!important;
+    margin:0 auto!important;
+  }
+}
+
+/* ---------- Content identity ---------- */
+html[data-theme="fullstyle-simkl"] .view-title{
+  font-size:28px!important;
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  color:#f4f8fb!important;
+}
+
+html[data-theme="fullstyle-simkl"] .view-desc{
+  color:#8494a4!important;
+}
+
+html[data-theme="fullstyle-simkl"] .section-label{
+  color:#7f91a2!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+}
+
+html[data-theme="fullstyle-simkl"] .card,
+html[data-theme="fullstyle-simkl"] .stat-box,
+html[data-theme="fullstyle-simkl"] .new-entry-box,
+html[data-theme="fullstyle-simkl"] .log-form,
+html[data-theme="fullstyle-simkl"] .modal,
+html[data-theme="fullstyle-simkl"] .import-card,
+html[data-theme="fullstyle-simkl"] .profile-stat-hero{
+  background:
+    linear-gradient(145deg,#121a23,#0f161e)!important;
+  border:1px solid #22313d!important;
+  border-radius:11px!important;
+  color:#eef3f7!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.12)!important;
+}
+
+html[data-theme="fullstyle-simkl"] .hero{
+  position:relative!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(480px 240px at 88% -10%,rgba(85,168,255,.12),transparent 66%),
+    radial-gradient(400px 220px at 8% 105%,rgba(86,194,113,.08),transparent 70%),
+    linear-gradient(145deg,#151f29,#10171f)!important;
+  border:1px solid #2a3946!important;
+  border-radius:14px!important;
+  box-shadow:0 18px 40px rgba(0,0,0,.18)!important;
+}
+
+html[data-theme="fullstyle-simkl"] .hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(86,194,113,.26),rgba(85,168,255,.22));
+  height:3px;
+}
+
+html[data-theme="fullstyle-simkl"] .hero-name{
+  color:#fff!important;
+  font-weight:900!important;
+  letter-spacing:-.025em!important;
+}
+
+html[data-theme="fullstyle-simkl"] .hero-amount,
+html[data-theme="fullstyle-simkl"] .item-sub,
+html[data-theme="fullstyle-simkl"] .hist-amt,
+html[data-theme="fullstyle-simkl"] .hist-note,
+html[data-theme="fullstyle-simkl"] .hint{
+  color:#8e9eac!important;
+}
+
+/* ---------- Media/library rows ---------- */
+html[data-theme="fullstyle-simkl"] .library-item,
+html[data-theme="fullstyle-simkl"] .history-item,
+html[data-theme="fullstyle-simkl"] .timeline-item,
+html[data-theme="fullstyle-simkl"] .record-row{
+  background:#111922!important;
+  border-color:#21303c!important;
+  border-radius:9px!important;
+}
+
+html[data-theme="fullstyle-simkl"] .library-item:hover,
+html[data-theme="fullstyle-simkl"] .history-item:hover,
+html[data-theme="fullstyle-simkl"] .record-row:hover{
+  background:#15202a!important;
+  border-color:#314352!important;
+}
+
+html[data-theme="fullstyle-simkl"] .item-title,
+html[data-theme="fullstyle-simkl"] .hist-cat,
+html[data-theme="fullstyle-simkl"] .timeline-title{
+  color:#eef4f7!important;
+  font-weight:800!important;
+}
+
+/* ---------- Buttons & controls ---------- */
+html[data-theme="fullstyle-simkl"] .btn{
+  border-radius:7px!important;
+  border-color:#2a3946!important;
+  background:#17212b!important;
+  color:#d9e2e9!important;
+  box-shadow:none!important;
+  font-weight:800!important;
+}
+
+html[data-theme="fullstyle-simkl"] .btn:hover{
+  background:#1d2a36!important;
+  border-color:#3a4c5c!important;
+}
+
+html[data-theme="fullstyle-simkl"] .btn-primary{
+  background:linear-gradient(135deg,#58c874,#4bb967)!important;
+  border-color:#66d17f!important;
+  color:#07110a!important;
+  box-shadow:0 8px 22px rgba(86,194,113,.16)!important;
+}
+
+html[data-theme="fullstyle-simkl"] .btn-primary:hover{
+  background:linear-gradient(135deg,#67d581,#56c873)!important;
+}
+
+html[data-theme="fullstyle-simkl"] input,
+html[data-theme="fullstyle-simkl"] select,
+html[data-theme="fullstyle-simkl"] textarea{
+  background:#0e151c!important;
+  border:1px solid #2a3946!important;
+  color:#eef4f7!important;
+  -webkit-text-fill-color:#eef4f7!important;
+  border-radius:7px!important;
+}
+
+html[data-theme="fullstyle-simkl"] input::placeholder,
+html[data-theme="fullstyle-simkl"] textarea::placeholder{
+  color:#647587!important;
+  -webkit-text-fill-color:#647587!important;
+  opacity:1!important;
+}
+
+html[data-theme="fullstyle-simkl"] input:focus,
+html[data-theme="fullstyle-simkl"] select:focus,
+html[data-theme="fullstyle-simkl"] textarea:focus{
+  border-color:#56c271!important;
+  box-shadow:0 0 0 2px rgba(86,194,113,.12)!important;
+}
+
+html[data-theme="fullstyle-simkl"] select option{
+  background:#111820!important;
+  color:#eef4f7!important;
+}
+
+/* ---------- Pills, tags, progress ---------- */
+html[data-theme="fullstyle-simkl"] .tag,
+html[data-theme="fullstyle-simkl"] .pill,
+html[data-theme="fullstyle-simkl"] .status-choice,
+html[data-theme="fullstyle-simkl"] .priority-choice,
+html[data-theme="fullstyle-simkl"] .category-choice{
+  background:#17212b!important;
+  border-color:#263744!important;
+  color:#bcc8d2!important;
+  border-radius:7px!important;
+}
+
+html[data-theme="fullstyle-simkl"] .progress-fill,
+html[data-theme="fullstyle-simkl"] .xp-fill{
+  background:linear-gradient(90deg,#56c271,#55a8ff)!important;
+}
+
+html[data-theme="fullstyle-simkl"] .health-dot,
+html[data-theme="fullstyle-simkl"] .brand-mark{
+  box-shadow:0 0 0 1px rgba(255,255,255,.05)!important;
+}
+
+/* ---------- On This Day ---------- */
+html[data-theme="fullstyle-simkl"] .on-this-day,
+html[data-theme="fullstyle-simkl"] .v126-otd{
+  background:#101820!important;
+  border:1px solid #22313d!important;
+  border-radius:12px!important;
+}
+
+html[data-theme="fullstyle-simkl"] .v159-otd-event-chip{
+  background:rgba(86,194,113,.08)!important;
+  border-color:rgba(86,194,113,.18)!important;
+  color:#a8d7b4!important;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width:860px){
+  html[data-theme="fullstyle-simkl"] #app{
+    display:block!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .sidebar{
+    display:none!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .main{
+    margin:0!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:18px 12px 108px!important;
+    background:
+      radial-gradient(500px 300px at 100% -10%,rgba(85,168,255,.06),transparent 70%),
+      #0b1016!important;
+    box-sizing:border-box!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .main>.container,
+  html[data-theme="fullstyle-simkl"] .container{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mobile-tabbar{
+    background:rgba(10,15,21,.98)!important;
+    border-top:1px solid #263442!important;
+    backdrop-filter:blur(14px)!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mtab{
+    color:#8292a1!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mtab.active{
+    color:#56c271!important;
+    background:rgba(86,194,113,.07)!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mobile-more-menu{
+    background:#111820!important;
+    border:1px solid #2a3946!important;
+    border-radius:10px!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mobile-more-item{
+    color:#b9c5cf!important;
+    border-radius:7px!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .mobile-more-item:hover,
+  html[data-theme="fullstyle-simkl"] .mobile-more-item.active{
+    background:#17242e!important;
+    color:#56c271!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .view-title{
+    font-size:24px!important;
+  }
+
+  html[data-theme="fullstyle-simkl"] .hero{
+    padding:18px!important;
+  }
 }
 </style>
 
@@ -9035,8 +9517,8 @@ App.exportJSON=function(){
     const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     const payload=Object.assign({},snapshot(),{
       backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:162,
-      mediaFlowVersion:162,
+      backupVersion:164,
+      mediaFlowVersion:164,
       exportedAt:now.toISOString(),
       progression:mediaFlowLevelInfo(),
       progressionBreakdown:v120XPBreakdown()
@@ -9364,8 +9846,8 @@ window.addEventListener('beforeunload', function(e){
 
 /* MediaFlow v107: Full Style Themes library expanded to the complete service set. */
 /* MediaFlow v101: Full Style Themes runtime scope fix */
-const FULL_STYLE_THEMES=['fullstyle-anilist','fullstyle-anisearch','fullstyle-aniwatch','fullstyle-betaseries','fullstyle-criticker','fullstyle-crunchyroll','fullstyle-episodecalendar','fullstyle-hianime','fullstyle-imdb','fullstyle-letterboxd','fullstyle-livechart','fullstyle-kitsu','fullstyle-moviesfad','fullstyle-myanimelist','fullstyle-netflix','fullstyle-primewire','fullstyle-seriesfad','fullstyle-stremio','fullstyle-trakt','fullstyle-tvtime','fullstyle-tviso','fullstyle-twee'];
-  const FULL_STYLE_LABELS={'fullstyle-anilist':'AniList','fullstyle-anisearch':'AniSearch','fullstyle-aniwatch':'AniWatch','fullstyle-betaseries':'BetaSeries','fullstyle-criticker':'Criticker','fullstyle-crunchyroll':'Crunchyroll','fullstyle-episodecalendar':'EpisodeCalendar','fullstyle-hianime':'HiAnime','fullstyle-imdb':'IMDb','fullstyle-letterboxd':'Letterboxd','fullstyle-livechart':'LiveChart','fullstyle-kitsu':'Kitsu','fullstyle-moviesfad':'MoviesFad','fullstyle-myanimelist':'MyAnimeList','fullstyle-netflix':'Netflix','fullstyle-primewire':'PrimeWire','fullstyle-seriesfad':'SeriesFad','fullstyle-stremio':'Stremio','fullstyle-trakt':'trakt','fullstyle-tvtime':'TV Time','fullstyle-tviso':'Tviso','fullstyle-twee':'Twee'};
+const FULL_STYLE_THEMES=['fullstyle-anilist','fullstyle-anisearch','fullstyle-aniwatch','fullstyle-betaseries','fullstyle-criticker','fullstyle-crunchyroll','fullstyle-episodecalendar','fullstyle-hianime','fullstyle-imdb','fullstyle-letterboxd','fullstyle-livechart','fullstyle-kitsu','fullstyle-moviesfad','fullstyle-myanimelist','fullstyle-netflix','fullstyle-primewire','fullstyle-seriesfad','fullstyle-simkl','fullstyle-stremio','fullstyle-trakt','fullstyle-tvtime','fullstyle-tviso','fullstyle-twee'];
+  const FULL_STYLE_LABELS={'fullstyle-anilist':'AniList','fullstyle-anisearch':'AniSearch','fullstyle-aniwatch':'AniWatch','fullstyle-betaseries':'BetaSeries','fullstyle-criticker':'Criticker','fullstyle-crunchyroll':'Crunchyroll','fullstyle-episodecalendar':'EpisodeCalendar','fullstyle-hianime':'HiAnime','fullstyle-imdb':'IMDb','fullstyle-letterboxd':'Letterboxd','fullstyle-livechart':'LiveChart','fullstyle-kitsu':'Kitsu','fullstyle-moviesfad':'MoviesFad','fullstyle-myanimelist':'MyAnimeList','fullstyle-netflix':'Netflix','fullstyle-primewire':'PrimeWire','fullstyle-seriesfad':'SeriesFad','fullstyle-simkl':'Simkl','fullstyle-stremio':'Stremio','fullstyle-trakt':'trakt','fullstyle-tvtime':'TV Time','fullstyle-tviso':'Tviso','fullstyle-twee':'Twee'};
   for(const t of FULL_STYLE_THEMES){
     if(!V43_THEMES.includes(t)) V43_THEMES.push(t);
     V43_THEME_LABELS[t]=FULL_STYLE_LABELS[t];
@@ -21488,7 +21970,7 @@ function v162CollectionPanelHtml(mode){
       <div class="v162-cover-theme-head">
         <div>
           <div class="v162-cover-theme-title">Dynamic Cover Theme</div>
-          <div class="hint">MediaFlow automatically rotates priority between recommendation and On This Day covers. The cover drives an adaptive full-app palette while v162 keeps all text/form controls contrast-safe.</div>
+          <div class="hint">MediaFlow automatically rotates priority between recommendation and On This Day covers. The cover drives an adaptive full-app palette while keeping text and form controls contrast-safe.</div>
         </div>
         <span class="v162-cover-theme-badge">Automatic</span>
       </div>
@@ -21747,6 +22229,246 @@ Object.assign(App,{
   v162SaveImageThemeUrls,
   v162SetImageThemeInterval
 });
+
+
+
+/* ============================================================
+   MediaFlow v163 — Dynamic Cover Theme rotation control
+   ============================================================ */
+
+const V163_BACKUP_SCHEMA_VERSION=6;
+
+function v163ClampDynamicInterval(value){
+  const n=Math.round(Number(value)||30);
+  return Math.max(5,Math.min(3600,n));
+}
+
+function v163EnsureDynamicRotationSetting(settings){
+  const target=(settings&&typeof settings==='object')?settings:{};
+  target.v163DynamicThemeIntervalSec=v163ClampDynamicInterval(
+    target.v163DynamicThemeIntervalSec
+  );
+  return target;
+}
+
+v163EnsureDynamicRotationSetting(S.settings||DEFAULT_SETTINGS);
+
+const v163EnsureThemeSettingsObjectBase=v162EnsureThemeSettingsObject;
+v162EnsureThemeSettingsObject=function(settings){
+  const target=v163EnsureThemeSettingsObjectBase(settings);
+  return v163EnsureDynamicRotationSetting(target);
+};
+
+const v163EnsureThemeSettingsBase=v162EnsureThemeSettings;
+v162EnsureThemeSettings=function(){
+  const target=v163EnsureThemeSettingsBase();
+  v163EnsureDynamicRotationSetting(target);
+  return target;
+};
+
+function v163DynamicThemeInterval(){
+  return v163ClampDynamicInterval(
+    v162EnsureThemeSettings().v163DynamicThemeIntervalSec
+  );
+}
+
+function v163SetDynamicThemeInterval(value){
+  const settings=v162EnsureThemeSettings();
+  settings.v163DynamicThemeIntervalSec=v163ClampDynamicInterval(value);
+
+  clearTimeout(V159_DYNAMIC_SOURCE_TIMER);
+  V159_DYNAMIC_SOURCE_TIMER=null;
+
+  persistSettings();
+  render();
+
+  if(v162ThemeMode()==='dynamic'){
+    v146ScheduleDynamicTheme();
+    v159EnsureDynamicSourceTimer();
+  }
+}
+
+// Exact user-controlled interval replaces v159's random 24–36 second cadence.
+v159EnsureDynamicSourceTimer=function(){
+  if(!S.settings?.dynamicCoverTheme || v162ThemeMode()!=='dynamic'){
+    clearTimeout(V159_DYNAMIC_SOURCE_TIMER);
+    V159_DYNAMIC_SOURCE_TIMER=null;
+    return;
+  }
+
+  if(V159_DYNAMIC_SOURCE_TIMER)return;
+
+  const delay=v163DynamicThemeInterval()*1000;
+
+  V159_DYNAMIC_SOURCE_TIMER=setTimeout(()=>{
+    V159_DYNAMIC_SOURCE_TIMER=null;
+
+    if(S.settings?.dynamicCoverTheme && v162ThemeMode()==='dynamic'){
+      V159_FORCED_THEME_SOURCE=null;
+      v146ScheduleDynamicTheme();
+      v159EnsureDynamicSourceTimer();
+    }
+  },delay);
+};
+
+// On This Day can continue its visual 12s hero rotation, but it no longer
+// forces Dynamic Cover Theme to switch before the configured interval.
+const v163ApplyOtdHeroBase=v159ApplyOtdHero;
+v159ApplyOtdHero=function(index,options={}){
+  if(v162ThemeMode()==='dynamic'){
+    options=Object.assign({},options,{forceTheme:false});
+  }
+  return v163ApplyOtdHeroBase(index,options);
+};
+
+// Add interval control to the existing Dynamic Cover Theme panel.
+const v163CollectionPanelBase=v162CollectionPanelHtml;
+v162CollectionPanelHtml=function(mode){
+  let out=v163CollectionPanelBase(mode);
+  if(mode!=='dynamic')return out;
+
+  const controls=`<div class="v162-theme-controls">
+    <div class="field" style="margin:0">
+      <label class="field-label">Rotate every (seconds)</label>
+      <input type="number" min="5" max="3600" step="1"
+        value="${v163DynamicThemeInterval()}"
+        onchange="App.v163SetDynamicThemeInterval(this.value)">
+    </div>
+  </div>
+  <div class="v162-rotation-note">Dynamic Cover Theme changes its active recommendation / On This Day theme source on this exact interval. The Dashboard's On This Day title can still rotate visually without forcing an early theme change.</div>`;
+
+  out=out.replace(
+    '<div id="v146-dynamic-theme-status" class="v162-theme-status"><span>Analyzing cover…</span></div>',
+    controls+'<div id="v146-dynamic-theme-status" class="v162-theme-status"><span>Analyzing cover…</span></div>'
+  );
+
+  return out;
+};
+
+// ---- Persistence / cloud verification / backup -----------------------------
+
+const v163PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v163EnsureDynamicRotationSetting(S.settings||DEFAULT_SETTINGS);
+  return v163PersistSettingsBase.apply(this,arguments);
+};
+
+const v163SnapshotBase=snapshot;
+snapshot=function(){
+  v163EnsureDynamicRotationSetting(S.settings||DEFAULT_SETTINGS);
+  const x=v163SnapshotBase();
+  x.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  x.cloudSyncVersion=Math.max(Number(x.cloudSyncVersion)||0,163);
+  return x;
+};
+
+const v163ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v163ApplyStateBase.apply(this,arguments);
+  v163EnsureDynamicRotationSetting(S.settings||DEFAULT_SETTINGS);
+
+  clearTimeout(V159_DYNAMIC_SOURCE_TIMER);
+  V159_DYNAMIC_SOURCE_TIMER=null;
+
+  return result;
+};
+
+const v163MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v163MergeStatesBase(a,b)||{};
+  out.settings=v163EnsureDynamicRotationSetting(out.settings||{});
+  out.cloudSyncVersion=Math.max(
+    Number(a?.cloudSyncVersion)||0,
+    Number(b?.cloudSyncVersion)||0,
+    Number(out.cloudSyncVersion)||0,
+    163
+  );
+  return out;
+};
+
+const v163VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v163VerifyCloudStateBase(cloudState,expected);
+  const problems=[...(base?.missing||[])];
+
+  const cloud=v163EnsureDynamicRotationSetting(
+    JSON.parse(JSON.stringify(cloudState?.settings||{}))
+  );
+  const wanted=v163EnsureDynamicRotationSetting(
+    JSON.parse(JSON.stringify(expected?.settings||{}))
+  );
+
+  if(
+    Number(cloud.v163DynamicThemeIntervalSec)!==
+    Number(wanted.v163DynamicThemeIntervalSec)
+  ){
+    problems.push('Dynamic Cover Theme rotation interval');
+  }
+
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+
+const v163BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v163EnsureDynamicRotationSetting(S.settings||DEFAULT_SETTINGS);
+
+  const payload=v163BuildFullBackupBase();
+  payload.backupSchemaVersion=V163_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+
+  payload.backupManifest=v148BackupManifest(
+    payload,
+    payload.portableExtras||{}
+  );
+  payload.backupManifest.schemaVersion=V163_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v163 backup. Includes configurable Dynamic Cover Theme rotation interval plus all v162 adaptive theme collections, navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences. Authentication credentials and filesystem permission handles remain intentionally non-portable.';
+
+  return payload;
+};
+
+const v163BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v163BackupManifestBase(state,extras);
+
+  manifest.schemaVersion=V163_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    dynamicCoverThemeRotationInterval:true
+  });
+
+  return manifest;
+};
+
+Object.assign(App,{
+  v163SetDynamicThemeInterval
+});
+
+
+
+/* ============================================================
+   MediaFlow v164 — Simkl Full Style Theme
+   ------------------------------------------------------------
+   The selected Full Style theme already persists in S.settings.theme,
+   therefore the existing cloud, Sync Now, Full Backup, Automatic Backup,
+   JSON export/import and Settings merge pipelines require no new schema field.
+   ============================================================ */
+
+const v164BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v164BuildFullBackupBase();
+
+  // Keep current schema: v164 introduces a new allowed theme ID, not a new
+  // persistent structure.
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+
+  if(payload.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow v164 backup. Includes the selected Simkl Full Style theme through normal Settings persistence, plus all existing Library/History, adaptive themes, navigation, Personal Order, Old System, Rating Queue and portable preferences.';
+  }
+
+  return payload;
+};
 
 
 
