@@ -1079,7 +1079,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="148">
+<meta name="mediaflow-version" content="150">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1119,6 +1119,8 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v146: Dynamic full-cover theme mode -->
 <!-- MediaFlow v147: Dynamic Settings footer with version + Alex Godly copyright -->
 <!-- MediaFlow v148: Complete-data backup audit + modern full export/import -->
+<!-- MediaFlow v149: Day-streak XP multiplier + v149 full-backup compatibility -->
+<!-- MediaFlow v150: Streak XP performance cache + linear completion bonus indexing -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -1790,6 +1792,73 @@ html[data-v146-dynamic-active="1"] ::selection{
   line-height:1.55;
 }
 .v148-backup-note b{color:var(--text-dim)}
+</style>
+
+
+<style id="mf-v149-streak-xp-css">
+/* MediaFlow v149 — day-streak XP multiplier */
+.v149-sidebar-streak-xp{
+  display:inline-block;
+  margin-left:5px;
+  font-family:var(--font-body);
+  font-size:10px;
+  font-weight:800;
+  color:var(--flow);
+  vertical-align:middle;
+}
+.v149-streak-xp-card{
+  margin:10px 0 14px;
+  padding:12px 13px;
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  background:var(--panel-raised);
+}
+.v149-streak-xp-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.v149-streak-xp-head b{font-size:12px}
+.v149-streak-xp-mult{
+  color:var(--flow);
+  font-family:var(--font-display);
+  font-size:18px;
+  font-weight:700;
+}
+.v149-streak-xp-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.v149-streak-xp-grid>div{
+  padding:9px 10px;
+  border:1px solid var(--border-soft);
+  border-radius:8px;
+  background:var(--panel);
+}
+.v149-streak-xp-grid b{
+  display:block;
+  color:var(--text);
+  font-size:12px;
+}
+.v149-streak-xp-grid small{
+  display:block;
+  margin-top:2px;
+  color:var(--text-mute);
+  font-size:9.5px;
+}
+.v149-streak-xp-note{
+  margin-top:9px;
+  color:var(--text-mute);
+  font-size:10px;
+  line-height:1.55;
+}
+@media(max-width:650px){
+  .v149-streak-xp-grid{grid-template-columns:1fr}
+}
 </style>
 
 </head>
@@ -3685,7 +3754,7 @@ function mediaFlowLevelInfo(){
 function refreshXPPreview(){
   const el=document.getElementById('xp-preview'); if(!el) return;
   const x=estimateCurrentLogXP();
-  el.innerHTML=`<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small>${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation multiplier</small>`;
+  el.innerHTML=`<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small>${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation × ${Number(x.streakMultiplier||1).toFixed(2)} streak (${Number(x.streak||0)}d)</small>`;
 }
 function renderLevelBlock(){
   const l=mediaFlowLevelInfo();
@@ -3768,7 +3837,7 @@ function renderShell(){
 
         <div class="k" style="margin-top:14px;">Day streak</div>
 
-        <div class="v">${computeDayStreak()} 🔥</div>
+        <div class="v">${computeDayStreak()} 🔥 <span class="v149-sidebar-streak-xp">×${v149StreakMultiplier(computeDayStreak()).toFixed(2)} XP</span></div>
 
         <div style="font-size:10.5px; color:var(--text-mute); margin-top:10px;">
 
@@ -4199,7 +4268,7 @@ function renderLogForm(t, cat){
 
     </div>
 
-    <div id="xp-preview" style="margin:10px 0 14px;padding:11px 13px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:10px;color:var(--flow);line-height:1.45;">${(()=>{const x=estimateCurrentLogXP();return `<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small style="color:var(--text-mute)">${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation multiplier</small>`})()}</div>
+    <div id="xp-preview" style="margin:10px 0 14px;padding:11px 13px;border:1px solid var(--border-soft);background:var(--panel-raised);border-radius:10px;color:var(--flow);line-height:1.45;">${(()=>{const x=estimateCurrentLogXP();return `<div><b>+${x.xp.toLocaleString()} XP</b> for this log</div><small style="color:var(--text-mute)">${escapeHtml(x.label)} · ${x.base.toLocaleString()} base × ${x.multiplier} rotation × ${Number(x.streakMultiplier||1).toFixed(2)} streak (${Number(x.streak||0)}d)</small>`})()}</div>
 
     <div class="field">
 
@@ -4777,7 +4846,7 @@ function renderHistory(){
         <div class="hist-cat">${escapeHtml(cat.name)}</div>
 
         <div class="hist-amt">${s.actualAmount} ${unitLabel(s.unit,s.actualAmount)} · ${fmtMinutes(s.minutes)}${s.status==='logged'?'':` · target ${s.targetAmount}`}</div>${s.source==='batch'?`<div class="hist-note" style="margin-top:4px">Batch Log</div>`:''}${s.assignedCategoryId&&s.assignedCategoryId!==s.categoryId?`<div class="hist-note" style="margin-top:4px">Recommended: ${escapeHtml(getCategory(s.assignedCategoryId)?.name||'Unknown')}</div>`:''}
-        ${s.status!=='skipped'?`<div class="hist-xp" style="margin-top:4px;font-size:11px;color:var(--flow);font-weight:800;">+${Math.round(sessionStoredXP(s)).toLocaleString()} XP · ${escapeHtml(xpRotationLabel(s.healthStatus||'healthy'))}</div>`:''}
+        ${s.status!=='skipped'?`<div class="hist-xp" style="margin-top:4px;font-size:11px;color:var(--flow);font-weight:800;">+${Math.round(sessionStoredXP(s)).toLocaleString()} XP · ${escapeHtml(xpRotationLabel(s.healthStatus||'healthy'))} · 🔥 ${escapeHtml(v149SessionStreakLabel(s))}</div>`:''}
 
         ${s.note? `<div class="hist-note">"${escapeHtml(s.note)}"</div>`:''}
 
@@ -8404,8 +8473,8 @@ App.exportJSON=function(){
     const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     const payload=Object.assign({},snapshot(),{
       backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:148,
-      mediaFlowVersion:148,
+      backupVersion:150,
+      mediaFlowVersion:150,
       exportedAt:now.toISOString(),
       progression:mediaFlowLevelInfo(),
       progressionBreakdown:v120XPBreakdown()
@@ -14205,6 +14274,766 @@ renderSettings=function(){
   const exportButton='<button class="btn" onclick="App.exportJSON()">Export JSON backup</button>';
   if(out.includes(exportButton))out=out.replace(exportButton,exportButton+note);
   return out;
+};
+
+
+
+/* ============================================================
+   MediaFlow v149 — Day-Streak XP Multiplier
+   ------------------------------------------------------------
+   Rules:
+   - streaks are built from genuine, non-skipped History activity days;
+   - every History/log XP gain on that day is multiplied by that day's streak;
+   - repeat XP is inside the session XP and is multiplied too;
+   - logged-completion bonus XP also receives the streak multiplier;
+   - Library maintenance / rating rewards remain their configured fixed rewards;
+   - the multiplier grows continuously with streak length:
+       1 + 0.10 * log2(streak)
+     Day 1 = 1.00x, Day 2 = 1.10x, Day 7 ≈ 1.28x,
+     Day 30 ≈ 1.49x, Day 100 ≈ 1.66x.
+   ============================================================ */
+
+const V149_STREAK_XP_VERSION=1;
+let V149_STREAK_DIRTY=true;
+let V149_STREAK_MAP=new Map();
+
+function v149DateKeyFromSession(s){
+  const raw=String(s?.date||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+  const ts=Number(s?.timestamp)||0;
+  if(ts>0){
+    const d=new Date(ts);
+    if(!Number.isNaN(d.getTime()))return d.toISOString().slice(0,10);
+  }
+  return '';
+}
+
+function v149ShiftDateKey(key,delta){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(key||'')))return '';
+  const d=new Date(`${key}T12:00:00Z`);
+  if(Number.isNaN(d.getTime()))return '';
+  d.setUTCDate(d.getUTCDate()+Number(delta||0));
+  return d.toISOString().slice(0,10);
+}
+
+function v149BuildStreakMap(sessions){
+  const days=new Set();
+  for(const s of (Array.isArray(sessions)?sessions:[])){
+    if(!s||s.status==='skipped')continue;
+    const key=v149DateKeyFromSession(s);
+    if(key)days.add(key);
+  }
+
+  const map=new Map();
+  for(const key of [...days].sort()){
+    const prev=v149ShiftDateKey(key,-1);
+    map.set(key,(map.get(prev)||0)+1);
+  }
+  return map;
+}
+
+function v149MarkStreakDirty(){
+  V149_STREAK_DIRTY=true;
+}
+
+function v149StreakMultiplier(streak){
+  if(levelingSettings().enabled===false)return 1;
+  const n=Math.max(0,Math.floor(Number(streak)||0));
+  if(n<=1)return 1;
+  return Math.round((1+0.10*Math.log2(n))*100)/100;
+}
+
+const v149SessionStoredXPBase=sessionStoredXP;
+
+function v149AnnotateSessionStreakXP(){
+  V149_STREAK_MAP=v149BuildStreakMap(S.sessions||[]);
+
+  for(const s of (S.sessions||[])){
+    if(!s||typeof s!=='object')continue;
+
+    if(s.status==='skipped'){
+      s.streakAtLog=0;
+      s.streakMultiplier=1;
+      s.streakBaseXP=0;
+      s.streakBonusXP=0;
+      s.xpWithStreak=0;
+      s.streakXPVersion=V149_STREAK_XP_VERSION;
+      continue;
+    }
+
+    const key=v149DateKeyFromSession(s);
+    const streak=key?(V149_STREAK_MAP.get(key)||1):1;
+    const multiplier=v149StreakMultiplier(streak);
+    const raw=Math.max(0,Math.round(Number(v149SessionStoredXPBase(s))||0));
+    const total=Math.max(0,Math.round(raw*multiplier));
+
+    s.streakAtLog=streak;
+    s.streakMultiplier=multiplier;
+    s.streakBaseXP=raw;
+    s.streakBonusXP=Math.max(0,total-raw);
+    s.xpWithStreak=total;
+    s.streakXPVersion=V149_STREAK_XP_VERSION;
+  }
+
+  V149_STREAK_DIRTY=false;
+  return V149_STREAK_MAP;
+}
+
+function v149EnsureStreakXP(){
+  if(V149_STREAK_DIRTY)v149AnnotateSessionStreakXP();
+  return V149_STREAK_MAP;
+}
+
+function v149StreakForDateKey(key){
+  const map=v149EnsureStreakXP();
+  return map.get(String(key||''))||0;
+}
+
+function v149ProspectiveTodayStreak(){
+  const map=v149EnsureStreakXP();
+  const today=todayISO();
+  if(map.has(today))return map.get(today)||1;
+  const yesterday=v149ShiftDateKey(today,-1);
+  return (map.get(yesterday)||0)+1;
+}
+
+function v149SessionStreakLabel(s){
+  v149EnsureStreakXP();
+  const streak=Math.max(0,Number(s?.streakAtLog)||0);
+  const mult=Math.max(1,Number(s?.streakMultiplier)||1);
+  return `${streak}d ×${mult.toFixed(2)}`;
+}
+
+// Final History XP source of truth: base History XP + streak multiplier.
+// The stored s.xp remains the pre-streak amount so old backups and existing
+// repeat-XP reconstruction continue to work without double multiplication.
+sessionStoredXP=function(s){
+  if(!s||s.status==='skipped')return 0;
+  v149EnsureStreakXP();
+  if(Number.isFinite(Number(s.xpWithStreak)))return Math.max(0,Number(s.xpWithStreak));
+  return Math.max(0,Number(v149SessionStoredXPBase(s))||0);
+};
+
+// Existing sidebar streak now shares the exact same historical day engine.
+computeDayStreak=function(){
+  return v149StreakForDateKey(todayISO());
+};
+
+// The log form previews the XP that will actually be worth after today's
+// prospective streak is included.
+const v149EstimateCurrentLogXPBase=estimateCurrentLogXP;
+estimateCurrentLogXP=function(){
+  const base=v149EstimateCurrentLogXPBase();
+  const streak=v149ProspectiveTodayStreak();
+  const streakMultiplier=v149StreakMultiplier(streak);
+  return Object.assign({},base,{
+    preStreakXP:Math.max(0,Number(base.xp)||0),
+    streak,
+    streakMultiplier,
+    xp:Math.max(0,Math.round((Number(base.xp)||0)*streakMultiplier))
+  });
+};
+
+function v149SessionRawXPTotal(sessions){
+  return (Array.isArray(sessions)?sessions:[]).reduce((sum,s)=>{
+    if(!s||s.status==='skipped')return sum;
+    const stored=Number(s.xp);
+    if(Number.isFinite(stored)&&stored>0)return sum+Math.max(0,stored);
+    const cat=getCategory(s.categoryId);
+    return sum+Math.max(0,Number(calculateConsumptionXP(
+      cat,
+      Number(s.actualAmount)||0,
+      Number(s.minutes)||0,
+      s.healthStatus||'healthy'
+    ).xp)||0);
+  },0);
+}
+
+function v149SessionStreakBonusForState(state){
+  const sessions=Array.isArray(state?.sessions)?state.sessions:[];
+  const map=v149BuildStreakMap(sessions);
+  let bonus=0;
+
+  for(const s of sessions){
+    if(!s||s.status==='skipped')continue;
+    const stored=Number(s.xp);
+    let raw=0;
+    if(Number.isFinite(stored)&&stored>0)raw=Math.max(0,stored);
+    else{
+      const cat=getCategory(s.categoryId);
+      raw=Math.max(0,Number(calculateConsumptionXP(
+        cat,
+        Number(s.actualAmount)||0,
+        Number(s.minutes)||0,
+        s.healthStatus||'healthy'
+      ).xp)||0);
+    }
+
+    const streak=map.get(v149DateKeyFromSession(s))||1;
+    const total=Math.max(0,Math.round(raw*v149StreakMultiplier(streak)));
+    bonus+=Math.max(0,total-raw);
+  }
+
+  return Math.round(bonus);
+}
+
+function v149CompletionDateKeyForState(item,state){
+  const ts=Number(item?.completedAt)||0;
+  if(ts>0){
+    const d=new Date(ts);
+    if(!Number.isNaN(d.getTime()))return d.toISOString().slice(0,10);
+  }
+
+  const id=String(item?.id||'');
+  if(!id)return '';
+
+  let best='';
+  let bestTs=0;
+  for(const s of (state?.sessions||[])){
+    if(!s||s.status==='skipped')continue;
+    if(!(s.titles||[]).some(t=>String(t?.libraryId||'')===id))continue;
+    const st=Number(s.timestamp)||0;
+    if(st>=bestTs){
+      bestTs=st;
+      best=v149DateKeyFromSession(s);
+    }
+  }
+  return best;
+}
+
+function v149LoggedCompletionStreakBonusForState(state){
+  const ledger=state?.xpLedger?.logCompletions||{};
+  const library=Array.isArray(state?.library)?state.library:[];
+  const map=v149BuildStreakMap(state?.sessions||[]);
+  const byId=new Map(library.filter(i=>i?.id).map(i=>[String(i.id),i]));
+  let bonus=0;
+
+  for(const [id,value] of Object.entries(ledger)){
+    const raw=Math.max(0,Number(value)||0);
+    if(raw<=0)continue;
+    const item=byId.get(String(id));
+    if(!item)continue;
+    const key=v149CompletionDateKeyForState(item,state);
+    const streak=map.get(key)||0;
+    const mult=v149StreakMultiplier(streak);
+    bonus+=Math.max(0,Math.round(raw*mult)-raw);
+  }
+
+  return Math.round(bonus);
+}
+
+function v149LoggedCompletionStreakBonus(){
+  return v149LoggedCompletionStreakBonusForState({
+    sessions:S.sessions||[],
+    library:S.library||[],
+    xpLedger:S.xpLedger||{}
+  });
+}
+
+// Logged-completion bonus is XP earned through a genuine consumption log, so it
+// participates in the same day-streak multiplier.
+const v149LibraryXPTotalBase=libraryXPTotal;
+libraryXPTotal=function(){
+  return v149LibraryXPTotalBase()+v149LoggedCompletionStreakBonus();
+};
+
+// Keep Library History before/after XP deltas accurate with the new multiplier.
+const v149SnapshotXPBase=v50SnapshotXP;
+v50SnapshotXP=function(x){
+  const base=v149SnapshotXPBase(x);
+  if(base==null)return base;
+  return base
+    +v149SessionStreakBonusForState(x||{})
+    +v149LoggedCompletionStreakBonusForState(x||{});
+};
+
+// Progression breakdown/export now describes the streak contribution explicitly.
+const v149XPBreakdownBase=v120XPBreakdown;
+v120XPBreakdown=function(){
+  const b=v149XPBreakdownBase();
+  const rawHistoryXP=Math.round(v149SessionRawXPTotal(S.sessions||[]));
+  const streakedHistoryXP=Math.round((S.sessions||[]).reduce((a,s)=>a+sessionStoredXP(s),0));
+  const sessionStreakBonusXP=Math.max(0,streakedHistoryXP-rawHistoryXP);
+  const loggedCompletionStreakBonusXP=v149LoggedCompletionStreakBonus();
+  const streakBonusXP=sessionStreakBonusXP+loggedCompletionStreakBonusXP;
+
+  return Object.assign({},b,{
+    total:(Number(b.total)||0)+loggedCompletionStreakBonusXP,
+    historyXP:streakedHistoryXP,
+    preStreakHistoryXP:rawHistoryXP,
+    sessionStreakBonusXP,
+    loggedCompletionStreakBonusXP,
+    streakBonusXP,
+    currentDayStreak:computeDayStreak(),
+    currentStreakMultiplier:v149StreakMultiplier(computeDayStreak()),
+    prospectiveTodayStreak:v149ProspectiveTodayStreak(),
+    prospectiveTodayMultiplier:v149StreakMultiplier(v149ProspectiveTodayStreak()),
+    streakXPFormulaVersion:V149_STREAK_XP_VERSION
+  });
+};
+
+// Mark streak annotations dirty whenever History can change.
+const v149PersistSessionsBase=persistSessions;
+persistSessions=function(){
+  v149MarkStreakDirty();
+  return v149PersistSessionsBase.apply(this,arguments);
+};
+
+const v149MfCommitBase=mfCommit;
+mfCommit=function(){
+  v149MarkStreakDirty();
+  return v149MfCommitBase.apply(this,arguments);
+};
+
+const v149RestoreCoreBase=mfRestoreCore;
+mfRestoreCore=function(){
+  const result=v149RestoreCoreBase.apply(this,arguments);
+  v149MarkStreakDirty();
+  return result;
+};
+
+const v149ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v149ApplyStateBase.apply(this,arguments);
+  v149MarkStreakDirty();
+  return result;
+};
+
+// v134 is the final optimized progression repair engine. Mark the streak cache
+// dirty before it rewrites base/repeat session XP so its final mediaFlowLevelInfo()
+// uses freshly rebuilt streak totals.
+const v149RecalculateXPOptimizedBase=v134RecalculateXPOptimized;
+v134RecalculateXPOptimized=async function(){
+  v149MarkStreakDirty();
+  const result=await v149RecalculateXPOptimizedBase.apply(this,arguments);
+  v149MarkStreakDirty();
+  v149EnsureStreakXP();
+  return mediaFlowLevelInfo();
+};
+v46RecalculateXP=v134RecalculateXPOptimized;
+
+// v149 Settings panel.
+const v149RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  v149EnsureStreakXP();
+  let h=v149RenderSettingsBase();
+
+  const current=computeDayStreak();
+  const prospective=v149ProspectiveTodayStreak();
+  const currentMult=v149StreakMultiplier(current);
+  const nextMult=v149StreakMultiplier(prospective);
+  const b=v120XPBreakdown();
+
+  const marker='<div style="font-weight:700;font-size:12px;margin:14px 0 8px;">ROTATION XP MULTIPLIERS</div>';
+  const card=`<div style="font-weight:700;font-size:12px;margin:14px 0 8px;">DAY-STREAK XP</div>
+    <div class="v149-streak-xp-card">
+      <div class="v149-streak-xp-head">
+        <div><b>Higher streak → higher daily log XP</b><div class="hint" style="margin-top:3px">Your genuine non-skipped History days build the multiplier.</div></div>
+        <div class="v149-streak-xp-mult">×${(current>0?currentMult:nextMult).toFixed(2)}</div>
+      </div>
+      <div class="v149-streak-xp-grid">
+        <div><b>${current.toLocaleString()} day${current===1?'':'s'}</b><small>current streak</small></div>
+        <div><b>${prospective.toLocaleString()} day${prospective===1?'':'s'} · ×${nextMult.toFixed(2)}</b><small>your next log today</small></div>
+        <div><b>+${Math.round(b.streakBonusXP||0).toLocaleString()} XP</b><small>lifetime streak bonus</small></div>
+      </div>
+      <div class="v149-streak-xp-note">Formula: <b>1 + 0.10 × log₂(streak)</b>. Day 1 = ×1.00, Day 2 = ×1.10, Day 7 ≈ ×1.28, Day 30 ≈ ×1.49. The multiplier applies to consumption/History XP, repeat XP and logged-completion bonus XP. Fixed Library maintenance and Rating XP keep their configured values.</div>
+    </div>`;
+
+  if(h.includes(marker) && !h.includes('DAY-STREAK XP')){
+    h=h.replace(marker,card+marker);
+  }
+
+  h=h.replace('Full Backup v148:','Full Backup v149:');
+  h=h.replace(
+    'XP ledgers, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue.',
+    'XP ledgers, day-streak XP metadata, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue.'
+  );
+
+  return h;
+};
+
+// ------------------------------------------------------------
+// v149 Full Backup / Import compatibility audit
+// ------------------------------------------------------------
+
+const v149BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v149BackupManifestBase(state,extras);
+  manifest.schemaVersion=3;
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    streakXP:true,
+    streakSessionMetadata:true
+  });
+
+  const sessions=Array.isArray(state?.sessions)?state.sessions:[];
+  const streakMap=v149BuildStreakMap(sessions);
+  const maxStreak=streakMap.size?Math.max(...streakMap.values()):0;
+  manifest.counts=Object.assign({},manifest.counts||{},{
+    activeStreakDays:streakMap.size,
+    longestReconstructedStreak:maxStreak
+  });
+
+  manifest.note='Complete MediaFlow v149 backup. Day-streak XP is reconstructable from History dates and also exports per-session streak metadata. Browser authentication credentials and filesystem permission handles are intentionally non-portable.';
+  return manifest;
+};
+
+const v149BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  // Ensure exported sessions contain current streak/multiplier/bonus metadata.
+  v149MarkStreakDirty();
+  v149EnsureStreakXP();
+
+  const payload=v149BuildFullBackupBase();
+  payload.backupSchemaVersion=3;
+  payload.backupVersion=v148CurrentVersion();
+  payload.mediaFlowVersion=v148CurrentVersion();
+  payload.streakXP={
+    version:V149_STREAK_XP_VERSION,
+    formula:'1 + 0.10 * log2(streak)',
+    appliesTo:[
+      'consumption History XP',
+      'repeat XP',
+      'logged-completion bonus XP'
+    ],
+    breakdown:v120XPBreakdown()
+  };
+  payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
+  return payload;
+};
+
+// v148 import already validates the canonical state, applies it through the full
+// state wrapper chain and calls v46RecalculateXP(). Because v149 redirects that
+// recalculation engine above, v148/v149/older backups automatically reconstruct
+// streak XP from imported History. No separate fragile import path is needed.
+
+
+
+/* ============================================================
+   MediaFlow v150 — v149 Streak XP Performance Fix
+   ------------------------------------------------------------
+   Root causes fixed:
+   1) mediaFlowXP() still reduced the full History on every level read/render;
+   2) v149 logged-completion streak bonus rebuilt maps repeatedly;
+   3) completion-date fallback could scan all History once per completion
+      (O(completions × history));
+   4) the XP breakdown repeated several full History scans.
+
+   v150 builds one shared live XP/streak cache after relevant data changes.
+   Normal renders now read totals in O(1). Library History before/after snapshots
+   use a single linear indexed scan instead of nested History scans.
+   ============================================================ */
+
+let V150_XP_CACHE_DIRTY=true;
+let V150_XP_CACHE={
+  historyXP:0,
+  rawHistoryXP:0,
+  sessionStreakBonusXP:0,
+  loggedCompletionStreakBonusXP:0,
+  fixedLibraryXP:0,
+  totalXP:0,
+  completedTitles:0,
+  libraryTitleXP:0,
+  completedTitleXP:0,
+  libraryEditXP:0,
+  manualCoverXP:0,
+  loggedCompletionBonusXP:0,
+  ratingXP:0,
+  ratingRewards:0
+};
+
+function v150LedgerSum(ledger,name){
+  return Object.values(ledger?.[name]||{}).reduce((a,v)=>a+(Number(v)||0),0);
+}
+
+function v150BaseSessionXP(s){
+  if(!s||s.status==='skipped')return 0;
+  const stored=Number(s.xp);
+  if(Number.isFinite(stored)&&stored>0)return Math.max(0,stored);
+  if((Number(s.actualAmount)||0)>0&&(Number(s.minutes)||0)>0){
+    const cat=getCategory(s.categoryId);
+    return Math.max(0,Number(calculateConsumptionXP(
+      cat,
+      Number(s.actualAmount)||0,
+      Number(s.minutes)||0,
+      s.healthStatus||'healthy'
+    ).xp)||0);
+  }
+  return 0;
+}
+
+function v150CompletionDateKey(item,latestSessionDateByLibraryId){
+  const ts=Number(item?.completedAt)||0;
+  if(ts>0){
+    const d=new Date(ts);
+    if(!Number.isNaN(d.getTime()))return d.toISOString().slice(0,10);
+  }
+  return latestSessionDateByLibraryId.get(String(item?.id||''))?.key||'';
+}
+
+function v150ComputeStateMetrics(state,mutateSessions=false){
+  const sessions=Array.isArray(state?.sessions)?state.sessions:[];
+  const library=Array.isArray(state?.library)?state.library:[];
+  const ledger=state?.xpLedger||{};
+  const streakMap=v149BuildStreakMap(sessions);
+  const latestSessionDateByLibraryId=new Map();
+
+  let rawHistoryXP=0;
+  let historyXP=0;
+
+  for(const s of sessions){
+    if(!s||s.status==='skipped'){
+      if(mutateSessions&&s){
+        s.streakAtLog=0;
+        s.streakMultiplier=1;
+        s.streakBaseXP=0;
+        s.streakBonusXP=0;
+        s.xpWithStreak=0;
+        s.streakXPVersion=V149_STREAK_XP_VERSION;
+      }
+      continue;
+    }
+
+    const key=v149DateKeyFromSession(s);
+    const streak=key?(streakMap.get(key)||1):1;
+    const multiplier=v149StreakMultiplier(streak);
+    const raw=Math.max(0,Math.round(v150BaseSessionXP(s)));
+    const total=Math.max(0,Math.round(raw*multiplier));
+
+    rawHistoryXP+=raw;
+    historyXP+=total;
+
+    if(mutateSessions){
+      s.streakAtLog=streak;
+      s.streakMultiplier=multiplier;
+      s.streakBaseXP=raw;
+      s.streakBonusXP=Math.max(0,total-raw);
+      s.xpWithStreak=total;
+      s.streakXPVersion=V149_STREAK_XP_VERSION;
+    }
+
+    const ts=Number(s.timestamp)||0;
+    for(const t of (s.titles||[])){
+      const id=String(t?.libraryId||'');
+      if(!id)continue;
+      const prev=latestSessionDateByLibraryId.get(id);
+      if(!prev||ts>=prev.ts){
+        latestSessionDateByLibraryId.set(id,{ts,key});
+      }
+    }
+  }
+
+  const completionLedger=ledger?.logCompletions||{};
+  const completionIds=new Set(Object.keys(completionLedger));
+  const libraryByCompletionId=new Map();
+  let completedTitles=0;
+
+  for(const item of library){
+    if(v120IsCompleted(item))completedTitles++;
+    const id=String(item?.id||'');
+    if(id&&completionIds.has(id))libraryByCompletionId.set(id,item);
+  }
+
+  let loggedCompletionStreakBonusXP=0;
+  for(const [id,value] of Object.entries(completionLedger)){
+    const raw=Math.max(0,Number(value)||0);
+    if(raw<=0)continue;
+    const item=libraryByCompletionId.get(String(id));
+    if(!item)continue;
+
+    const key=v150CompletionDateKey(item,latestSessionDateByLibraryId);
+    const streak=streakMap.get(key)||0;
+    const total=Math.max(0,Math.round(raw*v149StreakMultiplier(streak)));
+    loggedCompletionStreakBonusXP+=Math.max(0,total-raw);
+  }
+
+  const l=levelingSettings();
+  const enabled=l.enabled!==false;
+  const libraryTitleXP=enabled
+    ? library.length*Math.max(0,Math.round(Number(l.libraryAdditionXP)||0))
+    : 0;
+  const completedTitleXP=enabled
+    ? completedTitles*Math.max(0,Math.round(Number(l.completionXP)||0))
+    : 0;
+
+  const libraryEditXP=v150LedgerSum(ledger,'libraryEdits');
+  const manualCoverXP=v150LedgerSum(ledger,'manualCovers');
+  const loggedCompletionBonusXP=v150LedgerSum(ledger,'logCompletions');
+  const ratingXP=v150LedgerSum(ledger,'ratings');
+  const ratingRewards=Object.keys(ledger?.ratings||{}).length;
+
+  const fixedLibraryXP=
+    libraryTitleXP+
+    completedTitleXP+
+    libraryEditXP+
+    manualCoverXP+
+    loggedCompletionBonusXP+
+    ratingXP;
+
+  return {
+    streakMap,
+    rawHistoryXP:Math.round(rawHistoryXP),
+    historyXP:Math.round(historyXP),
+    sessionStreakBonusXP:Math.max(0,Math.round(historyXP-rawHistoryXP)),
+    loggedCompletionStreakBonusXP:Math.round(loggedCompletionStreakBonusXP),
+    fixedLibraryXP:Math.round(fixedLibraryXP),
+    totalXP:Math.round(historyXP+fixedLibraryXP+loggedCompletionStreakBonusXP),
+    completedTitles,
+    libraryTitleXP:Math.round(libraryTitleXP),
+    completedTitleXP:Math.round(completedTitleXP),
+    libraryEditXP:Math.round(libraryEditXP),
+    manualCoverXP:Math.round(manualCoverXP),
+    loggedCompletionBonusXP:Math.round(loggedCompletionBonusXP),
+    ratingXP:Math.round(ratingXP),
+    ratingRewards
+  };
+}
+
+function v150BuildLiveXPCache(){
+  const metrics=v150ComputeStateMetrics({
+    sessions:S.sessions||[],
+    library:S.library||[],
+    xpLedger:S.xpLedger||{}
+  },true);
+
+  V149_STREAK_MAP=metrics.streakMap;
+  V149_STREAK_DIRTY=false;
+  V150_XP_CACHE=metrics;
+  V150_XP_CACHE_DIRTY=false;
+  return V150_XP_CACHE;
+}
+
+function v150EnsureLiveXPCache(){
+  if(V150_XP_CACHE_DIRTY||V149_STREAK_DIRTY)return v150BuildLiveXPCache();
+  return V150_XP_CACHE;
+}
+
+// All existing v149 dirty paths call this binding at runtime.
+v149MarkStreakDirty=function(){
+  V149_STREAK_DIRTY=true;
+  V150_XP_CACHE_DIRTY=true;
+};
+
+// Reuse the same single pass for streak annotations and aggregates.
+v149AnnotateSessionStreakXP=function(){
+  v150BuildLiveXPCache();
+  return V149_STREAK_MAP;
+};
+v149EnsureStreakXP=function(){
+  v150EnsureLiveXPCache();
+  return V149_STREAK_MAP;
+};
+
+// O(1) normal History XP read after the cache is built.
+sessionStoredXP=function(s){
+  if(!s||s.status==='skipped')return 0;
+  v150EnsureLiveXPCache();
+  if(Number.isFinite(Number(s.xpWithStreak)))return Math.max(0,Number(s.xpWithStreak));
+  return Math.max(0,v150BaseSessionXP(s));
+};
+
+// O(1) progression totals during normal rendering.
+mediaFlowXP=function(){
+  return v150EnsureLiveXPCache().totalXP;
+};
+
+libraryXPTotal=function(){
+  const c=v150EnsureLiveXPCache();
+  return c.fixedLibraryXP+c.loggedCompletionStreakBonusXP;
+};
+
+v149LoggedCompletionStreakBonus=function(){
+  return v150EnsureLiveXPCache().loggedCompletionStreakBonusXP;
+};
+
+v149SessionRawXPTotal=function(sessions){
+  if(sessions===S.sessions)return v150EnsureLiveXPCache().rawHistoryXP;
+  return v150ComputeStateMetrics({sessions:Array.isArray(sessions)?sessions:[],library:[],xpLedger:{}},false).rawHistoryXP;
+};
+
+v149SessionStreakBonusForState=function(state){
+  if(state?.sessions===S.sessions&&state?.library===S.library&&state?.xpLedger===S.xpLedger){
+    return v150EnsureLiveXPCache().sessionStreakBonusXP;
+  }
+  return v150ComputeStateMetrics(state||{},false).sessionStreakBonusXP;
+};
+
+v149LoggedCompletionStreakBonusForState=function(state){
+  if(state?.sessions===S.sessions&&state?.library===S.library&&state?.xpLedger===S.xpLedger){
+    return v150EnsureLiveXPCache().loggedCompletionStreakBonusXP;
+  }
+  return v150ComputeStateMetrics(state||{},false).loggedCompletionStreakBonusXP;
+};
+
+// Replace the multi-pass v149 breakdown with one cached read.
+v120XPBreakdown=function(){
+  v120EnsureXPState();
+  const c=v150EnsureLiveXPCache();
+  const currentDayStreak=v149StreakForDateKey(todayISO());
+  const prospectiveTodayStreak=v149ProspectiveTodayStreak();
+
+  return {
+    total:c.totalXP,
+    historyXP:c.historyXP,
+    preStreakHistoryXP:c.rawHistoryXP,
+    sessionStreakBonusXP:c.sessionStreakBonusXP,
+    loggedCompletionStreakBonusXP:c.loggedCompletionStreakBonusXP,
+    streakBonusXP:c.sessionStreakBonusXP+c.loggedCompletionStreakBonusXP,
+    libraryTitleXP:c.libraryTitleXP,
+    completedTitleXP:c.completedTitleXP,
+    libraryEditXP:c.libraryEditXP,
+    manualCoverXP:c.manualCoverXP,
+    loggedCompletionBonusXP:c.loggedCompletionBonusXP,
+    ratingXP:c.ratingXP,
+    ratingRewards:c.ratingRewards,
+    completedTitles:c.completedTitles,
+    currentDayStreak,
+    currentStreakMultiplier:v149StreakMultiplier(currentDayStreak),
+    prospectiveTodayStreak,
+    prospectiveTodayMultiplier:v149StreakMultiplier(prospectiveTodayStreak),
+    streakXPFormulaVersion:V149_STREAK_XP_VERSION
+  };
+};
+
+// Library History before/after XP comparisons stay exact, but are now linear
+// O(history + library) instead of v149's potential O(completions × history).
+v50SnapshotXP=function(x){
+  if(!x)return null;
+  return v150ComputeStateMetrics({
+    sessions:Array.isArray(x.sessions)?x.sessions:[],
+    library:Array.isArray(x.library)?x.library:[],
+    xpLedger:x.xpLedger||{}
+  },false).totalXP;
+};
+
+// Invalidate the aggregate cache for every persistent source that can affect XP.
+const v150PersistLibraryBase=persistLibrary;
+persistLibrary=function(){
+  v149MarkStreakDirty();
+  return v150PersistLibraryBase.apply(this,arguments);
+};
+
+const v150PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v149MarkStreakDirty();
+  return v150PersistSettingsBase.apply(this,arguments);
+};
+
+// The v149 wrappers already invalidate on persistSessions, mfCommit,
+// restoreCore and applyState. Calculate XP also marks dirty before/after.
+
+// Backup/export compatibility: there is no new persistent v150 data.
+// Schema v3 remains valid; the runtime cache is intentionally reconstructed.
+const v150BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v150EnsureLiveXPCache();
+  const payload=v150BuildFullBackupBase();
+  if(payload?.streakXP){
+    payload.streakXP.performanceModel='v150 cached aggregate; reconstructed from History on import';
+  }
+  if(payload?.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow backup. v150 XP performance caches are runtime-only and are rebuilt from imported History/Library/XP ledgers; no user data depends on the cache.';
+  }
+  return payload;
 };
 
 
