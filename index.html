@@ -1079,7 +1079,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="150">
+<meta name="mediaflow-version" content="152">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1121,6 +1121,8 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v148: Complete-data backup audit + modern full export/import -->
 <!-- MediaFlow v149: Day-streak XP multiplier + v149 full-backup compatibility -->
 <!-- MediaFlow v150: Streak XP performance cache + linear completion bonus indexing -->
+<!-- MediaFlow v151: Versionless Full Backup label -->
+<!-- MediaFlow v152: Automatic Backup upgraded to complete Full Backup pipeline -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -8473,8 +8475,8 @@ App.exportJSON=function(){
     const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     const payload=Object.assign({},snapshot(),{
       backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:150,
-      mediaFlowVersion:150,
+      backupVersion:152,
+      mediaFlowVersion:152,
       exportedAt:now.toISOString(),
       progression:mediaFlowLevelInfo(),
       progressionBreakdown:v120XPBreakdown()
@@ -14269,7 +14271,7 @@ App.importJSON=function(file){
 const v148RenderSettingsBase=renderSettings;
 renderSettings=function(){
   let out=v148RenderSettingsBase();
-  const note=`<div class="v148-backup-note"><b>Full Backup v148:</b> exports/restores all persistent MediaFlow account data — categories, Library metadata/covers/dates, consumption History, Settings/themes, XP ledgers, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue. Browser authentication and filesystem folder permissions are not portable JSON data.</div>`;
+  const note=`<div class="v148-backup-note"><b>Full Backup:</b> exports/restores all persistent MediaFlow account data — categories, Library metadata/covers/dates, consumption History, Settings/themes, XP ledgers, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue. Browser authentication and filesystem folder permissions are not portable JSON data.</div>`;
 
   const exportButton='<button class="btn" onclick="App.exportJSON()">Export JSON backup</button>';
   if(out.includes(exportButton))out=out.replace(exportButton,exportButton+note);
@@ -14643,7 +14645,7 @@ renderSettings=function(){
     h=h.replace(marker,card+marker);
   }
 
-  h=h.replace('Full Backup v148:','Full Backup v150:');
+  h=h.replace('Full Backup:','Full Backup:');
   h=h.replace(
     'XP ledgers, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue.',
     'XP ledgers, day-streak XP metadata, completion timeline, Library History, profile data, stopwatch, MAL link, Personal Order + recovery state and the saved Rating Queue.'
@@ -15034,6 +15036,31 @@ v148BuildFullBackup=function(){
     payload.backupManifest.note='Complete MediaFlow backup. v150 XP performance caches are runtime-only and are rebuilt from imported History/Library/XP ledgers; no user data depends on the cache.';
   }
   return payload;
+};
+
+
+
+/* ============================================================
+   MediaFlow v152 — Automatic Backup = Full Backup
+   ------------------------------------------------------------
+   Before v152, automatic folder backups still serialized snapshot()
+   directly. That covered the core account state but skipped newer
+   portable extras introduced by the modern Full Backup pipeline,
+   such as the saved Rating Queue and portable UI preferences.
+
+   v152 routes BOTH scheduled automatic backups and the manual
+   "Save backup now" folder backup through the FINAL full-backup
+   builder chain (v148 -> v149 -> v150), so folder backups and the
+   normal Export JSON backup now carry the same complete data model.
+   ============================================================ */
+
+backupSnapshot=function(){
+  // v148BuildFullBackup is intentionally resolved at call time.
+  // At this point it is the FINAL wrapped builder, including:
+  // - v148 complete-data backup + Rating Queue / portable UI prefs
+  // - v149 streak-XP schema/metadata
+  // - v150 performance-model compatibility metadata
+  return v148BuildFullBackup();
 };
 
 
