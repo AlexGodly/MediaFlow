@@ -1079,7 +1079,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="165">
+<meta name="mediaflow-version" content="172">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1136,6 +1136,13 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v163: Configurable Dynamic Cover Theme rotation interval + copy cleanup -->
 <!-- MediaFlow v164: Simkl Full Style Theme -->
 <!-- MediaFlow v165: System Respect XP + recommended-title rewards + no-skip/no-reroll multipliers -->
+<!-- MediaFlow v166: Automatic Seasonal fresh-episode detection via Jikan/MAL public episode data -->
+<!-- MediaFlow v167: Editable System Respect XP rewards and multiplier tuning -->
+<!-- MediaFlow v168: Settings cleanup — removed MAL username sync card -->
+<!-- MediaFlow v169: Advanced media-service import with forced-category and source-type mapping modes -->
+<!-- MediaFlow v170: Advanced type-level Don’t Import exclusions -->
+<!-- MediaFlow v171: Default-category recovery + last-deleted category restore + highlight controls -->
+<!-- MediaFlow v172: Unified Normal/Advanced media-services import interface switch -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -2951,6 +2958,495 @@ html[data-theme="fullstyle-simkl"] .v159-otd-event-chip{
 }
 </style>
 
+
+<style id="mf-v166-seasonal-auto-css">
+.v166-seasonal-auto{
+  margin-top:4px;
+  padding:12px;
+  border:1px solid color-mix(in srgb,var(--flow) 18%,var(--border-soft));
+  border-radius:10px;
+  background:color-mix(in srgb,var(--flow) 4%,var(--panel-raised));
+}
+.v166-seasonal-auto-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:9px;
+}
+.v166-seasonal-auto-title{
+  font-size:11px;
+  font-weight:850;
+  color:var(--text);
+}
+.v166-seasonal-auto-actions{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.v166-seasonal-status{
+  margin-top:8px;
+  padding:8px 9px;
+  border:1px solid var(--border-soft);
+  border-radius:8px;
+  background:var(--panel);
+  color:var(--text-dim);
+  font-size:9.5px;
+  line-height:1.55;
+}
+.v166-seasonal-status b{color:var(--text)}
+.v166-seasonal-progress{
+  margin-top:7px;
+  height:4px;
+  border-radius:999px;
+  overflow:hidden;
+  background:var(--border-soft);
+}
+.v166-seasonal-progress>span{
+  display:block;
+  height:100%;
+  width:0;
+  border-radius:999px;
+  background:var(--flow);
+  transition:width .2s ease;
+}
+.v166-seasonal-grid{
+  display:grid;
+  grid-template-columns:minmax(160px,1fr) minmax(120px,180px);
+  gap:8px;
+  align-items:end;
+}
+@media(max-width:650px){
+  .v166-seasonal-grid{grid-template-columns:1fr}
+}
+</style>
+
+
+<style id="mf-v167-respect-editor-css">
+.v167-respect-edit-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.v167-respect-edit{
+  padding:9px 10px;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:var(--panel-raised);
+}
+.v167-respect-edit label{
+  display:block;
+  color:var(--text-mute);
+  font-size:9px;
+  margin-bottom:5px;
+}
+.v167-respect-edit input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:34px;
+  font-weight:800;
+}
+.v167-respect-readonly{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+  gap:7px;
+  margin-top:9px;
+}
+.v167-respect-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  margin-top:9px;
+  flex-wrap:wrap;
+}
+</style>
+
+
+<style id="mf-v169-advanced-import-css">
+.v169-advanced-card{
+  position:relative;
+  overflow:hidden;
+}
+.v169-advanced-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto auto 0;
+  width:100%;
+  height:2px;
+  background:linear-gradient(90deg,var(--flow),transparent 70%);
+  opacity:.55;
+  pointer-events:none;
+}
+.v169-mode-grid{
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr);
+  gap:10px;
+}
+.v169-file-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+.v169-file-name{
+  min-width:0;
+  max-width:440px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  color:var(--text-dim);
+  font-size:10px;
+}
+.v169-scan-box{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  background:var(--panel-raised);
+}
+.v169-scan-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:9px;
+}
+.v169-type-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:430px;
+  overflow:auto;
+  padding-right:2px;
+}
+.v169-type-row{
+  display:grid;
+  grid-template-columns:minmax(130px,1fr) 70px minmax(180px,1fr);
+  gap:8px;
+  align-items:center;
+  padding:8px 9px;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:var(--panel);
+}
+.v169-type-name{
+  min-width:0;
+  color:var(--text);
+  font-size:10.5px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.v169-type-count{
+  color:var(--text-mute);
+  font-size:9px;
+  text-align:right;
+}
+.v169-type-row select{
+  min-width:0;
+  width:100%;
+}
+.v169-ready{
+  margin-top:9px;
+  color:var(--text-dim);
+  font-size:9.5px;
+  line-height:1.55;
+}
+.v169-scan-progress{
+  height:4px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--border-soft);
+  margin-top:8px;
+}
+.v169-scan-progress>span{
+  display:block;
+  height:100%;
+  width:0;
+  background:var(--flow);
+  border-radius:999px;
+  transition:width .15s ease;
+}
+@media(max-width:720px){
+  .v169-mode-grid{grid-template-columns:1fr}
+  .v169-type-row{
+    grid-template-columns:minmax(0,1fr) 56px;
+  }
+  .v169-type-row select{
+    grid-column:1/-1;
+  }
+}
+</style>
+
+
+<style id="mf-v170-advanced-import-exclusions-css">
+.v169-type-row{
+  grid-template-columns:minmax(130px,1fr) 70px minmax(180px,1fr) auto!important;
+}
+.v170-dont-import{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  min-width:94px;
+  white-space:nowrap;
+  cursor:pointer;
+  color:var(--text-dim);
+  font-size:9.5px;
+  font-weight:800;
+  user-select:none;
+}
+.v170-dont-import input{
+  width:auto!important;
+  min-height:auto!important;
+  margin:0;
+  accent-color:var(--overused);
+}
+.v169-type-row.v170-type-excluded{
+  opacity:.72;
+  border-style:dashed;
+  background:color-mix(in srgb,var(--overused) 4%,var(--panel));
+}
+.v169-type-row.v170-type-excluded .v169-type-name{
+  text-decoration:line-through;
+  text-decoration-thickness:1px;
+  color:var(--text-mute);
+}
+.v169-type-row.v170-type-excluded select{
+  opacity:.55;
+}
+@media(max-width:720px){
+  .v169-type-row{
+    grid-template-columns:minmax(0,1fr) 56px auto!important;
+  }
+  .v169-type-row select{
+    grid-column:1/-1!important;
+  }
+  .v170-dont-import{
+    grid-column:3;
+    grid-row:1;
+  }
+}
+</style>
+
+
+<style id="mf-v171-category-recovery-css">
+.v171-category-tools{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+  padding:10px;
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  background:var(--panel-raised);
+}
+.v171-category-tool-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.v171-highlight-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--text-dim);
+  font-size:10px;
+  font-weight:750;
+}
+.v171-default-category{
+  position:relative;
+  border-color:color-mix(in srgb,var(--flow) 38%,var(--border-soft))!important;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb,var(--flow) 7%,var(--panel-raised)),
+      var(--panel-raised) 44%
+    )!important;
+}
+.v171-default-category::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:7px;
+  bottom:7px;
+  width:3px;
+  border-radius:999px;
+  background:var(--flow);
+  opacity:.82;
+}
+.v171-default-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-left:7px;
+  padding:2px 6px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--flow) 30%,var(--border-soft));
+  background:color-mix(in srgb,var(--flow) 9%,var(--panel));
+  color:var(--flow);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.06em;
+  vertical-align:middle;
+}
+.v171-recovery-note{
+  color:var(--text-mute);
+  font-size:9.5px;
+  line-height:1.5;
+}
+@media(max-width:760px){
+  .v171-category-tools{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .v171-category-tool-actions{
+    width:100%;
+  }
+  .v171-category-tool-actions .btn{
+    flex:1 1 160px;
+  }
+}
+</style>
+
+
+<style id="mf-v172-import-interface-css">
+.v172-import-interface-shell{
+  margin-bottom:22px;
+}
+.v172-import-mode-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+  padding:10px;
+  border:1px solid var(--border-soft);
+  border-radius:11px;
+  background:var(--panel-raised);
+}
+.v172-import-mode-copy{
+  min-width:180px;
+  flex:1;
+}
+.v172-import-mode-copy b{
+  display:block;
+  font-size:11px;
+  color:var(--text);
+}
+.v172-import-mode-copy small{
+  display:block;
+  margin-top:3px;
+  color:var(--text-mute);
+  font-size:9.5px;
+  line-height:1.45;
+}
+.v172-import-switch{
+  display:inline-grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  border:1px solid var(--border-soft);
+  border-radius:10px;
+  background:var(--panel);
+  min-width:310px;
+}
+.v172-import-switch button{
+  position:relative;
+  min-height:35px;
+  border:0;
+  border-radius:7px;
+  padding:7px 12px;
+  background:transparent;
+  color:var(--text-dim);
+  font:inherit;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+  transition:.16s ease;
+}
+.v172-import-switch button:hover{
+  background:var(--panel-raised);
+  color:var(--text);
+}
+.v172-import-switch button.active{
+  background:var(--panel-raised);
+  color:var(--text);
+  box-shadow:inset 0 0 0 1px var(--border);
+}
+.v172-import-switch button.advanced-choice{
+  padding-right:90px;
+}
+.v172-import-switch button.advanced-choice.active{
+  background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 58%,var(--border));
+}
+.v172-recommended-badge{
+  position:absolute;
+  top:50%;
+  right:7px;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  padding:2px 6px;
+  border-radius:999px;
+  background:var(--flow);
+  color:var(--bg);
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.055em;
+  white-space:nowrap;
+}
+.v172-import-interface-shell.is-advanced>.v169-advanced-card{
+  border-color:color-mix(in srgb,var(--flow) 58%,var(--border))!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--flow) 10%,transparent);
+}
+.v172-advanced-recommendation{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:-3px 0 11px;
+  padding:7px 9px;
+  border:1px solid color-mix(in srgb,var(--flow) 35%,var(--border-soft));
+  border-radius:8px;
+  background:color-mix(in srgb,var(--flow) 7%,var(--panel));
+  color:var(--text-dim);
+  font-size:9.5px;
+  line-height:1.45;
+}
+.v172-advanced-recommendation strong{
+  color:var(--flow);
+}
+@media(max-width:720px){
+  .v172-import-mode-bar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .v172-import-switch{
+    width:100%;
+    min-width:0;
+  }
+  .v172-import-switch button.advanced-choice{
+    padding-right:12px;
+    padding-top:18px;
+  }
+  .v172-recommended-badge{
+    top:5px;
+    right:50%;
+    transform:translateX(50%);
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -3367,10 +3863,18 @@ const DEFAULT_SETTINGS = {
   randomness: 0.28,      // jitter fraction
 
   seasonalFreshCount: 0,
+  seasonalFreshAuto: true,          // v166: derive fresh Seasonal Anime titles from Jikan/MAL episode data
+  seasonalFreshSyncMinutes: 60,     // v166: background refresh cadence
+  seasonalFreshLastSyncAt: 0,
+  seasonalFreshLastProvider: 'Jikan / MyAnimeList',
+  seasonalFreshLastMatched: 0,
+  seasonalFreshLastEpisodeTotal: 0,
   exactTitleRecommendations: false,
   prioritizePersonalOrder: false, // v139: when exact-title recommendations are enabled, prefer the first eligible title in Personal Order for the selected category
   customCategoryIcons: [], // v144: reusable [{type:'emoji'|'url',value:string}] category icon palette
   customCategoryColors: [], // v144: reusable #RRGGBB category color palette
+  highlightDefaultCategories: true, // v171: visually identify categories whose IDs belong to MediaFlow defaults
+  mediaServicesImportInterface: 'advanced', // v172: normal | advanced; advanced is recommended/default
   dynamicCoverTheme: false, // v146: dynamic full-cover theme mode; recommended cover -> On This Day -> selected theme
   theme: 'dark',
   globalAppearanceEnabled: true, // v132: when false, themes use their original/native appearance with no global Light/Dark override
@@ -6317,7 +6821,7 @@ function resetSettingsSection(section){
     S.settings.exactTitleRecommendations=DEFAULT_SETTINGS.exactTitleRecommendations;
     S.settings.prioritizePersonalOrder=DEFAULT_SETTINGS.prioritizePersonalOrder;
   }else if(section==='scheduler'){
-    ['neglectRate','neglectCap','repetitionPenalty','consecutivePenalty','saturationWeight','seasonalBonus','randomness','seasonalFreshCount'].forEach(k=>S.settings[k]=DEFAULT_SETTINGS[k]);
+    ['neglectRate','neglectCap','repetitionPenalty','consecutivePenalty','saturationWeight','seasonalBonus','randomness','seasonalFreshCount','seasonalFreshAuto','seasonalFreshSyncMinutes','seasonalFreshLastSyncAt','seasonalFreshLastProvider','seasonalFreshLastMatched','seasonalFreshLastEpisodeTotal'].forEach(k=>S.settings[k]=DEFAULT_SETTINGS[k]);
   }else if(section==='leveling'){
     S.settings.leveling=cloneDefaults(DEFAULT_SETTINGS.leveling);
   }else if(section==='appearance'){
@@ -8550,7 +9054,7 @@ renderSettings=function(){
   let html=_oldRenderSettings();
   const themeCard=`<div class="section-label settings-section-head"><span>APPEARANCE</span>${defaultButton('appearance')}</div><div class="card" style="margin-bottom:22px;"><div class="field"><label class="field-label">UI look</label><select onchange="App.setTheme(this.value)"><option value="dark" ${S.settings.theme==='dark'?'selected':''}>Dark</option><option value="light" ${S.settings.theme==='light'?'selected':''}>Light</option><option value="amoled" ${S.settings.theme==='amoled'?'selected':''}>AMOLED</option></select><small class="hint">Choose the overall MediaFlow interface style.</small></div></div>`;
   const backupCard=`<div class="section-label settings-section-head"><span>AUTOMATIC BACKUPS</span>${defaultButton('backups')}</div><div class="card" style="margin-bottom:22px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><div><b>Automatic local JSON backup</b><div class="profile-note">Choose a folder on this computer. MediaFlow can periodically write a backup while the app is open. Browsers cannot write to arbitrary paths while the app is closed.</div></div><button class="toggle ${S.settings.backup?.enabled?'on':''}" onclick="App.toggleBackup()"></button></div><div class="field-row" style="margin-top:14px;"><div class="field"><label class="field-label">Backup every</label><select onchange="App.updateBackup('interval',this.value)"><option value="5" ${Number(S.settings.backup?.interval)===5?'selected':''}>5 minutes</option><option value="15" ${Number(S.settings.backup?.interval)===15?'selected':''}>15 minutes</option><option value="30" ${Number(S.settings.backup?.interval)===30?'selected':''}>30 minutes</option><option value="60" ${Number(S.settings.backup?.interval)===60?'selected':''}>1 hour</option><option value="360" ${Number(S.settings.backup?.interval)===360?'selected':''}>6 hours</option><option value="1440" ${Number(S.settings.backup?.interval)===1440?'selected':''}>Daily</option></select></div><div class="field"><label class="field-label">File mode</label><select onchange="App.updateBackup('mode',this.value)"><option value="single" ${S.settings.backup?.mode==='single'?'selected':''}>One file (overwrite)</option><option value="multiple" ${S.settings.backup?.mode==='multiple'?'selected':''}>Multiple files</option></select></div></div><div class="field"><label class="field-label">Single-file name</label><input value="${escapeHtml(S.settings.backup?.fileName||'mediaflow-backup.json')}" onchange="App.updateBackup('fileName',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="App.chooseBackupFolder()">Choose backup folder</button><button class="btn btn-ghost" onclick="App.backupNow()">Back up now</button></div><small class="hint">Folder permission is stored in this browser when supported. Multiple-file mode creates a timestamped JSON file each time.</small></div>`;
-  const linksCard=`<div class="section-label">LINKS — MYANIMELIST</div><div class="card" style="margin-bottom:22px;"><div class="field-row"><div class="field"><label class="field-label">MAL username</label><input value="${escapeHtml(S.malLink?.username||'')}" placeholder="Your MAL username" onchange="App.setMalLink('username',this.value)"></div><div class="field"><label class="field-label">Sync</label><select onchange="App.setMalLink('mode',this.value)"><option value="anime" ${S.malLink?.mode==='anime'?'selected':''}>Import anime only</option><option value="manga" ${S.malLink?.mode==='manga'?'selected':''}>Import manga only</option><option value="both" ${S.malLink?.mode==='both'?'selected':''}>Import anime and manga</option></select></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="App.syncMAL()">Sync MAL to Library</button></div><small class="hint">MediaFlow reads public MAL list data through a web API. Large lists are processed page-by-page with progress updates so the UI stays responsive.</small></div>`;
+  const linksCard='';
   const offlineCard='';
   const emptyCard=`<div class="section-label">LIBRARY MAINTENANCE</div><div class="card" style="margin-bottom:22px;"><b>Empty library</b><div class="profile-note">Advanced clearing options. History is preserved.</div><button class="btn btn-danger" style="margin-top:12px" onclick="App.emptyLibraryAdvanced()">Empty library…</button></div>`;
 const dataIdx=html.indexOf('<div class="section-label">DATA</div>'); if(dataIdx>=0) html=html.slice(0,dataIdx)+themeCard+backupCard+linksCard+offlineCard+emptyCard+html.slice(dataIdx); else html+=themeCard+backupCard+linksCard+offlineCard+emptyCard;
@@ -9579,8 +10083,8 @@ App.exportJSON=function(){
     const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     const payload=Object.assign({},snapshot(),{
       backupFormat:'MediaFlow_Full_Backup',
-      backupVersion:165,
-      mediaFlowVersion:165,
+      backupVersion:172,
+      mediaFlowVersion:172,
       exportedAt:now.toISOString(),
       progression:mediaFlowLevelInfo(),
       progressionBreakdown:v120XPBreakdown()
@@ -16921,6 +17425,7 @@ loadAll=async function(){
   S.oldSystemUI={consumeCategoryId:S.oldSystem.enabledCategoryIds[0]||'',consumeAmount:1};
   S.navLayout=v161NormalizeNavLayout(d?.navLayout);
   S.respectState=v165NormalizeRespectState(d?.respectState);
+  S.categoryRecovery=v171NormalizeCategoryRecovery(d?.categoryRecovery);
   if(d?.portableExtras) v155ApplyPortableExtras(d.portableExtras);
   V153_HISTORY_CACHE_DIRTY=true;
 };
@@ -18688,7 +19193,7 @@ async function v158ImportExchangeFile(service,file){
     finishImportProgress(
       true,
       `${mfServiceName(service)} import complete`,
-      `${result.added.toLocaleString()} added · ${result.updated.toLocaleString()} updated · ${result.startDates.toLocaleString()} start dates · ${result.finishDates.toLocaleString()} finish dates · ${result.timestamps.toLocaleString()} timestamps · ${result.covers.toLocaleString()} cover URLs${result.skipped?` · ${result.skipped.toLocaleString()} skipped`:''}.`
+      `${result.added.toLocaleString()} added · ${result.updated.toLocaleString()} updated${result.blocked?` · ${result.blocked.toLocaleString()} blocked by type`:''} · ${result.startDates.toLocaleString()} start dates · ${result.finishDates.toLocaleString()} finish dates · ${result.timestamps.toLocaleString()} timestamps · ${result.covers.toLocaleString()} cover URLs${result.skipped>result.blocked?` · ${(result.skipped-result.blocked).toLocaleString()} other skipped`:''}.`
     );
     render();
   }catch(e){
@@ -23145,6 +23650,2965 @@ v148BackupManifest=function(state,extras){
 // Import uses the final v46ApplyState chain above, so respectState is restored.
 // Per-session reward fields are normal History fields and are restored unchanged.
 // v152 Automatic Backup resolves this final v148BuildFullBackup at runtime.
+
+
+
+/* ============================================================
+   MediaFlow v166 — Automatic Seasonal Fresh-Episode Detection
+   ------------------------------------------------------------
+   AniList is not used.
+
+   Provider:
+   - Jikan v4, which exposes public MyAnimeList data without OAuth/API keys.
+   - Exact MAL IDs are preferred.
+   - Titles without MAL IDs use a strict exact-title/year resolver once; a
+     resolved MAL ID is then stored on the Library title to avoid repeated
+     searches.
+
+   Fresh-title definition:
+   - Seasonal Anime Library title;
+   - not completed/dropped;
+   - Jikan's public MAL episode list contains an aired/released episode number
+     greater than MediaFlow Library progress.
+
+   Performance:
+   - only Seasonal categories are scanned;
+   - sequential throttled requests, no request storm;
+   - in-memory TTL cache;
+   - MAL IDs are persisted for future fast refreshes;
+   - one final save/render at most, never per title;
+   - provider failure preserves the last good seasonalFreshCount.
+   ============================================================ */
+
+const V166_SEASONAL_PROVIDER='Jikan / MyAnimeList';
+const V166_JIKAN_BASE='https://api.jikan.moe/v4';
+const V166_DEFAULT_SYNC_MINUTES=60;
+const V166_MIN_SYNC_MINUTES=15;
+const V166_MAX_SYNC_MINUTES=1440;
+const V166_CACHE_TTL=20*60*1000;
+
+let V166_SEASONAL_SYNC_RUNNING=false;
+let V166_SEASONAL_TIMER=null;
+let V166_LAST_JIKAN_REQUEST_AT=0;
+let V166_SEASONAL_RUNTIME={
+  status:'idle',
+  checked:0,
+  total:0,
+  matched:0,
+  freshTitles:0,
+  freshEpisodes:0,
+  message:'',
+  error:'',
+  startedAt:0,
+  finishedAt:0
+};
+const V166_JIKAN_CACHE=new Map();
+
+function v166ClampSyncMinutes(value){
+  const n=Math.round(Number(value)||V166_DEFAULT_SYNC_MINUTES);
+  return Math.max(V166_MIN_SYNC_MINUTES,Math.min(V166_MAX_SYNC_MINUTES,n));
+}
+
+function v166EnsureSeasonalSettings(settings){
+  const s=(settings&&typeof settings==='object')?settings:{};
+  if(typeof s.seasonalFreshAuto!=='boolean')s.seasonalFreshAuto=true;
+  s.seasonalFreshSyncMinutes=v166ClampSyncMinutes(s.seasonalFreshSyncMinutes);
+  s.seasonalFreshCount=Math.max(0,Math.round(Number(s.seasonalFreshCount)||0));
+  s.seasonalFreshLastSyncAt=Math.max(0,Number(s.seasonalFreshLastSyncAt)||0);
+  s.seasonalFreshLastProvider=String(s.seasonalFreshLastProvider||V166_SEASONAL_PROVIDER);
+  s.seasonalFreshLastMatched=Math.max(0,Math.round(Number(s.seasonalFreshLastMatched)||0));
+  s.seasonalFreshLastEpisodeTotal=Math.max(0,Math.round(Number(s.seasonalFreshLastEpisodeTotal)||0));
+  return s;
+}
+
+v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+
+function v166SeasonalCategories(){
+  return new Set(
+    (S.categories||[])
+      .filter(c=>c && (c.seasonal===true || String(c.id)==='seasonal'))
+      .map(c=>String(c.id))
+  );
+}
+
+function v166SeasonalCandidates(){
+  const ids=v166SeasonalCategories();
+  return (S.library||[]).filter(item=>
+    item &&
+    ids.has(String(item.categoryId||'')) &&
+    item.status!=='completed' &&
+    item.status!=='dropped'
+  );
+}
+
+function v166GetMalId(item){
+  const values=[
+    item?.externalIds?.mal,
+    item?.malId,
+    item?.mal_id
+  ];
+  for(const value of values){
+    const s=String(value??'').trim();
+    if(/^\d+$/.test(s))return s;
+  }
+  return '';
+}
+
+function v166StoreMalId(item,malId){
+  const id=String(malId||'').trim();
+  if(!item||!/^\d+$/.test(id))return false;
+
+  item.externalIds=(item.externalIds&&typeof item.externalIds==='object')
+    ?item.externalIds:{};
+
+  if(String(item.externalIds.mal||'')===id)return false;
+
+  item.externalIds.mal=id;
+  item.modifiedAt=Math.max(Number(item.modifiedAt)||0,Date.now());
+  return true;
+}
+
+function v166Sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function v166JikanThrottle(){
+  const gap=430;
+  const wait=Math.max(0,gap-(Date.now()-V166_LAST_JIKAN_REQUEST_AT));
+  if(wait>0)await v166Sleep(wait);
+  V166_LAST_JIKAN_REQUEST_AT=Date.now();
+}
+
+async function v166FetchJikan(path,{force=false,ttl=V166_CACHE_TTL}={}){
+  const url=path.startsWith('http')?path:`${V166_JIKAN_BASE}${path}`;
+  const cached=V166_JIKAN_CACHE.get(url);
+
+  if(!force && cached && Date.now()-cached.at<ttl){
+    return cached.data;
+  }
+
+  await v166JikanThrottle();
+
+  let lastError=null;
+
+  for(let attempt=0;attempt<3;attempt++){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),10000);
+
+    try{
+      const res=await fetch(url,{
+        signal:controller.signal,
+        cache:'no-store',
+        headers:{Accept:'application/json'}
+      });
+      clearTimeout(timer);
+
+      if(res.ok){
+        const data=await res.json();
+        V166_JIKAN_CACHE.set(url,{at:Date.now(),data});
+        return data;
+      }
+
+      lastError=new Error(`Jikan HTTP ${res.status}`);
+
+      if(![408,429,500,502,503,504].includes(res.status)){
+        break;
+      }
+
+      const retryAfter=Math.max(0,Number(res.headers.get('Retry-After'))||0);
+      await v166Sleep(retryAfter?retryAfter*1000:700*(attempt+1));
+    }catch(e){
+      clearTimeout(timer);
+      lastError=e;
+      if(attempt<2)await v166Sleep(500*(attempt+1));
+    }
+  }
+
+  throw lastError||new Error('Jikan request failed');
+}
+
+function v166CandidateYear(item){
+  const y=typeof v158ItemYear==='function'?v158ItemYear(item):Number(item?.year);
+  return Number.isFinite(Number(y))&&Number(y)>1900?Number(y):null;
+}
+
+async function v166ResolveMalId(item,force=false){
+  const existing=v166GetMalId(item);
+  if(existing)return {malId:existing,stored:false};
+
+  const title=cleanTitle(item?.title||'');
+  if(!title)return {malId:'',stored:false};
+
+  const payload=await v166FetchJikan(
+    `/anime?q=${encodeURIComponent(title)}&limit=10`,
+    {force,ttl:24*60*60*1000}
+  );
+
+  let rows=(payload?.data||[]).filter(x=>{
+    if(typeof v158ExactTitleCandidate==='function'&&typeof v158JikanTitles==='function'){
+      return v158ExactTitleCandidate(item,v158JikanTitles(x));
+    }
+
+    const wanted=cleanTitle(item.title||'').toLocaleLowerCase();
+    const titles=[
+      x?.title,x?.title_english,x?.title_japanese,
+      ...(Array.isArray(x?.title_synonyms)?x.title_synonyms:[])
+    ].filter(Boolean).map(v=>cleanTitle(v).toLocaleLowerCase());
+
+    return titles.includes(wanted);
+  });
+
+  // Seasonal Anime should not accidentally resolve to a movie with the same name.
+  const nonMovie=rows.filter(x=>String(x?.type||'').toLowerCase()!=='movie');
+  if(nonMovie.length)rows=nonMovie;
+
+  const year=v166CandidateYear(item);
+  if(year){
+    const sameYear=rows.filter(x=>{
+      const candidate=
+        Number(x?.year)||
+        (x?.aired?.from?new Date(x.aired.from).getFullYear():0);
+      return Number(candidate)===year;
+    });
+    if(sameYear.length)rows=sameYear;
+  }
+
+  const unique=new Map();
+  for(const x of rows){
+    const id=String(x?.mal_id||'');
+    if(/^\d+$/.test(id))unique.set(id,x);
+  }
+
+  // Safety first: ambiguous title-only matches are skipped, not guessed.
+  if(unique.size!==1)return {malId:'',stored:false};
+
+  const malId=[...unique.keys()][0];
+  return {malId,stored:v166StoreMalId(item,malId)};
+}
+
+function v166AiredEpisodeNumber(row,now=Date.now()){
+  const num=Math.max(0,Math.floor(Number(row?.mal_id)||0));
+  if(!num)return 0;
+
+  // Current Jikan episode resources commonly contain aired ISO dates.
+  // If the field is absent, its presence in the public episode list itself is
+  // treated as the provider's released/available signal.
+  const aired=row?.aired?new Date(row.aired).getTime():0;
+  if(aired && Number.isFinite(aired) && aired>now+5*60*1000)return 0;
+
+  return num;
+}
+
+async function v166AvailableEpisodeCount(malId,force=false){
+  const first=await v166FetchJikan(
+    `/anime/${encodeURIComponent(malId)}/episodes?page=1`,
+    {force,ttl:V166_CACHE_TTL}
+  );
+
+  const now=Date.now();
+  let available=0;
+
+  for(const row of (first?.data||[])){
+    available=Math.max(available,v166AiredEpisodeNumber(row,now));
+  }
+
+  const lastPage=Math.max(
+    1,
+    Math.floor(Number(first?.pagination?.last_visible_page)||1)
+  );
+
+  // Seasonal titles are normally one page. For long-running titles fetch only
+  // the last page instead of walking every historical page.
+  if(lastPage>1){
+    const last=await v166FetchJikan(
+      `/anime/${encodeURIComponent(malId)}/episodes?page=${lastPage}`,
+      {force,ttl:V166_CACHE_TTL}
+    );
+
+    for(const row of (last?.data||[])){
+      available=Math.max(available,v166AiredEpisodeNumber(row,now));
+    }
+  }
+
+  return available;
+}
+
+function v166SeasonalStatusText(){
+  const r=V166_SEASONAL_RUNTIME;
+  const s=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+
+  if(!s.seasonalFreshAuto){
+    return `Manual mode · current scheduler value: ${s.seasonalFreshCount} title${s.seasonalFreshCount===1?'':'s'}.`;
+  }
+
+  if(r.status==='running'){
+    return `Checking ${r.checked.toLocaleString()} / ${r.total.toLocaleString()} Seasonal Anime title${r.total===1?'':'s'}… ${r.matched.toLocaleString()} matched to MyAnimeList.`;
+  }
+
+  if(r.status==='error'){
+    return `Automatic refresh failed; MediaFlow kept the last good value (${s.seasonalFreshCount}). ${r.error||'Jikan is temporarily unavailable.'}`;
+  }
+
+  const when=s.seasonalFreshLastSyncAt
+    ?new Date(s.seasonalFreshLastSyncAt).toLocaleString()
+    :'not checked yet';
+
+  return `${s.seasonalFreshCount.toLocaleString()} title${s.seasonalFreshCount===1?'':'s'} with fresh episodes · ${s.seasonalFreshLastEpisodeTotal.toLocaleString()} episode${s.seasonalFreshLastEpisodeTotal===1?'':'s'} waiting · ${s.seasonalFreshLastMatched.toLocaleString()} title${s.seasonalFreshLastMatched===1?'':'s'} matched · last checked ${when}.`;
+}
+
+function v166UpdateSeasonalStatusDOM(){
+  const el=document.getElementById('v166-seasonal-status');
+  if(el)el.innerHTML=escapeHtml(v166SeasonalStatusText());
+
+  const bar=document.getElementById('v166-seasonal-progress-fill');
+  if(bar){
+    const r=V166_SEASONAL_RUNTIME;
+    const pct=r.total?Math.round(r.checked/r.total*100):0;
+    bar.style.width=`${Math.max(0,Math.min(100,pct))}%`;
+  }
+
+  const value=document.getElementById('v166-seasonal-fresh-count');
+  if(value)value.value=String(Math.max(0,Number(S.settings?.seasonalFreshCount)||0));
+
+  const button=document.getElementById('v166-seasonal-refresh-btn');
+  if(button)button.disabled=V166_SEASONAL_SYNC_RUNNING;
+}
+
+async function v166RefreshSeasonalFresh({force=false,notify=false}={}){
+  const settings=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+
+  if(!settings.seasonalFreshAuto && !force)return null;
+  if(V166_SEASONAL_SYNC_RUNNING){
+    if(notify)showToast('Seasonal episode refresh is already running.');
+    return null;
+  }
+
+  V166_SEASONAL_SYNC_RUNNING=true;
+  const rows=v166SeasonalCandidates();
+  const previousCount=settings.seasonalFreshCount;
+
+  V166_SEASONAL_RUNTIME={
+    status:'running',
+    checked:0,
+    total:rows.length,
+    matched:0,
+    freshTitles:0,
+    freshEpisodes:0,
+    message:'',
+    error:'',
+    startedAt:Date.now(),
+    finishedAt:0
+  };
+  v166UpdateSeasonalStatusDOM();
+
+  let libraryChanged=false;
+  let successfulChecks=0;
+  let failures=0;
+
+  try{
+    for(let i=0;i<rows.length;i++){
+      const item=rows[i];
+
+      try{
+        const resolved=await v166ResolveMalId(item,force);
+        if(resolved.stored)libraryChanged=true;
+
+        if(resolved.malId){
+          V166_SEASONAL_RUNTIME.matched++;
+          const available=await v166AvailableEpisodeCount(resolved.malId,force);
+          successfulChecks++;
+
+          const progress=Math.max(0,Number(item.progress)||0);
+          const waiting=Math.max(0,available-progress);
+
+          if(waiting>0){
+            V166_SEASONAL_RUNTIME.freshTitles++;
+            V166_SEASONAL_RUNTIME.freshEpisodes+=waiting;
+          }
+        }
+      }catch(e){
+        failures++;
+        console.warn('MediaFlow v166 Seasonal check skipped',item?.title,e);
+      }
+
+      V166_SEASONAL_RUNTIME.checked=i+1;
+      v166UpdateSeasonalStatusDOM();
+
+      // Yield periodically so a large Seasonal list never locks the UI.
+      if(i && i%5===0){
+        await new Promise(resolve=>{
+          if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>resolve());
+          else setTimeout(resolve,0);
+        });
+      }
+    }
+
+    // If every provider lookup failed, do NOT turn a good old value into zero.
+    if(rows.length>0 && successfulChecks===0 && failures>0){
+      throw new Error('Jikan did not return any usable episode data this time.');
+    }
+
+    settings.seasonalFreshCount=V166_SEASONAL_RUNTIME.freshTitles;
+    settings.seasonalFreshLastSyncAt=Date.now();
+    settings.seasonalFreshLastProvider=V166_SEASONAL_PROVIDER;
+    settings.seasonalFreshLastMatched=V166_SEASONAL_RUNTIME.matched;
+    settings.seasonalFreshLastEpisodeTotal=V166_SEASONAL_RUNTIME.freshEpisodes;
+
+    V166_SEASONAL_RUNTIME.status='success';
+    V166_SEASONAL_RUNTIME.finishedAt=Date.now();
+
+    // One atomic save only after the whole scan. This carries any newly-resolved
+    // MAL IDs plus the scheduler count/settings at once.
+    if(libraryChanged){
+      try{v53InvalidateLibraryCache();}catch(_){}
+    }
+    await saveState();
+
+    if(S.view==='settings')render();
+    else v166UpdateSeasonalStatusDOM();
+
+    if(notify){
+      showToast(
+        `${settings.seasonalFreshCount} Seasonal title${settings.seasonalFreshCount===1?'':'s'} with fresh episodes`
+      );
+    }
+
+    return {
+      freshTitles:settings.seasonalFreshCount,
+      freshEpisodes:settings.seasonalFreshLastEpisodeTotal,
+      matched:settings.seasonalFreshLastMatched,
+      previousCount
+    };
+  }catch(e){
+    console.warn('MediaFlow v166 automatic Seasonal refresh failed',e);
+    V166_SEASONAL_RUNTIME.status='error';
+    V166_SEASONAL_RUNTIME.error=String(e?.message||e);
+    V166_SEASONAL_RUNTIME.finishedAt=Date.now();
+
+    // Preserve previous count on failure.
+    settings.seasonalFreshCount=previousCount;
+    v166UpdateSeasonalStatusDOM();
+
+    if(notify)showToast('Could not refresh Seasonal episodes; last good value was kept.');
+    return null;
+  }finally{
+    V166_SEASONAL_SYNC_RUNNING=false;
+    v166UpdateSeasonalStatusDOM();
+    v166ScheduleSeasonalRefresh(false);
+  }
+}
+
+function v166StopSeasonalTimer(){
+  clearTimeout(V166_SEASONAL_TIMER);
+  V166_SEASONAL_TIMER=null;
+}
+
+function v166ScheduleSeasonalRefresh(runSoon=false){
+  v166StopSeasonalTimer();
+
+  const settings=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  if(!settings.seasonalFreshAuto)return;
+
+  let delay;
+  if(runSoon){
+    const age=Date.now()-Number(settings.seasonalFreshLastSyncAt||0);
+    delay=age>=10*60*1000?4500:Math.max(15000,10*60*1000-age);
+  }else{
+    delay=v166ClampSyncMinutes(settings.seasonalFreshSyncMinutes)*60*1000;
+  }
+
+  V166_SEASONAL_TIMER=setTimeout(()=>{
+    V166_SEASONAL_TIMER=null;
+    v166RefreshSeasonalFresh({force:false,notify:false});
+  },delay);
+}
+
+function v166ToggleSeasonalAuto(){
+  const settings=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  settings.seasonalFreshAuto=!settings.seasonalFreshAuto;
+
+  if(settings.seasonalFreshAuto){
+    persistSettings();
+    render();
+    v166ScheduleSeasonalRefresh(true);
+  }else{
+    v166StopSeasonalTimer();
+    persistSettings();
+    render();
+  }
+}
+
+function v166SetSeasonalSyncMinutes(value){
+  const settings=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  settings.seasonalFreshSyncMinutes=v166ClampSyncMinutes(value);
+  persistSettings();
+  v166ScheduleSeasonalRefresh(false);
+  render();
+}
+
+function v166SetManualSeasonalFreshCount(value){
+  const settings=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  if(settings.seasonalFreshAuto)return;
+  settings.seasonalFreshCount=Math.max(0,Math.round(Number(value)||0));
+  persistSettings();
+  render();
+}
+
+function v166SeasonalSettingsHtml(){
+  const s=v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  const auto=s.seasonalFreshAuto!==false;
+
+  return `<div class="field v166-seasonal-auto">
+    <div class="v166-seasonal-auto-head">
+      <div>
+        <label class="field-label">Seasonal — titles with fresh episodes waiting</label>
+        <div class="hint">Automatic mode uses Jikan's public MyAnimeList episode data — no AniList API, OAuth token or API key. MediaFlow compares released episode numbers with each Seasonal Anime title's Library progress.</div>
+      </div>
+      <div class="v166-seasonal-auto-actions">
+        <span class="pill">${auto?'Automatic · Jikan':'Manual'}</span>
+        <button type="button" class="toggle ${auto?'on':''}" onclick="App.v166ToggleSeasonalAuto()" aria-label="Toggle automatic Seasonal episode detection"></button>
+      </div>
+    </div>
+
+    <div class="v166-seasonal-grid">
+      <div class="field" style="margin:0">
+        <label class="field-label">${auto?'Detected fresh titles':'Manual fresh-title count'}</label>
+        <input id="v166-seasonal-fresh-count" type="number" min="0"
+          value="${Math.max(0,Number(s.seasonalFreshCount)||0)}"
+          ${auto?'readonly':''}
+          onchange="App.v166SetManualSeasonalFreshCount(this.value)">
+      </div>
+      <div class="field" style="margin:0">
+        <label class="field-label">Check every (minutes)</label>
+        <input type="number" min="${V166_MIN_SYNC_MINUTES}" max="${V166_MAX_SYNC_MINUTES}" step="1"
+          value="${v166ClampSyncMinutes(s.seasonalFreshSyncMinutes)}"
+          ${auto?'':'disabled'}
+          onchange="App.v166SetSeasonalSyncMinutes(this.value)">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px">
+      <button id="v166-seasonal-refresh-btn" type="button" class="btn btn-sm"
+        ${auto?'':'disabled'}
+        onclick="App.v166RefreshSeasonalFresh(true)">
+        Refresh now
+      </button>
+      <span class="hint">Unmatched/ambiguous titles are skipped instead of guessed. MAL IDs imported from MAL are used directly and are fastest.</span>
+    </div>
+
+    <div id="v166-seasonal-status" class="v166-seasonal-status">${escapeHtml(v166SeasonalStatusText())}</div>
+    <div class="v166-seasonal-progress"><span id="v166-seasonal-progress-fill"></span></div>
+  </div>`;
+}
+
+// Replace the old manual v165 field instead of adding a second setting.
+const v166RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v166RenderSettingsBase();
+
+  h=h.replace(
+    /<div class="field" style="margin-top:4px;">\s*<label class="field-label">Seasonal — titles with fresh episodes waiting<\/label>[\s\S]*?<\/div>\s*(?=<\/div>\s*<div class="section-label settings-section-head"><span>LEVELING)/,
+    v166SeasonalSettingsHtml()
+  );
+
+  return h;
+};
+
+// ---- State normalization / persistence -------------------------------------
+
+const v166PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  return v166PersistSettingsBase.apply(this,arguments);
+};
+
+const v166LoadAllBase=loadAll;
+loadAll=async function(){
+  await v166LoadAllBase.apply(this,arguments);
+  v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  v166ScheduleSeasonalRefresh(true);
+};
+
+const v166SnapshotBase=snapshot;
+snapshot=function(){
+  v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  const x=v166SnapshotBase();
+  x.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  x.cloudSyncVersion=Math.max(Number(x.cloudSyncVersion)||0,166);
+  return x;
+};
+
+const v166ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v166ApplyStateBase.apply(this,arguments);
+  v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS);
+  v166ScheduleSeasonalRefresh(true);
+  return result;
+};
+
+const v166MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v166MergeStatesBase(a,b)||{};
+  out.settings=v166EnsureSeasonalSettings(out.settings||{});
+  out.cloudSyncVersion=Math.max(
+    Number(a?.cloudSyncVersion)||0,
+    Number(b?.cloudSyncVersion)||0,
+    Number(out.cloudSyncVersion)||0,
+    166
+  );
+  return out;
+};
+
+// Verify the automatic scheduler state during protected Sync Now.
+const v166VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v166VerifyCloudStateBase(cloudState,expected);
+  const problems=[...(base?.missing||[])];
+
+  const cloud=v166EnsureSeasonalSettings(
+    JSON.parse(JSON.stringify(cloudState?.settings||{}))
+  );
+  const wanted=v166EnsureSeasonalSettings(
+    JSON.parse(JSON.stringify(expected?.settings||{}))
+  );
+
+  for(const key of [
+    'seasonalFreshAuto',
+    'seasonalFreshSyncMinutes',
+    'seasonalFreshCount',
+    'seasonalFreshLastSyncAt',
+    'seasonalFreshLastMatched',
+    'seasonalFreshLastEpisodeTotal'
+  ]){
+    if(String(cloud[key])!==String(wanted[key])){
+      problems.push('Automatic Seasonal episode state');
+      break;
+    }
+  }
+
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+
+// Full Backup/Automatic Backup need no new top-level object because all v166
+// durable data lives in the canonical Settings object. Explicitly document it.
+const v166BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v166BuildFullBackupBase();
+
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.settings=JSON.parse(JSON.stringify(
+    v166EnsureSeasonalSettings(S.settings||DEFAULT_SETTINGS)
+  ));
+
+  payload.backupManifest=v148BackupManifest(
+    payload,
+    payload.portableExtras||{}
+  );
+
+  if(payload.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow v166 backup. Includes automatic Seasonal fresh-episode detection settings/last good scheduler value through canonical Settings, plus System Respect XP, adaptive themes, navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences.';
+  }
+
+  return payload;
+};
+
+const v166BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v166BackupManifestBase(state,extras);
+  const settings=v166EnsureSeasonalSettings(
+    JSON.parse(JSON.stringify(state?.settings||{}))
+  );
+
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    automaticSeasonalFreshEpisodes:true,
+    seasonalFreshSchedulerValue:true,
+    seasonalJikanProvider:true
+  });
+  manifest.counts=Object.assign({},manifest.counts||{},{
+    seasonalFreshTitles:settings.seasonalFreshCount,
+    seasonalFreshEpisodesWaiting:settings.seasonalFreshLastEpisodeTotal,
+    seasonalTitlesMatched:settings.seasonalFreshLastMatched
+  });
+
+  return manifest;
+};
+
+// Public actions.
+App.v166ToggleSeasonalAuto=v166ToggleSeasonalAuto;
+App.v166SetSeasonalSyncMinutes=v166SetSeasonalSyncMinutes;
+App.v166SetManualSeasonalFreshCount=v166SetManualSeasonalFreshCount;
+App.v166RefreshSeasonalFresh=function(force){
+  return v166RefreshSeasonalFresh({force:!!force,notify:true});
+};
+
+// If the main startup path already ran before this patch's load wrapper became
+// relevant, arm a safe delayed refresh anyway.
+setTimeout(()=>v166ScheduleSeasonalRefresh(true),5000);
+
+
+
+/* ============================================================
+   MediaFlow v167 — Editable System Respect XP
+   ------------------------------------------------------------
+   User-editable future reward tuning:
+   - recommended category base XP;
+   - recommended exact-title base XP;
+   - No-Skip growth rate + cap;
+   - First-pick growth rate + cap.
+
+   Existing History rewards remain frozen exactly as earned. Editing these
+   values changes future rewards/current projected multipliers only; it never
+   retroactively rewrites old session XP.
+   ============================================================ */
+
+const V167_BACKUP_SCHEMA_VERSION=8;
+const V167_RESPECT_CONFIG_DEFAULT={
+  categoryBaseXP:10,
+  exactTitleBaseXP:25,
+  noSkipGrowthPercent:8,
+  noSkipCapPercent:50,
+  firstPickGrowthPercent:14,
+  firstPickCapPercent:75,
+  modifiedAt:0
+};
+
+function v167ClampRespectNumber(value,min,max,fallback){
+  const n=Number(value);
+  return Number.isFinite(n)
+    ?Math.max(min,Math.min(max,n))
+    :fallback;
+}
+
+function v167NormalizeRespectConfig(raw){
+  const src=(raw&&typeof raw==='object')?raw:{};
+  return {
+    categoryBaseXP:Math.round(v167ClampRespectNumber(
+      src.categoryBaseXP,0,10000,V167_RESPECT_CONFIG_DEFAULT.categoryBaseXP
+    )),
+    exactTitleBaseXP:Math.round(v167ClampRespectNumber(
+      src.exactTitleBaseXP,0,10000,V167_RESPECT_CONFIG_DEFAULT.exactTitleBaseXP
+    )),
+    noSkipGrowthPercent:v167ClampRespectNumber(
+      src.noSkipGrowthPercent,0,100,V167_RESPECT_CONFIG_DEFAULT.noSkipGrowthPercent
+    ),
+    noSkipCapPercent:v167ClampRespectNumber(
+      src.noSkipCapPercent,0,1000,V167_RESPECT_CONFIG_DEFAULT.noSkipCapPercent
+    ),
+    firstPickGrowthPercent:v167ClampRespectNumber(
+      src.firstPickGrowthPercent,0,100,V167_RESPECT_CONFIG_DEFAULT.firstPickGrowthPercent
+    ),
+    firstPickCapPercent:v167ClampRespectNumber(
+      src.firstPickCapPercent,0,1000,V167_RESPECT_CONFIG_DEFAULT.firstPickCapPercent
+    ),
+    modifiedAt:Math.max(0,Number(src.modifiedAt)||0)
+  };
+}
+
+function v167EnsureRespectConfig(settings=S.settings){
+  const target=(settings&&typeof settings==='object')?settings:{};
+  target.systemRespectXP=v167NormalizeRespectConfig(target.systemRespectXP);
+  return target.systemRespectXP;
+}
+
+v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+
+function v167RespectConfig(){
+  return v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+}
+
+// FINAL multiplier logic now reads the user's saved configuration.
+v165RespectMultipliers=function(noSkipStreak,noRerollStreak){
+  const cfg=v167RespectConfig();
+  const skip=Math.max(0,Number(noSkipStreak)||0);
+  const reroll=Math.max(0,Number(noRerollStreak)||0);
+
+  const noSkipGrowth=cfg.noSkipGrowthPercent/100;
+  const noSkipCap=cfg.noSkipCapPercent/100;
+  const firstPickGrowth=cfg.firstPickGrowthPercent/100;
+  const firstPickCap=cfg.firstPickCapPercent/100;
+
+  const noSkip=v165RoundMultiplier(
+    1+Math.min(
+      noSkipCap,
+      noSkipGrowth*Math.log2(Math.max(1,skip))
+    )
+  );
+
+  const noReroll=v165RoundMultiplier(
+    1+Math.min(
+      firstPickCap,
+      firstPickGrowth*Math.log2(Math.max(1,reroll))
+    )
+  );
+
+  return {
+    noSkip,
+    noReroll,
+    combined:v165RoundMultiplier(noSkip*noReroll)
+  };
+};
+
+// FINAL reward function: same v165 behavior, but future rewards use the
+// editable v167 configuration instead of fixed constants.
+v165ApplyRespectReward=function(task,entries,sessionGroupId,assignedCat){
+  const st=v165EnsureRespectState();
+  const cfg=v167RespectConfig();
+  const groupRows=v165GroupSessions(sessionGroupId);
+
+  const respected=groupRows.some(s=>
+    s &&
+    s.status!=='skipped' &&
+    String(s.categoryId||'')===String(task?.categoryId||assignedCat?.id||'') &&
+    Number(s.actualAmount)>0
+  );
+
+  if(!respected){
+    st.noSkipStreak=0;
+    st.noRerollStreak=0;
+    st.currentRerolls=0;
+    st.modifiedAt=Date.now();
+    return 0;
+  }
+
+  const hadReroll=st.currentRerolls>0;
+
+  st.noSkipStreak++;
+
+  if(hadReroll)st.noRerollStreak=0;
+  else st.noRerollStreak++;
+
+  st.bestNoSkipStreak=Math.max(st.bestNoSkipStreak,st.noSkipStreak);
+  st.bestNoRerollStreak=Math.max(st.bestNoRerollStreak,st.noRerollStreak);
+
+  const titleFollowed=v165RecommendedTitleLogged(task,entries,groupRows);
+  const exactEnabled=!!S.settings?.exactTitleRecommendations;
+
+  const categoryXP=Math.max(0,Math.round(Number(cfg.categoryBaseXP)||0));
+  const exactTitleXP=titleFollowed
+    ?Math.max(0,Math.round(Number(cfg.exactTitleBaseXP)||0))
+    :0;
+
+  const baseRespectXP=categoryXP+exactTitleXP;
+  const mult=v165RespectMultipliers(st.noSkipStreak,st.noRerollStreak);
+  const levelingEnabled=levelingSettings().enabled!==false;
+
+  const bonus=levelingEnabled
+    ?Math.max(0,Math.round(
+      baseRespectXP*mult.noSkip*mult.noReroll
+    ))
+    :0;
+
+  const target=
+    groupRows.find(s=>
+      s &&
+      s.status!=='skipped' &&
+      String(s.categoryId||'')===String(task?.categoryId||'')
+    ) ||
+    groupRows.find(s=>s&&s.status!=='skipped');
+
+  if(target){
+    target.v165RespectBonusXP=bonus;
+    target.v165RespectBaseXP=baseRespectXP;
+    target.v165SystemBaseXP=categoryXP;
+    target.v165RecommendedTitleBaseXP=exactTitleXP;
+    target.v165RecommendedTitleFollowed=!!titleFollowed;
+    target.v165ExactTitleRecommendationEnabled=exactEnabled;
+    target.v165RecommendedLibraryId=exactEnabled?String(task?.libraryId||''):'';
+    target.v165RecommendedTitle=exactEnabled?cleanTitle(task?.title||''):'';
+    target.v165NoSkipStreak=st.noSkipStreak;
+    target.v165NoRerollStreak=st.noRerollStreak;
+    target.v165NoSkipMultiplier=mult.noSkip;
+    target.v165NoRerollMultiplier=mult.noReroll;
+    target.v165RespectMultiplier=mult.combined;
+    target.v165RerollsBeforeLog=st.currentRerolls;
+    target.v165RespectXPVersion=V165_RESPECT_XP_VERSION;
+
+    // Audit exactly which configuration produced this historical reward.
+    target.v167RespectConfigAtLog={
+      categoryBaseXP:categoryXP,
+      exactTitleBaseXP:Math.max(0,Math.round(Number(cfg.exactTitleBaseXP)||0)),
+      noSkipGrowthPercent:cfg.noSkipGrowthPercent,
+      noSkipCapPercent:cfg.noSkipCapPercent,
+      firstPickGrowthPercent:cfg.firstPickGrowthPercent,
+      firstPickCapPercent:cfg.firstPickCapPercent
+    };
+  }
+
+  st.currentRerolls=0;
+  st.lastRewardAt=Date.now();
+  st.modifiedAt=st.lastRewardAt;
+
+  if(bonus>0){
+    const titlePart=titleFollowed?' · recommended title followed':'';
+    setTimeout(()=>showToast(
+      `System respected · +${bonus.toLocaleString()} XP${titlePart} · no-Skip ${st.noSkipStreak} · first-pick ${st.noRerollStreak}`
+    ),0);
+  }
+
+  return bonus;
+};
+
+function v167RespectEditorHtml(){
+  const st=v165EnsureRespectState();
+  const cfg=v167RespectConfig();
+  const mult=v165RespectMultipliers(st.noSkipStreak,st.noRerollStreak);
+  const b=v120XPBreakdown();
+
+  return `<div class="v165-respect-card">
+    <div class="v165-respect-head">
+      <div>
+        <div class="v165-respect-title">SYSTEM RESPECT XP</div>
+        <div class="hint">Customize how strongly MediaFlow rewards following its recommendations. Changes affect future recommendation rewards only; already-earned History XP stays exactly as it was earned.</div>
+      </div>
+    </div>
+
+    <div class="v167-respect-edit-grid">
+      <div class="v167-respect-edit">
+        <label>Recommended category — base XP</label>
+        <input type="number" min="0" max="10000" step="1"
+          value="${cfg.categoryBaseXP}"
+          onchange="App.v167UpdateRespectSetting('categoryBaseXP',this.value)">
+      </div>
+
+      <div class="v167-respect-edit">
+        <label>Recommended exact title — base XP</label>
+        <input type="number" min="0" max="10000" step="1"
+          value="${cfg.exactTitleBaseXP}"
+          onchange="App.v167UpdateRespectSetting('exactTitleBaseXP',this.value)">
+      </div>
+
+      <div class="v167-respect-edit">
+        <label>No-Skip growth per log2 step (%)</label>
+        <input type="number" min="0" max="100" step="0.5"
+          value="${cfg.noSkipGrowthPercent}"
+          onchange="App.v167UpdateRespectSetting('noSkipGrowthPercent',this.value)">
+      </div>
+
+      <div class="v167-respect-edit">
+        <label>No-Skip maximum bonus (%)</label>
+        <input type="number" min="0" max="1000" step="1"
+          value="${cfg.noSkipCapPercent}"
+          onchange="App.v167UpdateRespectSetting('noSkipCapPercent',this.value)">
+      </div>
+
+      <div class="v167-respect-edit">
+        <label>First-pick growth per log2 step (%)</label>
+        <input type="number" min="0" max="100" step="0.5"
+          value="${cfg.firstPickGrowthPercent}"
+          onchange="App.v167UpdateRespectSetting('firstPickGrowthPercent',this.value)">
+      </div>
+
+      <div class="v167-respect-edit">
+        <label>First-pick maximum bonus (%)</label>
+        <input type="number" min="0" max="1000" step="1"
+          value="${cfg.firstPickCapPercent}"
+          onchange="App.v167UpdateRespectSetting('firstPickCapPercent',this.value)">
+      </div>
+    </div>
+
+    <div class="v167-respect-readonly">
+      <div class="v165-respect-stat">
+        <small>No-Skip streak</small>
+        <b>${st.noSkipStreak} · ×${mult.noSkip.toFixed(2)}</b>
+      </div>
+      <div class="v165-respect-stat">
+        <small>First-pick streak</small>
+        <b>${st.noRerollStreak} · ×${mult.noReroll.toFixed(2)}</b>
+      </div>
+      <div class="v165-respect-stat">
+        <small>Combined respect multiplier</small>
+        <b>×${mult.combined.toFixed(2)}</b>
+      </div>
+      <div class="v165-respect-stat">
+        <small>Respect XP earned</small>
+        <b>${Number(b.systemRespectBonusXP||0).toLocaleString()} XP</b>
+      </div>
+    </div>
+
+    <div class="v167-respect-actions">
+      <button type="button" class="btn btn-sm btn-ghost"
+        onclick="App.v167ResetRespectSettings()">Reset reward settings</button>
+    </div>
+
+    <div class="v165-respect-note">
+      Skip resets both streaks. <b>Give me something else</b> resets only the stronger First-pick streak, so avoiding Skip still has value.
+      Exact-title XP is awarded only when <b>Exact title recommendations</b> is enabled and the recommended title is actually present in the log.
+      Existing day-streak XP can multiply the resulting session XP afterward.
+    </div>
+  </div>`;
+}
+
+// Remove the old read-only v165 panel entirely and insert the editable one.
+const v167RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v167RenderSettingsBase();
+
+  h=h.replace(
+    /<div class="v165-respect-card">[\s\S]*?<div class="v165-respect-note">[\s\S]*?<\/div>\s*<\/div>/,
+    v167RespectEditorHtml()
+  );
+
+  return h;
+};
+
+function v167UpdateRespectSetting(key,value){
+  const allowed=new Set([
+    'categoryBaseXP',
+    'exactTitleBaseXP',
+    'noSkipGrowthPercent',
+    'noSkipCapPercent',
+    'firstPickGrowthPercent',
+    'firstPickCapPercent'
+  ]);
+  if(!allowed.has(String(key)))return;
+
+  const cfg=v167RespectConfig();
+
+  const bounds={
+    categoryBaseXP:[0,10000,V167_RESPECT_CONFIG_DEFAULT.categoryBaseXP,true],
+    exactTitleBaseXP:[0,10000,V167_RESPECT_CONFIG_DEFAULT.exactTitleBaseXP,true],
+    noSkipGrowthPercent:[0,100,V167_RESPECT_CONFIG_DEFAULT.noSkipGrowthPercent,false],
+    noSkipCapPercent:[0,1000,V167_RESPECT_CONFIG_DEFAULT.noSkipCapPercent,false],
+    firstPickGrowthPercent:[0,100,V167_RESPECT_CONFIG_DEFAULT.firstPickGrowthPercent,false],
+    firstPickCapPercent:[0,1000,V167_RESPECT_CONFIG_DEFAULT.firstPickCapPercent,false]
+  };
+
+  const [min,max,fallback,whole]=bounds[key];
+  let next=v167ClampRespectNumber(value,min,max,fallback);
+  if(whole)next=Math.round(next);
+
+  cfg[key]=next;
+  cfg.modifiedAt=Date.now();
+  S.settings.systemRespectXP=cfg;
+
+  persistSettings();
+  render();
+}
+
+function v167ResetRespectSettings(){
+  S.settings.systemRespectXP=Object.assign(
+    {},
+    V167_RESPECT_CONFIG_DEFAULT,
+    {modifiedAt:Date.now()}
+  );
+  persistSettings();
+  render();
+  showToast('System Respect XP reward settings reset.');
+}
+
+Object.assign(App,{
+  v167UpdateRespectSetting,
+  v167ResetRespectSettings
+});
+
+// ---- Persistence / merge / import ------------------------------------------
+
+const v167PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+  return v167PersistSettingsBase.apply(this,arguments);
+};
+
+const v167LoadAllBase=loadAll;
+loadAll=async function(){
+  await v167LoadAllBase.apply(this,arguments);
+  v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+};
+
+const v167SnapshotBase=snapshot;
+snapshot=function(){
+  v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+  const x=v167SnapshotBase();
+  x.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  x.cloudSyncVersion=Math.max(Number(x.cloudSyncVersion)||0,167);
+  return x;
+};
+
+const v167ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v167ApplyStateBase.apply(this,arguments);
+  v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+  return result;
+};
+
+const v167MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v167MergeStatesBase(a,b)||{};
+
+  const ac=v167NormalizeRespectConfig(a?.settings?.systemRespectXP);
+  const bc=v167NormalizeRespectConfig(b?.settings?.systemRespectXP);
+
+  const chosen=
+    (Number(ac.modifiedAt)||0)>=(Number(bc.modifiedAt)||0)
+      ?ac
+      :bc;
+
+  out.settings=out.settings||{};
+  out.settings.systemRespectXP=chosen;
+  out.cloudSyncVersion=Math.max(
+    Number(a?.cloudSyncVersion)||0,
+    Number(b?.cloudSyncVersion)||0,
+    Number(out.cloudSyncVersion)||0,
+    167
+  );
+
+  return out;
+};
+
+// Preserve the historical config audit object when cloud/local versions of the
+// same v165+ History session are merged.
+const v167MergeSessionRespectFieldsBase=v165MergeSessionRespectFields;
+v165MergeSessionRespectFields=function(target,...sources){
+  const result=v167MergeSessionRespectFieldsBase(target,...sources);
+
+  for(const src of sources){
+    if(
+      src &&
+      src.v167RespectConfigAtLog &&
+      typeof src.v167RespectConfigAtLog==='object'
+    ){
+      result.v167RespectConfigAtLog=JSON.parse(
+        JSON.stringify(src.v167RespectConfigAtLog)
+      );
+    }
+  }
+
+  return result;
+};
+
+// ---- Protected Sync verification -------------------------------------------
+
+const v167VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v167VerifyCloudStateBase(cloudState,expected);
+  const problems=[...(base?.missing||[])];
+
+  const cloud=v167NormalizeRespectConfig(
+    cloudState?.settings?.systemRespectXP
+  );
+  const wanted=v167NormalizeRespectConfig(
+    expected?.settings?.systemRespectXP
+  );
+
+  for(const key of [
+    'categoryBaseXP',
+    'exactTitleBaseXP',
+    'noSkipGrowthPercent',
+    'noSkipCapPercent',
+    'firstPickGrowthPercent',
+    'firstPickCapPercent',
+    'modifiedAt'
+  ]){
+    if(Number(cloud[key])!==Number(wanted[key])){
+      problems.push('System Respect XP configuration');
+      break;
+    }
+  }
+
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+
+// ---- Full Backup / Automatic Backup ----------------------------------------
+
+const v167BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v167EnsureRespectConfig(S.settings||DEFAULT_SETTINGS);
+  const payload=v167BuildFullBackupBase();
+
+  payload.backupSchemaVersion=V167_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+
+  payload.backupManifest=v148BackupManifest(
+    payload,
+    payload.portableExtras||{}
+  );
+  payload.backupManifest.schemaVersion=V167_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v167 backup. Includes editable System Respect XP reward configuration and historical per-log respect reward metadata, plus automatic Seasonal episode state, adaptive themes/navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences. Authentication credentials and filesystem permission handles remain intentionally non-portable.';
+
+  return payload;
+};
+
+const v167BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v167BackupManifestBase(state,extras);
+  const cfg=v167NormalizeRespectConfig(
+    state?.settings?.systemRespectXP
+  );
+
+  manifest.schemaVersion=V167_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    editableSystemRespectXP:true,
+    systemRespectRewardConfiguration:true,
+    historicalRespectConfigurationAudit:true
+  });
+
+  manifest.systemRespectXPConfig=Object.assign({},cfg);
+
+  return manifest;
+};
+
+// v152 Automatic Backup already resolves the final v148BuildFullBackup() at
+// call time, so it automatically receives the v167 schema/configuration.
+// JSON export/import use the same final full-backup/apply-state chains.
+
+
+
+/* ============================================================
+   MediaFlow v168 — Settings cleanup
+   ------------------------------------------------------------
+   Removed the visible MyAnimeList username/list-sync card from Settings.
+   MAL XML import, imported MAL metadata, Jikan seasonal detection and legacy
+   internal helpers remain intact for compatibility.
+   ============================================================ */
+
+const v168BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v168BuildFullBackupBase();
+
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+
+  if(payload.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow v168 backup. The old MyAnimeList username/list-sync Settings card is no longer shown; persistent account data, MAL-imported metadata, automatic Seasonal/Jikan state, System Respect XP, themes, navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences remain preserved.';
+  }
+
+  return payload;
+};
+
+
+
+/* ============================================================
+   MediaFlow v169 — Advanced Import / Export — Media Services
+   ============================================================ */
+
+const V169_ADVANCED_IMPORT={
+  service:'anilist',
+  mode:'single',             // single | map
+  categoryId:'',
+  file:null,
+  fileName:'',
+  records:null,
+  normalized:null,
+  recordTypeKeys:null,
+  types:[],
+  mappings:{},
+  excludedTypes:{},          // v170: source-type key -> true means skip this type entirely
+  scanning:false,
+  scanProgress:0,
+  scanMessage:'',
+  parseError:''
+};
+
+const V169_TYPE_KEYS=[
+  'series_type','anime_type','manga_type','media_type','mediatype',
+  'mediaType','title_type','show_type','movie_type','content_type',
+  'contentType','type','kind','format','subtype','list_type',
+  'listType','category','__group'
+];
+
+function v169CategoryOptions(selectedId){
+  const rows=(S.categories||[]).filter(Boolean);
+  return rows.map(c=>{
+    const id=String(c.id||'');
+    const icon=typeof v144CategoryIconText==='function'
+      ?v144CategoryIconText(c)
+      :String(c.icon||'');
+    const label=`${icon?icon+' ':''}${String(c.name||id)}`.trim();
+    return `<option value="${escapeHtml(id)}" ${String(selectedId)===id?'selected':''}>${escapeHtml(label)}</option>`;
+  }).join('');
+}
+
+function v169EnsureAdvancedCategory(){
+  const valid=new Set((S.categories||[]).map(c=>String(c?.id||'')).filter(Boolean));
+  if(!valid.has(String(V169_ADVANCED_IMPORT.categoryId||''))){
+    V169_ADVANCED_IMPORT.categoryId=String(
+      (S.categories||[]).find(c=>c?.enabled!==false)?.id ||
+      S.categories?.[0]?.id ||
+      ''
+    );
+  }
+  return V169_ADVANCED_IMPORT.categoryId;
+}
+
+function v169NormalizeSourceType(value){
+  let s=String(value??'').trim();
+  if(!s)return '';
+
+  s=s.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+
+  const upper=s.toUpperCase();
+  const special={
+    'TV':'TV',
+    'OVA':'OVA',
+    'ONA':'ONA',
+    'AMV':'AMV'
+  };
+  if(special[upper])return special[upper];
+
+  return s.replace(/\b\w/g,ch=>ch.toUpperCase());
+}
+
+function v169NestedTypeObjects(raw){
+  if(!raw||typeof raw!=='object')return [];
+
+  const out=[raw];
+  for(const key of [
+    'show','movie','media','anime','manga','item','node','entry',
+    'book','series','title','details','metadata'
+  ]){
+    const value=raw[key];
+    if(value&&typeof value==='object'&&!Array.isArray(value))out.push(value);
+  }
+  return out;
+}
+
+function v169ExtractSourceType(raw){
+  const objects=v169NestedTypeObjects(raw);
+
+  for(const key of V169_TYPE_KEYS){
+    for(const obj of objects){
+      const value=obj?.[key];
+      if(
+        value!=null &&
+        typeof value!=='object' &&
+        String(value).trim()
+      ){
+        const label=v169NormalizeSourceType(value);
+        if(label)return label;
+      }
+    }
+  }
+
+  // Structural fallbacks cover services whose export distinguishes media by
+  // nested object/group rather than an explicit "type" field.
+  if(raw?.movie)return 'Movie';
+  if(raw?.show)return 'Show';
+  if(raw?.anime)return 'Anime';
+  if(raw?.manga)return 'Manga';
+  if(raw?.book)return 'Book';
+
+  const group=v169NormalizeSourceType(raw?.__group);
+  if(group)return group;
+
+  return 'Unspecified';
+}
+
+function v169TypeKey(label){
+  return String(label||'Unspecified')
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/\s+/g,' ');
+}
+
+async function v169Yield(){
+  await new Promise(resolve=>{
+    if(typeof requestAnimationFrame==='function'){
+      requestAnimationFrame(()=>resolve());
+    }else{
+      setTimeout(resolve,0);
+    }
+  });
+}
+
+async function v169ParseAdvancedFile(file){
+  if(!file)throw new Error('Choose an export file first.');
+
+  const text=await file.text();
+  const name=String(file.name||'').toLowerCase();
+
+  let records;
+  if(name.endsWith('.xml')||/^\s*</.test(text)){
+    records=mfXmlRecords(text);
+  }else if(
+    name.endsWith('.csv') ||
+    (!name.endsWith('.json') && text.includes(','))
+  ){
+    records=mfCsvParse(text);
+  }else{
+    records=mfFlattenJson(JSON.parse(text));
+  }
+
+  if(!Array.isArray(records)||!records.length){
+    throw new Error('No recognizable media records were found.');
+  }
+
+  return records;
+}
+
+function v169DefaultMappedCategory(normalized){
+  const requested=String(normalized?.categoryId||'');
+  if(S.categories.some(c=>String(c?.id||'')===requested))return requested;
+
+  return String(
+    (S.categories||[]).find(c=>c?.enabled!==false)?.id ||
+    S.categories?.[0]?.id ||
+    ''
+  );
+}
+
+async function v169ScanAdvancedFile({force=false}={}){
+  const state=V169_ADVANCED_IMPORT;
+  if(!state.file)return;
+  if(state.scanning)return;
+
+  state.scanning=true;
+  state.scanProgress=0;
+  state.scanMessage='Reading export file…';
+  state.parseError='';
+  render();
+
+  try{
+    const records=await v169ParseAdvancedFile(state.file);
+    const normalized=new Array(records.length);
+    const recordTypeKeys=new Array(records.length);
+    const typeMap=new Map();
+    const priorMappings=Object.assign({},state.mappings||{});
+    const priorExcluded=Object.assign({},state.excludedTypes||{});
+
+    state.scanMessage=`Scanning ${records.length.toLocaleString()} records…`;
+    state.scanProgress=2;
+    v169UpdateScanDOM();
+
+    const service=String(state.service||'json');
+
+    for(let i=0;i<records.length;i++){
+      const raw=records[i];
+      const rec=v158NormalizeRecord(raw,service);
+      normalized[i]=rec;
+
+      if(rec){
+        const label=v169ExtractSourceType(raw);
+        const key=v169TypeKey(label);
+        recordTypeKeys[i]=key;
+
+        let row=typeMap.get(key);
+        if(!row){
+          row={
+            key,
+            label,
+            count:0,
+            defaultCategoryId:v169DefaultMappedCategory(rec)
+          };
+          typeMap.set(key,row);
+        }
+        row.count++;
+      }else{
+        recordTypeKeys[i]='';
+      }
+
+      if(i && i%400===0){
+        state.scanProgress=Math.min(
+          96,
+          Math.round(((i+1)/records.length)*96)
+        );
+        state.scanMessage=
+          `Scanning ${Math.min(i+1,records.length).toLocaleString()} / ${records.length.toLocaleString()} records…`;
+        v169UpdateScanDOM();
+        await v169Yield();
+      }
+    }
+
+    const types=[...typeMap.values()].sort((a,b)=>
+      b.count-a.count || a.label.localeCompare(b.label)
+    );
+
+    const mappings={};
+    for(const row of types){
+      const previous=priorMappings[row.key];
+      const previousValid=S.categories.some(
+        c=>String(c?.id||'')===String(previous||'')
+      );
+      mappings[row.key]=previousValid
+        ?String(previous)
+        :String(row.defaultCategoryId||v169EnsureAdvancedCategory());
+    }
+
+    state.records=records;
+    state.normalized=normalized;
+    state.recordTypeKeys=recordTypeKeys;
+    state.types=types;
+    state.mappings=mappings;
+    state.excludedTypes=Object.fromEntries(
+      types
+        .filter(row=>priorExcluded[row.key]===true)
+        .map(row=>[row.key,true])
+    );
+    state.scanProgress=100;
+    state.scanMessage=
+      `${records.length.toLocaleString()} records scanned · ${types.length.toLocaleString()} source type${types.length===1?'':'s'} detected`;
+    state.parseError='';
+  }catch(e){
+    console.error('MediaFlow v169 advanced scan failed',e);
+    state.records=null;
+    state.normalized=null;
+    state.recordTypeKeys=null;
+    state.types=[];
+    state.scanProgress=0;
+    state.parseError=String(e?.message||e);
+    state.scanMessage='Scan failed.';
+  }finally{
+    state.scanning=false;
+    render();
+  }
+}
+
+function v169UpdateScanDOM(){
+  const state=V169_ADVANCED_IMPORT;
+  const bar=document.getElementById('v169-scan-fill');
+  if(bar)bar.style.width=`${Math.max(0,Math.min(100,state.scanProgress||0))}%`;
+
+  const msg=document.getElementById('v169-scan-message');
+  if(msg)msg.textContent=state.scanMessage||'';
+}
+
+function v169SetAdvancedService(value){
+  const state=V169_ADVANCED_IMPORT;
+  state.service=String(value||'json');
+  state.records=null;
+  state.normalized=null;
+  state.recordTypeKeys=null;
+  state.types=[];
+  state.mappings={};
+  state.excludedTypes={};
+  state.parseError='';
+
+  if(state.mode==='map'&&state.file){
+    v169ScanAdvancedFile({force:true});
+  }else{
+    render();
+  }
+}
+
+function v169SetAdvancedMode(value){
+  const state=V169_ADVANCED_IMPORT;
+  state.mode=value==='map'?'map':'single';
+
+  if(state.mode==='map'&&state.file&&!state.records){
+    v169ScanAdvancedFile({force:true});
+  }else{
+    render();
+  }
+}
+
+function v169SetAdvancedCategory(value){
+  if(!S.categories.some(c=>String(c?.id||'')===String(value||'')))return;
+  V169_ADVANCED_IMPORT.categoryId=String(value);
+}
+
+function v169SetTypeMapping(typeKey,value){
+  if(!S.categories.some(c=>String(c?.id||'')===String(value||'')))return;
+  V169_ADVANCED_IMPORT.mappings[String(typeKey||'')]=String(value);
+}
+
+function v170TypeExcluded(typeKey){
+  return V169_ADVANCED_IMPORT.excludedTypes?.[String(typeKey||'')]===true;
+}
+
+function v170SetTypeExcluded(typeKey,checked){
+  const key=String(typeKey||'');
+  if(!key)return;
+
+  V169_ADVANCED_IMPORT.excludedTypes=
+    V169_ADVANCED_IMPORT.excludedTypes||{};
+
+  if(checked)V169_ADVANCED_IMPORT.excludedTypes[key]=true;
+  else delete V169_ADVANCED_IMPORT.excludedTypes[key];
+
+  render();
+}
+
+function v169PickAdvancedImport(){
+  document.getElementById('v169-advanced-file')?.click();
+}
+
+function v169PickAdvancedPreset(service){
+  V169_ADVANCED_IMPORT.service=String(service||'json');
+  render();
+  setTimeout(()=>document.getElementById('v169-advanced-file')?.click(),0);
+}
+
+function v169PrepareAdvancedImport(file){
+  if(!file)return;
+
+  const state=V169_ADVANCED_IMPORT;
+  state.file=file;
+  state.fileName=String(file.name||'export file');
+  state.records=null;
+  state.normalized=null;
+  state.recordTypeKeys=null;
+  state.types=[];
+  state.mappings={};
+  state.excludedTypes={};
+  state.parseError='';
+
+  if(state.mode==='map'){
+    v169ScanAdvancedFile({force:true});
+  }else{
+    render();
+  }
+}
+
+function v169ClearAdvancedFile(){
+  const state=V169_ADVANCED_IMPORT;
+  state.file=null;
+  state.fileName='';
+  state.records=null;
+  state.normalized=null;
+  state.recordTypeKeys=null;
+  state.types=[];
+  state.mappings={};
+  state.scanning=false;
+  state.scanProgress=0;
+  state.scanMessage='';
+  state.parseError='';
+  render();
+}
+
+function v169ResolveMappedCategory(index,rec){
+  const state=V169_ADVANCED_IMPORT;
+
+  if(state.mode==='single'){
+    return v169EnsureAdvancedCategory();
+  }
+
+  const key=String(state.recordTypeKeys?.[index]||'');
+  const mapped=String(state.mappings?.[key]||'');
+
+  if(mapped && S.categories.some(c=>String(c?.id||'')===mapped)){
+    return mapped;
+  }
+
+  return v169DefaultMappedCategory(rec);
+}
+
+async function v169MergeAdvancedRecords(records,normalized,service){
+  const list=Array.isArray(records)?records:[];
+  const norm=Array.isArray(normalized)?normalized:[];
+  const index=v158ImportIndex();
+  const touched=new Map();
+
+  let added=0,updated=0,skipped=0,blocked=0,covers=0;
+  let startDates=0,finishDates=0,timestamps=0;
+
+  const total=Math.max(1,list.length);
+
+  for(let i=0;i<list.length;i++){
+    let rec=norm[i]||v158NormalizeRecord(list[i],service);
+
+    if(!rec){
+      skipped++;
+      continue;
+    }
+
+    // v170: Option 2 can exclude a whole source type. Check this before title
+    // matching, Library mutation, metadata merging, or category routing.
+    const recordTypeKey=String(
+      V169_ADVANCED_IMPORT.recordTypeKeys?.[i]||''
+    );
+    if(
+      V169_ADVANCED_IMPORT.mode==='map' &&
+      recordTypeKey &&
+      v170TypeExcluded(recordTypeKey)
+    ){
+      blocked++;
+      skipped++;
+
+      if(i && i%100===0){
+        updateImportProgress(
+          i+1,total,added,updated,skipped,
+          `${blocked.toLocaleString()} blocked by type · ${startDates.toLocaleString()} starts · ${finishDates.toLocaleString()} finishes · ${timestamps.toLocaleString()} timestamps · ${covers.toLocaleString()} cover URLs`
+        );
+        await v169Yield();
+      }
+      continue;
+    }
+
+    // Clone because cached scan normalization should remain immutable if the
+    // user changes category mappings before importing.
+    rec=Object.assign({},rec,{
+      externalIds:Object.assign({},rec.externalIds||{})
+    });
+
+    const targetCategory=v169ResolveMappedCategory(i,rec);
+    if(!targetCategory){
+      skipped++;
+      continue;
+    }
+
+    // Setting the target before matching helps disambiguate same-title records.
+    rec.categoryId=targetCategory;
+
+    const existing=v158FindImportItem(rec,index);
+    const result=v158ApplyNormalizedRecord(
+      rec,
+      service,
+      index,
+      touched
+    );
+
+    let item=existing;
+    if(!item)item=v158FindImportItem(rec,index);
+
+    // Advanced import is deliberately authoritative about category assignment:
+    // both new and already-matched titles move to the chosen/mapped category.
+    if(item){
+      item.categoryId=targetCategory;
+      item.modifiedAt=Date.now();
+      touched.set(String(item.id),item);
+      index.add(item);
+    }
+
+    if(result==='added')added++;
+    else if(result==='updated')updated++;
+    else skipped++;
+
+    if(rec.coverUrl)covers++;
+    if(rec.startedAt)startDates++;
+    if(rec.completedAt)finishDates++;
+    if(rec.sourceTimestamp)timestamps++;
+
+    if(i && i%100===0){
+      updateImportProgress(
+        i+1,total,added,updated,skipped,
+        `${startDates.toLocaleString()} starts · ${finishDates.toLocaleString()} finishes · ${timestamps.toLocaleString()} timestamps · ${covers.toLocaleString()} cover URLs`
+      );
+      await v169Yield();
+    }
+  }
+
+  v158SyncCompletionTimeline(touched);
+  normalizeSeasonalLibraryItems();
+  v53InvalidateLibraryCache();
+
+  return {
+    added,updated,skipped,blocked,covers,startDates,finishDates,timestamps,touched
+  };
+}
+
+async function v169RunAdvancedImport(){
+  const state=V169_ADVANCED_IMPORT;
+  if(!state.file){
+    showToast('Choose an export file first.');
+    return;
+  }
+
+  if(state.scanning){
+    showToast('Wait for the file scan to finish.');
+    return;
+  }
+
+  if(state.mode==='single'&&!v169EnsureAdvancedCategory()){
+    showToast('Choose a destination category first.');
+    return;
+  }
+
+  try{
+    let records=state.records;
+    let normalized=state.normalized;
+
+    if(!records){
+      showImportProgress(
+        `Advanced ${mfServiceName(state.service)} import`,
+        1
+      );
+      updateImportProgress(
+        0,1,0,0,0,
+        'Reading and normalizing export file…'
+      );
+
+      records=await v169ParseAdvancedFile(state.file);
+      normalized=new Array(records.length);
+
+      for(let i=0;i<records.length;i++){
+        normalized[i]=v158NormalizeRecord(
+          records[i],
+          state.service
+        );
+        if(i&&i%500===0)await v169Yield();
+      }
+
+      // Mapping mode requires type keys. This normally exists because file
+      // selection scans automatically, but keep the importer safe if called
+      // programmatically.
+      if(state.mode==='map'){
+        state.records=records;
+        state.normalized=normalized;
+        await v169ScanAdvancedFile({force:true});
+        records=state.records;
+        normalized=state.normalized;
+      }
+    }
+
+    if(state.mode==='map'){
+      if(!state.types.length){
+        throw new Error(
+          'No recognizable media types were found in this file.'
+        );
+      }
+
+      const unmapped=state.types.filter(row=>
+        !v170TypeExcluded(row.key) &&
+        !S.categories.some(
+          c=>String(c?.id||'')===String(state.mappings?.[row.key]||'')
+        )
+      );
+
+      if(unmapped.length){
+        throw new Error(
+          `Choose a destination category for every detected type (${unmapped.length} remaining).`
+        );
+      }
+    }
+
+    showImportProgress(
+      `Advanced ${mfServiceName(state.service)} import`,
+      records.length
+    );
+
+    mfBegin(
+      `Advanced ${mfServiceName(state.service)} import`,
+      state.fileName||state.file.name||'export'
+    );
+
+    const result=await v169MergeAdvancedRecords(
+      records,
+      normalized,
+      state.service
+    );
+
+    mfCommit(
+      `Advanced ${mfServiceName(state.service)} import`,
+      `${result.added} added, ${result.updated} updated · ${result.blocked||0} blocked by type · ${state.mode==='single'?'one destination category':`${state.types.length} detected source types`}`
+    );
+
+    // mfCommit already queued the one complete state save. Await it rather than
+    // queueing another duplicate cloud write.
+    await saveQueue;
+
+    updateImportProgress(
+      records.length,
+      records.length,
+      result.added,
+      result.updated,
+      result.skipped,
+      'Advanced category assignment saved.'
+    );
+
+    finishImportProgress(
+      true,
+      'Advanced import complete',
+      `${result.added.toLocaleString()} added · ${result.updated.toLocaleString()} updated · ${result.startDates.toLocaleString()} start dates · ${result.finishDates.toLocaleString()} finish dates · ${result.timestamps.toLocaleString()} timestamps · ${result.covers.toLocaleString()} cover URLs${result.skipped?` · ${result.skipped.toLocaleString()} skipped`:''}.`
+    );
+
+    // Preserve the selected service/mode/category, but release the potentially
+    // large File/record arrays immediately after completion.
+    state.file=null;
+    state.fileName='';
+    state.records=null;
+    state.normalized=null;
+    state.recordTypeKeys=null;
+    state.types=[];
+    state.mappings={};
+    state.scanProgress=0;
+    state.scanMessage='';
+    state.parseError='';
+
+    render();
+  }catch(e){
+    console.error('MediaFlow v169 advanced import failed',e);
+
+    // Restore pre-import core state if this failed after mfBegin.
+    const last=S.undoStack?.[S.undoStack.length-1];
+    if(
+      last &&
+      !last.after &&
+      String(last.action||'').startsWith('Advanced ')
+    ){
+      S.undoStack.pop();
+      mfRestoreCore(last.before);
+    }
+
+    finishImportProgress(
+      false,
+      'Advanced import failed',
+      String(e?.message||e)
+    );
+  }
+}
+
+function v169AdvancedExport(){
+  const service=String(
+    document.getElementById('v169-advanced-service')?.value ||
+    V169_ADVANCED_IMPORT.service ||
+    'json'
+  );
+
+  V169_ADVANCED_IMPORT.service=service;
+
+  const rows=mfExchangeRows();
+  let blob,name;
+
+  if(['mal','malxml','aniwatch','hianime','livechart'].includes(service)){
+    blob=new Blob([mfMalXmlExport()],{type:'application/xml'});
+    name=`mediaflow-${service}-${todayISO()}.xml`;
+  }else if(['json','anilist','anisearch','kitsu','stremio','trakt'].includes(service)){
+    blob=new Blob([
+      JSON.stringify({
+        source:'MediaFlow',
+        target:mfServiceName(service),
+        exportedAt:new Date().toISOString(),
+        items:rows
+      },null,2)
+    ],{type:'application/json'});
+    name=`mediaflow-${service}-${todayISO()}.json`;
+  }else{
+    const headers=Object.keys(
+      rows[0]||{
+        title:'',
+        media_type:'',
+        status:'',
+        progress:'',
+        total:'',
+        rating:'',
+        year:''
+      }
+    );
+    const csv=[
+      headers.join(','),
+      ...rows.map(r=>headers.map(k=>mfCsvEscape(r[k])).join(','))
+    ].join('\r\n');
+
+    blob=new Blob([csv],{type:'text/csv'});
+    name=`mediaflow-${service}-${todayISO()}.csv`;
+  }
+
+  triggerDownload(blob,name);
+  showDataProgress(
+    `Advanced export for ${mfServiceName(service)}`,
+    'Creating exchange file…',
+    70
+  );
+
+  setTimeout(()=>finishDataProgress(
+    true,
+    'Export complete',
+    `${rows.length.toLocaleString()} Library titles exported for ${mfServiceName(service)}.`
+  ),100);
+}
+
+function v169AdvancedImportHtml(){
+  const state=V169_ADVANCED_IMPORT;
+  v169EnsureAdvancedCategory();
+
+  const serviceOptions=MF_EXCHANGE_SERVICES.map(([id,name])=>
+    `<option value="${escapeHtml(id)}" ${state.service===id?'selected':''}>${escapeHtml(name)}</option>`
+  ).join('');
+
+  const modeSingle=state.mode!=='map';
+
+  const typeRows=state.types.map(row=>{
+    const selected=state.mappings?.[row.key]||row.defaultCategoryId||'';
+    const excluded=v170TypeExcluded(row.key);
+    return `<div class="v169-type-row ${excluded?'v170-type-excluded':''}">
+      <div class="v169-type-name" title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</div>
+      <div class="v169-type-count">${row.count.toLocaleString()} title${row.count===1?'':'s'}</div>
+      <select ${excluded?'disabled':''} onchange="App.v169SetTypeMapping('${escapeHtml(row.key)}',this.value)">
+        ${v169CategoryOptions(selected)}
+      </select>
+      <label class="v170-dont-import">
+        <input type="checkbox" ${excluded?'checked':''}
+          onchange="App.v170SetTypeExcluded('${escapeHtml(row.key)}',this.checked)">
+        <span>Don't import</span>
+      </label>
+    </div>`;
+  }).join('');
+
+  let scanBox='';
+  if(state.mode==='map'){
+    if(state.scanning){
+      scanBox=`<div class="v169-scan-box">
+        <div class="v169-scan-head">
+          <b>Scanning source types…</b>
+          <span class="hint">${Math.round(state.scanProgress||0)}%</span>
+        </div>
+        <div id="v169-scan-message" class="hint">${escapeHtml(state.scanMessage||'Scanning…')}</div>
+        <div class="v169-scan-progress"><span id="v169-scan-fill" style="width:${Math.round(state.scanProgress||0)}%"></span></div>
+      </div>`;
+    }else if(state.parseError){
+      scanBox=`<div class="v169-scan-box">
+        <b>Could not scan this file</b>
+        <div class="v169-ready">${escapeHtml(state.parseError)}</div>
+      </div>`;
+    }else if(state.file&&state.types.length){
+      scanBox=`<div class="v169-scan-box">
+        <div class="v169-scan-head">
+          <div>
+            <b>Detected source types</b>
+            <div class="hint">${(state.records?.length||0).toLocaleString()} records · ${state.types.length.toLocaleString()} unique type${state.types.length===1?'':'s'}. Route each type to a MediaFlow category, or mark a type <b>Don't import</b> to skip every title of that type.</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="App.v169RescanAdvancedImport()">Rescan</button>
+        </div>
+        <div class="v169-type-list">${typeRows}</div>
+      </div>`;
+    }else if(state.file){
+      scanBox=`<div class="v169-scan-box">
+        <div class="v169-ready">No recognizable source types have been detected yet.</div>
+      </div>`;
+    }
+  }
+
+  return `<div class="section-label settings-section-head"><span>ADVANCED IMPORT / EXPORT — MEDIA SERVICES</span></div>
+    <div class="card v169-advanced-card" style="margin-bottom:22px;">
+      <div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;">
+        Advanced category routing for the same MediaFlow service/format exchange system. Choose one destination category for the entire import, or let MediaFlow scan the file's own media types and map each detected type to a category before anything is imported.
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Service / format</label>
+          <select id="v169-advanced-service" onchange="App.v169SetAdvancedService(this.value)">
+            ${serviceOptions}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Import routing</label>
+          <select onchange="App.v169SetAdvancedMode(this.value)">
+            <option value="single" ${modeSingle?'selected':''}>Option 1 — All titles → one category</option>
+            <option value="map" ${!modeSingle?'selected':''}>Option 2 — Scan source types → map categories</option>
+          </select>
+        </div>
+      </div>
+
+      ${modeSingle?`
+        <div class="field" style="margin-top:4px">
+          <label class="field-label">Destination category for every imported title</label>
+          <select onchange="App.v169SetAdvancedCategory(this.value)">
+            ${v169CategoryOptions(state.categoryId)}
+          </select>
+          <small class="hint">New titles and matching Library titles updated by this advanced import are assigned to this category.</small>
+        </div>
+      `:`
+        <div class="hint" style="margin-top:4px">
+          Choose the export file first. MediaFlow dynamically reads that service's actual type fields — for example MAL TV / Movie / OVA / ONA / Special, AniList formats, Simkl groups, or whatever type values the selected export really contains.
+        </div>
+      `}
+
+      <div class="v169-file-row">
+        <button type="button" class="btn" onclick="App.v169PickAdvancedImport()">Choose export file</button>
+        <input id="v169-advanced-file" type="file"
+          accept=".json,.csv,.xml,.txt,application/json,text/csv,text/xml,application/xml"
+          style="display:none"
+          onchange="App.v169PrepareAdvancedImport(this.files[0]);this.value=''">
+        ${state.fileName?`
+          <span class="v169-file-name" title="${escapeHtml(state.fileName)}">${escapeHtml(state.fileName)}</span>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="App.v169ClearAdvancedFile()">Clear</button>
+        `:''}
+      </div>
+
+      ${scanBox}
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button type="button" class="btn btn-primary"
+          onclick="App.v169RunAdvancedImport()"
+          ${!state.file||state.scanning?'disabled':''}>
+          Import with advanced routing
+        </button>
+        <button type="button" class="btn" onclick="App.v169AdvancedExport()">Export for selected service</button>
+        <button type="button" class="btn" onclick="App.v169PickAdvancedPreset('malxml')">Quick MAL XML import</button>
+        <button type="button" class="btn" onclick="App.v169PickAdvancedPreset('simkl')">Quick Simkl JSON import</button>
+      </div>
+
+      <small class="hint">
+        Supports every service/format already available in MediaFlow. Type mapping is dynamic rather than hard-coded: MediaFlow inspects the selected file's own type/format/group fields, so service-specific values are discovered from the export itself. In Option 2 each detected type can either be routed to a category or blocked with <b>Don't import</b>. Scanning and importing are batched with browser yields, and the parsed file is reused instead of being scanned again during import.
+      </small>
+    </div>`;
+}
+
+// Insert the new section immediately after the existing media-service exchange
+// card and before DATA, without changing the standard importer.
+const v169RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v169RenderSettingsBase();
+  const dataMarker='<div class="section-label">DATA</div>';
+
+  if(h.includes(dataMarker) && !h.includes('ADVANCED IMPORT / EXPORT — MEDIA SERVICES')){
+    h=h.replace(dataMarker,v169AdvancedImportHtml()+dataMarker);
+  }
+
+  return h;
+};
+
+Object.assign(App,{
+  v169SetAdvancedService,
+  v169SetAdvancedMode,
+  v169SetAdvancedCategory,
+  v169SetTypeMapping,
+  v170SetTypeExcluded,
+  v169PickAdvancedImport,
+  v169PickAdvancedPreset,
+  v169PrepareAdvancedImport,
+  v169ClearAdvancedFile,
+  v169RunAdvancedImport,
+  v169AdvancedExport,
+  v169RescanAdvancedImport(){
+    return v169ScanAdvancedFile({force:true});
+  }
+});
+
+// v169 adds no durable account structure: routing/file scans are intentionally
+// runtime-only. Imported category assignments are normal Library categoryIds,
+// so cloud sync, Full Backup, Automatic Backup and JSON import/export already
+// preserve the result through the existing complete-state pipelines.
+const v169BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v169BuildFullBackupBase();
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+
+  if(payload.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow v169 backup. Advanced media-service imports persist their resulting Library category assignments as normal Library data; temporary file scans/type mappings are intentionally runtime-only. All existing account data, automatic Seasonal/Jikan state, System Respect XP, themes, navigation, Personal Order, Old System, Rating Queue and portable preferences remain preserved.';
+  }
+
+  return payload;
+};
+
+
+
+/* ============================================================
+   MediaFlow v170 — Advanced import type exclusions
+   ------------------------------------------------------------
+   Option 2 now lets each detected source type be either:
+   - routed to a MediaFlow category; or
+   - marked "Don't import", which skips every record of that type before any
+     Library matching or mutation happens.
+
+   Exclusion choices are intentionally temporary import-workspace state.
+   The resulting Library remains fully covered by the existing cloud, Sync Now,
+   Full Backup, Automatic Backup and JSON backup pipelines.
+   ============================================================ */
+
+const v170BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v170BuildFullBackupBase();
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+
+  if(payload.backupManifest){
+    payload.backupManifest.note='Complete MediaFlow v170 backup. Advanced Option 2 can block selected source types from an import; temporary type-routing/exclusion choices are runtime-only, while all imported Library results and existing account data remain preserved through the normal backup/cloud pipelines.';
+  }
+
+  return payload;
+};
+
+
+
+/* ============================================================
+   MediaFlow v171 — Category Recovery & Default Identity
+   ============================================================ */
+
+const V171_BACKUP_SCHEMA_VERSION=9;
+const V171_CATEGORY_RECOVERY_DEFAULT={
+  lastDeletedCategory:null,
+  lastDeletedIndex:-1,
+  modifiedAt:0
+};
+
+function v171Clone(value,fallback=null){
+  try{return JSON.parse(JSON.stringify(value));}
+  catch(_){
+    try{return JSON.parse(JSON.stringify(fallback));}
+    catch(__){return fallback;}
+  }
+}
+
+function v171DefaultCategoryIds(){
+  return new Set(DEFAULT_CATEGORIES.map(c=>String(c.id)));
+}
+
+function v171IsDefaultCategory(id){
+  return v171DefaultCategoryIds().has(String(id||''));
+}
+
+function v171NormalizeCategoryRecovery(raw){
+  const src=(raw&&typeof raw==='object')?raw:{};
+  const cat=src.lastDeletedCategory&&typeof src.lastDeletedCategory==='object'
+    ?v171Clone(src.lastDeletedCategory,null)
+    :null;
+
+  return {
+    lastDeletedCategory:cat,
+    lastDeletedIndex:Number.isFinite(Number(src.lastDeletedIndex))
+      ?Math.max(-1,Math.floor(Number(src.lastDeletedIndex)))
+      :-1,
+    modifiedAt:Math.max(0,Number(src.modifiedAt)||0)
+  };
+}
+
+function v171EnsureCategoryState(){
+  S.settings=S.settings||DEFAULT_SETTINGS;
+  if(typeof S.settings.highlightDefaultCategories!=='boolean'){
+    S.settings.highlightDefaultCategories=true;
+  }
+  S.categoryRecovery=v171NormalizeCategoryRecovery(S.categoryRecovery);
+  return S.categoryRecovery;
+}
+
+v171EnsureCategoryState();
+
+function v171MissingDefaultCategories(){
+  const existing=new Set((S.categories||[]).map(c=>String(c?.id||'')));
+  return DEFAULT_CATEGORIES.filter(c=>!existing.has(String(c.id)));
+}
+
+function v171LastDeletedStatus(){
+  const rec=v171EnsureCategoryState();
+  const cat=rec.lastDeletedCategory;
+  if(!cat)return {cat:null,canRestore:false,exists:false};
+
+  const exists=(S.categories||[]).some(
+    c=>String(c?.id||'')===String(cat.id||'')
+  );
+  return {cat,canRestore:!exists,exists};
+}
+
+async function v171RestoreDefaultCategories(){
+  const missing=v171MissingDefaultCategories();
+  if(!missing.length){
+    showToast('All default categories are already present.');
+    return;
+  }
+
+  const existingIds=new Set((S.categories||[]).map(c=>String(c?.id||'')));
+  let restored=0;
+
+  // Append only missing canonical defaults. Existing default-ID categories are
+  // never overwritten, so user edits/renames remain intact.
+  for(const original of DEFAULT_CATEGORIES){
+    const id=String(original.id);
+    if(existingIds.has(id))continue;
+
+    const restoredCategory=v171Clone(original,{});
+    restoredCategory.id=id; // explicit invariant: canonical ID must survive.
+    restoredCategory.custom=false;
+
+    S.categories.push(restoredCategory);
+    existingIds.add(id);
+    restored++;
+  }
+
+  await persistCategories();
+  try{v53InvalidateLibraryCache();}catch(_){}
+  render();
+
+  showToast(
+    `${restored} default categor${restored===1?'y':'ies'} restored with original IDs`
+  );
+}
+
+async function v171RestoreLastDeletedCategory(){
+  const rec=v171EnsureCategoryState();
+  const cat=rec.lastDeletedCategory;
+
+  if(!cat){
+    showToast('There is no deleted category to restore.');
+    return;
+  }
+
+  if(
+    (S.categories||[]).some(
+      c=>String(c?.id||'')===String(cat.id||'')
+    )
+  ){
+    showToast('That category ID already exists.');
+    return;
+  }
+
+  const restored=v171Clone(cat,{});
+  const index=Math.max(
+    0,
+    Math.min(
+      S.categories.length,
+      Number.isFinite(Number(rec.lastDeletedIndex))
+        ?Math.floor(Number(rec.lastDeletedIndex))
+        :S.categories.length
+    )
+  );
+
+  S.categories.splice(index,0,restored);
+
+  // Recovery slot is consumed only after a successful restoration.
+  S.categoryRecovery={
+    lastDeletedCategory:null,
+    lastDeletedIndex:-1,
+    modifiedAt:Date.now()
+  };
+
+  await persistCategories();
+  try{v53InvalidateLibraryCache();}catch(_){}
+  render();
+  showToast(`${restored.name||'Category'} restored`);
+}
+
+function v171ToggleDefaultCategoryHighlight(){
+  v171EnsureCategoryState();
+  S.settings.highlightDefaultCategories=
+    S.settings.highlightDefaultCategories===false;
+
+  persistSettings();
+  render();
+}
+
+// Capture the full category record and original array position immediately
+// before the existing deletion code removes it and saves the canonical state.
+const v171ConfirmDeleteCategoryBase=App.confirmDeleteCategory;
+App.confirmDeleteCategory=async function(id,button){
+  const index=(S.categories||[]).findIndex(
+    c=>String(c?.id||'')===String(id||'')
+  );
+  const cat=index>=0?S.categories[index]:null;
+
+  if(cat){
+    S.categoryRecovery={
+      lastDeletedCategory:v171Clone(cat,null),
+      lastDeletedIndex:index,
+      modifiedAt:Date.now()
+    };
+  }
+
+  return v171ConfirmDeleteCategoryBase.call(this,id,button);
+};
+
+// Keep the confirmation copy accurate now that one deleted category can be
+// recovered from Settings.
+const v171CategoryDeleteModalBase=categoryDeleteModalHtml;
+categoryDeleteModalHtml=function(d){
+  let h=v171CategoryDeleteModalBase(d);
+  h=h.replace(
+    '<b style="color:var(--text);">This cannot be undone.</b><br>Past history is kept, but entries that reference this category may show it as removed.',
+    '<b style="color:var(--text);">Recovery available.</b><br>The most recently deleted category can be restored from Settings → Categories until another category is deleted. Past history is kept.'
+  );
+  return h;
+};
+
+function v171CategoryRowsHtml(){
+  const highlight=S.settings?.highlightDefaultCategories!==false;
+
+  return (S.categories||[]).map((c,index)=>{
+    const isDefault=v171IsDefaultCategory(c.id);
+    const highlighted=highlight&&isDefault;
+    const icon=typeof v144CategoryIconHtml==='function'
+      ?v144CategoryIconHtml(c)
+      :escapeHtml(c.icon||'🗂️');
+
+    return `<div class="cat-manage-row ${highlighted?'v171-default-category':''}" data-category-id="${escapeHtml(String(c.id))}">
+      <div class="hero-icon" style="width:36px;height:36px;font-size:17px;background:${escapeHtml(String(c.color||'#555'))}22;color:${escapeHtml(String(c.color||'#555'))};">${icon}</div>
+
+      <div class="name">
+        ${escapeHtml(c.name)}
+        ${highlighted?'<span class="v171-default-badge">DEFAULT</span>':''}
+        <div class="meta">${c.target} ${unitLabel(c.unit,c.target)} target · weight ${c.weight} ${c.seasonal?'· seasonal':''}</div>
+      </div>
+
+      <div class="cat-order-controls" style="display:flex;gap:5px;align-items:center;">
+        <input class="v157-position-input" type="number" min="1" max="${S.categories.length}" step="1" value="${index+1}"
+          title="Set exact category position" aria-label="Set ${escapeHtml(c.name)} category position"
+          onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()"
+          onkeydown="if(event.key==='Enter'){this.blur();}"
+          onchange="App.v157SetCategoryPosition('${escapeHtml(String(c.id))}',this.value)">
+        <button type="button" class="btn btn-sm btn-ghost cat-drag-handle" title="Drag to reorder" aria-label="Drag ${escapeHtml(c.name)} to reorder" onpointerdown="App.v73CategoryDragStart(event,'${escapeHtml(String(c.id))}')">☰</button>
+        <button class="btn btn-sm btn-ghost" onclick="App.v72MoveCategory('${escapeHtml(String(c.id))}',-1)" ${S.categories[0]?.id===c.id?'disabled':''} title="Move category up" aria-label="Move ${escapeHtml(c.name)} up">↑</button>
+        <button class="btn btn-sm btn-ghost" onclick="App.v72MoveCategory('${escapeHtml(String(c.id))}',1)" ${S.categories[S.categories.length-1]?.id===c.id?'disabled':''} title="Move category down" aria-label="Move ${escapeHtml(c.name)} down">↓</button>
+      </div>
+
+      <button class="toggle ${c.enabled?'on':''}" onclick="App.toggleCategory('${escapeHtml(String(c.id))}')"></button>
+      <button class="btn btn-sm btn-ghost cat-edit-btn" onclick="App.openCategoryModal('${escapeHtml(String(c.id))}')">Edit</button>
+      <button class="btn btn-sm btn-danger cat-delete-btn" onclick="App.deleteCategory('${escapeHtml(String(c.id))}')">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+function v171CategoriesSectionHtml(){
+  v171EnsureCategoryState();
+
+  const missing=v171MissingDefaultCategories();
+  const last=v171LastDeletedStatus();
+  const highlight=S.settings.highlightDefaultCategories!==false;
+
+  let lastLabel='Restore last deleted';
+  if(last.cat){
+    lastLabel=`Restore last deleted · ${escapeHtml(String(last.cat.name||last.cat.id||'category'))}`;
+  }
+
+  return `<div class="settings-categories-full">
+    <div class="section-label">CATEGORIES</div>
+    <div class="card">
+      <div class="v171-category-tools">
+        <div>
+          <div style="font-size:11px;font-weight:850;color:var(--text)">Category recovery</div>
+          <div class="v171-recovery-note">
+            MediaFlow's ${DEFAULT_CATEGORIES.length} built-in categories are recognized by their original IDs. Restoring missing defaults never overwrites an existing category with the same default ID.
+          </div>
+        </div>
+
+        <div class="v171-category-tool-actions">
+          <button type="button" class="btn btn-sm"
+            onclick="App.v171RestoreDefaultCategories()"
+            ${missing.length?'':'disabled'}>
+            Restore missing defaults${missing.length?` (${missing.length})`:''}
+          </button>
+
+          <button type="button" class="btn btn-sm btn-ghost"
+            onclick="App.v171RestoreLastDeletedCategory()"
+            ${last.canRestore?'':'disabled'}>
+            ${lastLabel}
+          </button>
+
+          <label class="v171-highlight-toggle">
+            <span>Highlight defaults</span>
+            <button type="button"
+              class="toggle ${highlight?'on':''}"
+              onclick="event.preventDefault();App.v171ToggleDefaultCategoryHighlight()"
+              aria-label="Toggle default category highlighting"></button>
+          </label>
+        </div>
+      </div>
+
+      ${v171CategoryRowsHtml()}
+
+      <button class="btn btn-block" style="margin-top:14px;" onclick="App.openCategoryModal()">+ Add category</button>
+    </div>
+  </div>`;
+}
+
+// Replace only the original Categories block. All later Settings additions
+// (themes, navigation, imports, XP, etc.) continue through the existing chain.
+const v171RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v171RenderSettingsBase();
+  const replacement=v171CategoriesSectionHtml();
+
+  h=h.replace(
+    /<div class="settings-categories-full">[\s\S]*?<\/div>\s*<\/div>\s*(?=<div class="two-col")/,
+    replacement
+  );
+
+  return h;
+};
+
+Object.assign(App,{
+  v171RestoreDefaultCategories,
+  v171RestoreLastDeletedCategory,
+  v171ToggleDefaultCategoryHighlight
+});
+
+// ---- Persistence / cloud / merge / import ----------------------------------
+
+const v171PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v171EnsureCategoryState();
+  return v171PersistSettingsBase.apply(this,arguments);
+};
+
+const v171SnapshotBase=snapshot;
+snapshot=function(){
+  v171EnsureCategoryState();
+  const x=v171SnapshotBase();
+
+  x.categoryRecovery=v171Clone(
+    S.categoryRecovery,
+    V171_CATEGORY_RECOVERY_DEFAULT
+  );
+  x.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  x.cloudSyncVersion=Math.max(Number(x.cloudSyncVersion)||0,171);
+
+  return x;
+};
+
+const v171ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v171ApplyStateBase.apply(this,arguments);
+
+  S.categoryRecovery=v171NormalizeCategoryRecovery(d?.categoryRecovery);
+  v171EnsureCategoryState();
+
+  return result;
+};
+
+const v171MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v171MergeStatesBase(a,b)||{};
+
+  const ar=v171NormalizeCategoryRecovery(a?.categoryRecovery);
+  const br=v171NormalizeCategoryRecovery(b?.categoryRecovery);
+
+  out.categoryRecovery=v171Clone(
+    (Number(ar.modifiedAt)||0)>=(Number(br.modifiedAt)||0)
+      ?ar
+      :br,
+    V171_CATEGORY_RECOVERY_DEFAULT
+  );
+
+  out.settings=out.settings||{};
+  if(typeof out.settings.highlightDefaultCategories!=='boolean'){
+    const av=a?.settings?.highlightDefaultCategories;
+    const bv=b?.settings?.highlightDefaultCategories;
+    out.settings.highlightDefaultCategories=
+      typeof av==='boolean'
+        ?av
+        :typeof bv==='boolean'
+          ?bv
+          :true;
+  }
+
+  out.cloudSyncVersion=Math.max(
+    Number(a?.cloudSyncVersion)||0,
+    Number(b?.cloudSyncVersion)||0,
+    Number(out.cloudSyncVersion)||0,
+    171
+  );
+
+  return out;
+};
+
+// ---- Protected Sync completeness + post-upload verification ----------------
+
+const v171StateCompletenessBase=v155StateCompleteness;
+v155StateCompleteness=function(state){
+  const base=v171StateCompletenessBase(state);
+  const missing=[...(base?.missing||[])];
+
+  if(!state?.categoryRecovery||typeof state.categoryRecovery!=='object'){
+    missing.push('category recovery');
+  }
+
+  return {ok:missing.length===0,missing:[...new Set(missing)]};
+};
+
+function v171CategoryAudit(state){
+  const rows=(Array.isArray(state?.categories)?state.categories:[]).map(c=>({
+    id:String(c?.id||''),
+    name:String(c?.name||''),
+    icon:String(c?.icon||''),
+    iconUrl:String(c?.iconUrl||''),
+    type:String(c?.type||''),
+    unit:String(c?.unit||''),
+    target:Number(c?.target)||0,
+    weight:Number(c?.weight)||0,
+    minutesPerUnit:Number(c?.minutesPerUnit)||0,
+    seasonal:!!c?.seasonal,
+    color:String(c?.color||''),
+    enabled:c?.enabled!==false,
+    custom:!!c?.custom
+  }));
+
+  const rec=v171NormalizeCategoryRecovery(state?.categoryRecovery);
+
+  return {
+    rows,
+    order:Array.isArray(state?.categoryOrder)
+      ?state.categoryOrder.map(String)
+      :[],
+    highlight:state?.settings?.highlightDefaultCategories!==false,
+    recovery:{
+      lastDeletedCategory:rec.lastDeletedCategory,
+      lastDeletedIndex:rec.lastDeletedIndex,
+      modifiedAt:rec.modifiedAt
+    }
+  };
+}
+
+const v171VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v171VerifyCloudStateBase(cloudState,expected);
+  const problems=[...(base?.missing||[])];
+
+  const cloudAudit=v171CategoryAudit(cloudState);
+  const expectedAudit=v171CategoryAudit(expected);
+
+  if(JSON.stringify(cloudAudit.rows)!==JSON.stringify(expectedAudit.rows)){
+    problems.push('Categories');
+  }
+
+  if(JSON.stringify(cloudAudit.order)!==JSON.stringify(expectedAudit.order)){
+    problems.push('Category order');
+  }
+
+  if(cloudAudit.highlight!==expectedAudit.highlight){
+    problems.push('Default category highlight preference');
+  }
+
+  if(
+    JSON.stringify(cloudAudit.recovery)!==
+    JSON.stringify(expectedAudit.recovery)
+  ){
+    problems.push('Category recovery');
+  }
+
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+
+// ---- Full Backup / Automatic Backup / JSON import-export -------------------
+
+const v171BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v171EnsureCategoryState();
+  const payload=v171BuildFullBackupBase();
+
+  payload.backupSchemaVersion=V171_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.categoryRecovery=v171Clone(
+    S.categoryRecovery,
+    V171_CATEGORY_RECOVERY_DEFAULT
+  );
+  payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+
+  payload.backupManifest=v148BackupManifest(
+    payload,
+    payload.portableExtras||{}
+  );
+  payload.backupManifest.schemaVersion=V171_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v171 backup. Includes categories with stable IDs/order, default-category highlight preference, last-deleted category recovery state, advanced imports, automatic Seasonal/Jikan state, System Respect XP, themes/navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences. Authentication credentials and filesystem permission handles remain intentionally non-portable.';
+
+  return payload;
+};
+
+const v171BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v171BackupManifestBase(state,extras);
+  const missingIds=new Set(
+    DEFAULT_CATEGORIES
+      .map(c=>String(c.id))
+      .filter(id=>!(state?.categories||[]).some(c=>String(c?.id||'')===id))
+  );
+  const rec=v171NormalizeCategoryRecovery(state?.categoryRecovery);
+
+  manifest.schemaVersion=V171_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    stableDefaultCategoryIds:true,
+    defaultCategoryHighlightPreference:true,
+    lastDeletedCategoryRecovery:true,
+    categoryRecoveryPosition:true
+  });
+
+  manifest.counts=Object.assign({},manifest.counts||{},{
+    defaultCategoriesPresent:DEFAULT_CATEGORIES.length-missingIds.size,
+    defaultCategoriesMissing:missingIds.size,
+    recoverableDeletedCategory:rec.lastDeletedCategory?1:0
+  });
+
+  return manifest;
+};
+
+// v152 Automatic Backup resolves the final v148BuildFullBackup() at runtime,
+// so v171 recovery/highlight/category state is automatically included.
+// Full JSON import applies categoryRecovery through the final v46ApplyState()
+// chain above.
+
+
+
+/* ============================================================
+   MediaFlow v172 — Unified Media Services Import Interface
+   ------------------------------------------------------------
+   The old Normal and Advanced media-service cards are no longer rendered as
+   two separate Settings sections. One shared section now exposes a switch:
+     • Normal
+     • Advanced (Recommended)
+
+   The selected interface is an account Settings preference. Switching views
+   does not discard the in-memory v169/v170 Advanced file scan workspace.
+   ============================================================ */
+
+const V172_BACKUP_SCHEMA_VERSION=10;
+
+function v172NormalizeImportInterface(value){
+  return String(value||'').toLowerCase()==='normal'
+    ?'normal'
+    :'advanced';
+}
+
+function v172EnsureImportInterfaceSettings(settings=S.settings){
+  settings=settings&&typeof settings==='object'?settings:{};
+  settings.mediaServicesImportInterface=v172NormalizeImportInterface(
+    settings.mediaServicesImportInterface
+  );
+  return settings;
+}
+
+v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+
+function v172SetImportInterface(mode){
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  S.settings.mediaServicesImportInterface=
+    v172NormalizeImportInterface(mode);
+
+  persistSettings();
+  render();
+}
+
+function v172NormalMediaServicesBodyHtml(){
+  return `<div class="card" style="margin-bottom:0;">
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;">
+      Import library exports from other tracking services or export your MediaFlow Library into exchange files for those services. MediaFlow merges matching titles and preserves progress, status, ratings, dates and external IDs when the source contains them.
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">Service / format</label>
+        <select id="exchange-service">${mfExchangeServiceOptions()}</select>
+      </div>
+      <div class="field">
+        <label class="field-label">Import</label>
+        <button class="btn" onclick="App.pickExchangeImport()">Choose export file</button>
+        <input id="exchange-file" type="file"
+          accept=".json,.csv,.xml,.txt,application/json,text/csv,text/xml,application/xml"
+          style="display:none"
+          onchange="App.prepareExchangeImport(this.files[0])">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn btn-primary" onclick="App.exportExchange()">Export for selected service</button>
+      <button class="btn" onclick="document.getElementById('mal-file').click()">Quick MAL XML import</button>
+      <input type="file" id="mal-file" accept=".xml,text/xml" style="display:none"
+        onchange="App.prepareLegacyImport('mal',this.files[0])">
+      <button class="btn" onclick="document.getElementById('simkl-file').click()">Quick Simkl JSON import</button>
+      <input type="file" id="simkl-file" accept=".json,application/json" style="display:none"
+        onchange="App.prepareLegacyImport('simkl',this.files[0])">
+    </div>
+
+    <small class="hint">
+      AniList · AniSearch · AniWatch · BetaSeries · Criticker · Crunchyroll · EpisodeCalendar · HiAnime · IMDb · Letterboxd · LiveChart · Kitsu · MoviesFad · MyAnimeList · MAL-XML · Netflix · PrimeWire · SeriesFad · Stremio · trakt · TV Time · Tviso · Twee · CSV · JSON. Different services expose different fields, so MediaFlow imports what is actually present instead of inventing missing data. v158 also imports Start Date, Finish Date, source timestamps and external cover URLs whenever the source includes them.
+    </small>
+  </div>`;
+}
+
+function v172AdvancedMediaServicesBodyHtml(){
+  let h=v169AdvancedImportHtml();
+
+  // Remove only the old Advanced section heading. The complete v169/v170
+  // Advanced card remains authoritative, including type mapping/exclusions.
+  h=h.replace(
+    /^<div class="section-label settings-section-head"><span>ADVANCED IMPORT \/ EXPORT — MEDIA SERVICES<\/span><\/div>\s*/,
+    ''
+  );
+
+  // Mark Advanced as the recommended workflow inside the chosen interface.
+  h=h.replace(
+    /(<div class="card v169-advanced-card"[^>]*>)/,
+    `$1<div class="v172-advanced-recommendation"><strong>Recommended</strong><span>Use Advanced Import when you want explicit category routing, per-source-type mapping, or “Don’t import” exclusions before Library changes are applied.</span></div>`
+  );
+
+  // The shared shell owns vertical spacing now.
+  h=h.replace(
+    'class="card v169-advanced-card" style="margin-bottom:22px;"',
+    'class="card v169-advanced-card" style="margin-bottom:0;"'
+  );
+
+  return h;
+}
+
+function v172MediaServicesSectionHtml(){
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  const mode=S.settings.mediaServicesImportInterface;
+  const advanced=mode==='advanced';
+
+  return `<div class="section-label settings-section-head">
+      <span>IMPORT / EXPORT — MEDIA SERVICES</span>
+      ${defaultButton('mal')}
+    </div>
+
+    <div class="v172-import-interface-shell ${advanced?'is-advanced':'is-normal'}">
+      <div class="v172-import-mode-bar">
+        <div class="v172-import-mode-copy">
+          <b>Import interface</b>
+          <small>Use one interface at a time. You can switch whenever you need the extra routing controls.</small>
+        </div>
+
+        <div class="v172-import-switch" role="tablist" aria-label="Media services import interface">
+          <button type="button"
+            class="${advanced?'':'active'}"
+            role="tab"
+            aria-selected="${advanced?'false':'true'}"
+            onclick="App.v172SetImportInterface('normal')">
+            Normal
+          </button>
+
+          <button type="button"
+            class="advanced-choice ${advanced?'active':''}"
+            role="tab"
+            aria-selected="${advanced?'true':'false'}"
+            onclick="App.v172SetImportInterface('advanced')">
+            Advanced
+            <span class="v172-recommended-badge">RECOMMENDED</span>
+          </button>
+        </div>
+      </div>
+
+      ${advanced
+        ?v172AdvancedMediaServicesBodyHtml()
+        :v172NormalMediaServicesBodyHtml()}
+    </div>`;
+}
+
+// Final Settings wrapper: collapse the legacy normal and separately-inserted
+// advanced sections into one switchable section while preserving every section
+// that may sit between them (for example Cover Maintenance).
+const v172RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v172RenderSettingsBase();
+  const placeholder='<!--MF_V172_MEDIA_SERVICES_INTERFACE-->';
+
+  // Remove the old standard media-services section only.
+  const normalPattern=/<div class="section-label settings-section-head"><span>IMPORT \/ EXPORT — MEDIA SERVICES<\/span>[\s\S]*?<small class="hint">AniList[\s\S]*?external cover URLs whenever the source includes them\.<\/small>\s*<\/div>/;
+
+  if(normalPattern.test(h)){
+    h=h.replace(normalPattern,placeholder);
+  }else{
+    // Backward-safe fallback for a build whose v158 descriptive suffix is absent.
+    h=h.replace(
+      /<div class="section-label settings-section-head"><span>IMPORT \/ EXPORT — MEDIA SERVICES<\/span>[\s\S]*?<small class="hint">AniList[\s\S]*?inventing missing data\.<\/small>\s*<\/div>/,
+      placeholder
+    );
+  }
+
+  // Remove the separately-rendered v169/v170 Advanced section.
+  h=h.replace(
+    /<div class="section-label settings-section-head"><span>ADVANCED IMPORT \/ EXPORT — MEDIA SERVICES<\/span><\/div>\s*<div class="card v169-advanced-card"[\s\S]*?parsed file is reused instead of being scanned again during import\.\s*<\/small>\s*<\/div>/,
+    ''
+  );
+
+  // Insert one combined switchable interface at the original standard section.
+  if(h.includes(placeholder)){
+    h=h.replace(placeholder,v172MediaServicesSectionHtml());
+  }
+
+  return h;
+};
+
+Object.assign(App,{
+  v172SetImportInterface
+});
+
+// ---- Persistence / cloud / Sync Now / backups ------------------------------
+
+const v172PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  return v172PersistSettingsBase.apply(this,arguments);
+};
+
+const v172LoadAllBase=loadAll;
+loadAll=async function(){
+  await v172LoadAllBase.apply(this,arguments);
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+};
+
+const v172SnapshotBase=snapshot;
+snapshot=function(){
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  const x=v172SnapshotBase();
+
+  x.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  x.cloudSyncVersion=Math.max(
+    Number(x.cloudSyncVersion)||0,
+    172
+  );
+
+  return x;
+};
+
+const v172ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v172ApplyStateBase.apply(this,arguments);
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  return result;
+};
+
+const v172MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v172MergeStatesBase(a,b)||{};
+  out.settings=out.settings||{};
+
+  out.settings.mediaServicesImportInterface=
+    v172NormalizeImportInterface(
+      out.settings.mediaServicesImportInterface ??
+      a?.settings?.mediaServicesImportInterface ??
+      b?.settings?.mediaServicesImportInterface
+    );
+
+  out.cloudSyncVersion=Math.max(
+    Number(a?.cloudSyncVersion)||0,
+    Number(b?.cloudSyncVersion)||0,
+    Number(out.cloudSyncVersion)||0,
+    172
+  );
+
+  return out;
+};
+
+const v172VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v172VerifyCloudStateBase(cloudState,expected);
+  const problems=[...(base?.missing||[])];
+
+  const cloudMode=v172NormalizeImportInterface(
+    cloudState?.settings?.mediaServicesImportInterface
+  );
+  const wantedMode=v172NormalizeImportInterface(
+    expected?.settings?.mediaServicesImportInterface
+  );
+
+  if(cloudMode!==wantedMode){
+    problems.push('Media Services import interface preference');
+  }
+
+  return {
+    ok:problems.length===0,
+    missing:[...new Set(problems)]
+  };
+};
+
+const v172BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v172EnsureImportInterfaceSettings(S.settings||DEFAULT_SETTINGS);
+  const payload=v172BuildFullBackupBase();
+
+  payload.backupSchemaVersion=V172_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+
+  payload.backupManifest=v148BackupManifest(
+    payload,
+    payload.portableExtras||{}
+  );
+  payload.backupManifest.schemaVersion=V172_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v172 backup. Includes the unified Normal/Advanced media-services import interface preference, category recovery/default identity, advanced routing/exclusions, automatic Seasonal/Jikan state, System Respect XP, themes/navigation, Library/History, Personal Order, Old System, Rating Queue and portable preferences. Authentication credentials and filesystem permission handles remain intentionally non-portable.';
+
+  return payload;
+};
+
+const v172BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v172BackupManifestBase(state,extras);
+
+  manifest.schemaVersion=V172_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{},{
+    unifiedMediaServicesImportInterface:true,
+    mediaServicesImportInterfacePreference:true,
+    advancedImportRecommended:true
+  });
+
+  return manifest;
+};
+
+// v152 Automatic Backup calls the final v148BuildFullBackup() dynamically, so
+// the v172 interface preference is included automatically. Full JSON import
+// restores Settings through the final v46ApplyState() chain above.
 
 
 
