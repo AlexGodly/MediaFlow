@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="189">
+<meta name="mediaflow-version" content="191">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1155,6 +1155,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v183: Readability pass + shared Library Overview visibility toggle + complete v183 backup/cloud audit -->
 <!-- MediaFlow v185: Title Details readability pass -->
 <!-- MediaFlow v188: Library title-size control + advanced Library Overview configuration -->
+<!-- MediaFlow v191: Clean Covers + restorable deleted-title Library History -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -6036,6 +6037,82 @@ html[data-theme="fullstyle-myanimelist"] #view-root .v176-library-synopsis{
   .v189-sort-control{width:100%}.v189-sort-control select{min-width:0;flex:1}
   .v189-unfinished-filter{width:100%;justify-content:space-between}
   .v189-dynamic-batchbar{align-items:stretch}.v189-batch-left{width:100%}
+}
+</style>
+
+<style id="mf-v191-clean-covers-restore-css">
+/* ============================================================
+   MediaFlow v191 — Clean Covers + deleted-title restore
+   ============================================================ */
+.v191-clean-covers-control{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:40px;
+  padding:6px 10px;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:var(--panel-raised);
+  color:var(--text-dim);
+  font-size:11.5px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.v191-clean-covers-control b{
+  min-width:26px;
+  color:var(--text);
+  font-size:10.5px;
+  text-align:center;
+}
+
+/* Clean Covers only strips selection UI from cover-based layouts. */
+.v191-clean-covers .library-view-covers .item-row>.mf-select,
+.v191-clean-covers .library-view-covers-title .item-row>.mf-select,
+.v191-clean-covers .v181-dynamic-covers .v189-cover-select,
+.v191-clean-covers .v181-dynamic-covers-title .v189-cover-select,
+.v191-clean-covers .v189-selectable-cover>.v189-cover-select{
+  display:none!important;
+}
+
+.v191-restore-block{
+  display:grid;
+  gap:7px;
+  margin-top:9px;
+  padding:9px 10px;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:var(--panel-raised);
+}
+.v191-restore-row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.v191-restore-title{
+  min-width:0;
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--text-dim);
+  font-size:11.5px;
+  font-weight:750;
+}
+.v191-restore-row .btn{
+  flex:0 0 auto;
+}
+.v191-restore-all{
+  justify-self:start;
+  margin-top:2px;
+}
+
+@media(max-width:760px){
+  .v191-clean-covers-control{width:100%;justify-content:space-between}
+  .v191-restore-row{align-items:flex-start;flex-direction:column}
+  .v191-restore-title{white-space:normal}
+  .v191-restore-row .btn{width:100%}
+  .v191-restore-all{width:100%}
 }
 </style>
 
@@ -39376,6 +39453,441 @@ v148BackupManifest=function(state,extras){
     cloudSyncVersion:V189_CLOUD_SYNC_VERSION,
     backupSchemaVersion:V189_BACKUP_SCHEMA_VERSION,
     titlesWithLastSeenTimestamp:seen
+  };
+  return manifest;
+};
+
+
+/* ============================================================
+   MediaFlow v190 — Shared Normal / Dynamic Library batch toolbar
+   v189 added the full toolbar to Dynamic Library. v190 exposes the
+   same workflow in Normal Library without changing selection data.
+   ============================================================ */
+function v190NormalLibraryBatchBarHtml(){
+  const n=mfSelectedIds().length;
+  return `<div class="mf-batchbar v189-dynamic-batchbar v190-normal-batchbar">
+    <div class="v189-batch-left">
+      <button type="button" class="btn btn-sm" onclick="App.selectVisibleLibrary(true)">Select visible</button>
+      <button type="button" class="btn btn-sm" onclick="App.selectAllLibrary()">Select all matching</button>
+      <button type="button" class="btn btn-sm" onclick="App.deselectAllLibrary()">Deselect all</button>
+      <button type="button" class="btn btn-sm" ${n?'':'disabled'} onclick="App.v69RepairSelectedCompleted()">Fix completed progress</button>
+    </div>
+    <b>${n.toLocaleString()} selected</b><span class="spacer"></span>
+    <select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select>
+    <select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+    <select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${(S.categories||[]).map(c=>`<option value="${escapeHtml(String(c.id))}">${v144CategoryIconText(c)} ${escapeHtml(c.name)}</option>`).join('')}</select>
+    <button type="button" class="btn btn-sm btn-danger" ${n?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button>
+  </div>`;
+}
+
+const v190RenderLibraryBase=renderLibrary;
+renderLibrary=function(){
+  let h=v190RenderLibraryBase.apply(this,arguments);
+  const cfg=v181EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
+
+  if(cfg.mode==='classic'&&!h.includes('v190-normal-batchbar')){
+    const overviewToggle=v183LibraryOverviewToggleHtml();
+    const batch=v190NormalLibraryBatchBarHtml();
+
+    // Place the toolbar immediately before the shared Library Overview control,
+    // matching Dynamic Library's prominent management position.
+    if(h.includes(overviewToggle)){
+      h=h.replace(overviewToggle,batch+overviewToggle);
+    }else if(h.includes('<div class="lib-toolbar">')){
+      h=h.replace('<div class="lib-toolbar">',batch+'<div class="lib-toolbar">');
+    }else{
+      h=batch+h;
+    }
+  }
+
+  return h;
+};
+
+/* v190 is a rendering/workflow parity release. It adds no new persistent
+   fields, so v189 cloud state + Full Backup schema v23 remain canonical. */
+const v190BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  const payload=v190BuildFullBackupBase.apply(this,arguments);
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
+  payload.backupManifest.schemaVersion=V189_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v190 backup. Adds Normal/Dynamic Library batch-toolbar parity while preserving the v189 persistent Library last-seen data, v188 Overview/title-size settings, v186 Control Center and all prior Library, History, Logging, Respect XP, Statistics, theme and protected cloud data. v190 adds no new persistent fields; Full Backup schema remains v23 and Cloud Sync remains v189-compatible.';
+  return payload;
+};
+const v190BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v190BackupManifestBase.apply(this,arguments);
+  manifest.includes=Object.assign({},manifest.includes||{}, {
+    normalLibraryBulkActions:true,
+    dynamicLibraryBulkActions:true,
+    sharedNormalDynamicBatchToolbar:true
+  });
+  manifest.v190={
+    sharedLibraryBatchToolbar:true,
+    persistentSchemaChanged:false,
+    cloudSyncVersion:V189_CLOUD_SYNC_VERSION,
+    backupSchemaVersion:V189_BACKUP_SCHEMA_VERSION
+  };
+  return manifest;
+};
+
+/* ============================================================
+   MediaFlow v191 — Clean Covers + Restorable Deleted Titles
+   - Clean Covers hides cover-view selection squares in Normal/Dynamic Library
+   - Deleted Library titles store restorable snapshots in Library History
+   - Restore title / Restore all actions are persisted through cloud + backups
+   ============================================================ */
+const V191_CLOUD_SYNC_VERSION=191;
+const V191_BACKUP_SCHEMA_VERSION=24;
+
+function v191NormalizeLibrarySettings(raw){
+  const src=(raw&&typeof raw==='object')?raw:{};
+  return {
+    cleanCovers:!!src.cleanCovers,
+    modifiedAt:Math.max(0,Number(src.modifiedAt)||0)
+  };
+}
+function v191EnsureLibrarySettings(settings=S.settings){
+  settings=settings&&typeof settings==='object'?settings:{};
+  settings.v191Library=v191NormalizeLibrarySettings(settings.v191Library);
+  return settings.v191Library;
+}
+function v191CleanCoversEnabled(){
+  return !!v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS).cleanCovers;
+}
+function v191IsCoverView(){
+  const mode=String(S.settings?.libraryView||'list');
+  return mode==='covers'||mode==='covers-title';
+}
+function v191CoverSelectionLocked(){
+  return v191CleanCoversEnabled()&&v191IsCoverView();
+}
+function v191CleanCoversControlHtml(){
+  const on=v191CleanCoversEnabled();
+  return `<label class="v191-clean-covers-control" title="Hide title-selection squares in Covers and Covers + titles. Turn this off when you want to select covers.">
+    <span>Clean Covers</span>
+    <button type="button" class="toggle ${on?'on':''}" onclick="event.preventDefault();App.v191ToggleCleanCovers()" aria-label="Toggle Clean Covers"></button>
+    <b>${on?'ON':'OFF'}</b>
+  </label>`;
+}
+function v191ToggleCleanCovers(){
+  const cfg=v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
+  cfg.cleanCovers=!cfg.cleanCovers;
+  cfg.modifiedAt=Date.now();
+  if(cfg.cleanCovers&&v191IsCoverView())S.librarySelection={};
+  persistSettings();
+  render();
+  showToast(cfg.cleanCovers?'Clean Covers enabled · selection squares hidden':'Clean Covers disabled · cover selection restored');
+}
+function v191GuardCoverSelection(){
+  if(!v191CoverSelectionLocked())return false;
+  showToast('Turn off Clean Covers to select titles in cover view.');
+  return true;
+}
+
+Object.assign(App,{v191ToggleCleanCovers});
+
+/* Selection APIs are guarded only while a cover-based view is active. List,
+   Compact and Cards retain their normal selection workflow. */
+for(const name of ['toggleLibrarySelect','selectVisibleLibrary','selectAllLibrary','v189SelectDynamicVisible','v189SelectDynamicAllMatching']){
+  const base=App[name];
+  if(typeof base!=='function')continue;
+  App[name]=function(...args){
+    if(v191GuardCoverSelection())return;
+    return base.apply(this,args);
+  };
+}
+
+/* Switching into a cover view while Clean Covers is enabled clears any old
+   hidden selection so batch actions can never operate on invisible checks. */
+const v191SetLibraryViewBase=App.setLibraryView;
+if(typeof v191SetLibraryViewBase==='function'){
+  App.setLibraryView=function(mode){
+    if(v191CleanCoversEnabled()&&(mode==='covers'||mode==='covers-title'))S.librarySelection={};
+    return v191SetLibraryViewBase.apply(this,arguments);
+  };
+}
+
+/* Add the shared Clean Covers control to both Normal and Dynamic Library. */
+const v191RenderLibraryBase=renderLibrary;
+renderLibrary=function(){
+  let h=v191RenderLibraryBase.apply(this,arguments);
+  const control=v191CleanCoversControlHtml();
+  if(!h.includes('v191-clean-covers-control')){
+    const titleControl=v188TitleTextControlHtml();
+    if(h.includes(titleControl))h=h.replace(titleControl,titleControl+control);
+    else{
+      const coverControl=v181InlineCoverControl('library','Cover size');
+      if(h.includes(coverControl))h=h.replace(coverControl,coverControl+control);
+      else if(h.includes('<div class="lib-toolbar">'))h=h.replace('<div class="lib-toolbar">',control+'<div class="lib-toolbar">');
+      else h=control+h;
+    }
+  }
+  return `<div class="v191-clean-covers-scope ${v191CleanCoversEnabled()?'v191-clean-covers':''}">${h}</div>`;
+};
+
+/* ---------- Persistent deleted-title snapshots ---------- */
+function v191Clone(value){
+  try{return JSON.parse(JSON.stringify(value));}catch(_){return null;}
+}
+function v191DeletedItemsFromTransaction(){
+  const tx=(S.undoStack||[])[(S.undoStack||[]).length-1];
+  if(!tx?.before?.library||!tx?.after?.library)return [];
+  const afterIds=new Set((tx.after.library||[]).map(i=>String(i?.id||'')));
+  const out=[];
+  for(const item of (tx.before.library||[])){
+    const id=String(item?.id||'');
+    if(!id||afterIds.has(id))continue;
+    const copy=v191Clone(item);
+    if(copy)out.push(copy);
+  }
+  return out;
+}
+
+/* Extend the existing rich activity logger rather than replacing its change,
+   XP and exact-ID metadata. Future deletion entries receive complete snapshots. */
+const v191ActivityBase=mfActivity;
+mfActivity=function(action,detail){
+  const deletedItems=v191DeletedItemsFromTransaction();
+  v191ActivityBase.apply(this,arguments);
+  if(deletedItems.length&&Array.isArray(S.activityLog)&&S.activityLog[0]){
+    S.activityLog[0].deletedItems=deletedItems;
+    S.activityLog[0].restoreVersion=191;
+  }
+};
+
+function v191ActivityById(activityId){
+  return (S.activityLog||[]).find(x=>String(x?.id||'')===String(activityId||''))||null;
+}
+function v191RestorableDeletedItem(activityId,itemId){
+  const entry=v191ActivityById(activityId);
+  if(!entry)return null;
+  return (Array.isArray(entry.deletedItems)?entry.deletedItems:[]).find(i=>String(i?.id||'')===String(itemId||''))||null;
+}
+function v191LatestDeletionActivityByTitle(){
+  const latest=new Map();
+  for(const entry of (S.activityLog||[])){
+    for(const item of (Array.isArray(entry?.deletedItems)?entry.deletedItems:[])){
+      const id=String(item?.id||'');
+      if(id&&!latest.has(id))latest.set(id,String(entry.id||''));
+    }
+  }
+  return latest;
+}
+function v191RestoreCategoryFallback(item){
+  const categories=S.categories||[];
+  if(categories.some(c=>String(c?.id||'')===String(item?.categoryId||'')))return {item,changed:false};
+  const fallback=categories.find(c=>c?.enabled!==false)||categories[0];
+  if(!fallback)return {item,changed:false};
+  item.categoryId=fallback.id;
+  return {item,changed:true,categoryName:fallback.name||'available category'};
+}
+function v191RestoreOneSnapshot(snapshot){
+  const copy=v191Clone(snapshot);
+  if(!copy?.id)return {ok:false};
+  if((S.library||[]).some(i=>String(i?.id||'')===String(copy.id)))return {ok:false,exists:true,item:copy};
+  const fixed=v191RestoreCategoryFallback(copy);
+  S.library.push(fixed.item);
+  if(fixed.item.status==='completed'){
+    S.completionTimeline=S.completionTimeline||[];
+    if(!S.completionTimeline.some(x=>String(x?.libraryId||'')===String(fixed.item.id))){
+      S.completionTimeline.push({
+        libraryId:fixed.item.id,
+        title:cleanTitle(fixed.item.title),
+        categoryId:fixed.item.categoryId,
+        completedAt:fixed.item.completedAt||Date.now()
+      });
+    }
+  }
+  return {ok:true,item:fixed.item,categoryChanged:fixed.changed,categoryName:fixed.categoryName};
+}
+async function v191RestoreDeletedTitle(activityId,itemId){
+  const snapshot=v191RestorableDeletedItem(activityId,itemId);
+  if(!snapshot){showToast('This deleted-title snapshot is not available.');return;}
+  if((S.library||[]).some(i=>String(i?.id||'')===String(itemId||''))){showToast('That title is already restored.');render();return;}
+
+  const title=cleanTitle(snapshot.title)||'Deleted title';
+  mfBegin('Restore title',title);
+  const result=v191RestoreOneSnapshot(snapshot);
+  if(!result.ok){showToast(result.exists?'That title is already restored.':'Could not restore that title.');return;}
+  normalizeSeasonalLibraryItems();
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  mfCommit('Restore title',title);
+  try{await persistLibrary();}catch(_){ }
+  try{await saveState();}catch(_){ }
+  render();
+  showToast(result.categoryChanged?`Restored ${title} · original category was missing, moved to ${result.categoryName}`:`Restored ${title} ✓`);
+}
+async function v191RestoreDeletedGroup(activityId){
+  const entry=v191ActivityById(activityId);
+  const latest=v191LatestDeletionActivityByTitle();
+  const snapshots=(Array.isArray(entry?.deletedItems)?entry.deletedItems:[]).filter(item=>{
+    const id=String(item?.id||'');
+    return id&&latest.get(id)===String(activityId||'')&&!(S.library||[]).some(x=>String(x?.id||'')===id);
+  });
+  if(!snapshots.length){showToast('All titles from this deletion are already restored.');render();return;}
+
+  mfBegin('Restore deleted titles',`${snapshots.length} titles`);
+  let restored=0,categoryFallbacks=0;
+  for(const snapshot of snapshots){
+    const r=v191RestoreOneSnapshot(snapshot);
+    if(r.ok){restored++;if(r.categoryChanged)categoryFallbacks++;}
+  }
+  if(!restored){showToast('No titles could be restored.');return;}
+  normalizeSeasonalLibraryItems();
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  mfCommit('Restore deleted titles',`${restored} titles`);
+  try{await persistLibrary();}catch(_){ }
+  try{await saveState();}catch(_){ }
+  render();
+  showToast(`${restored.toLocaleString()} ${restored===1?'title':'titles'} restored${categoryFallbacks?` · ${categoryFallbacks} moved to available categories`:''} ✓`);
+}
+Object.assign(App,{v191RestoreDeletedTitle,v191RestoreDeletedGroup});
+
+/* Library History now renders restoration controls for v191+ deletion entries.
+   Only the newest deletion snapshot for a given Library ID is actionable, which
+   avoids restoring stale older versions after a restore/re-delete cycle. */
+function v191ActivityHtml(){
+  const lookup=v50LibraryLookup();
+  const latestDelete=v191LatestDeletionActivityByTitle();
+  const rows=(S.activityLog||[]).slice(0,1000).map(x=>{
+    const ids=v43FindLogTitles(x,lookup);
+    const change=(x.changes||[]).map(c=>`<div>• <b>${escapeHtml(c.title)}</b> ${escapeHtml(c.kind)}${c.fields?.length?`<div>${c.fields.map(escapeHtml).join('<br>')}</div>`:''}</div>`).join('');
+    const earned=Math.max(0,Number(x.xpEarned)||0);
+    const xp=earned?`<div class="mf-activity-xp" title="XP earned by this Library action"><strong>+${earned.toLocaleString()} XP</strong> earned</div>`:'';
+
+    const deleted=(Array.isArray(x.deletedItems)?x.deletedItems:[]).filter(i=>i?.id);
+    const restoreRows=deleted.map(item=>{
+      const id=String(item.id);
+      const latest=latestDelete.get(id)===String(x.id||'');
+      const exists=(S.library||[]).some(z=>String(z?.id||'')===id);
+      const actionable=latest&&!exists;
+      return `<div class="v191-restore-row">
+        <span class="v191-restore-title">${escapeHtml(cleanTitle(item.title)||'Deleted title')}</span>
+        <button type="button" class="btn btn-sm ${actionable?'':'btn-ghost'}" ${actionable?'':'disabled'}
+          onclick="App.v191RestoreDeletedTitle('${escapeHtml(String(x.id||''))}','${escapeHtml(id)}')">
+          ${exists?'Restored':actionable?'Restore title':'Older deletion'}
+        </button>
+      </div>`;
+    }).join('');
+    const restorableCount=deleted.filter(item=>{
+      const id=String(item?.id||'');
+      return id&&latestDelete.get(id)===String(x.id||'')&&!(S.library||[]).some(z=>String(z?.id||'')===id);
+    }).length;
+    const restoreBlock=deleted.length?`<div class="v191-restore-block">
+      ${restoreRows}
+      ${deleted.length>1&&restorableCount>1?`<button type="button" class="btn btn-sm btn-primary v191-restore-all" onclick="App.v191RestoreDeletedGroup('${escapeHtml(String(x.id||''))}')">Restore all deleted titles (${restorableCount})</button>`:''}
+    </div>`:'';
+
+    return `<div class="mf-activity-row"><div class="mf-activity-time">${new Date(x.timestamp).toLocaleString()}</div><div><b>${escapeHtml(x.action)}</b>${x.detail?`<div class="v43-log-detail">${escapeHtml(x.detail)}</div>`:''}${xp}${change?`<div class="v43-log-detail">${change}</div>`:''}${restoreBlock}${ids.length?`<div class="v43-log-actions">${ids.slice(0,5).map(id=>{const i=S.library.find(z=>z.id===id);return i?`<button class="btn btn-sm btn-ghost" onclick="App.openLibraryModal('${id}')">Edit ${escapeHtml(cleanTitle(i.title))}</button>`:''}).join('')}</div>`:''}</div></div>`;
+  }).join('')||'<div class="empty-state">No library activity recorded yet.</div>';
+  return `<div class="card"><div class="section-label">LIBRARY CHANGE LOG</div><div class="mf-activity" style="max-height:none">${rows}</div></div>`;
+}
+mfActivityHtml=v191ActivityHtml;
+
+/* ---------- Persistence / cloud / backup ---------- */
+DEFAULT_SETTINGS.v191Library=v191NormalizeLibrarySettings(DEFAULT_SETTINGS.v191Library);
+v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
+
+const v191PersistSettingsBase=persistSettings;
+persistSettings=function(){v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);return v191PersistSettingsBase.apply(this,arguments);};
+const v191LoadAllBase=loadAll;
+loadAll=async function(){await v191LoadAllBase.apply(this,arguments);v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);};
+const v191ApplyStateBase=v46ApplyState;
+v46ApplyState=function(){const r=v191ApplyStateBase.apply(this,arguments);v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);return r;};
+
+const v191SnapshotBase=snapshot;
+snapshot=function(){
+  v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
+  const out=v191SnapshotBase.apply(this,arguments)||{};
+  out.cloudSyncVersion=Math.max(Number(out.cloudSyncVersion)||0,V191_CLOUD_SYNC_VERSION);
+  return out;
+};
+const v191MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v191MergeStatesBase.apply(this,arguments)||{};
+  out.settings=out.settings||{};
+  const left=v191NormalizeLibrarySettings(a?.settings?.v191Library);
+  const right=v191NormalizeLibrarySettings(b?.settings?.v191Library);
+  out.settings.v191Library=(right.modifiedAt>left.modifiedAt)?right:left;
+  out.cloudSyncVersion=Math.max(Number(a?.cloudSyncVersion)||0,Number(b?.cloudSyncVersion)||0,Number(out.cloudSyncVersion)||0,V191_CLOUD_SYNC_VERSION);
+  return out;
+};
+
+function v191HashString(text){
+  let h=2166136261>>>0;
+  const s=String(text||'');
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return h>>>0;
+}
+function v191StableValue(value){
+  if(Array.isArray(value))return value.map(v191StableValue);
+  if(value&&typeof value==='object'){
+    const out={};
+    for(const key of Object.keys(value).sort())out[key]=v191StableValue(value[key]);
+    return out;
+  }
+  return value;
+}
+function v191DeletedArchiveAudit(state){
+  const rows=[];
+  let count=0;
+  for(const entry of (state?.activityLog||[])){
+    const items=Array.isArray(entry?.deletedItems)?entry.deletedItems:[];
+    for(const item of items){
+      if(!item?.id)continue;
+      count++;
+      rows.push(`${entry?.id||''}:${item.id}:${JSON.stringify(v191StableValue(item))}`);
+    }
+  }
+  rows.sort();
+  return {count,hash:v191HashString(rows.join('|'))};
+}
+const v191VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v191VerifyCloudStateBase.apply(this,arguments);
+  const problems=[...(base?.missing||[])];
+  const cloudCfg=v191NormalizeLibrarySettings(cloudState?.settings?.v191Library);
+  const expectedCfg=v191NormalizeLibrarySettings(expected?.settings?.v191Library);
+  if(JSON.stringify(cloudCfg)!==JSON.stringify(expectedCfg))problems.push('Clean Covers setting');
+  const ca=v191DeletedArchiveAudit(cloudState),ea=v191DeletedArchiveAudit(expected);
+  if(ca.count!==ea.count||ca.hash!==ea.hash)problems.push('Restorable deleted-title Library History');
+  if(Number(cloudState?.cloudSyncVersion||0)<V191_CLOUD_SYNC_VERSION)problems.push('v191 cloud state version');
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+
+const v191BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v191EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
+  const payload=v191BuildFullBackupBase.apply(this,arguments);
+  payload.backupSchemaVersion=V191_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
+  payload.backupManifest.schemaVersion=V191_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v191 backup. Adds persistent Clean Covers preference for Normal/Dynamic cover views and complete restorable snapshots for Library title deletions, including Restore title / Restore all controls in Library History. Preserves v189 Last Seen data, v188 Library Overview/title-size settings, v186 Control Center and all prior Library, History, Logging, Respect XP, Statistics, theme and protected cloud data.';
+  return payload;
+};
+const v191BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v191BackupManifestBase.apply(this,arguments);
+  const cfg=v191NormalizeLibrarySettings(state?.settings?.v191Library);
+  const audit=v191DeletedArchiveAudit(state);
+  manifest.schemaVersion=V191_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{}, {
+    cleanCovers:true,
+    restorableDeletedTitles:true,
+    restoreDeletedTitleFromLibraryHistory:true,
+    restoreDeletedBatchFromLibraryHistory:true,
+    v191CloudSyncAudit:true
+  });
+  manifest.v191={
+    cloudSyncVersion:V191_CLOUD_SYNC_VERSION,
+    backupSchemaVersion:V191_BACKUP_SCHEMA_VERSION,
+    cleanCovers:cfg.cleanCovers,
+    restorableDeletedTitleSnapshots:audit.count,
+    deletedArchiveHash:audit.hash
   };
   return manifest;
 };
