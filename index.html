@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="195">
+<meta name="mediaflow-version" content="197">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1159,6 +1159,8 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v193: Dashboard section visibility + Missing Covers queue + Stopwatch visibility -->
 <!-- MediaFlow v194: Global adjustable category-icon sizing + Completion Timeline URL-icon support -->
 <!-- MediaFlow v195: Rate Your Library right-aligned actions + Edit title label -->
+<!-- MediaFlow v196: Settings Preset export/import — settings-only portable configuration -->
+<!-- MediaFlow v197: Category Clear controls + designed confirmation in Category/Dynamic settings -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -40479,6 +40481,337 @@ v148BackupManifest=function(state,extras){
 };
 
 
+/* ============================================================
+   MediaFlow v196 — Settings Presets
+   ------------------------------------------------------------
+   Canonical settings-only portability path.
+
+   IMPORTANT FOR FUTURE MEDIAFLOW RELEASES:
+   - New persistent settings stored anywhere inside S.settings are included
+     automatically because the entire settings object is cloned here.
+   - Category configuration/order is exported too because Categories are edited
+     from Settings but live outside S.settings.
+   - If a future Settings feature stores persistent configuration somewhere
+     outside S.settings/categories/categoryOrder, extend this canonical builder
+     at the same time as Full Backup, Automatic Backup, cloud/Sync Now and XP
+     persistence audits.
+   - Library, consumption History, Library History, XP ledgers, profile data,
+     current tasks, stopwatch state and other account content are intentionally
+     excluded from a Settings Preset.
+   ============================================================ */
+const V196_SETTINGS_PRESET_SCHEMA_VERSION=1;
+const V196_SETTINGS_PRESET_FORMAT='MediaFlow_Settings_Preset';
+
+function v196SettingsPresetTimestamp(date=new Date()){
+  const pad=n=>String(n).padStart(2,'0');
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+}
+
+function v196BuildSettingsPreset(){
+  const now=new Date();
+  return {
+    presetFormat:V196_SETTINGS_PRESET_FORMAT,
+    presetSchemaVersion:V196_SETTINGS_PRESET_SCHEMA_VERSION,
+    mediaFlowVersion:v161CurrentVersion(),
+    exportedAt:now.toISOString(),
+    settings:v148SafeClone(S.settings||DEFAULT_SETTINGS,{}),
+    categories:v148SafeClone(Array.isArray(S.categories)?S.categories:[],[]),
+    categoryOrder:v74SyncCategoryOrder().slice(),
+    presetManifest:{
+      settingsOnly:true,
+      canonicalSettingsObject:'S.settings',
+      includes:{
+        allSettingsFields:true,
+        categoryConfiguration:true,
+        categoryOrder:true,
+        themes:true,
+        schedulerSettings:true,
+        levelingConfiguration:true,
+        dashboardSectionSettings:true,
+        libraryPresentationSettings:true,
+        backupPreferences:true
+      },
+      excludes:{
+        library:true,
+        consumptionHistory:true,
+        libraryHistory:true,
+        xpLedgers:true,
+        profile:true,
+        stopwatchState:true,
+        currentTask:true,
+        activeSession:true,
+        personalOrder:true,
+        ratingQueue:true,
+        completionTimeline:true,
+        authentication:true,
+        cloudCredentials:true
+      },
+      note:'Settings Presets contain configuration only. They do not contain Library titles, History, XP/progression, profile data or authentication credentials.'
+    }
+  };
+}
+
+function v196ValidateSettingsPreset(data){
+  if(!data||typeof data!=='object'||Array.isArray(data))return {ok:false,message:'This file is not a MediaFlow Settings Preset.'};
+  if(String(data.presetFormat||'')!==V196_SETTINGS_PRESET_FORMAT)return {ok:false,message:'This JSON is not a MediaFlow Settings Preset.'};
+  if(!data.settings||typeof data.settings!=='object'||Array.isArray(data.settings))return {ok:false,message:'This Settings Preset does not contain a valid settings object.'};
+  const schema=Number(data.presetSchemaVersion)||0;
+  if(schema<1)return {ok:false,message:'This Settings Preset uses an unsupported schema.'};
+  return {ok:true};
+}
+
+function v196NormalizeImportedSettings(raw){
+  const incoming=v148SafeClone(raw,{});
+  const next=Object.assign({},DEFAULT_SETTINGS,incoming||{});
+  next.backup=Object.assign({},DEFAULT_SETTINGS.backup,incoming?.backup||{});
+  next.leveling=Object.assign({},DEFAULT_SETTINGS.leveling,incoming?.leveling||{});
+  next.leveling.unitXP=Object.assign({},DEFAULT_SETTINGS.leveling.unitXP,incoming?.leveling?.unitXP||{});
+  next.leveling.rotationMultiplier=Object.assign({},DEFAULT_SETTINGS.leveling.rotationMultiplier,incoming?.leveling?.rotationMultiplier||{});
+  return next;
+}
+
+function v196MergePresetCategories(presetCategories,presetOrder){
+  if(!Array.isArray(presetCategories)||!presetCategories.length)return;
+  const current=Array.isArray(S.categories)?S.categories:[];
+  const currentById=new Map(current.map(c=>[String(c?.id||''),c]));
+  const merged=[];
+  for(const raw of presetCategories){
+    if(!raw||typeof raw!=='object')continue;
+    const id=String(raw.id||'').trim();
+    if(!id)continue;
+    const existing=currentById.get(id)||{};
+    merged.push(Object.assign({},existing,v148SafeClone(raw,{}),{id}));
+    currentById.delete(id);
+  }
+  // Never delete an account's newer/extra categories just because an older
+  // settings preset did not know about them. Append them after preset entries.
+  for(const c of currentById.values())merged.push(c);
+  if(merged.length)S.categories=merged;
+  const order=Array.isArray(presetOrder)?presetOrder.map(String):[];
+  if(order.length)v74ApplyCategoryOrder(order);
+  else v74SyncCategoryOrder();
+}
+
+App.exportSettingsPreset=function(){
+  showDataProgress('Exporting Settings Preset','Collecting MediaFlow configuration only…',12);
+  setTimeout(()=>{
+    try{
+      const payload=v196BuildSettingsPreset();
+      updateDataProgress(58,'Packing Settings, category configuration and presentation preferences…');
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const stamp=v196SettingsPresetTimestamp(new Date(payload.exportedAt));
+      const filename=`MediaFlie_ Settings_${stamp}.json`;
+      updateDataProgress(88,'Creating Settings Preset download…');
+      triggerDownload(blob,filename);
+      finishDataProgress(true,'Settings Preset exported',`${filename} · configuration only — Library, History and XP data were not included.`);
+    }catch(e){
+      console.error(e);
+      finishDataProgress(false,'Settings Preset export failed','MediaFlow could not create the settings preset file.');
+    }
+  },30);
+};
+
+App.importSettingsPreset=async function(file){
+  if(!file)return;
+  showDataProgress('Importing Settings Preset','Reading settings-only preset…',8);
+  try{
+    const data=JSON.parse(await file.text());
+    const validation=v196ValidateSettingsPreset(data);
+    if(!validation.ok){
+      finishDataProgress(false,'Preset rejected',validation.message);
+      return;
+    }
+    updateDataProgress(30,'Applying MediaFlow settings…');
+    S.settings=v196NormalizeImportedSettings(data.settings);
+    v196MergePresetCategories(data.categories,data.categoryOrder||data.settings?.categoryOrder||[]);
+    S.settings.categoryOrder=v74SyncCategoryOrder().slice();
+
+    // Let the current release's normalizers keep every nested setting current.
+    try{v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);}catch(_){ }
+    try{v194EnsureCategoryIconSettings(S.settings||DEFAULT_SETTINGS);}catch(_){ }
+    try{applyTheme(S.settings?.theme||'dark');}catch(_){ }
+    try{v194ApplyCategoryIconScale();}catch(_){ }
+    try{localStorage.setItem('mf_theme',String(S.settings?.theme||'dark'));}catch(_){ }
+    try{restartBackupTimer();}catch(_){ }
+
+    updateDataProgress(72,'Saving imported settings to your MediaFlow account…');
+    await saveState();
+    await saveQueue;
+    render();
+    finishDataProgress(true,'Settings Preset imported','Settings and category configuration were applied. Library, History, XP and profile data were left untouched.');
+  }catch(e){
+    console.error(e);
+    finishDataProgress(false,'Settings Preset import failed','Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
+  }finally{
+    try{const input=document.getElementById('v196-settings-preset-file');if(input)input.value='';}catch(_){ }
+  }
+};
+
+function v196SettingsPresetCard(){
+  return `<div class="section-label">SETTINGS PRESET</div>
+    <div class="card v196-settings-preset-card" style="margin-bottom:22px">
+      <div class="v196-settings-preset-head">
+        <div>
+          <b>Settings-only preset</b>
+          <div class="hint">Export your MediaFlow configuration without exporting your Library, History, XP, profile or other account data. The preset includes the complete current Settings object plus category configuration and category order.</div>
+        </div>
+        <span class="pill">Preset schema ${V196_SETTINGS_PRESET_SCHEMA_VERSION}</span>
+      </div>
+      <div class="v196-settings-preset-actions">
+        <button class="btn btn-primary" type="button" onclick="App.exportSettingsPreset()">Export settings preset</button>
+        <button class="btn" type="button" onclick="document.getElementById('v196-settings-preset-file').click()">Import settings preset</button>
+        <input id="v196-settings-preset-file" type="file" accept="application/json,.json" style="display:none" onchange="App.importSettingsPreset(this.files[0])">
+      </div>
+      <div class="hint" style="margin-top:10px">Export filename: <b>MediaFlie_ Settings_&lt;timestamp&gt;.json</b>. Future persistent Settings fields stored in <code>S.settings</code> are automatically included by this canonical preset builder; settings stored elsewhere must be added here during the same release audit.</div>
+    </div>`;
+}
+
+const v196RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v196RenderSettingsBase.apply(this,arguments);
+  const marker='<div class="section-label">DATA</div>';
+  if(h.includes(marker))h=h.replace(marker,v196SettingsPresetCard()+marker);
+  else h+=v196SettingsPresetCard();
+  return h;
+};
+
+
+/* ============================================================
+   MediaFlow v197 — Category Clear Controls
+   ------------------------------------------------------------
+   Adds a Clear action beside Edit/Delete in:
+   - Settings → Categories
+   - Settings → Dynamic Library category row
+
+   Clear removes Library titles assigned to that category while keeping the
+   category itself and consumption History. The existing Library History
+   transaction/deleted-snapshot pipeline remains authoritative, so cleared
+   titles are recorded and can be restored through Library History.
+
+   No new persistent setting/data field is introduced in v197. Cloud Sync,
+   Full Backup and Settings Preset schemas therefore stay unchanged.
+   ============================================================ */
+
+function v197CategoryClearInfo(id){
+  const sid=String(id||'');
+  const cat=(S.categories||[]).find(c=>String(c?.id||'')===sid)||null;
+  const items=(S.library||[]).filter(i=>String(i?.categoryId||'')===sid);
+  return {cat,items,count:items.length};
+}
+
+function v197CategoryClearModalHtml(data){
+  const id=String(data?.id||'');
+  const info=v197CategoryClearInfo(id);
+  const cat=info.cat;
+  if(!cat)return `<div class="priority-modal v197-category-clear-modal"><div class="modal-title">Category unavailable</div><div class="hint">This category no longer exists.</div><div class="modal-actions"><button type="button" class="btn" onclick="App.closeModal()">Close</button></div></div>`;
+
+  const count=info.count;
+  const noun=count===1?'title':'titles';
+  const sample=info.items.slice(0,3).map(item=>`<div class="v197-clear-sample-row"><span>•</span><span>${escapeHtml(cleanTitle(item?.title)||'Untitled')}</span></div>`).join('');
+  const more=Math.max(0,count-3);
+
+  return `<div class="priority-modal v197-category-clear-modal">
+    <div class="v197-category-clear-head">
+      <div class="v197-category-clear-icon">${v144CategoryIconHtml(cat)}</div>
+      <div>
+        <div class="modal-title">Clear ${escapeHtml(cat.name)}?</div>
+        <div class="hint">Delete every Library title currently assigned to this category.</div>
+      </div>
+    </div>
+
+    <div class="v197-category-clear-count">
+      <strong>${count.toLocaleString()}</strong>
+      <span>${noun} will be removed from your Library</span>
+    </div>
+
+    ${sample?`<div class="v197-category-clear-samples">${sample}${more?`<div class="v197-clear-more">+ ${more.toLocaleString()} more</div>`:''}</div>`:''}
+
+    <div class="v197-category-clear-warning">
+      <b>The category itself will stay.</b>
+      <span>Consumption History and Statistics stay intact. MediaFlow records the removed titles in Library History, where supported deletion snapshots can be restored later.</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="App.closeModal()">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="App.v197ConfirmCategoryClear('${escapeHtml(id)}',this)">Clear ${count.toLocaleString()} ${noun}</button>
+    </div>
+  </div>`;
+}
+
+function v197OpenCategoryClear(id){
+  const info=v197CategoryClearInfo(id);
+  if(!info.cat){showToast('That category no longer exists.');return;}
+  if(!info.count){showToast(`${info.cat.name} is already empty`);return;}
+  S.modal={type:'categoryClear',data:{id:String(id)}};
+  render();
+}
+
+const v197ClearCategoryBase=App.clearCategoryLibrary;
+async function v197ConfirmCategoryClear(id,button){
+  if(button?.dataset?.working==='1')return;
+  if(button){button.dataset.working='1';button.disabled=true;}
+
+  const info=v197CategoryClearInfo(id);
+  if(!info.cat){S.modal=null;render();showToast('That category no longer exists.');return;}
+  if(!info.count){S.modal=null;render();showToast(`${info.cat.name} is already empty`);return;}
+
+  // Close the confirmation before invoking the existing clear transaction.
+  // That transaction already records Library History and v191 restore snapshots.
+  S.modal=null;
+  const modal=document.getElementById('modal-root');
+  if(modal)modal.remove();
+
+  if(typeof v197ClearCategoryBase==='function'){
+    v197ClearCategoryBase.call(App,String(id));
+  }else{
+    mfClearCategory(String(id));
+  }
+}
+
+// Existing Category Maintenance buttons now receive the same designed
+// confirmation instead of clearing immediately.
+App.clearCategoryLibrary=function(id){v197OpenCategoryClear(id);};
+Object.assign(App,{v197OpenCategoryClear,v197ConfirmCategoryClear});
+
+/* New modal type, without disturbing any of MediaFlow's existing modal chain. */
+const v197RenderModalBase=renderModal;
+renderModal=function(){
+  if(S.modal?.type!=='categoryClear')return v197RenderModalBase.apply(this,arguments);
+  let el=document.getElementById('modal-root');
+  if(el)el.remove();
+  const wrap=document.createElement('div');
+  wrap.id='modal-root';
+  wrap.innerHTML=`<div class="modal-overlay" onclick="if(event.target===this) App.closeModal()"><div class="modal">${v197CategoryClearModalHtml(S.modal.data)}</div></div>`;
+  document.body.appendChild(wrap);
+};
+
+/* Category Settings: place Clear directly between Edit and Delete. */
+const v197CategoryRowsHtmlBase=v171CategoryRowsHtml;
+v171CategoryRowsHtml=function(){
+  let h=v197CategoryRowsHtmlBase.apply(this,arguments);
+  h=h.replace(
+    /(<button class="btn btn-sm btn-ghost cat-edit-btn" onclick="App\.openCategoryModal\('([^']+)'\)">Edit<\/button>)\s*(<button class="btn btn-sm btn-danger cat-delete-btn" onclick="App\.deleteCategory\('\2'\)">Delete<\/button>)/g,
+    `$1<button type="button" class="btn btn-sm v197-clear-btn cat-clear-btn" onclick="App.v197OpenCategoryClear('$2')">Clear</button>$3`
+  );
+  return h;
+};
+
+/* Dynamic Library category rows: same Edit → Clear → Delete action cluster. */
+const v197DynamicLibrarySettingsHtmlBase=v181DynamicLibrarySettingsHtml;
+v181DynamicLibrarySettingsHtml=function(){
+  let h=v197DynamicLibrarySettingsHtmlBase.apply(this,arguments);
+  h=h.replace(
+    /(<button type="button" class="btn btn-sm btn-ghost" onclick="App\.openCategoryModal\('([^']+)'\)">Edit<\/button>)\s*(<button type="button" class="btn btn-sm btn-danger" onclick="App\.deleteCategory\('\2'\)">Delete<\/button>)/g,
+    `$1<button type="button" class="btn btn-sm v197-clear-btn" onclick="App.v197OpenCategoryClear('$2')">Clear</button>$3`
+  );
+  h=h.replace(
+    'show/hide the category, or edit/delete it directly.',
+    'show/hide the category, or edit/clear/delete it directly.'
+  );
+  return h;
+};
+
+
 })();
 
 
@@ -43081,6 +43414,68 @@ html:not([data-appearance])[data-native-scheme="light"] .btn:hover{
 @media(max-width:620px){
   .v194-category-icon-controls{grid-template-columns:1fr 82px}
   .v194-category-icon-controls .btn{grid-column:1/-1}
+}
+</style>
+
+
+<style id="mf-v197-category-clear-css">
+/* MediaFlow v197 — category Clear controls + confirmation. */
+.v197-clear-btn{
+  border-color:color-mix(in srgb,var(--flow) 38%,var(--border-soft))!important;
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--flow) 7%,var(--panel-raised))!important;
+}
+.v197-clear-btn:hover{
+  border-color:color-mix(in srgb,var(--flow) 70%,var(--border-soft))!important;
+  background:color-mix(in srgb,var(--flow) 13%,var(--panel-raised))!important;
+}
+.v197-category-clear-modal{max-width:560px}
+.v197-category-clear-head{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.v197-category-clear-icon{
+  width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;
+  border:1px solid color-mix(in srgb,var(--flow) 38%,var(--border-soft));
+  border-radius:14px;background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));
+  font-size:22px;overflow:hidden
+}
+.v197-category-clear-head .modal-title{margin:0 0 4px}
+.v197-category-clear-count{
+  display:flex;align-items:baseline;gap:10px;padding:14px 15px;margin:0 0 12px;
+  border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised)
+}
+.v197-category-clear-count strong{font-family:var(--font-display);font-size:28px;color:var(--text);line-height:1}
+.v197-category-clear-count span{color:var(--text-dim);font-size:12px;line-height:1.4}
+.v197-category-clear-samples{
+  padding:11px 13px;margin-bottom:12px;border:1px solid var(--border-soft);
+  border-radius:11px;background:color-mix(in srgb,var(--panel-raised) 72%,transparent)
+}
+.v197-clear-sample-row{display:flex;gap:8px;align-items:flex-start;color:var(--text-dim);font-size:11.5px;line-height:1.5}
+.v197-clear-sample-row span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v197-clear-more{margin-top:5px;color:var(--text-mute);font-size:10.5px;font-weight:750}
+.v197-category-clear-warning{
+  display:grid;gap:5px;padding:13px 14px;border:1px solid color-mix(in srgb,#ff5d75 48%,var(--border-soft));
+  border-radius:12px;background:color-mix(in srgb,#ff5d75 7%,var(--panel-raised));
+  color:var(--text-dim);font-size:11.5px;line-height:1.55
+}
+.v197-category-clear-warning b{color:var(--text);font-size:12px}
+
+/* v197 adds one extra action to Category Settings. */
+@media(min-width:901px){
+  .settings-categories-full .cat-manage-row{
+    grid-template-columns:44px minmax(260px,1fr) auto auto auto auto auto!important;
+  }
+  .settings-categories-full .cat-manage-row>.cat-clear-btn{grid-column:auto!important;grid-row:auto!important}
+}
+@media(min-width:601px) and (max-width:900px){
+  .cat-manage-row>.cat-clear-btn{grid-column:2;grid-row:2;justify-self:center}
+}
+@media(max-width:600px){
+  .cat-manage-row>.cat-clear-btn{grid-column:2;grid-row:3;justify-self:center}
+}
+@media(max-width:430px){
+  .v197-category-clear-head{align-items:flex-start}
+  .v197-category-clear-count{align-items:flex-start;flex-direction:column;gap:5px}
+  .v197-category-clear-modal .modal-actions{display:grid;grid-template-columns:1fr}
+  .v197-category-clear-modal .modal-actions .btn{width:100%}
 }
 </style>
 
