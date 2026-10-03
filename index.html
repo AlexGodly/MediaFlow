@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="197">
+<meta name="mediaflow-version" content="198">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1160,7 +1160,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v194: Global adjustable category-icon sizing + Completion Timeline URL-icon support -->
 <!-- MediaFlow v195: Rate Your Library right-aligned actions + Edit title label -->
 <!-- MediaFlow v196: Settings Preset export/import — settings-only portable configuration -->
-<!-- MediaFlow v197: Category Clear controls + designed confirmation in Category/Dynamic settings -->
+<!-- MediaFlow v198: Settings Preset UI cleanup + corrected export filename -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -40600,7 +40600,7 @@ App.exportSettingsPreset=function(){
       updateDataProgress(58,'Packing Settings, category configuration and presentation preferences…');
       const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
       const stamp=v196SettingsPresetTimestamp(new Date(payload.exportedAt));
-      const filename=`MediaFlie_ Settings_${stamp}.json`;
+      const filename=`MediaFlow_Settings_${stamp}.json`;
       updateDataProgress(88,'Creating Settings Preset download…');
       triggerDownload(blob,filename);
       finishDataProgress(true,'Settings Preset exported',`${filename} · configuration only — Library, History and XP data were not included.`);
@@ -40655,14 +40655,12 @@ function v196SettingsPresetCard(){
           <b>Settings-only preset</b>
           <div class="hint">Export your MediaFlow configuration without exporting your Library, History, XP, profile or other account data. The preset includes the complete current Settings object plus category configuration and category order.</div>
         </div>
-        <span class="pill">Preset schema ${V196_SETTINGS_PRESET_SCHEMA_VERSION}</span>
       </div>
       <div class="v196-settings-preset-actions">
         <button class="btn btn-primary" type="button" onclick="App.exportSettingsPreset()">Export settings preset</button>
         <button class="btn" type="button" onclick="document.getElementById('v196-settings-preset-file').click()">Import settings preset</button>
         <input id="v196-settings-preset-file" type="file" accept="application/json,.json" style="display:none" onchange="App.importSettingsPreset(this.files[0])">
       </div>
-      <div class="hint" style="margin-top:10px">Export filename: <b>MediaFlie_ Settings_&lt;timestamp&gt;.json</b>. Future persistent Settings fields stored in <code>S.settings</code> are automatically included by this canonical preset builder; settings stored elsewhere must be added here during the same release audit.</div>
     </div>`;
 }
 
@@ -40675,6 +40673,14 @@ renderSettings=function(){
   return h;
 };
 
+
+/* ============================================================
+   MediaFlow v198 — Settings Preset UI Cleanup
+   - Removed the visible preset-schema badge from Settings.
+   - Removed the internal/export-filename explanatory hint from Settings.
+   - Corrected Settings Preset exports to MediaFlow_Settings_<timestamp>.json.
+   - UI/export-name only: no persistent schema bump required.
+   ============================================================ */
 
 /* ============================================================
    MediaFlow v197 — Category Clear Controls
