@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="191">
+<meta name="mediaflow-version" content="192">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1156,6 +1156,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v185: Title Details readability pass -->
 <!-- MediaFlow v188: Library title-size control + advanced Library Overview configuration -->
 <!-- MediaFlow v191: Clean Covers + restorable deleted-title Library History -->
+<!-- MediaFlow v192: Dashboard section visibility + Missing Covers queue -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -6113,6 +6114,31 @@ html[data-theme="fullstyle-myanimelist"] #view-root .v176-library-synopsis{
   .v191-restore-title{white-space:normal}
   .v191-restore-row .btn{width:100%}
   .v191-restore-all{width:100%}
+}
+</style>
+
+<style id="mf-v192-dashboard-customization-css">
+/* MediaFlow v192 — Dashboard section controls + Missing Covers queue */
+.v192-dashboard-settings-card{margin-bottom:22px}
+.v192-dashboard-settings-head b{font-size:14px;line-height:1.35}
+.v192-dashboard-settings-head .hint{font-size:11.5px;line-height:1.5;margin-top:3px}
+.v192-dashboard-toggle-list{display:grid;gap:8px;margin-top:12px}
+.v192-dashboard-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 12px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised)}
+.v192-dashboard-toggle-row>div{min-width:0;flex:1}
+.v192-dashboard-toggle-row b{font-size:12.5px;line-height:1.35}
+.v192-dashboard-toggle-row .hint{font-size:10.8px;line-height:1.45;margin-top:3px}
+.v192-missing-covers{margin-top:12px;margin-bottom:22px;overflow:hidden}
+.v192-missing-sub{margin-top:3px;color:var(--text-mute);font-size:11px;line-height:1.45}
+.v192-cover-placeholder{cursor:pointer}
+.v192-cover-control{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.v192-cover-url-field{margin:0;min-width:260px;flex:1 1 340px}
+.v192-cover-url-field input{font-size:13.5px}
+.v192-cover-actions{flex:0 1 auto}
+@media(max-width:700px){
+  .v192-cover-control{align-items:stretch}
+  .v192-cover-url-field{min-width:0;flex-basis:100%}
+  .v192-cover-actions{width:100%}
+  .v192-cover-actions .btn{flex:1}
 }
 </style>
 
@@ -39888,6 +39914,325 @@ v148BackupManifest=function(state,extras){
     cleanCovers:cfg.cleanCovers,
     restorableDeletedTitleSnapshots:audit.count,
     deletedArchiveHash:audit.hash
+  };
+  return manifest;
+};
+
+/* ============================================================
+   MediaFlow v192
+   - Dashboard section visibility controls
+   - Show/hide Today's Balance
+   - Show/hide Rate Your Library
+   - New Missing Covers queue under Rating Queue
+   - Full Backup schema v25 + Cloud Sync audit v192
+   ============================================================ */
+
+const V192_BACKUP_SCHEMA_VERSION=25;
+const V192_CLOUD_SYNC_VERSION=192;
+const V192_DASHBOARD_DEFAULT={
+  showTodayBalance:true,
+  showRatingQueue:true,
+  showMissingCovers:true,
+  modifiedAt:0
+};
+
+function v192NormalizeDashboardSettings(raw){
+  const src=(raw&&typeof raw==='object')?raw:{};
+  return {
+    showTodayBalance:src.showTodayBalance!==false,
+    showRatingQueue:src.showRatingQueue!==false,
+    showMissingCovers:src.showMissingCovers!==false,
+    modifiedAt:Math.max(0,Number(src.modifiedAt)||0)
+  };
+}
+
+function v192EnsureDashboardSettings(settings=S.settings){
+  settings=settings&&typeof settings==='object'?settings:{};
+  settings.v192Dashboard=v192NormalizeDashboardSettings(settings.v192Dashboard);
+  return settings.v192Dashboard;
+}
+
+function v192ToggleDashboardSection(key){
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  if(!['showTodayBalance','showRatingQueue','showMissingCovers'].includes(key))return;
+  cfg[key]=!cfg[key];
+  cfg.modifiedAt=Date.now();
+  persistSettings();
+  render();
+  const labels={
+    showTodayBalance:"Today's Balance",
+    showRatingQueue:'Rate Your Library',
+    showMissingCovers:'Missing Covers'
+  };
+  showToast(`${labels[key]} ${cfg[key]?'shown':'hidden'} on Dashboard`);
+}
+
+Object.assign(App,{v192ToggleDashboardSection});
+
+/* ---------- Missing Covers queue ---------- */
+let V192_MISSING_COVER_QUEUE=[];
+let V192_MISSING_COVER_QUEUE_LOADED=false;
+
+function v192MissingCoverStorageKey(){
+  return `mf_missing_cover_queue_v192_${String(AUTH_USER?.id||'local')}`;
+}
+function v192LoadMissingCoverQueue(){
+  if(V192_MISSING_COVER_QUEUE_LOADED)return;
+  V192_MISSING_COVER_QUEUE_LOADED=true;
+  try{
+    const raw=localStorage.getItem(v192MissingCoverStorageKey());
+    const parsed=raw?JSON.parse(raw):[];
+    V192_MISSING_COVER_QUEUE=Array.isArray(parsed)?parsed.map(String).filter(Boolean):[];
+  }catch(_){V192_MISSING_COVER_QUEUE=[];}
+}
+function v192SaveMissingCoverQueue(){
+  try{localStorage.setItem(v192MissingCoverStorageKey(),JSON.stringify(V192_MISSING_COVER_QUEUE));}catch(_){}
+}
+function v192MissingCoverItems(){
+  return (S.library||[]).filter(item=>item?.id&&!String(item.coverUrl||'').trim());
+}
+function v192SyncMissingCoverQueue(){
+  v192LoadMissingCoverQueue();
+  const missing=v192MissingCoverItems();
+  const valid=new Set(missing.map(item=>String(item.id)));
+  V192_MISSING_COVER_QUEUE=V192_MISSING_COVER_QUEUE.map(String).filter(id=>valid.has(id));
+  const present=new Set(V192_MISSING_COVER_QUEUE);
+  for(const item of missing){
+    const id=String(item.id);
+    if(!present.has(id)){
+      V192_MISSING_COVER_QUEUE.push(id);
+      present.add(id);
+    }
+  }
+  v192SaveMissingCoverQueue();
+  return missing;
+}
+function v192CurrentMissingCoverItem(){
+  v192SyncMissingCoverQueue();
+  const id=V192_MISSING_COVER_QUEUE[0];
+  return id?(S.library||[]).find(item=>String(item?.id||'')===String(id)):null;
+}
+function v192MissingCoversHtml(){
+  const missing=v192SyncMissingCoverQueue();
+  if(!(S.library||[]).length){
+    return `<div class="card v123-rating-queue v192-missing-covers"><div class="section-label">MISSING COVERS</div><div class="v123-rating-done"><b>No Library titles yet</b><span>Add titles to your Library and titles without cover URLs will appear here.</span></div></div>`;
+  }
+  if(!missing.length){
+    return `<div class="card v123-rating-queue v192-missing-covers"><div class="section-label">MISSING COVERS</div><div class="v123-rating-done"><b>Every Library title has a cover ✓</b><span>If a cover URL is removed later, that title will automatically appear here.</span></div></div>`;
+  }
+  const item=v192CurrentMissingCoverItem();
+  if(!item)return '';
+  const cat=getCategory(item.categoryId);
+  const progress=item.total!=null
+    ? `${Number(item.progress)||0}/${Number(item.total)||0}`
+    : `${Number(item.progress)||0} ${unitLabel(cat?.unit||'units',Number(item.progress)||0)}`;
+  return `<div class="card v123-rating-queue v192-missing-covers">
+    <div class="v123-rating-head">
+      <div><div class="section-label">MISSING COVERS</div><div class="v192-missing-sub">Add cover URLs to titles that currently have no artwork.</div></div>
+      <div class="v123-rating-count">${missing.length.toLocaleString()} title${missing.length===1?'':'s'} without covers</div>
+    </div>
+    <div class="v123-rating-main">
+      <button type="button" class="v123-rating-placeholder v186-rating-placeholder-button v192-cover-placeholder" title="Open title details" onclick="event.preventDefault();event.stopPropagation();App.v181OpenTitleDetails('${escapeHtml(String(item.id))}')">${v144CategoryIconHtml(cat)}</button>
+      <div class="v123-rating-copy">
+        <div class="v123-rating-title">${escapeHtml(cleanTitle(item.title))}</div>
+        <div class="v123-rating-meta">${v144CategoryIconHtml(cat)} ${escapeHtml(cat?.name||'Library')} · ${escapeHtml(v123StatusLabel(item.status))} · ${escapeHtml(progress)}</div>
+        <div class="v192-cover-control">
+          <div class="field v192-cover-url-field"><label class="field-label">COVER URL</label><input id="v192-cover-url-input" type="url" placeholder="Paste cover image URL" onkeydown="if(event.key==='Enter'){event.preventDefault();App.v192SaveMissingCover()}"></div>
+          <div class="v123-rating-actions v192-cover-actions">
+            <button type="button" class="btn btn-ghost" onclick="App.openLibraryModal('${escapeHtml(String(item.id))}')">Edit title</button>
+            <button type="button" class="btn btn-ghost" onclick="App.v192SkipMissingCover()">Skip</button>
+            <button type="button" class="btn btn-primary" onclick="App.v192SaveMissingCover()">Save cover & Next</button>
+          </div>
+        </div>
+        <div class="v123-rating-xp">Paste a cover URL directly here, or use Edit title for MediaFlow's full cover search/editor. Skip moves this title behind the rest of the missing-cover queue.</div>
+      </div>
+    </div>
+  </div>`;
+}
+function v192SkipMissingCover(){
+  v192SyncMissingCoverQueue();
+  if(!V192_MISSING_COVER_QUEUE.length)return;
+  const first=V192_MISSING_COVER_QUEUE.shift();
+  V192_MISSING_COVER_QUEUE.push(first);
+  v192SaveMissingCoverQueue();
+  render();
+  showToast(V192_MISSING_COVER_QUEUE.length>1?'Skipped for now · this title will return after the rest of the queue':'Skipped · this is the only title without a cover');
+}
+function v192SaveMissingCover(){
+  const item=v192CurrentMissingCoverItem();
+  if(!item)return;
+  const input=document.getElementById('v192-cover-url-input');
+  const cover=String(input?.value||'').trim();
+  if(!cover){
+    showToast('Paste a cover URL first.');
+    try{input?.focus();}catch(_){}
+    return;
+  }
+  const oldCover=String(item.coverUrl||'').trim();
+  const beforeXP=mediaFlowXP();
+  mfBegin('Add cover',cleanTitle(item.title));
+  item.coverUrl=cover;
+  item.coverSource='manual';
+  item.modifiedAt=Date.now();
+  if(typeof V178_EDITABLE_RICH_FIELDS!=='undefined'&&V178_EDITABLE_RICH_FIELDS.includes('coverUrl')){
+    item.richMetadataManual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
+    item.richMetadataManual.coverUrl=true;
+  }
+  if(cover!==oldCover){
+    try{v44AwardEditXP(item.id);}catch(_){}
+    try{v44AwardManualCoverXP(item.id);}catch(_){}
+  }
+  mfCommit('Add cover',`${cleanTitle(item.title)} · manual cover URL`);
+  V192_MISSING_COVER_QUEUE=V192_MISSING_COVER_QUEUE.filter(id=>String(id)!==String(item.id));
+  v192SaveMissingCoverQueue();
+  try{v53InvalidateLibraryCache();}catch(_){}
+  persistLibrary();
+  const gained=Math.max(0,Math.round(mediaFlowXP()-beforeXP));
+  render();
+  showToast(`Cover saved${gained?` · +${gained.toLocaleString()} XP`:''} ✓`);
+}
+Object.assign(App,{v192SkipMissingCover,v192SaveMissingCover});
+
+/* Rate Your Library visibility uses the existing queue without altering it. */
+const v192RatingQueueHtmlBase=v123RatingQueueHtml;
+v123RatingQueueHtml=function(){
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  return cfg.showRatingQueue===false?'':v192RatingQueueHtmlBase.apply(this,arguments);
+};
+
+/* Existing stopwatchHtml already ends with Rate Your Library, so append the new
+   Missing Covers card here to keep it directly underneath the rating section. */
+const v192StopwatchHtmlBase=stopwatchHtml;
+stopwatchHtml=function(){
+  let h=v192StopwatchHtmlBase.apply(this,arguments);
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  if(cfg.showMissingCovers!==false)h+=v192MissingCoversHtml();
+  return h;
+};
+
+/* Today's Balance is rendered by the original Dashboard renderer. Remove only
+   that section when disabled, leaving the rest of Dashboard untouched. */
+const v192RenderDashboardBase=renderDashboard;
+renderDashboard=function(){
+  const html=v192RenderDashboardBase.apply(this,arguments);
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  if(cfg.showTodayBalance!==false)return html;
+  const host=document.createElement('div');
+  host.innerHTML=html;
+  const label=[...host.querySelectorAll('.section-label')].find(el=>String(el.textContent||'').trim().toUpperCase()==="TODAY'S BALANCE");
+  if(label){
+    const head=label.parentElement;
+    const next=head?.nextElementSibling;
+    if(next?.classList?.contains('card'))next.remove();
+    head?.remove();
+  }
+  return host.innerHTML;
+};
+
+/* ---------- Settings UI ---------- */
+function v192DashboardVisibilitySettingsHtml(){
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  const row=(key,title,desc)=>`<div class="v192-dashboard-toggle-row"><div><b>${escapeHtml(title)}</b><div class="hint">${escapeHtml(desc)}</div></div><button type="button" class="toggle ${cfg[key]!==false?'on':''}" onclick="App.v192ToggleDashboardSection('${key}')" aria-label="Toggle ${escapeHtml(title)}"></button></div>`;
+  return `<div class="card v192-dashboard-settings-card">
+    <div class="v192-dashboard-settings-head"><div><b>Dashboard sections</b><div class="hint">Choose which optional Dashboard sections MediaFlow shows. Hiding a section never deletes its Library, History or settings data.</div></div></div>
+    <div class="v192-dashboard-toggle-list">
+      ${row('showTodayBalance',"Today's Balance",'Show or hide the Today’s Balance category section.')}
+      ${row('showRatingQueue','Rate Your Library','Show or hide the unrated-title queue on Dashboard.')}
+      ${row('showMissingCovers','Missing Covers','Show or hide the queue for Library titles that do not have a cover URL.')}
+    </div>
+  </div>`;
+}
+const v192RenderSettingsBase=renderSettings;
+renderSettings=function(){
+  let h=v192RenderSettingsBase.apply(this,arguments);
+  const marker='<div class="section-label">DASHBOARD SETTINGS</div>';
+  if(h.includes(marker))h=h.replace(marker,marker+v192DashboardVisibilitySettingsHtml());
+  else h+=`<div class="section-label">DASHBOARD SETTINGS</div>${v192DashboardVisibilitySettingsHtml()}`;
+  return h;
+};
+
+/* ---------- Persistence / cloud / backup ---------- */
+DEFAULT_SETTINGS.v192Dashboard=v192NormalizeDashboardSettings(DEFAULT_SETTINGS.v192Dashboard);
+v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+
+const v192PersistSettingsBase=persistSettings;
+persistSettings=function(){
+  v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  return v192PersistSettingsBase.apply(this,arguments);
+};
+const v192LoadAllBase=loadAll;
+loadAll=async function(){
+  await v192LoadAllBase.apply(this,arguments);
+  v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  V192_MISSING_COVER_QUEUE_LOADED=false;
+  v192LoadMissingCoverQueue();
+};
+const v192SnapshotBase=snapshot;
+snapshot=function(){
+  v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  const out=v192SnapshotBase.apply(this,arguments)||{};
+  out.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  out.cloudSyncVersion=Math.max(Number(out.cloudSyncVersion)||0,V192_CLOUD_SYNC_VERSION);
+  return out;
+};
+const v192ApplyStateBase=v46ApplyState;
+v46ApplyState=function(d){
+  const result=v192ApplyStateBase.apply(this,arguments);
+  v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  return result;
+};
+const v192MergeStatesBase=mergeStates;
+mergeStates=function(a,b){
+  const out=v192MergeStatesBase.apply(this,arguments)||{};
+  out.settings=out.settings||{};
+  const av=v192NormalizeDashboardSettings(a?.settings?.v192Dashboard);
+  const bv=v192NormalizeDashboardSettings(b?.settings?.v192Dashboard);
+  out.settings.v192Dashboard=(Number(av.modifiedAt)||0)>=(Number(bv.modifiedAt)||0)?av:bv;
+  out.cloudSyncVersion=Math.max(Number(a?.cloudSyncVersion)||0,Number(b?.cloudSyncVersion)||0,Number(out.cloudSyncVersion)||0,V192_CLOUD_SYNC_VERSION);
+  return out;
+};
+const v192VerifyCloudStateBase=v155VerifyCloudState;
+v155VerifyCloudState=function(cloudState,expected){
+  const base=v192VerifyCloudStateBase.apply(this,arguments);
+  const problems=[...(base?.missing||[])];
+  const cloudCfg=v192NormalizeDashboardSettings(cloudState?.settings?.v192Dashboard);
+  const wantedCfg=v192NormalizeDashboardSettings(expected?.settings?.v192Dashboard);
+  if(JSON.stringify(cloudCfg)!==JSON.stringify(wantedCfg))problems.push('v192 Dashboard section visibility');
+  if(Number(cloudState?.cloudSyncVersion||0)<V192_CLOUD_SYNC_VERSION)problems.push('v192 cloud state version');
+  return {ok:problems.length===0,missing:[...new Set(problems)]};
+};
+const v192BuildFullBackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+  v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  const payload=v192BuildFullBackupBase.apply(this,arguments);
+  payload.backupSchemaVersion=V192_BACKUP_SCHEMA_VERSION;
+  payload.backupVersion=v161CurrentVersion();
+  payload.mediaFlowVersion=v161CurrentVersion();
+  payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
+  payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
+  payload.backupManifest.schemaVersion=V192_BACKUP_SCHEMA_VERSION;
+  payload.backupManifest.note='Complete MediaFlow v192 backup. Adds persistent Dashboard visibility settings for Today’s Balance, Rate Your Library and the new Missing Covers queue. Missing Covers lets users work through Library titles with no cover URL and save manual cover URLs directly from Dashboard. Preserves v191 Clean Covers/deletion recovery, v189 Last Seen, v188 Library Overview/title size, v186 Control Center and all prior Library, History, Logging, Respect XP, Statistics, theme and protected cloud data.';
+  return payload;
+};
+const v192BackupManifestBase=v148BackupManifest;
+v148BackupManifest=function(state,extras){
+  const manifest=v192BackupManifestBase.apply(this,arguments);
+  const cfg=v192NormalizeDashboardSettings(state?.settings?.v192Dashboard);
+  manifest.schemaVersion=V192_BACKUP_SCHEMA_VERSION;
+  manifest.includes=Object.assign({},manifest.includes||{}, {
+    dashboardTodayBalanceVisibility:true,
+    dashboardRatingQueueVisibility:true,
+    dashboardMissingCoversVisibility:true,
+    dashboardMissingCoversQueue:true,
+    v192CloudSyncAudit:true
+  });
+  manifest.v192={
+    cloudSyncVersion:V192_CLOUD_SYNC_VERSION,
+    backupSchemaVersion:V192_BACKUP_SCHEMA_VERSION,
+    showTodayBalance:cfg.showTodayBalance,
+    showRatingQueue:cfg.showRatingQueue,
+    showMissingCovers:cfg.showMissingCovers,
+    missingCoverTitles:(state?.library||[]).filter(i=>i?.id&&!String(i.coverUrl||'').trim()).length
   };
   return manifest;
 };
