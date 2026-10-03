@@ -1,0 +1,2162 @@
+/* MediaFlow v201 — Full-style platform themes and global appearance layer; intentionally loaded after runtime.
+   Order is intentionally preserved from the original single-file build. */
+
+/* ===== Original style block 61: mf-v100-full-style-css (line 41598) ===== */
+/* Full Style Themes intentionally transform layout as well as palette. */
+html[data-theme="fullstyle-netflix"]{
+  --bg:#141414;--panel:#181818;--panel-raised:#242424;--border:#3a3a3a;--border-soft:#2b2b2b;
+  --text:#fff;--text-dim:#d2d2d2;--text-mute:#8c8c8c;--flow:#e50914;--flow-dim:#8b070e;
+  --healthy:#46d369;--warning:#f5b642;--danger:#e87c03;
+}
+html[data-theme="fullstyle-netflix"] body{background:#141414!important;color:#fff;font-family:Arial,Helvetica,sans-serif!important;}
+html[data-theme="fullstyle-netflix"] .app-shell{background:#141414!important;}
+html[data-theme="fullstyle-netflix"] .sidebar{position:fixed!important;left:0!important;right:0!important;top:0!important;bottom:auto!important;width:100%!important;height:68px!important;min-height:0!important;padding:0 4vw!important;display:flex!important;align-items:center!important;gap:24px!important;background:linear-gradient(180deg,rgba(0,0,0,.92),rgba(0,0,0,.72))!important;border:0!important;z-index:100!important;box-shadow:none!important;}
+html[data-theme="fullstyle-netflix"] .sidebar-resizer{display:none!important;}
+html[data-theme="fullstyle-netflix"] .brand{display:flex!important;padding:0!important;flex:0 0 auto!important;gap:8px!important;align-items:center!important;}
+html[data-theme="fullstyle-netflix"] .brand-mark{width:8px!important;height:34px!important;border-radius:2px!important;background:#e50914!important;box-shadow:none!important;transform:skew(-8deg)!important;}
+html[data-theme="fullstyle-netflix"] .brand-name{font-family:Arial,Helvetica,sans-serif!important;font-size:24px!important;font-weight:900!important;letter-spacing:-1px!important;text-transform:uppercase!important;color:#e50914!important;}
+html[data-theme="fullstyle-netflix"] .brand-sub{display:none!important;}
+html[data-theme="fullstyle-netflix"] .nav{display:flex!important;align-items:center!important;gap:2px!important;flex:1!important;margin:0!important;overflow-x:auto!important;scrollbar-width:none!important;}
+html[data-theme="fullstyle-netflix"] .nav::-webkit-scrollbar{display:none!important;}
+html[data-theme="fullstyle-netflix"] .nav-item{width:auto!important;padding:8px 10px!important;margin:0!important;border:0!important;border-radius:3px!important;background:transparent!important;color:#e5e5e5!important;font-size:13px!important;font-weight:500!important;white-space:nowrap!important;}
+html[data-theme="fullstyle-netflix"] .nav-item:hover{color:#b3b3b3!important;background:transparent!important;}
+html[data-theme="fullstyle-netflix"] .nav-item.active{color:#fff!important;background:transparent!important;font-weight:800!important;box-shadow:inset 0 -2px #e50914!important;}
+html[data-theme="fullstyle-netflix"] .nav-item .nav-icon{opacity:.9!important;}
+html[data-theme="fullstyle-netflix"] .sidebar-bottom{position:static!important;margin:0 0 0 auto!important;padding:0!important;border:0!important;flex:0 0 auto!important;}
+html[data-theme="fullstyle-netflix"] .account-menu{margin:0!important;border:0!important;background:transparent!important;padding:4px!important;min-width:0!important;}
+html[data-theme="fullstyle-netflix"] .account-menu-email,html[data-theme="fullstyle-netflix"] .cloud-badge{display:none!important;}
+html[data-theme="fullstyle-netflix"] .main{margin-left:0!important;padding-top:68px!important;background:#141414!important;min-height:100vh!important;}
+html[data-theme="fullstyle-netflix"] .topbar{background:transparent!important;border:0!important;padding-left:4vw!important;padding-right:4vw!important;}
+html[data-theme="fullstyle-netflix"] .content{max-width:none!important;padding-left:4vw!important;padding-right:4vw!important;}
+html[data-theme="fullstyle-netflix"] .page-title,html[data-theme="fullstyle-netflix"] h1,html[data-theme="fullstyle-netflix"] h2{font-family:Arial,Helvetica,sans-serif!important;font-weight:800!important;letter-spacing:-.02em!important;}
+html[data-theme="fullstyle-netflix"] .section-label{color:#fff!important;font-size:17px!important;font-weight:800!important;letter-spacing:0!important;text-transform:none!important;margin-top:24px!important;}
+html[data-theme="fullstyle-netflix"] .card,html[data-theme="fullstyle-netflix"] .hero,html[data-theme="fullstyle-netflix"] .log-form,html[data-theme="fullstyle-netflix"] .new-entry-box{background:#1f1f1f!important;border-color:#303030!important;border-radius:6px!important;box-shadow:0 4px 18px rgba(0,0,0,.22)!important;}
+html[data-theme="fullstyle-netflix"] .card:hover{border-color:#484848!important;}
+html[data-theme="fullstyle-netflix"] .btn{border-radius:4px!important;font-weight:700!important;border-color:#4a4a4a!important;background:#333!important;color:#fff!important;}
+html[data-theme="fullstyle-netflix"] .btn:hover{background:#4a4a4a!important;}
+html[data-theme="fullstyle-netflix"] .btn-primary{background:#e50914!important;border-color:#e50914!important;color:#fff!important;box-shadow:none!important;}
+html[data-theme="fullstyle-netflix"] .btn-primary:hover{background:#f6121d!important;border-color:#f6121d!important;}
+html[data-theme="fullstyle-netflix"] input,html[data-theme="fullstyle-netflix"] select,html[data-theme="fullstyle-netflix"] textarea{background:#262626!important;color:#fff!important;border-color:#4a4a4a!important;border-radius:4px!important;}
+html[data-theme="fullstyle-netflix"] input:focus,html[data-theme="fullstyle-netflix"] select:focus,html[data-theme="fullstyle-netflix"] textarea:focus{border-color:#fff!important;box-shadow:0 0 0 1px #fff!important;}
+html[data-theme="fullstyle-netflix"] .library-view-cards .library-item,html[data-theme="fullstyle-netflix"] .library-view-cards .lib-item{background:#222!important;border:0!important;border-radius:5px!important;transition:transform .18s ease,box-shadow .18s ease!important;}
+html[data-theme="fullstyle-netflix"] .library-view-cards .library-item:hover,html[data-theme="fullstyle-netflix"] .library-view-cards .lib-item:hover{transform:scale(1.025)!important;box-shadow:0 10px 28px rgba(0,0,0,.55)!important;z-index:3!important;}
+html[data-theme="fullstyle-netflix"] .status-badge{border-radius:3px!important;}
+html[data-theme="fullstyle-netflix"] .modal-backdrop{background:rgba(0,0,0,.78)!important;backdrop-filter:blur(2px)!important;}
+html[data-theme="fullstyle-netflix"] .modal{background:#181818!important;border:1px solid #333!important;border-radius:8px!important;box-shadow:0 24px 80px #000!important;}
+html[data-theme="fullstyle-netflix"] .progress-fill,html[data-theme="fullstyle-netflix"] .xp-fill{background:#e50914!important;}
+html[data-theme="fullstyle-netflix"] ::selection{background:#e50914;color:#fff;}
+@media(max-width:860px){
+ html[data-theme="fullstyle-netflix"] .sidebar{display:none!important;}
+ html[data-theme="fullstyle-netflix"] .main{padding-top:0!important;}
+ html[data-theme="fullstyle-netflix"] .mobile-tabbar{background:rgba(10,10,10,.96)!important;border-top:1px solid #2b2b2b!important;backdrop-filter:blur(14px)!important;}
+ html[data-theme="fullstyle-netflix"] .mobile-tab.active{color:#e50914!important;}
+ html[data-theme="fullstyle-netflix"] .content,html[data-theme="fullstyle-netflix"] .topbar{padding-left:16px!important;padding-right:16px!important;}
+}
+
+/* ===== Original style block 62: mf-v102-netflix-layout-fix (line 41654) ===== */
+/* v102: target MediaFlow's real structural classes so the Netflix skin never collapses/overlaps Settings. */
+@media (min-width:861px){
+  html[data-theme="fullstyle-netflix"] #app{display:block!important;min-height:100vh!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar{box-sizing:border-box!important;overflow:visible!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar-foot{margin:0 0 0 auto!important;padding:0!important;border:0!important;display:flex!important;align-items:center!important;flex:0 0 auto!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.k,
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.v,
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.level-block{display:none!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .account-menu{display:flex!important;align-items:center!important;gap:8px!important;position:relative!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .account-profile-btn{flex:0 0 auto!important;}
+  html[data-theme="fullstyle-netflix"] .main{box-sizing:border-box!important;margin:0!important;padding:100px 4vw 90px!important;width:100%!important;max-width:none!important;min-height:100vh!important;}
+  html[data-theme="fullstyle-netflix"] .main>.container,
+  html[data-theme="fullstyle-netflix"] .container{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important;}
+  html[data-theme="fullstyle-netflix"] .view-head{width:100%!important;}
+}
+@media (max-width:860px){
+  html[data-theme="fullstyle-netflix"] #app{display:block!important;}
+  html[data-theme="fullstyle-netflix"] .main{margin:0!important;width:100%!important;max-width:none!important;padding:20px 16px 104px!important;box-sizing:border-box!important;}
+  html[data-theme="fullstyle-netflix"] .main>.container,
+  html[data-theme="fullstyle-netflix"] .container{width:100%!important;max-width:none!important;margin:0!important;}
+}
+
+/* ===== Original style block 63: mf-v103-netflix-header-navigation-fix (line 41681) ===== */
+/* v103: keep Netflix Full Style cinematic, but never sacrifice navigation or progression visibility. */
+@media (min-width:861px){
+  html[data-theme="fullstyle-netflix"] .sidebar{
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    height:76px!important;
+    padding:0 2.4vw!important;
+    gap:16px!important;
+    overflow:visible!important;
+    z-index:80!important;
+  }
+  html[data-theme="fullstyle-netflix"] .brand{
+    flex-direction:row!important;
+    flex:0 0 auto!important;
+    margin:0!important;
+  }
+  html[data-theme="fullstyle-netflix"] .nav{
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    width:auto!important;
+    margin:0!important;
+    gap:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-netflix"] .nav-item{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:max-content!important;
+    padding:9px 9px!important;
+  }
+  html[data-theme="fullstyle-netflix"] .nav-item svg{
+    display:none!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:10px!important;
+    flex:0 0 auto!important;
+    min-width:0!important;
+    margin:0 0 0 auto!important;
+    padding:0!important;
+    border:0!important;
+  }
+  /* Restore leveling in a compact header card instead of hiding it. */
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.level-block{
+    display:block!important;
+    width:190px!important;
+    min-width:160px!important;
+    margin:0!important;
+    padding:7px 10px!important;
+    border:1px solid #333!important;
+    border-radius:5px!important;
+    background:#1b1b1b!important;
+    box-shadow:none!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .level-head{
+    gap:8px!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .level-title{
+    color:#9b9b9b!important;
+    font-size:9px!important;
+    letter-spacing:.06em!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .level-num{
+    color:#e50914!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:15px!important;
+    line-height:1!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .xp-line{
+    margin-top:3px!important;
+    gap:6px!important;
+    font-size:9px!important;
+    color:#b3b3b3!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .xp-track{
+    height:4px!important;
+    margin-top:5px!important;
+    background:#3a3a3a!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .xp-fill{
+    background:#e50914!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .level-next{
+    display:none!important;
+  }
+  /* Keep the day streak visible as a compact chip; its text label is unnecessary in the header. */
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.k{
+    display:none!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.v{
+    display:block!important;
+    margin:0!important;
+    padding:7px 9px!important;
+    border:1px solid #333!important;
+    border-radius:5px!important;
+    background:#1b1b1b!important;
+    color:#fff!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:13px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  /* The cloud sentence belonged to the vertical sidebar and crowds a horizontal Netflix header. */
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>div[style*="font-size:10.5px"]{
+    display:none!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot .account-menu{
+    flex:0 0 auto!important;
+    margin:0!important;
+    padding:0!important;
+    gap:7px!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-netflix"] .main{
+    padding-top:104px!important;
+  }
+}
+
+/* Medium desktop/tablet landscape: put navigation on its own second row instead of hiding links. */
+@media (min-width:861px) and (max-width:1280px){
+  html[data-theme="fullstyle-netflix"] .sidebar{
+    height:118px!important;
+    flex-wrap:wrap!important;
+    align-content:center!important;
+    padding:9px 22px!important;
+    gap:7px 14px!important;
+  }
+  html[data-theme="fullstyle-netflix"] .brand{order:1!important;}
+  html[data-theme="fullstyle-netflix"] .sidebar-foot{order:2!important;margin-left:auto!important;}
+  html[data-theme="fullstyle-netflix"] .nav{
+    order:3!important;
+    flex:1 0 100%!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:38px!important;
+  }
+  html[data-theme="fullstyle-netflix"] .main{
+    padding-top:142px!important;
+  }
+  html[data-theme="fullstyle-netflix"] .sidebar-foot>.level-block{
+    width:170px!important;
+  }
+}
+
+@media (max-width:860px){
+  /* Mobile keeps MediaFlow's bottom navigation, including the More menu for the remaining pages. */
+  html[data-theme="fullstyle-netflix"] .mtab.active{
+    color:#e50914!important;
+  }
+}
+
+/* ===== Original style block 64: mf-v104-myanimelist-full-style (line 41846) ===== */
+/*
+   v104 — MyAnimeList Full Style
+   Inspired by MyAnimeList's dense database layout: dark content surfaces,
+   signature MAL blue navigation, compact controls, thin borders and list-first spacing.
+   MediaFlow functionality and data remain unchanged.
+*/
+html[data-theme="fullstyle-myanimelist"]{
+  --bg:#111111;
+  --panel:#1a1a1a;
+  --panel-raised:#202020;
+  --border:#3a3a3a;
+  --border-soft:#2c2c2c;
+  --text:#e8e8e8;
+  --text-dim:#b8b8b8;
+  --text-mute:#858585;
+  --flow:#2e51a2;
+  --flow-dim:#244481;
+  --healthy:#56b88f;
+  --neglect:#8f80d8;
+  --overused:#d76070;
+  --due:#4d8bc6;
+  --radius-s:2px;
+  --radius-m:3px;
+  --radius-l:4px;
+  --font-display:Arial,Helvetica,sans-serif;
+  --font-body:Verdana,Arial,Helvetica,sans-serif;
+  color-scheme:dark;
+}
+html[data-theme="fullstyle-myanimelist"] body{
+  background:#111111!important;
+  color:var(--text)!important;
+  font-family:Verdana,Arial,Helvetica,sans-serif!important;
+  font-size:13px!important;
+}
+html[data-theme="fullstyle-myanimelist"] ::selection{background:#2e51a2!important;color:#fff!important;}
+html[data-theme="fullstyle-myanimelist"] ::-webkit-scrollbar-thumb{background:#465d94!important;border-radius:2px!important;}
+
+/* Desktop header: MAL-style identity row + blue navigation row. */
+@media (min-width:861px){
+  html[data-theme="fullstyle-myanimelist"] #app{
+    display:block!important;
+    min-height:100vh!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar{
+    position:fixed!important;
+    inset:0 0 auto 0!important;
+    width:100%!important;
+    height:96px!important;
+    min-height:0!important;
+    padding:0!important;
+    display:grid!important;
+    grid-template-columns:auto minmax(20px,1fr) auto!important;
+    grid-template-rows:56px 40px!important;
+    align-items:center!important;
+    background:#121212!important;
+    border:0!important;
+    border-bottom:1px solid #203e82!important;
+    box-shadow:0 2px 8px rgba(0,0,0,.32)!important;
+    z-index:100!important;
+    overflow:visible!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-resizer{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .brand{
+    grid-column:1!important;
+    grid-row:1!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    margin:0!important;
+    padding:0 0 0 24px!important;
+    min-width:0!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .brand-mark{
+    width:27px!important;
+    height:27px!important;
+    border-radius:2px!important;
+    background:#2e51a2!important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)!important;
+    transform:none!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .brand-name{
+    color:#f5f5f5!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:22px!important;
+    font-weight:800!important;
+    letter-spacing:-.7px!important;
+    line-height:1!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .brand-sub{
+    display:block!important;
+    color:#888!important;
+    font-size:9px!important;
+    line-height:1.1!important;
+    margin-top:3px!important;
+    text-transform:uppercase!important;
+    letter-spacing:.08em!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .nav{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+    width:100%!important;
+    height:40px!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0 18px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:stretch!important;
+    gap:0!important;
+    background:#2e51a2!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    white-space:nowrap!important;
+    scrollbar-width:none!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .nav::-webkit-scrollbar{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .nav-item{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:max-content!important;
+    height:40px!important;
+    margin:0!important;
+    padding:0 13px!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:6px!important;
+    border:0!important;
+    border-right:1px solid rgba(255,255,255,.10)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:#f4f6fb!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:12px!important;
+    font-weight:700!important;
+    line-height:40px!important;
+    transition:background .12s ease,color .12s ease!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .nav-item:first-child{border-left:1px solid rgba(255,255,255,.10)!important;}
+  html[data-theme="fullstyle-myanimelist"] .nav-item:hover{background:#25478f!important;color:#fff!important;}
+  html[data-theme="fullstyle-myanimelist"] .nav-item.active{
+    background:#1f3f84!important;
+    color:#fff!important;
+    box-shadow:inset 0 -3px #fff!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .nav-item svg{
+    display:block!important;
+    width:14px!important;
+    height:14px!important;
+    opacity:.92!important;
+  }
+
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot{
+    grid-column:3!important;
+    grid-row:1!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:8px!important;
+    margin:0!important;
+    padding:0 20px 0 10px!important;
+    border:0!important;
+    min-width:0!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot>.level-block{
+    display:block!important;
+    width:190px!important;
+    min-width:150px!important;
+    margin:0!important;
+    padding:6px 9px!important;
+    border:1px solid #333!important;
+    border-radius:2px!important;
+    background:#191919!important;
+    box-shadow:none!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .level-title{
+    color:#999!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:8px!important;
+    letter-spacing:.08em!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .level-num{
+    color:#6f8fd9!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:14px!important;
+    font-weight:800!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .xp-line{
+    margin-top:2px!important;
+    color:#9b9b9b!important;
+    font-size:8px!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .xp-track{
+    height:3px!important;
+    margin-top:4px!important;
+    background:#323232!important;
+    border-radius:0!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .xp-fill{background:#2e51a2!important;border-radius:0!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot .level-next{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot>.k{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot>.v{
+    display:block!important;
+    margin:0!important;
+    padding:6px 8px!important;
+    border:1px solid #333!important;
+    border-radius:2px!important;
+    background:#191919!important;
+    color:#ddd!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:11px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot>div[style*="font-size:10.5px"]{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .account-menu{
+    margin:0!important;
+    padding:4px 5px!important;
+    gap:6px!important;
+    border:1px solid #333!important;
+    border-radius:2px!important;
+    background:#191919!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .account-menu-email{color:#ccc!important;font-size:10px!important;max-width:120px!important;}
+  html[data-theme="fullstyle-myanimelist"] .cloud-badge{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .account-avatar{width:24px!important;height:24px!important;border-color:#3c4f7f!important;}
+
+  html[data-theme="fullstyle-myanimelist"] .main{
+    margin:0!important;
+    padding:118px 22px 90px!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    background:#111!important;
+    box-sizing:border-box!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .main>.container,
+  html[data-theme="fullstyle-myanimelist"] .container{
+    width:100%!important;
+    max-width:1240px!important;
+    margin:0 auto!important;
+    box-sizing:border-box!important;
+  }
+}
+
+/* Dense database-like content language. */
+html[data-theme="fullstyle-myanimelist"] .view-head{
+  align-items:flex-end!important;
+  margin-bottom:14px!important;
+  padding-bottom:7px!important;
+  border-bottom:1px solid #2e51a2!important;
+}
+html[data-theme="fullstyle-myanimelist"] .view-title{
+  color:#f0f0f0!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:24px!important;
+  font-weight:700!important;
+  letter-spacing:-.3px!important;
+}
+html[data-theme="fullstyle-myanimelist"] .view-desc{color:#8d8d8d!important;font-size:11px!important;}
+html[data-theme="fullstyle-myanimelist"] .section-label{
+  display:block!important;
+  margin:18px 0 0!important;
+  padding:6px 8px!important;
+  border:1px solid #244481!important;
+  border-bottom:0!important;
+  border-radius:2px 2px 0 0!important;
+  background:#2e51a2!important;
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:.02em!important;
+  line-height:1.15!important;
+  text-transform:none!important;
+}
+html[data-theme="fullstyle-myanimelist"] .section-label + .card{
+  border-top-left-radius:0!important;
+  border-top-right-radius:0!important;
+}
+html[data-theme="fullstyle-myanimelist"] .card,
+html[data-theme="fullstyle-myanimelist"] .stat-box,
+html[data-theme="fullstyle-myanimelist"] .hero,
+html[data-theme="fullstyle-myanimelist"] .log-form,
+html[data-theme="fullstyle-myanimelist"] .new-entry-box,
+html[data-theme="fullstyle-myanimelist"] .reason-explain{
+  background:#1a1a1a!important;
+  border:1px solid #343434!important;
+  border-radius:2px!important;
+  box-shadow:none!important;
+}
+html[data-theme="fullstyle-myanimelist"] .card{padding:14px!important;}
+html[data-theme="fullstyle-myanimelist"] .stat-box{padding:12px 14px!important;}
+html[data-theme="fullstyle-myanimelist"] .stat-box .num{font-family:Arial,Helvetica,sans-serif!important;font-size:21px!important;font-weight:700!important;}
+html[data-theme="fullstyle-myanimelist"] .stat-box .lbl{font-size:10px!important;color:#909090!important;}
+html[data-theme="fullstyle-myanimelist"] .today-strip{gap:8px!important;margin-bottom:14px!important;}
+
+html[data-theme="fullstyle-myanimelist"] .hero{
+  padding:19px 20px!important;
+  background:#181818!important;
+  border-top:3px solid #2e51a2!important;
+  margin-bottom:16px!important;
+}
+html[data-theme="fullstyle-myanimelist"] .hero::before{display:none!important;}
+html[data-theme="fullstyle-myanimelist"] .hero-name{font-family:Arial,Helvetica,sans-serif!important;font-size:26px!important;font-weight:700!important;}
+html[data-theme="fullstyle-myanimelist"] .hero-eyebrow{color:#6f8fd9!important;font-size:10px!important;text-transform:uppercase!important;font-weight:700!important;}
+html[data-theme="fullstyle-myanimelist"] .hero-icon{border-radius:2px!important;}
+html[data-theme="fullstyle-myanimelist"] .hero-actions{gap:6px!important;margin-top:15px!important;}
+html[data-theme="fullstyle-myanimelist"] .pill,
+html[data-theme="fullstyle-myanimelist"] .tag,
+html[data-theme="fullstyle-myanimelist"] .status-badge{
+  border-radius:2px!important;
+}
+
+html[data-theme="fullstyle-myanimelist"] .btn{
+  min-height:0!important;
+  padding:7px 11px!important;
+  border:1px solid #4a4a4a!important;
+  border-radius:2px!important;
+  background:#252525!important;
+  color:#e8e8e8!important;
+  box-shadow:none!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+html[data-theme="fullstyle-myanimelist"] .btn:hover{background:#303030!important;border-color:#5a5a5a!important;}
+html[data-theme="fullstyle-myanimelist"] .btn-primary{
+  background:#2e51a2!important;
+  border-color:#2e51a2!important;
+  color:#fff!important;
+}
+html[data-theme="fullstyle-myanimelist"] .btn-primary:hover{background:#385fb8!important;border-color:#385fb8!important;}
+html[data-theme="fullstyle-myanimelist"] .btn-danger{background:#281a1d!important;border-color:#8e3d4c!important;color:#e58b99!important;}
+html[data-theme="fullstyle-myanimelist"] .btn-ghost{background:transparent!important;border-color:transparent!important;color:#aaa!important;}
+html[data-theme="fullstyle-myanimelist"] .link-btn{color:#6f8fd9!important;}
+
+html[data-theme="fullstyle-myanimelist"] input[type=text],
+html[data-theme="fullstyle-myanimelist"] input[type=number],
+html[data-theme="fullstyle-myanimelist"] input[type=email],
+html[data-theme="fullstyle-myanimelist"] input[type=password],
+html[data-theme="fullstyle-myanimelist"] select,
+html[data-theme="fullstyle-myanimelist"] textarea{
+  min-height:34px!important;
+  padding:7px 34px 7px 9px!important;
+  border:1px solid #454545!important;
+  border-radius:2px!important;
+  background-color:#202020!important;
+  color:#eee!important;
+  box-shadow:none!important;
+  font-family:Verdana,Arial,Helvetica,sans-serif!important;
+  font-size:11px!important;
+}
+html[data-theme="fullstyle-myanimelist"] input:focus,
+html[data-theme="fullstyle-myanimelist"] select:focus,
+html[data-theme="fullstyle-myanimelist"] textarea:focus{
+  border-color:#5272bc!important;
+  box-shadow:0 0 0 1px #5272bc!important;
+}
+html[data-theme="fullstyle-myanimelist"] select option{background:#202020!important;color:#eee!important;}
+html[data-theme="fullstyle-myanimelist"] label.field-label{font-size:10px!important;color:#aaa!important;}
+
+html[data-theme="fullstyle-myanimelist"] .progress-track,
+html[data-theme="fullstyle-myanimelist"] .stats-level-track,
+html[data-theme="fullstyle-myanimelist"] .stats-level-progress-track{
+  border-radius:0!important;
+  background:#2c2c2c!important;
+  border-color:#393939!important;
+}
+html[data-theme="fullstyle-myanimelist"] .progress-fill,
+html[data-theme="fullstyle-myanimelist"] .stats-level-fill,
+html[data-theme="fullstyle-myanimelist"] .stats-level-progress-fill,
+html[data-theme="fullstyle-myanimelist"] .xp-fill{
+  border-radius:0!important;
+  background:#2e51a2!important;
+}
+
+/* List/table density — central to the MAL visual language. */
+html[data-theme="fullstyle-myanimelist"] .item-row,
+html[data-theme="fullstyle-myanimelist"] .hist-row,
+html[data-theme="fullstyle-myanimelist"] .balance-row,
+html[data-theme="fullstyle-myanimelist"] .record-row,
+html[data-theme="fullstyle-myanimelist"] .mf-activity-row,
+html[data-theme="fullstyle-myanimelist"] .cat-manage-row{
+  border-bottom-color:#303030!important;
+}
+html[data-theme="fullstyle-myanimelist"] .item-row{padding-top:9px!important;padding-bottom:9px!important;}
+html[data-theme="fullstyle-myanimelist"] .item-row:hover,
+html[data-theme="fullstyle-myanimelist"] .hist-row:hover,
+html[data-theme="fullstyle-myanimelist"] .balance-row:hover{
+  background:#202020!important;
+}
+html[data-theme="fullstyle-myanimelist"] .item-title,
+html[data-theme="fullstyle-myanimelist"] .hist-cat,
+html[data-theme="fullstyle-myanimelist"] .bal-name{font-family:Arial,Helvetica,sans-serif!important;font-weight:700!important;}
+html[data-theme="fullstyle-myanimelist"] .library-cover-thumb{border-radius:1px!important;border-color:#444!important;box-shadow:none!important;}
+html[data-theme="fullstyle-myanimelist"] .library-view-cards .library-cover-thumb{border-radius:1px!important;}
+html[data-theme="fullstyle-myanimelist"] .library-view-cards .library-item,
+html[data-theme="fullstyle-myanimelist"] .library-view-cards .lib-item{
+  border:1px solid #383838!important;
+  border-radius:2px!important;
+  background:#191919!important;
+  box-shadow:none!important;
+}
+html[data-theme="fullstyle-myanimelist"] .library-view-cards .library-item:hover,
+html[data-theme="fullstyle-myanimelist"] .library-view-cards .lib-item:hover{
+  transform:none!important;
+  border-color:#5272bc!important;
+  box-shadow:none!important;
+}
+html[data-theme="fullstyle-myanimelist"] .v43-view-switch{padding:5px 0!important;}
+html[data-theme="fullstyle-myanimelist"] .mf-batchbar,
+html[data-theme="fullstyle-myanimelist"] .v87-log-tools,
+html[data-theme="fullstyle-myanimelist"] .v86-log-tools{
+  border-radius:2px!important;
+  background:#181818!important;
+  border-color:#343434!important;
+}
+
+html[data-theme="fullstyle-myanimelist"] .modal-overlay{
+  background:rgba(0,0,0,.74)!important;
+  backdrop-filter:none!important;
+}
+html[data-theme="fullstyle-myanimelist"] .modal{
+  max-width:540px;
+  padding:18px!important;
+  border:1px solid #455b91!important;
+  border-radius:2px!important;
+  background:#191919!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.55)!important;
+}
+html[data-theme="fullstyle-myanimelist"] .modal-title{
+  margin:-18px -18px 16px!important;
+  padding:8px 10px!important;
+  background:#2e51a2!important;
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:15px!important;
+  font-weight:700!important;
+}
+
+/* Profile/stat surfaces become flatter and denser. */
+html[data-theme="fullstyle-myanimelist"] .profile-stat-hero{
+  padding:16px!important;
+  border-radius:2px!important;
+  background:#191919!important;
+  border-color:#343434!important;
+}
+html[data-theme="fullstyle-myanimelist"] .profile-stat-avatar{border-radius:2px!important;border-color:#2e51a2!important;}
+html[data-theme="fullstyle-myanimelist"] .sat-row,
+html[data-theme="fullstyle-myanimelist"] .score-grid>div,
+html[data-theme="fullstyle-myanimelist"] .recap-grid>div,
+html[data-theme="fullstyle-myanimelist"] .mf-achievement{
+  border-radius:2px!important;
+  background:#1e1e1e!important;
+}
+
+/* Medium desktop: keep every page link and the level card available. */
+@media (min-width:861px) and (max-width:1180px){
+  html[data-theme="fullstyle-myanimelist"] .brand{padding-left:14px!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot{padding-right:12px!important;gap:5px!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar-foot>.level-block{width:155px!important;min-width:130px!important;}
+  html[data-theme="fullstyle-myanimelist"] .account-menu-email{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .nav{padding-left:8px!important;padding-right:8px!important;}
+  html[data-theme="fullstyle-myanimelist"] .nav-item{padding-left:9px!important;padding-right:9px!important;font-size:11px!important;}
+}
+
+/* Mobile retains MediaFlow's reliable bottom navigation, visually reskinned as MAL. */
+@media (max-width:860px){
+  html[data-theme="fullstyle-myanimelist"] #app{display:block!important;}
+  html[data-theme="fullstyle-myanimelist"] .sidebar{display:none!important;}
+  html[data-theme="fullstyle-myanimelist"] .main{
+    margin:0!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:18px 12px 108px!important;
+    background:#111!important;
+    box-sizing:border-box!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .main>.container,
+  html[data-theme="fullstyle-myanimelist"] .container{width:100%!important;max-width:none!important;margin:0!important;}
+  html[data-theme="fullstyle-myanimelist"] .mobile-tabbar{
+    background:#202d50!important;
+    border-top:2px solid #2e51a2!important;
+    backdrop-filter:none!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .mtab{color:#b8c5e1!important;}
+  html[data-theme="fullstyle-myanimelist"] .mtab.active{color:#fff!important;background:#2e51a2!important;}
+  html[data-theme="fullstyle-myanimelist"] .mobile-more-menu{
+    background:#191919!important;
+    border:1px solid #455b91!important;
+    border-radius:2px!important;
+  }
+  html[data-theme="fullstyle-myanimelist"] .mobile-more-item{border-radius:2px!important;}
+  html[data-theme="fullstyle-myanimelist"] .mobile-more-item.active,
+  html[data-theme="fullstyle-myanimelist"] .mobile-more-item:hover{background:#2e51a2!important;color:#fff!important;}
+  html[data-theme="fullstyle-myanimelist"] .view-title{font-size:21px!important;}
+  html[data-theme="fullstyle-myanimelist"] .section-label{margin-top:14px!important;}
+  html[data-theme="fullstyle-myanimelist"] .card{padding:12px!important;}
+}
+
+/* ===== Original style block 65: mf-v105-crunchyroll-full-style (line 42353) ===== */
+/*
+   v105 — Crunchyroll Full Style
+   A complete orange-on-charcoal streaming-library presentation with a compact
+   global header, high-contrast action controls, rounded content surfaces and
+   media-forward cards. MediaFlow's data, scheduler and navigation remain intact.
+*/
+html[data-theme="fullstyle-crunchyroll"]{
+  --bg:#0f0f10;
+  --panel:#18191c;
+  --panel-raised:#23252b;
+  --border:#35373d;
+  --border-soft:#292b30;
+  --text:#f5f5f5;
+  --text-dim:#c6c7cb;
+  --text-mute:#8d9098;
+  --flow:#f47521;
+  --flow-dim:#a94c12;
+  --healthy:#48c78e;
+  --neglect:#a58bfa;
+  --overused:#ef6b78;
+  --due:#5aa9e6;
+  --radius-s:6px;
+  --radius-m:10px;
+  --radius-l:14px;
+  --font-display:Arial,Helvetica,sans-serif;
+  --font-body:Arial,Helvetica,sans-serif;
+  color-scheme:dark;
+}
+html[data-theme="fullstyle-crunchyroll"] body{
+  background:#0f0f10!important;
+  color:#f5f5f5!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+html[data-theme="fullstyle-crunchyroll"] ::selection{background:#f47521!important;color:#111!important;}
+html[data-theme="fullstyle-crunchyroll"] ::-webkit-scrollbar-thumb{background:#4a4d54!important;border-radius:999px!important;}
+
+/* Desktop: one streaming-style global header with every MediaFlow destination available. */
+@media (min-width:861px){
+  html[data-theme="fullstyle-crunchyroll"] #app{display:block!important;min-height:100vh!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar{
+    position:fixed!important;
+    inset:0 0 auto 0!important;
+    width:100%!important;
+    height:74px!important;
+    min-height:0!important;
+    padding:0 28px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    gap:18px!important;
+    background:#141519!important;
+    border:0!important;
+    border-bottom:1px solid #282a30!important;
+    box-shadow:0 4px 18px rgba(0,0,0,.24)!important;
+    z-index:100!important;
+    overflow:visible!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-resizer{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .brand{
+    display:flex!important;
+    flex:0 0 auto!important;
+    align-items:center!important;
+    gap:10px!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .brand-mark{
+    position:relative!important;
+    width:34px!important;
+    height:34px!important;
+    border-radius:50%!important;
+    background:#f47521!important;
+    box-shadow:none!important;
+    overflow:hidden!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .brand-mark::after{
+    content:''!important;
+    position:absolute!important;
+    width:20px!important;
+    height:20px!important;
+    right:-2px!important;
+    top:7px!important;
+    border-radius:50%!important;
+    background:#141519!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .brand-name{
+    color:#fff!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:21px!important;
+    font-weight:800!important;
+    letter-spacing:-.5px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .brand-sub{
+    display:block!important;
+    color:#f47521!important;
+    font-size:8px!important;
+    font-weight:800!important;
+    letter-spacing:.12em!important;
+    text-transform:uppercase!important;
+    margin-top:2px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .nav{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    width:auto!important;
+    margin:0!important;
+    gap:2px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    white-space:nowrap!important;
+    scrollbar-width:none!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .nav::-webkit-scrollbar{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .nav-item{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:max-content!important;
+    padding:10px 10px!important;
+    border:0!important;
+    border-radius:5px!important;
+    background:transparent!important;
+    color:#c8c9ce!important;
+    font-size:12px!important;
+    font-weight:700!important;
+    transition:background .14s ease,color .14s ease!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .nav-item svg{width:15px!important;height:15px!important;opacity:.9!important;}
+  html[data-theme="fullstyle-crunchyroll"] .nav-item:hover{background:#24262b!important;color:#fff!important;}
+  html[data-theme="fullstyle-crunchyroll"] .nav-item.active{
+    background:#2c2e34!important;
+    color:#fff!important;
+    box-shadow:inset 0 -3px #f47521!important;
+  }
+
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:8px!important;
+    flex:0 0 auto!important;
+    min-width:0!important;
+    margin:0 0 0 auto!important;
+    padding:0!important;border:0!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot>.level-block{
+    display:block!important;
+    width:184px!important;
+    min-width:154px!important;
+    margin:0!important;
+    padding:7px 10px!important;
+    border:1px solid #34363c!important;
+    border-radius:8px!important;
+    background:#1d1f24!important;
+    box-shadow:none!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .level-title{
+    color:#9fa2aa!important;
+    font-size:8px!important;
+    letter-spacing:.08em!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .level-num{
+    color:#f47521!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:14px!important;
+    font-weight:800!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .xp-line{
+    margin-top:2px!important;
+    color:#aeb0b7!important;
+    font-size:8px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .xp-track{
+    height:4px!important;
+    margin-top:5px!important;
+    background:#34363d!important;
+    border-radius:99px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .xp-fill{background:#f47521!important;border-radius:99px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot .level-next{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot>.k{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot>.v{
+    display:block!important;
+    margin:0!important;
+    padding:8px 9px!important;
+    border:1px solid #34363c!important;
+    border-radius:8px!important;
+    background:#1d1f24!important;
+    color:#fff!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot>div[style*="font-size:10.5px"]{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .account-menu{
+    margin:0!important;
+    padding:4px 5px!important;
+    gap:6px!important;
+    border:1px solid #34363c!important;
+    border-radius:8px!important;
+    background:#1d1f24!important;
+    white-space:nowrap!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .account-menu-email{color:#d4d5d8!important;font-size:10px!important;max-width:120px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .cloud-badge{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .account-avatar{width:25px!important;height:25px!important;border-color:#494b52!important;}
+
+  html[data-theme="fullstyle-crunchyroll"] .main{
+    margin:0!important;
+    padding:102px 3.5vw 92px!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    background:#0f0f10!important;
+    box-sizing:border-box!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .main>.container,
+  html[data-theme="fullstyle-crunchyroll"] .container{
+    width:100%!important;
+    max-width:1440px!important;
+    margin:0 auto!important;
+    box-sizing:border-box!important;
+  }
+}
+
+/* Medium desktop: move navigation to a second row rather than hiding destinations. */
+@media (min-width:861px) and (max-width:1280px){
+  html[data-theme="fullstyle-crunchyroll"] .sidebar{
+    height:116px!important;
+    flex-wrap:wrap!important;
+    align-content:center!important;
+    padding:9px 22px!important;
+    gap:7px 12px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .brand{order:1!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot{order:2!important;margin-left:auto!important;}
+  html[data-theme="fullstyle-crunchyroll"] .nav{
+    order:3!important;
+    flex:1 0 100%!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:38px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .main{padding-top:140px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar-foot>.level-block{width:164px!important;min-width:136px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .account-menu-email{display:none!important;}
+}
+
+/* Crunchyroll-like content language: broad dark surfaces and orange interaction hierarchy. */
+html[data-theme="fullstyle-crunchyroll"] .view-head{
+  align-items:flex-end!important;
+  margin-bottom:22px!important;
+  padding-bottom:12px!important;
+  border-bottom:1px solid #2e3035!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .view-title{
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:30px!important;
+  font-weight:800!important;
+  letter-spacing:-.7px!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .view-desc{color:#9b9ea6!important;font-size:12px!important;}
+html[data-theme="fullstyle-crunchyroll"] .section-label{
+  margin:24px 0 10px!important;
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:17px!important;
+  font-weight:800!important;
+  letter-spacing:-.2px!important;
+  text-transform:none!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .section-label::before{
+  content:''!important;
+  display:inline-block!important;
+  width:4px!important;
+  height:17px!important;
+  margin-right:9px!important;
+  border-radius:99px!important;
+  background:#f47521!important;
+  vertical-align:-2px!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .card,
+html[data-theme="fullstyle-crunchyroll"] .stat-box,
+html[data-theme="fullstyle-crunchyroll"] .hero,
+html[data-theme="fullstyle-crunchyroll"] .log-form,
+html[data-theme="fullstyle-crunchyroll"] .new-entry-box,
+html[data-theme="fullstyle-crunchyroll"] .reason-explain,
+html[data-theme="fullstyle-crunchyroll"] .profile-stat-hero{
+  background:#18191c!important;
+  border:1px solid #2c2e33!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .card{padding:18px!important;}
+html[data-theme="fullstyle-crunchyroll"] .today-strip{gap:12px!important;margin-bottom:20px!important;}
+html[data-theme="fullstyle-crunchyroll"] .stat-box{padding:15px 17px!important;}
+html[data-theme="fullstyle-crunchyroll"] .stat-box .num{font-family:Arial,Helvetica,sans-serif!important;font-size:25px!important;font-weight:800!important;}
+html[data-theme="fullstyle-crunchyroll"] .stat-box .lbl{color:#9598a0!important;font-size:10px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.06em!important;}
+
+html[data-theme="fullstyle-crunchyroll"] .hero{
+  position:relative!important;
+  padding:28px 30px!important;
+  overflow:hidden!important;
+  background:linear-gradient(120deg,#1b1c20 0%,#242127 58%,#2b1d16 100%)!important;
+  border-color:#3b332d!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .hero::before{
+  content:''!important;
+  display:block!important;
+  position:absolute!important;
+  width:330px!important;
+  height:330px!important;
+  right:-100px!important;
+  top:-135px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle,rgba(244,117,33,.32),rgba(244,117,33,0) 67%)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .hero-eyebrow{
+  color:#f47521!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.09em!important;
+  text-transform:uppercase!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .hero-name{
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:34px!important;
+  font-weight:900!important;
+  letter-spacing:-.8px!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .hero-icon{border-radius:8px!important;}
+html[data-theme="fullstyle-crunchyroll"] .hero-actions{gap:8px!important;}
+html[data-theme="fullstyle-crunchyroll"] .pill,
+html[data-theme="fullstyle-crunchyroll"] .tag,
+html[data-theme="fullstyle-crunchyroll"] .status-badge{border-radius:6px!important;}
+
+html[data-theme="fullstyle-crunchyroll"] .btn{
+  padding:9px 14px!important;
+  border:1px solid #464950!important;
+  border-radius:7px!important;
+  background:#27292f!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:12px!important;
+  font-weight:800!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .btn:hover{background:#33353c!important;border-color:#5b5e66!important;}
+html[data-theme="fullstyle-crunchyroll"] .btn-primary{
+  background:#f47521!important;
+  border-color:#f47521!important;
+  color:#17110d!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .btn-primary:hover{background:#ff8533!important;border-color:#ff8533!important;}
+html[data-theme="fullstyle-crunchyroll"] .btn-danger{background:#2b1b1d!important;border-color:#87424a!important;color:#ff9da8!important;}
+html[data-theme="fullstyle-crunchyroll"] .btn-ghost{background:transparent!important;border-color:transparent!important;color:#b7b9bf!important;}
+html[data-theme="fullstyle-crunchyroll"] .link-btn{color:#f7a56e!important;}
+
+html[data-theme="fullstyle-crunchyroll"] input[type=text],
+html[data-theme="fullstyle-crunchyroll"] input[type=number],
+html[data-theme="fullstyle-crunchyroll"] input[type=email],
+html[data-theme="fullstyle-crunchyroll"] input[type=password],
+html[data-theme="fullstyle-crunchyroll"] select,
+html[data-theme="fullstyle-crunchyroll"] textarea{
+  min-height:40px!important;
+  padding:9px 40px 9px 11px!important;
+  border:1px solid #42444b!important;
+  border-radius:7px!important;
+  background-color:#202126!important;
+  color:#f3f3f4!important;
+  box-shadow:none!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:12px!important;
+}
+html[data-theme="fullstyle-crunchyroll"] input:focus,
+html[data-theme="fullstyle-crunchyroll"] select:focus,
+html[data-theme="fullstyle-crunchyroll"] textarea:focus{
+  border-color:#f47521!important;
+  box-shadow:0 0 0 2px rgba(244,117,33,.18)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] select option{background:#202126!important;color:#f3f3f4!important;}
+html[data-theme="fullstyle-crunchyroll"] label.field-label{color:#c0c2c7!important;font-size:11px!important;}
+
+html[data-theme="fullstyle-crunchyroll"] .progress-track,
+html[data-theme="fullstyle-crunchyroll"] .stats-level-track,
+html[data-theme="fullstyle-crunchyroll"] .stats-level-progress-track{
+  background:#2b2d32!important;
+  border-color:#35373d!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .progress-fill,
+html[data-theme="fullstyle-crunchyroll"] .stats-level-fill,
+html[data-theme="fullstyle-crunchyroll"] .stats-level-progress-fill,
+html[data-theme="fullstyle-crunchyroll"] .xp-fill{background:#f47521!important;}
+
+/* Media/library surfaces feel more cover-forward and interactive. */
+html[data-theme="fullstyle-crunchyroll"] .item-row,
+html[data-theme="fullstyle-crunchyroll"] .hist-row,
+html[data-theme="fullstyle-crunchyroll"] .balance-row,
+html[data-theme="fullstyle-crunchyroll"] .record-row,
+html[data-theme="fullstyle-crunchyroll"] .mf-activity-row,
+html[data-theme="fullstyle-crunchyroll"] .cat-manage-row{border-bottom-color:#2c2e33!important;}
+html[data-theme="fullstyle-crunchyroll"] .item-row:hover,
+html[data-theme="fullstyle-crunchyroll"] .hist-row:hover,
+html[data-theme="fullstyle-crunchyroll"] .balance-row:hover{background:#202126!important;}
+html[data-theme="fullstyle-crunchyroll"] .library-cover-thumb{
+  border-radius:6px!important;
+  border-color:#383a40!important;
+  box-shadow:0 7px 18px rgba(0,0,0,.24)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .library-view-cards .library-item,
+html[data-theme="fullstyle-crunchyroll"] .library-view-cards .lib-item{
+  border:1px solid #2c2e33!important;
+  border-radius:9px!important;
+  background:#18191c!important;
+  box-shadow:none!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .library-view-cards .library-item:hover,
+html[data-theme="fullstyle-crunchyroll"] .library-view-cards .lib-item:hover{
+  transform:translateY(-3px)!important;
+  border-color:#f47521!important;
+  box-shadow:0 12px 26px rgba(0,0,0,.32)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .mf-batchbar,
+html[data-theme="fullstyle-crunchyroll"] .v87-log-tools,
+html[data-theme="fullstyle-crunchyroll"] .v86-log-tools{
+  background:#17181b!important;
+  border-color:#2c2e33!important;
+  border-radius:9px!important;
+}
+
+html[data-theme="fullstyle-crunchyroll"] .modal-overlay{
+  background:rgba(0,0,0,.74)!important;
+  backdrop-filter:blur(4px)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .modal{
+  padding:22px!important;
+  border:1px solid #3a3c42!important;
+  border-radius:12px!important;
+  background:#1a1b1f!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.6)!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .modal-title{
+  color:#fff!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:20px!important;
+  font-weight:900!important;
+}
+html[data-theme="fullstyle-crunchyroll"] .profile-stat-avatar{border-color:#f47521!important;}
+html[data-theme="fullstyle-crunchyroll"] .sat-row,
+html[data-theme="fullstyle-crunchyroll"] .score-grid>div,
+html[data-theme="fullstyle-crunchyroll"] .recap-grid>div,
+html[data-theme="fullstyle-crunchyroll"] .mf-achievement{
+  background:#202126!important;
+  border-color:#303239!important;
+  border-radius:8px!important;
+}
+
+/* Mobile keeps MediaFlow's reliable navigation and reskins it instead of removing functionality. */
+@media (max-width:860px){
+  html[data-theme="fullstyle-crunchyroll"] #app{display:block!important;}
+  html[data-theme="fullstyle-crunchyroll"] .sidebar{display:none!important;}
+  html[data-theme="fullstyle-crunchyroll"] .main{
+    margin:0!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:18px 13px 108px!important;
+    background:#0f0f10!important;
+    box-sizing:border-box!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .main>.container,
+  html[data-theme="fullstyle-crunchyroll"] .container{width:100%!important;max-width:none!important;margin:0!important;}
+  html[data-theme="fullstyle-crunchyroll"] .mobile-tabbar{
+    background:rgba(20,21,25,.97)!important;
+    border-top:2px solid #f47521!important;
+    backdrop-filter:blur(12px)!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .mtab{color:#a9abb2!important;}
+  html[data-theme="fullstyle-crunchyroll"] .mtab.active{color:#f47521!important;}
+  html[data-theme="fullstyle-crunchyroll"] .mobile-more-menu{
+    background:#1a1b1f!important;
+    border:1px solid #3a3c42!important;
+    border-radius:10px!important;
+  }
+  html[data-theme="fullstyle-crunchyroll"] .mobile-more-item.active,
+  html[data-theme="fullstyle-crunchyroll"] .mobile-more-item:hover{background:#2a221d!important;color:#f47521!important;}
+  html[data-theme="fullstyle-crunchyroll"] .view-title{font-size:24px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .hero{padding:22px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .hero-name{font-size:27px!important;}
+  html[data-theme="fullstyle-crunchyroll"] .card{padding:14px!important;}
+}
+
+/* ===== Original style block 66: mf-v107-full-style-expansion (line 42856) ===== */
+/*
+   v107 adds independent Full Style identities for the remaining services in
+   MediaFlow's exchange ecosystem. The neutral light/dark surfaces are left to
+   v106's global appearance layer, while these rules own layout, geometry,
+   accent language, typography and interaction character.
+*/
+
+/* ---------- Per-theme identity tokens ---------- */
+html[data-theme="fullstyle-anilist"]{--flow:#3db4f2;--v107-accent2:#7bd6ff;--v107-radius:7px;--v107-radius-lg:11px;--v107-cover-radius:5px;--v107-header-size:80px;--v107-content:1240px;--v107-shadow:0 8px 24px rgba(61,180,242,.08);--v107-letter:.01em;--v107-nav-weight:700;--v107-hero-pattern:linear-gradient(115deg,transparent 0 58%,color-mix(in srgb,#3db4f2 13%,transparent) 58% 100%)}
+html[data-theme="fullstyle-anisearch"]{--flow:#e86c2f;--v107-accent2:#3b8fbe;--v107-radius:3px;--v107-radius-lg:5px;--v107-cover-radius:2px;--v107-header-size:78px;--v107-content:1180px;--v107-shadow:none;--v107-letter:.025em;--v107-nav-weight:800;--v107-hero-pattern:repeating-linear-gradient(135deg,transparent 0 13px,color-mix(in srgb,#e86c2f 6%,transparent) 13px 14px)}
+html[data-theme="fullstyle-aniwatch"]{--flow:#ffbade;--v107-accent2:#bba7ff;--v107-radius:16px;--v107-radius-lg:24px;--v107-cover-radius:12px;--v107-header-size:86px;--v107-content:1320px;--v107-shadow:0 18px 42px rgba(124,87,150,.16);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 86% 18%,color-mix(in srgb,#ffbade 26%,transparent),transparent 34%),radial-gradient(circle at 72% 88%,color-mix(in srgb,#a993ff 16%,transparent),transparent 38%)}
+html[data-theme="fullstyle-betaseries"]{--flow:#ff4f4f;--v107-accent2:#6675ff;--v107-radius:8px;--v107-radius-lg:12px;--v107-cover-radius:7px;--v107-header-size:80px;--v107-content:1280px;--v107-shadow:0 10px 30px rgba(255,79,79,.09);--v107-letter:.005em;--v107-nav-weight:800;--v107-hero-pattern:linear-gradient(105deg,color-mix(in srgb,#ff4f4f 9%,transparent),transparent 45%,color-mix(in srgb,#6675ff 8%,transparent))}
+html[data-theme="fullstyle-criticker"]{--flow:#f39c12;--v107-accent2:#89929b;--v107-radius:2px;--v107-radius-lg:3px;--v107-cover-radius:2px;--v107-header-size:74px;--v107-content:1160px;--v107-shadow:none;--v107-letter:.04em;--v107-nav-weight:900;--v107-hero-pattern:linear-gradient(90deg,color-mix(in srgb,#f39c12 12%,transparent) 1px,transparent 1px),linear-gradient(color-mix(in srgb,#f39c12 7%,transparent) 1px,transparent 1px);--v107-pattern-size:28px 28px}
+html[data-theme="fullstyle-episodecalendar"]{--flow:#4aa3df;--v107-accent2:#6fc17a;--v107-radius:5px;--v107-radius-lg:7px;--v107-cover-radius:4px;--v107-header-size:76px;--v107-content:1220px;--v107-shadow:0 6px 18px rgba(74,163,223,.07);--v107-letter:.02em;--v107-nav-weight:700;--v107-hero-pattern:linear-gradient(90deg,color-mix(in srgb,#4aa3df 8%,transparent) 1px,transparent 1px),linear-gradient(color-mix(in srgb,#4aa3df 8%,transparent) 1px,transparent 1px);--v107-pattern-size:42px 42px}
+html[data-theme="fullstyle-hianime"]{--flow:#b9e36f;--v107-accent2:#b89aff;--v107-radius:15px;--v107-radius-lg:22px;--v107-cover-radius:11px;--v107-header-size:86px;--v107-content:1320px;--v107-shadow:0 16px 38px rgba(185,227,111,.10);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 82% 20%,color-mix(in srgb,#b9e36f 24%,transparent),transparent 34%),linear-gradient(125deg,transparent 54%,color-mix(in srgb,#b89aff 11%,transparent))}
+html[data-theme="fullstyle-imdb"]{--flow:#f5c518;--v107-accent2:#f5c518;--v107-radius:4px;--v107-radius-lg:6px;--v107-cover-radius:3px;--v107-header-size:76px;--v107-content:1280px;--v107-shadow:0 8px 24px rgba(0,0,0,.16);--v107-letter:.005em;--v107-nav-weight:900;--v107-hero-pattern:linear-gradient(115deg,color-mix(in srgb,#f5c518 12%,transparent),transparent 48%)}
+html[data-theme="fullstyle-letterboxd"]{--flow:#00e054;--v107-accent2:#40bcf4;--v107-radius:6px;--v107-radius-lg:10px;--v107-cover-radius:4px;--v107-header-size:80px;--v107-content:1260px;--v107-shadow:0 12px 28px rgba(0,224,84,.08);--v107-letter:.01em;--v107-nav-weight:800;--v107-hero-pattern:radial-gradient(circle at 78% 50%,rgba(255,128,0,.22) 0 6%,transparent 6.5%),radial-gradient(circle at 84% 50%,rgba(0,224,84,.22) 0 6%,transparent 6.5%),radial-gradient(circle at 90% 50%,rgba(64,188,244,.22) 0 6%,transparent 6.5%)}
+html[data-theme="fullstyle-livechart"]{--flow:#e84c4c;--v107-accent2:#4a9ce8;--v107-radius:3px;--v107-radius-lg:5px;--v107-cover-radius:3px;--v107-header-size:76px;--v107-content:1260px;--v107-shadow:none;--v107-letter:.025em;--v107-nav-weight:800;--v107-hero-pattern:repeating-linear-gradient(90deg,transparent 0 84px,color-mix(in srgb,#e84c4c 7%,transparent) 84px 85px)}
+html[data-theme="fullstyle-kitsu"]{--flow:#f75239;--v107-accent2:#6f5aa7;--v107-radius:13px;--v107-radius-lg:18px;--v107-cover-radius:10px;--v107-header-size:82px;--v107-content:1260px;--v107-shadow:0 16px 34px rgba(247,82,57,.10);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:linear-gradient(135deg,color-mix(in srgb,#f75239 13%,transparent),transparent 42%,color-mix(in srgb,#6f5aa7 10%,transparent))}
+html[data-theme="fullstyle-moviesfad"]{--flow:#e74c3c;--v107-accent2:#2f8ed6;--v107-radius:9px;--v107-radius-lg:14px;--v107-cover-radius:8px;--v107-header-size:82px;--v107-content:1340px;--v107-shadow:0 18px 38px rgba(0,0,0,.15);--v107-letter:.005em;--v107-nav-weight:800;--v107-hero-pattern:linear-gradient(90deg,transparent 0 50%,color-mix(in srgb,#e74c3c 14%,transparent) 100%)}
+html[data-theme="fullstyle-primewire"]{--flow:#44c8f5;--v107-accent2:#34d399;--v107-radius:6px;--v107-radius-lg:10px;--v107-cover-radius:6px;--v107-header-size:80px;--v107-content:1320px;--v107-shadow:0 12px 32px rgba(68,200,245,.10);--v107-letter:.015em;--v107-nav-weight:800;--v107-hero-pattern:linear-gradient(130deg,color-mix(in srgb,#44c8f5 13%,transparent),transparent 43%,color-mix(in srgb,#34d399 8%,transparent))}
+html[data-theme="fullstyle-seriesfad"]{--flow:#9b59b6;--v107-accent2:#f39c12;--v107-radius:10px;--v107-radius-lg:16px;--v107-cover-radius:8px;--v107-header-size:82px;--v107-content:1300px;--v107-shadow:0 15px 34px rgba(155,89,182,.11);--v107-letter:.005em;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 85% 30%,color-mix(in srgb,#9b59b6 22%,transparent),transparent 34%),linear-gradient(120deg,transparent 54%,color-mix(in srgb,#f39c12 9%,transparent))}
+html[data-theme="fullstyle-stremio"]{--flow:#7b5cff;--v107-accent2:#27c5ff;--v107-radius:14px;--v107-radius-lg:22px;--v107-cover-radius:10px;--v107-header-size:88px;--v107-content:1360px;--v107-shadow:0 22px 54px rgba(68,48,180,.18);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 82% 25%,color-mix(in srgb,#7b5cff 28%,transparent),transparent 31%),radial-gradient(circle at 92% 76%,color-mix(in srgb,#27c5ff 16%,transparent),transparent 28%)}
+html[data-theme="fullstyle-trakt"]{--flow:#ed1c24;--v107-accent2:#a7a7a7;--v107-radius:4px;--v107-radius-lg:6px;--v107-cover-radius:3px;--v107-header-size:76px;--v107-content:1260px;--v107-shadow:none;--v107-letter:.01em;--v107-nav-weight:900;--v107-hero-pattern:linear-gradient(110deg,color-mix(in srgb,#ed1c24 12%,transparent),transparent 40%)}
+html[data-theme="fullstyle-tvtime"]{--flow:#ff2d55;--v107-accent2:#7c66ff;--v107-radius:16px;--v107-radius-lg:24px;--v107-cover-radius:12px;--v107-header-size:86px;--v107-content:1280px;--v107-shadow:0 16px 40px rgba(255,45,85,.11);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 86% 22%,color-mix(in srgb,#ff2d55 22%,transparent),transparent 32%),radial-gradient(circle at 72% 90%,color-mix(in srgb,#7c66ff 13%,transparent),transparent 34%)}
+html[data-theme="fullstyle-tviso"]{--flow:#00a7c4;--v107-accent2:#53d4c4;--v107-radius:3px;--v107-radius-lg:5px;--v107-cover-radius:3px;--v107-header-size:76px;--v107-content:1200px;--v107-shadow:none;--v107-letter:.025em;--v107-nav-weight:800;--v107-hero-pattern:linear-gradient(135deg,color-mix(in srgb,#00a7c4 12%,transparent),transparent 45%)}
+html[data-theme="fullstyle-twee"]{--flow:#ec407a;--v107-accent2:#7e57c2;--v107-radius:18px;--v107-radius-lg:26px;--v107-cover-radius:13px;--v107-header-size:88px;--v107-content:1260px;--v107-shadow:0 16px 40px rgba(236,64,122,.11);--v107-letter:0;--v107-nav-weight:700;--v107-hero-pattern:radial-gradient(circle at 84% 20%,color-mix(in srgb,#ec407a 22%,transparent),transparent 34%),radial-gradient(circle at 72% 86%,color-mix(in srgb,#7e57c2 15%,transparent),transparent 34%)}
+
+/* ---------- Shared full-layout shell for every NEW v107 style ---------- */
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+){
+  --font-body:Inter,Manrope,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font-display:Inter,Manrope,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) body{font-family:var(--font-body)!important;letter-spacing:var(--v107-letter,0)!important;}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) #app{display:block!important;min-height:100vh!important;}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar{
+  position:fixed!important;inset:0 0 auto 0!important;z-index:95!important;
+  width:100%!important;height:var(--v107-header-size,80px)!important;
+  padding:10px 22px!important;display:flex!important;flex-direction:row!important;
+  align-items:center!important;gap:16px!important;border-right:0!important;
+  border-bottom:1px solid var(--border-soft)!important;box-shadow:0 8px 28px rgba(0,0,0,.08)!important;
+}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-resizer{display:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .brand{display:flex!important;align-items:center!important;gap:9px!important;padding:0!important;margin:0!important;flex:0 0 auto!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .brand-mark{width:30px!important;height:30px!important;border-radius:var(--v107-radius,6px)!important;background:linear-gradient(135deg,var(--flow),var(--v107-accent2,var(--flow)))!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--flow) 38%,transparent)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .brand-name{font-family:var(--font-display)!important;font-size:18px!important;font-weight:900!important;letter-spacing:-.02em!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .brand-sub{display:none!important;}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .nav{
+  min-width:0!important;flex:1 1 auto!important;display:flex!important;flex-direction:row!important;
+  align-items:center!important;gap:3px!important;margin:0!important;overflow-x:auto!important;overflow-y:hidden!important;
+  scrollbar-width:none!important;white-space:nowrap!important;
+}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .nav::-webkit-scrollbar{display:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .nav-item{
+  flex:0 0 auto!important;padding:8px 10px!important;border:0!important;border-radius:var(--v107-radius,6px)!important;
+  background:transparent!important;font-size:11px!important;font-weight:var(--v107-nav-weight,800)!important;letter-spacing:.015em!important;
+}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .nav-item svg{width:15px!important;height:15px!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .nav-item.active{background:color-mix(in srgb,var(--flow) 13%,var(--panel-raised))!important;box-shadow:inset 0 -2px 0 var(--flow)!important;color:var(--text)!important;}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot{
+  flex:0 0 auto!important;margin:0!important;padding:0!important;border:0!important;display:flex!important;align-items:center!important;gap:8px!important;
+}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .account-menu{margin:0!important;padding:6px 7px!important;border-radius:var(--v107-radius,6px)!important;max-width:220px!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .level-block{margin:0!important;padding:6px 9px!important;min-width:150px!important;border-radius:var(--v107-radius,6px)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .level-title{display:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .level-num{font-size:13px!important;font-weight:900!important;color:var(--flow)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .xp-line{font-size:9px!important;margin-top:0!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .xp-track{height:4px!important;margin-top:4px!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot .level-next{display:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot>.k{display:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot>.v{margin:0!important;padding:7px 9px!important;border:1px solid var(--border)!important;border-radius:var(--v107-radius,6px)!important;font-family:var(--font-body)!important;font-size:12px!important;font-weight:900!important;white-space:nowrap!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .sidebar-foot>div:last-child{display:none!important;}
+
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .main{margin:0!important;width:100%!important;max-width:none!important;padding:calc(var(--v107-header-size,80px) + 28px) 32px 90px!important;box-sizing:border-box!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .main>.container,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .container{width:min(100%,var(--v107-content,1280px))!important;max-width:none!important;margin:0 auto!important;}
+
+/* ---------- Shared component language ---------- */
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .view-title{font-family:var(--font-display)!important;font-weight:900!important;letter-spacing:-.025em!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .section-label{font-size:10px!important;font-weight:900!important;letter-spacing:.11em!important;text-transform:uppercase!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .card,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .stat-box,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .hero,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .modal{border-radius:var(--v107-radius-lg,10px)!important;box-shadow:var(--v107-shadow)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .hero{position:relative!important;overflow:hidden!important;padding:26px 28px!important;background-image:var(--v107-hero-pattern)!important;background-size:var(--v107-pattern-size,auto)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .hero-name{font-family:var(--font-display)!important;font-weight:900!important;letter-spacing:-.035em!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .hero-eyebrow{color:var(--flow)!important;font-size:10px!important;font-weight:900!important;letter-spacing:.11em!important;text-transform:uppercase!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .btn{border-radius:var(--v107-radius,6px)!important;font-weight:800!important;box-shadow:none!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .btn-primary{background:var(--flow)!important;border-color:var(--flow)!important;color:#0d1015!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) input,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) select,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) textarea{border-radius:var(--v107-radius,6px)!important;}
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .library-cover-thumb,
+html:is(
+  [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+  [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+  [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+  [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+  [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+  [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+) .v50-cover{border-radius:var(--v107-cover-radius,6px)!important;}
+
+/* ---------- Theme-specific structural signatures ---------- */
+/* AniList: clean tracker dashboard with thin blue rails. */
+html[data-theme="fullstyle-anilist"] .card,
+html[data-theme="fullstyle-anilist"] .stat-box{border-top:2px solid color-mix(in srgb,var(--flow) 65%,var(--border))!important;}
+html[data-theme="fullstyle-anilist"] .nav-item.active{box-shadow:inset 0 -3px 0 var(--flow)!important;}
+html[data-theme="fullstyle-anilist"] .library-view-cards .library-item{transition:transform .14s ease!important;}
+html[data-theme="fullstyle-anilist"] .library-view-cards .library-item:hover{transform:translateY(-2px)!important;}
+
+/* AniSearch: compact directory/database geometry. */
+html[data-theme="fullstyle-anisearch"] .card{padding:15px!important;}
+html[data-theme="fullstyle-anisearch"] .item-row,
+html[data-theme="fullstyle-anisearch"] .hist-row{padding-top:9px!important;padding-bottom:9px!important;}
+html[data-theme="fullstyle-anisearch"] .section-label{border-left:3px solid var(--flow)!important;padding-left:7px!important;}
+
+/* AniWatch: soft rounded streaming shell. */
+html[data-theme="fullstyle-aniwatch"] .sidebar{backdrop-filter:blur(18px)!important;}
+html[data-theme="fullstyle-aniwatch"] .nav-item.active{border-radius:999px!important;box-shadow:none!important;background:color-mix(in srgb,var(--flow) 16%,var(--panel-raised))!important;}
+html[data-theme="fullstyle-aniwatch"] .btn{border-radius:999px!important;}
+html[data-theme="fullstyle-aniwatch"] .library-view-cards .library-item{border-radius:18px!important;overflow:hidden!important;}
+
+/* BetaSeries: crisp red status strips. */
+html[data-theme="fullstyle-betaseries"] .card{border-left:3px solid color-mix(in srgb,var(--flow) 55%,var(--border-soft))!important;}
+html[data-theme="fullstyle-betaseries"] .nav-item.active{box-shadow:inset 3px 0 0 var(--flow)!important;}
+html[data-theme="fullstyle-betaseries"] .status-badge{border-radius:4px!important;}
+
+/* Criticker: scoreboard / rating-board feel. */
+html[data-theme="fullstyle-criticker"] .stat-box .num,
+html[data-theme="fullstyle-criticker"] .record-row .v{font-family:"Courier New",monospace!important;font-weight:900!important;}
+html[data-theme="fullstyle-criticker"] .card{border-width:1px!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 5%,transparent)!important;}
+html[data-theme="fullstyle-criticker"] .btn-primary{color:#1b1405!important;}
+
+/* EpisodeCalendar: calendar-grid cues. */
+html[data-theme="fullstyle-episodecalendar"] .card{background-image:linear-gradient(90deg,color-mix(in srgb,var(--flow) 3%,transparent) 1px,transparent 1px)!important;background-size:64px 100%!important;}
+html[data-theme="fullstyle-episodecalendar"] .today-strip .stat-box{border-top:3px solid var(--flow)!important;}
+html[data-theme="fullstyle-episodecalendar"] .section-label::before{content:'▦';margin-right:6px;color:var(--flow)!important;}
+
+/* HiAnime: playful lime/purple streaming language. */
+html[data-theme="fullstyle-hianime"] .nav-item.active{border-radius:999px!important;box-shadow:none!important;}
+html[data-theme="fullstyle-hianime"] .btn-primary{border-radius:999px!important;}
+html[data-theme="fullstyle-hianime"] .hero-icon{border-radius:16px!important;transform:rotate(-3deg)!important;}
+
+/* IMDb: bold yellow rails and square information cards. */
+html[data-theme="fullstyle-imdb"] .sidebar{box-shadow:inset 0 -3px 0 var(--flow),0 8px 24px rgba(0,0,0,.10)!important;}
+html[data-theme="fullstyle-imdb"] .brand-mark{background:var(--flow)!important;border-radius:4px!important;}
+html[data-theme="fullstyle-imdb"] .card,
+html[data-theme="fullstyle-imdb"] .stat-box{border-radius:4px!important;}
+html[data-theme="fullstyle-imdb"] .btn-primary{color:#181818!important;}
+html[data-theme="fullstyle-imdb"] .section-label{color:var(--text)!important;border-left:5px solid var(--flow)!important;padding-left:8px!important;}
+
+/* Letterboxd: poster-first cinema layout and three-tone accent line. */
+html[data-theme="fullstyle-letterboxd"] .sidebar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;background:linear-gradient(90deg,#ff8000 0 33.333%,#00e054 33.333% 66.666%,#40bcf4 66.666%)!important;}
+html[data-theme="fullstyle-letterboxd"] .library-view-cards .library-item{transition:transform .15s ease,box-shadow .15s ease!important;}
+html[data-theme="fullstyle-letterboxd"] .library-view-cards .library-item:hover{transform:translateY(-4px) scale(1.01)!important;box-shadow:0 14px 28px rgba(0,0,0,.18)!important;}
+html[data-theme="fullstyle-letterboxd"] .status-badge{border-radius:999px!important;}
+
+/* LiveChart: schedule-board rails. */
+html[data-theme="fullstyle-livechart"] .item-row,
+html[data-theme="fullstyle-livechart"] .hist-row{border-left:2px solid color-mix(in srgb,var(--flow) 45%,var(--border-soft))!important;padding-left:10px!important;}
+html[data-theme="fullstyle-livechart"] .section-label{border-bottom:2px solid var(--flow)!important;padding-bottom:5px!important;width:max-content!important;}
+html[data-theme="fullstyle-livechart"] .today-strip{gap:6px!important;}
+
+/* Kitsu: social-feed cards and rounded interactions. */
+html[data-theme="fullstyle-kitsu"] .profile-stat-hero,
+html[data-theme="fullstyle-kitsu"] .hero{border-radius:20px!important;}
+html[data-theme="fullstyle-kitsu"] .item-row:hover{transform:translateX(2px)!important;}
+html[data-theme="fullstyle-kitsu"] .btn-primary{border-radius:12px!important;}
+
+/* MoviesFad: poster wall with cinematic top treatment. */
+html[data-theme="fullstyle-moviesfad"] .library-view-cards .library-item{border-radius:12px!important;overflow:hidden!important;}
+html[data-theme="fullstyle-moviesfad"] .library-cover-thumb{box-shadow:0 10px 24px rgba(0,0,0,.24)!important;}
+html[data-theme="fullstyle-moviesfad"] .hero{border-left:4px solid var(--flow)!important;}
+
+/* PrimeWire: lean catalog with cyan action rails. */
+html[data-theme="fullstyle-primewire"] .nav-item.active{background:transparent!important;box-shadow:inset 0 -3px 0 var(--flow)!important;}
+html[data-theme="fullstyle-primewire"] .card{border-top:1px solid color-mix(in srgb,var(--flow) 34%,var(--border-soft))!important;}
+html[data-theme="fullstyle-primewire"] .btn-primary{background:linear-gradient(135deg,var(--flow),var(--v107-accent2))!important;}
+
+/* SeriesFad: TV-season blocks with purple/orange labels. */
+html[data-theme="fullstyle-seriesfad"] .section-label{color:var(--v107-accent2)!important;}
+html[data-theme="fullstyle-seriesfad"] .card{border-top:3px solid color-mix(in srgb,var(--flow) 60%,var(--border-soft))!important;}
+html[data-theme="fullstyle-seriesfad"] .status-badge{border-radius:999px!important;}
+
+/* Stremio: glassy launcher-like shell. */
+html[data-theme="fullstyle-stremio"] .sidebar,
+html[data-theme="fullstyle-stremio"] .card,
+html[data-theme="fullstyle-stremio"] .hero,
+html[data-theme="fullstyle-stremio"] .modal{backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;}
+html[data-theme="fullstyle-stremio"] .nav-item.active{border-radius:12px!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--flow) 34%,transparent),0 8px 24px color-mix(in srgb,var(--flow) 13%,transparent)!important;}
+html[data-theme="fullstyle-stremio"] .btn-primary{background:linear-gradient(135deg,var(--flow),var(--v107-accent2))!important;color:#fff!important;}
+
+/* trakt: activity-stream geometry and red progress rails. */
+html[data-theme="fullstyle-trakt"] .sidebar{box-shadow:inset 0 -3px 0 var(--flow)!important;}
+html[data-theme="fullstyle-trakt"] .hist-row,
+html[data-theme="fullstyle-trakt"] .mf-activity-row{border-left:3px solid color-mix(in srgb,var(--flow) 44%,var(--border-soft))!important;padding-left:12px!important;}
+html[data-theme="fullstyle-trakt"] .btn-primary{color:#fff!important;}
+
+/* TV Time: rounded social tracking cards. */
+html[data-theme="fullstyle-tvtime"] .nav-item.active,
+html[data-theme="fullstyle-tvtime"] .btn{border-radius:999px!important;}
+html[data-theme="fullstyle-tvtime"] .stat-box{border-radius:18px!important;}
+html[data-theme="fullstyle-tvtime"] .profile-stat-avatar{border:3px solid var(--flow)!important;}
+
+/* Tviso: dense tabs and cyan underline system. */
+html[data-theme="fullstyle-tviso"] .nav-item{border-radius:0!important;}
+html[data-theme="fullstyle-tviso"] .nav-item.active{background:transparent!important;box-shadow:inset 0 -3px 0 var(--flow)!important;}
+html[data-theme="fullstyle-tviso"] .card{border-radius:3px!important;}
+html[data-theme="fullstyle-tviso"] .section-label{border-bottom:1px solid var(--flow)!important;padding-bottom:5px!important;}
+
+/* Twee: playful rounded/pill presentation. */
+html[data-theme="fullstyle-twee"] .nav-item.active,
+html[data-theme="fullstyle-twee"] .btn{border-radius:999px!important;}
+html[data-theme="fullstyle-twee"] .card,
+html[data-theme="fullstyle-twee"] .stat-box{border-radius:20px!important;}
+html[data-theme="fullstyle-twee"] .hero-icon{border-radius:50%!important;}
+
+/* ---------- Medium screens: preserve every page link and progression ---------- */
+@media (min-width:861px) and (max-width:1220px){
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ){--v107-header-size:126px;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .sidebar{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;grid-template-rows:56px 48px!important;padding:7px 16px!important;gap:0 12px!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .brand{grid-column:1;grid-row:1!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .sidebar-foot{grid-column:2;grid-row:1!important;justify-self:end!important;min-width:0!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .nav{grid-column:1/-1;grid-row:2!important;width:100%!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .account-menu-email,
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .cloud-badge{display:none!important;}
+}
+
+/* ---------- Mobile: keep the proven bottom navigation / More menu ---------- */
+@media (max-width:860px){
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) #app{display:block!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .sidebar{display:none!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .main{margin:0!important;width:100%!important;max-width:none!important;padding:18px 13px 108px!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .main>.container,
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .container{width:100%!important;max-width:none!important;margin:0!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .mobile-tabbar{border-top:2px solid var(--flow)!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],
+    [data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .mtab.active{color:var(--flow)!important;}
+  html:is(
+    [data-theme="fullstyle-anilist"],[data-theme="fullstyle-anisearch"],[data-theme="fullstyle-aniwatch"],
+    [data-theme="fullstyle-betaseries"],[data-theme="fullstyle-criticker"],[data-theme="fullstyle-episodecalendar"],
+    [data-theme="fullstyle-hianime"],[data-theme="fullstyle-imdb"],[data-theme="fullstyle-letterboxd"],[data-theme="fullstyle-livechart"],[data-theme="fullstyle-kitsu"],[data-theme="fullstyle-moviesfad"],
+    [data-theme="fullstyle-primewire"],[data-theme="fullstyle-seriesfad"],[data-theme="fullstyle-stremio"],
+    [data-theme="fullstyle-trakt"],[data-theme="fullstyle-tvtime"],[data-theme="fullstyle-tviso"],[data-theme="fullstyle-twee"]
+  ) .card{padding:14px!important;}
+}
+
+/* v107 provenance note: these are MediaFlow-original interpretations inspired by
+   the listed services' visual languages; no third-party logos/assets are bundled. */
+
+/* ===== Original style block 67: mf-v106-global-appearance (line 43512) ===== */
+/*
+   This layer is intentionally independent from data-theme.
+   Existing and future themes keep their accent, typography and layout identity;
+   data-appearance controls the neutral surface/text system globally.
+*/
+html[data-appearance="light"]{
+  --bg:#f5f7fb!important;
+  --panel:#ffffff!important;
+  --panel-raised:#f0f3f8!important;
+  --border:#cbd3df!important;
+  --border-soft:#e0e5ec!important;
+  --text:#171a21!important;
+  --text-dim:#4d586a!important;
+  --text-mute:#737f92!important;
+  --flow-dim:color-mix(in srgb,var(--flow) 62%,#ffffff)!important;
+  color-scheme:light!important;
+}
+html[data-appearance="dark"]{
+  --bg:#0b0e14!important;
+  --panel:#141922!important;
+  --panel-raised:#1c2330!important;
+  --border:#343d4d!important;
+  --border-soft:#252d3a!important;
+  --text:#f2f4f8!important;
+  --text-dim:#b6becb!important;
+  --text-mute:#7f8999!important;
+  --flow-dim:color-mix(in srgb,var(--flow) 58%,#0b0e14)!important;
+  color-scheme:dark!important;
+}
+
+/* Root surfaces. These intentionally come after every theme/full-style stylesheet. */
+html[data-appearance="light"] body,
+html[data-appearance="light"] #app,
+html[data-appearance="light"] .main,
+html[data-appearance="light"] .auth-screen{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--flow) 3%,#ffffff),var(--bg) 280px)!important;
+  color:var(--text)!important;
+}
+html[data-appearance="dark"] body,
+html[data-appearance="dark"] #app,
+html[data-appearance="dark"] .main,
+html[data-appearance="dark"] .auth-screen{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--flow) 3%,#111722),var(--bg) 320px)!important;
+  color:var(--text)!important;
+}
+
+html[data-appearance="light"] .sidebar{
+  background:color-mix(in srgb,var(--flow) 3%,#ffffff)!important;
+  border-color:var(--border-soft)!important;
+  color:var(--text)!important;
+}
+html[data-appearance="dark"] .sidebar{
+  background:color-mix(in srgb,var(--flow) 3%,#11161f)!important;
+  border-color:var(--border-soft)!important;
+  color:var(--text)!important;
+}
+
+/* Shared surfaces. */
+html[data-appearance] .card,
+html[data-appearance] .stat-box,
+html[data-appearance] .profile-stat-hero,
+html[data-appearance] .auth-card,
+html[data-appearance] .import-card,
+html[data-appearance] .modal,
+html[data-appearance] .account-menu,
+html[data-appearance] .level-block,
+html[data-appearance] .reason-explain,
+html[data-appearance] .new-entry-box,
+html[data-appearance] .mf-batchbar,
+html[data-appearance] .v87-log-tools,
+html[data-appearance] .v86-log-tools,
+html[data-appearance] .v66-cat-panel,
+html[data-appearance] .mobile-more-menu,
+html[data-appearance] .log-suggestion-list,
+html[data-appearance] .v82-repeat-panel,
+html[data-appearance] .v82-repeat-grid>div,
+html[data-appearance] .sat-row,
+html[data-appearance] .score-grid>div,
+html[data-appearance] .recap-grid>div,
+html[data-appearance] .mf-achievement,
+html[data-appearance] .empty-library-option,
+html[data-appearance] .v45-cover-choice{
+  background:var(--panel)!important;
+  border-color:var(--border-soft)!important;
+  color:var(--text)!important;
+}
+html[data-appearance] .hero{
+  background:linear-gradient(145deg,color-mix(in srgb,var(--flow) 7%,var(--panel-raised)),var(--panel))!important;
+  border-color:var(--border-soft)!important;
+  color:var(--text)!important;
+}
+html[data-appearance] .intensity-opt,
+html[data-appearance] .status-choice,
+html[data-appearance] .category-choice,
+html[data-appearance] .priority-choice,
+html[data-appearance] .import-stat,
+html[data-appearance] .tag,
+html[data-appearance] .pill,
+html[data-appearance] .setup-code,
+html[data-appearance] .auth-tabs,
+html[data-appearance] .v43-rating-grid>div{
+  background:var(--panel-raised)!important;
+  border-color:var(--border-soft)!important;
+  color:var(--text)!important;
+}
+
+/* Text hierarchy — important for full styles that previously hard-coded white. */
+html[data-appearance] .view-title,
+html[data-appearance] .hero-name,
+html[data-appearance] .item-title,
+html[data-appearance] .hist-cat,
+html[data-appearance] .record-row .v,
+html[data-appearance] .modal-title,
+html[data-appearance] .empty-state .em-title,
+html[data-appearance] .auth-title,
+html[data-appearance] .auth-brand-name,
+html[data-appearance] .import-title,
+html[data-appearance] .timeline-title,
+html[data-appearance] .v76-otd-copy b,
+html[data-appearance] .v76-otd-row-copy b{
+  color:var(--text)!important;
+}
+html[data-appearance] .view-desc,
+html[data-appearance] .hero-amount,
+html[data-appearance] .item-sub,
+html[data-appearance] .hist-amt,
+html[data-appearance] .hist-note,
+html[data-appearance] .profile-note,
+html[data-appearance] .auth-sub,
+html[data-appearance] .account-menu-email,
+html[data-appearance] .record-row .k,
+html[data-appearance] .v43-log-detail,
+html[data-appearance] .health-note,
+html[data-appearance] .health-action,
+html[data-appearance] .field-label,
+html[data-appearance] label.field-label,
+html[data-appearance] small.hint{
+  color:var(--text-dim)!important;
+}
+html[data-appearance] .section-label{color:var(--flow)!important;}
+html[data-appearance] .brand-sub{color:var(--text-mute)!important;}
+
+/* Theme identity is retained through accents. Netflix's red wordmark remains red. */
+html[data-appearance="light"][data-theme="fullstyle-myanimelist"] .brand-name,
+html[data-appearance="light"][data-theme="fullstyle-crunchyroll"] .brand-name{color:var(--text)!important;}
+html[data-appearance="light"][data-theme="fullstyle-crunchyroll"] .brand-mark::after{background:color-mix(in srgb,var(--flow) 3%,#ffffff)!important;}
+html[data-appearance="dark"][data-theme="fullstyle-crunchyroll"] .brand-mark::after{background:color-mix(in srgb,var(--flow) 3%,#11161f)!important;}
+
+/* Navigation remains theme-specific in shape/layout, but readable in either mode. */
+html[data-appearance] .nav-item{color:var(--text-dim)!important;}
+html[data-appearance] .nav-item:hover{color:var(--text)!important;background:color-mix(in srgb,var(--flow) 7%,var(--panel-raised))!important;}
+html[data-appearance] .nav-item.active{color:var(--text)!important;}
+html[data-appearance] .sidebar-foot>.v{background:var(--panel-raised)!important;border-color:var(--border)!important;color:var(--text)!important;}
+html[data-appearance] .sidebar-foot .level-block{background:var(--panel-raised)!important;border-color:var(--border)!important;}
+html[data-appearance] .sidebar-foot .xp-line{color:var(--text-dim)!important;}
+html[data-appearance] .sidebar-foot .xp-track{background:var(--border)!important;}
+
+/* Form controls and secondary buttons. Primary buttons keep the theme accent. */
+html[data-appearance] input[type=text],
+html[data-appearance] input[type=number],
+html[data-appearance] input[type=email],
+html[data-appearance] input[type=password],
+html[data-appearance] input[type=url],
+html[data-appearance] input[type=date],
+html[data-appearance] input[type=time],
+html[data-appearance] select,
+html[data-appearance] textarea{
+  background-color:var(--panel-raised)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+html[data-appearance] select option,
+html[data-appearance] select optgroup{background:var(--panel)!important;color:var(--text)!important;}
+html[data-appearance] .btn:not(.btn-primary):not(.btn-danger){
+  background:var(--panel-raised)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+html[data-appearance] .btn:not(.btn-primary):not(.btn-danger):hover{
+  background:color-mix(in srgb,var(--flow) 8%,var(--panel-raised))!important;
+  border-color:color-mix(in srgb,var(--flow) 48%,var(--border))!important;
+}
+html[data-appearance] .btn-ghost:not(.btn-primary):not(.btn-danger){background:transparent!important;}
+
+/* Rows, lists and hover states. */
+html[data-appearance] .item-row,
+html[data-appearance] .hist-row,
+html[data-appearance] .balance-row,
+html[data-appearance] .record-row,
+html[data-appearance] .mf-activity-row,
+html[data-appearance] .cat-manage-row,
+html[data-appearance] .v76-otd-row,
+html[data-appearance] .log-suggestion{
+  border-color:var(--border-soft)!important;
+}
+html[data-appearance] .item-row:hover,
+html[data-appearance] .hist-row:hover,
+html[data-appearance] .balance-row:hover,
+html[data-appearance] .log-suggestion:hover{
+  background:color-mix(in srgb,var(--flow) 6%,var(--panel-raised))!important;
+}
+html[data-appearance] .library-view-cards .item-row,
+html[data-appearance] .library-view-cards .library-item,
+html[data-appearance] .library-view-cards .lib-item{
+  background:var(--panel)!important;
+  border-color:var(--border-soft)!important;
+}
+html[data-appearance] .library-cover-thumb,
+html[data-appearance] .v50-cover{border-color:var(--border-soft)!important;}
+
+/* Progress / charts keep theme accent while their tracks follow global mode. */
+html[data-appearance] .progress-track,
+html[data-appearance] .stats-level-track,
+html[data-appearance] .stats-level-progress-track,
+html[data-appearance] .xp-track,
+html[data-appearance] .bal-bar-track,
+html[data-appearance] .import-track{
+  background:var(--border-soft)!important;
+  border-color:var(--border)!important;
+}
+html[data-appearance] .progress-fill,
+html[data-appearance] .stats-level-fill,
+html[data-appearance] .stats-level-progress-fill,
+html[data-appearance] .xp-fill,
+html[data-appearance] .import-fill{background:var(--flow)!important;}
+
+/* Overlays / bottom navigation. */
+html[data-appearance="light"] .modal-overlay,
+html[data-appearance="light"] .import-overlay{background:rgba(35,43,56,.34)!important;}
+html[data-appearance="dark"] .modal-overlay,
+html[data-appearance="dark"] .import-overlay{background:rgba(0,0,0,.72)!important;}
+html[data-appearance="light"] .mobile-tabbar{
+  background:rgba(255,255,255,.96)!important;
+  border-color:var(--border-soft)!important;
+}
+html[data-appearance="dark"] .mobile-tabbar{
+  background:rgba(15,19,27,.96)!important;
+  border-color:var(--border-soft)!important;
+}
+html[data-appearance] .mtab{color:var(--text-mute)!important;}
+html[data-appearance] .mtab.active{color:var(--flow)!important;}
+html[data-appearance] .mobile-more-item{color:var(--text)!important;}
+html[data-appearance] .mobile-more-item.active,
+html[data-appearance] .mobile-more-item:hover{background:color-mix(in srgb,var(--flow) 8%,var(--panel-raised))!important;color:var(--flow)!important;}
+
+html[data-appearance] ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text-mute) 56%,var(--panel-raised))!important;}
+html[data-appearance] ::selection{background:var(--flow)!important;color:var(--bg)!important;}
+
+/* Settings control itself: small visual cue that this is a global layer. */
+.v106-global-appearance{
+  margin:14px 0!important;
+  padding:13px!important;
+  border:1px solid color-mix(in srgb,var(--flow) 32%,var(--border-soft))!important;
+  border-radius:10px!important;
+  background:color-mix(in srgb,var(--flow) 5%,var(--panel-raised))!important;
+}
+.v106-global-appearance.v132-native-appearance{
+  border-style:dashed!important;
+}
+.v106-global-appearance .v132-appearance-mode-controls[aria-disabled="true"]{
+  opacity:.55;
+}
+.v106-global-appearance .v132-appearance-mode-controls select:disabled{
+  cursor:not-allowed;
+}

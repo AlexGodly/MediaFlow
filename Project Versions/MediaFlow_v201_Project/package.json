@@ -1,0 +1,11 @@
+{
+  "name": "mediaflow",
+  "version": "201.0.0",
+  "private": true,
+  "description": "MediaFlow by Alex Godly \u2014 organized v201 static web application.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "verify": "npm run build && npm run check"
+  }
+}

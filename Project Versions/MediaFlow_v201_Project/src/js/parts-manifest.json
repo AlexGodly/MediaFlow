@@ -1,0 +1,274 @@
+[
+  {
+    "file": "src/js/core/00-constants-auth.js",
+    "original_lines": [
+      6375,
+      6629
+    ],
+    "description": "Constants, Supabase auth and account helpers"
+  },
+  {
+    "file": "src/js/core/01-state.js",
+    "original_lines": [
+      6630,
+      6695
+    ],
+    "description": "Canonical application state"
+  },
+  {
+    "file": "src/js/core/02-storage-cloud.js",
+    "original_lines": [
+      6696,
+      7218
+    ],
+    "description": "Local/cloud persistence, merges and safety guards"
+  },
+  {
+    "file": "src/js/core/03-utils.js",
+    "original_lines": [
+      7219,
+      7321
+    ],
+    "description": "Shared utilities"
+  },
+  {
+    "file": "src/js/core/04-scheduler.js",
+    "original_lines": [
+      7322,
+      7556
+    ],
+    "description": "Scheduler and recommendation calculations"
+  },
+  {
+    "file": "src/js/core/05-session-flow.js",
+    "original_lines": [
+      7557,
+      7850
+    ],
+    "description": "Session lifecycle and logging flow"
+  },
+  {
+    "file": "src/js/core/06-stats-helpers.js",
+    "original_lines": [
+      7851,
+      7973
+    ],
+    "description": "Derived/statistics helpers"
+  },
+  {
+    "file": "src/js/ui/shell.js",
+    "original_lines": [
+      7974,
+      8242
+    ],
+    "description": "Application shell, navigation and shared UI rendering"
+  },
+  {
+    "file": "src/js/views/dashboard.js",
+    "original_lines": [
+      8243,
+      8618
+    ],
+    "description": "Dashboard view"
+  },
+  {
+    "file": "src/js/views/library.js",
+    "original_lines": [
+      8619,
+      9012
+    ],
+    "description": "Library view and large-library engine"
+  },
+  {
+    "file": "src/js/views/batch-log.js",
+    "original_lines": [
+      9013,
+      9129
+    ],
+    "description": "Batch Log view"
+  },
+  {
+    "file": "src/js/views/history.js",
+    "original_lines": [
+      9130,
+      9266
+    ],
+    "description": "History view"
+  },
+  {
+    "file": "src/js/views/statistics.js",
+    "original_lines": [
+      9267,
+      9448
+    ],
+    "description": "Statistics view"
+  },
+  {
+    "file": "src/js/views/profile.js",
+    "original_lines": [
+      9449,
+      9532
+    ],
+    "description": "Profile settings view"
+  },
+  {
+    "file": "src/js/views/settings.js",
+    "original_lines": [
+      9533,
+      9861
+    ],
+    "description": "Settings view"
+  },
+  {
+    "file": "src/js/ui/modals.js",
+    "original_lines": [
+      9862,
+      10164
+    ],
+    "description": "Modal rendering"
+  },
+  {
+    "file": "src/js/core/07-app-actions.js",
+    "original_lines": [
+      10165,
+      11192
+    ],
+    "description": "Public App actions and event surface"
+  },
+  {
+    "file": "src/js/ui/sidebar.js",
+    "original_lines": [
+      11193,
+      11270
+    ],
+    "description": "Desktop sidebar resizing"
+  },
+  {
+    "file": "src/js/features/legacy-v16-v43.js",
+    "original_lines": [
+      11271,
+      12359
+    ],
+    "description": "Backups, stopwatch, analytics and library workflow foundations"
+  },
+  {
+    "file": "src/js/features/v44-v50.js",
+    "original_lines": [
+      12360,
+      13077
+    ],
+    "description": "Ratings, covers, progression, sync reliability and cover-forward UI"
+  },
+  {
+    "file": "src/js/core/08-render-init.js",
+    "original_lines": [
+      13078,
+      13178
+    ],
+    "description": "Render loop, initialization and service-worker registration"
+  },
+  {
+    "file": "src/js/features/appearance-v106-v134.js",
+    "original_lines": [
+      13179,
+      14953
+    ],
+    "description": "Appearance layers, completion/repeat XP, rating queue, classic stats and performance"
+  },
+  {
+    "file": "src/js/features/history-order-v136-v148.js",
+    "original_lines": [
+      14954,
+      18603
+    ],
+    "description": "Lifecycle history, Personal Order, category palettes, dynamic cover themes and backup audit"
+  },
+  {
+    "file": "src/js/features/xp-old-system-v149-v154.js",
+    "original_lines": [
+      18604,
+      20201
+    ],
+    "description": "Streak XP and Old System"
+  },
+  {
+    "file": "src/js/features/cloud-order-import-v155-v160.js",
+    "original_lines": [
+      20202,
+      23911
+    ],
+    "description": "Complete cloud state, Order performance/positions, import metadata and dynamic-cover reliability"
+  },
+  {
+    "file": "src/js/features/navigation-themes-v161-v168.js",
+    "original_lines": [
+      23912,
+      27582
+    ],
+    "description": "About/navigation, adaptive cover collections, Simkl theme, Respect XP and seasonal detection"
+  },
+  {
+    "file": "src/js/features/import-recovery-v169-v173.js",
+    "original_lines": [
+      27583,
+      30559
+    ],
+    "description": "Advanced imports, category recovery, unified import UI and v173 Order/Old System upgrades"
+  },
+  {
+    "file": "src/js/features/recommendations-pagination-v174-v176.js",
+    "original_lines": [
+      30560,
+      32327
+    ],
+    "description": "Recommended-title editing, pagination, Batch Log filters and rich Library rows"
+  },
+  {
+    "file": "src/js/features/cover-metadata-logging-v177-v180.js",
+    "original_lines": [
+      32328,
+      35316
+    ],
+    "description": "Cover sizing, metadata editor, dual logging and recommendation rerolls"
+  },
+  {
+    "file": "src/js/features/dynamic-library-v181-v184.js",
+    "original_lines": [
+      35317,
+      38101
+    ],
+    "description": "Dynamic Library, global title details and readability controls"
+  },
+  {
+    "file": "src/js/features/library-controls-v186-v191.js",
+    "original_lines": [
+      38102,
+      39941
+    ],
+    "description": "Category ordering, Library overview controls, sorting/bulk actions and restorable deletions"
+  },
+  {
+    "file": "src/js/features/dashboard-presets-v192-v200.js",
+    "original_lines": [
+      39942,
+      41242
+    ],
+    "description": "Dashboard controls, icon clarity, settings presets, status vocabulary and category defaults"
+  },
+  {
+    "file": "src/js/features/v201.js",
+    "original_lines": [
+      41243,
+      41449
+    ],
+    "description": "v201 category icon sizing and persistence audit"
+  },
+  {
+    "file": "src/js/legacy/post-iife-compat.js",
+    "original_lines": [
+      41453,
+      41585
+    ],
+    "description": "Late compatibility code retained exactly outside the original IIFE"
+  }
+]

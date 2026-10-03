@@ -1,0 +1,10 @@
+{
+  "name": "MediaFlow by Alex Godly",
+  "short_name": "MediaFlow",
+  "description": "Media rotation, library, history, statistics and personal order.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E111A",
+  "theme_color": "#0E111A"
+}
