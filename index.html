@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="192">
+<meta name="mediaflow-version" content="193">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1156,7 +1156,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v185: Title Details readability pass -->
 <!-- MediaFlow v188: Library title-size control + advanced Library Overview configuration -->
 <!-- MediaFlow v191: Clean Covers + restorable deleted-title Library History -->
-<!-- MediaFlow v192: Dashboard section visibility + Missing Covers queue -->
+<!-- MediaFlow v193: Dashboard section visibility + Missing Covers queue + Stopwatch visibility -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -39927,12 +39927,13 @@ v148BackupManifest=function(state,extras){
    - Full Backup schema v25 + Cloud Sync audit v192
    ============================================================ */
 
-const V192_BACKUP_SCHEMA_VERSION=25;
-const V192_CLOUD_SYNC_VERSION=192;
+const V192_BACKUP_SCHEMA_VERSION=26;
+const V192_CLOUD_SYNC_VERSION=193;
 const V192_DASHBOARD_DEFAULT={
   showTodayBalance:true,
   showRatingQueue:true,
   showMissingCovers:true,
+  showStopwatch:true,
   modifiedAt:0
 };
 
@@ -39942,6 +39943,7 @@ function v192NormalizeDashboardSettings(raw){
     showTodayBalance:src.showTodayBalance!==false,
     showRatingQueue:src.showRatingQueue!==false,
     showMissingCovers:src.showMissingCovers!==false,
+    showStopwatch:src.showStopwatch!==false,
     modifiedAt:Math.max(0,Number(src.modifiedAt)||0)
   };
 }
@@ -39954,7 +39956,7 @@ function v192EnsureDashboardSettings(settings=S.settings){
 
 function v192ToggleDashboardSection(key){
   const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
-  if(!['showTodayBalance','showRatingQueue','showMissingCovers'].includes(key))return;
+  if(!['showTodayBalance','showRatingQueue','showMissingCovers','showStopwatch'].includes(key))return;
   cfg[key]=!cfg[key];
   cfg.modifiedAt=Date.now();
   persistSettings();
@@ -39962,7 +39964,8 @@ function v192ToggleDashboardSection(key){
   const labels={
     showTodayBalance:"Today's Balance",
     showRatingQueue:'Rate Your Library',
-    showMissingCovers:'Missing Covers'
+    showMissingCovers:'Missing Covers',
+    showStopwatch:'Stopwatch'
   };
   showToast(`${labels[key]} ${cfg[key]?'shown':'hidden'} on Dashboard`);
 }
@@ -40139,6 +40142,7 @@ function v192DashboardVisibilitySettingsHtml(){
       ${row('showTodayBalance',"Today's Balance",'Show or hide the Today’s Balance category section.')}
       ${row('showRatingQueue','Rate Your Library','Show or hide the unrated-title queue on Dashboard.')}
       ${row('showMissingCovers','Missing Covers','Show or hide the queue for Library titles that do not have a cover URL.')}
+      ${row('showStopwatch','Stopwatch','Show or hide the Stopwatch card on Dashboard. Its current timer state is preserved while hidden.')}
     </div>
   </div>`;
 }
@@ -40197,8 +40201,8 @@ v155VerifyCloudState=function(cloudState,expected){
   const problems=[...(base?.missing||[])];
   const cloudCfg=v192NormalizeDashboardSettings(cloudState?.settings?.v192Dashboard);
   const wantedCfg=v192NormalizeDashboardSettings(expected?.settings?.v192Dashboard);
-  if(JSON.stringify(cloudCfg)!==JSON.stringify(wantedCfg))problems.push('v192 Dashboard section visibility');
-  if(Number(cloudState?.cloudSyncVersion||0)<V192_CLOUD_SYNC_VERSION)problems.push('v192 cloud state version');
+  if(JSON.stringify(cloudCfg)!==JSON.stringify(wantedCfg))problems.push('v193 Dashboard section visibility');
+  if(Number(cloudState?.cloudSyncVersion||0)<V192_CLOUD_SYNC_VERSION)problems.push('v193 cloud state version');
   return {ok:problems.length===0,missing:[...new Set(problems)]};
 };
 const v192BuildFullBackupBase=v148BuildFullBackup;
@@ -40211,7 +40215,7 @@ v148BuildFullBackup=function(){
   payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
   payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
   payload.backupManifest.schemaVersion=V192_BACKUP_SCHEMA_VERSION;
-  payload.backupManifest.note='Complete MediaFlow v192 backup. Adds persistent Dashboard visibility settings for Today’s Balance, Rate Your Library and the new Missing Covers queue. Missing Covers lets users work through Library titles with no cover URL and save manual cover URLs directly from Dashboard. Preserves v191 Clean Covers/deletion recovery, v189 Last Seen, v188 Library Overview/title size, v186 Control Center and all prior Library, History, Logging, Respect XP, Statistics, theme and protected cloud data.';
+  payload.backupManifest.note='Complete MediaFlow v193 backup. Adds persistent Dashboard visibility for Stopwatch alongside Today’s Balance, Rate Your Library and Missing Covers. Hiding Stopwatch affects only Dashboard presentation and preserves the timer state. Preserves v192 Missing Covers, v191 Clean Covers/deletion recovery, v189 Last Seen, v188 Library Overview/title size, v186 Control Center and all prior Library, History, Logging, Respect XP, Statistics, theme and protected cloud data.';
   return payload;
 };
 const v192BackupManifestBase=v148BackupManifest;
@@ -40224,17 +40228,38 @@ v148BackupManifest=function(state,extras){
     dashboardRatingQueueVisibility:true,
     dashboardMissingCoversVisibility:true,
     dashboardMissingCoversQueue:true,
-    v192CloudSyncAudit:true
+    dashboardStopwatchVisibility:true,
+    v193CloudSyncAudit:true
   });
-  manifest.v192={
+  manifest.v193={
     cloudSyncVersion:V192_CLOUD_SYNC_VERSION,
     backupSchemaVersion:V192_BACKUP_SCHEMA_VERSION,
     showTodayBalance:cfg.showTodayBalance,
     showRatingQueue:cfg.showRatingQueue,
     showMissingCovers:cfg.showMissingCovers,
+    showStopwatch:cfg.showStopwatch,
     missingCoverTitles:(state?.library||[]).filter(i=>i?.id&&!String(i.coverUrl||'').trim()).length
   };
   return manifest;
+};
+
+
+/* ============================================================
+   MediaFlow v193
+   - Dashboard Stopwatch Show/Hide setting
+   - Hides only the Stopwatch card; Rate Your Library and Missing Covers
+     remain controlled independently by their own Dashboard settings.
+   - Stopwatch timer state is preserved while the card is hidden.
+   ============================================================ */
+const v193StopwatchHtmlBase=stopwatchHtml;
+stopwatchHtml=function(){
+  const html=v193StopwatchHtmlBase.apply(this,arguments);
+  const cfg=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
+  if(cfg.showStopwatch!==false)return html;
+  const host=document.createElement('div');
+  host.innerHTML=html;
+  host.querySelector('.stopwatch-card')?.remove();
+  return host.innerHTML;
 };
 
 
