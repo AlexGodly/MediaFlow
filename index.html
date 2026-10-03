@@ -1078,7 +1078,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 .category-delete-modal .v79-delete-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 13%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);font-size:24px}
 .category-delete-modal .v79-delete-warning{margin-top:14px;padding:12px 13px;border-radius:12px;background:color-mix(in srgb,var(--danger) 8%,var(--panel-raised));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--border-soft));line-height:1.55}
 </style>
-<meta name="mediaflow-version" content="194">
+<meta name="mediaflow-version" content="195">
 
 <style>
 /* v86 — logging browser integrated into core renderer */
@@ -1158,6 +1158,7 @@ html[data-theme="light"] .hint,html[data-theme="light"] .profile-note{color:#687
 <!-- MediaFlow v191: Clean Covers + restorable deleted-title Library History -->
 <!-- MediaFlow v193: Dashboard section visibility + Missing Covers queue + Stopwatch visibility -->
 <!-- MediaFlow v194: Global adjustable category-icon sizing + Completion Timeline URL-icon support -->
+<!-- MediaFlow v195: Rate Your Library right-aligned actions + Edit title label -->
 
 <style id="mf-v123-rating-queue-css">
 /* MediaFlow v123 — Dashboard Rating Queue */
@@ -6143,6 +6144,22 @@ html[data-theme="fullstyle-myanimelist"] #view-root .v176-library-synopsis{
 }
 </style>
 
+
+<style id="mf-v195-rating-actions-css">
+/* MediaFlow v195 — align Rate Your Library actions with Missing Covers. */
+.v123-rating-queue:not(.v192-missing-covers) .v123-rating-control{
+  width:100%;
+}
+.v123-rating-queue:not(.v192-missing-covers) .v123-rating-control .v123-rating-actions{
+  margin-left:auto;
+  justify-content:flex-end;
+}
+@media(max-width:620px){
+  .v123-rating-queue:not(.v192-missing-covers) .v123-rating-control .v123-rating-actions{
+    margin-left:0;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -14147,7 +14164,7 @@ function v123RatingQueueHtml(){
       <div class="v123-rating-meta">${v144CategoryIconHtml(cat)} ${escapeHtml(cat?.name||'Library')} · ${escapeHtml(v123StatusLabel(item.status))} · ${escapeHtml(progress)}</div>
       <div class="v123-rating-control">
         <div class="field"><label class="field-label">YOUR RATING / 10</label><input id="v123-rating-input" type="number" min="0.1" max="10" step="0.1" inputmode="decimal" placeholder="e.g. 8.5" onkeydown="if(event.key==='Enter'){event.preventDefault();App.v123ConfirmRating()}"></div>
-        <div class="v123-rating-actions"><button type="button" class="btn btn-ghost" onclick="App.openLibraryModal('${escapeHtml(String(item.id))}')">Edit</button><button type="button" class="btn btn-ghost" onclick="App.v123SkipRating()">Skip</button><button type="button" class="btn btn-primary" onclick="App.v123ConfirmRating()">Confirm & Next</button></div>
+        <div class="v123-rating-actions"><button type="button" class="btn btn-ghost" onclick="App.openLibraryModal('${escapeHtml(String(item.id))}')">Edit title</button><button type="button" class="btn btn-ghost" onclick="App.v123SkipRating()">Skip</button><button type="button" class="btn btn-primary" onclick="App.v123ConfirmRating()">Confirm & Next</button></div>
       </div>
       <div class="v123-rating-xp">${escapeHtml(xpText)} Skip gives no XP and moves this title behind the rest of the queue. Your queue position is remembered after refresh.</div>
     </div></div>
