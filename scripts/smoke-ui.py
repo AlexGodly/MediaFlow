@@ -3,13 +3,14 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v227.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v228.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
 CSS225=ROOT/'assets/css/95-v225-icons-personal-order.css'
 CSS226=ROOT/'assets/css/96-v226-semantic-ui-library.css'
 CSS227=ROOT/'assets/css/97-v227-ui-icon-corrections.css'
+CSS228=ROOT/'assets/css/98-v228-library-priority-dynamic-row.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -28,6 +29,7 @@ css224=CSS224.read_text(encoding='utf-8')
 css225=CSS225.read_text(encoding='utf-8')
 css226=CSS226.read_text(encoding='utf-8')
 css227=CSS227.read_text(encoding='utf-8')
+css228=CSS228.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -58,6 +60,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css225)
     page.add_style_tag(content=css226)
     page.add_style_tag(content=css227)
+    page.add_style_tag(content=css228)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -354,10 +357,75 @@ with sync_playwright() as p:
       const svg=b?.querySelector('.v225-btn-icon svg');
       return !!svg && !svg.querySelector('circle') && !!svg.querySelector('path');
     }''')
+
+    # v228 Library metadata icons + Dynamic category-row ordering.
+    page.evaluate("()=>App.setView('settings')")
+    page.wait_for_timeout(260)
+    v228_settings=page.evaluate(r'''() => {
+      const selector=document.querySelector('select[aria-label="Dynamic Library category row order"]');
+      const rows=[...document.querySelectorAll('.v186-dynamic-category-row')];
+      const first=rows[0];
+      const firstId=first?.dataset.v228DynamicCategory||'';
+      const mainName=(()=>{
+        const el=document.querySelector('.settings-categories-full .cat-manage-row>.name');
+        return (el?.textContent||'').trim().split(/\n/)[0].trim();
+      })();
+      const dynamicName=(first?.querySelector('.v181-config-copy b')?.textContent||'').trim();
+      return {
+        dynamicOrderSelector:!!selector,
+        dynamicOrderDefault:selector?.value||'',
+        dynamicDragHandle:!!first?.querySelector('.v228-dynamic-drag-handle'),
+        dynamicDragHandleEnabled:!first?.querySelector('.v228-dynamic-drag-handle')?.disabled,
+        dynamicDragHandleIconFree:!first?.querySelector('.v228-dynamic-drag-handle')?.querySelector('.v225-btn-icon'),
+        firstDynamicId:firstId,
+        mainCategoryName:mainName,
+        firstDynamicName:dynamicName
+      };
+    }''')
+    result.update(v228_settings)
+
+    # Create a different custom row order, then prove Follow Categories ignores it
+    # while switching back restores the saved custom order.
+    first_id=result.get('firstDynamicId','')
+    if first_id:
+        page.evaluate("id=>App.v181MoveDynamicCategory(id,1)", first_id)
+        page.wait_for_timeout(180)
+        result['customOrderMovedFirstName']=page.evaluate("()=>document.querySelector('.v186-dynamic-category-row .v181-config-copy b')?.textContent.trim()||''")
+        page.evaluate("()=>App.v228SetDynamicCategoryOrderMode('category')")
+        page.wait_for_timeout(220)
+        result['followOrderModeStored']=page.evaluate("()=>MediaFlowRuntime.getSettings().v181Library.dynamicCategoryOrderMode")
+        result['followOrderFirstName']=page.evaluate("()=>document.querySelector('.v186-dynamic-category-row .v181-config-copy b')?.textContent.trim()||''")
+        result['followDragDisabled']=page.evaluate("()=>document.querySelector('.v186-dynamic-category-row .v228-dynamic-drag-handle')?.disabled===true")
+        page.evaluate("()=>App.v228SetDynamicCategoryOrderMode('custom')")
+        page.wait_for_timeout(220)
+        result['customOrderModeStored']=page.evaluate("()=>MediaFlowRuntime.getSettings().v181Library.dynamicCategoryOrderMode")
+        result['customOrderRestoredFirstName']=page.evaluate("()=>document.querySelector('.v186-dynamic-category-row .v181-config-copy b')?.textContent.trim()||''")
+
+    v228_icons=page.evaluate(r'''() => {
+      const probe=document.createElement('div');
+      probe.innerHTML=`
+        <button class="pill category-click"><img class="v144-cat-icon-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="> Category</button>
+        <button class="pill priority-click">low priority</button>
+        <button class="pill priority-click">medium priority</button>
+        <button class="pill priority-click">high priority</button>`;
+      document.body.appendChild(probe);
+      App.v228RefreshLibraryMetadataIcons();
+      const category=probe.querySelector('.category-click');
+      const priorities=[...probe.querySelectorAll('.priority-click')];
+      const out={
+        libraryCategoryGenericIconRemoved:!category.querySelector('.v225-btn-icon'),
+        libraryCategoryOwnIconPreserved:!!category.querySelector('.v144-cat-icon-img'),
+        libraryPriorityIcons:priorities.map(x=>x.dataset.v226SemanticIcon||''),
+        libraryPrioritySvgDistinct:new Set(priorities.map(x=>x.querySelector('.v225-btn-icon')?.innerHTML||'')).size===3
+      };
+      probe.remove();
+      return out;
+    }''')
+    result.update(v228_icons)
     browser.close()
 
 required={
-    'runtimeVersion':227,
+    'runtimeVersion':228,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -439,10 +507,26 @@ required={
     'categoryNoIconModeHidden':True,
     'automaticModeIcon':True,
     'minusTimePlainIcon':True,
+    'dynamicOrderSelector':True,
+    'dynamicOrderDefault':'custom',
+    'dynamicDragHandle':True,
+    'dynamicDragHandleEnabled':True,
+    'dynamicDragHandleIconFree':True,
+    'followOrderModeStored':'category',
+    'followDragDisabled':True,
+    'customOrderModeStored':'custom',
+    'libraryCategoryGenericIconRemoved':True,
+    'libraryCategoryOwnIconPreserved':True,
+    'libraryPriorityIcons':['priorityLow','priorityMedium','priorityHigh'],
+    'libraryPrioritySvgDistinct':True,
 }
 fail=[]
 for k,v in required.items():
     if result.get(k)!=v: fail.append(f'{k}: expected {v!r}, got {result.get(k)!r}')
+if result.get('mainCategoryName') and result.get('mainCategoryName') not in result.get('followOrderFirstName',''):
+    fail.append(f"Follow Categories order did not use main category order: {result.get('followOrderFirstName')!r} vs {result.get('mainCategoryName')!r}")
+if result.get('customOrderMovedFirstName') and result.get('customOrderRestoredFirstName')!=result.get('customOrderMovedFirstName'):
+    fail.append('Custom Dynamic row order was not preserved after switching to Follow Categories and back')
 if result.get('categoryPositionWidth',0)<54: fail.append(f"Category order input is still too narrow: {result.get('categoryPositionWidth')}px")
 if result.get('desktopScrollbarWidth')=='none': fail.append('desktop Settings navigator scrollbar was hidden; it should remain available')
 if len(result.get('navGroups',[]))<6: fail.append('organized Settings navigation did not render enough groups')

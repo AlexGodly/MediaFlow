@@ -1,9 +1,9 @@
-const CACHE_NAME = 'mediaflow-v227-static-v1';
+const CACHE_NAME = 'mediaflow-v228-static-v1';
 const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./assets/js/mediaflow-v227.bundle.js",
+  "./assets/js/mediaflow-v228.bundle.js",
   "./assets/css/00-foundation.css",
   "./assets/css/10-navigation-core-ui.css",
   "./assets/css/20-dashboard-personal-order.css",
@@ -18,7 +18,8 @@ const STATIC_ASSETS = [
   "./assets/css/94-v224-library-sorting-actions.css",
   "./assets/css/95-v225-icons-personal-order.css",
   "./assets/css/96-v226-semantic-ui-library.css",
-  "./assets/css/97-v227-ui-icon-corrections.css"
+  "./assets/css/97-v227-ui-icon-corrections.css",
+  "./assets/css/98-v228-library-priority-dynamic-row.css"
 ];
 
 self.addEventListener('install', event => {

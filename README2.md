@@ -1,24 +1,26 @@
-# MediaFlow v227 — Modular Project
+# MediaFlow v228 — Modular Project
 
-**App release:** v227  
+**App release:** v228  
 **Stable feature/data base:** v201  
 **Cloud Sync:** v201  
 **Full Backup Schema:** v29  
 **Settings Preset Schema:** v1
 
-MediaFlow v227 is a focused interface-correction release built on v226. It fixes the Dynamic Library category icon URL mode, cleans up several remaining icon inconsistencies, improves visibility switches, and removes unwanted action icons from Dashboard poster placeholders.
+MediaFlow v228 is a focused Library and Dynamic-row configuration release built on v227. It removes redundant Library metadata icons, aligns Library priority pills with the priority picker, restores Dynamic category drag handles, and adds a persistent choice between an independent Dynamic row order and the main Categories order.
 
-## Main v227 changes
+## Main v228 changes
 
-- Fixed **Dynamic Library → Category icon URL** so category tabs actually display each category's configured URL icon.
-- Removed the leading dropdown icon from the **Dynamic category row icons** selector itself.
-- Made **Add time / Minus time** visually consistent by using a plain minus icon instead of a circled minus.
-- Added distinct semantic icons for **Low**, **Medium**, and **High** priority controls.
-- Fixed Show/Hide switch icons so the eye/eye-off icon remains fully visible instead of sitting under the toggle knob.
-- Added clear **Automatic** and **Manual** mode icons to Seasonal fresh-episode settings.
-- Removed global action icons from the poster placeholders used by **Rate Your Library** and **Missing Covers** on the Dashboard.
-- Removed redundant global icons from category-choice controls that already show the category's own identity.
-- Preserved all v226 Settings/category layout fixes, Dynamic Library sizing parity, Cloud Sync v201, Full Backup Schema v29, Settings Preset Schema v1, and existing user data.
+- Removed the extra global action icon from Library category metadata while preserving the category's own URL/icon identity.
+- Added distinct Low / Medium / High icons to Library priority pills using the same visual language as the priority popup.
+- Restored a three-line **☰** drag handle to Dynamic category-row Settings.
+- Added functional drag-and-drop reordering for the custom Dynamic category row.
+- Added **Dynamic category row order** with:
+  - **Custom Dynamic row order**
+  - **Follow Categories order**
+- Custom order remains the default and is preserved when Follow mode is temporarily enabled.
+- Follow mode updates Dynamic Library from the main Categories order automatically while keeping Dynamic visibility and category actions independent.
+- Integrated the new persistent preference with Settings reset, cloud merge/verification, Sync Now, Full Backup, Automatic Backup and Settings Presets.
+- Preserved Cloud Sync v201, Full Backup Schema v29, Settings Preset Schema v1, and existing user data.
 
 ## Development
 
@@ -42,4 +44,4 @@ python scripts/smoke-ui.py
 
 For local development use `scripts/serve.bat` on Windows or `scripts/serve.sh` on macOS/Linux.
 
-See `docs/CHANGELOG_v227.md` for the full release notes.
+See `docs/CHANGELOG_v228.md` for the full release notes.

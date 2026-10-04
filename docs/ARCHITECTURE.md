@@ -1,8 +1,8 @@
-# MediaFlow v227 Architecture
+# MediaFlow v228 Architecture
 
 ## Runtime foundation
 
-MediaFlow v227 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the legacy v201-compatible application state and render helpers remain available inside the same lexical scope.
+MediaFlow v228 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the stable v201-compatible application state and render helpers remain available inside the same lexical scope.
 
 ```text
 build-order.json
@@ -11,7 +11,7 @@ runtime_extensions slot
       ↓
 998-runtime-extension-foundation-v219.js
       ↓
-221–224 active release modules
+v221–v224 active release modules
       ↓
 156-v225-personal-order-toolbar-polish.js
       ↓
@@ -25,48 +25,90 @@ runtime_extensions slot
       ↓
 161-v227-ui-icon-corrections.js
       ↓
+162-v228-library-priority-dynamic-row.js
+      ↓
 999-close-app.js
 ```
 
-## v227 ownership
+## v228 ownership
 
-The v227 semantic corrections are owned by:
+The v228 runtime behavior is owned by:
 
 ```text
-src/js/components/161-v227-ui-icon-corrections.js
+src/js/components/162-v228-library-priority-dynamic-row.js
 ```
 
 That module owns:
 
-- plain Minus Time icon treatment;
-- Low / Medium / High priority semantic icons;
-- visibility-toggle icon handling;
-- Automatic / Manual state icons;
-- Dashboard poster-placeholder icon exclusions;
-- redundant category-choice icon removal; and
-- the icon-free exception for the Dynamic category-row icon selector.
+- the Library category-pill global-icon exclusion;
+- Library priority-pill semantic icon mapping;
+- Low / Medium / High priority icon parity with the priority picker;
+- `settings.v181Library.dynamicCategoryOrderMode` normalization/defaults;
+- effective Dynamic category order resolution;
+- custom/follow order mode switching;
+- Dynamic category drag-and-drop handlers;
+- Settings UI augmentation for the order source and drag handle;
+- effective-order use in Dynamic Library rendering and selection;
+- Library Overview Dynamic-order parity;
+- individual Settings reset integration; and
+- explicit Full Backup manifest metadata for the new persistent setting.
 
-Shared v227 presentation is owned by:
+Shared v228 presentation is owned by:
 
 ```text
-assets/css/97-v227-ui-icon-corrections.css
+assets/css/98-v228-library-priority-dynamic-row.css
 ```
 
-The stylesheet also fixes the Dynamic Library category URL icon mode by deliberately outranking the older v181 clean-tab rule that hid category images with `#view-root ... !important`.
+The stylesheet owns Library metadata icon cleanup, priority-pill icon sizing, the Dynamic order-source setting card, responsive drag/position/action row layout, drag/drop feedback, and Follow-mode read-only styling.
+
+## Dynamic category order model
+
+The existing `settings.v181Library.categoryOrder` continues storing the user's independent Dynamic custom order.
+
+v228 adds:
+
+```text
+settings.v181Library.dynamicCategoryOrderMode
+```
+
+with values:
+
+```text
+custom   → use settings.v181Library.categoryOrder
+category → use the current main S.categories order
+```
+
+Follow mode does **not** overwrite `categoryOrder`. Switching back to Custom therefore restores the previous Dynamic-specific order.
+
+Dynamic visibility remains stored independently in `hiddenCategoryIds`.
+
+## Persistence audit
+
+The new order-source preference is inside `S.settings.v181Library`.
+
+As a result:
+
+- local settings persistence includes it;
+- v181 cloud merge/verification includes it through `v181NormalizeLibrarySettings`;
+- Sync Now includes it;
+- Full Backup includes it;
+- Automatic Backup includes it through the Full Backup pipeline;
+- Settings Preset Export/Import includes it because the complete Settings object is cloned;
+- reset/default flows include it through `DEFAULT_SETTINGS.v181Library`.
+
+v228 additionally extends the backup manifest so the order-source preference is explicit in exported backup metadata.
+
+No persistence schema bump is required.
 
 ## Generated runtime
 
 The browser loads:
 
 ```text
-assets/js/mediaflow-v227.bundle.js
+assets/js/mediaflow-v228.bundle.js
 ```
 
 The generated bundle must exactly match `build-order.json` plus `runtime-order.json`.
-
-## Persistence
-
-v227 introduces no new persistent schema. The existing Dynamic Library category icon preference remains stored in `settings.v181Library.dynamicCategoryIcons` and continues through local settings, cloud settings, Full Backup, Automatic Backup, Settings Preset, Sync Now and import/export behavior.
 
 ## Validation
 
@@ -78,11 +120,11 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The Chromium smoke test validates Settings integrity, v226 regressions, the Dynamic category icon URL visibility fix, the icon-free selector exception, priority icons, visibility switches, Dashboard poster placeholders, Automatic/Manual state icons and stopwatch minus treatment.
+The Chromium smoke test validates v221–v227 regressions plus v228 category metadata cleanup, priority icons, the Dynamic row order selector, restored drag handle, Follow Categories behavior, and preservation of the custom Dynamic order when switching modes.
 
 ## Compatibility
 
-- App release: **227**
+- App release: **228**
 - Stable feature/data base: **201**
 - Runtime foundation: **219**
 - Cloud Sync contract: **201**
