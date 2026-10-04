@@ -7,12 +7,12 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="219">' not in index: errors.append('index.html version is not 219')
-if 'assets/js/mediaflow-v219.bundle.js' not in index: errors.append('index.html does not load v219 bundle')
-if 'assets/css/90-v219-settings-organizer.css' not in index: errors.append('index.html does not load v219 Settings stylesheet')
-if 'mediaflow-v219-static-v1' not in sw: errors.append('service worker cache version is not v219')
-if './assets/js/mediaflow-v219.bundle.js' not in sw: errors.append('service worker does not cache v219 bundle')
-if './assets/css/90-v219-settings-organizer.css' not in sw: errors.append('service worker does not cache v219 Settings stylesheet')
+if '<meta name="mediaflow-version" content="220">' not in index: errors.append('index.html version is not 220')
+if 'assets/js/mediaflow-v220.bundle.js' not in index: errors.append('index.html does not load v220 bundle')
+if 'assets/css/91-v220-settings-polish.css' not in index: errors.append('index.html does not load v220 Settings stylesheet')
+if 'mediaflow-v220-static-v1' not in sw: errors.append('service worker cache version is not v220')
+if './assets/js/mediaflow-v220.bundle.js' not in sw: errors.append('service worker does not cache v220 bundle')
+if './assets/css/91-v220-settings-polish.css' not in sw: errors.append('service worker does not cache v220 Settings stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -39,52 +39,57 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v219.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v220.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v219 bundle')
+if not bundle: errors.append('missing v220 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
-# Runtime architecture must be active before closure.
+# v219 runtime foundation remains the safe extension point; v220 Settings must register before closure.
 required_runtime=[
     'MediaFlow v219 — Runtime Extension Foundation',
     'const MediaFlowRuntime=',
     'window.MediaFlowRuntime=MediaFlowRuntime;',
-    "MediaFlowRuntime.registerPageRenderer('settings',v219RenderSettingsPage);",
-    "MediaFlowRuntime.registerPageEnhancer('settings',v219EnhanceSettingsDom);"
+    "MediaFlowRuntime.registerPageRenderer('settings',v220RenderSettingsPage);",
+    "MediaFlowRuntime.registerPageEnhancer('settings',v220EnhanceSettingsDom);",
+    'MediaFlowRuntime.version=220;'
 ]
 for pat in required_runtime:
-    if pat not in bundle: errors.append(f'missing v219 runtime feature: {pat}')
+    if pat not in bundle: errors.append(f'missing v220 runtime feature: {pat}')
 close_pos=bundle.rfind('})();')
 for pat in required_runtime:
     pos=bundle.find(pat)
-    if pos<0 or pos>close_pos: errors.append(f'v219 runtime feature is not inside the active app scope: {pat}')
+    if pos<0 or pos>close_pos: errors.append(f'v220 runtime feature is not inside the active app scope: {pat}')
 
-# Settings requirements.
 required_settings=[
-    'MediaFlow v219 — Active Organized Settings Browser',
-    'function v219SearchSettings',
-    'function v219EnhanceSettingsDom',
-    'function v219RestoreAllDefaults',
-    'function v219ResetSettingPath',
-    'function v219ResetNavigationDefaults',
-    'S.settings=v219Clone(DEFAULT_SETTINGS);',
-    'S.navLayout=v161NormalizeNavLayout(null)',
-    'Search settings…',
+    'MediaFlow v220 — Settings Organization & Search Polish',
+    'function v220SearchSettings',
+    'function v220OrganizeSettingsContent',
+    'function v220NormalizeSectionLabels',
+    'function v220EnhanceSettingsDom',
+    'function v220RestoreAllDefaults',
+    'function v220ResetSettingPath',
+    'function v220ResetNavigationDefaults',
+    "'Library':['CATEGORIES','LIBRARY EXPERIENCE'",
+    'Search by setting, feature, or section…',
     'Restore all defaults',
     'Reset section',
-    'resetAllSettings=v219RestoreAllDefaults;'
+    "title.replace(/^🛠\\s*/u,'')",
+    'resetAllSettings=v220RestoreAllDefaults;'
 ]
 for pat in required_settings:
-    if pat not in bundle: errors.append(f'missing v219 Settings feature: {pat}')
+    if pat not in bundle: errors.append(f'missing v220 Settings feature: {pat}')
 
-mod=(SRC/'pages/settings/144-v219-active-settings-page.js').read_text(encoding='utf-8')
-restore=re.search(r'function v219RestoreAllDefaults\(\)\{([\s\S]*?)\n\}',mod)
-if not restore: errors.append('v219RestoreAllDefaults function not found')
+mod=SRC/'pages/settings/145-v220-active-settings-page.js'
+if not mod.exists(): errors.append('missing v220 Settings runtime module')
 else:
-    body=restore.group(1)
-    if 'resetAll()' in body or 'S.library=' in body or 'S.sessions=' in body or 'S.categories=' in body:
-        errors.append('v219 Restore all defaults appears to modify content data')
+    mt=mod.read_text(encoding='utf-8')
+    restore=re.search(r'function v220RestoreAllDefaults\(\)\{([\s\S]*?)\n\}',mt)
+    if not restore: errors.append('v220RestoreAllDefaults function not found')
+    else:
+        body=restore.group(1)
+        if 'resetAll()' in body or 'S.library=' in body or 'S.sessions=' in body or 'S.categories=' in body:
+            errors.append('v220 Restore all defaults appears to modify content data')
 
 # Preserve v217 navigation regression fix.
 for pat in [
@@ -114,6 +119,7 @@ print('CHECK OK')
 print('Build manifest rows:',len(order))
 print('Runtime extension modules:',len(runtime_order))
 print('Settings page renderer: active inside app scope')
+print('v220 Settings ordering/search polish: present')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

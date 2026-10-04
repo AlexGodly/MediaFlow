@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v219.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v220.bundle.js'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -36,7 +36,7 @@ setup_js=r'''() => {
 
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True, executable_path=chromium, args=['--no-sandbox'])
-    page=browser.new_page()
+    page=browser.new_page(viewport={'width':1600,'height':1100})
     errors=[]
     page.on('pageerror', lambda exc: errors.append(str(exc)))
     page.set_content('<!doctype html><html><body><div id="app"></div></body></html>')
@@ -44,55 +44,93 @@ with sync_playwright() as p:
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
     page.evaluate("()=>App.setView('settings')")
-    page.wait_for_timeout(350)
-    result=page.evaluate(r'''() => ({
-      runtimeVersion:window.MediaFlowRuntime?.version||0,
-      settingsRegistered:window.MediaFlowRuntime?.hasPageRenderer?.('settings')===true,
-      settingsPage:!!document.querySelector('.v219-settings-page'),
-      searchExists:!!document.getElementById('v219-settings-search'),
-      navGroups:document.querySelectorAll('.v219-settings-nav-group').length,
-      navItems:document.querySelectorAll('.v219-settings-nav-item').length,
-      resetButtons:document.querySelectorAll('.v219-setting-reset,.v219-section-reset').length,
-      restoreAllExists:[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Restore all defaults')
-    })''')
+    page.wait_for_timeout(450)
+    result=page.evaluate(r'''() => {
+      const groups=[...document.querySelectorAll('.v220-settings-nav-group')].map(g=>({
+        title:g.querySelector('.v220-settings-nav-title')?.textContent.trim()||'',
+        items:[...g.querySelectorAll('.v220-settings-nav-item')].map(x=>x.textContent.trim())
+      }));
+      const pageGroups=[...document.querySelectorAll('.v220-settings-page-group')].map(g=>({
+        title:g.querySelector('h2')?.textContent.trim()||'',
+        sections:[...g.querySelectorAll('.section-label')].filter(x=>!x.closest('.card')).map(x=>{
+          const c=x.cloneNode(true); c.querySelectorAll('button').forEach(b=>b.remove()); return c.textContent.trim().replace(/\s+/g,' ');
+        })
+      }));
+      const labels=[...document.querySelectorAll('.v220-settings-content .section-label')].filter(x=>!x.closest('.card'));
+      const normalized=labels.map(x=>{
+        const c=x.cloneNode(true); c.querySelectorAll('button').forEach(b=>b.remove()); return c.textContent.trim().replace(/\s+/g,' ');
+      });
+      const requestedNoDefault=['DAILY GOAL','TITLE RECOMMENDATIONS','MEDIAFLOW SYSTEM','SCHEDULER TUNING','LEVELING & XP','AUTOMATIC BACKUPS'];
+      const defaultLeak=requestedNoDefault.filter(name=>{
+        const el=labels.find(x=>{const c=x.cloneNode(true);c.querySelectorAll('button').forEach(b=>b.remove());return c.textContent.trim().replace(/\s+/g,' ')===name;});
+        return !el || [...el.querySelectorAll('button')].some(b=>/^Default$/i.test(b.textContent.trim()));
+      });
+      return {
+        runtimeVersion:window.MediaFlowRuntime?.version||0,
+        settingsRegistered:window.MediaFlowRuntime?.hasPageRenderer?.('settings')===true,
+        settingsPage:!!document.querySelector('.v220-settings-page'),
+        searchExists:!!document.getElementById('v220-settings-search'),
+        searchPlaceholder:document.getElementById('v220-settings-search')?.getAttribute('placeholder')||'',
+        navGroups:groups,
+        pageGroups,
+        resetButtons:document.querySelectorAll('.v220-setting-reset,.v220-section-reset').length,
+        restoreAllExists:[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Restore all defaults'),
+        categoriesFirstInLibrary:groups.find(g=>g.title==='Library')?.items?.[0]==='CATEGORIES',
+        noOtherGroup:!groups.some(g=>g.title==='Other'),
+        groupOrderMatches:JSON.stringify(groups.map(g=>g.title))===JSON.stringify(pageGroups.map(g=>g.title)),
+        librarySectionOrderMatches:JSON.stringify(groups.find(g=>g.title==='Library')?.items||[])===JSON.stringify((pageGroups.find(g=>g.title==='Library')?.sections||[]).map(x=>x==='DEFAULT LOGGING METHOD'?'LOGGING METHOD':x)),
+        libraryIntegrityClean:normalized.includes('LIBRARY INTEGRITY')&&!normalized.some(x=>x.includes('🛠')),
+        defaultLeak,
+        pageHasCategoriesFirst:(pageGroups.find(g=>g.title==='Library')?.sections||[])[0]==='CATEGORIES'
+      };
+    }''')
     search=page.evaluate(r'''() => {
-      const before=[...document.querySelectorAll('.v219-settings-nav-item')].filter(b=>!b.classList.contains('v219-settings-hidden')).length;
-      App.v219SearchSettings('cover');
-      const after=[...document.querySelectorAll('.v219-settings-nav-item')].filter(b=>!b.classList.contains('v219-settings-hidden')).length;
-      return {before,after,searchFilters:after>0&&after<before};
+      const before=[...document.querySelectorAll('.v220-settings-nav-item')].filter(b=>!b.classList.contains('v220-settings-hidden')).length;
+      App.v220SearchSettings('cover');
+      const after=[...document.querySelectorAll('.v220-settings-nav-item')].filter(b=>!b.classList.contains('v220-settings-hidden')).length;
+      const clearVisible=!document.getElementById('v220-settings-clear')?.hidden;
+      return {before,after,searchFilters:after>0&&after<before,clearVisible};
     }''')
     result.update(search)
-    page.evaluate("()=>App.v219ClearSettingsSearch()")
+    page.evaluate("()=>App.v220ClearSettingsSearch()")
     page.evaluate("()=>App.updateSetting('dailyMinutes',999)")
     page.wait_for_timeout(250)
     result['changedSetting']=page.evaluate("()=>window.MediaFlowRuntime.getSettings().dailyMinutes===999")
-    page.evaluate("()=>App.v219ResetSettingPath('dailyMinutes','Daily minutes')")
+    page.evaluate("()=>App.v220ResetSettingPath('dailyMinutes','Daily minutes')")
     page.wait_for_timeout(250)
     result['individualResetWorks']=page.evaluate("()=>window.MediaFlowRuntime.getSettings().dailyMinutes===window.MediaFlowRuntime.getDefaultSettings().dailyMinutes")
     page.evaluate("()=>App.updateSetting('tasksPerDay',99)")
     page.wait_for_timeout(200)
-    page.evaluate("()=>App.v219RestoreAllDefaults()")
+    page.evaluate("()=>App.v220RestoreAllDefaults()")
     page.wait_for_timeout(300)
     result['restoreAllWorks']=page.evaluate("()=>window.MediaFlowRuntime.getSettings().tasksPerDay===window.MediaFlowRuntime.getDefaultSettings().tasksPerDay")
     browser.close()
 
 required={
-    'runtimeVersion':219,
+    'runtimeVersion':220,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
     'restoreAllExists':True,
     'searchFilters':True,
+    'clearVisible':True,
     'changedSetting':True,
     'individualResetWorks':True,
     'restoreAllWorks':True,
+    'categoriesFirstInLibrary':True,
+    'noOtherGroup':True,
+    'groupOrderMatches':True,
+    'librarySectionOrderMatches':True,
+    'libraryIntegrityClean':True,
+    'pageHasCategoriesFirst':True,
 }
 fail=[]
 for k,v in required.items():
     if result.get(k)!=v: fail.append(f'{k}: expected {v!r}, got {result.get(k)!r}')
-if result.get('navGroups',0)<5: fail.append('organized Settings navigation did not render enough groups')
-if result.get('navItems',0)<10: fail.append('organized Settings navigation did not render enough sections')
+if len(result.get('navGroups',[]))<6: fail.append('organized Settings navigation did not render enough groups')
 if result.get('resetButtons',0)<10: fail.append('per-setting/section reset controls did not render')
+if result.get('defaultLeak'): fail.append('native Default button/text still present in: '+', '.join(result['defaultLeak']))
+if 'feature, or section' not in result.get('searchPlaceholder',''): fail.append('new v220 search placeholder is missing')
 if errors: fail.extend(f'browser page error: {e}' for e in errors)
 print(json.dumps(result,indent=2))
 if fail:

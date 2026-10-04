@@ -35055,7 +35055,7 @@ v148BuildFullBackup=function(){
   payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
   payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
   payload.backupManifest.schemaVersion=V201_BACKUP_SCHEMA_VERSION;
-  payload.backupManifest.note='Complete MediaFlow v218 organized-settings modular backup (stable v201 feature base). Expands global category-icon sizing and adds an independent persistent cover-placeholder category-icon scale. Preserves v200 category default missing covers, v199 status terminology, v198 Settings Presets, v197 category recovery and all prior Library, History, Logging, XP, Statistics, themes and protected cloud data.';
+  payload.backupManifest.note='Complete MediaFlow v220 settings-organization modular backup (stable v201 feature base). Expands global category-icon sizing and adds an independent persistent cover-placeholder category-icon scale. Preserves v200 category default missing covers, v199 status terminology, v198 Settings Presets, v197 category recovery and all prior Library, History, Logging, XP, Statistics, themes and protected cloud data.';
   return payload;
 };
 const v201BackupManifestBase=v148BackupManifest;
@@ -35093,161 +35093,86 @@ v196BuildSettingsPreset=function(){
   return preset;
 };
 
-})();
-
-
-/* v50 one-time Library History integrity migration.
-   Exact IDs only. Ambiguous/unsafe legacy entries are left unlinked. */
-setTimeout(async()=>{
-  try{
-    if(!S.migrations?.libraryHistoryExactIdsV50?.done){
-      const r=v50MigrateLibraryHistoryLinks();
-      if(r.linked>0) await saveState();
-      if(S.view==='libraryhistory') render();
-      console.info(`MediaFlow v63: linked ${r.linked} legacy Library History entr${r.linked===1?'y':'ies'} by exact unique title.`);
-    }
-  }catch(e){console.warn('MediaFlow v63 Library History migration skipped:',e);}
-},0);
-
-
-/* MediaFlow v63
-   Global dropdown styling is CSS-driven, so all current and future native
-   <select> controls automatically inherit the designed theme-aware UI. */
-
-
-/* MediaFlow v63 — Large Library Performance Update
-   - debounced Library search
-   - cached normalized title index
-   - cached filter/sort results
-   - one-pass Library overview aggregation
-   - one-pass History last-touched index
-   - reduced offscreen row painting */
-
-
-/* MediaFlow v63 — Library Search Focus Hotfix
-   Debounced search now restores focus and caret after the Library DOM refresh,
-   allowing uninterrupted typing while retaining v53 performance optimizations. */
-
-/* MediaFlow v63 — Platform Theme Collection
-Separate MediaFlow and Platform theme selectors. Platform themes are MediaFlow palette interpretations inspired by the named services; no third-party logos/assets/layouts are copied. */
-/* MediaFlow v63 — v56 Loading Hotfix + Profile Picture URL
-   Rebuilt from the stable v55 base. The URL-avatar feature is isolated to the
-   Profile Settings action and performs no image/network work during app startup. */
-/* MediaFlow v63 — Stopwatch Full Time Adjustment
-   Adds Minus time alongside Set time and Add time. Entered H/M/S can be
-   repeatedly added or subtracted, never going below 00:00:00. The resulting
-   value becomes the reset/start value and can be started normally. */
-/* MediaFlow v63 — Actual Consumption Category Integrity
-   Logging titles from categories different from the scheduler recommendation now
-   credits History, category balance, health, XP and the next rotation to the
-   categories actually consumed. The originally assigned category is preserved
-   as metadata instead of being falsely credited as completed. Mixed-category
-   logs are split into category-correct linked session records. */
-
-/* MediaFlow v63 — Batch Logging & Recommendation Status Refinement
-   Batch Log records multiple Library titles with independent amounts/minutes and
-   feeds the same sessions-based scheduler, health, statistics, XP and progresssystems. Recommendation statuses now describe recommendation fulfillment only:
-   Complete / Partial / Over / Skipped. Off-category and batch consumption uses
-   Logged, while a fully missed recommendation receives a zero-consumption Skipped
-   record so it is never falsely credited. */
-
-/* MediaFlow v63 — Dedicated Batch Logging
-   Adds a visible Batch Log navigation page with multi-title rows, automatic
-   Library category detection, independent amount/minutes, date and note,
-   Logged status for non-recommendation consumption, Library progress and
-   completion updates, XP, History, Statistics, and scheduler balance/health
-   integration. Recommendation statuses remain Complete/Partial/Over/Skipped. */
-
-/* MediaFlow v63 — Searchable Responsive Batch Logging
-   Batch Log now uses type-to-search Library title selection across all categories,
-   responsive phone/tablet cards with no horizontal row scrolling, and explicitly
-   updates each selected title's Library progress on submission. */
-
-/* MediaFlow v63 — Mobile Navigation & Statistics Responsiveness
-   Replaces the overcrowded mobile tab bar with five always-visible primary tabs
-   plus a More menu for Library History, Profile and Settings. Statistics charts,
-   cards, progress tracks and record rows now shrink/wrap cleanly on phones and
-   tablets without pushing Settings off-screen or requiring horizontal scrolling. */
-/* MediaFlow v64 — Classic Mobile Bottom Menu Design
-   Preserves every v63 responsiveness/navigation fix while restoring the
-   original pre-v63 visual design for the mobile bottom menu. The More fallback
-   remains available when all destination tabs cannot fit safely. */
-
-/* MediaFlow v65 — Mobile Bottom Navigation Visual Restoration
-   Restyles the mobile bottom navigation to match the supplied reference:
-   large outline icons above full labels on a clean flat bottom bar, with the
-   active destination highlighted by the current theme accent. The v63
-   responsive navigation logic and More fallback remain intact. */
-
-
 /* ============================================================
-   v76 — On This Day: whole-day activity
+   MediaFlow v219 — Runtime Extension Foundation
+   ------------------------------------------------------------
+   New MediaFlow releases register active page renderers here instead of
+   appending patches after the legacy application closure. Runtime extension
+   files are injected by scripts/build.py BEFORE 999-close-app.js.
    ============================================================ */
-renderOnThisDay=function(){
-  const now=new Date(), groups=new Map();
-  for(const s of (S.sessions||[])){
-    if(!s || s.status==='skipped') continue;
-    const d=new Date(Number(s.timestamp)||0);
-    if(Number.isNaN(d.getTime())) continue;
-    const years=now.getFullYear()-d.getFullYear();
-    if(years<1 || d.getMonth()!==now.getMonth() || d.getDate()!==now.getDate()) continue;
-    if(!groups.has(years)) groups.set(years,[]);
-    const rows=groups.get(years);
-    for(const t of (s.titles||[])){
-      if(!t?.title) continue;
-      rows.push({
-        title:t.title, libraryId:t.libraryId||null,
-        qty:Number(t.qty ?? t.amount ?? 0)||0,
-        categoryId:t.categoryId || s.categoryId || null,
-        minutes:Number(t.minutes)||0, timestamp:Number(s.timestamp)||0
-      });
-    }
+const V219_RUNTIME_VERSION=219;
+const V219_PAGE_RENDERERS=new Map();
+const V219_PAGE_ENHANCERS=new Map();
+
+function v219RegisterPageRenderer(view,renderer){
+  const key=String(view||'').trim();
+  if(!key||typeof renderer!=='function')throw new Error('MediaFlowRuntime.registerPageRenderer requires a view id and renderer function.');
+  V219_PAGE_RENDERERS.set(key,renderer);
+  return renderer;
+}
+function v219RegisterPageEnhancer(view,enhancer){
+  const key=String(view||'').trim();
+  if(!key||typeof enhancer!=='function')throw new Error('MediaFlowRuntime.registerPageEnhancer requires a view id and function.');
+  const list=V219_PAGE_ENHANCERS.get(key)||[];
+  list.push(enhancer);
+  V219_PAGE_ENHANCERS.set(key,list);
+  return enhancer;
+}
+function v219RunPageEnhancers(view){
+  const list=V219_PAGE_ENHANCERS.get(String(view||''))||[];
+  for(const fn of list){
+    try{fn();}catch(err){console.error(`MediaFlow v219: ${view} page enhancer failed`,err);}
   }
-  if(!groups.size) return '';
-  const years=Math.min(...groups.keys()), raw=groups.get(years).sort((a,b)=>a.timestamp-b.timestamp);
-  const merged=[], byKey=new Map();
-  for(const x of raw){
-    const key=x.libraryId ? `id:${x.libraryId}` : `title:${cleanTitle(x.title).toLowerCase()}`;
-    let m=byKey.get(key);
-    if(!m){m={...x,qty:0,minutes:0};byKey.set(key,m);merged.push(m);}
-    m.qty+=x.qty; m.minutes+=x.minutes;
+}
+
+const v219LegacyRenderView=renderView;
+renderView=function(){
+  const view=String(S.view||'');
+  const renderer=V219_PAGE_RENDERERS.get(view);
+  if(!renderer)return v219LegacyRenderView.apply(this,arguments);
+  const root=document.getElementById('view-root');
+  if(!root)return;
+  let html='';
+  try{
+    html=renderer({view,state:S,settings:S.settings,defaults:DEFAULT_SETTINGS,app:App,runtime:MediaFlowRuntime})||'';
+  }catch(err){
+    console.error(`MediaFlow v219: registered renderer for ${view} failed; using legacy renderer`,err);
+    return v219LegacyRenderView.apply(this,arguments);
   }
-  if(!merged.length) return '';
-  const first=merged[0], firstItem=v50FindLibraryItem(first.libraryId,first.title), cover=v50Cover(firstItem);
-  const extra=merged.length-1;
-  const amountText=x=>{
-    const item=v50FindLibraryItem(x.libraryId,x.title), cat=getCategory(item?.categoryId||x.categoryId);
-    const unit=cat?.unit||'';
-    const bits=[];
-    if(x.qty>0) bits.push(`${x.qty} ${escapeHtml(unit||'unit'+(x.qty===1?'':'s'))}`);
-    if(x.minutes>0) bits.push(fmtMinutes(x.minutes));
-    return bits.join(' · ');
-  };
-  const rows=merged.map(x=>{
-    const item=v50FindLibraryItem(x.libraryId,x.title), cat=getCategory(item?.categoryId||x.categoryId), img=v50Cover(item);
-    return `<div class="v76-otd-row">${img||`<div class="v76-otd-placeholder">${v144CategoryIconHtml(cat)}</div>`}<div class="v76-otd-row-copy"><b>${escapeHtml(cleanTitle(x.title))}</b><small>${escapeHtml(cat?.name||'Library')}${amountText(x)?` · ${amountText(x)}`:''}</small></div></div>`;
-  }).join('');
-  return `<details class="on-this-day v76-otd ${cover?'v50-onthisday':''}"><summary class="v76-otd-summary">${cover}<div class="v76-otd-copy"><span>On this day · ${years} year${years===1?'':'s'} ago you logged</span><b>${escapeHtml(cleanTitle(first.title))}</b>${firstItem?`<small>${escapeHtml(getCategory(firstItem.categoryId)?.name||'Library')}</small>`:''}${extra?`<span class="v76-otd-more">+${extra} more logged that day · tap to view all</span>`:`<span class="v76-otd-more">Tap to view details</span>`}</div><span class="v76-otd-chevron">⌄</span></summary><div class="v76-otd-list">${rows}</div></details>`;
+  root.innerHTML=`<div class="fade-in">${html}</div>`;
+  setTimeout(()=>v219RunPageEnhancers(view),0);
 };
 
-
+const MediaFlowRuntime={
+  version:V219_RUNTIME_VERSION,
+  registerPageRenderer:v219RegisterPageRenderer,
+  registerPageEnhancer:v219RegisterPageEnhancer,
+  hasPageRenderer(view){return V219_PAGE_RENDERERS.has(String(view||''));},
+  getRegisteredPages(){return [...V219_PAGE_RENDERERS.keys()];},
+  getCurrentView(){return String(S.view||'');},
+  requestRender(){return render();},
+  getSettings(){return JSON.parse(JSON.stringify(S.settings||{}));},
+  getDefaultSettings(){return JSON.parse(JSON.stringify(DEFAULT_SETTINGS||{}));}
+};
+window.MediaFlowRuntime=MediaFlowRuntime;
 /* ============================================================
-   MediaFlow v218 — Organized Settings Browser
+   MediaFlow v220 — Settings Organization & Search Polish
    - searchable Settings page
-   - sticky Settings index / quick navigation
+   - redesigned Settings search and quick navigation
+   - page sections ordered exactly like the Settings index
    - per-setting reset buttons where a canonical default exists
    - complete Restore all defaults audit, including navigation layout
    ============================================================ */
 
-const V218_SETTINGS_VERSION=218;
-let V218_SETTINGS_REGISTRY=[];
-let V218_SETTINGS_QUERY='';
+const V220_SETTINGS_VERSION=220;
+let V220_SETTINGS_REGISTRY=[];
+let V220_SETTINGS_QUERY='';
 
-function v218Clone(value){
+function v220Clone(value){
   return value==null?value:JSON.parse(JSON.stringify(value));
 }
 
-function v218Slug(value){
+function v220Slug(value){
   return String(value||'settings')
     .trim().toLowerCase()
     .replace(/&/g,' and ')
@@ -35255,19 +35180,68 @@ function v218Slug(value){
     .replace(/^-+|-+$/g,'') || 'settings';
 }
 
-function v218SettingsGroup(label){
-  const t=String(label||'').toUpperCase();
-  if(/CATEGORY|LIBRARY|COVER|LOGGING|TITLE DETAILS/.test(t))return 'Library';
-  if(/DASHBOARD|NAVIGATION|APP UPDATE/.test(t))return 'Interface';
-  if(/THEME|APPEARANCE|STYLE/.test(t))return 'Appearance';
-  if(/SCHEDULER|MEDIAFLOW SYSTEM|TITLE RECOMMEND|DAILY GOAL|SEASONAL/.test(t))return 'MediaFlow System';
-  if(/LEVEL|XP|RESPECT/.test(t))return 'Progression';
-  if(/BACKUP|DATA|IMPORT|EXPORT|CLOUD|PRESET|SYNC/.test(t))return 'Data & Sync';
-  if(/STATISTIC/.test(t))return 'Statistics';
-  return 'Other';
+const V220_SETTINGS_GROUP_ORDER=['Library','Interface','Appearance','MediaFlow System','Progression','Statistics','Data & Sync'];
+
+const V220_SETTINGS_SECTION_ORDER={
+  'Library':['CATEGORIES','LIBRARY EXPERIENCE','DEFAULT LOGGING METHOD','COVER SIZE ADJUSTMENT','LIBRARY INTEGRITY','CATEGORY ICONS','MISSING TITLE COVERS','LIBRARY OVERVIEW','LIBRARY MAINTENANCE','CATEGORY MAINTENANCE','COVER MAINTENANCE'],
+  'Interface':['DASHBOARD SETTINGS','NAVIGATION','APP UPDATES'],
+  'Appearance':['THEMES & CUSTOMIZATION'],
+  'MediaFlow System':['DAILY GOAL','TITLE RECOMMENDATIONS','MEDIAFLOW SYSTEM','SCHEDULER TUNING'],
+  'Progression':['LEVELING & XP'],
+  'Statistics':['STATISTICS SETTINGS'],
+  'Data & Sync':['IMPORT / EXPORT — MEDIA SERVICES','AUTOMATIC BACKUPS','CLOUD SYNC','SETTINGS PRESET','DATA']
+};
+
+const V220_NATIVE_DEFAULT_BUTTON_SECTIONS=new Set([
+  'DAILY GOAL','TITLE RECOMMENDATIONS','SCHEDULER TUNING','LEVELING & XP','AUTOMATIC BACKUPS'
+]);
+
+function v220PlainSectionTitle(label){
+  if(!label)return '';
+  const clone=label.cloneNode(true);
+  clone.querySelectorAll('button').forEach(btn=>btn.remove());
+  let title=String(clone.textContent||'').trim().replace(/\s+/g,' ');
+  title=title.replace(/^🛠\s*/u,'').trim();
+  title=title.replace(/\s+Default$/i,'').trim();
+  if(/^LOGGING METHOD$/i.test(title))title='DEFAULT LOGGING METHOD';
+  return title;
 }
 
-function v218GetByPath(obj,path){
+function v220DisplaySectionTitle(title){
+  const t=String(title||'').trim();
+  if(t==='DEFAULT LOGGING METHOD')return 'LOGGING METHOD';
+  return t;
+}
+
+function v220SettingsGroup(label){
+  const t=String(label||'').trim().toUpperCase();
+  if(t==='CATEGORIES'||/^(LIBRARY|DEFAULT LOGGING METHOD|COVER SIZE ADJUSTMENT|LIBRARY INTEGRITY|CATEGORY ICONS|MISSING TITLE COVERS|CATEGORY MAINTENANCE|COVER MAINTENANCE)/.test(t))return 'Library';
+  if(/^(DASHBOARD SETTINGS|NAVIGATION|APP UPDATES)/.test(t))return 'Interface';
+  if(/THEME|APPEARANCE|STYLE/.test(t))return 'Appearance';
+  if(/^(DAILY GOAL|TITLE RECOMMENDATIONS|MEDIAFLOW SYSTEM|SCHEDULER TUNING)/.test(t)||/SEASONAL/.test(t))return 'MediaFlow System';
+  if(/^(LEVELING & XP|LEVELING|XP|SYSTEM RESPECT)/.test(t))return 'Progression';
+  if(/STATISTIC/.test(t))return 'Statistics';
+  if(/IMPORT|EXPORT|BACKUP|DATA|CLOUD|PRESET|SYNC/.test(t))return 'Data & Sync';
+  return 'Library';
+}
+
+function v220SectionSortRank(item){
+  const list=V220_SETTINGS_SECTION_ORDER[item.group]||[];
+  const idx=list.indexOf(item.title);
+  return idx>=0?idx:1000+Number(item.index||0);
+}
+
+function v220SortedRegistry(registry){
+  return [...(registry||[])].sort((a,b)=>{
+    const ga=V220_SETTINGS_GROUP_ORDER.indexOf(a.group);
+    const gb=V220_SETTINGS_GROUP_ORDER.indexOf(b.group);
+    if(ga!==gb)return ga-gb;
+    const sa=v220SectionSortRank(a), sb=v220SectionSortRank(b);
+    return sa!==sb?sa-sb:a.index-b.index;
+  });
+}
+
+function v220GetByPath(obj,path){
   let cur=obj;
   for(const part of String(path||'').split('.').filter(Boolean)){
     if(cur==null||typeof cur!=='object'||!(part in cur))return undefined;
@@ -35276,7 +35250,7 @@ function v218GetByPath(obj,path){
   return cur;
 }
 
-function v218SetByPath(obj,path,value){
+function v220SetByPath(obj,path,value){
   const parts=String(path||'').split('.').filter(Boolean);
   if(!parts.length)return false;
   let cur=obj;
@@ -35289,7 +35263,7 @@ function v218SetByPath(obj,path,value){
   return true;
 }
 
-function v218TouchModifiedAt(path){
+function v220TouchModifiedAt(path){
   const parts=String(path||'').split('.').filter(Boolean);
   let cur=S.settings;
   const chain=[];
@@ -35306,7 +35280,7 @@ function v218TouchModifiedAt(path){
   }
 }
 
-function v218ApplySettingsSideEffects(){
+function v220ApplySettingsSideEffects(){
   try{applyTheme(S.settings?.theme||DEFAULT_SETTINGS.theme);}catch(_){ }
   try{v181ApplyCoverVars();}catch(_){ }
   try{v194ApplyCategoryIconScale();}catch(_){ }
@@ -35317,22 +35291,22 @@ function v218ApplySettingsSideEffects(){
   try{v146ScheduleDynamicTheme();}catch(_){ }
 }
 
-function v218ResetSettingPath(path,label){
-  const def=v218GetByPath(DEFAULT_SETTINGS,path);
+function v220ResetSettingPath(path,label){
+  const def=v220GetByPath(DEFAULT_SETTINGS,path);
   if(def===undefined){
     showToast(`No canonical default is registered for ${label||'this setting'}.`);
     return;
   }
   S.settings=S.settings||{};
-  v218SetByPath(S.settings,path,v218Clone(def));
-  v218TouchModifiedAt(path);
-  v218ApplySettingsSideEffects();
+  v220SetByPath(S.settings,path,v220Clone(def));
+  v220TouchModifiedAt(path);
+  v220ApplySettingsSideEffects();
   persistSettings();
   render();
   showToast(`${label||'Setting'} restored to default`);
 }
 
-function v218ResetNavigationDefaults(){
+function v220ResetNavigationDefaults(){
   try{
     S.navLayout=v161NormalizeNavLayout(null);
     S.navLayout.modifiedAt=Date.now();
@@ -35344,8 +35318,8 @@ function v218ResetNavigationDefaults(){
   }
 }
 
-function v218ResetScopeCategory(scopeKey,id,label){
-  const def=v218GetByPath(DEFAULT_SETTINGS,`v186ControlCenter.${scopeKey}.categoryIds`);
+function v220ResetScopeCategory(scopeKey,id,label){
+  const def=v220GetByPath(DEFAULT_SETTINGS,`v186ControlCenter.${scopeKey}.categoryIds`);
   if(!Array.isArray(def))return;
   const cfg=v186EnsureControlCenter(S.settings||DEFAULT_SETTINGS);
   const scope=cfg?.[scopeKey];
@@ -35359,21 +35333,21 @@ function v218ResetScopeCategory(scopeKey,id,label){
   showToast(`${label||'Category'} restored to default`);
 }
 
-function v218RestoreAllDefaults(){
+function v220RestoreAllDefaults(){
   const ok=window.confirm('Restore every MediaFlow setting to its default?\n\nYour Library, History, XP, categories and other content data are not deleted. Navigation layout and all Settings preferences will be reset.');
   if(!ok)return;
 
-  S.settings=v218Clone(DEFAULT_SETTINGS);
+  S.settings=v220Clone(DEFAULT_SETTINGS);
   S.malLink={username:'',mode:'anime'};
   try{S.navLayout=v161NormalizeNavLayout(null);S.navLayout.modifiedAt=Date.now();}catch(_){ }
 
-  v218ApplySettingsSideEffects();
+  v220ApplySettingsSideEffects();
   try{saveState();}catch(_){persistSettings();}
   render();
   showToast('All settings restored to defaults');
 }
 
-function v218ResetDescriptorForControl(el){
+function v220ResetDescriptorForControl(el){
   if(!el)return null;
   const code=[el.getAttribute('onchange'),el.getAttribute('onclick'),el.getAttribute('oninput')].filter(Boolean).join(' ');
   if(!code)return null;
@@ -35430,27 +35404,27 @@ function v218ResetDescriptorForControl(el){
   return null;
 }
 
-function v218SettingLabelForControl(el){
+function v220SettingLabelForControl(el){
   const holder=el.closest('.field,.settings-toggle-row,.v192-dashboard-toggle-row,.v167-respect-edit,.v181-cover-setting,.v186-stat-toggle,.v186-scope-row,.v186-scope-head,.v188-overview-settings-grid,.v194-category-icon-controls,.v161-nav-row');
   const label=holder?.querySelector('.field-label,label,b,.v186-scope-name,.v161-nav-label')?.textContent;
   return String(label||el.getAttribute('aria-label')||el.getAttribute('title')||'Setting').trim().replace(/\s+/g,' ');
 }
 
-function v218ResetButtonContainer(el){
+function v220ResetButtonContainer(el){
   return el.closest('.field,.settings-toggle-row,.v192-dashboard-toggle-row,.v167-respect-edit,.v181-cover-setting,.v186-stat-toggle,.v186-scope-row,.v186-scope-head,.v194-category-icon-controls,.v161-nav-row') || el.parentElement;
 }
 
-function v218EnhancePerSettingResets(root){
+function v220EnhancePerSettingResets(root){
   if(!root)return;
-  const controls=[...root.querySelectorAll('input[onchange],select[onchange],button.toggle[onclick]')];
+  const controls=[...root.querySelectorAll('input[onchange],input[oninput],select[onchange],button[onclick]')];
   const seen=new WeakMap();
 
   for(const el of controls){
     if(el.closest('.settings-categories-full'))continue; // Category objects are Library data, not Settings defaults.
     if(el.type==='file'||el.disabled)continue;
-    const desc=v218ResetDescriptorForControl(el);
+    const desc=v220ResetDescriptorForControl(el);
     if(!desc)continue;
-    const holder=v218ResetButtonContainer(el);
+    const holder=v220ResetButtonContainer(el);
     if(!holder)continue;
 
     const key=desc.type==='path'?`path:${desc.path}`:desc.type==='scopeCategory'?`scope:${desc.scope}:${desc.id}`:desc.type;
@@ -35463,26 +35437,26 @@ function v218EnhancePerSettingResets(root){
     const existing=[...holder.querySelectorAll('button')].some(b=>/reset|default/i.test(String(b.textContent||'')));
     if(existing&&holder!==el.parentElement)continue;
 
-    const label=v218SettingLabelForControl(el);
+    const label=v220SettingLabelForControl(el);
     const btn=document.createElement('button');
     btn.type='button';
-    btn.className='btn btn-sm btn-ghost v218-setting-reset';
+    btn.className='btn btn-sm btn-ghost v220-setting-reset';
     btn.textContent='Reset';
     btn.title=`Restore ${label} to default`;
     btn.setAttribute('aria-label',`Restore ${label} to default`);
     btn.addEventListener('click',ev=>{
       ev.preventDefault();ev.stopPropagation();
-      if(desc.type==='path')v218ResetSettingPath(desc.path,label);
-      else if(desc.type==='navigation')v218ResetNavigationDefaults();
-      else if(desc.type==='scopeCategory')v218ResetScopeCategory(desc.scope,desc.id,label);
+      if(desc.type==='path')v220ResetSettingPath(desc.path,label);
+      else if(desc.type==='navigation')v220ResetNavigationDefaults();
+      else if(desc.type==='scopeCategory')v220ResetScopeCategory(desc.scope,desc.id,label);
     });
-    holder.classList.add('v218-resettable-setting');
+    holder.classList.add('v220-resettable-setting');
     holder.appendChild(btn);
   }
 }
 
 
-function v218SectionResetPlan(title){
+function v220SectionResetPlan(title){
   const t=String(title||'').trim().toUpperCase();
   if(t==='DAILY GOAL')return {kind:'legacy',section:'daily'};
   if(t==='TITLE RECOMMENDATIONS')return {kind:'legacy',section:'titles'};
@@ -35506,146 +35480,214 @@ function v218SectionResetPlan(title){
   return null;
 }
 
-function v218ResetSettingsPaths(paths,label){
+function v220ResetSettingsPaths(paths,label){
   S.settings=S.settings||{};
   let changed=false;
   for(const path of (paths||[])){
-    const def=v218GetByPath(DEFAULT_SETTINGS,path);
+    const def=v220GetByPath(DEFAULT_SETTINGS,path);
     if(def===undefined)continue;
-    v218SetByPath(S.settings,path,v218Clone(def));
-    v218TouchModifiedAt(path);
+    v220SetByPath(S.settings,path,v220Clone(def));
+    v220TouchModifiedAt(path);
     changed=true;
   }
   if(!changed){showToast(`No canonical defaults are registered for ${label||'this section'}.`);return;}
-  v218ApplySettingsSideEffects();
+  v220ApplySettingsSideEffects();
   persistSettings();
   render();
   showToast(`${label||'Section'} restored to defaults`);
 }
 
-function v218ResetSettingsSectionPlan(plan,label){
+function v220ResetSettingsSectionPlan(plan,label){
   if(!plan)return;
   if(plan.kind==='legacy'){resetSettingsSection(plan.section);return;}
-  if(plan.kind==='navigation'){v218ResetNavigationDefaults();return;}
-  if(plan.kind==='paths'){v218ResetSettingsPaths(plan.paths,label);}
+  if(plan.kind==='navigation'){v220ResetNavigationDefaults();return;}
+  if(plan.kind==='paths'){v220ResetSettingsPaths(plan.paths,label);}
 }
 
-function v218EnhanceSectionResetButtons(root){
+function v220EnhanceSectionResetButtons(root){
   if(!root)return;
   const labels=[...root.querySelectorAll('.section-label')].filter(el=>!el.closest('.card'));
   for(const label of labels){
-    const title=String(label.textContent||'').replace(/\b(Default|Reset)\b/gi,'').trim().replace(/\s+/g,' ');
-    const plan=v218SectionResetPlan(title);
+    const title=v220PlainSectionTitle(label);
+    const plan=v220SectionResetPlan(title);
     if(!plan)continue;
-    const existing=[...label.querySelectorAll('button')].some(btn=>/reset|default/i.test(String(btn.textContent||'')));
+    const existing=[...label.querySelectorAll('button')].some(btn=>/reset section/i.test(String(btn.textContent||'')));
     if(existing)continue;
     const btn=document.createElement('button');
     btn.type='button';
-    btn.className='btn btn-sm btn-ghost v218-section-reset';
+    btn.className='btn btn-sm btn-ghost v220-section-reset';
     btn.textContent='Reset section';
-    btn.title=`Restore ${title} to defaults`;
-    btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();v218ResetSettingsSectionPlan(plan,title);});
-    label.classList.add('v218-settings-section-head');
+    btn.title=`Restore ${v220DisplaySectionTitle(title)} to defaults`;
+    btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();v220ResetSettingsSectionPlan(plan,v220DisplaySectionTitle(title));});
+    label.classList.add('v220-settings-section-head');
     label.appendChild(btn);
   }
 }
 
-function v218SectionNodes(label){
+function v220NormalizeSectionLabels(root){
+  if(!root)return;
+  const labels=[...root.querySelectorAll('.section-label')].filter(el=>!el.closest('.card'));
+  for(const label of labels){
+    const title=v220PlainSectionTitle(label);
+    if(title==='LIBRARY INTEGRITY'){
+      const buttons=[...label.querySelectorAll('button')];
+      label.textContent='LIBRARY INTEGRITY';
+      buttons.forEach(btn=>label.appendChild(btn));
+    }
+    if(V220_NATIVE_DEFAULT_BUTTON_SECTIONS.has(title)){
+      label.querySelectorAll('button').forEach(btn=>{
+        if(/^Default$/i.test(String(btn.textContent||'').trim()))btn.remove();
+      });
+    }
+  }
+}
+
+function v220SectionNodes(label){
+  const special=label.closest('.settings-categories-full');
+  if(special)return [special];
   const nodes=[label];
   let cur=label.nextElementSibling;
   while(cur){
     if(cur.classList?.contains('section-label'))break;
+    if(cur.matches?.('.two-col,footer,.v147-settings-footer,.v220-settings-empty,.v220-settings-page-group'))break;
+    if(cur.querySelector?.(':scope > .section-label'))break;
     nodes.push(cur);
     cur=cur.nextElementSibling;
   }
   return nodes;
 }
 
-function v218BuildSettingsRegistry(root){
+function v220BuildSettingsRegistry(root){
   const labels=[...root.querySelectorAll('.section-label')].filter(el=>!el.closest('.card'));
   const used=new Set();
+  const seenMoveNodes=new Set();
   const registry=[];
   labels.forEach((label,index)=>{
-    const title=String(label.textContent||'').replace(/\b(Default|Reset)\b/gi,'').trim().replace(/\s+/g,' ');
+    const title=v220PlainSectionTitle(label);
     if(!title)return;
-    let id=`v218-settings-${v218Slug(title)}`;
-    let n=2;while(used.has(id))id=`v218-settings-${v218Slug(title)}-${n++}`;
+    let id=`v220-settings-${v220Slug(title)}`;
+    let n=2;while(used.has(id))id=`v220-settings-${v220Slug(title)}-${n++}`;
     used.add(id);
     label.id=id;
-    const nodes=v218SectionNodes(label);
+    const nodes=v220SectionNodes(label).filter(node=>{
+      if(seenMoveNodes.has(node))return false;
+      seenMoveNodes.add(node);return true;
+    });
     const text=nodes.map(node=>node.textContent||'').join(' ').replace(/\s+/g,' ').toLowerCase();
-    registry.push({id,title,group:v218SettingsGroup(title),label,nodes,text,index});
+    registry.push({id,title,displayTitle:v220DisplaySectionTitle(title),group:v220SettingsGroup(title),label,nodes,text,index});
   });
-  V218_SETTINGS_REGISTRY=registry;
-  return registry;
+  V220_SETTINGS_REGISTRY=v220SortedRegistry(registry);
+  return V220_SETTINGS_REGISTRY;
 }
 
-function v218RenderSettingsNav(registry){
-  const nav=document.getElementById('v218-settings-nav');
-  if(!nav)return;
-  const groups=[];
-  for(const item of registry){
-    let group=groups.find(g=>g.name===item.group);
-    if(!group){group={name:item.group,items:[]};groups.push(group);}
-    group.items.push(item);
+function v220OrganizeSettingsContent(root,registry){
+  if(!root)return;
+  root.querySelectorAll(':scope > .v220-settings-page-group').forEach(el=>el.remove());
+  const footer=[...root.children].find(el=>el.matches?.('footer,.v147-settings-footer'))||null;
+  const empty=document.getElementById('v220-settings-empty');
+  const anchor=footer||empty||null;
+  const sorted=v220SortedRegistry(registry);
+
+  for(const groupName of V220_SETTINGS_GROUP_ORDER){
+    const items=sorted.filter(item=>item.group===groupName);
+    if(!items.length)continue;
+    const group=document.createElement('section');
+    group.className='v220-settings-page-group';
+    group.dataset.settingsGroup=groupName;
+    group.innerHTML=`<div class="v220-settings-page-group-head"><div><span class="v220-settings-page-group-kicker">Settings group</span><h2>${escapeHtml(groupName)}</h2></div><span class="v220-settings-page-group-count">${items.length} section${items.length===1?'':'s'}</span></div><div class="v220-settings-page-group-body"></div>`;
+    const body=group.querySelector('.v220-settings-page-group-body');
+    for(const item of items){
+      for(const node of item.nodes){ if(node&&node.parentNode)body.appendChild(node); }
+    }
+    root.insertBefore(group,anchor);
   }
-  nav.innerHTML=groups.map(group=>`<div class="v218-settings-nav-group">
-    <div class="v218-settings-nav-title">${escapeHtml(group.name)}</div>
-    ${group.items.map(item=>`<button type="button" class="v218-settings-nav-item" data-settings-target="${escapeHtml(item.id)}" onclick="App.v218JumpSettings('${escapeHtml(item.id)}')">${escapeHtml(item.title)}</button>`).join('')}
+
+  root.querySelectorAll(':scope > .two-col').forEach(wrapper=>{if(!wrapper.children.length)wrapper.remove();});
+}
+
+function v220RenderSettingsNav(registry){
+  const nav=document.getElementById('v220-settings-nav');
+  if(!nav)return;
+  const sorted=v220SortedRegistry(registry);
+  const groups=V220_SETTINGS_GROUP_ORDER.map(name=>({name,items:sorted.filter(item=>item.group===name)})).filter(group=>group.items.length);
+  nav.innerHTML=groups.map(group=>`<div class="v220-settings-nav-group" data-settings-group="${escapeHtml(group.name)}">
+    <div class="v220-settings-nav-title">${escapeHtml(group.name)}</div>
+    ${group.items.map(item=>`<button type="button" class="v220-settings-nav-item" data-settings-target="${escapeHtml(item.id)}" onclick="App.v220JumpSettings('${escapeHtml(item.id)}')">${escapeHtml(item.displayTitle)}</button>`).join('')}
   </div>`).join('');
 }
 
-function v218SearchSettings(value){
+function v220SearchSettings(value){
   const query=String(value||'').trim().toLowerCase();
-  V218_SETTINGS_QUERY=query;
+  V220_SETTINGS_QUERY=query;
   let visible=0;
-  for(const section of V218_SETTINGS_REGISTRY){
-    const match=!query||section.text.includes(query)||section.title.toLowerCase().includes(query);
-    section.nodes.forEach(node=>node.classList.toggle('v218-settings-hidden',!match));
+  for(const section of V220_SETTINGS_REGISTRY){
+    const match=!query||section.text.includes(query)||section.title.toLowerCase().includes(query)||section.displayTitle.toLowerCase().includes(query)||section.group.toLowerCase().includes(query);
+    section.nodes.forEach(node=>node.classList.toggle('v220-settings-hidden',!match));
     if(match)visible++;
-    const nav=document.querySelector(`.v218-settings-nav-item[data-settings-target="${CSS.escape(section.id)}"]`);
-    if(nav)nav.classList.toggle('v218-settings-hidden',!match);
+    const nav=document.querySelector(`.v220-settings-nav-item[data-settings-target="${CSS.escape(section.id)}"]`);
+    if(nav)nav.classList.toggle('v220-settings-hidden',!match);
   }
-  document.querySelectorAll('.v218-settings-nav-group').forEach(group=>{
-    const any=[...group.querySelectorAll('.v218-settings-nav-item')].some(btn=>!btn.classList.contains('v218-settings-hidden'));
-    group.classList.toggle('v218-settings-hidden',!any);
+  document.querySelectorAll('.v220-settings-nav-group').forEach(group=>{
+    const any=[...group.querySelectorAll('.v220-settings-nav-item')].some(btn=>!btn.classList.contains('v220-settings-hidden'));
+    group.classList.toggle('v220-settings-hidden',!any);
   });
-  const count=document.getElementById('v218-settings-search-count');
-  if(count)count.textContent=query?`${visible} section${visible===1?'':'s'} found`:`${V218_SETTINGS_REGISTRY.length} settings sections`;
-  const empty=document.getElementById('v218-settings-empty');
+  document.querySelectorAll('.v220-settings-page-group').forEach(group=>{
+    const groupName=group.dataset.settingsGroup||'';
+    const any=V220_SETTINGS_REGISTRY.some(section=>section.group===groupName&&section.nodes.some(node=>!node.classList.contains('v220-settings-hidden')));
+    group.classList.toggle('v220-settings-hidden',!any);
+  });
+  const count=document.getElementById('v220-settings-search-count');
+  if(count)count.textContent=query?`${visible} result${visible===1?'':'s'}`:`${V220_SETTINGS_REGISTRY.length} sections`;
+  const clear=document.getElementById('v220-settings-clear');
+  if(clear)clear.hidden=!query;
+  const empty=document.getElementById('v220-settings-empty');
   if(empty)empty.hidden=visible!==0;
 }
 
-function v218ClearSettingsSearch(){
-  const input=document.getElementById('v218-settings-search');
+function v220ClearSettingsSearch(){
+  const input=document.getElementById('v220-settings-search');
   if(input)input.value='';
-  v218SearchSettings('');
+  v220SearchSettings('');
   input?.focus();
 }
 
-function v218JumpSettings(id){
+function v220JumpSettings(id){
   const el=document.getElementById(String(id||''));
   if(!el)return;
   el.scrollIntoView({behavior:'smooth',block:'start'});
-  el.classList.add('v218-settings-flash');
-  setTimeout(()=>el.classList.remove('v218-settings-flash'),900);
+  el.classList.add('v220-settings-flash');
+  setTimeout(()=>el.classList.remove('v220-settings-flash'),900);
 }
 
-function v218EnhanceSettingsDom(){
-  const page=document.querySelector('.v218-settings-page');
+function v220BindSettingsSearchShortcut(){
+  if(window.__v220SettingsSearchShortcutBound)return;
+  window.__v220SettingsSearchShortcutBound=true;
+  document.addEventListener('keydown',ev=>{
+    if((ev.ctrlKey||ev.metaKey)&&String(ev.key||'').toLowerCase()==='k'&&String(S.view||'')==='settings'){
+      ev.preventDefault();
+      document.getElementById('v220-settings-search')?.focus();
+    }
+  });
+}
+
+function v220EnhanceSettingsDom(){
+  const page=document.querySelector('.v220-settings-page');
   if(!page||String(S.view||'')!=='settings')return;
-  const content=page.querySelector('.v218-settings-content');
+  const content=page.querySelector('.v220-settings-content');
   if(!content)return;
-  const registry=v218BuildSettingsRegistry(content);
-  v218RenderSettingsNav(registry);
-  v218EnhancePerSettingResets(content);
-  v218EnhanceSectionResetButtons(content);
-  v218SearchSettings(V218_SETTINGS_QUERY);
+  v220NormalizeSectionLabels(content);
+  const registry=v220BuildSettingsRegistry(content);
+  v220OrganizeSettingsContent(content,registry);
+  v220RenderSettingsNav(registry);
+  v220EnhancePerSettingResets(content);
+  v220EnhanceSectionResetButtons(content);
+  v220BindSettingsSearchShortcut();
+  v220SearchSettings(V220_SETTINGS_QUERY);
 }
 
-const v218RenderSettingsBase=renderSettings;
-renderSettings=function(){
-  let raw=v218RenderSettingsBase.apply(this,arguments);
+const v220LegacySettingsRenderer=renderSettings;
+function v220RenderSettingsPage(){
+  let raw=v220LegacySettingsRenderer.apply(this,arguments);
   let head='';
   try{
     const host=document.createElement('div');
@@ -35661,42 +35703,45 @@ renderSettings=function(){
     raw=host.innerHTML;
   }catch(_){ }
 
-  const html=`<div class="v218-settings-page">
+  return `<div class="v220-settings-page">
     ${head||'<div class="view-head"><div><div class="view-title">Settings</div><div class="view-desc">Configure MediaFlow.</div></div></div>'}
-    <div class="v218-settings-toolbar">
-      <div class="v218-settings-search-wrap">
-        <span class="v218-settings-search-icon">⌕</span>
-        <input id="v218-settings-search" type="search" autocomplete="off" placeholder="Search settings…" value="${escapeHtml(V218_SETTINGS_QUERY)}" oninput="App.v218SearchSettings(this.value)">
-        <button type="button" class="btn btn-sm btn-ghost v218-settings-clear" onclick="App.v218ClearSettingsSearch()">Clear</button>
+    <div class="v220-settings-toolbar">
+      <div class="v220-settings-search-panel">
+        <div class="v220-settings-search-control">
+          <span class="v220-settings-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg></span>
+          <div class="v220-settings-search-field">
+            <label for="v220-settings-search">Search settings</label>
+            <input id="v220-settings-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search by setting, feature, or section…" value="${escapeHtml(V220_SETTINGS_QUERY)}" oninput="App.v220SearchSettings(this.value)">
+          </div>
+          <kbd class="v220-settings-search-shortcut">Ctrl K</kbd>
+          <button id="v220-settings-clear" type="button" class="v220-settings-clear" onclick="App.v220ClearSettingsSearch()" aria-label="Clear settings search" title="Clear search" ${V220_SETTINGS_QUERY?'':'hidden'}>×</button>
+        </div>
+        <div class="v220-settings-search-status"><span id="v220-settings-search-count">Settings</span><span class="v220-settings-search-help">Search names, descriptions, and controls</span></div>
       </div>
-      <div class="v218-settings-toolbar-meta"><span id="v218-settings-search-count">Settings</span><button type="button" class="btn btn-danger" onclick="App.v218RestoreAllDefaults()">Restore all defaults</button></div>
+      <button type="button" class="btn btn-danger v220-restore-all" onclick="App.v220RestoreAllDefaults()">Restore all defaults</button>
     </div>
-    <div class="v218-settings-layout">
-      <aside id="v218-settings-nav" class="v218-settings-nav" aria-label="Settings sections"></aside>
-      <main class="v218-settings-content">${raw}<div id="v218-settings-empty" class="empty-state v218-settings-empty" hidden>No settings match your search.</div></main>
+    <div class="v220-settings-layout">
+      <aside id="v220-settings-nav" class="v220-settings-nav" aria-label="Settings sections"></aside>
+      <main class="v220-settings-content">${raw}<div id="v220-settings-empty" class="empty-state v220-settings-empty" hidden>No settings match your search.</div></main>
     </div>
   </div>`;
+}
 
-  setTimeout(v218EnhanceSettingsDom,0);
-  return html;
-};
-
-// Replace the old incomplete reset-all implementation with the audited v218 path.
-resetAllSettings=v218RestoreAllDefaults;
+// Replace the old incomplete reset-all implementation with the audited v220 path.
+resetAllSettings=v220RestoreAllDefaults;
 Object.assign(App,{
-  resetAllSettings:v218RestoreAllDefaults,
-  v218RestoreAllDefaults,
-  v218ResetSettingPath,
-  v218ResetNavigationDefaults,
-  v218SearchSettings,
-  v218ClearSettingsSearch,
-  v218JumpSettings
+  resetAllSettings:v220RestoreAllDefaults,
+  v220RestoreAllDefaults,
+  v220ResetSettingPath,
+  v220ResetNavigationDefaults,
+  v220SearchSettings,
+  v220ClearSettingsSearch,
+  v220JumpSettings
 });
 
-/* Rebuild the Settings index after any full render. */
-const v218RenderBase=render;
-render=function(){
-  const result=v218RenderBase.apply(this,arguments);
-  if(String(S.view||'')==='settings')setTimeout(v218EnhanceSettingsDom,0);
-  return result;
-};
+// v220 keeps Settings on the active runtime renderer and applies the polished organization layer.
+MediaFlowRuntime.registerPageRenderer('settings',v220RenderSettingsPage);
+MediaFlowRuntime.registerPageEnhancer('settings',v220EnhanceSettingsDom);
+MediaFlowRuntime.version=220;
+
+})();

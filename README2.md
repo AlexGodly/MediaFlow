@@ -1,14 +1,13 @@
-# MediaFlow v219 — Runtime Foundation + Organized Settings
+# MediaFlow v220 — Settings Polish & Synchronized Organization
 
 **Stable feature base:** MediaFlow v201  
-**App release:** v219  
+**App release:** v220  
+**Runtime foundation:** v219  
 **Cloud Sync compatibility:** v201  
 **Full Backup schema:** v29  
 **Settings Preset schema:** v1
 
-v219 fixes the architecture problem that caused some later source files to exist without actually controlling the running app. New runtime extensions are now injected inside MediaFlow's live application scope, and Settings is the first page registered through the new active page-renderer registry.
-
-The Settings page now visibly includes a searchable browser, grouped navigation, per-setting reset controls, section resets, and an audited Restore all defaults action.
+v220 builds on the working v219 active-runtime foundation and focuses on making Settings easier to use and visually consistent. The left Settings index and the actual Settings page now share the same grouping and section order, Categories is the first Library section, the search UI has been redesigned, and noisy legacy `Default` labels have been removed from the affected section headers.
 
 ## Run MediaFlow
 
@@ -20,34 +19,61 @@ Run `scripts\serve.bat`, then open `http://localhost:8080/`.
 bash scripts/serve.sh
 ```
 
-## Runtime architecture
+## v220 Settings structure
 
 ```text
-MediaFlow_v219_Modular/
-├── index.html
-├── assets/
-│   ├── css/90-v219-settings-organizer.css
-│   └── js/mediaflow-v219.bundle.js
-├── src/js/
-│   ├── core/runtime/
-│   │   ├── 998-runtime-extension-foundation-v219.js
-│   │   └── 999-close-app.js
-│   ├── pages/settings/144-v219-active-settings-page.js
-│   ├── runtime-order.json
-│   └── build-order.json
-├── scripts/
-│   ├── build.py
-│   ├── check.py
-│   ├── smoke-ui.py
-│   └── locate.py
-└── tests/settings-smoke.html
+Library
+├── Categories
+├── Library Experience
+├── Logging Method
+├── Cover Size Adjustment
+├── Library Integrity
+├── Category Icons
+├── Missing Title Covers
+├── Library Overview
+├── Library Maintenance
+├── Category Maintenance
+└── Cover Maintenance
+
+Interface
+├── Dashboard Settings
+├── Navigation
+└── App Updates
+
+Appearance
+└── Themes & Customization
+
+MediaFlow System
+├── Daily Goal
+├── Title Recommendations
+├── MediaFlow System
+└── Scheduler Tuning
+
+Progression
+└── Leveling & XP
+
+Statistics
+└── Statistics Settings
+
+Data & Sync
+├── Import / Export — Media Services
+├── Automatic Backups
+├── Cloud Sync
+├── Settings Preset
+└── Data
 ```
 
-## Why future updates now appear
+## Active runtime files
 
-`build-order.json` contains a dedicated `runtime_extensions` slot before `999-close-app.js`. `scripts/build.py` injects every file listed in `runtime-order.json` into that slot while MediaFlow's state, renderers and helpers are still in scope. New release modules therefore cannot silently land after the old closure like the broken v218 Settings patch did.
+```text
+src/js/core/runtime/998-runtime-extension-foundation-v219.js
+src/js/pages/settings/145-v220-active-settings-page.js
+src/js/runtime-order.json
+assets/css/91-v220-settings-polish.css
+assets/js/mediaflow-v220.bundle.js
+```
 
-The new `window.MediaFlowRuntime` also provides a real page renderer/enhancer registry. Settings is registered through that registry instead of overriding the old renderer from outside the app.
+The v219 runtime-extension foundation remains the safe execution layer for future updates. v220 registers the active Settings renderer inside that runtime instead of patching the application after its private scope closes.
 
 ## Build and verify
 
@@ -57,7 +83,7 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The UI smoke test launches Chromium, opens Settings, and verifies that the v219 runtime is active, the search field exists, the organized Settings navigation renders, reset buttons exist, and search actually filters sections.
+The Chromium smoke test verifies the actual rendered Settings page, including the new search, Categories-first Library ordering, matching left-menu/page group order, cleaned Library Integrity label, removed legacy `Default` buttons, per-setting resets, and Restore all defaults.
 
 ## Compatibility
 
