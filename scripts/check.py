@@ -7,11 +7,11 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="228">' not in index: errors.append('index.html version is not 228')
-if 'assets/js/mediaflow-v228.bundle.js' not in index: errors.append('index.html does not load v228 bundle')
+if '<meta name="mediaflow-version" content="229">' not in index: errors.append('index.html version is not 229')
+if 'assets/js/mediaflow-v229.bundle.js' not in index: errors.append('index.html does not load v229 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v228-static-v1' not in sw: errors.append('service worker cache version is not v228')
-if './assets/js/mediaflow-v228.bundle.js' not in sw: errors.append('service worker does not cache v228 bundle')
+if 'mediaflow-v229-static-v1' not in sw: errors.append('service worker cache version is not v229')
+if './assets/js/mediaflow-v229.bundle.js' not in sw: errors.append('service worker does not cache v229 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
 if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
@@ -23,6 +23,8 @@ if 'assets/css/97-v227-ui-icon-corrections.css' not in index: errors.append('ind
 if './assets/css/97-v227-ui-icon-corrections.css' not in sw: errors.append('service worker does not cache v227 UI stylesheet')
 if 'assets/css/98-v228-library-priority-dynamic-row.css' not in index: errors.append('index.html does not load v228 UI stylesheet')
 if './assets/css/98-v228-library-priority-dynamic-row.css' not in sw: errors.append('service worker does not cache v228 UI stylesheet')
+if 'assets/css/99-v229-library-choice-modals.css' not in index: errors.append('index.html does not load v229 modal stylesheet')
+if './assets/css/99-v229-library-choice-modals.css' not in sw: errors.append('service worker does not cache v229 modal stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -46,6 +48,7 @@ if 'pages/settings/159-v226-category-settings-dynamic-icon-mode.js' not in runti
 if 'pages/library/160-v226-library-sizing-display-polish.js' not in runtime_order: errors.append('missing active v226 runtime module: pages/library/160-v226-library-sizing-display-polish.js')
 if 'components/161-v227-ui-icon-corrections.js' not in runtime_order: errors.append('missing active v227 runtime module: components/161-v227-ui-icon-corrections.js')
 if 'components/162-v228-library-priority-dynamic-row.js' not in runtime_order: errors.append('missing active v228 runtime module: components/162-v228-library-priority-dynamic-row.js')
+if 'components/163-v229-library-choice-modals.js' not in runtime_order: errors.append('missing active v229 runtime module: components/163-v229-library-choice-modals.js')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -67,9 +70,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v228.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v229.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v228 bundle')
+if not bundle: errors.append('missing v229 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -314,6 +317,31 @@ try:
 except Exception as e:
     errors.append(f'node syntax check failed: {e}')
 
+
+# v229 choice-modal regression checks.
+css229=(ROOT/'assets/css/99-v229-library-choice-modals.css').read_text(encoding='utf-8') if (ROOT/'assets/css/99-v229-library-choice-modals.css').exists() else ''
+if not css229: errors.append('missing v229 choice-modal stylesheet')
+for pat in [
+    'V229_CATEGORY_MODAL_PAGE_SIZE=15',
+    "libraryStatusModalHtml=function(d)",
+    "libraryCategoryModalHtml=function(d)",
+    "const cats=(S.categories||[]).slice()",
+    'cats.length>V229_CATEGORY_MODAL_PAGE_SIZE',
+    'v144CategoryIconHtml(cat||{})',
+    "if(el?.matches?.('.status-choice'))return null",
+    'select[aria-label="Dynamic Library category row icons"]'
+]:
+    if pat not in bundle: errors.append(f'missing v229 modal feature: {pat}')
+for pat in [
+    '.modal:has(.v229-category-modal)',
+    '.v229-category-choice-list{',
+    'max-height:none!important',
+    '.v229-category-choice-list-two{grid-template-columns:repeat(2,minmax(0,1fr))}',
+    '.v229-status-choice-icon>.v225-btn-icon',
+    'select[aria-label="Dynamic Library category row icons"][data-v226-dropdown-icon]'
+]:
+    if pat not in css229: errors.append(f'missing v229 modal CSS: {pat}')
+
 if errors:
     print('CHECK FAILED')
     for e in errors: print('-',e)
@@ -329,7 +357,8 @@ print('v224 Library/sorting/page naming/recommendation actions: preserved')
 print('v225 Personal Order clarity/global button icons/Account polish: preserved')
 print('v226 semantic icons/dropdowns/category layout/Dynamic Library sizing: preserved')
 print('v227 icon/category-row/dashboard-cover corrections: preserved')
-print('v228 Library metadata/Dynamic row ordering controls: active')
+print('v228 Library metadata/Dynamic row ordering controls: preserved')
+print('v229 Category/Status popup polish: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v228.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v229.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
@@ -11,6 +11,7 @@ CSS225=ROOT/'assets/css/95-v225-icons-personal-order.css'
 CSS226=ROOT/'assets/css/96-v226-semantic-ui-library.css'
 CSS227=ROOT/'assets/css/97-v227-ui-icon-corrections.css'
 CSS228=ROOT/'assets/css/98-v228-library-priority-dynamic-row.css'
+CSS229=ROOT/'assets/css/99-v229-library-choice-modals.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -30,6 +31,7 @@ css225=CSS225.read_text(encoding='utf-8')
 css226=CSS226.read_text(encoding='utf-8')
 css227=CSS227.read_text(encoding='utf-8')
 css228=CSS228.read_text(encoding='utf-8')
+css229=CSS229.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -61,6 +63,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css226)
     page.add_style_tag(content=css227)
     page.add_style_tag(content=css228)
+    page.add_style_tag(content=css229)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -141,7 +144,7 @@ with sync_playwright() as p:
         categoryDragHasNoIcon:!!drag&&!drag.querySelector('.v225-btn-icon'),
         settingsNavIconCoverage:navItems.length>0&&navItems.every(x=>!!x.querySelector('.v225-btn-icon')),
         settingsDropdownIconCoverage:selects.filter(x=>x.getAttribute('aria-label')!=='Dynamic Library category row icons').every(x=>!!x.dataset.v226DropdownIcon),
-        dynamicCategoryModeSelectorIconFree:!document.querySelector('select[aria-label="Dynamic Library category row icons"]')?.dataset.v226DropdownIcon,
+        dynamicCategoryModeSelectorIcon:document.querySelector('select[aria-label="Dynamic Library category row icons"]')?.dataset.v226DropdownIcon||'',
         dynamicCategoryIconSetting:!!document.querySelector('select[aria-label="Dynamic Library category row icons"]'),
         dynamicCategoryIconDefault:document.documentElement.dataset.v226DynamicCategoryIcons||''
       };
@@ -422,10 +425,68 @@ with sync_playwright() as p:
       return out;
     }''')
     result.update(v228_icons)
+
+    # v229 choice-modal regression probes.
+    page.evaluate("()=>App.setView('settings')")
+    page.wait_for_timeout(180)
+    result['categoryIconUrlSelectorIcon']=page.evaluate("()=>document.querySelector('select[aria-label=\"Dynamic Library category row icons\"]')?.dataset.v226DropdownIcon||''")
+
+    page.evaluate("()=>App.openCategoryModal('seasonal')")
+    page.wait_for_timeout(100)
+    page.evaluate("()=>{const x=document.getElementById('m-icon-url');if(x){x.value='https://example.com/mediaflow-v229-seasonal.png';App.saveCategoryModal('seasonal')}}")
+    page.wait_for_timeout(120)
+
+    page.evaluate("()=>App.openLibraryModal()")
+    page.wait_for_timeout(80)
+    page.evaluate("()=>{const x=document.getElementById('l-title');if(x){x.value='v229 Modal Smoke Title';App.saveLibraryModal(null)}}")
+    page.wait_for_timeout(150)
+    page.evaluate("()=>{App.v181SetLibraryMode('normal');App.setView('library')}")
+    page.wait_for_timeout(260)
+
+    category_opened=page.evaluate("()=>{const b=document.querySelector('.category-click');if(!b)return false;b.click();return true}")
+    if category_opened:
+        page.wait_for_timeout(160)
+        v229_category=page.evaluate(r'''() => {
+          const modal=document.querySelector('.v229-category-modal');
+          const choices=[...document.querySelectorAll('.v229-category-choice')];
+          const list=document.querySelector('.v229-category-choice-list');
+          const pagination=document.querySelector('.v229-category-pagination');
+          const seasonal=choices.find(x=>x.textContent.includes('Seasonal Anime'));
+          const img=seasonal?.querySelector('.v144-cat-icon-img');
+          return {
+            v229CategoryModal:!!modal,
+            v229CategoryPageSize:choices.length,
+            v229CategoryPagination:!!pagination,
+            v229CategoryNoInnerScroll:list?getComputedStyle(list).overflowY!=='auto'&&getComputedStyle(list).overflowY!=='scroll':false,
+            v229CategoryUrlImage:!!img && img.getAttribute('src')==='https://example.com/mediaflow-v229-seasonal.png',
+            v229CategoryModalWidth:Math.round(modal?.closest('.modal')?.getBoundingClientRect().width||0),
+            v229CategoryPageLabel:pagination?.textContent.replace(/\s+/g,' ').trim()||''
+          };
+        }''')
+        result.update(v229_category)
+        page.evaluate("()=>App.closeModal()")
+        page.wait_for_timeout(80)
+
+    status_opened=page.evaluate("()=>{const b=document.querySelector('.status-click');if(!b)return false;b.click();return true}")
+    if status_opened:
+        page.wait_for_timeout(140)
+        v229_status=page.evaluate(r'''() => {
+          const choices=[...document.querySelectorAll('.v229-status-modal .status-choice')];
+          return {
+            v229StatusModal:!!document.querySelector('.v229-status-modal'),
+            v229StatusChoiceCount:choices.length,
+            v229StatusSemanticIcons:choices.every(x=>!!x.querySelector('.choice-icon .v225-btn-icon')),
+            v229StatusNoDuplicateLeadingIcons:choices.every(x=>!x.querySelector(':scope > .v225-btn-icon')),
+            v229StatusDistinctIcons:new Set(choices.map(x=>x.querySelector('.choice-icon .v225-btn-icon')?.innerHTML||'')).size===5
+          };
+        }''')
+        result.update(v229_status)
+        page.evaluate("()=>App.closeModal()")
+
     browser.close()
 
 required={
-    'runtimeVersion':228,
+    'runtimeVersion':229,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -461,7 +522,7 @@ required={
     'settingsDropdownIconCoverage':True,
     'dynamicCategoryIconSetting':True,
     'dynamicCategoryIconDefault':'none',
-    'dynamicCategoryModeSelectorIconFree':True,
+    'dynamicCategoryModeSelectorIcon':'categoryArtwork',
     'mobileOverflowX':'auto',
     'mobileScrollbarWidth':'none',
     'mobileScrollable':True,
@@ -519,6 +580,17 @@ required={
     'libraryCategoryOwnIconPreserved':True,
     'libraryPriorityIcons':['priorityLow','priorityMedium','priorityHigh'],
     'libraryPrioritySvgDistinct':True,
+    'categoryIconUrlSelectorIcon':'categoryArtwork',
+    'v229CategoryModal':True,
+    'v229CategoryPageSize':9,
+    'v229CategoryPagination':False,
+    'v229CategoryNoInnerScroll':True,
+    'v229CategoryUrlImage':True,
+    'v229StatusModal':True,
+    'v229StatusChoiceCount':5,
+    'v229StatusSemanticIcons':True,
+    'v229StatusNoDuplicateLeadingIcons':True,
+    'v229StatusDistinctIcons':True,
 }
 fail=[]
 for k,v in required.items():
@@ -536,6 +608,7 @@ if result.get('aboutButtonIcons',0)<5: fail.append('About action buttons did not
 if result.get('accountEmailMinHeight')!='44px': fail.append(f"Account field polish missing: expected 44px min-height, got {result.get('accountEmailMinHeight')!r}")
 if result.get('visibilityToggleWidth',0)<48: fail.append(f"Visibility toggle is too narrow for its icon: {result.get('visibilityToggleWidth')}px")
 if result.get('visibilityToggleIconWidth',0)<12: fail.append(f"Visibility toggle icon is still clipped: {result.get('visibilityToggleIconWidth')}px")
+if result.get('v229CategoryModalWidth',0)<700: fail.append(f"v229 category modal is too narrow for 15 visible choices: {result.get('v229CategoryModalWidth')}px")
 if result.get('defaultLeak'): fail.append('native Default button/text still present in: '+', '.join(result['defaultLeak']))
 if 'feature, or section' not in result.get('searchPlaceholder',''): fail.append('Settings search placeholder changed unexpectedly')
 if errors: fail.extend(f'browser page error: {e}' for e in errors)

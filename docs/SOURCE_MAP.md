@@ -1,4 +1,4 @@
-# MediaFlow v228 Source Ownership Map
+# MediaFlow v229 Source Ownership Map
 
 ## Active runtime modules
 
@@ -24,6 +24,7 @@ Current release chain includes:
 - `pages/library/160-v226-library-sizing-display-polish.js` — Dynamic Library sizing parity and `Cover+Titles` naming.
 - `components/161-v227-ui-icon-corrections.js` — v227 icon corrections, visibility switches, Automatic/Manual indicators and Dashboard poster cleanup.
 - `components/162-v228-library-priority-dynamic-row.js` — Library category/priority metadata icon cleanup, Dynamic row order source, restored drag controls, effective-order rendering and persistence audit metadata.
+- `components/163-v229-library-choice-modals.js` — Set Category real URL artwork, all-category paging, Set Status semantic icons, duplicate-status-icon suppression and Category Icon URL dropdown icon restoration.
 - `core/runtime/999-close-app.js` — explicit end of the application scope.
 
 ## Active release styling
@@ -35,6 +36,34 @@ Current release chain includes:
 - `assets/css/96-v226-semantic-ui-library.css` — category-layout containment, dropdown icons, Dynamic category artwork modes and sizing parity.
 - `assets/css/97-v227-ui-icon-corrections.css` — category URL visibility fix, switch spacing, priority choice cleanup and Dashboard poster protection.
 - `assets/css/98-v228-library-priority-dynamic-row.css` — Library metadata cleanup and responsive Dynamic row order/drag UI.
+- `assets/css/99-v229-library-choice-modals.css` — Set Category grid/pagination, URL-icon presentation, Set Status semantic icon presentation and Category Icon URL dropdown artwork icon.
+
+## v229 modal ownership
+
+### Set Category
+
+Owned by `components/163-v229-library-choice-modals.js` and `99-v229-library-choice-modals.css`.
+
+Key behavior:
+
+- source list: `S.categories`;
+- page size: 15;
+- pagination threshold: more than 15 categories;
+- category artwork: `v144CategoryIconHtml(...)`;
+- no inner choice-list scrolling;
+- current-category-aware initial page.
+
+### Set Status
+
+Owned by `components/163-v229-library-choice-modals.js`.
+
+Uses the same semantic icon names as Dynamic Library and keeps `.status-choice` free of a second global button icon.
+
+### Dynamic category-row icon selector
+
+The underlying persistent setting remains owned by `pages/settings/159-v226-category-settings-dynamic-icon-mode.js`.
+
+v229 changes only the selector's visual icon treatment.
 
 ## Ownership folders
 

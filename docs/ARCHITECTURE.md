@@ -1,8 +1,8 @@
-# MediaFlow v228 Architecture
+# MediaFlow v229 Architecture
 
 ## Runtime foundation
 
-MediaFlow v228 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the stable v201-compatible application state and render helpers remain available inside the same lexical scope.
+MediaFlow v229 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the stable v201-compatible application state and render helpers remain available inside the same lexical scope.
 
 ```text
 build-order.json
@@ -27,76 +27,116 @@ v221–v224 active release modules
       ↓
 162-v228-library-priority-dynamic-row.js
       ↓
+163-v229-library-choice-modals.js
+      ↓
 999-close-app.js
 ```
 
-## v228 ownership
+## v229 ownership
 
-The v228 runtime behavior is owned by:
+The v229 runtime behavior is owned by:
 
 ```text
-src/js/components/162-v228-library-priority-dynamic-row.js
+src/js/components/163-v229-library-choice-modals.js
 ```
 
 That module owns:
 
-- the Library category-pill global-icon exclusion;
-- Library priority-pill semantic icon mapping;
-- Low / Medium / High priority icon parity with the priority picker;
-- `settings.v181Library.dynamicCategoryOrderMode` normalization/defaults;
-- effective Dynamic category order resolution;
-- custom/follow order mode switching;
-- Dynamic category drag-and-drop handlers;
-- Settings UI augmentation for the order source and drag handle;
-- effective-order use in Dynamic Library rendering and selection;
-- Library Overview Dynamic-order parity;
-- individual Settings reset integration; and
-- explicit Full Backup manifest metadata for the new persistent setting.
+- Set Category modal rendering;
+- use of `v144CategoryIconHtml(...)` for real category Icon URL artwork;
+- inclusion of every current category instead of only enabled categories;
+- 15-category paging and page selection;
+- Set Category Previous / Next actions;
+- opening on the page that contains the title's current category;
+- Set Status semantic icon parity with Dynamic Library;
+- suppression of duplicate global icons on status choices; and
+- the restored artwork icon on the Dynamic category-row icon selector.
 
-Shared v228 presentation is owned by:
+Shared v229 presentation is owned by:
 
 ```text
-assets/css/98-v228-library-priority-dynamic-row.css
+assets/css/99-v229-library-choice-modals.css
 ```
 
-The stylesheet owns Library metadata icon cleanup, priority-pill icon sizing, the Dynamic order-source setting card, responsive drag/position/action row layout, drag/drop feedback, and Follow-mode read-only styling.
+The stylesheet owns the wider Set Category modal, non-scrolling category-choice grid, responsive one/two-column layout, pagination presentation, category URL image sizing, Set Status semantic-icon sizing, and the Category Icon URL dropdown's restored leading artwork icon.
 
-## Dynamic category order model
+## Category modal paging model
 
-The existing `settings.v181Library.categoryOrder` continues storing the user's independent Dynamic custom order.
-
-v228 adds:
+Set Category uses:
 
 ```text
-settings.v181Library.dynamicCategoryOrderMode
+V229_CATEGORY_MODAL_PAGE_SIZE = 15
 ```
 
-with values:
+Behavior:
 
 ```text
-custom   → use settings.v181Library.categoryOrder
-category → use the current main S.categories order
+category count <= 15  → show all choices, no pagination
+category count > 15   → show 15 choices per page + pagination
 ```
 
-Follow mode does **not** overwrite `categoryOrder`. Switching back to Custom therefore restores the previous Dynamic-specific order.
+The category choice grid intentionally overrides the legacy `.choice-list` `max-height` / `overflow:auto` behavior so the category list itself never becomes an inner scrolling area.
 
-Dynamic visibility remains stored independently in `hiddenCategoryIds`.
+The outer modal remains constrained by the viewport and can still participate in normal modal viewport scrolling on very small displays.
 
-## Persistence audit
+## Category artwork model
 
-The new order-source preference is inside `S.settings.v181Library`.
+Category choices now call:
 
-As a result:
+```text
+v144CategoryIconHtml(category)
+```
 
-- local settings persistence includes it;
-- v181 cloud merge/verification includes it through `v181NormalizeLibrarySettings`;
-- Sync Now includes it;
-- Full Backup includes it;
-- Automatic Backup includes it through the Full Backup pipeline;
-- Settings Preset Export/Import includes it because the complete Settings object is cloned;
-- reset/default flows include it through `DEFAULT_SETTINGS.v181Library`.
+That existing helper:
 
-v228 additionally extends the backup manifest so the order-source preference is explicit in exported backup metadata.
+1. validates `category.iconUrl` as HTTP/HTTPS;
+2. displays the URL image when valid; and
+3. falls back to the category emoji when no usable URL exists.
+
+No duplicate icon storage is introduced by v229.
+
+## Status icon model
+
+Set Status maps its five state IDs to the existing v226 semantic icon names:
+
+```text
+planned   → planToWatch
+active    → watching
+paused    → onHold
+completed → completedStatus
+dropped   → dropped
+```
+
+The popup therefore uses the same SVG definitions already used by Dynamic Library.
+
+`.status-choice` is excluded from the global action-button decorator because each row renders its explicit semantic icon inside `.choice-icon`.
+
+## Dropdown icon integration
+
+v227 intentionally exempted:
+
+```text
+select[aria-label="Dynamic Library category row icons"]
+```
+
+from leading dropdown icons.
+
+v229 overrides that focused exception after the v227 handler runs and assigns the existing artwork/cover SVG through the v226 dropdown-icon system.
+
+The selector values and persistence path are unchanged.
+
+## Persistence
+
+v229 adds no new persistent fields.
+
+The release changes rendering and interaction only, so existing persistence paths remain unchanged:
+
+- local settings persistence;
+- cloud merge / verification;
+- Sync Now;
+- Full Backup;
+- Automatic Backup;
+- Settings Preset Export / Import.
 
 No persistence schema bump is required.
 
@@ -105,7 +145,7 @@ No persistence schema bump is required.
 The browser loads:
 
 ```text
-assets/js/mediaflow-v228.bundle.js
+assets/js/mediaflow-v229.bundle.js
 ```
 
 The generated bundle must exactly match `build-order.json` plus `runtime-order.json`.
@@ -120,11 +160,13 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The Chromium smoke test validates v221–v227 regressions plus v228 category metadata cleanup, priority icons, the Dynamic row order selector, restored drag handle, Follow Categories behavior, and preservation of the custom Dynamic order when switching modes.
+The Chromium smoke test validates v221–v228 regressions plus v229 category URL artwork, no-inner-scroll category choices, status semantic icons, duplicate-icon suppression, and the restored Category Icon URL selector icon.
+
+Static structural checks additionally verify that category pagination remains conditional on more than 15 categories.
 
 ## Compatibility
 
-- App release: **228**
+- App release: **229**
 - Stable feature/data base: **201**
 - Runtime foundation: **219**
 - Cloud Sync contract: **201**
