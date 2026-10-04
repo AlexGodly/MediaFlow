@@ -150,7 +150,7 @@ v148BuildFullBackup=function(){
   payload.settings=JSON.parse(JSON.stringify(S.settings||DEFAULT_SETTINGS));
   payload.backupManifest=v148BackupManifest(payload,payload.portableExtras||{});
   payload.backupManifest.schemaVersion=V201_BACKUP_SCHEMA_VERSION;
-  payload.backupManifest.note='Complete MediaFlow v216 architecture-refactored backup (stable v201 feature base). Expands global category-icon sizing and adds an independent persistent cover-placeholder category-icon scale. Preserves v200 category default missing covers, v199 status terminology, v198 Settings Presets, v197 category recovery and all prior Library, History, Logging, XP, Statistics, themes and protected cloud data.';
+  payload.backupManifest.note='Complete MediaFlow v217 modular navigation-fix backup (stable v201 feature base). Expands global category-icon sizing and adds an independent persistent cover-placeholder category-icon scale. Preserves v200 category default missing covers, v199 status terminology, v198 Settings Presets, v197 category recovery and all prior Library, History, Logging, XP, Statistics, themes and protected cloud data.';
   return payload;
 };
 const v201BackupManifestBase=v148BackupManifest;

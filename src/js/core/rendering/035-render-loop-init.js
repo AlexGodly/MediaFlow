@@ -12,7 +12,10 @@ function render(){
 
   // update sidebar active states + streak without full rebuild for smoothness
 
-  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    const viewId=String(el.dataset?.view||'');
+    el.classList.toggle('active',viewId===String(S.view||''));
+  });
 
   const mobileBar=document.querySelector('.mobile-tabbar'); if(mobileBar) mobileBar.innerHTML=renderMobileTabs();
   const accountName=document.querySelector('.account-menu-email');

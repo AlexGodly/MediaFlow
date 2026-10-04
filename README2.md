@@ -1,12 +1,12 @@
-# MediaFlow v216 — Modular Page / Component Architecture
+# MediaFlow v217 — Modular Architecture + Navigation Fix
 
 **Stable feature base:** MediaFlow v201  
-**App release:** v216  
+**App release:** v217  
 **Cloud Sync compatibility:** v201  
 **Full Backup schema:** v29  
 **Settings Preset schema:** v1
 
-v216 is the deeper architecture phase built on v215. The app is still one SPA and behaves like the stable v201 build, but the editable JavaScript source is now organized by ownership instead of by one giant HTML file or broad chronological chunks.
+v217 keeps the deeper v216 architecture and fixes the sidebar active-state/default-order bug without changing the stable v201 feature base. The app is still one SPA and behaves like the stable v201 build, but the editable JavaScript source is now organized by ownership instead of by one giant HTML file or broad chronological chunks.
 
 ## Run MediaFlow
 
@@ -21,11 +21,11 @@ bash scripts/serve.sh
 ## Source architecture
 
 ```text
-MediaFlow_v216_Modular/
+MediaFlow_v217_Modular/
 ├── index.html
 ├── assets/
 │   ├── css/
-│   └── js/mediaflow-v216.bundle.js
+│   └── js/mediaflow-v217.bundle.js
 ├── src/js/
 │   ├── core/
 │   ├── pages/
@@ -55,7 +55,7 @@ MediaFlow_v216_Modular/
     ├── ARCHITECTURE.md
     ├── SOURCE_MAP.md
     ├── INTEGRITY.md
-    └── CHANGELOG_v216.md
+    └── CHANGELOG_v217.md
 ```
 
 ## Important compatibility rule
@@ -77,7 +77,7 @@ python scripts/build.py
 python scripts/check.py
 ```
 
-`check.py` does more than syntax checking: it verifies the generated v216 runtime is executable-code compatible with the stable v215/v201 runtime.
+`check.py` does more than syntax checking: it verifies the generated v217 runtime is executable-code compatible with the stable v215/v201 runtime.
 
 ## Find code quickly
 

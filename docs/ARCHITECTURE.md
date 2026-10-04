@@ -1,8 +1,8 @@
-# MediaFlow v216 Architecture
+# MediaFlow v217 Architecture
 
 ## Goal
 
-v216 is the second-stage refactor of the stable v201 feature base. Unlike v215's broad chronological `parts/` directory, v216 gives every editable JavaScript fragment a concrete ownership area: `core/`, `pages/`, `components/`, `features/`, `services/`, `utils/`, or `legacy/`.
+v217 is the second-stage refactor of the stable v201 feature base. Unlike v215's broad chronological `parts/` directory, v217 gives every editable JavaScript fragment a concrete ownership area: `core/`, `pages/`, `components/`, `features/`, `services/`, `utils/`, or `legacy/`.
 
 The priority remains **runtime compatibility first**. The browser bundle is reconstructed in the exact stable execution order, so reorganizing source ownership does not rewrite application behavior.
 
@@ -11,7 +11,7 @@ The priority remains **runtime compatibility first**. The browser bundle is reco
 1. `index.html` — SPA entry point.
 2. `assets/css/*.css` — v215-extracted stable styles, unchanged in content/order.
 3. Supabase browser client CDN.
-4. `assets/js/mediaflow-v216.bundle.js` — generated compatibility bundle.
+4. `assets/js/mediaflow-v217.bundle.js` — generated compatibility bundle.
 5. Service worker / PWA manifest.
 
 ## Editable JavaScript source
@@ -32,7 +32,7 @@ src/js/
 
 ## Why the browser still uses a generated bundle
 
-The stable v201 runtime was built around one shared lexical closure. Turning every file into an independently loaded ES module in one release would change scope semantics and could break stable data/render behavior. v216 therefore changes **source ownership without changing execution semantics**.
+The stable v201 runtime was built around one shared lexical closure. Turning every file into an independently loaded ES module in one release would change scope semantics and could break stable data/render behavior. v217 therefore changes **source ownership without changing execution semantics**.
 
 This is a deliberate migration architecture:
 
@@ -44,7 +44,7 @@ This is a deliberate migration architecture:
 
 ## Validation guarantee
 
-`scripts/check.py` reconstructs the bundle from all owned fragments, runs `node --check`, and normalizes the v216 human-readable backup note before comparing the SHA-256 hash against the stable v215/v201 runtime. If any executable JS changed unexpectedly, the check fails.
+`scripts/check.py` reconstructs the bundle from all owned fragments, runs `node --check`, and normalizes the v217 human-readable backup note before comparing the SHA-256 hash against the stable v215/v201 runtime. If any executable JS changed unexpectedly, the check fails.
 
 ## Version/data compatibility
 

@@ -2,7 +2,7 @@
    MediaFlow v161 — About + Custom Navigation + Data Audit
    ============================================================ */
 
-const V161_NAV_LAYOUT_VERSION=1;
+const V161_NAV_LAYOUT_VERSION=2;
 const V161_BACKUP_SCHEMA_VERSION=4;
 const V161_UPDATE_CHECK_INTERVAL=6*60*60*1000;
 const V161_UPDATE_SOURCES=[
@@ -26,7 +26,9 @@ ICONS.about=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 
 if(!NAV_ITEMS.some(n=>n.id==='about')){
   const settingsIndex=NAV_ITEMS.findIndex(n=>n.id==='settings');
-  NAV_ITEMS.splice(settingsIndex>=0?settingsIndex:NAV_ITEMS.length,0,{id:'about',label:'About'});
+  // v217 default navigation ends with Settings -> About. User-customized
+  // navigation order remains fully supported through Navigation settings.
+  NAV_ITEMS.splice(settingsIndex>=0?settingsIndex+1:NAV_ITEMS.length,0,{id:'about',label:'About'});
 }
 if(!MOBILE_MORE_NAV.includes('about'))MOBILE_MORE_NAV.push('about');
 
@@ -46,10 +48,18 @@ function v161NormalizeNavLayout(raw){
   const validSet=new Set(valid);
   const src=(raw&&typeof raw==='object')?raw:{};
 
+  // v216's canonical default accidentally placed About before Settings.
+  // Only migrate that exact old default. Any genuinely customized order is
+  // preserved, so Navigation settings remain authoritative for the user.
+  const oldDefault=['dashboard','library','order','oldsystem','libraryhistory','history','batch','stats','profile','about','settings'];
+  const rawOrder=Array.isArray(src.order)?src.order.map(x=>String(x||'')):[];
+  const oldDefaultMatch=rawOrder.length===oldDefault.length && oldDefault.every((id,i)=>rawOrder[i]===id);
+  const sourceOrder=oldDefaultMatch ? valid : rawOrder;
+
   const order=[];
   const seen=new Set();
 
-  for(const id of (Array.isArray(src.order)?src.order:[])){
+  for(const id of sourceOrder){
     const sid=String(id||'');
     if(validSet.has(sid)&&!seen.has(sid)){
       seen.add(sid);

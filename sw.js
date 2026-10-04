@@ -1,9 +1,9 @@
-const CACHE_NAME = 'mediaflow-v216-static-v1';
+const CACHE_NAME = 'mediaflow-v217-static-v1';
 const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./assets/js/mediaflow-v216.bundle.js",
+  "./assets/js/mediaflow-v217.bundle.js",
   "./assets/css/00-foundation.css",
   "./assets/css/10-navigation-core-ui.css",
   "./assets/css/20-dashboard-personal-order.css",

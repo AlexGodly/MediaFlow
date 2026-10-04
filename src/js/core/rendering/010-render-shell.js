@@ -176,7 +176,7 @@ function renderShell(){
 
          ${v161VisibleNavItems().map(n=>` 
 
-          <div class="nav-item ${S.view===n.id?'active':''}" onclick="App.setView('${n.id}')">
+          <div class="nav-item ${S.view===n.id?'active':''}" data-view="${escapeHtml(String(n.id))}" onclick="App.setView('${n.id}')">
 
             ${ICONS[n.id]}<span>${n.label}</span>
 
