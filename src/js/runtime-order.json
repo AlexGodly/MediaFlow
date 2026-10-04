@@ -14,5 +14,6 @@
   "components/157-v225-global-button-icons.js",
   "components/158-v226-semantic-icons-dropdowns.js",
   "pages/settings/159-v226-category-settings-dynamic-icon-mode.js",
-  "pages/library/160-v226-library-sizing-display-polish.js"
+  "pages/library/160-v226-library-sizing-display-polish.js",
+  "components/161-v227-ui-icon-corrections.js"
 ]

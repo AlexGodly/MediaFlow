@@ -1,4 +1,4 @@
-# MediaFlow v226 Source Ownership Map
+# MediaFlow v227 Source Ownership Map
 
 ## Active runtime modules
 
@@ -22,6 +22,7 @@ Current release chain includes:
 - `components/158-v226-semantic-icons-dropdowns.js` — v226 semantic button-icon overrides and purpose-aware dropdown icons.
 - `pages/settings/159-v226-category-settings-dynamic-icon-mode.js` — Dynamic category-row icon preference and Settings reset/persistence hooks.
 - `pages/library/160-v226-library-sizing-display-polish.js` — Dynamic Library sizing parity and `Cover+Titles` display naming.
+- `components/161-v227-ui-icon-corrections.js` — v227 icon corrections, visibility-switch handling, Automatic/Manual indicators, category-selector exception and Dashboard poster cleanup.
 - `core/runtime/999-close-app.js` — explicit end of the application scope.
 
 ## Active release styling
@@ -31,6 +32,7 @@ Current release chain includes:
 - `assets/css/94-v224-library-sorting-actions.css` — v224 Library/sort/recommendation controls.
 - `assets/css/95-v225-icons-personal-order.css` — v225 Personal Order toolbar, global button icons and Account fields.
 - `assets/css/96-v226-semantic-ui-library.css` — category-layout containment, purpose-aware dropdown icons, Dynamic category-row icon modes, and Dynamic Library sizing parity.
+- `assets/css/97-v227-ui-icon-corrections.css` — Dynamic category URL visibility fix, icon-free category-mode selector, visibility-switch spacing, priority-icon cleanup, mode pills and Dashboard poster protection.
 
 ## Ownership folders
 

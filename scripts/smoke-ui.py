@@ -3,12 +3,13 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v226.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v227.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
 CSS225=ROOT/'assets/css/95-v225-icons-personal-order.css'
 CSS226=ROOT/'assets/css/96-v226-semantic-ui-library.css'
+CSS227=ROOT/'assets/css/97-v227-ui-icon-corrections.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -26,6 +27,7 @@ css222=CSS222.read_text(encoding='utf-8')
 css224=CSS224.read_text(encoding='utf-8')
 css225=CSS225.read_text(encoding='utf-8')
 css226=CSS226.read_text(encoding='utf-8')
+css227=CSS227.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -55,6 +57,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css224)
     page.add_style_tag(content=css225)
     page.add_style_tag(content=css226)
+    page.add_style_tag(content=css227)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -134,7 +137,8 @@ with sync_playwright() as p:
         categoryDeleteInside:!!cardRect&&!!delRect&&delRect.right<=cardRect.right+1,
         categoryDragHasNoIcon:!!drag&&!drag.querySelector('.v225-btn-icon'),
         settingsNavIconCoverage:navItems.length>0&&navItems.every(x=>!!x.querySelector('.v225-btn-icon')),
-        settingsDropdownIconCoverage:selects.length===0||selects.every(x=>!!x.dataset.v226DropdownIcon),
+        settingsDropdownIconCoverage:selects.filter(x=>x.getAttribute('aria-label')!=='Dynamic Library category row icons').every(x=>!!x.dataset.v226DropdownIcon),
+        dynamicCategoryModeSelectorIconFree:!document.querySelector('select[aria-label="Dynamic Library category row icons"]')?.dataset.v226DropdownIcon,
         dynamicCategoryIconSetting:!!document.querySelector('select[aria-label="Dynamic Library category row icons"]'),
         dynamicCategoryIconDefault:document.documentElement.dataset.v226DynamicCategoryIcons||''
       };
@@ -300,10 +304,60 @@ with sync_playwright() as p:
     result['dashboardLogSort']=page.locator('select[aria-label="Dashboard logging sort field"]').input_value() if page.locator('select[aria-label="Dashboard logging sort field"]').count() else ''
     result['dashboardLogSortDir']=' '.join(page.locator('button[aria-label="Dashboard logging sort direction"]').inner_text().split()) if page.locator('button[aria-label="Dashboard logging sort direction"]').count() else ''
     result['dashboardActionIcons']=page.evaluate("()=>document.querySelectorAll('.v224-rec-action svg').length")
+
+    # v227 focused regression probes.
+    page.evaluate("()=>App.setView('settings')")
+    page.wait_for_timeout(220)
+    v227_probe=page.evaluate(r'''() => {
+      const probe=document.createElement('div');
+      probe.id='v227-probe';
+      probe.innerHTML=`
+        <button class="priority-choice" onclick="App.setPriorityChoice('x','low')"><span class="priority-choice-icon">▼</span><b>Low</b></button>
+        <button class="priority-choice" onclick="App.setPriorityChoice('x','medium')"><span class="priority-choice-icon">●</span><b>Medium</b></button>
+        <button class="priority-choice" onclick="App.setPriorityChoice('x','high')"><span class="priority-choice-icon">▲</span><b>High</b></button>
+        <button class="toggle on" aria-label="Hide Example"></button>
+        <button class="v123-rating-placeholder v186-rating-placeholder-button">POSTER</button>
+        <div class="v181-dynamic-nav"><div class="v181-dynamic-row"><span class="v181-dynamic-row-label">Category</span><button class="btn"><img class="v144-cat-icon-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""> Example</button></div></div>`;
+      document.getElementById('view-root').appendChild(probe);
+      App.v227RefreshIconsAndDropdowns();
+      const priorities=[...probe.querySelectorAll('.priority-choice')];
+      const toggle=probe.querySelector('.toggle');
+      const poster=probe.querySelector('.v123-rating-placeholder');
+      document.documentElement.dataset.v226DynamicCategoryIcons='category-url';
+      const img=probe.querySelector('.v144-cat-icon-img');
+      const urlModeDisplay=getComputedStyle(img).display;
+      document.documentElement.dataset.v226DynamicCategoryIcons='none';
+      const noIconDisplay=getComputedStyle(img).display;
+      const out={
+        priorityIcons:priorities.map(x=>x.dataset.v226SemanticIcon||''),
+        priorityLegacyGlyphHidden:priorities.every(x=>getComputedStyle(x.querySelector('.priority-choice-icon')).display==='none'),
+        visibilityToggleIcon:toggle.dataset.v226SemanticIcon||'',
+        visibilityToggleWidth:Math.round(toggle.getBoundingClientRect().width),
+        visibilityToggleIconWidth:Math.round(toggle.querySelector('.v225-btn-icon')?.getBoundingClientRect().width||0),
+        dashboardPosterIconFree:!poster.querySelector('.v225-btn-icon'),
+        categoryUrlModeVisible:urlModeDisplay!=='none',
+        categoryNoIconModeHidden:noIconDisplay==='none'
+      };
+      probe.remove();
+      return out;
+    }''')
+    result.update(v227_probe)
+
+    # The Seasonal automatic/manual state pill should now carry a semantic icon.
+    result['automaticModeIcon']=page.evaluate("()=>!!document.querySelector('.v227-mode-pill-auto .v225-btn-icon')")
+
+    # Stopwatch Add/Minus use matching plain + / - symbols (no circle around minus).
+    page.evaluate("()=>App.setView('dashboard')")
+    page.wait_for_timeout(220)
+    result['minusTimePlainIcon']=page.evaluate(r'''() => {
+      const b=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Minus time');
+      const svg=b?.querySelector('.v225-btn-icon svg');
+      return !!svg && !svg.querySelector('circle') && !!svg.querySelector('path');
+    }''')
     browser.close()
 
 required={
-    'runtimeVersion':226,
+    'runtimeVersion':227,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -339,6 +393,7 @@ required={
     'settingsDropdownIconCoverage':True,
     'dynamicCategoryIconSetting':True,
     'dynamicCategoryIconDefault':'none',
+    'dynamicCategoryModeSelectorIconFree':True,
     'mobileOverflowX':'auto',
     'mobileScrollbarWidth':'none',
     'mobileScrollable':True,
@@ -376,6 +431,14 @@ required={
     'batchSortDir':'↑ ASC',
     'dashboardLogSort':'title',
     'dashboardLogSortDir':'↑ ASC',
+    'priorityIcons':['priorityLow','priorityMedium','priorityHigh'],
+    'priorityLegacyGlyphHidden':True,
+    'visibilityToggleIcon':'hide',
+    'dashboardPosterIconFree':True,
+    'categoryUrlModeVisible':True,
+    'categoryNoIconModeHidden':True,
+    'automaticModeIcon':True,
+    'minusTimePlainIcon':True,
 }
 fail=[]
 for k,v in required.items():
@@ -387,6 +450,8 @@ if result.get('resetButtons',0)<10: fail.append('per-setting/section reset contr
 if result.get('accountButtonIcons',0)<5: fail.append('Account action buttons did not receive enough v225 icons')
 if result.get('aboutButtonIcons',0)<5: fail.append('About action buttons did not receive v225 icons')
 if result.get('accountEmailMinHeight')!='44px': fail.append(f"Account field polish missing: expected 44px min-height, got {result.get('accountEmailMinHeight')!r}")
+if result.get('visibilityToggleWidth',0)<48: fail.append(f"Visibility toggle is too narrow for its icon: {result.get('visibilityToggleWidth')}px")
+if result.get('visibilityToggleIconWidth',0)<12: fail.append(f"Visibility toggle icon is still clipped: {result.get('visibilityToggleIconWidth')}px")
 if result.get('defaultLeak'): fail.append('native Default button/text still present in: '+', '.join(result['defaultLeak']))
 if 'feature, or section' not in result.get('searchPlaceholder',''): fail.append('Settings search placeholder changed unexpectedly')
 if errors: fail.extend(f'browser page error: {e}' for e in errors)
