@@ -302,14 +302,22 @@ function v181RenderDynamicLibrary(){
   }
 
   const activeCat=getCategory(cfg.activeCategoryId);
-  const allForActive=(S.library||[]).filter(
-    item=>item&&String(item.categoryId)===String(activeCat.id)
-  );
+  const categoryCounts=new Map();
+  const allForActive=[];
+  for(const item of (S.library||[])){
+    if(!item)continue;
+    const categoryId=String(item.categoryId||'');
+    categoryCounts.set(categoryId,(categoryCounts.get(categoryId)||0)+1);
+    if(categoryId===String(activeCat.id))allForActive.push(item);
+  }
+  const statusCounts=new Map();
+  for(const item of allForActive){
+    const status=String(item.status||'planned');
+    statusCounts.set(status,(statusCounts.get(status)||0)+1);
+  }
 
   const categoryButtons=cats.map(cat=>{
-    const count=(S.library||[]).filter(
-      item=>item&&String(item.categoryId)===String(cat.id)
-    ).length;
+    const count=categoryCounts.get(String(cat.id))||0;
 
     return `<button type="button"
       class="btn btn-sm ${String(cat.id)===String(cfg.activeCategoryId)?'active':''}"
@@ -320,9 +328,7 @@ function v181RenderDynamicLibrary(){
   }).join('');
 
   const statusButtons=cfg.statusOrder.map(status=>{
-    const count=allForActive.filter(
-      item=>String(item.status||'planned')===status
-    ).length;
+    const count=statusCounts.get(String(status))||0;
 
     return `<button type="button"
       class="btn btn-sm ${status===cfg.activeStatus?'active':''}"

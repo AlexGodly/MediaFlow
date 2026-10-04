@@ -53,14 +53,28 @@ function renderLibrary(){
   const cats = S.categories;
   const ov=v53LibraryOverview();
 
+  // v232 performance: precompute the values used by the overview estimator in
+  // one Library pass. Older code scanned the entire Library twice per category,
+  // which became expensive with tens of thousands of titles and made filter
+  // interactions feel frozen.
+  const v232OverviewMeta=new Map();
+  for(const item of (S.library||[])){
+    const id=String(item?.categoryId||'');
+    let row=v232OverviewMeta.get(id);
+    if(!row){row={knownCount:0,knownTotal:0,unknownCount:0};v232OverviewMeta.set(id,row);}
+    const total=Number(item?.total);
+    if(Number.isFinite(total)&&total>0){row.knownCount++;row.knownTotal+=total;}
+    else row.unknownCount++;
+  }
+
   // v80: Overview-only estimates for titles whose real total is unknown.
   // These values are presentation estimates only; item.total is never changed.
   const v80OverviewEstimate=(cat,x)=>{
     if(!x.items) return {total:0,pct:0,estimated:false};
     if(!x.unknown && x.total>0) return {total:x.total,pct:Math.min(100,Math.round(x.knownDone/x.total*100)),estimated:false};
-    const knownItems=S.library.filter(i=>i.categoryId===cat.id && Number(i.total)>0);
-    const knownAvg=knownItems.length ? knownItems.reduce((sum,i)=>sum+Number(i.total),0)/knownItems.length : 0;
-    const unknownCount=S.library.filter(i=>i.categoryId===cat.id && !(Number(i.total)>0)).length;
+    const meta=v232OverviewMeta.get(String(cat.id))||{knownCount:0,knownTotal:0,unknownCount:0};
+    const knownAvg=meta.knownCount ? meta.knownTotal/meta.knownCount : 0;
+    const unknownCount=meta.unknownCount;
     const observed=Math.max(0,Number(x.done)||0);
     const baseline=Math.max(1,Number(cat.target)||1);
     // Prefer the category's own known-title average. If none exists, use a conservative

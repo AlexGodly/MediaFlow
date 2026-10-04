@@ -1,20 +1,33 @@
-# MediaFlow v229 Integrity Notes
+# MediaFlow v232 Integrity Notes
 
 - The modular build continues using the stable MediaFlow v201-compatible feature/data base.
 - Runtime extensions remain inside the active application scope before `999-close-app.js`.
-- `mediaflow-v229.bundle.js` must exactly match `build-order.json` plus `runtime-order.json`.
+- `mediaflow-v232.bundle.js` must exactly match `build-order.json` plus `runtime-order.json`.
 - No inline JavaScript or inline style blocks are reintroduced into `index.html`.
-- Cloud Sync remains v201.
-- Full Backup remains Schema v29.
-- Settings Preset remains Schema v1.
-- The v228 Dynamic row order mode remains stored inside `settings.v181Library`; v229 adds no new persistent fields.
-- Follow Categories mode must never overwrite the stored custom Dynamic row order.
-- Dynamic row drag controls are active only in Custom mode and remain glyph-only (`☰`).
-- Library category pills must preserve the category's own configured identity while remaining free of the redundant global action icon.
-- Library Low / Medium / High priority pills must resolve to distinct semantic icons.
-- Set Category must use the existing `v144CategoryIconHtml(...)` URL-first category identity pipeline.
-- Set Category must include all current categories and paginate only when the category count exceeds 15.
-- The Set Category choice grid must not use its own internal scrollbar.
-- Set Status must use the same five semantic status SVGs as Dynamic Library and must not receive a second generic action icon.
-- The Dynamic category-row icon selector must retain its v226 purpose-aware dropdown icon treatment in v229.
-- Chromium UI testing must verify v221–v229 behavior in the rendered application.
+- Cloud Sync remains **v201**.
+- Full Backup remains **Schema v29**.
+- Settings Preset remains **Schema v1**.
+- Personal Order dedicated export is **format v4** while preserving previous import compatibility.
+- Library Mode must be the first Settings → Library navigation/section entry, followed by Categories.
+- Active Settings highlighting from v231 must remain functional.
+- Removed inherited-source helper sentences must not be rendered in Choice & Filter Layout.
+- Exact **All** actions must receive the v232 all-items icon rather than the generic action arrow icon.
+- v225/v226/v230 whole-document MutationObservers must be disconnected after v232 initializes.
+- `V232_UI_OBSERVER` must be the active scoped/batched UI enhancer.
+- v230 select/category-panel reorder application must be idempotent.
+- Dynamic Library status order must come only from `settings.v181Library.statusOrder`.
+- Status Filter/Set Status configuration must never reorder Dynamic Library itself.
+- Dynamic status/category switching must render before queued persistence.
+- Normal Library overview statistics must not perform full-Library scans once per category.
+- Dynamic category/status counts must be generated without repeated full-Library filter passes.
+- Choice & Filter Layout must be normalized in current local/cloud snapshot paths.
+- Cloud merge/verification must explicitly cover `settings.v230ChoiceLayout`.
+- Full Backup and Automatic Backup must include the current complete Settings object.
+- Settings Preset must include current v181/v230/v231/v232 persistent settings.
+- History CSV must use the expanded current-column exporter.
+- Title Details metadata cards must not receive global action icons.
+- Title Details category artwork inside metadata pills must be hidden.
+- Only Edit title / Close / Edit all title details / Close keep action-button icons in Title Details.
+- Desktop Title Details must fit without an internal scrollbar in the v232 wide and compact-desktop regression viewports.
+- `scripts/smoke-ui.py` must pass v221–v232 compatibility behavior.
+- `scripts/perf-v232.py` must pass a synthetic 30,000-title Library interaction regression without freezes or page errors.

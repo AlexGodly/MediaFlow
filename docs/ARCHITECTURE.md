@@ -172,3 +172,88 @@ Static structural checks additionally verify that category pagination remains co
 - Cloud Sync contract: **201**
 - Full Backup schema: **29**
 - Settings Preset schema: **1**
+
+## v230 — Choice & Filter Layout Control Center
+
+`src/js/components/164-v230-choice-filter-layout.js` owns the v230 cross-surface ordering/visibility layer.
+
+Persistent configuration lives in `S.settings.v230ChoiceLayout`, with one configuration object for each of Set Category, Set Status, Set Priority, Category Filter, Status Filter and Priority Filter. Category-based surfaces may resolve their effective order/visibility from the main Categories state or from the Dynamic Category Row state without overwriting their saved custom order. Filter DOM enhancers apply the resolved configuration to native selects, checkbox category panels and the Dynamic Library status row after rendering.
+
+The module is loaded through the v219 runtime-extension slot, before the explicit application closure, and therefore remains inside the active MediaFlow scope. The v230 settings are part of the canonical Settings object and require no Cloud Sync, Full Backup or Settings Preset schema bump.
+
+## v231 — Settings Navigation + Layout Inheritance Polish
+
+`src/js/components/165-v231-settings-library-mode-layout-inheritance.js` is the final v231 runtime extension.
+
+It keeps the v230 `S.settings.v230ChoiceLayout` model but expands source resolution with:
+
+- `setStatus.source = dynamicStatus`;
+- `categoryFilter.source = setCategory`;
+- `statusFilter.source = dynamicStatus` in addition to `setStatus`.
+
+Dynamic status inheritance reads `S.settings.v181Library.statusOrder` live and does not copy it into the dependent layout. Category Filter → Set Category recursively resolves Set Category's effective source, including Category Settings and Dynamic Category Row inheritance.
+
+The module also promotes `v181Library.mode` into a separate `LIBRARY MODE` Settings section while leaving Dynamic Library configuration under `LIBRARY EXPERIENCE`.
+
+Settings sidebar highlighting is maintained by a lightweight scroll tracker. Sidebar jumps temporarily lock the clicked target during smooth scrolling, then return to normal scroll-based detection.
+
+v231 adds no new persistent top-level schema. Existing Cloud Sync v201, Full Backup Schema v29 and Settings Preset Schema v1 remain valid.
+
+### v231 active release assets
+
+- `src/js/components/165-v231-settings-library-mode-layout-inheritance.js`
+- `assets/css/101-v231-settings-layout-inheritance.css`
+- generated bundle: `assets/js/mediaflow-v231.bundle.js`
+
+## v232 — Performance, Dynamic Status Ownership & Persistence Audit
+
+`src/js/components/166-v232-library-performance-persistence-details.js` is the final v232 runtime extension.
+
+### UI enhancement architecture
+
+v225, v226 and v230 each installed a whole-document `MutationObserver`. On Library re-renders these could all rescan the document, and v230 could re-append filter/select children, creating additional mutations. v232 disconnects those three observers and installs one `V232_UI_OBSERVER` that batches newly-added roots with `requestAnimationFrame` and enhances only those subtrees.
+
+The v230 select/category-panel application methods are overridden with idempotent versions: if order/visibility already matches the effective layout, no nodes are moved.
+
+### Library hot paths
+
+The classic Library overview estimator now precomputes known-total/unknown-total information in one Library pass instead of repeatedly scanning the Library per category.
+
+Dynamic Library category/status counts are also produced from single passes. Status/category switching renders first and queues `persistSettings()` afterward.
+
+### Dynamic Status ownership
+
+Dynamic Library status navigation is authoritative from `settings.v181Library.statusOrder` only. `v230ApplyDynamicStatusRow()` is disabled so Status Filter settings cannot reorder Dynamic Library.
+
+Set Status and Status Filter may still inherit **from** Dynamic Status through the v231 source model; the dependency is one-way.
+
+### Persistence audit
+
+v232 explicitly normalizes `settings.v230ChoiceLayout` during persistence/load/apply/snapshot operations and adds a `modifiedAt`-based cloud merge/verification layer for it. Existing `settings.v181Library` cloud handling remains authoritative for Dynamic Library state.
+
+Full Backup and Settings Preset builders are finalized at v232 while preserving **Full Backup Schema v29**, **Settings Preset Schema v1**, and **Cloud Sync v201**. Automatic Backup dynamically resolves the final Full Backup builder and therefore uses the same v232 payload.
+
+Personal Order dedicated export is finalized as format v4, and History CSV is expanded for the current session data model.
+
+### Title Details
+
+`assets/css/102-v232-performance-details-settings.css` owns the wider/denser desktop Title Details presentation. The global button-icon resolver excludes `.v181-detail-card`; metadata-card icons are hidden, while the four real action buttons continue through the global semantic icon system.
+
+### v232 active release assets
+
+- `src/js/components/166-v232-library-performance-persistence-details.js`
+- `assets/css/102-v232-performance-details-settings.css`
+- optimized `src/js/pages/library/013-v70-expanded-library-display-ordering.js`
+- optimized `src/js/pages/library/112-dynamic-library-rendering.js`
+- generated bundle: `assets/js/mediaflow-v232.bundle.js`
+- large-Library regression: `scripts/perf-v232.py`
+
+### Compatibility
+
+- App release: **232**
+- Stable feature/data base: **201**
+- Runtime foundation: **219**
+- Cloud Sync contract: **201**
+- Full Backup schema: **29**
+- Settings Preset schema: **1**
+- Personal Order dedicated export format: **4**

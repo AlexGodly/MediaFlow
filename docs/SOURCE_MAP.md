@@ -74,3 +74,31 @@ v229 changes only the selector's visual icon treatment.
 - `services/` — cloud/persistence logic.
 - `utils/` — shared helpers.
 - `legacy/` — compatibility source that still participates in the generated application runtime.
+
+## v230 runtime extension
+
+- `src/js/components/164-v230-choice-filter-layout.js` — Choice & Filter Layout settings, inheritance resolution, ordering/show-hide actions, Set Category/Status/Priority modal resolution, reusable filter DOM application and persistence normalization.
+- `assets/css/100-v230-choice-filter-layout.css` — responsive Choice & Filter Layout cards, row controls, drag/drop states and hidden-filter presentation.
+
+## v231 runtime extension
+
+- `src/js/components/165-v231-settings-library-mode-layout-inheritance.js` — Library Mode Settings extraction, Settings active-section highlighting, Set Priority default correction, Set Status Dynamic Status inheritance, Category Filter → Set Category inheritance, and Status Filter Dynamic Status inheritance.
+- `assets/css/101-v231-settings-layout-inheritance.css` — Library Mode card presentation and active Settings sidebar styling.
+
+## v232 runtime extension and hot-path ownership
+
+- `src/js/components/166-v232-library-performance-persistence-details.js` — Settings order/copy cleanup, semantic All icon, scoped UI observer, Dynamic Status isolation, fast Dynamic switching, v230/v231 cloud/persistence audit, Full Backup/Settings Preset finalization, Personal Order format-v4 export/import wrapper, and current History CSV export.
+- `src/js/pages/library/013-v70-expanded-library-display-ordering.js` — v232 one-pass Library overview statistics used to remove repeated per-category full-Library scans.
+- `src/js/pages/library/112-dynamic-library-rendering.js` — v232 one-pass Dynamic category/status counts.
+- `assets/css/102-v232-performance-details-settings.css` — wider non-scrolling desktop Title Details, metadata-icon cleanup, and Library paint containment hints.
+- `scripts/perf-v232.py` — 30,000-title Normal/Dynamic Library interaction regression plus Dynamic Status independence and Title Details fit checks.
+
+### v232 data-path ownership
+
+- Full Data Export / Import: canonical Full Backup state remains Schema v29; final v232 builder explicitly reserializes the current Settings object and manifest.
+- Automatic Backup: continues resolving the final `v148BuildFullBackup()` dynamically.
+- Cloud / Sync Now: current state snapshots include complete Settings; v232 additionally merges/verifies `v230ChoiceLayout` explicitly.
+- Dynamic Library persistence: remains in `settings.v181Library`, including independent `statusOrder`.
+- Settings Preset: Schema v1, finalized against current Settings normalization.
+- Personal Order: dedicated export format v4 with current recovery metadata; older imports remain supported through the existing compatibility importer.
+- History: current CSV exporter includes current session metadata instead of the older minimal column set.

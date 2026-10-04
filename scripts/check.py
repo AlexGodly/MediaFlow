@@ -7,11 +7,11 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="229">' not in index: errors.append('index.html version is not 229')
-if 'assets/js/mediaflow-v229.bundle.js' not in index: errors.append('index.html does not load v229 bundle')
+if '<meta name="mediaflow-version" content="232">' not in index: errors.append('index.html version is not 232')
+if 'assets/js/mediaflow-v232.bundle.js' not in index: errors.append('index.html does not load v232 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v229-static-v1' not in sw: errors.append('service worker cache version is not v229')
-if './assets/js/mediaflow-v229.bundle.js' not in sw: errors.append('service worker does not cache v229 bundle')
+if 'mediaflow-v232-static-v1' not in sw: errors.append('service worker cache version is not v232')
+if './assets/js/mediaflow-v232.bundle.js' not in sw: errors.append('service worker does not cache v232 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
 if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
@@ -25,6 +25,13 @@ if 'assets/css/98-v228-library-priority-dynamic-row.css' not in index: errors.ap
 if './assets/css/98-v228-library-priority-dynamic-row.css' not in sw: errors.append('service worker does not cache v228 UI stylesheet')
 if 'assets/css/99-v229-library-choice-modals.css' not in index: errors.append('index.html does not load v229 modal stylesheet')
 if './assets/css/99-v229-library-choice-modals.css' not in sw: errors.append('service worker does not cache v229 modal stylesheet')
+if 'assets/css/100-v230-choice-filter-layout.css' not in index: errors.append('index.html does not load v230 choice/filter stylesheet')
+if './assets/css/100-v230-choice-filter-layout.css' not in sw: errors.append('service worker does not cache v230 choice/filter stylesheet')
+if 'assets/css/101-v231-settings-layout-inheritance.css' not in index: errors.append('index.html does not load v231 settings/inheritance stylesheet')
+if './assets/css/101-v231-settings-layout-inheritance.css' not in sw: errors.append('service worker does not cache v231 settings/inheritance stylesheet')
+
+if 'assets/css/102-v232-performance-details-settings.css' not in index: errors.append('index.html does not load v232 stylesheet')
+if './assets/css/102-v232-performance-details-settings.css' not in sw: errors.append('service worker does not cache v232 stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -49,6 +56,9 @@ if 'pages/library/160-v226-library-sizing-display-polish.js' not in runtime_orde
 if 'components/161-v227-ui-icon-corrections.js' not in runtime_order: errors.append('missing active v227 runtime module: components/161-v227-ui-icon-corrections.js')
 if 'components/162-v228-library-priority-dynamic-row.js' not in runtime_order: errors.append('missing active v228 runtime module: components/162-v228-library-priority-dynamic-row.js')
 if 'components/163-v229-library-choice-modals.js' not in runtime_order: errors.append('missing active v229 runtime module: components/163-v229-library-choice-modals.js')
+if 'components/164-v230-choice-filter-layout.js' not in runtime_order: errors.append('missing active v230 runtime module: components/164-v230-choice-filter-layout.js')
+if 'components/165-v231-settings-library-mode-layout-inheritance.js' not in runtime_order: errors.append('missing active v231 runtime module: components/165-v231-settings-library-mode-layout-inheritance.js')
+if 'components/166-v232-library-performance-persistence-details.js' not in runtime_order: errors.append('missing active v232 runtime module: components/166-v232-library-performance-persistence-details.js')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -70,9 +80,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v229.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v232.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v229 bundle')
+if not bundle: errors.append('missing v232 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -358,7 +368,74 @@ print('v225 Personal Order clarity/global button icons/Account polish: preserved
 print('v226 semantic icons/dropdowns/category layout/Dynamic Library sizing: preserved')
 print('v227 icon/category-row/dashboard-cover corrections: preserved')
 print('v228 Library metadata/Dynamic row ordering controls: preserved')
+# v230 choice/filter layout checks.
+css230=(ROOT/'assets/css/100-v230-choice-filter-layout.css').read_text(encoding='utf-8') if (ROOT/'assets/css/100-v230-choice-filter-layout.css').exists() else ''
+if not css230: errors.append('missing v230 choice/filter stylesheet')
+for pat in [
+    'MediaFlow v230 — Choice + Filter Layout Control Center',
+    'CHOICE & FILTER LAYOUT',
+    'Follow Category Settings',
+    'Follow Dynamic Category Row',
+    'function v230SetPosition',
+    'function v230DragStart',
+    'function v230ApplyFilterLayouts',
+    'MediaFlowRuntime.version=V230_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v230 choice/filter feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v230 choice/filter feature is outside active app scope: {pat}')
+for pat in ['.v230-settings-grid','.v230-layout-row','.v230-drag-handle','.v230-position']:
+    if pat not in css230: errors.append(f'missing v230 choice/filter CSS: {pat}')
+
 print('v229 Category/Status popup polish: active')
+# v231 Settings / inheritance checks.
+css231=(ROOT/'assets/css/101-v231-settings-layout-inheritance.css').read_text(encoding='utf-8') if (ROOT/'assets/css/101-v231-settings-layout-inheritance.css').exists() else ''
+if not css231: errors.append('missing v231 settings/inheritance stylesheet')
+for pat in [
+    'MediaFlow v231 — Settings Navigation + Layout Inheritance Polish',
+    "modeLabel.textContent='LIBRARY MODE'",
+    "if(surface==='setStatus')values.push(['dynamicStatus','Follow Dynamic Status Order'])",
+    "['setStatus','Follow Set Status'],['dynamicStatus','Follow Dynamic Status Order']",
+    "['setCategory','Follow Set Category']",
+    "const V231_SET_PRIORITY_DEFAULT=['high','medium','low'];",
+    'MediaFlowRuntime.version=V231_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v231 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v231 feature is outside active app scope: {pat}')
+for pat in ['.v231-library-mode-card','.v221-settings-nav-item.v231-active']:
+    if pat not in css231: errors.append(f'missing v231 CSS: {pat}')
+if 'Drag with ☰, use the number or arrows to reorder, and show/hide individual choices.' in (SRC/'components/165-v231-settings-library-mode-layout-inheritance.js').read_text(encoding='utf-8'):
+    errors.append('v231 reintroduced removed Choice & Filter helper copy')
+
+print('v230 Choice/Filter layout controls: active')
+
+# v232 performance / persistence / details checks.
+css232=(ROOT/'assets/css/102-v232-performance-details-settings.css').read_text(encoding='utf-8') if (ROOT/'assets/css/102-v232-performance-details-settings.css').exists() else ''
+for pat in [
+    'MediaFlow v232 — Library Performance + Persistence Audit + Details Polish',
+    'V225_ICON_OBSERVER.disconnect()',
+    'V226_DROPDOWN_OBSERVER.disconnect()',
+    'V230_FILTER_OBSERVER.disconnect()',
+    'v230ApplyDynamicStatusRow=function(){return;}',
+    "list.unshift('LIBRARY MODE')",
+    "payload.formatVersion=Math.max(Number(payload.formatVersion)||1,V232_ORDER_FORMAT_VERSION)",
+    'choiceFilterLayoutV230V231:true',
+    'App.exportCSV=function()',
+    'MediaFlowRuntime.version=V232_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v232 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v232 feature is outside active app scope: {pat}')
+for pat in ['.v181-title-details-modal','.v181-detail-card>.v225-btn-icon','content-visibility:auto']:
+    if pat not in css232: errors.append(f'missing v232 CSS: {pat}')
+
+classic232=(SRC/'pages/library/013-v70-expanded-library-display-ordering.js').read_text(encoding='utf-8')
+dynamic232=(SRC/'pages/library/112-dynamic-library-rendering.js').read_text(encoding='utf-8')
+if 'const v232OverviewMeta=new Map();' not in classic232: errors.append('missing v232 one-pass classic Library overview optimization')
+if 'const categoryCounts=new Map();' not in dynamic232 or 'const statusCounts=new Map();' not in dynamic232: errors.append('missing v232 one-pass Dynamic Library count optimization')
+if not (ROOT/'scripts/perf-v232.py').exists(): errors.append('missing v232 large-Library performance regression script')
+if not (ROOT/'docs/CHANGELOG_v232.md').exists(): errors.append('missing v232 changelog')
+
+print('v231 Settings navigation/inheritance polish: active')
+print('v232 Library performance/persistence/details audit: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())
