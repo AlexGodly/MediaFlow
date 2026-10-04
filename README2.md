@@ -1,23 +1,22 @@
-# MediaFlow v224 — Modular Project
+# MediaFlow v225 — Modular Project
 
-**App release:** v224  
+**App release:** v225  
 **Stable feature/data base:** v201  
 **Cloud Sync:** v201  
 **Full Backup Schema:** v29  
 **Settings Preset Schema:** v1
 
-v224 builds on the working v219+ runtime-extension architecture and adds Library cleanup, a cover filter, unified sort-field + ASC/DESC controls, Personal Order / Account naming, and redesigned Dashboard recommendation actions.
+MediaFlow v225 builds on v224 with a clearer Personal Order → Add Titles control layout and a global icon language for current and future action buttons.
 
-## Main v224 changes
+## Main v225 changes
 
-- Library page no longer shows **Empty library**; use Settings → Library Maintenance instead.
-- **+ Add title** is the single right-side Library header action.
-- Normal and Dynamic Library add **All covers / Has cover / Missing cover** filtering.
-- Library, Batch Log, Personal Order Add Titles, and Dashboard logging use one sort field plus an independent **ASC/DESC** switch.
-- Default sort is **Alphabetic · ASC**.
-- **Order** → **Personal Order**.
-- **Profile settings** → **Account**.
-- Dashboard **Edit / Reroll title / Rerolls history** actions are grouped under the recommended title with icons.
+- Rebuilt the **Personal Order → Add Titles** filter/sort toolbar so Categories, Sort by, Direction, Status and Priority are individually labeled and easy to scan.
+- Preserved the v224 sorting model: one sort field plus an independent **ASC/DESC** direction button, defaulting to **Alphabetic · ASC**.
+- Added a centralized **global button icon system** that automatically enhances current and future text action buttons.
+- Added dedicated icons for Skip, Confirm, Reroll, Edit, Delete/Empty, Details, Fix/Repair, Calculate, Cancel, Save, Add, Clear, Use, Previous/Next, Stopwatch actions, Library modes, display modes, import/export/restore, Personal Order controls, Old System modes, logging modes, sync, scan/fix, auth and About actions.
+- Existing controls that already have their own icon, toggles, swatches and numeric pagination remain untouched to avoid duplicate/noisy UI.
+- Polished **Account** text fields with clearer spacing, focus states, borders and responsive action layout.
+- Preserved every v224 Library, sorting, navigation-name and Dashboard recommendation improvement.
 
 ## Development
 
@@ -41,4 +40,4 @@ python scripts/smoke-ui.py
 
 For local development use `scripts/serve.bat` on Windows or `scripts/serve.sh` on macOS/Linux.
 
-See `docs/CHANGELOG_v224.md` for the full release notes.
+See `docs/CHANGELOG_v225.md` for the full release notes.

@@ -9,5 +9,7 @@
   "pages/personal-order/152-v224-personal-order-sorting.js",
   "features/logging/153-v224-dashboard-logging-sorting.js",
   "components/navigation/154-v224-page-names.js",
-  "pages/dashboard/155-v224-recommendation-actions.js"
+  "pages/dashboard/155-v224-recommendation-actions.js",
+  "pages/personal-order/156-v225-personal-order-toolbar-polish.js",
+  "components/157-v225-global-button-icons.js"
 ]

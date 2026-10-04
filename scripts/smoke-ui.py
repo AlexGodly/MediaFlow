@@ -3,10 +3,11 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v224.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v225.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
+CSS225=ROOT/'assets/css/95-v225-icons-personal-order.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -22,6 +23,7 @@ bundle=BUNDLE.read_text(encoding='utf-8')
 css=CSS.read_text(encoding='utf-8')
 css222=CSS222.read_text(encoding='utf-8')
 css224=CSS224.read_text(encoding='utf-8')
+css225=CSS225.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -49,6 +51,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css)
     page.add_style_tag(content=css222)
     page.add_style_tag(content=css224)
+    page.add_style_tag(content=css225)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -220,11 +223,19 @@ with sync_playwright() as p:
     result['personalOrderTitle']=page.locator('h1').first.text_content().strip() if page.locator('h1').count() else ''
     result['personalOrderSort']=page.locator('select[aria-label="Personal Order Add Titles sort field"]').input_value() if page.locator('select[aria-label="Personal Order Add Titles sort field"]').count() else ''
     result['personalOrderSortDir']=' '.join(page.locator('button[aria-label="Personal Order Add Titles sort direction"]').inner_text().split()) if page.locator('button[aria-label="Personal Order Add Titles sort direction"]').count() else ''
+    result['personalOrderFilterLabels']=page.evaluate("()=>[...document.querySelectorAll('.v225-order-filter-label')].map(x=>x.textContent.trim())")
+    result['personalOrderClearIcon']=page.evaluate("()=>!![...document.querySelectorAll('#v140-order-picker-tools button')].find(b=>b.textContent.trim()==='Clear filters')?.querySelector('.v225-btn-icon')")
+    result['personalOrderAllTitlesIcon']=page.evaluate("()=>!![...document.querySelectorAll('.v138-order-switch button')].find(b=>b.textContent.trim()==='All Titles')?.querySelector('.v225-btn-icon')")
     page.evaluate("()=>App.setView('profile')")
     page.wait_for_timeout(180)
     result['accountTitle']=page.locator('.view-title').first.text_content().strip() if page.locator('.view-title').count() else ''
+    result['accountButtonIcons']=page.evaluate("()=>document.querySelectorAll('.profile-card .v225-btn-icon').length")
+    result['accountEmailMinHeight']=page.evaluate("()=>getComputedStyle(document.querySelector('#profile-email')).minHeight") if page.locator('#profile-email').count() else ''
     result['navPersonalOrder']=page.evaluate("()=>[...document.querySelectorAll('.nav-item')].some(x=>x.textContent.trim()==='Personal Order')")
     result['navAccount']=page.evaluate("()=>[...document.querySelectorAll('.nav-item')].some(x=>x.textContent.trim()==='Account')")
+    page.evaluate("()=>App.setView('about')")
+    page.wait_for_timeout(180)
+    result['aboutButtonIcons']=page.evaluate("()=>document.querySelectorAll('.v161-about-links .v225-btn-icon').length")
     page.evaluate("()=>App.setView('batch')")
     page.wait_for_timeout(220)
     result['batchSort']=page.locator('select[aria-label="Batch Log sort field"]').input_value() if page.locator('select[aria-label="Batch Log sort field"]').count() else ''
@@ -242,7 +253,7 @@ with sync_playwright() as p:
     browser.close()
 
 required={
-    'runtimeVersion':224,
+    'runtimeVersion':225,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -290,6 +301,9 @@ required={
     'personalOrderTitle':'Personal Order',
     'personalOrderSort':'title',
     'personalOrderSortDir':'↑ ASC',
+    'personalOrderFilterLabels':['Categories','Sort by','Direction','Status','Priority'],
+    'personalOrderClearIcon':True,
+    'personalOrderAllTitlesIcon':True,
     'accountTitle':'Account',
     'navPersonalOrder':True,
     'navAccount':True,
@@ -304,6 +318,9 @@ for k,v in required.items():
 if result.get('desktopScrollbarWidth')=='none': fail.append('desktop Settings navigator scrollbar was hidden; it should remain available')
 if len(result.get('navGroups',[]))<6: fail.append('organized Settings navigation did not render enough groups')
 if result.get('resetButtons',0)<10: fail.append('per-setting/section reset controls did not render')
+if result.get('accountButtonIcons',0)<5: fail.append('Account action buttons did not receive enough v225 icons')
+if result.get('aboutButtonIcons',0)<5: fail.append('About action buttons did not receive v225 icons')
+if result.get('accountEmailMinHeight')!='44px': fail.append(f"Account field polish missing: expected 44px min-height, got {result.get('accountEmailMinHeight')!r}")
 if result.get('defaultLeak'): fail.append('native Default button/text still present in: '+', '.join(result['defaultLeak']))
 if 'feature, or section' not in result.get('searchPlaceholder',''): fail.append('Settings search placeholder changed unexpectedly')
 if errors: fail.extend(f'browser page error: {e}' for e in errors)

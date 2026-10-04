@@ -1,8 +1,8 @@
-# MediaFlow v222 Architecture
+# MediaFlow v225 Architecture
 
 ## Runtime foundation
 
-v221 continues using the v219 runtime-extension architecture. New release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while MediaFlow's private state and render helpers are still available.
+MediaFlow v225 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the legacy v201-compatible application state and render helpers remain available inside the same lexical scope.
 
 ```text
 build-order.json
@@ -11,43 +11,46 @@ runtime_extensions slot
       ↓
 998-runtime-extension-foundation-v219.js
       ↓
-146-v221-active-settings-page.js
+221–224 active release modules
+      ↓
+156-v225-personal-order-toolbar-polish.js
+      ↓
+157-v225-global-button-icons.js
       ↓
 999-close-app.js
 ```
 
-This keeps release changes connected to the application that actually runs.
+## v225 ownership
 
-## Active Settings ownership
-
-The active Settings page is owned by:
+Personal Order Add Titles clarity is owned by:
 
 ```text
-src/js/pages/settings/146-v221-active-settings-page.js
-assets/css/92-v221-settings-polish.css
+src/js/pages/personal-order/156-v225-personal-order-toolbar-polish.js
 ```
 
-The module handles:
+The global action-button icon language is owned by:
 
-- searchable Settings
-- synchronized left index + page ordering
-- Library/Interface/Appearance/MediaFlow System/Progression/Data & Sync/Updates groups
-- Statistics Settings inside Interface
-- App Updates in the bottom Updates group
-- per-setting reset controls
-- section reset controls
-- audited Restore All Defaults
-- responsive Settings navigation behavior
+```text
+src/js/components/157-v225-global-button-icons.js
+```
+
+Shared v225 presentation is owned by:
+
+```text
+assets/css/95-v225-icons-personal-order.css
+```
+
+The icon enhancer is runtime-driven and observes newly rendered DOM nodes, so future text action buttons inherit the icon system without duplicating icon markup across every page renderer.
 
 ## Generated runtime
 
 The browser loads:
 
 ```text
-assets/js/mediaflow-v222.bundle.js
+assets/js/mediaflow-v225.bundle.js
 ```
 
-It remains a compatibility bundle because the stable v201 application still shares one lexical runtime, while v219+ release modules have an explicit safe injection point.
+The generated bundle must exactly match `build-order.json` plus `runtime-order.json`.
 
 ## Validation
 
@@ -59,12 +62,12 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The smoke test launches Chromium and verifies the rendered UI instead of relying only on syntax checks.
+The Chromium smoke test validates Settings integrity, v222/v223 Dashboard regressions, v224 Library/sorting behavior, v225 Personal Order controls, global icons and Account field styling.
 
 ## Compatibility
 
-- App release: **221**
-- Stable feature base: **201**
+- App release: **225**
+- Stable feature/data base: **201**
 - Runtime foundation: **219**
 - Cloud Sync contract: **201**
 - Full Backup schema: **29**
