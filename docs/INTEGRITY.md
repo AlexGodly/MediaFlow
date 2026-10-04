@@ -1,8 +1,8 @@
-# Integrity Notes
+# MediaFlow v216 Integrity Notes
 
-- Stable source file: `MediaFlow_v201.html`
-- Original inline JS SHA256: `a556c002f57505e29badc4c755fd7c42d86c9d06a32901cee758a4911ce714dd`
-- v215 bundle SHA256: `04eeb987df031254fdbd7ae4a444c26018ecd9025ab081b85b5d3baf6a5e0649`
-- JavaScript difference from v201: one human-readable Full Backup note string updated to identify the v215 modular release; runtime feature logic otherwise comes from the stable v201 script.
-- CSS extraction check: all 74 original style-block contents are present in the same order.
-- Persistent data schemas intentionally remain unchanged.
+- Stable runtime base: MediaFlow v215 modular build, itself derived from stable MediaFlow v201.
+- Stable v215 JS SHA256: `04eeb987df031254fdbd7ae4a444c26018ecd9025ab081b85b5d3baf6a5e0649`
+- v216 executable JavaScript difference: only the human-readable Full Backup note identifies v216; `scripts/check.py` reverses that note and requires the result to hash exactly to the v215 stable runtime.
+- Source layout change: 143 exact ordered fragments distributed across ownership folders.
+- CSS runtime content and stylesheet order are retained from v215.
+- Persistent schemas remain unchanged.

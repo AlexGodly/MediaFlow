@@ -1,78 +1,92 @@
-# MediaFlow v215 — Modular Refactor
+# MediaFlow v216 — Modular Page / Component Architecture
 
 **Stable feature base:** MediaFlow v201  
-**App version:** v215  
-**Cloud sync compatibility:** v201  
+**App release:** v216  
+**Cloud Sync compatibility:** v201  
 **Full Backup schema:** v29  
 **Settings Preset schema:** v1
 
-This release restructures the stable v201 single-file application into a maintainable project without intentionally changing its v201 feature behavior or persistent data formats.
+v216 is the deeper architecture phase built on v215. The app is still one SPA and behaves like the stable v201 build, but the editable JavaScript source is now organized by ownership instead of by one giant HTML file or broad chronological chunks.
 
-## Run it
-
-The deployable entry point is `index.html`. For normal browser/PWA behavior, serve the folder over HTTP instead of double-clicking the file.
+## Run MediaFlow
 
 ### Windows
-
 Run `scripts\serve.bat`, then open `http://localhost:8080/`.
 
 ### macOS / Linux
-
-Run:
-
 ```bash
 bash scripts/serve.sh
 ```
 
-Then open `http://localhost:8080/`.
-
-## Project structure
+## Source architecture
 
 ```text
-MediaFlow_v215_Modular/
+MediaFlow_v216_Modular/
 ├── index.html
-├── manifest.json
-├── sw.js
-├── VERSION
 ├── assets/
-│   ├── css/                 # external stylesheets, kept in original cascade order
-│   └── js/
-│       └── mediaflow-v215.bundle.js  # deployable compatibility bundle
-├── src/
-│   └── js/
-│       ├── build-order.json
-│       └── parts/           # logical source fragments, concatenated in original order
+│   ├── css/
+│   └── js/mediaflow-v216.bundle.js
+├── src/js/
+│   ├── core/
+│   ├── pages/
+│   │   ├── dashboard/
+│   │   ├── library/
+│   │   ├── personal-order/
+│   │   ├── library-history/
+│   │   ├── history/
+│   │   ├── batch-log/
+│   │   ├── statistics/
+│   │   ├── profile-settings/
+│   │   ├── settings/
+│   │   └── old-system/
+│   ├── components/
+│   ├── features/
+│   ├── services/
+│   ├── utils/
+│   ├── legacy/
+│   └── build-order.json
 ├── scripts/
-│   ├── build.py             # rebuild JS bundle from source parts
-│   ├── check.py             # structural + JS syntax checks
+│   ├── build.py
+│   ├── check.py
+│   ├── locate.py
 │   ├── serve.bat
 │   └── serve.sh
 └── docs/
     ├── ARCHITECTURE.md
-    ├── CHANGELOG_v215.md
-    └── INTEGRITY.md
+    ├── SOURCE_MAP.md
+    ├── INTEGRITY.md
+    └── CHANGELOG_v216.md
 ```
 
-## Why the JavaScript has a bundle
+## Important compatibility rule
 
-The v201 application accumulated a very large shared lexical scope. Splitting that closure into independently loaded browser scripts would change variable visibility and risk breaking the stable build. v215 therefore uses a **compatibility-first modular source layout**:
+Files under `src/js/` are now **owned by real app domains**, but they are concatenated in `build-order.json` into one compatibility bundle. Do not add these files as separate `<script>` tags yet. The stable v201 application shares lexical state, so preserving source order is what keeps the app functioning exactly as before.
 
-- the source is separated into logical `src/js/parts/*.part.js` files;
-- `scripts/build.py` concatenates them in the exact original execution order;
-- the browser loads one generated bundle;
-- future work can progressively extract real independent modules from these parts without destabilizing the app.
+This architecture makes future debugging much easier: use the owning folder first, then shared components/services. For example:
 
-This removes the 1.8 MB inline HTML problem immediately while preserving the shared-scope behavior of v201.
+- Library bug → `src/js/pages/library/`
+- Dashboard bug → `src/js/pages/dashboard/`
+- category UI → `src/js/components/category/`
+- cloud sync → `src/js/services/cloud-sync/`
+- backups → `src/js/features/backup/`
 
-## Building after JavaScript edits
+## Build and verify
 
 ```bash
 python scripts/build.py
 python scripts/check.py
 ```
 
-Do not load files in `src/js/parts/` directly from HTML. They are ordered source fragments of the stable shared closure.
+`check.py` does more than syntax checking: it verifies the generated v216 runtime is executable-code compatible with the stable v215/v201 runtime.
+
+## Find code quickly
+
+```bash
+python scripts/locate.py renderLibrary
+python scripts/locate.py "category icon"
+python scripts/locate.py v155VerifyCloudState
+```
 
 ## GitHub Pages
 
-Upload the project contents to the root of the Pages branch/repository. `index.html`, `manifest.json`, `sw.js`, `assets/`, and the other folders can remain exactly as provided.
+Deploy the project contents as usual. `index.html` remains the single SPA entry point.

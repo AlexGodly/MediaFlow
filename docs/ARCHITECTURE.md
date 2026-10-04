@@ -1,37 +1,57 @@
-# MediaFlow v215 Architecture
+# MediaFlow v216 Architecture
 
-## Objective
+## Goal
 
-v215 is a structural refactor of stable v201. The priority is behavior preservation first, then progressive modular extraction in later releases.
+v216 is the second-stage refactor of the stable v201 feature base. Unlike v215's broad chronological `parts/` directory, v216 gives every editable JavaScript fragment a concrete ownership area: `core/`, `pages/`, `components/`, `features/`, `services/`, `utils/`, or `legacy/`.
 
-## Runtime layers
+The priority remains **runtime compatibility first**. The browser bundle is reconstructed in the exact stable execution order, so reorganizing source ownership does not rewrite application behavior.
 
-1. `index.html` — clean application entry point and dependency ordering.
-2. `assets/css/*.css` — CSS extracted from 74 inline style blocks and grouped in the original cascade order.
-3. Supabase CDN — retained exactly as the v201 runtime dependency.
-4. `assets/js/mediaflow-v215.bundle.js` — generated compatibility bundle preserving the v201 shared closure.
-5. Late theme/control styles — still linked after the app script to retain the original pre/post-script stylesheet ordering as closely as possible.
+## Runtime
 
-## JavaScript source organization
+1. `index.html` — SPA entry point.
+2. `assets/css/*.css` — v215-extracted stable styles, unchanged in content/order.
+3. Supabase browser client CDN.
+4. `assets/js/mediaflow-v216.bundle.js` — generated compatibility bundle.
+5. Service worker / PWA manifest.
 
-`src/js/parts/` is intentionally split by contiguous feature generations. These fragments share the original v201 IIFE lexical scope and are concatenated by `scripts/build.py`.
+## Editable JavaScript source
 
-This is safer than pretending the old code is already independent ES modules. Future refactors can now move one feature at a time from a source part into a true module with explicit imports/exports.
+```text
+src/js/
+├── core/          # state, storage, render shell, public app actions
+├── pages/         # Dashboard, Library, Personal Order, History, Statistics, Settings, etc.
+├── components/    # modals, navigation, category/cover UI, pagination, title details
+├── features/      # scheduler, logging, XP, backup, imports, themes, rewatch
+├── services/      # cloud sync and persistence pipelines
+├── utils/         # shared helpers
+├── legacy/        # stable compatibility code not yet safely assigned/extracted
+└── build-order.json
+```
 
-## Recommended future extraction order
+`pages/` contains actual source fragments owned by pages; they are not separate HTML documents because MediaFlow remains a SPA.
 
-1. Reusable UI primitives: modal, pagination, cover rendering, category filter.
-2. State/storage/cloud adapters.
-3. Page renderers: Dashboard, Library, Personal Order, History, Statistics, Settings.
-4. Feature services: Logging, Scheduler, XP, Backup, Import.
-5. Legacy migrations isolated behind a migration runner.
+## Why the browser still uses a generated bundle
+
+The stable v201 runtime was built around one shared lexical closure. Turning every file into an independently loaded ES module in one release would change scope semantics and could break stable data/render behavior. v216 therefore changes **source ownership without changing execution semantics**.
+
+This is a deliberate migration architecture:
+
+- future Library bugs are located under `src/js/pages/library/` plus shared components/services;
+- Dashboard work is under `src/js/pages/dashboard/`;
+- category UI work is under `src/js/components/category/`;
+- cloud issues are under `src/js/services/cloud-sync/`;
+- build order remains explicit so compatibility can be proved after each extraction.
+
+## Validation guarantee
+
+`scripts/check.py` reconstructs the bundle from all owned fragments, runs `node --check`, and normalizes the v216 human-readable backup note before comparing the SHA-256 hash against the stable v215/v201 runtime. If any executable JS changed unexpectedly, the check fails.
 
 ## Version/data compatibility
 
-- UI/app release number: **215**
+- App release: **216**
 - Stable feature base: **201**
-- Cloud sync contract: **201**
+- Cloud Sync contract: **201**
 - Full Backup schema: **29**
 - Settings Preset schema: **1**
 
-The higher app version does not imply a persistent-data migration.
+No persistent-data migration is introduced by the architecture refactor.
