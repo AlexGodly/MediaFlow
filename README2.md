@@ -1,46 +1,24 @@
-# MediaFlow v229 — Modular Project
+# MediaFlow v230 — Modular Project
 
-**App release:** v229  
-**Stable feature/data base:** v201  
+**App release:** v230  
+**Stable feature base:** v201  
 **Cloud Sync:** v201  
 **Full Backup Schema:** v29  
 **Settings Preset Schema:** v1
 
-MediaFlow v229 is a focused Library choice-popup release built on v228. It upgrades Set Category to use each category's real Icon URL, removes the category-list scrollbar by showing up to 15 categories at once, adds pagination only when more than 15 categories exist, aligns Set Status icons with Dynamic Library, and restores a clear artwork icon to the Dynamic category-row Icon URL selector.
+MediaFlow v230 adds a centralized **Choice & Filter Layout** settings section for the reusable Set Category, Set Status, Set Priority, Category Filter, Status Filter, and Priority Filter interfaces. Each surface can control order and visibility with drag handles, exact position numbers, arrows, and show/hide toggles. Category-based surfaces can use independent settings, follow the main Categories configuration, or follow the Dynamic Category Row. Status/Priority filters can also inherit their matching Set popup configuration.
 
-## Main v229 changes
+## Main v230 changes
 
-- **Set Category** now renders `v144CategoryIconHtml(...)`, so a category's configured Icon URL is shown instead of the generic image emoji whenever a valid URL exists.
-- Set Category now includes **all current categories**, including categories disabled from scheduling/display.
-- Set Category renders up to **15 categories per page** with no internal category-list scrollbar.
-- Pagination appears **only when the category count is greater than 15**.
-- The Set Category popup automatically opens on the page containing the title's current category.
-- Category choices expand into a wider responsive layout and use two columns when needed so 15 choices remain readable at once.
-- **Set Status** now uses the exact semantic status icon language already used by Dynamic Library: Plan to Watch, Watching, On Hold, Completed and Dropped.
-- Removed the duplicate generic action icon from Set Status choices.
-- The **Dynamic category row icons** selector now has an artwork/image icon while preserving its existing values and behavior.
-- Preserved v228 Dynamic row ordering, v227 artwork fixes, v226 semantic controls, and all existing data schemas.
+- Added **Settings → Library → Choice & Filter Layout**.
+- Independent ordering/visibility for Set Category, Set Status, Set Priority, Category Filter, Status Filter, and Priority Filter.
+- Drag, exact numeric position, ↑/↓ ordering, and show/hide controls.
+- Category surfaces can use **Own settings**, **Follow Category Settings**, or **Follow Dynamic Category Row**.
+- Status Filter can optionally **Follow Set Status**.
+- Priority Filter can optionally **Follow Set Priority**.
+- Set Category pagination from v229 now respects configured ordering and hidden choices.
+- Native status/priority/category filter controls are reordered/hidden automatically across MediaFlow.
+- Dynamic Library status-row filters respect the Status Filter layout.
+- New settings are stored inside `S.settings`, so Settings Preset, Full Backup, Automatic Backup, Sync Now, and cloud settings persistence continue to cover them without schema changes.
 
-## Development
-
-Rebuild the browser bundle:
-
-```bash
-python scripts/build.py
-```
-
-Run structural checks:
-
-```bash
-python scripts/check.py
-```
-
-Run Chromium UI smoke tests:
-
-```bash
-python scripts/smoke-ui.py
-```
-
-For local development use `scripts/serve.bat` on Windows or `scripts/serve.sh` on macOS/Linux.
-
-See `docs/CHANGELOG_v229.md` for the full release notes.
+See `docs/CHANGELOG_v230.md` for full release notes.

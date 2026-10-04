@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v229.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v230.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
@@ -12,6 +12,7 @@ CSS226=ROOT/'assets/css/96-v226-semantic-ui-library.css'
 CSS227=ROOT/'assets/css/97-v227-ui-icon-corrections.css'
 CSS228=ROOT/'assets/css/98-v228-library-priority-dynamic-row.css'
 CSS229=ROOT/'assets/css/99-v229-library-choice-modals.css'
+CSS230=ROOT/'assets/css/100-v230-choice-filter-layout.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -32,6 +33,7 @@ css226=CSS226.read_text(encoding='utf-8')
 css227=CSS227.read_text(encoding='utf-8')
 css228=CSS228.read_text(encoding='utf-8')
 css229=CSS229.read_text(encoding='utf-8')
+css230=CSS230.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -64,6 +66,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css227)
     page.add_style_tag(content=css228)
     page.add_style_tag(content=css229)
+    page.add_style_tag(content=css230)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -483,10 +486,80 @@ with sync_playwright() as p:
         result.update(v229_status)
         page.evaluate("()=>App.closeModal()")
 
+    # v230 focused regression probes: organized Settings section, independent
+    # ordering/visibility, category inheritance sources, and filter application.
+    page.evaluate("()=>App.setView('settings')")
+    page.wait_for_timeout(180)
+    v230_settings=page.evaluate(r'''() => {
+      const nav=[...document.querySelectorAll('.v221-settings-nav-item')].find(x=>x.textContent.trim()==='CHOICE & FILTER LAYOUT');
+      const section=[...document.querySelectorAll('.section-label')].find(x=>{const c=x.cloneNode(true);c.querySelectorAll('button').forEach(b=>b.remove());return c.textContent.trim()==='CHOICE & FILTER LAYOUT';});
+      const cards=[...document.querySelectorAll('.v230-surface-card')];
+      const catSource=cards.find(c=>c.querySelector('b')?.textContent.trim()==='Set Category')?.querySelector('select');
+      return {
+        v230SettingsSection:!!section,
+        v230SettingsNavIcon:nav?.dataset.v226SemanticIcon==='filter'||!!nav?.querySelector('.v225-btn-icon'),
+        v230SurfaceCards:cards.length,
+        v230SetCategorySources:[...(catSource?.options||[])].map(o=>o.value),
+        v230DragHandles:document.querySelectorAll('.v230-drag-handle').length,
+        v230PositionInputs:document.querySelectorAll('.v230-position').length,
+        v230VisibilityToggles:document.querySelectorAll('.v230-layout-row>.toggle').length
+      };
+    }''')
+    result.update(v230_settings)
+
+    ids=page.evaluate("()=>[...document.querySelectorAll('.v230-surface-card')].find(c=>c.querySelector('b')?.textContent.trim()==='Set Category')?.querySelectorAll('.v230-layout-row') ? [...[...document.querySelectorAll('.v230-surface-card')].find(c=>c.querySelector('b')?.textContent.trim()==='Set Category').querySelectorAll('.v230-layout-row')].slice(0,3).map(r=>r.dataset.v230Id) : []")
+    if len(ids)>=2:
+        first,second=ids[0],ids[1]
+        page.evaluate("([a,b])=>{App.v230SetSource('setCategory','custom');App.v230SetPosition('setCategory',b,1);App.v230ToggleVisible('setCategory',a,false);}", [first,second])
+        page.wait_for_timeout(220)
+        page.evaluate("()=>{App.setView('library');App.v181SetLibraryMode('normal')}")
+        page.wait_for_timeout(220)
+        opened=page.evaluate("()=>{const b=document.querySelector('.category-click');if(!b)return false;b.click();return true}")
+        if opened:
+            page.wait_for_timeout(120)
+            probe=page.evaluate(r"([a,b])=>{const rows=[...document.querySelectorAll('.v229-category-choice')];const ids=rows.map(r=>{const c=String(r.getAttribute('onclick')||'');const m=c.match(/setLibraryCategory\('[^']*','([^']+)'/);return m?m[1]:''});return {v230SetCategoryFirst:ids[0]||'',v230SetCategoryHiddenAbsent:!ids.includes(a),v230SetCategoryMovedFirst:ids[0]===b};}", [first,second])
+            result.update(probe)
+            page.evaluate("()=>App.closeModal()")
+
+        page.evaluate("([a])=>{App.v230SetSource('categoryFilter','custom');App.v230ToggleVisible('categoryFilter',a,false);App.setView('library');}", [first])
+        page.wait_for_timeout(180)
+        result['v230CategoryFilterHidden']=page.evaluate("a=>{const rows=[...document.querySelectorAll('.v66-cat-option')];const row=rows.find(r=>String(r.querySelector('input')?.getAttribute('onchange')||'').includes(a));return !!row&&row.hidden===true;}", first)
+        page.evaluate("()=>App.v230SetSource('categoryFilter','dynamic')")
+        page.wait_for_timeout(120)
+        result['v230CategoryFilterDynamicSource']=page.evaluate("()=>MediaFlowRuntime.getSettings()?.v230ChoiceLayout?.categoryFilter?.source||''")
+        page.evaluate("()=>App.v230SetSource('categoryFilter','custom')")
+
+    # Status popup order/visibility.
+    page.evaluate("()=>{App.v230SetSource('setStatus','custom');App.v230SetPosition('setStatus','dropped',1);App.v230ToggleVisible('setStatus','paused',false);App.setView('library');}")
+    page.wait_for_timeout(180)
+    opened=page.evaluate("()=>{const b=document.querySelector('.status-click');if(!b)return false;b.click();return true}")
+    if opened:
+        page.wait_for_timeout(100)
+        result.update(page.evaluate(r'''() => {
+          const labels=[...document.querySelectorAll('.v229-status-modal .status-choice .v229-choice-copy b')].map(x=>x.textContent.trim());
+          return {v230SetStatusFirst:labels[0]||'',v230SetStatusOnHoldHidden:!labels.includes('On Hold')};
+        }'''))
+        page.evaluate("()=>App.closeModal()")
+
+    # Filter ordering/visibility across native filters.
+    page.evaluate("()=>{App.v230SetSource('statusFilter','custom');App.v230SetPosition('statusFilter','dropped',1);App.v230ToggleVisible('statusFilter','paused',false);App.v230SetSource('priorityFilter','custom');App.v230SetPosition('priorityFilter','low',1);App.setView('library');}")
+    page.wait_for_timeout(200)
+    result.update(page.evaluate(r'''() => {
+      const selects=[...document.querySelectorAll('.lib-filters select')];
+      const status=selects.find(s=>[...s.options].some(o=>o.textContent.trim()==='All statuses'));
+      const priority=selects.find(s=>[...s.options].some(o=>o.textContent.trim()==='All priorities'));
+      const visibleValues=s=>[...s.options].filter(o=>!o.hidden).map(o=>o.value);
+      return {
+        v230StatusFilterOrder:status?visibleValues(status):[],
+        v230PriorityFilterOrder:priority?visibleValues(priority):[],
+        v230StatusFilterHiddenOnHold:status?[...status.options].find(o=>o.value==='paused')?.hidden===true:false
+      };
+    }'''))
+
     browser.close()
 
 required={
-    'runtimeVersion':229,
+    'runtimeVersion':230,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -591,6 +664,19 @@ required={
     'v229StatusSemanticIcons':True,
     'v229StatusNoDuplicateLeadingIcons':True,
     'v229StatusDistinctIcons':True,
+    'v230SettingsSection':True,
+    'v230SettingsNavIcon':True,
+    'v230SurfaceCards':6,
+    'v230SetCategorySources':['custom','categories','dynamic'],
+    'v230SetCategoryHiddenAbsent':True,
+    'v230SetCategoryMovedFirst':True,
+    'v230CategoryFilterHidden':True,
+    'v230CategoryFilterDynamicSource':'dynamic',
+    'v230SetStatusFirst':'Dropped',
+    'v230SetStatusOnHoldHidden':True,
+    'v230StatusFilterOrder':['all','dropped','active','completed','planned'],
+    'v230PriorityFilterOrder':['all','low','high','medium'],
+    'v230StatusFilterHiddenOnHold':True,
 }
 fail=[]
 for k,v in required.items():
@@ -609,6 +695,9 @@ if result.get('accountEmailMinHeight')!='44px': fail.append(f"Account field poli
 if result.get('visibilityToggleWidth',0)<48: fail.append(f"Visibility toggle is too narrow for its icon: {result.get('visibilityToggleWidth')}px")
 if result.get('visibilityToggleIconWidth',0)<12: fail.append(f"Visibility toggle icon is still clipped: {result.get('visibilityToggleIconWidth')}px")
 if result.get('v229CategoryModalWidth',0)<700: fail.append(f"v229 category modal is too narrow for 15 visible choices: {result.get('v229CategoryModalWidth')}px")
+if result.get('v230DragHandles',0)<6: fail.append('v230 layout drag handles did not render')
+if result.get('v230PositionInputs',0)<6: fail.append('v230 exact position inputs did not render')
+if result.get('v230VisibilityToggles',0)<6: fail.append('v230 show/hide toggles did not render')
 if result.get('defaultLeak'): fail.append('native Default button/text still present in: '+', '.join(result['defaultLeak']))
 if 'feature, or section' not in result.get('searchPlaceholder',''): fail.append('Settings search placeholder changed unexpectedly')
 if errors: fail.extend(f'browser page error: {e}' for e in errors)

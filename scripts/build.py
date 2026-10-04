@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'src/js'
 order=json.loads((SRC/'build-order.json').read_text(encoding='utf-8'))
 runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))
-out=ROOT/'assets/js/mediaflow-v229.bundle.js'
+out=ROOT/'assets/js/mediaflow-v230.bundle.js'
 parts=[]
 owned_count=0
 runtime_injected=False
@@ -25,7 +25,7 @@ if not runtime_injected:
 text=''.join(parts)
 out.write_text(text,encoding='utf-8')
 print(f'Built {out.relative_to(ROOT)} from {owned_count} source fragments ({len(text):,} characters)')
-print(f'Injected {len(runtime_order)} runtime extension module(s) through v229 inside the MediaFlow application scope')
+print(f'Injected {len(runtime_order)} runtime extension module(s) through v230 inside the MediaFlow application scope')
 try:
     subprocess.run(['node','--check',str(out)],check=True)
     print('JavaScript syntax: OK')
