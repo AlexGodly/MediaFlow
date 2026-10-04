@@ -1,0 +1,92 @@
+[
+  {
+    "file": "00-bootstrap-core.part.js",
+    "description": "Authentication, core state, render shell, foundational app behavior",
+    "start": 0,
+    "end": 112706
+  },
+  {
+    "file": "10-library-foundations.part.js",
+    "description": "Library/history/logging foundations and early ordering behavior",
+    "start": 112706,
+    "end": 296640
+  },
+  {
+    "file": "20-rewatch-themes-stats.part.js",
+    "description": "Repeat consumption, theme/statistics generations, supporting features",
+    "start": 296640,
+    "end": 424097
+  },
+  {
+    "file": "30-modern-stats-order.part.js",
+    "description": "Full-style runtime, statistics/lifecycle features through v136",
+    "start": 424097,
+    "end": 514536
+  },
+  {
+    "file": "40-personal-order-integrity.part.js",
+    "description": "v137-v143 Personal Order and Library integrity/confirmation features",
+    "start": 514536,
+    "end": 586076
+  },
+  {
+    "file": "50-category-theme-backup.part.js",
+    "description": "v144-v152 category palettes, dynamic themes, backup/streak pipeline",
+    "start": 586076,
+    "end": 669678
+  },
+  {
+    "file": "60-old-system-cloud-performance.part.js",
+    "description": "v153-v160 Old System, cloud audit, performance, dynamic cover reliability",
+    "start": 669678,
+    "end": 826785
+  },
+  {
+    "file": "70-navigation-cover-themes.part.js",
+    "description": "v161-v168 navigation, cover collections, Simkl style, Respect/seasonal features",
+    "start": 826785,
+    "end": 953326
+  },
+  {
+    "file": "80-import-recovery.part.js",
+    "description": "v169-v174 advanced import, category recovery, unified import UI, recommendation editing",
+    "start": 953326,
+    "end": 1054505
+  },
+  {
+    "file": "90-library-performance-metadata.part.js",
+    "description": "v175-v180 pagination, rich Library metadata, cover sizes, logging modes, rerolls",
+    "start": 1054505,
+    "end": 1185815
+  },
+  {
+    "file": "100-dynamic-library.part.js",
+    "description": "v181 Dynamic Library, title details, logging defaults and cover sizing",
+    "start": 1185815,
+    "end": 1254874
+  },
+  {
+    "file": "110-library-control-center.part.js",
+    "description": "v182-v188 Dynamic Library/readability/control-center/overview features",
+    "start": 1254874,
+    "end": 1319966
+  },
+  {
+    "file": "120-library-recovery-dashboard.part.js",
+    "description": "v189-v195 Library controls, recovery, Dashboard settings, category icons, rating actions",
+    "start": 1319966,
+    "end": 1390412
+  },
+  {
+    "file": "130-presets-status-category.part.js",
+    "description": "v196-v200 Settings Presets, status labels, category clear and default missing covers",
+    "start": 1390412,
+    "end": 1427649
+  },
+  {
+    "file": "140-v201-icon-scale-tail.part.js",
+    "description": "v201 icon scaling, app closure, retained legacy tail/migration compatibility code",
+    "start": 1427649,
+    "end": 1446999
+  }
+]
