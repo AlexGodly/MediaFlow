@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v222.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v223.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 try:
@@ -123,6 +123,28 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     result['restoreAllWorks']=page.evaluate("()=>window.MediaFlowRuntime.getSettings().tasksPerDay===window.MediaFlowRuntime.getDefaultSettings().tasksPerDay")
 
+    # v223 Dashboard Settings: On This Day sits directly below Today's Balance.
+    page.evaluate("()=>App.setView('settings')")
+    page.wait_for_timeout(250)
+    v223_settings=page.evaluate(r'''() => {
+      const rows=[...document.querySelectorAll('.v192-dashboard-toggle-row')];
+      const labels=rows.map(r=>r.querySelector('b')?.textContent.trim()||'');
+      return {
+        dashboardToggleLabels:labels,
+        onThisDayToggleExists:labels.includes('On This Day'),
+        onThisDayUnderTodayBalance:labels.indexOf('On This Day')===labels.indexOf("Today's Balance")+1,
+        onThisDayDefault:window.MediaFlowRuntime.getDefaultSettings()?.v192Dashboard?.showOnThisDay===true,
+        onThisDayInitiallyVisible:App.v223IsOnThisDayVisible()===true
+      };
+    }''')
+    result.update(v223_settings)
+    page.evaluate("()=>App.v192ToggleDashboardSection('showOnThisDay')")
+    page.wait_for_timeout(220)
+    result['onThisDayToggleHides']=page.evaluate("()=>App.v223IsOnThisDayVisible()===false && window.MediaFlowRuntime.getSettings()?.v192Dashboard?.showOnThisDay===false")
+    page.evaluate("()=>App.v221ResetSettingPath('v192Dashboard.showOnThisDay','On This Day')")
+    page.wait_for_timeout(220)
+    result['onThisDayIndividualResetWorks']=page.evaluate("()=>App.v223IsOnThisDayVisible()===true && window.MediaFlowRuntime.getSettings()?.v192Dashboard?.showOnThisDay===true")
+
     # Responsive horizontal Settings navigation: still scrollable, but scrollbar hidden.
     page.set_viewport_size({'width':760,'height':900})
     page.wait_for_timeout(250)
@@ -180,7 +202,7 @@ with sync_playwright() as p:
     browser.close()
 
 required={
-    'runtimeVersion':222,
+    'runtimeVersion':223,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -192,6 +214,12 @@ required={
     'changedSetting':True,
     'individualResetWorks':True,
     'restoreAllWorks':True,
+    'onThisDayToggleExists':True,
+    'onThisDayUnderTodayBalance':True,
+    'onThisDayDefault':True,
+    'onThisDayInitiallyVisible':True,
+    'onThisDayToggleHides':True,
+    'onThisDayIndividualResetWorks':True,
     'categoriesFirstInLibrary':True,
     'noOtherGroup':True,
     'noStatisticsGroup':True,

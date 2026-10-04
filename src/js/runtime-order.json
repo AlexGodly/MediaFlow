@@ -1,5 +1,6 @@
 [
   "core/runtime/998-runtime-extension-foundation-v219.js",
   "pages/settings/146-v221-active-settings-page.js",
-  "pages/dashboard/147-v222-dashboard-rendering-stability.js"
+  "pages/dashboard/147-v222-dashboard-rendering-stability.js",
+  "pages/dashboard/148-v223-on-this-day-dashboard-visibility.js"
 ]

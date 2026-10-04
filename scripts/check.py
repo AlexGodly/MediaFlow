@@ -7,11 +7,11 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="222">' not in index: errors.append('index.html version is not 222')
-if 'assets/js/mediaflow-v222.bundle.js' not in index: errors.append('index.html does not load v222 bundle')
+if '<meta name="mediaflow-version" content="223">' not in index: errors.append('index.html version is not 223')
+if 'assets/js/mediaflow-v223.bundle.js' not in index: errors.append('index.html does not load v223 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v222-static-v1' not in sw: errors.append('service worker cache version is not v222')
-if './assets/js/mediaflow-v222.bundle.js' not in sw: errors.append('service worker does not cache v222 bundle')
+if 'mediaflow-v223-static-v1' not in sw: errors.append('service worker cache version is not v223')
+if './assets/js/mediaflow-v223.bundle.js' not in sw: errors.append('service worker does not cache v223 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
@@ -21,6 +21,7 @@ order=json.loads((SRC/'build-order.json').read_text(encoding='utf-8'))
 runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))
 if 'pages/settings/146-v221-active-settings-page.js' not in runtime_order: errors.append('v221 Settings module is not active in runtime-order.json')
 if 'pages/dashboard/147-v222-dashboard-rendering-stability.js' not in runtime_order: errors.append('v222 Dashboard rendering-stability module is not active in runtime-order.json')
+if 'pages/dashboard/148-v223-on-this-day-dashboard-visibility.js' not in runtime_order: errors.append('v223 On This Day visibility module is not active in runtime-order.json')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -42,9 +43,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v222.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v223.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v222 bundle')
+if not bundle: errors.append('missing v223 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -135,6 +136,19 @@ for pat in [
     if pat not in css222: errors.append(f'missing v222 Dashboard compositor safeguard CSS: {pat}')
 if 'assets/css/93-v222-dashboard-rendering-stability.css' not in index: errors.append('index.html does not load v222 Dashboard rendering-stability stylesheet')
 if './assets/css/93-v222-dashboard-rendering-stability.css' not in sw: errors.append('service worker does not cache v222 Dashboard rendering-stability stylesheet')
+
+# v223 On This Day Dashboard visibility checks.
+required_v223=[
+    'MediaFlow v223 — On This Day Dashboard Visibility',
+    'showOnThisDay=src.showOnThisDay!==false',
+    "${row('showOnThisDay','On This Day'",
+    "if(cfg.showOnThisDay===false)return '';",
+    "dashboardOnThisDayVisibility:true",
+    'MediaFlowRuntime.version=V223_RUNTIME_VERSION;'
+]
+for pat in required_v223:
+    if pat not in bundle: errors.append(f'missing v223 On This Day visibility feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v223 On This Day visibility feature is outside active app scope: {pat}')
 
 # Preserve v217 navigation regression fix.
 for pat in [

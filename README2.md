@@ -1,44 +1,31 @@
-# MediaFlow v222 — Dashboard Rendering Stability
+# MediaFlow v223 — On This Day Dashboard Visibility
 
-**Created by Alex Godly**  
-**App release:** v222  
+**App release:** v223  
 **Stable feature/data base:** v201  
 **Cloud Sync:** v201  
-**Full Backup Schema:** v29  
-**Settings Preset Schema:** v1
+**Full Backup schema:** v29  
+**Settings Preset schema:** v1
 
-MediaFlow v222 continues the modular/runtime architecture from v219–v221 and fixes a rare Chromium/GPU rendering artifact around the Dashboard **On This Day** card.
+MediaFlow v223 adds a persistent **On This Day** visibility control to **Settings → Interface → Dashboard Settings**.
 
-The tiny green/yellow block that could occasionally appear below the collapsed card was treated as a compositor paint issue, not as Library corruption. v222 removes the risky hidden-row paint optimization, explicitly keeps the collapsed details body out of paint, isolates the card/Today strip, and performs a lightweight repaint after Dashboard and On This Day hero changes.
+The new control is placed directly below **Today's Balance**. Turning it off hides only the On This Day card from the Dashboard; it does not delete History data and does not disable On This Day cover/theme sources elsewhere.
 
-## Important v222 files
+The preference is stored in the existing `settings.v192Dashboard` object, so it participates in local persistence, cloud merge/verification, Full Backup, Automatic Backup, Settings Presets, Restore All Defaults, Reset section and individual Reset behavior.
+
+## Important v223 file
 
 ```text
-src/js/pages/dashboard/147-v222-dashboard-rendering-stability.js
-assets/css/93-v222-dashboard-rendering-stability.css
-assets/js/mediaflow-v222.bundle.js
+src/js/pages/dashboard/148-v223-on-this-day-dashboard-visibility.js
 ```
 
-The existing v221 Settings system remains active:
+## Build / validation
 
-```text
-src/js/pages/settings/146-v221-active-settings-page.js
-assets/css/92-v221-settings-polish.css
-```
-
-## Build
-
-```text
+```bash
 python scripts/build.py
-```
-
-## Validation
-
-```text
 python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The smoke test verifies both the v221 Settings behavior and the new v222 Dashboard paint safeguards in Chromium.
+The UI smoke test verifies that **On This Day** appears immediately below **Today's Balance**, can be toggled off, persists in the runtime settings object and can be individually reset to its default of **shown**.
 
-See `docs/CHANGELOG_v222.md` for the full release notes.
+See `docs/CHANGELOG_v223.md` for release notes.
