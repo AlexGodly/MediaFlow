@@ -35907,5 +35907,660 @@ App.v223IsOnThisDayVisible=function(){
   return v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS).showOnThisDay!==false;
 };
 MediaFlowRuntime.version=V223_RUNTIME_VERSION;
+/* ============================================================
+   MediaFlow v224 — Shared Sorting Foundation
+   ------------------------------------------------------------
+   One sort field + one Asc/Desc direction switch across every
+   Library-style browser introduced/updated in v224.
+   ============================================================ */
+const V224_RUNTIME_VERSION=224;
+const V224_DEFAULT_SORT_BASE='title';
+const V224_DEFAULT_SORT_DIR='asc';
+
+function v224SortDirection(value){
+  return String(value||'').toLowerCase()==='desc'?'desc':'asc';
+}
+function v224LegacySortParts(value,fallbackBase=V224_DEFAULT_SORT_BASE,fallbackDir=V224_DEFAULT_SORT_DIR){
+  const raw=String(value||'').toLowerCase().trim();
+  if(!raw||raw==='relevance')return {base:fallbackBase,dir:fallbackDir};
+  if(raw==='priority')return {base:'priority',dir:'desc'};
+  if(raw==='random')return {base:'random',dir:'asc'};
+  const m=raw.match(/^(title|priority|rating|progress|total|logging|edited|seen|added)-(asc|desc)$/);
+  if(m)return {base:m[1],dir:m[2]};
+  if(['title','priority','rating','progress','total','logging','edited','seen','added'].includes(raw)){
+    return {base:raw,dir:fallbackDir};
+  }
+  return {base:fallbackBase,dir:fallbackDir};
+}
+function v224SortKey(base,dir){
+  const b=String(base||V224_DEFAULT_SORT_BASE).toLowerCase();
+  if(b==='random')return 'random';
+  return `${b}-${v224SortDirection(dir)}`;
+}
+function v224SortOptionsHtml(base,options){
+  const current=String(base||V224_DEFAULT_SORT_BASE);
+  return (options||[]).map(([value,label])=>
+    `<option value="${escapeHtml(value)}" ${current===value?'selected':''}>${escapeHtml(label)}</option>`
+  ).join('');
+}
+function v224SortDirectionButton(dir,onclick,disabled=false,label='Sort direction'){
+  const d=v224SortDirection(dir);
+  return `<button type="button" class="btn btn-sm v224-sort-direction ${d==='desc'?'is-desc':'is-asc'}" ${disabled?'disabled':''}
+    onclick="${onclick}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}: ${d==='asc'?'Ascending':'Descending'}">
+    <span class="v224-sort-arrow" aria-hidden="true">${d==='asc'?'↑':'↓'}</span>
+    <span>${d==='asc'?'ASC':'DESC'}</span>
+  </button>`;
+}
+function v224CompareLibraryLike(a,b,base,dir){
+  const d=v224SortDirection(dir)==='desc'?-1:1;
+  const at=cleanTitle(a?.title||'');
+  const bt=cleanTitle(b?.title||'');
+  const title=()=>at.localeCompare(bt,undefined,{numeric:true,sensitivity:'base'});
+  const n=v=>Number.isFinite(Number(v))?Number(v):0;
+  const rank={low:0,medium:1,high:2};
+  let diff=0;
+  switch(String(base||'title')){
+    case 'title': diff=title(); break;
+    case 'priority': diff=(rank[String(a?.priority||'medium').toLowerCase()]??1)-(rank[String(b?.priority||'medium').toLowerCase()]??1); break;
+    case 'rating': diff=n(a?.rating)-n(b?.rating); break;
+    case 'progress': diff=n(a?.progress)-n(b?.progress); break;
+    case 'total': diff=n(a?.total)-n(b?.total); break;
+    case 'logging': diff=n(v53LastTouched(a))-n(v53LastTouched(b)); break;
+    case 'edited': diff=n(a?.modifiedAt||a?.createdAt)-n(b?.modifiedAt||b?.createdAt); break;
+    case 'seen': diff=n(a?.lastSeenAt)-n(b?.lastSeenAt); break;
+    case 'added': diff=n(a?.createdAt)-n(b?.createdAt); break;
+    default: diff=title(); break;
+  }
+  return (diff*d)||(title()*d);
+}
+/* ============================================================
+   MediaFlow v224 — Library Controls
+   ------------------------------------------------------------
+   - Removes Empty library from Library page header.
+   - Keeps + Add title as the single right-side header action.
+   - Adds cover-presence filter to Normal + Dynamic Library.
+   - Replaces direction-duplicated sorts with one sort field + ASC/DESC.
+   - Alphabetic / ASC is the default Library sort.
+   ============================================================ */
+const V224_LIBRARY_SORT_OPTIONS=[
+  ['title','Alphabetic'],
+  ['priority','Priority'],
+  ['rating','Rating'],
+  ['progress','Progress watched/read'],
+  ['total','Total episodes/chapters'],
+  ['logging','Last updated by logging'],
+  ['edited','Last edited'],
+  ['seen','Last seen in Title Details'],
+  ['added','Date added'],
+  ['random','Random']
+];
+
+function v224LibrarySortState(){
+  S.histFilters=S.histFilters||{};
+  const f=S.histFilters;
+  const allowed=new Set(V224_LIBRARY_SORT_OPTIONS.map(x=>x[0]));
+  let base=String(f.libSortBase||'').toLowerCase();
+  let dir=v224SortDirection(f.libSortDir);
+  if(!allowed.has(base)){
+    const parts=v224LegacySortParts(f.libSort,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+    base=allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE;
+    dir=parts.dir;
+    // v224 intentionally replaces the old implicit priority default.
+    if(!f.libSort) {base=V224_DEFAULT_SORT_BASE;dir=V224_DEFAULT_SORT_DIR;}
+  }
+  if(base==='random')dir='asc';
+  f.libSortBase=base;
+  f.libSortDir=dir;
+  f.libSort=v224SortKey(base,dir);
+  return {base,dir,key:f.libSort};
+}
+
+v189SortMode=function(){ return v224LibrarySortState().key; };
+
+v69SetLibrarySort=function(value){
+  S.histFilters=S.histFilters||{};
+  const allowed=new Set(V224_LIBRARY_SORT_OPTIONS.map(x=>x[0]));
+  const raw=String(value||'').toLowerCase();
+  const parts=v224LegacySortParts(raw,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+  const base=allowed.has(raw)?raw:(allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE);
+  const current=v224LibrarySortState();
+  const dir=base==='random'?'asc':(raw.includes('-')?parts.dir:current.dir);
+  S.histFilters.libSortBase=base;
+  S.histFilters.libSortDir=dir;
+  S.histFilters.libSort=v224SortKey(base,dir);
+  if(base==='random')S.histFilters.libRandomSeed=Date.now()+(++V189_RANDOM_COUNTER);
+  S.libPage=0;
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  render();
+};
+App.v69SetLibrarySort=v69SetLibrarySort;
+
+function v224ToggleLibrarySortDirection(){
+  const st=v224LibrarySortState();
+  if(st.base==='random')return;
+  S.histFilters.libSortDir=st.dir==='asc'?'desc':'asc';
+  S.histFilters.libSort=v224SortKey(st.base,S.histFilters.libSortDir);
+  S.libPage=0;
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  render();
+}
+App.v224ToggleLibrarySortDirection=v224ToggleLibrarySortDirection;
+
+v189ShuffleLibraryRandom=function(){
+  S.histFilters=S.histFilters||{};
+  S.histFilters.libSortBase='random';
+  S.histFilters.libSortDir='asc';
+  S.histFilters.libSort='random';
+  S.histFilters.libRandomSeed=Date.now()+(++V189_RANDOM_COUNTER);
+  S.libPage=0;
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  render();
+};
+App.v189ShuffleLibraryRandom=v189ShuffleLibraryRandom;
+
+v189SortOptionsHtml=function(){
+  return v224SortOptionsHtml(v224LibrarySortState().base,V224_LIBRARY_SORT_OPTIONS);
+};
+v189SortControlHtml=function(){
+  const st=v224LibrarySortState();
+  return `<div class="v189-sort-control v224-sort-control" data-v224-sort-scope="library">
+    <select onchange="App.v69SetLibrarySort(this.value)" aria-label="Library sort field">${v189SortOptionsHtml()}</select>
+    ${v224SortDirectionButton(st.dir,'App.v224ToggleLibrarySortDirection()',st.base==='random','Library sort direction')}
+    ${st.base==='random'?`<button type="button" class="btn btn-sm btn-ghost v189-shuffle-again" onclick="App.v189ShuffleLibraryRandom()">↻ Shuffle again</button>`:''}
+  </div>${v189UnfinishedFilterHtml()}`;
+};
+
+function v224LibraryCoverFilter(){
+  S.histFilters=S.histFilters||{};
+  const value=String(S.histFilters.libCover||'all').toLowerCase();
+  return ['all','has','missing'].includes(value)?value:'all';
+}
+function v224LibraryHasCover(item){
+  return !!String(item?.coverUrl||'').trim();
+}
+function v224FilterLibraryByCover(rows){
+  const mode=v224LibraryCoverFilter();
+  if(mode==='all')return rows;
+  return (rows||[]).filter(item=>mode==='has'?v224LibraryHasCover(item):!v224LibraryHasCover(item));
+}
+function v224SetLibraryCoverFilter(value){
+  S.histFilters=S.histFilters||{};
+  const v=String(value||'all').toLowerCase();
+  S.histFilters.libCover=['all','has','missing'].includes(v)?v:'all';
+  S.libPage=0;
+  try{v53InvalidateLibraryCache();}catch(_){ }
+  render();
+}
+App.v224SetLibraryCoverFilter=v224SetLibraryCoverFilter;
+function v224LibraryCoverFilterHtml(){
+  const mode=v224LibraryCoverFilter();
+  return `<select class="v224-cover-filter" onchange="App.v224SetLibraryCoverFilter(this.value)" aria-label="Filter titles by cover availability">
+    <option value="all" ${mode==='all'?'selected':''}>All covers</option>
+    <option value="has" ${mode==='has'?'selected':''}>Has cover</option>
+    <option value="missing" ${mode==='missing'?'selected':''}>Missing cover</option>
+  </select>`;
+}
+
+const v224FilteredLibraryBase=v53FilteredLibrary;
+v53FilteredLibrary=function(){
+  return v224FilterLibraryByCover(v224FilteredLibraryBase.apply(this,arguments));
+};
+const v224DynamicRowsBase=v181DynamicRows;
+v181DynamicRows=function(){
+  return v224FilterLibraryByCover(v224DynamicRowsBase.apply(this,arguments));
+};
+
+const v224RenderLibraryBase=renderLibrary;
+renderLibrary=function(){
+  let h=v224RenderLibraryBase.apply(this,arguments);
+
+  // Emptying the entire Library now lives only in Settings → Library Maintenance.
+  h=h.replace(/\s*<button class="btn btn-danger" onclick="App\.emptyLibraryAdvanced\(\)">Empty library<\/button>/g,'');
+
+  // Add one cover-presence filter beside the Library search in both modes.
+  if(!h.includes('class="v224-cover-filter"')){
+    h=h.replace(
+      /(<input[^>]+oninput="App\.searchLibrary\(this\.value\)"[^>]*>)/,
+      `$1${v224LibraryCoverFilterHtml()}`
+    );
+  }
+
+  return h;
+};
+
+// Normalize the new default at startup without touching persisted content data.
+v224LibrarySortState();
+/* ============================================================
+   MediaFlow v224 — Batch Log Unified Sorting
+   ------------------------------------------------------------
+   Batch Log now uses one sort field plus one ASC/DESC switch.
+   Alphabetic / ASC is the default.
+   ============================================================ */
+const V224_BATCH_SORT_OPTIONS=[
+  ['title','Alphabetic'],
+  ['priority','Priority'],
+  ['rating','Rating'],
+  ['progress','Progress'],
+  ['total','Total']
+];
+
+const v224NormalizeBatchLibraryStateBase=v175NormalizeBatchLibraryState;
+v175NormalizeBatchLibraryState=function(){
+  const st=v224NormalizeBatchLibraryStateBase.apply(this,arguments);
+  const allowed=new Set(V224_BATCH_SORT_OPTIONS.map(x=>x[0]));
+  let base=String(st.sortBase||'').toLowerCase();
+  let dir=v224SortDirection(st.sortDir);
+  if(!allowed.has(base)){
+    const parts=v224LegacySortParts(st.sort,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+    base=allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE;
+    dir=parts.dir;
+    if(!st.sort||st.sort==='relevance'){base=V224_DEFAULT_SORT_BASE;dir=V224_DEFAULT_SORT_DIR;}
+  }
+  st.sortBase=base;
+  st.sortDir=dir;
+  st.sort=v224SortKey(base,dir);
+  return st;
+};
+
+function v224BatchToggleSortDirection(){
+  const st=v175NormalizeBatchLibraryState();
+  st.sortDir=st.sortDir==='asc'?'desc':'asc';
+  st.sort=v224SortKey(st.sortBase,st.sortDir);
+  st.pages={};
+  v175RefreshBatchLibraryUI();
+}
+
+v175BatchSetFilter=function(key,value){
+  const st=v175NormalizeBatchLibraryState();
+  if(!['sort','status','priority'].includes(String(key)))return;
+  if(key==='sort'){
+    const allowed=new Set(V224_BATCH_SORT_OPTIONS.map(x=>x[0]));
+    st.sortBase=allowed.has(String(value))?String(value):V224_DEFAULT_SORT_BASE;
+    st.sort=v224SortKey(st.sortBase,st.sortDir);
+  }else{
+    st[key]=String(value||'all').toLowerCase();
+  }
+  st.pages={};
+  v175RefreshBatchLibraryUI();
+};
+
+v175BatchClearFilters=function(){
+  const st=v175NormalizeBatchLibraryState();
+  st.categories=[];
+  st.status='all';
+  st.priority='all';
+  st.sortBase=V224_DEFAULT_SORT_BASE;
+  st.sortDir=V224_DEFAULT_SORT_DIR;
+  st.sort=v224SortKey(st.sortBase,st.sortDir);
+  st.pages={};
+  v175RefreshBatchLibraryUI();
+};
+
+v175BatchLibraryToolsHtml=function(){
+  const st=v175NormalizeBatchLibraryState();
+  const cats=(S.categories||[]).filter(c=>c?.id);
+  const catLabel=st.categories.length?`${st.categories.length} categories selected`:'All categories';
+  return `<div id="v175-batch-library-tools" class="card v175-batch-library-tools">
+    <div class="section-label">BATCH LOG LIBRARY BROWSER</div>
+    <div class="v140-order-filterbar v224-browser-filterbar">
+      <details class="v66-cat-filter">
+        <summary class="btn">${escapeHtml(catLabel)} ▾</summary>
+        <div class="v66-cat-panel">
+          <div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" onclick="App.v175BatchClearCategories(event)">All</button></div>
+          ${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" ${st.categories.includes(String(c.id))?'checked':''} onchange="App.v175BatchToggleCategory('${escapeHtml(String(c.id))}',this.checked)"><span>${v144CategoryIconHtml(c)} ${escapeHtml(c.name)}</span></label>`).join('')}
+        </div>
+      </details>
+      <div class="v224-sort-pair">
+        <select aria-label="Batch Log sort field" onchange="App.v175BatchSetFilter('sort',this.value)">${v224SortOptionsHtml(st.sortBase,V224_BATCH_SORT_OPTIONS)}</select>
+        ${v224SortDirectionButton(st.sortDir,'App.v224BatchToggleSortDirection()',false,'Batch Log sort direction')}
+      </div>
+      <select aria-label="Batch Log Library title status" onchange="App.v175BatchSetFilter('status',this.value)">
+        <option value="all" ${st.status==='all'?'selected':''}>All statuses</option>
+        ${['planned','active','paused','completed','dropped'].map(x=>`<option value="${x}" ${st.status===x?'selected':''}>${v199StatusLabel(x)}</option>`).join('')}
+      </select>
+      <select aria-label="Batch Log Library title priority" onchange="App.v175BatchSetFilter('priority',this.value)">
+        <option value="all" ${st.priority==='all'?'selected':''}>All priorities</option>
+        ${['high','medium','low'].map(x=>`<option value="${x}" ${st.priority===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}
+      </select>
+      ${v175PageSizeControlHtml('batchLibrary','Per page')}
+      <button type="button" class="btn btn-sm btn-ghost" onclick="App.v175BatchClearFilters()">Clear filters</button>
+    </div>
+    <div class="v175-batch-browser-note">These filters apply to every Batch Log title search. Focus a title field with no text to browse the full Library, or type to search within the filtered results.</div>
+  </div>`;
+};
+
+Object.assign(App,{
+  v175BatchSetFilter,
+  v175BatchClearFilters,
+  v224BatchToggleSortDirection
+});
+
+// Normalize the transient browser state immediately for the v224 default.
+V175_BATCH_LIBRARY.sortBase=V224_DEFAULT_SORT_BASE;
+V175_BATCH_LIBRARY.sortDir=V224_DEFAULT_SORT_DIR;
+V175_BATCH_LIBRARY.sort=v224SortKey(V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+/* ============================================================
+   MediaFlow v224 — Personal Order Picker Sorting
+   ------------------------------------------------------------
+   The Add Titles browser now uses one sort field + ASC/DESC.
+   Alphabetic / ASC is the default. The saved Personal Order itself
+   remains manual and is never auto-sorted.
+   ============================================================ */
+const V224_ORDER_PICKER_SORT_OPTIONS=[
+  ['title','Alphabetic'],
+  ['priority','Priority'],
+  ['rating','Rating'],
+  ['progress','Progress'],
+  ['total','Total']
+];
+
+const v224EnsureOrderPickerUIBase=v140EnsureOrderPickerUI;
+v140EnsureOrderPickerUI=function(){
+  const ui=v224EnsureOrderPickerUIBase.apply(this,arguments);
+  const allowed=new Set(V224_ORDER_PICKER_SORT_OPTIONS.map(x=>x[0]));
+  let base=String(ui.sortBase||'').toLowerCase();
+  let dir=v224SortDirection(ui.sortDir);
+  if(!allowed.has(base)){
+    const parts=v224LegacySortParts(ui.sort,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+    base=allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE;
+    dir=parts.dir;
+    if(!ui.sort||ui.sort==='relevance'){base=V224_DEFAULT_SORT_BASE;dir=V224_DEFAULT_SORT_DIR;}
+  }
+  ui.sortBase=base;
+  ui.sortDir=dir;
+  ui.sort=v224SortKey(base,dir);
+  return ui;
+};
+
+function v224OrderToggleSortDirection(){
+  const ui=v140EnsureOrderPickerUI();
+  ui.sortDir=ui.sortDir==='asc'?'desc':'asc';
+  ui.sort=v224SortKey(ui.sortBase,ui.sortDir);
+  ui.page=0;
+  v138RefreshPickerDOM();
+}
+
+v140OrderSetFilter=function(key,value){
+  const ui=v140EnsureOrderPickerUI();
+  if(!['sort','status','priority'].includes(String(key)))return;
+  if(key==='sort'){
+    const allowed=new Set(V224_ORDER_PICKER_SORT_OPTIONS.map(x=>x[0]));
+    ui.sortBase=allowed.has(String(value))?String(value):V224_DEFAULT_SORT_BASE;
+    ui.sort=v224SortKey(ui.sortBase,ui.sortDir);
+  }else{
+    ui[key]=String(value||'all').toLowerCase();
+  }
+  ui.page=0;
+  v138RefreshPickerDOM();
+};
+
+v140OrderClearFilters=function(){
+  const ui=v140EnsureOrderPickerUI();
+  ui.categories=[];
+  ui.status='all';
+  ui.priority='all';
+  ui.sortBase=V224_DEFAULT_SORT_BASE;
+  ui.sortDir=V224_DEFAULT_SORT_DIR;
+  ui.sort=v224SortKey(ui.sortBase,ui.sortDir);
+  ui.page=0;
+  v138RefreshPickerDOM();
+};
+
+v140OrderPickerToolsHtml=function(data){
+  const {ui,candidates,pages}=data||v140OrderPickerPageData();
+  const cats=(S.categories||[]).filter(c=>c?.id);
+  const catLabel=ui.categories.length?`${ui.categories.length} categories selected`:'All categories';
+  return `<div class="v140-order-filterbar v224-browser-filterbar">
+    <details class="v66-cat-filter">
+      <summary class="btn">${escapeHtml(catLabel)} ▾</summary>
+      <div class="v66-cat-panel">
+        <div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" onclick="App.v140OrderClearCategories(event)">All</button></div>
+        ${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" ${ui.categories.includes(String(c.id))?'checked':''} onchange="App.v140OrderToggleCategory('${escapeHtml(String(c.id))}',this.checked)"><span>${v144CategoryIconHtml(c)} ${escapeHtml(c.name)}</span></label>`).join('')}
+      </div>
+    </details>
+    <div class="v224-sort-pair">
+      <select aria-label="Personal Order Add Titles sort field" onchange="App.v140OrderSetFilter('sort',this.value)">${v224SortOptionsHtml(ui.sortBase,V224_ORDER_PICKER_SORT_OPTIONS)}</select>
+      ${v224SortDirectionButton(ui.sortDir,'App.v224OrderToggleSortDirection()',false,'Personal Order Add Titles sort direction')}
+    </div>
+    <select aria-label="Personal Order Library title status" onchange="App.v140OrderSetFilter('status',this.value)">
+      <option value="all" ${ui.status==='all'?'selected':''}>All statuses</option>
+      ${['planned','active','paused','completed','dropped'].map(x=>`<option value="${x}" ${ui.status===x?'selected':''}>${v199StatusLabel(x)}</option>`).join('')}
+    </select>
+    <select aria-label="Personal Order Library title priority" onchange="App.v140OrderSetFilter('priority',this.value)">
+      <option value="all" ${ui.priority==='all'?'selected':''}>All priorities</option>
+      ${['high','medium','low'].map(x=>`<option value="${x}" ${ui.priority===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}
+    </select>
+    <button type="button" class="btn btn-sm btn-ghost v140-order-clear" onclick="App.v140OrderClearFilters()">Clear filters</button>
+    <div class="v140-order-matchline">${candidates.length.toLocaleString()} match${candidates.length===1?'':'es'} · Page ${ui.page+1}/${pages}</div>
+  </div>`;
+};
+
+Object.assign(App,{
+  v140OrderSetFilter,
+  v140OrderClearFilters,
+  v224OrderToggleSortDirection
+});
+/* ============================================================
+   MediaFlow v224 — Dashboard Logging Library Browser Sorting
+   ------------------------------------------------------------
+   Logging from the Dashboard now exposes its Library browser and
+   sort controls immediately, even before a search is typed.
+   One sort field + ASC/DESC is used. Alphabetic / ASC is default.
+   ============================================================ */
+const V224_LOG_SORT_OPTIONS=[
+  ['title','Alphabetic'],
+  ['priority','Priority'],
+  ['rating','Rating'],
+  ['progress','Progress'],
+  ['total','Total']
+];
+
+function v224NormalizeLogSort(){
+  const allowed=new Set(V224_LOG_SORT_OPTIONS.map(x=>x[0]));
+  let base=String(V89_LOG.sortBase||'').toLowerCase();
+  let dir=v224SortDirection(V89_LOG.sortDir);
+  if(!allowed.has(base)){
+    const parts=v224LegacySortParts(V89_LOG.sort,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+    base=allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE;
+    dir=parts.dir;
+    if(!V89_LOG.sort||V89_LOG.sort==='relevance'){base=V224_DEFAULT_SORT_BASE;dir=V224_DEFAULT_SORT_DIR;}
+  }
+  V89_LOG.sortBase=base;
+  V89_LOG.sortDir=dir;
+  V89_LOG.sort=v224SortKey(base,dir);
+  return V89_LOG;
+}
+
+logTitleCandidates=function(query){
+  const st=v224NormalizeLogSort();
+  const q=String(query||'').trim().toLowerCase();
+  let rows=(S.library||[]).filter(i=>i?.id);
+  if(q){
+    rows=rows.filter(i=>{
+      const cat=getCategory(i.categoryId);
+      return [
+        cleanTitle(i.title),cat?.name||'',i.status||'',i.priority||'',i.source||'',i.year||'',
+        ...(Array.isArray(i.tags)?i.tags:[])
+      ].join(' ').toLowerCase().includes(q);
+    });
+  }
+  if(st.categories.length)rows=rows.filter(i=>st.categories.includes(String(i.categoryId||'')));
+  if(st.status!=='all')rows=rows.filter(i=>String(i.status||'planned').toLowerCase()===st.status);
+  if(st.priority!=='all')rows=rows.filter(i=>String(i.priority||'medium').toLowerCase()===st.priority);
+  rows=rows.slice().sort((a,b)=>v224CompareLibraryLike(a,b,st.sortBase,st.sortDir));
+  return rows;
+};
+
+function v224LogToolsHtml(candidates,pages){
+  const st=v224NormalizeLogSort();
+  const cats=(S.categories||[]).filter(c=>c?.id);
+  const catLabel=st.categories.length?`${st.categories.length} categories selected`:'All categories';
+  return `<div class="v87-log-tools v89-log-tools v224-log-tools" data-v89-log-tools="1">
+    <details class="v66-cat-filter"><summary class="btn">${escapeHtml(catLabel)} ▾</summary><div class="v66-cat-panel"><div class="v66-cat-head"><b>Show categories</b><button type="button" class="btn btn-sm btn-ghost" onclick="App.v224LogClearCategories(event)">All</button></div>${cats.map(c=>`<label class="v66-cat-option"><input type="checkbox" ${st.categories.includes(String(c.id))?'checked':''} onchange="App.v224LogToggleCategory('${escapeHtml(String(c.id))}',this.checked)"><span>${v144CategoryIconHtml(c)} ${escapeHtml(c.name)}</span></label>`).join('')}</div></details>
+    <div class="v224-sort-pair">
+      <select aria-label="Dashboard logging sort field" onchange="App.v224LogSetSort(this.value)">${v224SortOptionsHtml(st.sortBase,V224_LOG_SORT_OPTIONS)}</select>
+      ${v224SortDirectionButton(st.sortDir,'App.v224LogToggleSortDirection()',false,'Dashboard logging sort direction')}
+    </div>
+    <select aria-label="Logging title status" onchange="App.v224LogSetFilter('status',this.value)"><option value="all" ${st.status==='all'?'selected':''}>All statuses</option>${['planned','active','paused','completed','dropped'].map(x=>`<option value="${x}" ${st.status===x?'selected':''}>${v199StatusLabel(x)}</option>`).join('')}</select>
+    <select aria-label="Logging title priority" onchange="App.v224LogSetFilter('priority',this.value)"><option value="all" ${st.priority==='all'?'selected':''}>All priorities</option>${['high','medium','low'].map(x=>`<option value="${x}" ${st.priority===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>
+    ${v175PageSizeControlHtml('loggingLibrary','Per page')}
+    <button type="button" class="btn btn-sm btn-ghost v87-log-clear" onclick="App.v224LogClearFilters()">Clear filters</button>
+    <span class="v87-log-count">${candidates.length.toLocaleString()} match${candidates.length===1?'':'es'} · Page ${V89_LOG.page+1}/${pages}</span>
+  </div>`;
+}
+
+function v224LogSuggestionsHtml(){
+  v224NormalizeLogSort();
+  V89_LOG.pageSize=v175PageSize('loggingLibrary');
+  const q=String(S.entryDraft?.title||'').trim();
+  const candidates=logTitleCandidates(q);
+  const pages=Math.max(1,Math.ceil(candidates.length/V89_LOG.pageSize));
+  V89_LOG.page=Math.max(0,Math.min(V89_LOG.page,pages-1));
+  const rows=candidates.slice(V89_LOG.page*V89_LOG.pageSize,(V89_LOG.page+1)*V89_LOG.pageSize);
+  const tools=v224LogToolsHtml(candidates,pages);
+  if(!rows.length){
+    return tools+'<div class="v86-log-empty">No Library titles match the current search and filters.</div>';
+  }
+  const list=`<div class="log-suggestion-list">${rows.map(i=>{
+    const c=getCategory(i.categoryId);
+    const progress=i.total!=null?`${i.progress||0}/${i.total}`:'progress unknown';
+    const repeat=(i.status==='completed'||(Number(i.total)>0&&Number(i.progress)>=Number(i.total)))?' · ↻ Rewatch/Reread':'';
+    const cover=i.coverUrl?`<img class="v86-log-cover" src="${escapeHtml(i.coverUrl)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'';
+    return `<div class="log-suggestion"><div class="v86-log-result">${cover}<div><b>${escapeHtml(cleanTitle(i.title))}</b><small>${v144CategoryIconHtml(c)} ${escapeHtml(c?.name||'Library')} · ${escapeHtml(v199StatusLabel(i.status))} · ${escapeHtml(i.priority||'medium')} priority · ${escapeHtml(progress)}${repeat}</small></div></div><button class="btn btn-sm btn-ghost" type="button" onclick="App.selectLogTitle('${escapeHtml(String(i.id))}')">Use</button></div>`;
+  }).join('')}</div>`;
+  const count=Math.min(5,pages);
+  let from=Math.max(0,V89_LOG.page-2);
+  if(from+count>pages)from=Math.max(0,pages-count);
+  const nums=[];
+  for(let n=from;n<Math.min(pages,from+count);n++)nums.push(`<button type="button" class="btn btn-sm ${n===V89_LOG.page?'active':''}" onclick="App.v224LogPage(${n})">${n+1}</button>`);
+  const pager=pages>1?`<div class="v86-log-pager"><button type="button" class="btn btn-sm" ${V89_LOG.page===0?'disabled':''} onclick="App.v224LogPage(${V89_LOG.page-1})">← Prev</button>${nums.join('')}<button type="button" class="btn btn-sm" ${V89_LOG.page===pages-1?'disabled':''} onclick="App.v224LogPage(${V89_LOG.page+1})">Next →</button></div>`:'';
+  return tools+list+pager;
+}
+
+renderLogSuggestions=function(){
+  const box=document.getElementById('log-suggestions');
+  if(!box)return;
+  box.innerHTML=v224LogSuggestionsHtml();
+};
+
+function v224LogSetSort(value){
+  const st=v224NormalizeLogSort();
+  const allowed=new Set(V224_LOG_SORT_OPTIONS.map(x=>x[0]));
+  st.sortBase=allowed.has(String(value))?String(value):V224_DEFAULT_SORT_BASE;
+  st.sort=v224SortKey(st.sortBase,st.sortDir);
+  st.page=0;
+  renderLogSuggestions();
+}
+function v224LogToggleSortDirection(){
+  const st=v224NormalizeLogSort();
+  st.sortDir=st.sortDir==='asc'?'desc':'asc';
+  st.sort=v224SortKey(st.sortBase,st.sortDir);
+  st.page=0;
+  renderLogSuggestions();
+}
+function v224LogSetFilter(key,value){
+  const st=v224NormalizeLogSort();
+  if(!['status','priority'].includes(String(key)))return;
+  st[key]=String(value||'all').toLowerCase();
+  st.page=0;
+  renderLogSuggestions();
+}
+function v224LogToggleCategory(id,on){
+  const st=v224NormalizeLogSort();
+  const set=new Set(st.categories||[]);
+  if(on)set.add(String(id));else set.delete(String(id));
+  st.categories=[...set];st.page=0;renderLogSuggestions();
+}
+function v224LogClearCategories(event){
+  if(event){event.preventDefault();event.stopPropagation();}
+  const st=v224NormalizeLogSort();st.categories=[];st.page=0;renderLogSuggestions();
+}
+function v224LogClearFilters(){
+  const st=v224NormalizeLogSort();
+  st.categories=[];st.status='all';st.priority='all';st.sortBase=V224_DEFAULT_SORT_BASE;st.sortDir=V224_DEFAULT_SORT_DIR;st.sort=v224SortKey(st.sortBase,st.sortDir);st.page=0;renderLogSuggestions();
+}
+function v224LogPage(page){
+  V89_LOG.page=Math.max(0,Math.floor(Number(page)||0));
+  renderLogSuggestions();
+}
+
+const v224RenderLogFormBase=renderLogForm;
+renderLogForm=function(){
+  let h=v224RenderLogFormBase.apply(this,arguments);
+  return h.replace('<div id="log-suggestions" class="log-suggestions"></div>',`<div id="log-suggestions" class="log-suggestions">${v224LogSuggestionsHtml()}</div>`);
+};
+
+Object.assign(App,{
+  v224LogSetSort,
+  v224LogToggleSortDirection,
+  v224LogSetFilter,
+  v224LogToggleCategory,
+  v224LogClearCategories,
+  v224LogClearFilters,
+  v224LogPage
+});
+
+V89_LOG.sortBase=V224_DEFAULT_SORT_BASE;
+V89_LOG.sortDir=V224_DEFAULT_SORT_DIR;
+V89_LOG.sort=v224SortKey(V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
+/* ============================================================
+   MediaFlow v224 — Page Naming Cleanup
+   ------------------------------------------------------------
+   Order -> Personal Order
+   Profile settings -> Account
+   IDs stay unchanged for complete navigation/data compatibility.
+   ============================================================ */
+const v224OrderNavItem=NAV_ITEMS.find(n=>n.id==='order');
+if(v224OrderNavItem)v224OrderNavItem.label='Personal Order';
+const v224ProfileNavItem=NAV_ITEMS.find(n=>n.id==='profile');
+if(v224ProfileNavItem)v224ProfileNavItem.label='Account';
+
+const v224RenderOrderBase=renderOrder;
+renderOrder=function(){
+  let h=v224RenderOrderBase.apply(this,arguments);
+  h=h.replace('<h1>Order</h1>','<h1>Personal Order</h1>');
+  h=h.replace('Titles added to Order','Titles added to Personal Order');
+  return h;
+};
+
+const v224RenderProfileBase=renderProfile;
+renderProfile=function(){
+  let h=v224RenderProfileBase.apply(this,arguments);
+  h=h.replace('>Profile settings<','>Account<');
+  h=h.replace('Manage your MediaFlow account and profile.','Manage your MediaFlow account and profile.');
+  return h;
+};
+/* ============================================================
+   MediaFlow v224 — Recommended Title Action Bar
+   ------------------------------------------------------------
+   Edit / Reroll title / Rerolls history are visually grouped under
+   the recommended title and receive clear icons.
+   ============================================================ */
+const V224_ICON_EDIT=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+const V224_ICON_REROLL=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-5V2"/><path d="M20 7a8 8 0 1 0 1.5 8"/></svg>`;
+const V224_ICON_HISTORY=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/><path d="M12 7v5l4 2"/></svg>`;
+
+const v224RenderDashboardBase=renderDashboard;
+renderDashboard=function(){
+  let h=v224RenderDashboardBase.apply(this,arguments);
+  const task=S.currentTask;
+  if(!task?.title||!S.settings?.exactTitleRecommendations)return h;
+
+  h=h.replace(
+    /<button type="button"\s+class="btn btn-sm btn-ghost v174-recommended-edit"[\s\S]*?<\/button>/,
+    `<button type="button" class="btn btn-sm btn-ghost v174-recommended-edit v224-rec-action" onclick="App.v174EditRecommendedTitle()" title="Edit this recommended Library title">${V224_ICON_EDIT}<span>Edit</span></button>`
+  );
+
+  const history=v180EnsureRecommendationHistory(task);
+  const rerolls=Math.max(0,history.length-1);
+  const controls=`<div class="v180-rec-actions v224-rec-actions">
+    <button type="button" class="btn btn-sm v224-rec-action" onclick="App.v180RerollRecommendedTitle()" title="Keep this category task and show the next MediaFlow-recommended title">${V224_ICON_REROLL}<span>Reroll title</span></button>
+    <button type="button" class="btn btn-sm btn-ghost v224-rec-action" onclick="App.v180OpenRerollHistory()" title="Show every title MediaFlow recommended for this current task">${V224_ICON_HISTORY}<span>Rerolls history</span><span class="v180-reroll-count">${rerolls}</span></button>
+  </div>`;
+  h=h.replace(/<div class="v180-rec-actions">[\s\S]*?<\/div>/,controls);
+  return h;
+};
+
+MediaFlowRuntime.version=V224_RUNTIME_VERSION;
 
 })();

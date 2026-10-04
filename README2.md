@@ -1,31 +1,44 @@
-# MediaFlow v223 — On This Day Dashboard Visibility
+# MediaFlow v224 — Modular Project
 
-**App release:** v223  
+**App release:** v224  
 **Stable feature/data base:** v201  
 **Cloud Sync:** v201  
-**Full Backup schema:** v29  
-**Settings Preset schema:** v1
+**Full Backup Schema:** v29  
+**Settings Preset Schema:** v1
 
-MediaFlow v223 adds a persistent **On This Day** visibility control to **Settings → Interface → Dashboard Settings**.
+v224 builds on the working v219+ runtime-extension architecture and adds Library cleanup, a cover filter, unified sort-field + ASC/DESC controls, Personal Order / Account naming, and redesigned Dashboard recommendation actions.
 
-The new control is placed directly below **Today's Balance**. Turning it off hides only the On This Day card from the Dashboard; it does not delete History data and does not disable On This Day cover/theme sources elsewhere.
+## Main v224 changes
 
-The preference is stored in the existing `settings.v192Dashboard` object, so it participates in local persistence, cloud merge/verification, Full Backup, Automatic Backup, Settings Presets, Restore All Defaults, Reset section and individual Reset behavior.
+- Library page no longer shows **Empty library**; use Settings → Library Maintenance instead.
+- **+ Add title** is the single right-side Library header action.
+- Normal and Dynamic Library add **All covers / Has cover / Missing cover** filtering.
+- Library, Batch Log, Personal Order Add Titles, and Dashboard logging use one sort field plus an independent **ASC/DESC** switch.
+- Default sort is **Alphabetic · ASC**.
+- **Order** → **Personal Order**.
+- **Profile settings** → **Account**.
+- Dashboard **Edit / Reroll title / Rerolls history** actions are grouped under the recommended title with icons.
 
-## Important v223 file
+## Development
 
-```text
-src/js/pages/dashboard/148-v223-on-this-day-dashboard-visibility.js
-```
-
-## Build / validation
+Rebuild the browser bundle:
 
 ```bash
 python scripts/build.py
+```
+
+Run structural checks:
+
+```bash
 python scripts/check.py
+```
+
+Run Chromium UI smoke tests:
+
+```bash
 python scripts/smoke-ui.py
 ```
 
-The UI smoke test verifies that **On This Day** appears immediately below **Today's Balance**, can be toggled off, persists in the runtime settings object and can be individually reset to its default of **shown**.
+For local development use `scripts/serve.bat` on Windows or `scripts/serve.sh` on macOS/Linux.
 
-See `docs/CHANGELOG_v223.md` for release notes.
+See `docs/CHANGELOG_v224.md` for the full release notes.

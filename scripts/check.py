@@ -7,12 +7,14 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="223">' not in index: errors.append('index.html version is not 223')
-if 'assets/js/mediaflow-v223.bundle.js' not in index: errors.append('index.html does not load v223 bundle')
+if '<meta name="mediaflow-version" content="224">' not in index: errors.append('index.html version is not 224')
+if 'assets/js/mediaflow-v224.bundle.js' not in index: errors.append('index.html does not load v224 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v223-static-v1' not in sw: errors.append('service worker cache version is not v223')
-if './assets/js/mediaflow-v223.bundle.js' not in sw: errors.append('service worker does not cache v223 bundle')
+if 'mediaflow-v224-static-v1' not in sw: errors.append('service worker cache version is not v224')
+if './assets/js/mediaflow-v224.bundle.js' not in sw: errors.append('service worker does not cache v224 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
+if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
+if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -22,6 +24,13 @@ runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))
 if 'pages/settings/146-v221-active-settings-page.js' not in runtime_order: errors.append('v221 Settings module is not active in runtime-order.json')
 if 'pages/dashboard/147-v222-dashboard-rendering-stability.js' not in runtime_order: errors.append('v222 Dashboard rendering-stability module is not active in runtime-order.json')
 if 'pages/dashboard/148-v223-on-this-day-dashboard-visibility.js' not in runtime_order: errors.append('v223 On This Day visibility module is not active in runtime-order.json')
+if 'core/runtime/149-v224-sort-foundation.js' not in runtime_order: errors.append('missing active v224 runtime module: core/runtime/149-v224-sort-foundation.js')
+if 'pages/library/150-v224-library-controls.js' not in runtime_order: errors.append('missing active v224 runtime module: pages/library/150-v224-library-controls.js')
+if 'pages/batch-log/151-v224-batch-log-sorting.js' not in runtime_order: errors.append('missing active v224 runtime module: pages/batch-log/151-v224-batch-log-sorting.js')
+if 'pages/personal-order/152-v224-personal-order-sorting.js' not in runtime_order: errors.append('missing active v224 runtime module: pages/personal-order/152-v224-personal-order-sorting.js')
+if 'features/logging/153-v224-dashboard-logging-sorting.js' not in runtime_order: errors.append('missing active v224 runtime module: features/logging/153-v224-dashboard-logging-sorting.js')
+if 'components/navigation/154-v224-page-names.js' not in runtime_order: errors.append('missing active v224 runtime module: components/navigation/154-v224-page-names.js')
+if 'pages/dashboard/155-v224-recommendation-actions.js' not in runtime_order: errors.append('missing active v224 runtime module: pages/dashboard/155-v224-recommendation-actions.js')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -43,9 +52,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v223.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v224.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v223 bundle')
+if not bundle: errors.append('missing v224 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -150,6 +159,32 @@ for pat in required_v223:
     if pat not in bundle: errors.append(f'missing v223 On This Day visibility feature: {pat}')
     elif bundle.find(pat)>close_pos: errors.append(f'v223 On This Day visibility feature is outside active app scope: {pat}')
 
+# v224 Library / sorting / naming / Dashboard action checks.
+required_v224=[
+    'MediaFlow v224 — Shared Sorting Foundation',
+    'MediaFlow v224 — Library Controls',
+    'MediaFlow v224 — Batch Log Unified Sorting',
+    'MediaFlow v224 — Personal Order Picker Sorting',
+    'MediaFlow v224 — Dashboard Logging Library Browser Sorting',
+    'MediaFlow v224 — Page Naming Cleanup',
+    'MediaFlow v224 — Recommended Title Action Bar',
+    "['title','Alphabetic']",
+    'All covers',
+    'Has cover',
+    'Missing cover',
+    "v224OrderNavItem.label='Personal Order'",
+    "v224ProfileNavItem.label='Account'",
+    'v224-rec-action',
+    'MediaFlowRuntime.version=V224_RUNTIME_VERSION;'
+]
+for pat in required_v224:
+    if pat not in bundle: errors.append(f'missing v224 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v224 feature is outside active app scope: {pat}')
+css224=(ROOT/'assets/css/94-v224-library-sorting-actions.css').read_text(encoding='utf-8') if (ROOT/'assets/css/94-v224-library-sorting-actions.css').exists() else ''
+if not css224: errors.append('missing v224 UI stylesheet')
+for pat in ['.v224-sort-direction','.v224-cover-filter','.v224-rec-action','.v174-recommended-title-row']:
+    if pat not in css224: errors.append(f'missing v224 UI CSS: {pat}')
+
 # Preserve v217 navigation regression fix.
 for pat in [
     'data-view="${escapeHtml(String(n.id))}"',
@@ -180,6 +215,8 @@ print('Runtime extension modules:',len(runtime_order))
 print('Settings page renderer: active inside app scope')
 print('v221 Settings ordering/search polish: preserved')
 print('v222 Dashboard rendering stability: present')
+print('v223 On This Day visibility: preserved')
+print('v224 Library/sorting/page naming/recommendation actions: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

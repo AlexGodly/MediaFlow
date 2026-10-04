@@ -3,9 +3,10 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v223.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v224.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
+CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -20,6 +21,7 @@ if not chromium:
 bundle=BUNDLE.read_text(encoding='utf-8')
 css=CSS.read_text(encoding='utf-8')
 css222=CSS222.read_text(encoding='utf-8')
+css224=CSS224.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -46,6 +48,7 @@ with sync_playwright() as p:
     page.set_content('<!doctype html><html><body><div id="app"></div></body></html>')
     page.add_style_tag(content=css)
     page.add_style_tag(content=css222)
+    page.add_style_tag(content=css224)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -199,10 +202,47 @@ with sync_playwright() as p:
       'todayStripIsolation':dash.get('stripIsolation'),
       'openOtdBodyDisplay':dash.get('openBodyDisplay')
     })
+
+    # v224 Library controls + page names.
+    page.evaluate("()=>App.setView('library')")
+    page.wait_for_timeout(250)
+    v224_library=page.evaluate(r'''() => ({
+      emptyLibraryButton:[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Empty library'),
+      addTitleButtons:[...document.querySelectorAll('.view-head button')].filter(b=>b.textContent.includes('Add title')).length,
+      coverFilter:!!document.querySelector('.v224-cover-filter'),
+      coverFilterOptions:[...document.querySelectorAll('.v224-cover-filter option')].map(o=>o.textContent.trim()),
+      librarySort:document.querySelector('[data-v224-sort-scope="library"] select')?.value||'',
+      librarySortDir:document.querySelector('[data-v224-sort-scope="library"] .v224-sort-direction')?.textContent.trim().replace(/\s+/g,' ')||''
+    })''')
+    result.update(v224_library)
+    page.evaluate("()=>App.setView('order')")
+    page.wait_for_timeout(220)
+    result['personalOrderTitle']=page.locator('h1').first.text_content().strip() if page.locator('h1').count() else ''
+    result['personalOrderSort']=page.locator('select[aria-label="Personal Order Add Titles sort field"]').input_value() if page.locator('select[aria-label="Personal Order Add Titles sort field"]').count() else ''
+    result['personalOrderSortDir']=' '.join(page.locator('button[aria-label="Personal Order Add Titles sort direction"]').inner_text().split()) if page.locator('button[aria-label="Personal Order Add Titles sort direction"]').count() else ''
+    page.evaluate("()=>App.setView('profile')")
+    page.wait_for_timeout(180)
+    result['accountTitle']=page.locator('.view-title').first.text_content().strip() if page.locator('.view-title').count() else ''
+    result['navPersonalOrder']=page.evaluate("()=>[...document.querySelectorAll('.nav-item')].some(x=>x.textContent.trim()==='Personal Order')")
+    result['navAccount']=page.evaluate("()=>[...document.querySelectorAll('.nav-item')].some(x=>x.textContent.trim()==='Account')")
+    page.evaluate("()=>App.setView('batch')")
+    page.wait_for_timeout(220)
+    result['batchSort']=page.locator('select[aria-label="Batch Log sort field"]').input_value() if page.locator('select[aria-label="Batch Log sort field"]').count() else ''
+    result['batchSortDir']=' '.join(page.locator('button[aria-label="Batch Log sort direction"]').inner_text().split()) if page.locator('button[aria-label="Batch Log sort direction"]').count() else ''
+    # Start a Dashboard session and verify logging browser sorting is immediately visible.
+    page.evaluate("()=>App.setView('dashboard')")
+    page.wait_for_timeout(180)
+    page.evaluate("()=>App.startSession()")
+    page.wait_for_timeout(220)
+    page.evaluate("()=>App.openLogForm()")
+    page.wait_for_timeout(220)
+    result['dashboardLogSort']=page.locator('select[aria-label="Dashboard logging sort field"]').input_value() if page.locator('select[aria-label="Dashboard logging sort field"]').count() else ''
+    result['dashboardLogSortDir']=' '.join(page.locator('button[aria-label="Dashboard logging sort direction"]').inner_text().split()) if page.locator('button[aria-label="Dashboard logging sort direction"]').count() else ''
+    result['dashboardActionIcons']=page.evaluate("()=>document.querySelectorAll('.v224-rec-action svg').length")
     browser.close()
 
 required={
-    'runtimeVersion':223,
+    'runtimeVersion':224,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -241,6 +281,22 @@ required={
     'otdIsolation':'isolate',
     'todayStripIsolation':'isolate',
     'openOtdBodyDisplay':'block',
+    'emptyLibraryButton':False,
+    'addTitleButtons':1,
+    'coverFilter':True,
+    'coverFilterOptions':['All covers','Has cover','Missing cover'],
+    'librarySort':'title',
+    'librarySortDir':'↑ ASC',
+    'personalOrderTitle':'Personal Order',
+    'personalOrderSort':'title',
+    'personalOrderSortDir':'↑ ASC',
+    'accountTitle':'Account',
+    'navPersonalOrder':True,
+    'navAccount':True,
+    'batchSort':'title',
+    'batchSortDir':'↑ ASC',
+    'dashboardLogSort':'title',
+    'dashboardLogSortDir':'↑ ASC',
 }
 fail=[]
 for k,v in required.items():
