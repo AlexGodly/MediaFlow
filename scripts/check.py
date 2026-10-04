@@ -7,11 +7,11 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="221">' not in index: errors.append('index.html version is not 221')
-if 'assets/js/mediaflow-v221.bundle.js' not in index: errors.append('index.html does not load v221 bundle')
+if '<meta name="mediaflow-version" content="222">' not in index: errors.append('index.html version is not 222')
+if 'assets/js/mediaflow-v222.bundle.js' not in index: errors.append('index.html does not load v222 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v221-static-v1' not in sw: errors.append('service worker cache version is not v221')
-if './assets/js/mediaflow-v221.bundle.js' not in sw: errors.append('service worker does not cache v221 bundle')
+if 'mediaflow-v222-static-v1' not in sw: errors.append('service worker cache version is not v222')
+if './assets/js/mediaflow-v222.bundle.js' not in sw: errors.append('service worker does not cache v222 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
@@ -20,6 +20,7 @@ for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
 order=json.loads((SRC/'build-order.json').read_text(encoding='utf-8'))
 runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))
 if 'pages/settings/146-v221-active-settings-page.js' not in runtime_order: errors.append('v221 Settings module is not active in runtime-order.json')
+if 'pages/dashboard/147-v222-dashboard-rendering-stability.js' not in runtime_order: errors.append('v222 Dashboard rendering-stability module is not active in runtime-order.json')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -41,9 +42,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v221.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v222.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v221 bundle')
+if not bundle: errors.append('missing v222 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -54,7 +55,7 @@ required_runtime=[
     'window.MediaFlowRuntime=MediaFlowRuntime;',
     "MediaFlowRuntime.registerPageRenderer('settings',v221RenderSettingsPage);",
     "MediaFlowRuntime.registerPageEnhancer('settings',v221EnhanceSettingsDom);",
-    'MediaFlowRuntime.version=221;'
+    'MediaFlowRuntime.version=222;'
 ]
 for pat in required_runtime:
     if pat not in bundle: errors.append(f'missing v221 runtime feature: {pat}')
@@ -111,6 +112,30 @@ else:
         if 'resetAll()' in body or 'S.library=' in body or 'S.sessions=' in body or 'S.categories=' in body:
             errors.append('v221 Restore all defaults appears to modify content data')
 
+# v222 Dashboard rendering-stability checks.
+required_v222=[
+    'MediaFlow v222 — Dashboard Rendering Stability',
+    'function v222StabilizeDashboardPaint',
+    'const v222RenderViewBase=renderView;',
+    'v159ApplyOtdHero=function()',
+    'App.v222StabilizeDashboardPaint=v222StabilizeDashboardPaint;',
+    'MediaFlowRuntime.version=222;'
+]
+for pat in required_v222:
+    if pat not in bundle: errors.append(f'missing v222 Dashboard paint guard: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v222 Dashboard paint guard is outside active app scope: {pat}')
+css222=(ROOT/'assets/css/93-v222-dashboard-rendering-stability.css').read_text(encoding='utf-8') if (ROOT/'assets/css/93-v222-dashboard-rendering-stability.css').exists() else ''
+if not css222: errors.append('missing v222 Dashboard rendering-stability stylesheet')
+for pat in [
+    '.v126-otd:not([open]) > .v126-otd-body',
+    'content-visibility:visible!important',
+    'contain:paint',
+    '.today-strip'
+]:
+    if pat not in css222: errors.append(f'missing v222 Dashboard compositor safeguard CSS: {pat}')
+if 'assets/css/93-v222-dashboard-rendering-stability.css' not in index: errors.append('index.html does not load v222 Dashboard rendering-stability stylesheet')
+if './assets/css/93-v222-dashboard-rendering-stability.css' not in sw: errors.append('service worker does not cache v222 Dashboard rendering-stability stylesheet')
+
 # Preserve v217 navigation regression fix.
 for pat in [
     'data-view="${escapeHtml(String(n.id))}"',
@@ -139,7 +164,8 @@ print('CHECK OK')
 print('Build manifest rows:',len(order))
 print('Runtime extension modules:',len(runtime_order))
 print('Settings page renderer: active inside app scope')
-print('v221 Settings ordering/search polish: present')
+print('v221 Settings ordering/search polish: preserved')
+print('v222 Dashboard rendering stability: present')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

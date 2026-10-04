@@ -1,4 +1,4 @@
-# MediaFlow v221 Architecture
+# MediaFlow v222 Architecture
 
 ## Runtime foundation
 
@@ -44,7 +44,7 @@ The module handles:
 The browser loads:
 
 ```text
-assets/js/mediaflow-v221.bundle.js
+assets/js/mediaflow-v222.bundle.js
 ```
 
 It remains a compatibility bundle because the stable v201 application still shares one lexical runtime, while v219+ release modules have an explicit safe injection point.

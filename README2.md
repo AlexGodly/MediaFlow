@@ -1,99 +1,44 @@
-# MediaFlow v221 — Settings Hierarchy & Responsive Navigation Polish
+# MediaFlow v222 — Dashboard Rendering Stability
 
-**Stable feature base:** MediaFlow v201  
-**App release:** v221  
-**Runtime foundation:** v219  
-**Cloud Sync compatibility:** v201  
-**Full Backup schema:** v29  
-**Settings Preset schema:** v1
+**Created by Alex Godly**  
+**App release:** v222  
+**Stable feature/data base:** v201  
+**Cloud Sync:** v201  
+**Full Backup Schema:** v29  
+**Settings Preset Schema:** v1
 
-v221 builds on the working v219/v220 runtime architecture and focuses on making the Settings hierarchy more consistent and easier to browse. Search behavior is intentionally preserved from v220.
+MediaFlow v222 continues the modular/runtime architecture from v219–v221 and fixes a rare Chromium/GPU rendering artifact around the Dashboard **On This Day** card.
 
-## Run MediaFlow
+The tiny green/yellow block that could occasionally appear below the collapsed card was treated as a compositor paint issue, not as Library corruption. v222 removes the risky hidden-row paint optimization, explicitly keeps the collapsed details body out of paint, isolates the card/Today strip, and performs a lightweight repaint after Dashboard and On This Day hero changes.
 
-### Windows
-Run `scripts\serve.bat`, then open `http://localhost:8080/`.
-
-### macOS / Linux
-```bash
-bash scripts/serve.sh
-```
-
-## v221 Settings structure
+## Important v222 files
 
 ```text
-Library
-├── Categories
-├── Library Experience
-├── Logging Method
-├── Cover Size Adjustment
-├── Library Integrity
-├── Category Icons
-├── Missing Title Covers
-├── Library Overview
-├── Library Maintenance
-├── Category Maintenance
-└── Cover Maintenance
-
-Interface
-├── Navigation
-├── Dashboard Settings
-└── Statistics Settings
-
-Appearance
-└── Themes & Customization
-
-MediaFlow System
-├── Daily Goal
-├── Title Recommendations
-├── MediaFlow System
-└── Scheduler Tuning
-
-Progression
-└── Leveling & XP
-
-Data & Sync
-├── Import / Export — Media Services
-├── Automatic Backups
-├── Cloud Sync
-├── Settings Preset
-└── Data
-
-Updates
-└── App Updates
+src/js/pages/dashboard/147-v222-dashboard-rendering-stability.js
+assets/css/93-v222-dashboard-rendering-stability.css
+assets/js/mediaflow-v222.bundle.js
 ```
 
-## v221 Settings changes
-
-- Restore All Defaults is aligned with the Settings search control rather than floating awkwardly in the toolbar.
-- App Updates moved out of Interface into a dedicated **Updates** group at the bottom.
-- The standalone **Statistics** group was removed.
-- **Statistics Settings** moved into **Interface**.
-- Interface order is now exactly: **Navigation → Dashboard Settings → Statistics Settings**.
-- Mobile Settings navigation remains horizontally scrollable, but its scrollbar is hidden on mobile/tablet widths.
-- Desktop Settings navigation keeps its normal thin scrollbar.
-- Settings search behavior and wording remain unchanged from v220.
-
-## Active runtime files
+The existing v221 Settings system remains active:
 
 ```text
-src/js/core/runtime/998-runtime-extension-foundation-v219.js
 src/js/pages/settings/146-v221-active-settings-page.js
-src/js/runtime-order.json
 assets/css/92-v221-settings-polish.css
-assets/js/mediaflow-v221.bundle.js
 ```
 
-## Build and verify
+## Build
 
-```bash
+```text
 python scripts/build.py
+```
+
+## Validation
+
+```text
 python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The Chromium smoke test verifies the actual rendered Settings page, including group ordering, Updates placement, Interface ordering, Restore All Defaults alignment, search behavior, reset controls, and responsive scrollbar behavior.
+The smoke test verifies both the v221 Settings behavior and the new v222 Dashboard paint safeguards in Chromium.
 
-## Compatibility
-
-The stable v201 Library/data model is preserved. Cloud Sync remains v201, Full Backup remains schema v29, and Settings Preset remains schema v1.
+See `docs/CHANGELOG_v222.md` for the full release notes.

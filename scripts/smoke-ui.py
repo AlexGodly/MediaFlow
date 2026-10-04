@@ -3,7 +3,8 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v221.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v222.bundle.js'
+CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 try:
     from playwright.sync_api import sync_playwright
@@ -18,6 +19,7 @@ if not chromium:
 
 bundle=BUNDLE.read_text(encoding='utf-8')
 css=CSS.read_text(encoding='utf-8')
+css222=CSS222.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -43,6 +45,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda exc: errors.append(str(exc)))
     page.set_content('<!doctype html><html><body><div id="app"></div></body></html>')
     page.add_style_tag(content=css)
+    page.add_style_tag(content=css222)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -135,10 +138,49 @@ with sync_playwright() as p:
       };
     }''')
     result.update(mobile)
+
+    # v222 regression probe: the hidden On This Day body must be completely out
+    # of paint while collapsed, and v159 rows must no longer use content-visibility:auto.
+    page.set_viewport_size({'width':1200,'height':900})
+    page.evaluate("()=>App.setView('dashboard')")
+    page.wait_for_timeout(180)
+    dash=page.evaluate(r'''() => {
+      const host=document.createElement('div');
+      host.id='v222-paint-probe';
+      host.innerHTML='<details class="on-this-day v126-otd"><summary class="v126-otd-summary"><div class="v159-otd-summary-cover-slot"><img class="v126-otd-summary-cover" alt="probe"></div><span>Probe</span></summary><div class="v126-otd-body"><div class="v126-otd-row v159-otd-row"><img class="v126-otd-row-cover" alt="hidden probe"></div></div></details><div class="today-strip"></div>';
+      document.body.appendChild(host);
+      App.v222StabilizeDashboardPaint();
+      const details=host.querySelector('.v126-otd');
+      const body=host.querySelector('.v126-otd-body');
+      const row=host.querySelector('.v159-otd-row');
+      const strip=host.querySelector('.today-strip');
+      const collapsed={
+        paintGuard:details.dataset.mfPaintGuard,
+        bodyDisplay:getComputedStyle(body).display,
+        rowContentVisibility:getComputedStyle(row).contentVisibility,
+        detailsContain:getComputedStyle(details).contain,
+        detailsIsolation:getComputedStyle(details).isolation,
+        stripIsolation:getComputedStyle(strip).isolation
+      };
+      details.open=true;
+      details.dispatchEvent(new Event('toggle'));
+      const openBodyDisplay=getComputedStyle(body).display;
+      host.remove();
+      return {...collapsed,openBodyDisplay};
+    }''')
+    result.update({
+      'dashboardPaintGuard':dash.get('paintGuard'),
+      'collapsedOtdBodyDisplay':dash.get('bodyDisplay'),
+      'otdRowContentVisibility':dash.get('rowContentVisibility'),
+      'otdPaintContain':dash.get('detailsContain'),
+      'otdIsolation':dash.get('detailsIsolation'),
+      'todayStripIsolation':dash.get('stripIsolation'),
+      'openOtdBodyDisplay':dash.get('openBodyDisplay')
+    })
     browser.close()
 
 required={
-    'runtimeVersion':221,
+    'runtimeVersion':222,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -165,6 +207,12 @@ required={
     'mobileOverflowX':'auto',
     'mobileScrollbarWidth':'none',
     'mobileScrollable':True,
+    'dashboardPaintGuard':'222',
+    'collapsedOtdBodyDisplay':'none',
+    'otdRowContentVisibility':'visible',
+    'otdIsolation':'isolate',
+    'todayStripIsolation':'isolate',
+    'openOtdBodyDisplay':'block',
 }
 fail=[]
 for k,v in required.items():
