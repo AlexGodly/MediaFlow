@@ -74,8 +74,3 @@ v229 changes only the selector's visual icon treatment.
 - `services/` — cloud/persistence logic.
 - `utils/` — shared helpers.
 - `legacy/` — compatibility source that still participates in the generated application runtime.
-
-## v230 runtime extension
-
-- `src/js/components/164-v230-choice-filter-layout.js` — Choice & Filter Layout settings, inheritance resolution, ordering/show-hide actions, Set Category/Status/Priority modal resolution, reusable filter DOM application and persistence normalization.
-- `assets/css/100-v230-choice-filter-layout.css` — responsive Choice & Filter Layout cards, row controls, drag/drop states and hidden-filter presentation.

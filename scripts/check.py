@@ -7,11 +7,11 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="230">' not in index: errors.append('index.html version is not 230')
-if 'assets/js/mediaflow-v230.bundle.js' not in index: errors.append('index.html does not load v230 bundle')
+if '<meta name="mediaflow-version" content="229">' not in index: errors.append('index.html version is not 229')
+if 'assets/js/mediaflow-v229.bundle.js' not in index: errors.append('index.html does not load v229 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v230-static-v1' not in sw: errors.append('service worker cache version is not v230')
-if './assets/js/mediaflow-v230.bundle.js' not in sw: errors.append('service worker does not cache v230 bundle')
+if 'mediaflow-v229-static-v1' not in sw: errors.append('service worker cache version is not v229')
+if './assets/js/mediaflow-v229.bundle.js' not in sw: errors.append('service worker does not cache v229 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
 if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
@@ -25,8 +25,6 @@ if 'assets/css/98-v228-library-priority-dynamic-row.css' not in index: errors.ap
 if './assets/css/98-v228-library-priority-dynamic-row.css' not in sw: errors.append('service worker does not cache v228 UI stylesheet')
 if 'assets/css/99-v229-library-choice-modals.css' not in index: errors.append('index.html does not load v229 modal stylesheet')
 if './assets/css/99-v229-library-choice-modals.css' not in sw: errors.append('service worker does not cache v229 modal stylesheet')
-if 'assets/css/100-v230-choice-filter-layout.css' not in index: errors.append('index.html does not load v230 choice/filter stylesheet')
-if './assets/css/100-v230-choice-filter-layout.css' not in sw: errors.append('service worker does not cache v230 choice/filter stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -51,7 +49,6 @@ if 'pages/library/160-v226-library-sizing-display-polish.js' not in runtime_orde
 if 'components/161-v227-ui-icon-corrections.js' not in runtime_order: errors.append('missing active v227 runtime module: components/161-v227-ui-icon-corrections.js')
 if 'components/162-v228-library-priority-dynamic-row.js' not in runtime_order: errors.append('missing active v228 runtime module: components/162-v228-library-priority-dynamic-row.js')
 if 'components/163-v229-library-choice-modals.js' not in runtime_order: errors.append('missing active v229 runtime module: components/163-v229-library-choice-modals.js')
-if 'components/164-v230-choice-filter-layout.js' not in runtime_order: errors.append('missing active v230 runtime module: components/164-v230-choice-filter-layout.js')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -73,9 +70,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v230.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v229.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v230 bundle')
+if not bundle: errors.append('missing v229 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -361,26 +358,7 @@ print('v225 Personal Order clarity/global button icons/Account polish: preserved
 print('v226 semantic icons/dropdowns/category layout/Dynamic Library sizing: preserved')
 print('v227 icon/category-row/dashboard-cover corrections: preserved')
 print('v228 Library metadata/Dynamic row ordering controls: preserved')
-# v230 choice/filter layout checks.
-css230=(ROOT/'assets/css/100-v230-choice-filter-layout.css').read_text(encoding='utf-8') if (ROOT/'assets/css/100-v230-choice-filter-layout.css').exists() else ''
-if not css230: errors.append('missing v230 choice/filter stylesheet')
-for pat in [
-    'MediaFlow v230 — Choice + Filter Layout Control Center',
-    'CHOICE & FILTER LAYOUT',
-    'Follow Category Settings',
-    'Follow Dynamic Category Row',
-    'function v230SetPosition',
-    'function v230DragStart',
-    'function v230ApplyFilterLayouts',
-    'MediaFlowRuntime.version=V230_RUNTIME_VERSION;'
-]:
-    if pat not in bundle: errors.append(f'missing v230 choice/filter feature: {pat}')
-    elif bundle.find(pat)>close_pos: errors.append(f'v230 choice/filter feature is outside active app scope: {pat}')
-for pat in ['.v230-settings-grid','.v230-layout-row','.v230-drag-handle','.v230-position']:
-    if pat not in css230: errors.append(f'missing v230 choice/filter CSS: {pat}')
-
 print('v229 Category/Status popup polish: active')
-print('v230 Choice/Filter layout controls: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())
