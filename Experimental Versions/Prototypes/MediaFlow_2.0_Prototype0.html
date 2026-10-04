@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediaFlow 2.0 — Prototype</title>
+<style>
+:root{
+ --bg:#080b11;--panel:#0f141d;--panel2:#141b26;--panel3:#192230;--line:#253044;
+ --text:#f4f7fb;--muted:#8f9bae;--accent:#e8a94a;--accent2:#ffca72;--good:#55d6a5;
+ --blue:#6ea8ff;--purple:#a68cff;--red:#ff6f7d;--radius:18px;--shadow:0 20px 50px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 70% -10%,rgba(232,169,74,.08),transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:20px 14px;border-right:1px solid var(--line);background:rgba(10,14,20,.94);backdrop-filter:blur(18px);display:flex;flex-direction:column}
+.brand{display:flex;gap:12px;align-items:center;padding:5px 8px 20px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 0 35px rgba(232,169,74,.2);display:grid;place-items:center;color:#171006;font-weight:1000}.brand b{font-size:17px}.brand small{display:block;color:var(--muted);margin-top:2px}
+.nav{display:grid;gap:5px;overflow:auto}.nav button{border:0;background:transparent;color:var(--muted);padding:11px 12px;border-radius:11px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px}.nav button:hover,.nav button.active{background:var(--panel2);color:var(--text)}.nav button.active{box-shadow:inset 3px 0 var(--accent)}
+.side-foot{margin-top:auto;padding:16px 8px 4px}.level{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}.xp{height:7px;background:#202938;border-radius:99px;overflow:hidden;margin:8px 0 12px}.xp i{display:block;height:100%;width:72%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.main{min-width:0}.top{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 26px;position:sticky;top:0;z-index:10;background:rgba(8,11,17,.82);backdrop-filter:blur(18px)}.search{flex:1;max-width:650px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;color:var(--text)}.pill{padding:8px 11px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-size:12px;color:var(--muted)}
+.content{padding:28px;max-width:1600px;margin:auto}.eyebrow{color:var(--accent);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.page-title{font-size:30px;margin:6px 0}.subtitle{color:var(--muted);margin:0 0 24px}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:linear-gradient(180deg,rgba(20,27,38,.98),rgba(15,20,29,.98));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.metric strong{font-size:28px;display:block;margin:7px 0 2px}.metric span{font-size:12px;color:var(--muted)}
+.hero{position:relative;overflow:hidden;min-height:280px;padding:28px;background:linear-gradient(110deg,rgba(17,23,33,.95) 20%,rgba(17,23,33,.76)),radial-gradient(circle at 85% 20%,rgba(232,169,74,.25),transparent 34%);border:1px solid #3b3327;border-radius:24px}.hero:after{content:"";position:absolute;right:-80px;top:-90px;width:340px;height:340px;border-radius:50%;border:60px solid rgba(232,169,74,.04)}.hero h2{font-size:34px;margin:12px 0 7px;max-width:720px}.hero p{color:#aeb7c5;max-width:650px;line-height:1.6}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.btn{border:1px solid var(--line);background:var(--panel3);color:var(--text);padding:10px 14px;border-radius:11px;cursor:pointer}.btn:hover{filter:brightness(1.12)}.primary{background:var(--accent);border-color:var(--accent);color:#161007;font-weight:850}.ghost{background:transparent}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:26px 0 12px}.section-head h3{margin:0;font-size:18px}.section-head small{color:var(--muted)}
+.progress{height:8px;background:#222c3a;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.mission{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.mission:last-child{border:0}.mi{width:42px;height:42px;border-radius:12px;background:#202938;display:grid;place-items:center;font-size:19px}.mission b{font-size:13px}.mission small{display:block;color:var(--muted);margin:4px 0 8px}.reward{font-size:11px;color:var(--accent);font-weight:800}
+.row{display:flex;align-items:center;gap:12px}.cover{width:48px;height:66px;border-radius:8px;background:linear-gradient(145deg,#38465c,#1b2431);display:grid;place-items:center;color:#aab6c7;font-size:10px;text-align:center}.grow{flex:1}.muted{color:var(--muted)}.tiny{font-size:11px}.tag{font-size:10px;padding:5px 8px;border-radius:999px;background:#222c3a;color:#bdc6d4}.tag.good{color:var(--good);background:rgba(85,214,165,.1)}
+.list{display:grid;gap:10px}.list .row{padding:10px;border-radius:13px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.045)}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}.tabs button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:8px 12px;border-radius:999px;cursor:pointer}.tabs button.active{background:rgba(232,169,74,.12);border-color:#6b542f;color:var(--accent2)}
+.library-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.library-toolbar input,.library-toolbar select{background:var(--panel);color:var(--text);border:1px solid var(--line);padding:10px;border-radius:10px}.library-toolbar input{flex:1;min-width:180px}
+table{width:100%;border-collapse:collapse}th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:10px}td{padding:12px 10px;border-top:1px solid var(--line);font-size:13px}
+.achievement{min-height:145px}.achievement .icon{font-size:28px}.achievement.locked{opacity:.45}.achievement b{display:block;margin:12px 0 6px}.achievement small{color:var(--muted)}
+.heat{display:grid;grid-template-columns:repeat(18,1fr);gap:5px}.heat i{aspect-ratio:1;border-radius:3px;background:#202938}.heat i:nth-child(3n){background:#5c482a}.heat i:nth-child(7n){background:#8d6930}.heat i:nth-child(11n){background:#c38c3b}
+.view{display:none}.view.active{display:block}.toast{position:fixed;right:22px;bottom:22px;padding:12px 16px;border-radius:12px;background:#202938;border:1px solid #38465a;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}
+.mobile{display:none}
+@media(max-width:1050px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}.app{grid-template-columns:84px 1fr}.brand div:not(.logo),.nav span,.side-foot{display:none}.nav button{justify-content:center;font-size:18px}.sidebar{padding:15px 10px}}
+@media(max-width:700px){.app{display:block}.sidebar{display:none}.top{padding:0 14px}.content{padding:18px 14px 90px}.g4,.g3,.g2{grid-template-columns:1fr}.hero h2{font-size:27px}.mobile{display:flex;position:fixed;z-index:20;bottom:0;left:0;right:0;background:rgba(10,14,20,.96);border-top:1px solid var(--line);padding:8px;gap:4px;overflow:auto}.mobile button{min-width:66px;flex:1;background:transparent;border:0;color:var(--muted);padding:7px 4px;font-size:10px}.mobile button b{display:block;font-size:18px;margin-bottom:3px}.mobile button.active{color:var(--accent)}table{min-width:720px}.table-wrap{overflow:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><div class="logo">MF</div><div><b>MediaFlow 2.0</b><small>Prototype · Local only</small></div></div>
+ <nav class="nav" id="nav"></nav>
+ <div class="side-foot">
+   <div class="level"><span>Level 183</span><span>72%</span></div><div class="xp"><i></i></div>
+   <div class="tiny muted">🔥 18 day streak · ×1.36 XP</div>
+ </div>
+</aside>
+<main class="main">
+ <header class="top">
+   <input class="search" id="globalSearch" placeholder="Search 29,847 titles, pages, commands…  ⌘ K">
+   <span class="pill">🔥 18 days</span><span class="pill">Lv. 183</span>
+ </header>
+ <div class="content">
+  <section class="view active" id="command">
+   <div class="eyebrow">MEDIAFLOW 2.0</div><h1 class="page-title">Command Center</h1><p class="subtitle">Your entire media life, one flow.</p>
+   <div class="hero">
+    <div class="eyebrow">FLOW ENGINE · RECOMMENDED NOW</div>
+    <h2>Continue your current Anime rotation</h2>
+    <p>MediaFlow picked this from your active rotation using category balance, priority, recent saturation and your Personal Order. You can accept it, reroll it, or switch Flow Mode.</p>
+    <div class="row" style="margin-top:18px"><div class="cover">TITLE<br>COVER</div><div><b>Frieren: Beyond Journey's End</b><div class="muted tiny" style="margin-top:5px">Episode 18 / 28 · Anime · Watching · High Priority</div></div></div>
+    <div class="actions"><button class="btn primary" onclick="toast('Flow started — prototype action')">▶ Start Flow</button><button class="btn" onclick="reroll()">↻ Give me something else</button><button class="btn ghost" onclick="toast('Flow Mode selector opened')">⚙ Balanced Mode</button></div>
+   </div>
+   <div class="section-head"><h3>Today at a glance</h3><small>Live prototype metrics</small></div>
+   <div class="grid g4">
+    <div class="card metric"><span>Library</span><strong>29,847</strong><span>+43 this month</span></div>
+    <div class="card metric"><span>Today</span><strong>7</strong><span>sessions · 214 min</span></div>
+    <div class="card metric"><span>Completion</span><strong>61%</strong><span>overall progress health</span></div>
+    <div class="card metric"><span>Flow Score</span><strong>92</strong><span>Excellent balance</span></div>
+   </div>
+   <div class="grid g2">
+    <div>
+     <div class="section-head"><h3>Flow Missions</h3><small>3 / 6 today</small></div>
+     <div class="card" id="missions"></div>
+    </div>
+    <div>
+     <div class="section-head"><h3>Rotation Pulse</h3><small>What needs attention</small></div>
+     <div class="card list">
+      <div class="row"><div class="mi">📺</div><div class="grow"><b>TV</b><div class="tiny muted">Behind target · last session 4 days ago</div></div><span class="tag">Needs flow</span></div>
+      <div class="row"><div class="mi">📖</div><div class="grow"><b>Manga</b><div class="tiny muted">Healthy · 4 sessions this week</div></div><span class="tag good">Balanced</span></div>
+      <div class="row"><div class="mi">🎬</div><div class="grow"><b>Movies</b><div class="tiny muted">Slightly under target</div></div><span class="tag">Due soon</span></div>
+      <div class="row"><div class="mi">📚</div><div class="grow"><b>Books</b><div class="tiny muted">On target · active streak 3 days</div></div><span class="tag good">Healthy</span></div>
+     </div>
+    </div>
+   </div>
+   <div class="section-head"><h3>Recent activity</h3><small>History preview</small></div>
+   <div class="card list" id="activity"></div>
+  </section>
+
+  <section class="view" id="dashboard"><div class="eyebrow">CLASSIC SYSTEM · EVOLVED</div><h1 class="page-title">Dashboard</h1><p class="subtitle">The familiar MediaFlow session workflow, preserved inside 2.0.</p><div class="grid g3"><div class="card metric"><span>Daily time</span><strong>214m</strong><span>of 240 minute target</span></div><div class="card metric"><span>Tasks</span><strong>7 / 8</strong><span>87% daily target</span></div><div class="card metric"><span>XP today</span><strong>+1,840</strong><span>includes streak multiplier</span></div></div><div class="section-head"><h3>Active session</h3></div><div class="hero"><div class="eyebrow">CURRENT TASK</div><h2>Anime · Watch 2 episodes</h2><p>Exact-title recommendations are enabled. Log progress against the recommended title or choose any eligible title from this category.</p><div class="actions"><button class="btn primary" onclick="toast('Progress logger opened')">Log progress</button><button class="btn" onclick="toast('Stopwatch started')">⏱ Stopwatch</button><button class="btn" onclick="reroll()">Skip / reroll</button></div></div></section>
+
+  <section class="view" id="library"><div class="eyebrow">LARGE LIBRARY ENGINE</div><h1 class="page-title">Library</h1><p class="subtitle">Designed for tens of thousands of titles.</p><div class="library-toolbar"><input id="libSearch" placeholder="Search library…" oninput="filterLibrary()"><select><option>All categories</option><option>Anime</option><option>Manga</option><option>Movies</option><option>TV</option></select><select><option>All statuses</option><option>Watching</option><option>Planning</option><option>On Hold</option><option>Completed</option><option>Dropped</option></select><button class="btn primary" onclick="toast('Add title opened')">+ Add title</button></div><div class="card table-wrap"><table><thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Progress</th><th>Priority</th><th>Rating</th></tr></thead><tbody id="libraryRows"></tbody></table></div></section>
+
+  <section class="view" id="order"><div class="eyebrow">PERSONAL ORDER</div><h1 class="page-title">Personal Order</h1><p class="subtitle">Your exact consumption sequence. Drag, reorder or use numeric positions.</p><div class="tabs"><button class="active">Global</button><button>Anime</button><button>Manga</button><button>Movies</button><button>TV</button></div><div class="card list" id="orderList"></div></section>
+
+  <section class="view" id="missionsView"><div class="eyebrow">PROGRESSION</div><h1 class="page-title">Missions & Achievements</h1><p class="subtitle">A progression system that keeps scaling even for massive libraries.</p><div class="grid g4" id="achievements"></div><div class="section-head"><h3>Milestone tracks</h3><small>Long-term progression</small></div><div class="grid g2"><div class="card"><b>Library Titan</b><p class="muted tiny">29,847 / 30,000 titles</p><div class="progress"><i style="width:99.49%"></i></div><div class="reward" style="margin-top:10px">Next: 30K TITAN badge · +10,000 XP</div></div><div class="card"><b>Lifetime Sessions</b><p class="muted tiny">8,421 / 10,000 sessions</p><div class="progress"><i style="width:84%"></i></div><div class="reward" style="margin-top:10px">Next: FLOW IMMORTAL · +25,000 XP</div></div></div></section>
+
+  <section class="view" id="history"><div class="eyebrow">TIMELINE</div><h1 class="page-title">History</h1><p class="subtitle">Every session, completion, lifecycle event and batch log.</p><div class="card list" id="historyList"></div></section>
+
+  <section class="view" id="batch"><div class="eyebrow">FAST LOGGING</div><h1 class="page-title">Batch Log</h1><p class="subtitle">Log multiple titles and categories in one pass.</p><div class="card"><div class="grid g3"><div><div class="tiny muted">TITLE</div><input class="search" style="width:100%;margin-top:7px" placeholder="Search title…"></div><div><div class="tiny muted">AMOUNT</div><input class="search" style="width:100%;margin-top:7px" value="1"></div><div><div class="tiny muted">MINUTES</div><input class="search" style="width:100%;margin-top:7px" value="24"></div></div><div class="actions"><button class="btn">+ Add another row</button><button class="btn primary" onclick="toast('Batch logged locally — prototype')">Log batch</button></div></div></section>
+
+  <section class="view" id="stats"><div class="eyebrow">INSIGHTS</div><h1 class="page-title">Statistics</h1><p class="subtitle">Your consumption patterns, progression and library health.</p><div class="grid g4"><div class="card metric"><span>Total sessions</span><strong>8,421</strong><span>all time</span></div><div class="card metric"><span>Time tracked</span><strong>3,184h</strong><span>across all media</span></div><div class="card metric"><span>Completed</span><strong>6,903</strong><span>titles</span></div><div class="card metric"><span>Longest streak</span><strong>47d</strong><span>personal record</span></div></div><div class="section-head"><h3>Consumption heatmap</h3><small>Recent activity intensity</small></div><div class="card"><div class="heat" id="heat"></div></div><div class="section-head"><h3>Category health</h3></div><div class="grid g3"><div class="card"><b>Anime</b><p class="muted tiny">31% of recent consumption</p><div class="progress"><i style="width:82%"></i></div></div><div class="card"><b>Manga</b><p class="muted tiny">24% of recent consumption</p><div class="progress"><i style="width:70%"></i></div></div><div class="card"><b>Movies</b><p class="muted tiny">13% of recent consumption</p><div class="progress"><i style="width:46%"></i></div></div></div></section>
+
+  <section class="view" id="profile"><div class="eyebrow">PROFILE SHOWCASE</div><h1 class="page-title">Alex Godly</h1><p class="subtitle">Prototype of the future shareable MediaFlow profile.</p><div class="grid g3"><div class="card metric"><span>Level</span><strong>183</strong><span>MediaFlow veteran</span></div><div class="card metric"><span>Library</span><strong>29,847</strong><span>titles collected</span></div><div class="card metric"><span>Achievements</span><strong>146</strong><span>32 legendary</span></div></div><div class="section-head"><h3>Showcase badges</h3></div><div class="grid g4"><div class="card achievement"><div class="icon">👑</div><b>Library Emperor</b><small>Own 25,000+ titles.</small></div><div class="card achievement"><div class="icon">🔥</div><b>Unbroken Flow</b><small>Maintain a long consumption streak.</small></div><div class="card achievement"><div class="icon">⚡</div><b>Heavy Consumer</b><small>Log 5,000 sessions.</small></div><div class="card achievement"><div class="icon">🧭</div><b>Omnivore</b><small>Stay active across many media types.</small></div></div></section>
+
+  <section class="view" id="settings"><div class="eyebrow">CUSTOMIZATION</div><h1 class="page-title">Settings</h1><p class="subtitle">Prototype settings are browser-local. No account or cloud backend.</p><div class="grid g2"><div class="card"><b>Appearance</b><p class="muted tiny">Theme, density, cover size, icon size and cover-only icon size.</p><div class="actions"><button class="btn" onclick="toast('Theme collection opened')">Theme collection</button><button class="btn" onclick="toast('Dynamic Cover Theme toggled')">Dynamic Cover Theme</button></div></div><div class="card"><b>Flow Engine</b><p class="muted tiny">Targets, weights, exact-title recommendations, Personal Order priority and anti-repeat behavior.</p><div class="actions"><button class="btn" onclick="toast('Flow preferences opened')">Configure Flow</button></div></div><div class="card"><b>Local prototype data</b><p class="muted tiny">Export/import concept, settings presets and local backup. No Supabase/Appwrite/cloud calls.</p><div class="actions"><button class="btn" onclick="exportPrototype()">Export prototype state</button><button class="btn" onclick="toast('Import dialog would open here')">Import</button></div></div><div class="card"><b>Navigation</b><p class="muted tiny">The full release can retain MediaFlow's reorderable/hideable navigation system.</p><div class="actions"><button class="btn" onclick="toast('Navigation editor opened')">Customize menu</button></div></div></div></section>
+
+  <section class="view" id="old"><div class="eyebrow">LEGACY ENGINE</div><h1 class="page-title">Old System</h1><p class="subtitle">Preserved as its own area for directional balances, simulation and consumption stats.</p><div class="tabs"><button class="active">System</button><button>View</button><button>Stats</button></div><div class="card"><h3 style="margin-top:0">Old System remains independent</h3><p class="muted">The 2.0 concept does not remove the classic directional conversion workflow. In a full migration this page would connect to the existing v201 Old System state and rules.</p><div class="grid g3"><div class="metric"><span>Eligible categories</span><strong>8</strong></div><div class="metric"><span>Conversions</span><strong>1,284</strong></div><div class="metric"><span>Consumed units</span><strong>18.4K</strong></div></div></div></section>
+ </div>
+</main>
+</div>
+<div class="mobile" id="mobile"></div><div class="toast" id="toast"></div>
+<script>
+const pages=[
+ ['command','✦','Command'],['dashboard','⌂','Dashboard'],['library','▦','Library'],['order','≡','Order'],
+ ['missionsView','◆','Progression'],['history','↺','History'],['batch','＋','Batch Log'],['stats','◫','Statistics'],
+ ['profile','●','Profile'],['settings','⚙','Settings'],['old','◌','Old System']
+];
+const lib=[
+ ['Frieren: Beyond Journey\\'s End','Anime','Watching','18 / 28','High','9.4'],
+ ['Berserk','Manga','Watching','221 / 380','High','9.7'],
+ ['Dune','Books','On Hold','312 / 688','Medium','9.0'],
+ ['Blade Runner 2049','Movies','Completed','1 / 1','Medium','9.2'],
+ ['Breaking Bad','TV','Completed','62 / 62','High','9.8'],
+ ['Vinland Saga','Anime','Watching','31 / 48','High','9.5'],
+ ['Vagabond','Manga','Planning','0 / 327','High','—'],
+ ['The Batman','Movies','Planning','0 / 1','Low','—']
+];
+const acts=[
+ ['Vinland Saga','Logged 2 episodes','Anime · 48 min','12 minutes ago'],
+ ['Berserk','Logged 6 chapters','Manga · 39 min','1 hour ago'],
+ ['Dune','Progress updated','Book · 31 pages','Yesterday'],
+ ['Blade Runner 2049','Completed','Movie · 164 min','Yesterday']
+];
+const missions=[
+ ['⚡','Daily Flow','Complete 8 sessions today',87,'+800 XP'],
+ ['🎯','Stay Balanced','Consume from 4 different categories',75,'+650 XP'],
+ ['🔥','Protect the Flame','Log at least one valid session today',100,'+250 XP'],
+ ['📚','Library Giant','Reach 30,000 Library titles',99,'Legendary badge']
+];
+const achievements=[
+ ['👑','Library Emperor','Reach 25,000 titles.',1],['🔥','Flowkeeper','Maintain an 18-day streak.',1],
+ ['⚡','Session Machine','Log 5,000 sessions.',1],['🌌','30K Titan','Reach 30,000 Library titles.',0],
+ ['📖','Chapter Devourer','Read 50,000 chapters.',1],['🎬','Cinema Vault','Complete 2,500 movies.',0],
+ ['🧭','Media Omnivore','Be active across 8 categories.',1],['♾','Flow Immortal','Log 10,000 sessions.',0]
+];
+function init(){
+ nav.innerHTML=pages.map((p,i)=>`<button class="${i===0?'active':''}" onclick="go('${p[0]}',this)"><b>${p[1]}</b><span>${p[2]}</span></button>`).join('');
+ mobile.innerHTML=pages.slice(0,6).map((p,i)=>`<button class="${i===0?'active':''}" onclick="go('${p[0]}',this)"><b>${p[1]}</b>${p[2]}</button>`).join('');
+ missionsEl=document.getElementById('missions');
+ missionsEl.innerHTML=missions.map(m=>`<div class="mission"><div class="mi">${m[0]}</div><div><b>${m[1]}</b><small>${m[2]}</small><div class="progress"><i style="width:${m[3]}%"></i></div></div><div class="reward">${m[4]}</div></div>`).join('');
+ activity.innerHTML=acts.map(a=>`<div class="row"><div class="cover">${a[0].split(' ')[0]}</div><div class="grow"><b>${a[0]}</b><div class="tiny muted">${a[1]} · ${a[2]}</div></div><span class="tiny muted">${a[3]}</span></div>`).join('');
+ historyList.innerHTML=activity.innerHTML+activity.innerHTML;
+ achievements.innerHTML=achievements.map(a=>`<div class="card achievement ${a[3]?'':'locked'}"><div class="icon">${a[0]}</div><b>${a[1]}</b><small>${a[2]}</small><div class="reward" style="margin-top:12px">${a[3]?'UNLOCKED':'LOCKED'}</div></div>`).join('');
+ orderList.innerHTML=lib.slice(0,6).map((x,i)=>`<div class="row"><b style="width:25px">${i+1}</b><div class="cover">${x[1]}</div><div class="grow"><b>${x[0]}</b><div class="tiny muted">${x[1]} · ${x[2]}</div></div><button class="btn" onclick="toast('Reorder control — prototype')">↕</button></div>`).join('');
+ heat.innerHTML='<i></i>'.repeat(126); renderLibrary(lib);
+}
+function go(id,el){
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+ document.querySelectorAll('.nav button,.mobile button').forEach(b=>b.classList.remove('active'));
+ document.querySelectorAll(`[onclick*="'${id}'"]`).forEach(b=>b.classList.add('active'));
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderLibrary(rows){libraryRows.innerHTML=rows.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td><span class="tag ${x[2]==='Completed'?'good':''}">${x[2]}</span></td><td>${x[3]}</td><td>${x[4]}</td><td>${x[5]}</td></tr>`).join('')}
+function filterLibrary(){let q=libSearch.value.toLowerCase();renderLibrary(lib.filter(x=>x.join(' ').toLowerCase().includes(q)))}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>x.classList.remove('show'),2200)}
+function reroll(){toast('Rerolled → Manga · Berserk · 6 chapters')}
+function exportPrototype(){const b=new Blob([JSON.stringify({prototype:'MediaFlow 2.0',version:'2.0-prototype',localOnly:true},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mediaflow-2-prototype-state.json';a.click();URL.revokeObjectURL(a.href);toast('Prototype state exported')}
+globalSearch.addEventListener('keydown',e=>{if(e.key==='Enter'){let q=e.target.value.toLowerCase();let p=pages.find(x=>x[2].toLowerCase().includes(q));if(p){go(p[0]);e.target.value=''}else toast('Prototype search: try Library, Statistics, History…')}})
+init();
+</script>
+</body>
+</html>
