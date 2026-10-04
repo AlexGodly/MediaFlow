@@ -1,13 +1,13 @@
-# MediaFlow v220 — Settings Polish & Synchronized Organization
+# MediaFlow v221 — Settings Hierarchy & Responsive Navigation Polish
 
 **Stable feature base:** MediaFlow v201  
-**App release:** v220  
+**App release:** v221  
 **Runtime foundation:** v219  
 **Cloud Sync compatibility:** v201  
 **Full Backup schema:** v29  
 **Settings Preset schema:** v1
 
-v220 builds on the working v219 active-runtime foundation and focuses on making Settings easier to use and visually consistent. The left Settings index and the actual Settings page now share the same grouping and section order, Categories is the first Library section, the search UI has been redesigned, and noisy legacy `Default` labels have been removed from the affected section headers.
+v221 builds on the working v219/v220 runtime architecture and focuses on making the Settings hierarchy more consistent and easier to browse. Search behavior is intentionally preserved from v220.
 
 ## Run MediaFlow
 
@@ -19,7 +19,7 @@ Run `scripts\serve.bat`, then open `http://localhost:8080/`.
 bash scripts/serve.sh
 ```
 
-## v220 Settings structure
+## v221 Settings structure
 
 ```text
 Library
@@ -36,9 +36,9 @@ Library
 └── Cover Maintenance
 
 Interface
-├── Dashboard Settings
 ├── Navigation
-└── App Updates
+├── Dashboard Settings
+└── Statistics Settings
 
 Appearance
 └── Themes & Customization
@@ -52,28 +52,37 @@ MediaFlow System
 Progression
 └── Leveling & XP
 
-Statistics
-└── Statistics Settings
-
 Data & Sync
 ├── Import / Export — Media Services
 ├── Automatic Backups
 ├── Cloud Sync
 ├── Settings Preset
 └── Data
+
+Updates
+└── App Updates
 ```
+
+## v221 Settings changes
+
+- Restore All Defaults is aligned with the Settings search control rather than floating awkwardly in the toolbar.
+- App Updates moved out of Interface into a dedicated **Updates** group at the bottom.
+- The standalone **Statistics** group was removed.
+- **Statistics Settings** moved into **Interface**.
+- Interface order is now exactly: **Navigation → Dashboard Settings → Statistics Settings**.
+- Mobile Settings navigation remains horizontally scrollable, but its scrollbar is hidden on mobile/tablet widths.
+- Desktop Settings navigation keeps its normal thin scrollbar.
+- Settings search behavior and wording remain unchanged from v220.
 
 ## Active runtime files
 
 ```text
 src/js/core/runtime/998-runtime-extension-foundation-v219.js
-src/js/pages/settings/145-v220-active-settings-page.js
+src/js/pages/settings/146-v221-active-settings-page.js
 src/js/runtime-order.json
-assets/css/91-v220-settings-polish.css
-assets/js/mediaflow-v220.bundle.js
+assets/css/92-v221-settings-polish.css
+assets/js/mediaflow-v221.bundle.js
 ```
-
-The v219 runtime-extension foundation remains the safe execution layer for future updates. v220 registers the active Settings renderer inside that runtime instead of patching the application after its private scope closes.
 
 ## Build and verify
 
@@ -83,7 +92,7 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The Chromium smoke test verifies the actual rendered Settings page, including the new search, Categories-first Library ordering, matching left-menu/page group order, cleaned Library Integrity label, removed legacy `Default` buttons, per-setting resets, and Restore all defaults.
+The Chromium smoke test verifies the actual rendered Settings page, including group ordering, Updates placement, Interface ordering, Restore All Defaults alignment, search behavior, reset controls, and responsive scrollbar behavior.
 
 ## Compatibility
 

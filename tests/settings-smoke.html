@@ -1,5 +1,5 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>MediaFlow v220 Settings Smoke</title>
+<html><head><meta charset="utf-8"><title>MediaFlow v221 Settings Smoke</title>
 <link rel="stylesheet" href="../assets/css/00-foundation.css">
 <link rel="stylesheet" href="../assets/css/10-navigation-core-ui.css">
 <link rel="stylesheet" href="../assets/css/20-dashboard-personal-order.css">
@@ -9,10 +9,10 @@
 <link rel="stylesheet" href="../assets/css/60-statistics.css">
 <link rel="stylesheet" href="../assets/css/70-full-style-themes.css">
 <link rel="stylesheet" href="../assets/css/80-late-control-center.css">
-<link rel="stylesheet" href="../assets/css/91-v220-settings-polish.css">
+<link rel="stylesheet" href="../assets/css/91-v221-settings-polish.css">
 </head><body>
 <div id="app"></div>
-<script src="../assets/js/mediaflow-v220.bundle.js"></script>
+<script src="../assets/js/mediaflow-v221.bundle.js"></script>
 <script>
 setTimeout(()=>{
   const result={};
@@ -22,16 +22,16 @@ setTimeout(()=>{
       try{
         result.runtimeVersion=window.MediaFlowRuntime?.version||0;
         result.registered=window.MediaFlowRuntime?.hasPageRenderer?.('settings')===true;
-        result.searchExists=!!document.getElementById('v220-settings-search');
-        result.navGroups=document.querySelectorAll('.v220-settings-nav-group').length;
-        result.navItems=document.querySelectorAll('.v220-settings-nav-item').length;
-        result.pageGroups=document.querySelectorAll('.v220-settings-page-group').length;
-        result.resetButtons=document.querySelectorAll('.v220-setting-reset,.v220-section-reset').length;
-        result.categoriesFirst=document.querySelector('.v220-settings-nav-group .v220-settings-nav-item')?.textContent.trim()==='CATEGORIES';
+        result.searchExists=!!document.getElementById('v221-settings-search');
+        result.navGroups=document.querySelectorAll('.v221-settings-nav-group').length;
+        result.navItems=document.querySelectorAll('.v221-settings-nav-item').length;
+        result.pageGroups=document.querySelectorAll('.v221-settings-page-group').length;
+        result.resetButtons=document.querySelectorAll('.v221-setting-reset,.v221-section-reset').length;
+        result.categoriesFirst=document.querySelector('.v221-settings-nav-group .v221-settings-nav-item')?.textContent.trim()==='CATEGORIES';
         result.restoreAllExists=[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Restore all defaults');
-        const before=[...document.querySelectorAll('.v220-settings-nav-item')].filter(b=>!b.classList.contains('v220-settings-hidden')).length;
-        App.v220SearchSettings('cover');
-        const after=[...document.querySelectorAll('.v220-settings-nav-item')].filter(b=>!b.classList.contains('v220-settings-hidden')).length;
+        const before=[...document.querySelectorAll('.v221-settings-nav-item')].filter(b=>!b.classList.contains('v221-settings-hidden')).length;
+        App.v221SearchSettings('cover');
+        const after=[...document.querySelectorAll('.v221-settings-nav-item')].filter(b=>!b.classList.contains('v221-settings-hidden')).length;
         result.searchFilters=after>0&&after<before;
         result.before=before; result.after=after;
       }catch(e){result.error=String(e&&e.stack||e);}

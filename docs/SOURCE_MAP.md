@@ -1,15 +1,15 @@
-# MediaFlow v220 Source Ownership Map
+# MediaFlow v221 Source Ownership Map
 
 ## Active runtime modules
 
 - `core/runtime/998-runtime-extension-foundation-v219.js` — active page renderer/enhancer registry and public runtime API.
-- `pages/settings/145-v220-active-settings-page.js` — v220 Settings renderer, organization, search, resets, and page ordering.
+- `pages/settings/146-v221-active-settings-page.js` — v221 Settings renderer, hierarchy, search integration, resets, ordering, and responsive behavior.
 - `core/runtime/999-close-app.js` — explicit end of the legacy application scope.
 - `runtime-order.json` — runtime modules injected before the app closure.
 
 ## Active Settings styling
 
-- `assets/css/91-v220-settings-polish.css` — redesigned search bar, Settings navigator, page-group presentation, responsive behavior, and reset styling.
+- `assets/css/92-v221-settings-polish.css` — Settings search/toolbar alignment, Settings navigator, page-group presentation, reset styling, and mobile scrollbar hiding.
 
 ## Existing ownership
 
@@ -21,4 +21,4 @@
 - `utils/` — shared helpers.
 - `legacy/` — compatibility source not yet migrated to active page modules.
 
-Older v218/v219 Settings implementations are archived under `docs/history/` and are not part of the active build.
+Older Settings implementations are retained only for history/reference and are not active in `runtime-order.json`.
