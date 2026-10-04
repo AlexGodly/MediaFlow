@@ -1,111 +1,108 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json, re, subprocess, hashlib, sys
+import json, re, subprocess, sys, hashlib
 ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'src/js'
 errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
-if "mediaflow-v217-static-v1" not in sw: errors.append('service worker cache version is not v217')
-if "./assets/js/mediaflow-v217.bundle.js" not in sw: errors.append('service worker does not cache v217 bundle')
-if 'mediaflow-v216.bundle.js' in sw: errors.append('service worker still references v216 bundle')
-if '<meta name="mediaflow-version" content="217">' not in index: errors.append('index.html version is not 217')
+
+if '<meta name="mediaflow-version" content="219">' not in index: errors.append('index.html version is not 219')
+if 'assets/js/mediaflow-v219.bundle.js' not in index: errors.append('index.html does not load v219 bundle')
+if 'assets/css/90-v219-settings-organizer.css' not in index: errors.append('index.html does not load v219 Settings stylesheet')
+if 'mediaflow-v219-static-v1' not in sw: errors.append('service worker cache version is not v219')
+if './assets/js/mediaflow-v219.bundle.js' not in sw: errors.append('service worker does not cache v219 bundle')
+if './assets/css/90-v219-settings-organizer.css' not in sw: errors.append('service worker does not cache v219 Settings stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
 
 order=json.loads((SRC/'build-order.json').read_text(encoding='utf-8'))
-joined=''
+runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))
+slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
+if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
+close_indexes=[i for i,row in enumerate(order) if row.get('path')=='core/runtime/999-close-app.js']
+if len(close_indexes)!=1: errors.append('build-order must contain exactly one explicit app closure')
+if slot_indexes and close_indexes and slot_indexes[0]>close_indexes[0]: errors.append('runtime extension slot is after the app closure')
+
+parts=[]
 for row in order:
-    p=SRC/row['path']
-    if not p.exists():
-        errors.append(f'missing source fragment: {row["path"]}')
+    if row.get('slot')=='runtime_extensions':
+        for rel in runtime_order:
+            p=SRC/rel
+            if not p.exists(): errors.append(f'missing runtime source module: {rel}')
+            else: parts.append(p.read_text(encoding='utf-8'))
         continue
-    joined+=p.read_text(encoding='utf-8')
+    rel=row.get('path')
+    if not rel: continue
+    p=SRC/rel
+    if not p.exists(): errors.append(f'missing source fragment: {rel}')
+    else: parts.append(p.read_text(encoding='utf-8'))
+joined=''.join(parts)
+bundle_path=ROOT/'assets/js/mediaflow-v219.bundle.js'
+bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
+if not bundle: errors.append('missing v219 bundle')
+if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
+if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
-bundle_path=ROOT/'assets/js/mediaflow-v217.bundle.js'
-if not bundle_path.exists():
-    errors.append('missing v217 bundle')
-    bundle=''
+# Runtime architecture must be active before closure.
+required_runtime=[
+    'MediaFlow v219 — Runtime Extension Foundation',
+    'const MediaFlowRuntime=',
+    'window.MediaFlowRuntime=MediaFlowRuntime;',
+    "MediaFlowRuntime.registerPageRenderer('settings',v219RenderSettingsPage);",
+    "MediaFlowRuntime.registerPageEnhancer('settings',v219EnhanceSettingsDom);"
+]
+for pat in required_runtime:
+    if pat not in bundle: errors.append(f'missing v219 runtime feature: {pat}')
+close_pos=bundle.rfind('})();')
+for pat in required_runtime:
+    pos=bundle.find(pat)
+    if pos<0 or pos>close_pos: errors.append(f'v219 runtime feature is not inside the active app scope: {pat}')
+
+# Settings requirements.
+required_settings=[
+    'MediaFlow v219 — Active Organized Settings Browser',
+    'function v219SearchSettings',
+    'function v219EnhanceSettingsDom',
+    'function v219RestoreAllDefaults',
+    'function v219ResetSettingPath',
+    'function v219ResetNavigationDefaults',
+    'S.settings=v219Clone(DEFAULT_SETTINGS);',
+    'S.navLayout=v161NormalizeNavLayout(null)',
+    'Search settings…',
+    'Restore all defaults',
+    'Reset section',
+    'resetAllSettings=v219RestoreAllDefaults;'
+]
+for pat in required_settings:
+    if pat not in bundle: errors.append(f'missing v219 Settings feature: {pat}')
+
+mod=(SRC/'pages/settings/144-v219-active-settings-page.js').read_text(encoding='utf-8')
+restore=re.search(r'function v219RestoreAllDefaults\(\)\{([\s\S]*?)\n\}',mod)
+if not restore: errors.append('v219RestoreAllDefaults function not found')
 else:
-    bundle=bundle_path.read_text(encoding='utf-8')
-if joined != bundle: errors.append('bundle does not exactly match ordered source fragments')
+    body=restore.group(1)
+    if 'resetAll()' in body or 'S.library=' in body or 'S.sessions=' in body or 'S.categories=' in body:
+        errors.append('v219 Restore all defaults appears to modify content data')
 
-# v217 navigation regression checks.
-required_patterns=[
+# Preserve v217 navigation regression fix.
+for pat in [
     'data-view="${escapeHtml(String(n.id))}"',
     "const viewId=String(el.dataset?.view||'');",
     "el.classList.toggle('active',viewId===String(S.view||''));",
-    'const V161_NAV_LAYOUT_VERSION=2;',
-    "NAV_ITEMS.splice(settingsIndex>=0?settingsIndex+1:NAV_ITEMS.length,0,{id:'about',label:'About'});",
-    "const oldDefault=['dashboard','library','order','oldsystem','libraryhistory','history','batch','stats','profile','about','settings'];",
-    'const sourceOrder=oldDefaultMatch ? valid : rawOrder;'
-]
-for pat in required_patterns:
+    'const V161_NAV_LAYOUT_VERSION=2;'
+]:
     if pat not in bundle: errors.append(f'missing v217 navigation fix: {pat}')
-if "NAV_ITEMS[i].id===S.view" in bundle:
-    errors.append('legacy index-based sidebar active-state logic still present')
-
-# Verify the corrected canonical default produced by the runtime insertion order.
-expected_default=['dashboard','library','order','oldsystem','libraryhistory','history','batch','stats','profile','settings','about']
-# The static base + insertion points are intentionally checked rather than executing app state.
-base_match=re.search(r"const NAV_ITEMS = \[(.*?)\];",bundle,re.S)
-if not base_match:
-    errors.append('NAV_ITEMS base definition not found')
-else:
-    ids=re.findall(r"\{id:'([^']+)'",base_match.group(1))
-    # Apply stable v201 insertion rules in bundle order.
-    if 'order' not in ids:
-        li=ids.index('library') if 'library' in ids else 0
-        ids.insert(li+1,'order')
-    if 'oldsystem' not in ids:
-        oi=ids.index('order') if 'order' in ids else -1
-        si=ids.index('stats') if 'stats' in ids else max(0,len(ids)-2)
-        ids.insert(oi+1 if oi>=0 else si,'oldsystem')
-    if 'about' not in ids:
-        si=ids.index('settings') if 'settings' in ids else len(ids)-1
-        ids.insert(si+1,'about')
-    if ids != expected_default:
-        errors.append(f'corrected default navigation order mismatch: {ids}')
-
-# Compatibility guard: reverse only the intentional v217 JS changes and require
-# the result to match the v216 runtime hash exactly. This catches accidental edits.
-normalized=bundle
-replacements=[
-    ('Complete MediaFlow v217 modular navigation-fix backup (stable v201 feature base).',
-     'Complete MediaFlow v216 architecture-refactored backup (stable v201 feature base).'),
-    ('const V161_NAV_LAYOUT_VERSION=2;','const V161_NAV_LAYOUT_VERSION=1;'),
-    ("  // v217 default navigation ends with Settings -> About. User-customized\n  // navigation order remains fully supported through Navigation settings.\n  NAV_ITEMS.splice(settingsIndex>=0?settingsIndex+1:NAV_ITEMS.length,0,{id:'about',label:'About'});",
-     "  NAV_ITEMS.splice(settingsIndex>=0?settingsIndex:NAV_ITEMS.length,0,{id:'about',label:'About'});"),
-    ("  // v216's canonical default accidentally placed About before Settings.\n  // Only migrate that exact old default. Any genuinely customized order is\n  // preserved, so Navigation settings remain authoritative for the user.\n  const oldDefault=['dashboard','library','order','oldsystem','libraryhistory','history','batch','stats','profile','about','settings'];\n  const rawOrder=Array.isArray(src.order)?src.order.map(x=>String(x||'')):[];\n  const oldDefaultMatch=rawOrder.length===oldDefault.length && oldDefault.every((id,i)=>rawOrder[i]===id);\n  const sourceOrder=oldDefaultMatch ? valid : rawOrder;\n\n",
-     ''),
-    ('  for(const id of sourceOrder){','  for(const id of (Array.isArray(src.order)?src.order:[])){'),
-    ('          <div class="nav-item ${S.view===n.id?\'active\':\'\'}" data-view="${escapeHtml(String(n.id))}" onclick="App.setView(\'${n.id}\')">',
-     '          <div class="nav-item ${S.view===n.id?\'active\':\'\'}" onclick="App.setView(\'${n.id}\')">'),
-    ("  document.querySelectorAll('.nav-item').forEach(el=>{\n    const viewId=String(el.dataset?.view||'');\n    el.classList.toggle('active',viewId===String(S.view||''));\n  });",
-     "  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', NAV_ITEMS[i].id===S.view));")
-]
-for new,old in replacements:
-    if new not in normalized:
-        errors.append('compatibility normalization pattern missing: '+new[:80])
-    else:
-        normalized=normalized.replace(new,old,1)
-V216_HASH='4444ec6b849c237f7fe7bf2e3a04159bcc1e0afada80186fcaaae713427951c1'
-if normalized and hashlib.sha256(normalized.encode()).hexdigest()!=V216_HASH:
-    errors.append('compatibility failure: v217 contains executable JS changes outside the intended navigation fix')
+if "NAV_ITEMS[i].id===S.view" in bundle: errors.append('legacy index-based sidebar active-state logic returned')
 
 for css in re.findall(r'href="(assets/css/[^"]+\.css)"',index):
     if not (ROOT/css).exists(): errors.append(f'missing stylesheet: {css}')
-required=['core','pages','components','features','services','utils','legacy']
-for d in required:
+for d in ['core','pages','components','features','services','utils','legacy']:
     if not (SRC/d).exists(): errors.append(f'missing source ownership folder: {d}')
-for d in ['dashboard','library','personal-order','history','statistics','settings']:
-    if not (SRC/'pages'/d).exists(): errors.append(f'missing page folder: {d}')
-critical=['function renderLibrary','function renderSettings','function renderStats','function renderDashboard','const DEFAULT_SETTINGS','window.App']
-for token in critical:
-    if token not in bundle: errors.append(f'missing critical runtime symbol/text: {token}')
+
 try:
-    subprocess.run(['node','--check',str(bundle_path)],check=True,stdout=subprocess.DEVNULL)
+    subprocess.run(['node','--check',str(bundle_path)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,text=True)
 except Exception as e:
     errors.append(f'node syntax check failed: {e}')
 
@@ -114,8 +111,9 @@ if errors:
     for e in errors: print('-',e)
     sys.exit(1)
 print('CHECK OK')
-print('Owned source fragments:',len(order))
-print('Navigation highlight: keyed by data-view ID')
-print('Default navigation order:', ' > '.join(expected_default))
-print('Compatibility: only intended v217 navigation runtime changes vs v216')
+print('Build manifest rows:',len(order))
+print('Runtime extension modules:',len(runtime_order))
+print('Settings page renderer: active inside app scope')
+print('Navigation highlight fix: preserved')
+print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

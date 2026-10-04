@@ -1,57 +1,59 @@
-# MediaFlow v217 Architecture
+# MediaFlow v219 Architecture
 
 ## Goal
 
-v217 is the second-stage refactor of the stable v201 feature base. Unlike v215's broad chronological `parts/` directory, v217 gives every editable JavaScript fragment a concrete ownership area: `core/`, `pages/`, `components/`, `features/`, `services/`, `utils/`, or `legacy/`.
+v219 fixes the runtime-boundary problem that caused some post-v201 patches to exist in source without actually controlling the live app. The project remains a SPA with one `index.html`, but future release modules now have an explicit place to run **inside** MediaFlow's active application scope.
 
-The priority remains **runtime compatibility first**. The browser bundle is reconstructed in the exact stable execution order, so reorganizing source ownership does not rewrite application behavior.
+## Runtime build
 
-## Runtime
+The stable v201-based source remains organized under `core/`, `pages/`, `components/`, `features/`, `services/`, `utils/`, and `legacy/`.
 
-1. `index.html` — SPA entry point.
-2. `assets/css/*.css` — v215-extracted stable styles, unchanged in content/order.
-3. Supabase browser client CDN.
-4. `assets/js/mediaflow-v217.bundle.js` — generated compatibility bundle.
-5. Service worker / PWA manifest.
-
-## Editable JavaScript source
+The key v219 addition is:
 
 ```text
-src/js/
-├── core/          # state, storage, render shell, public app actions
-├── pages/         # Dashboard, Library, Personal Order, History, Statistics, Settings, etc.
-├── components/    # modals, navigation, category/cover UI, pagination, title details
-├── features/      # scheduler, logging, XP, backup, imports, themes, rewatch
-├── services/      # cloud sync and persistence pipelines
-├── utils/         # shared helpers
-├── legacy/        # stable compatibility code not yet safely assigned/extracted
-└── build-order.json
+src/js/runtime-order.json
+              ↓
+build-order.json -> runtime_extensions slot
+              ↓
+core/runtime/999-close-app.js
 ```
 
-`pages/` contains actual source fragments owned by pages; they are not separate HTML documents because MediaFlow remains a SPA.
+`scripts/build.py` injects every module listed in `runtime-order.json` at the `runtime_extensions` slot before the legacy application closure is closed. This prevents new releases from silently landing after the private `S`, `renderSettings`, `renderView`, and other runtime variables have gone out of scope.
 
-## Why the browser still uses a generated bundle
+## Active page registry
 
-The stable v201 runtime was built around one shared lexical closure. Turning every file into an independently loaded ES module in one release would change scope semantics and could break stable data/render behavior. v217 therefore changes **source ownership without changing execution semantics**.
+`core/runtime/998-runtime-extension-foundation-v219.js` creates `window.MediaFlowRuntime` and a real page renderer/enhancer registry.
 
-This is a deliberate migration architecture:
+Settings is the first page migrated onto this active registry:
 
-- future Library bugs are located under `src/js/pages/library/` plus shared components/services;
-- Dashboard work is under `src/js/pages/dashboard/`;
-- category UI work is under `src/js/components/category/`;
-- cloud issues are under `src/js/services/cloud-sync/`;
-- build order remains explicit so compatibility can be proved after each extraction.
+```text
+pages/settings/144-v219-active-settings-page.js
+```
 
-## Validation guarantee
+The router now uses the registered Settings renderer when `S.view === 'settings'`. Other pages continue using their stable legacy renderers until they are migrated in future releases.
 
-`scripts/check.py` reconstructs the bundle from all owned fragments, runs `node --check`, and normalizes the v217 human-readable backup note before comparing the SHA-256 hash against the stable v215/v201 runtime. If any executable JS changed unexpectedly, the check fails.
+## Browser bundle
 
-## Version/data compatibility
+The browser loads `assets/js/mediaflow-v219.bundle.js`. It is still one compatibility bundle because the stable application shares lexical state, but v219 now has an explicit safe extension point instead of relying on accidental concatenation after the closure.
 
-- App release: **216**
+## Validation
+
+Run:
+
+```bash
+python scripts/build.py
+python scripts/check.py
+python scripts/smoke-ui.py
+```
+
+`check.py` verifies build order, the runtime slot, page registration, v217 navigation behavior, v219 Settings requirements, schemas, and JavaScript syntax.
+
+`smoke-ui.py` launches Chromium with a controlled in-memory MediaFlow account and verifies that the actual Settings page renders with search, organized navigation, reset buttons, working search filtering, individual reset behavior, and Restore all defaults.
+
+## Compatibility
+
+- App release: **219**
 - Stable feature base: **201**
 - Cloud Sync contract: **201**
 - Full Backup schema: **29**
 - Settings Preset schema: **1**
-
-No persistent-data migration is introduced by the architecture refactor.

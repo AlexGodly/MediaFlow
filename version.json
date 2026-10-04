@@ -1,8 +1,8 @@
 {
-  "appVersion": 217,
+  "appVersion": 219,
   "stableFeatureBase": 201,
   "cloudSyncVersion": 201,
   "fullBackupSchema": 29,
   "settingsPresetSchema": 1,
-  "architecture": "page-component-core compatibility source"
+  "architecture": "runtime extension slot + active page registry + organized settings browser"
 }

@@ -1,12 +1,14 @@
-# MediaFlow v217 — Modular Architecture + Navigation Fix
+# MediaFlow v219 — Runtime Foundation + Organized Settings
 
 **Stable feature base:** MediaFlow v201  
-**App release:** v217  
+**App release:** v219  
 **Cloud Sync compatibility:** v201  
 **Full Backup schema:** v29  
 **Settings Preset schema:** v1
 
-v217 keeps the deeper v216 architecture and fixes the sidebar active-state/default-order bug without changing the stable v201 feature base. The app is still one SPA and behaves like the stable v201 build, but the editable JavaScript source is now organized by ownership instead of by one giant HTML file or broad chronological chunks.
+v219 fixes the architecture problem that caused some later source files to exist without actually controlling the running app. New runtime extensions are now injected inside MediaFlow's live application scope, and Settings is the first page registered through the new active page-renderer registry.
+
+The Settings page now visibly includes a searchable browser, grouped navigation, per-setting reset controls, section resets, and an audited Restore all defaults action.
 
 ## Run MediaFlow
 
@@ -18,75 +20,45 @@ Run `scripts\serve.bat`, then open `http://localhost:8080/`.
 bash scripts/serve.sh
 ```
 
-## Source architecture
+## Runtime architecture
 
 ```text
-MediaFlow_v217_Modular/
+MediaFlow_v219_Modular/
 ├── index.html
 ├── assets/
-│   ├── css/
-│   └── js/mediaflow-v217.bundle.js
+│   ├── css/90-v219-settings-organizer.css
+│   └── js/mediaflow-v219.bundle.js
 ├── src/js/
-│   ├── core/
-│   ├── pages/
-│   │   ├── dashboard/
-│   │   ├── library/
-│   │   ├── personal-order/
-│   │   ├── library-history/
-│   │   ├── history/
-│   │   ├── batch-log/
-│   │   ├── statistics/
-│   │   ├── profile-settings/
-│   │   ├── settings/
-│   │   └── old-system/
-│   ├── components/
-│   ├── features/
-│   ├── services/
-│   ├── utils/
-│   ├── legacy/
+│   ├── core/runtime/
+│   │   ├── 998-runtime-extension-foundation-v219.js
+│   │   └── 999-close-app.js
+│   ├── pages/settings/144-v219-active-settings-page.js
+│   ├── runtime-order.json
 │   └── build-order.json
 ├── scripts/
 │   ├── build.py
 │   ├── check.py
-│   ├── locate.py
-│   ├── serve.bat
-│   └── serve.sh
-└── docs/
-    ├── ARCHITECTURE.md
-    ├── SOURCE_MAP.md
-    ├── INTEGRITY.md
-    └── CHANGELOG_v217.md
+│   ├── smoke-ui.py
+│   └── locate.py
+└── tests/settings-smoke.html
 ```
 
-## Important compatibility rule
+## Why future updates now appear
 
-Files under `src/js/` are now **owned by real app domains**, but they are concatenated in `build-order.json` into one compatibility bundle. Do not add these files as separate `<script>` tags yet. The stable v201 application shares lexical state, so preserving source order is what keeps the app functioning exactly as before.
+`build-order.json` contains a dedicated `runtime_extensions` slot before `999-close-app.js`. `scripts/build.py` injects every file listed in `runtime-order.json` into that slot while MediaFlow's state, renderers and helpers are still in scope. New release modules therefore cannot silently land after the old closure like the broken v218 Settings patch did.
 
-This architecture makes future debugging much easier: use the owning folder first, then shared components/services. For example:
-
-- Library bug → `src/js/pages/library/`
-- Dashboard bug → `src/js/pages/dashboard/`
-- category UI → `src/js/components/category/`
-- cloud sync → `src/js/services/cloud-sync/`
-- backups → `src/js/features/backup/`
+The new `window.MediaFlowRuntime` also provides a real page renderer/enhancer registry. Settings is registered through that registry instead of overriding the old renderer from outside the app.
 
 ## Build and verify
 
 ```bash
 python scripts/build.py
 python scripts/check.py
+python scripts/smoke-ui.py
 ```
 
-`check.py` does more than syntax checking: it verifies the generated v217 runtime is executable-code compatible with the stable v215/v201 runtime.
+The UI smoke test launches Chromium, opens Settings, and verifies that the v219 runtime is active, the search field exists, the organized Settings navigation renders, reset buttons exist, and search actually filters sections.
 
-## Find code quickly
+## Compatibility
 
-```bash
-python scripts/locate.py renderLibrary
-python scripts/locate.py "category icon"
-python scripts/locate.py v155VerifyCloudState
-```
-
-## GitHub Pages
-
-Deploy the project contents as usual. `index.html` remains the single SPA entry point.
+The stable v201 Library/data model is preserved. Cloud Sync remains v201, Full Backup remains schema v29, and Settings Preset remains schema v1.
