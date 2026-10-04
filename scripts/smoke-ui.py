@@ -3,11 +3,12 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v225.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v226.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
 CSS225=ROOT/'assets/css/95-v225-icons-personal-order.css'
+CSS226=ROOT/'assets/css/96-v226-semantic-ui-library.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -24,6 +25,7 @@ css=CSS.read_text(encoding='utf-8')
 css222=CSS222.read_text(encoding='utf-8')
 css224=CSS224.read_text(encoding='utf-8')
 css225=CSS225.read_text(encoding='utf-8')
+css226=CSS226.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -52,6 +54,7 @@ with sync_playwright() as p:
     page.add_style_tag(content=css222)
     page.add_style_tag(content=css224)
     page.add_style_tag(content=css225)
+    page.add_style_tag(content=css226)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -116,6 +119,27 @@ with sync_playwright() as p:
       return {before,after,searchFilters:after>0&&after<before,clearVisible};
     }''')
     result.update(search)
+    v226_settings=page.evaluate(r'''() => {
+      const categoryRow=document.querySelector('.settings-categories-full .cat-manage-row');
+      const categoryCard=document.querySelector('.settings-categories-full .card');
+      const pos=categoryRow?.querySelector('.v157-position-input');
+      const del=categoryRow?.querySelector('.cat-delete-btn');
+      const drag=categoryRow?.querySelector('.cat-drag-handle');
+      const cardRect=categoryCard?.getBoundingClientRect();
+      const delRect=del?.getBoundingClientRect();
+      const navItems=[...document.querySelectorAll('.v221-settings-nav-item')];
+      const selects=[...document.querySelectorAll('select:not([multiple])')];
+      return {
+        categoryPositionWidth:pos?Math.round(pos.getBoundingClientRect().width):0,
+        categoryDeleteInside:!!cardRect&&!!delRect&&delRect.right<=cardRect.right+1,
+        categoryDragHasNoIcon:!!drag&&!drag.querySelector('.v225-btn-icon'),
+        settingsNavIconCoverage:navItems.length>0&&navItems.every(x=>!!x.querySelector('.v225-btn-icon')),
+        settingsDropdownIconCoverage:selects.length===0||selects.every(x=>!!x.dataset.v226DropdownIcon),
+        dynamicCategoryIconSetting:!!document.querySelector('select[aria-label="Dynamic Library category row icons"]'),
+        dynamicCategoryIconDefault:document.documentElement.dataset.v226DynamicCategoryIcons||''
+      };
+    }''')
+    result.update(v226_settings)
     page.evaluate("()=>App.v221ClearSettingsSearch()")
     page.evaluate("()=>App.updateSetting('dailyMinutes',999)")
     page.wait_for_timeout(250)
@@ -218,6 +242,32 @@ with sync_playwright() as p:
       librarySortDir:document.querySelector('[data-v224-sort-scope="library"] .v224-sort-direction')?.textContent.trim().replace(/\s+/g,' ')||''
     })''')
     result.update(v224_library)
+    page.evaluate("()=>App.v181SetLibraryMode('dynamic')")
+    page.wait_for_timeout(260)
+    v226_dynamic=page.evaluate(r'''() => {
+      const modeBtn=[...document.querySelectorAll('.v181-library-mode-switch button')].find(b=>b.textContent.trim()==='Dynamic');
+      const rows=[...document.querySelectorAll('.v181-dynamic-row')];
+      const catRow=rows.find(r=>(r.querySelector('.v181-dynamic-row-label')?.textContent||'').trim()==='Category');
+      const statusRow=rows.find(r=>(r.querySelector('.v181-dynamic-row-label')?.textContent||'').trim()==='Status');
+      const display=[...document.querySelectorAll('.v181-display-switch button')].map(b=>b.textContent.trim());
+      const catButtons=[...(catRow?.querySelectorAll('button')||[])];
+      const statusButtons=[...(statusRow?.querySelectorAll('button')||[])];
+      const coverControl=document.getElementById('v181-cover-range-library');
+      const titleControl=document.querySelector('.v188-title-text-control input[type="range"]');
+      return {
+        dynamicModeIcon:!!modeBtn?.querySelector('.v225-btn-icon'),
+        dynamicModeSemanticIcon:modeBtn?.dataset.v226SemanticIcon||'',
+        dynamicCategoryGlobalIconsRemoved:catButtons.length>0&&catButtons.every(b=>!b.querySelector('.v225-btn-icon')),
+        dynamicStatusSemanticIcons:statusButtons.length>=5&&statusButtons.every(b=>!!b.querySelector('.v225-btn-icon')),
+        dynamicStatusIconNames:statusButtons.map(b=>[b.textContent.trim(),b.dataset.v226SemanticIcon||'']),
+        dynamicStatusSemanticNamesExact:['watching','onHold','completedStatus','dropped','planToWatch'].every((name,i)=>statusButtons[i]?.dataset.v226SemanticIcon===name),
+        coverTitlesLabel:display.includes('Cover+Titles'),
+        dynamicCoverControl:!!coverControl,
+        dynamicTitleControl:!!titleControl,
+        dynamicLibraryMarker:!!document.querySelector('.v226-dynamic-library')
+      };
+    }''')
+    result.update(v226_dynamic)
     page.evaluate("()=>App.setView('order')")
     page.wait_for_timeout(220)
     result['personalOrderTitle']=page.locator('h1').first.text_content().strip() if page.locator('h1').count() else ''
@@ -253,7 +303,7 @@ with sync_playwright() as p:
     browser.close()
 
 required={
-    'runtimeVersion':225,
+    'runtimeVersion':226,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,
@@ -283,6 +333,12 @@ required={
     'librarySectionOrderMatches':True,
     'libraryIntegrityClean':True,
     'pageHasCategoriesFirst':True,
+    'categoryDeleteInside':True,
+    'categoryDragHasNoIcon':True,
+    'settingsNavIconCoverage':True,
+    'settingsDropdownIconCoverage':True,
+    'dynamicCategoryIconSetting':True,
+    'dynamicCategoryIconDefault':'none',
     'mobileOverflowX':'auto',
     'mobileScrollbarWidth':'none',
     'mobileScrollable':True,
@@ -298,6 +354,15 @@ required={
     'coverFilterOptions':['All covers','Has cover','Missing cover'],
     'librarySort':'title',
     'librarySortDir':'↑ ASC',
+    'dynamicModeIcon':True,
+    'dynamicModeSemanticIcon':'dynamicLibrary',
+    'dynamicCategoryGlobalIconsRemoved':True,
+    'dynamicStatusSemanticIcons':True,
+    'dynamicStatusSemanticNamesExact':True,
+    'coverTitlesLabel':True,
+    'dynamicCoverControl':True,
+    'dynamicTitleControl':True,
+    'dynamicLibraryMarker':True,
     'personalOrderTitle':'Personal Order',
     'personalOrderSort':'title',
     'personalOrderSortDir':'↑ ASC',
@@ -315,6 +380,7 @@ required={
 fail=[]
 for k,v in required.items():
     if result.get(k)!=v: fail.append(f'{k}: expected {v!r}, got {result.get(k)!r}')
+if result.get('categoryPositionWidth',0)<54: fail.append(f"Category order input is still too narrow: {result.get('categoryPositionWidth')}px")
 if result.get('desktopScrollbarWidth')=='none': fail.append('desktop Settings navigator scrollbar was hidden; it should remain available')
 if len(result.get('navGroups',[]))<6: fail.append('organized Settings navigation did not render enough groups')
 if result.get('resetButtons',0)<10: fail.append('per-setting/section reset controls did not render')

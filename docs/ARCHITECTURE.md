@@ -1,8 +1,8 @@
-# MediaFlow v225 Architecture
+# MediaFlow v226 Architecture
 
 ## Runtime foundation
 
-MediaFlow v225 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the legacy v201-compatible application state and render helpers remain available inside the same lexical scope.
+MediaFlow v226 continues the v219 runtime-extension architecture. Release modules are injected through `src/js/runtime-order.json` before `core/runtime/999-close-app.js`, while the legacy v201-compatible application state and render helpers remain available inside the same lexical scope.
 
 ```text
 build-order.json
@@ -17,40 +17,56 @@ runtime_extensions slot
       ↓
 157-v225-global-button-icons.js
       ↓
+158-v226-semantic-icons-dropdowns.js
+      ↓
+159-v226-category-settings-dynamic-icon-mode.js
+      ↓
+160-v226-library-sizing-display-polish.js
+      ↓
 999-close-app.js
 ```
 
-## v225 ownership
+## v226 ownership
 
-Personal Order Add Titles clarity is owned by:
-
-```text
-src/js/pages/personal-order/156-v225-personal-order-toolbar-polish.js
-```
-
-The global action-button icon language is owned by:
+Semantic icon replacement and purpose-aware dropdown icons are owned by:
 
 ```text
-src/js/components/157-v225-global-button-icons.js
+src/js/components/158-v226-semantic-icons-dropdowns.js
 ```
 
-Shared v225 presentation is owned by:
+The Dynamic Library category-row icon preference and persistence/reset integration are owned by:
 
 ```text
-assets/css/95-v225-icons-personal-order.css
+src/js/pages/settings/159-v226-category-settings-dynamic-icon-mode.js
 ```
 
-The icon enhancer is runtime-driven and observes newly rendered DOM nodes, so future text action buttons inherit the icon system without duplicating icon markup across every page renderer.
+Dynamic Library cover/title sizing parity and the `Cover+Titles` display label are owned by:
+
+```text
+src/js/pages/library/160-v226-library-sizing-display-polish.js
+```
+
+Shared v226 presentation is owned by:
+
+```text
+assets/css/96-v226-semantic-ui-library.css
+```
+
+The v226 semantic icon pass intentionally runs after the v225 global button decorator. It can replace an already-mounted generic icon with a status-, Settings-, visibility-, refresh-, mode-, order-, or session-specific icon, while leaving drag handles icon-free.
 
 ## Generated runtime
 
 The browser loads:
 
 ```text
-assets/js/mediaflow-v225.bundle.js
+assets/js/mediaflow-v226.bundle.js
 ```
 
 The generated bundle must exactly match `build-order.json` plus `runtime-order.json`.
+
+## Persistence
+
+The new Dynamic Library category-row icon preference is stored in the existing `settings.v181Library` object. Existing local settings, cloud settings, Full Backup, Automatic Backup, Settings Preset, Sync Now and import/export pipelines continue to own persistence; no schema bump is required.
 
 ## Validation
 
@@ -62,11 +78,11 @@ python scripts/check.py
 python scripts/smoke-ui.py
 ```
 
-The Chromium smoke test validates Settings integrity, v222/v223 Dashboard regressions, v224 Library/sorting behavior, v225 Personal Order controls, global icons and Account field styling.
+The Chromium smoke test validates Settings integrity, category-layout containment, semantic icon behavior, dropdown icon coverage, Dynamic Library icon settings, Dynamic Library size controls, and v222–v225 regressions.
 
 ## Compatibility
 
-- App release: **225**
+- App release: **226**
 - Stable feature/data base: **201**
 - Runtime foundation: **219**
 - Cloud Sync contract: **201**

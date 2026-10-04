@@ -7,16 +7,18 @@ errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="225">' not in index: errors.append('index.html version is not 225')
-if 'assets/js/mediaflow-v225.bundle.js' not in index: errors.append('index.html does not load v225 bundle')
+if '<meta name="mediaflow-version" content="226">' not in index: errors.append('index.html version is not 226')
+if 'assets/js/mediaflow-v226.bundle.js' not in index: errors.append('index.html does not load v226 bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v225-static-v1' not in sw: errors.append('service worker cache version is not v225')
-if './assets/js/mediaflow-v225.bundle.js' not in sw: errors.append('service worker does not cache v225 bundle')
+if 'mediaflow-v226-static-v1' not in sw: errors.append('service worker cache version is not v226')
+if './assets/js/mediaflow-v226.bundle.js' not in sw: errors.append('service worker does not cache v226 bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
 if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
 if 'assets/css/95-v225-icons-personal-order.css' not in index: errors.append('index.html does not load v225 UI stylesheet')
 if './assets/css/95-v225-icons-personal-order.css' not in sw: errors.append('service worker does not cache v225 UI stylesheet')
+if 'assets/css/96-v226-semantic-ui-library.css' not in index: errors.append('index.html does not load v226 UI stylesheet')
+if './assets/css/96-v226-semantic-ui-library.css' not in sw: errors.append('service worker does not cache v226 UI stylesheet')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -35,6 +37,9 @@ if 'components/navigation/154-v224-page-names.js' not in runtime_order: errors.a
 if 'pages/dashboard/155-v224-recommendation-actions.js' not in runtime_order: errors.append('missing active v224 runtime module: pages/dashboard/155-v224-recommendation-actions.js')
 if 'pages/personal-order/156-v225-personal-order-toolbar-polish.js' not in runtime_order: errors.append('missing active v225 runtime module: pages/personal-order/156-v225-personal-order-toolbar-polish.js')
 if 'components/157-v225-global-button-icons.js' not in runtime_order: errors.append('missing active v225 runtime module: components/157-v225-global-button-icons.js')
+if 'components/158-v226-semantic-icons-dropdowns.js' not in runtime_order: errors.append('missing active v226 runtime module: components/158-v226-semantic-icons-dropdowns.js')
+if 'pages/settings/159-v226-category-settings-dynamic-icon-mode.js' not in runtime_order: errors.append('missing active v226 runtime module: pages/settings/159-v226-category-settings-dynamic-icon-mode.js')
+if 'pages/library/160-v226-library-sizing-display-polish.js' not in runtime_order: errors.append('missing active v226 runtime module: pages/library/160-v226-library-sizing-display-polish.js')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -56,9 +61,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v225.bundle.js'
+bundle_path=ROOT/'assets/js/mediaflow-v226.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v225 bundle')
+if not bundle: errors.append('missing v226 bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -208,6 +213,27 @@ if not css225: errors.append('missing v225 UI stylesheet')
 for pat in ['.v225-order-filterbar','.v225-order-filter-label','.v225-icon-button','.v225-btn-icon','.profile-card input[type="email"]']:
     if pat not in css225: errors.append(f'missing v225 UI CSS: {pat}')
 
+# v226 semantic icons / dropdowns / category layout / Dynamic sizing checks.
+required_v226=[
+    'MediaFlow v226 — Semantic Icons + Dropdown Icon Language',
+    'MediaFlow v226 — Category Settings Layout + Dynamic Row Icons',
+    'MediaFlow v226 — Library Sizing + Display Polish',
+    'function v226EnhanceDropdowns',
+    "V181_LIBRARY_DEFAULT.dynamicCategoryIcons='none';",
+    'Dynamic category row icons',
+    'Category icon URL',
+    "replace(/Covers \\+ titles/g,'Cover+Titles')",
+    'v226-dynamic-library',
+    'MediaFlowRuntime.version=V226_RUNTIME_VERSION;'
+]
+for pat in required_v226:
+    if pat not in bundle: errors.append(f'missing v226 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v226 feature is outside active app scope: {pat}')
+css226=(ROOT/'assets/css/96-v226-semantic-ui-library.css').read_text(encoding='utf-8') if (ROOT/'assets/css/96-v226-semantic-ui-library.css').exists() else ''
+if not css226: errors.append('missing v226 UI stylesheet')
+for pat in ['select[data-v226-dropdown-icon]', '.settings-categories-full .cat-manage-row', '.v226-dynamic-category-icon-setting', 'data-v226-dynamic-category-icons', '.v226-dynamic-library.library-view-list']:
+    if pat not in css226: errors.append(f'missing v226 UI CSS: {pat}')
+
 # Preserve v217 navigation regression fix.
 for pat in [
     'data-view="${escapeHtml(String(n.id))}"',
@@ -240,7 +266,8 @@ print('v221 Settings ordering/search polish: preserved')
 print('v222 Dashboard rendering stability: present')
 print('v223 On This Day visibility: preserved')
 print('v224 Library/sorting/page naming/recommendation actions: preserved')
-print('v225 Personal Order clarity/global button icons/Account polish: active')
+print('v225 Personal Order clarity/global button icons/Account polish: preserved')
+print('v226 semantic icons/dropdowns/category layout/Dynamic Library sizing: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

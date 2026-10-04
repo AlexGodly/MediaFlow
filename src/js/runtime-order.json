@@ -11,5 +11,8 @@
   "components/navigation/154-v224-page-names.js",
   "pages/dashboard/155-v224-recommendation-actions.js",
   "pages/personal-order/156-v225-personal-order-toolbar-polish.js",
-  "components/157-v225-global-button-icons.js"
+  "components/157-v225-global-button-icons.js",
+  "components/158-v226-semantic-icons-dropdowns.js",
+  "pages/settings/159-v226-category-settings-dynamic-icon-mode.js",
+  "pages/library/160-v226-library-sizing-display-polish.js"
 ]
