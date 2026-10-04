@@ -1,0 +1,33 @@
+# MediaFlow v232 Integrity Notes
+
+- The modular build continues using the stable MediaFlow v201-compatible feature/data base.
+- Runtime extensions remain inside the active application scope before `999-close-app.js`.
+- `mediaflow-v232.bundle.js` must exactly match `build-order.json` plus `runtime-order.json`.
+- No inline JavaScript or inline style blocks are reintroduced into `index.html`.
+- Cloud Sync remains **v201**.
+- Full Backup remains **Schema v29**.
+- Settings Preset remains **Schema v1**.
+- Personal Order dedicated export is **format v4** while preserving previous import compatibility.
+- Library Mode must be the first Settings → Library navigation/section entry, followed by Categories.
+- Active Settings highlighting from v231 must remain functional.
+- Removed inherited-source helper sentences must not be rendered in Choice & Filter Layout.
+- Exact **All** actions must receive the v232 all-items icon rather than the generic action arrow icon.
+- v225/v226/v230 whole-document MutationObservers must be disconnected after v232 initializes.
+- `V232_UI_OBSERVER` must be the active scoped/batched UI enhancer.
+- v230 select/category-panel reorder application must be idempotent.
+- Dynamic Library status order must come only from `settings.v181Library.statusOrder`.
+- Status Filter/Set Status configuration must never reorder Dynamic Library itself.
+- Dynamic status/category switching must render before queued persistence.
+- Normal Library overview statistics must not perform full-Library scans once per category.
+- Dynamic category/status counts must be generated without repeated full-Library filter passes.
+- Choice & Filter Layout must be normalized in current local/cloud snapshot paths.
+- Cloud merge/verification must explicitly cover `settings.v230ChoiceLayout`.
+- Full Backup and Automatic Backup must include the current complete Settings object.
+- Settings Preset must include current v181/v230/v231/v232 persistent settings.
+- History CSV must use the expanded current-column exporter.
+- Title Details metadata cards must not receive global action icons.
+- Title Details category artwork inside metadata pills must be hidden.
+- Only Edit title / Close / Edit all title details / Close keep action-button icons in Title Details.
+- Desktop Title Details must fit without an internal scrollbar in the v232 wide and compact-desktop regression viewports.
+- `scripts/smoke-ui.py` must pass v221–v232 compatibility behavior.
+- `scripts/perf-v232.py` must pass a synthetic 30,000-title Library interaction regression without freezes or page errors.
