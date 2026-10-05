@@ -1,0 +1,1148 @@
+[
+  {
+    "path": "features/logging/000-v89-functional-logging-filters-with-direct-event-binding.js",
+    "owner": "features/logging",
+    "heading": "MediaFlow v89: functional logging filters with direct event binding",
+    "start": 0,
+    "end": 105,
+    "characters": 105
+  },
+  {
+    "path": "core/constants/001-constants.js",
+    "owner": "core/constants",
+    "heading": "CONSTANTS",
+    "start": 105,
+    "end": 17381,
+    "characters": 17276
+  },
+  {
+    "path": "core/state/002-state.js",
+    "owner": "core/state",
+    "heading": "STATE",
+    "start": 17381,
+    "end": 19811,
+    "characters": 2430
+  },
+  {
+    "path": "pages/library-history/003-v63-library-history-integrity-large-library-fix.js",
+    "owner": "pages/library-history",
+    "heading": "MediaFlow v63 \u2014 Library History Integrity & Large-Library Fix",
+    "start": 19811,
+    "end": 20799,
+    "characters": 988
+  },
+  {
+    "path": "services/cloud-sync/004-v115-cloud-data-loss-prevention-recovery-guard.js",
+    "owner": "services/cloud-sync",
+    "heading": "MediaFlow v115 \u2014 Cloud Data Loss Prevention & Recovery Guard",
+    "start": 20799,
+    "end": 45046,
+    "characters": 24247
+  },
+  {
+    "path": "components/category/005-v74-persistent-category-ordering.js",
+    "owner": "components/category",
+    "heading": "MediaFlow v74 \u2014 persistent category ordering",
+    "start": 45046,
+    "end": 47502,
+    "characters": 2456
+  },
+  {
+    "path": "utils/006-util.js",
+    "owner": "utils",
+    "heading": "UTIL",
+    "start": 47502,
+    "end": 49789,
+    "characters": 2287
+  },
+  {
+    "path": "features/scheduler/007-scheduler.js",
+    "owner": "features/scheduler",
+    "heading": "SCHEDULER",
+    "start": 49789,
+    "end": 60541,
+    "characters": 10752
+  },
+  {
+    "path": "features/logging/008-session-flow.js",
+    "owner": "features/logging",
+    "heading": "SESSION FLOW",
+    "start": 60541,
+    "end": 76364,
+    "characters": 15823
+  },
+  {
+    "path": "pages/statistics/009-derived-stats-helpers.js",
+    "owner": "pages/statistics",
+    "heading": "DERIVED / STATS HELPERS",
+    "start": 76364,
+    "end": 80314,
+    "characters": 3950
+  },
+  {
+    "path": "core/rendering/010-render-shell.js",
+    "owner": "core/rendering",
+    "heading": "RENDER: SHELL",
+    "start": 80314,
+    "end": 92727,
+    "characters": 12413
+  },
+  {
+    "path": "pages/dashboard/011-view-dashboard.js",
+    "owner": "pages/dashboard",
+    "heading": "VIEW: DASHBOARD",
+    "start": 92727,
+    "end": 106531,
+    "characters": 13804
+  },
+  {
+    "path": "pages/library/012-v63-large-library-performance-engine.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v63 \u2014 Large Library Performance Engine",
+    "start": 106531,
+    "end": 112746,
+    "characters": 6215
+  },
+  {
+    "path": "pages/library/013-v70-expanded-library-display-ordering.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v70 \u2014 expanded Library display ordering",
+    "start": 112746,
+    "end": 127554,
+    "characters": 14808
+  },
+  {
+    "path": "pages/batch-log/014-view-batch-log-v61.js",
+    "owner": "pages/batch-log",
+    "heading": "VIEW: BATCH LOG \u2014 v61",
+    "start": 127554,
+    "end": 136929,
+    "characters": 9375
+  },
+  {
+    "path": "pages/history/015-view-history.js",
+    "owner": "pages/history",
+    "heading": "VIEW: HISTORY",
+    "start": 136929,
+    "end": 142620,
+    "characters": 5691
+  },
+  {
+    "path": "pages/statistics/016-view-stats.js",
+    "owner": "pages/statistics",
+    "heading": "VIEW: STATS",
+    "start": 142620,
+    "end": 148567,
+    "characters": 5947
+  },
+  {
+    "path": "pages/profile-settings/017-view-profile-settings.js",
+    "owner": "pages/profile-settings",
+    "heading": "VIEW: PROFILE SETTINGS",
+    "start": 148567,
+    "end": 154610,
+    "characters": 6043
+  },
+  {
+    "path": "pages/settings/018-view-settings.js",
+    "owner": "pages/settings",
+    "heading": "VIEW: SETTINGS",
+    "start": 154610,
+    "end": 156779,
+    "characters": 2169
+  },
+  {
+    "path": "services/cloud-sync/019-v74-and-drag-ordering-now-persist-an-explicit.js",
+    "owner": "services/cloud-sync",
+    "heading": "v74: \u2191/\u2193 and drag ordering now persist an explicit categoryOrder to cloud.",
+    "start": 156779,
+    "end": 173819,
+    "characters": 17040
+  },
+  {
+    "path": "components/modal/020-modals.js",
+    "owner": "components/modal",
+    "heading": "MODALS",
+    "start": 173819,
+    "end": 186494,
+    "characters": 12675
+  },
+  {
+    "path": "core/app/021-app-public-actions-bound-to-window.js",
+    "owner": "core/app",
+    "heading": "APP \u2014 public actions (bound to window)",
+    "start": 186494,
+    "end": 226393,
+    "characters": 39899
+  },
+  {
+    "path": "components/navigation/022-desktop-sidebar-resizing.js",
+    "owner": "components/navigation",
+    "heading": "DESKTOP SIDEBAR RESIZING",
+    "start": 226393,
+    "end": 229825,
+    "characters": 3432
+  },
+  {
+    "path": "pages/statistics/023-v16-features-backups-themes-stopwatch-mal-link-stats.js",
+    "owner": "pages/statistics",
+    "heading": "V16 FEATURES: BACKUPS, THEMES, STOPWATCH, MAL LINK, STATS",
+    "start": 229825,
+    "end": 259007,
+    "characters": 29182
+  },
+  {
+    "path": "pages/statistics/024-v28-analytics-cover-timeline-helpers.js",
+    "owner": "pages/statistics",
+    "heading": "V28 ANALYTICS / COVER / TIMELINE HELPERS",
+    "start": 259007,
+    "end": 279850,
+    "characters": 20843
+  },
+  {
+    "path": "legacy/025-v40-multi-service-exchange-hub-custom-import-confirmation.js",
+    "owner": "legacy",
+    "heading": "v40: Multi-service exchange hub + custom import confirmation",
+    "start": 279850,
+    "end": 292476,
+    "characters": 12626
+  },
+  {
+    "path": "features/import-export/026-v37-simkl-json-bulk-library-tools-activity-undo.js",
+    "owner": "features/import-export",
+    "heading": "v37: Simkl JSON + bulk library tools + activity + undo/redo",
+    "start": 292476,
+    "end": 296680,
+    "characters": 4204
+  },
+  {
+    "path": "features/rewatch/027-v81-repeat-consumption-rewatch-reread.js",
+    "owner": "features/rewatch",
+    "heading": "MediaFlow v81 \u2014 Repeat Consumption (Rewatch / Reread)",
+    "start": 296680,
+    "end": 299310,
+    "characters": 2630
+  },
+  {
+    "path": "features/rewatch/028-v82-per-title-rewatch-reread-visibility.js",
+    "owner": "features/rewatch",
+    "heading": "MediaFlow v82 \u2014 per-title Rewatch / Reread visibility",
+    "start": 299310,
+    "end": 316680,
+    "characters": 17370
+  },
+  {
+    "path": "features/themes/029-v63-original-50-theme-collection.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v63 \u2014 original 50 Theme Collection",
+    "start": 316680,
+    "end": 338075,
+    "characters": 21395
+  },
+  {
+    "path": "features/themes/030-v133-14-additional-built-in-themes.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v133 \u2014 14 additional built-in MediaFlow themes.",
+    "start": 338075,
+    "end": 346222,
+    "characters": 8147
+  },
+  {
+    "path": "features/themes/031-v55-platform-themes.js",
+    "owner": "features/themes",
+    "heading": "v55 Platform Themes",
+    "start": 346222,
+    "end": 376297,
+    "characters": 30075
+  },
+  {
+    "path": "pages/statistics/032-v44-stopwatch-add-time-ratings-covers-xp-timeline.js",
+    "owner": "pages/statistics",
+    "heading": "V44 \u2014 STOPWATCH ADD TIME / RATINGS / COVERS / XP / TIMELINE",
+    "start": 376297,
+    "end": 399097,
+    "characters": 22800
+  },
+  {
+    "path": "services/cloud-sync/033-v46-progression-cloud-sync-reliability.js",
+    "owner": "services/cloud-sync",
+    "heading": "v46 \u2014 Progression + Cloud Sync Reliability",
+    "start": 399097,
+    "end": 410312,
+    "characters": 11215
+  },
+  {
+    "path": "components/cover/034-v50-cover-forward-ui-simkl-export.js",
+    "owner": "components/cover",
+    "heading": "v50 \u2014 Cover-forward UI + Simkl export",
+    "start": 410312,
+    "end": 421978,
+    "characters": 11666
+  },
+  {
+    "path": "core/rendering/035-render-loop-init.js",
+    "owner": "core/rendering",
+    "heading": "RENDER LOOP + INIT",
+    "start": 421978,
+    "end": 424279,
+    "characters": 2301
+  },
+  {
+    "path": "features/themes/036-v101-full-style-themes-runtime-scope-fix.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v101: Full Style Themes runtime scope fix",
+    "start": 424279,
+    "end": 436480,
+    "characters": 12201
+  },
+  {
+    "path": "features/xp/037-v120-completion-xp-progression-integrity.js",
+    "owner": "features/xp",
+    "heading": "MediaFlow v120 \u2014 Completion XP + Progression Integrity",
+    "start": 436480,
+    "end": 453032,
+    "characters": 16552
+  },
+  {
+    "path": "features/rewatch/038-v121-rewatch-reread-xp.js",
+    "owner": "features/rewatch",
+    "heading": "MediaFlow v121 \u2014 Rewatch / Reread XP",
+    "start": 453032,
+    "end": 469810,
+    "characters": 16778
+  },
+  {
+    "path": "pages/dashboard/039-v123-dashboard-rating-queue-rating-xp.js",
+    "owner": "pages/dashboard",
+    "heading": "MediaFlow v123 \u2014 Dashboard Rating Queue + Rating XP",
+    "start": 469810,
+    "end": 482204,
+    "characters": 12394
+  },
+  {
+    "path": "pages/statistics/040-v129-restored-v1-statistics.js",
+    "owner": "pages/statistics",
+    "heading": "MediaFlow v129 \u2014 Restored v1 Statistics",
+    "start": 482204,
+    "end": 491552,
+    "characters": 9348
+  },
+  {
+    "path": "services/cloud-sync/041-v134-calculate-xp-sync-now-performance.js",
+    "owner": "services/cloud-sync",
+    "heading": "MediaFlow v134 \u2014 Calculate XP + Sync Now Performance",
+    "start": 491552,
+    "end": 507114,
+    "characters": 15562
+  },
+  {
+    "path": "pages/dashboard/042-v136-on-this-day-lifecycle-events.js",
+    "owner": "pages/dashboard",
+    "heading": "MediaFlow v136 \u2014 On This Day lifecycle events",
+    "start": 507114,
+    "end": 514632,
+    "characters": 7518
+  },
+  {
+    "path": "pages/history/043-v137-automatic-start-date-from-genuine-history.js",
+    "owner": "pages/history",
+    "heading": "MediaFlow v137 \u2014 Automatic Start Date from genuine History",
+    "start": 514632,
+    "end": 521388,
+    "characters": 6756
+  },
+  {
+    "path": "pages/personal-order/044-v138-personal-order.js",
+    "owner": "pages/personal-order",
+    "heading": "MediaFlow v138 \u2014 Personal Order",
+    "start": 521388,
+    "end": 557402,
+    "characters": 36014
+  },
+  {
+    "path": "pages/personal-order/045-v139-prioritize-personal-order-for-recommendations.js",
+    "owner": "pages/personal-order",
+    "heading": "MediaFlow v139 \u2014 Prioritize Personal Order for recommendations",
+    "start": 557402,
+    "end": 559463,
+    "characters": 2061
+  },
+  {
+    "path": "components/pagination/046-v141-fast-order-pagination-active-page-fix.js",
+    "owner": "components/pagination",
+    "heading": "MediaFlow v141 \u2014 Fast Order pagination + active-page fix",
+    "start": 559463,
+    "end": 565264,
+    "characters": 5801
+  },
+  {
+    "path": "components/cover/047-v142-order-import-export-clear-recovery.js",
+    "owner": "components/cover",
+    "heading": "MediaFlow v142 \u2014 Order import/export + clear recovery",
+    "start": 565264,
+    "end": 578575,
+    "characters": 13311
+  },
+  {
+    "path": "components/batch-toolbar/048-v143-library-bulk-action-confirmations.js",
+    "owner": "components/batch-toolbar",
+    "heading": "MediaFlow v143 \u2014 Library bulk-action confirmations",
+    "start": 578575,
+    "end": 586172,
+    "characters": 7597
+  },
+  {
+    "path": "components/category/049-v144-reusable-category-icon-color-palettes.js",
+    "owner": "components/category",
+    "heading": "MediaFlow v144 \u2014 Reusable Category Icon & Color Palettes",
+    "start": 586172,
+    "end": 605237,
+    "characters": 19065
+  },
+  {
+    "path": "features/themes/050-v145-dynamic-cover-based-theme-accent.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v145 \u2014 Dynamic cover-based theme accent",
+    "start": 605237,
+    "end": 616053,
+    "characters": 10816
+  },
+  {
+    "path": "features/themes/051-v146-dynamic-full-cover-theme.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v146 \u2014 Dynamic Full Cover Theme",
+    "start": 616053,
+    "end": 628178,
+    "characters": 12125
+  },
+  {
+    "path": "pages/settings/052-v147-dynamic-settings-version-copyright-footer.js",
+    "owner": "pages/settings",
+    "heading": "MediaFlow v147 \u2014 Dynamic Settings version/copyright footer",
+    "start": 628178,
+    "end": 629395,
+    "characters": 1217
+  },
+  {
+    "path": "features/backup/053-v148-complete-data-backup-audit-full-restore.js",
+    "owner": "features/backup",
+    "heading": "MediaFlow v148 \u2014 Complete-data Backup Audit + Full Restore",
+    "start": 629395,
+    "end": 642706,
+    "characters": 13311
+  },
+  {
+    "path": "features/xp/054-v149-day-streak-xp-multiplier.js",
+    "owner": "features/xp",
+    "heading": "MediaFlow v149 \u2014 Day-Streak XP Multiplier",
+    "start": 642706,
+    "end": 657693,
+    "characters": 14987
+  },
+  {
+    "path": "features/xp/055-v150-v149-streak-xp-performance-fix.js",
+    "owner": "features/xp",
+    "heading": "MediaFlow v150 \u2014 v149 Streak XP Performance Fix",
+    "start": 657693,
+    "end": 668645,
+    "characters": 10952
+  },
+  {
+    "path": "features/backup/056-v152-automatic-backup-full-backup.js",
+    "owner": "features/backup",
+    "heading": "MediaFlow v152 \u2014 Automatic Backup = Full Backup",
+    "start": 668645,
+    "end": 669774,
+    "characters": 1129
+  },
+  {
+    "path": "pages/old-system/057-v153-old-system.js",
+    "owner": "pages/old-system",
+    "heading": "MediaFlow v153 \u2014 Old System",
+    "start": 669774,
+    "end": 700283,
+    "characters": 30509
+  },
+  {
+    "path": "services/cloud-sync/058-v155-complete-cloud-state-full-sync-now.js",
+    "owner": "services/cloud-sync",
+    "heading": "MediaFlow v155 \u2014 Complete Cloud State + Full Sync Now",
+    "start": 700283,
+    "end": 716612,
+    "characters": 16329
+  },
+  {
+    "path": "pages/library/059-v156-fast-order-large-library-performance-engine.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v156 \u2014 Fast Order / Large-Library Performance Engine",
+    "start": 716612,
+    "end": 735448,
+    "characters": 18836
+  },
+  {
+    "path": "legacy/060-v157-direct-numeric-ordering.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v157 \u2014 Direct Numeric Ordering",
+    "start": 735448,
+    "end": 741602,
+    "characters": 6154
+  },
+  {
+    "path": "components/cover/061-v158-complete-import-metadata-safe-cover-repair.js",
+    "owner": "components/cover",
+    "heading": "MediaFlow v158 \u2014 Complete Import Metadata + Safe Cover Repair",
+    "start": 741602,
+    "end": 789455,
+    "characters": 47853
+  },
+  {
+    "path": "pages/dashboard/062-v159-rotating-on-this-day-adaptive-cover-themes.js",
+    "owner": "pages/dashboard",
+    "heading": "MediaFlow v159 \u2014 Rotating On This Day + Adaptive Cover Themes",
+    "start": 789455,
+    "end": 816252,
+    "characters": 26797
+  },
+  {
+    "path": "features/themes/063-v160-reliable-dynamic-cover-theme.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v160 \u2014 Reliable Dynamic Cover Theme",
+    "start": 816252,
+    "end": 826881,
+    "characters": 10629
+  },
+  {
+    "path": "components/navigation/064-v161-about-custom-navigation-data-audit.js",
+    "owner": "components/navigation",
+    "heading": "MediaFlow v161 \u2014 About + Custom Navigation + Data Audit",
+    "start": 826881,
+    "end": 855311,
+    "characters": 28430
+  },
+  {
+    "path": "components/cover/065-v162-user-controlled-adaptive-cover-collections.js",
+    "owner": "components/cover",
+    "heading": "MediaFlow v162 \u2014 User-controlled adaptive cover collections",
+    "start": 855311,
+    "end": 884799,
+    "characters": 29488
+  },
+  {
+    "path": "features/themes/066-v163-dynamic-cover-theme-rotation-control.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v163 \u2014 Dynamic Cover Theme rotation control",
+    "start": 884799,
+    "end": 891809,
+    "characters": 7010
+  },
+  {
+    "path": "features/themes/067-v164-simkl-full-style-theme.js",
+    "owner": "features/themes",
+    "heading": "MediaFlow v164 \u2014 Simkl Full Style Theme",
+    "start": 891809,
+    "end": 913085,
+    "characters": 21276
+  },
+  {
+    "path": "features/scheduler/068-v166-automatic-seasonal-fresh-episode-detection.js",
+    "owner": "features/scheduler",
+    "heading": "MediaFlow v166 \u2014 Automatic Seasonal Fresh-Episode Detection",
+    "start": 913085,
+    "end": 936130,
+    "characters": 23045
+  },
+  {
+    "path": "features/scheduler/069-v167-editable-system-respect-xp.js",
+    "owner": "features/scheduler",
+    "heading": "MediaFlow v167 \u2014 Editable System Respect XP",
+    "start": 936130,
+    "end": 953066,
+    "characters": 16936
+  },
+  {
+    "path": "pages/settings/070-v168-settings-cleanup.js",
+    "owner": "pages/settings",
+    "heading": "MediaFlow v168 \u2014 Settings cleanup",
+    "start": 953066,
+    "end": 954146,
+    "characters": 1080
+  },
+  {
+    "path": "features/import-export/071-v169-advanced-import-export-media-services.js",
+    "owner": "features/import-export",
+    "heading": "MediaFlow v169 \u2014 Advanced Import / Export \u2014 Media Services",
+    "start": 954146,
+    "end": 982328,
+    "characters": 28182
+  },
+  {
+    "path": "features/import-export/072-v170-advanced-import-type-exclusions.js",
+    "owner": "features/import-export",
+    "heading": "MediaFlow v170 \u2014 Advanced import type exclusions",
+    "start": 982328,
+    "end": 983602,
+    "characters": 1274
+  },
+  {
+    "path": "components/category/073-v171-category-recovery-default-identity.js",
+    "owner": "components/category",
+    "heading": "MediaFlow v171 \u2014 Category Recovery & Default Identity",
+    "start": 983602,
+    "end": 1000736,
+    "characters": 17134
+  },
+  {
+    "path": "legacy/074-v172-unified-media-services-import-interface.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v172 \u2014 Unified Media Services Import Interface",
+    "start": 1000736,
+    "end": 1013195,
+    "characters": 12459
+  },
+  {
+    "path": "components/pagination/075-order-edit-buttons-optional-ordered-title-pagination.js",
+    "owner": "components/pagination",
+    "heading": "ORDER \u2014 Edit buttons + optional ordered-title pagination",
+    "start": 1013195,
+    "end": 1021690,
+    "characters": 8495
+  },
+  {
+    "path": "pages/old-system/076-old-system-date-view.js",
+    "owner": "pages/old-system",
+    "heading": "OLD SYSTEM \u2014 Date View",
+    "start": 1021690,
+    "end": 1029101,
+    "characters": 7411
+  },
+  {
+    "path": "features/themes/077-themes-3-new-adaptive-cover-collections.js",
+    "owner": "features/themes",
+    "heading": "THEMES \u2014 3 new adaptive cover collections",
+    "start": 1029101,
+    "end": 1044072,
+    "characters": 14971
+  },
+  {
+    "path": "services/cloud-sync/078-v173-persistence-merge-sync-now-backups.js",
+    "owner": "services/cloud-sync",
+    "heading": "v173 persistence / merge / Sync Now / backups",
+    "start": 1044072,
+    "end": 1051459,
+    "characters": 7387
+  },
+  {
+    "path": "pages/dashboard/079-v174-edit-recommended-title-from-dashboard.js",
+    "owner": "pages/dashboard",
+    "heading": "MediaFlow v174 \u2014 Edit Recommended Title From Dashboard",
+    "start": 1051459,
+    "end": 1055325,
+    "characters": 3866
+  },
+  {
+    "path": "legacy/080-v175.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v175",
+    "start": 1055325,
+    "end": 1060899,
+    "characters": 5574
+  },
+  {
+    "path": "components/pagination/081-ordered-title-pagination-amount.js",
+    "owner": "components/pagination",
+    "heading": "Ordered-title pagination amount",
+    "start": 1060899,
+    "end": 1062587,
+    "characters": 1688
+  },
+  {
+    "path": "legacy/082-dedicated-order-export-import.js",
+    "owner": "legacy",
+    "heading": "Dedicated Order export/import",
+    "start": 1062587,
+    "end": 1063852,
+    "characters": 1265
+  },
+  {
+    "path": "pages/batch-log/083-batch-log-full-library-browser-filters.js",
+    "owner": "pages/batch-log",
+    "heading": "BATCH LOG \u2014 full Library browser filters",
+    "start": 1063852,
+    "end": 1078573,
+    "characters": 14721
+  },
+  {
+    "path": "services/cloud-sync/084-v175-persistence-merge-sync-now-backup.js",
+    "owner": "services/cloud-sync",
+    "heading": "v175 persistence / merge / Sync Now / backup",
+    "start": 1078573,
+    "end": 1084302,
+    "characters": 5729
+  },
+  {
+    "path": "pages/library/085-v176-dense-library-rows-rich-imported-metadata.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v176 \u2014 Dense Library Rows + Rich Imported Metadata",
+    "start": 1084302,
+    "end": 1094548,
+    "characters": 10246
+  },
+  {
+    "path": "pages/library/086-rich-library-row-presentation.js",
+    "owner": "pages/library",
+    "heading": "Rich Library row presentation",
+    "start": 1094548,
+    "end": 1098462,
+    "characters": 3914
+  },
+  {
+    "path": "services/cloud-sync/087-cloud-merge-preservation.js",
+    "owner": "services/cloud-sync",
+    "heading": "Cloud merge preservation",
+    "start": 1098462,
+    "end": 1099509,
+    "characters": 1047
+  },
+  {
+    "path": "legacy/088-media-service-exchange-export.js",
+    "owner": "legacy",
+    "heading": "Media-service exchange export",
+    "start": 1099509,
+    "end": 1100454,
+    "characters": 945
+  },
+  {
+    "path": "legacy/089-sync-verification.js",
+    "owner": "legacy",
+    "heading": "Sync verification",
+    "start": 1100454,
+    "end": 1102290,
+    "characters": 1836
+  },
+  {
+    "path": "features/backup/090-full-backup-automatic-backup.js",
+    "owner": "features/backup",
+    "heading": "Full Backup / Automatic Backup",
+    "start": 1102290,
+    "end": 1104134,
+    "characters": 1844
+  },
+  {
+    "path": "pages/library/091-v177-adjustable-library-order-cover-size.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v177 \u2014 Adjustable Library & Order Cover Size",
+    "start": 1104134,
+    "end": 1108821,
+    "characters": 4687
+  },
+  {
+    "path": "services/cloud-sync/092-persistence-cloud-sync-now-backup.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / cloud / Sync Now / backup",
+    "start": 1108821,
+    "end": 1112810,
+    "characters": 3989
+  },
+  {
+    "path": "legacy/093-v178-editable-rich-imported-metadata.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v178 \u2014 Editable Rich Imported Metadata",
+    "start": 1112810,
+    "end": 1119330,
+    "characters": 6520
+  },
+  {
+    "path": "pages/library/094-add-rich-fields-to-the-normal-library-editor.js",
+    "owner": "pages/library",
+    "heading": "Add rich fields to the normal Library editor",
+    "start": 1119330,
+    "end": 1123785,
+    "characters": 4455
+  },
+  {
+    "path": "legacy/095-protect-manually-edited-fields-from-future-imports.js",
+    "owner": "legacy",
+    "heading": "Protect manually edited fields from future imports",
+    "start": 1123785,
+    "end": 1126242,
+    "characters": 2457
+  },
+  {
+    "path": "services/cloud-sync/096-protected-sync-now-verification.js",
+    "owner": "services/cloud-sync",
+    "heading": "Protected Sync Now verification",
+    "start": 1126242,
+    "end": 1127325,
+    "characters": 1083
+  },
+  {
+    "path": "features/backup/097-full-backup-automatic-backup-2.js",
+    "owner": "features/backup",
+    "heading": "Full Backup / Automatic Backup",
+    "start": 1127325,
+    "end": 1129213,
+    "characters": 1888
+  },
+  {
+    "path": "features/logging/098-v179-dual-logging-modes.js",
+    "owner": "features/logging",
+    "heading": "MediaFlow v179 \u2014 Dual Logging Modes",
+    "start": 1129213,
+    "end": 1138127,
+    "characters": 8914
+  },
+  {
+    "path": "features/logging/099-normal-logging-ui.js",
+    "owner": "features/logging",
+    "heading": "Normal logging UI",
+    "start": 1138127,
+    "end": 1145919,
+    "characters": 7792
+  },
+  {
+    "path": "pages/batch-log/100-batch-log-state-ui.js",
+    "owner": "pages/batch-log",
+    "heading": "Batch Log state + UI",
+    "start": 1145919,
+    "end": 1157094,
+    "characters": 11175
+  },
+  {
+    "path": "services/cloud-sync/101-persistence-cloud-sync-now-backup-2.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / cloud / Sync Now / backup",
+    "start": 1157094,
+    "end": 1161028,
+    "characters": 3934
+  },
+  {
+    "path": "legacy/102-v180.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v180",
+    "start": 1161028,
+    "end": 1171602,
+    "characters": 10574
+  },
+  {
+    "path": "pages/dashboard/103-dashboard-controls-beside-the-recommended-title.js",
+    "owner": "pages/dashboard",
+    "heading": "Dashboard controls beside the recommended title",
+    "start": 1171602,
+    "end": 1173266,
+    "characters": 1664
+  },
+  {
+    "path": "features/scheduler/104-v180-system-respect-xp.js",
+    "owner": "features/scheduler",
+    "heading": "v180 SYSTEM RESPECT XP",
+    "start": 1173266,
+    "end": 1180428,
+    "characters": 7162
+  },
+  {
+    "path": "legacy/105-historical-merge-cache-audit-compatibility.js",
+    "owner": "legacy",
+    "heading": "Historical merge + cache/audit compatibility",
+    "start": 1180428,
+    "end": 1184598,
+    "characters": 4170
+  },
+  {
+    "path": "features/backup/106-full-backup-automatic-backup-3.js",
+    "owner": "features/backup",
+    "heading": "Full Backup / Automatic Backup",
+    "start": 1184598,
+    "end": 1186635,
+    "characters": 2037
+  },
+  {
+    "path": "legacy/107-v181.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v181",
+    "start": 1186635,
+    "end": 1191786,
+    "characters": 5151
+  },
+  {
+    "path": "features/logging/108-default-logging-mode.js",
+    "owner": "features/logging",
+    "heading": "Default Logging Mode",
+    "start": 1191786,
+    "end": 1196314,
+    "characters": 4528
+  },
+  {
+    "path": "components/cover/109-unlimited-per-surface-cover-size-manager.js",
+    "owner": "components/cover",
+    "heading": "Unlimited per-surface Cover Size Manager",
+    "start": 1196314,
+    "end": 1201971,
+    "characters": 5657
+  },
+  {
+    "path": "pages/library/110-library-display-modes.js",
+    "owner": "pages/library",
+    "heading": "Library Display Modes",
+    "start": 1201971,
+    "end": 1202974,
+    "characters": 1003
+  },
+  {
+    "path": "pages/library/111-classic-dynamic-library-switch.js",
+    "owner": "pages/library",
+    "heading": "Classic / Dynamic Library switch",
+    "start": 1202974,
+    "end": 1206562,
+    "characters": 3588
+  },
+  {
+    "path": "pages/library/112-dynamic-library-rendering.js",
+    "owner": "pages/library",
+    "heading": "Dynamic Library rendering",
+    "start": 1206562,
+    "end": 1222360,
+    "characters": 15798
+  },
+  {
+    "path": "components/title-details/113-global-title-details-popup.js",
+    "owner": "components/title-details",
+    "heading": "Global Title Details Popup",
+    "start": 1222360,
+    "end": 1241611,
+    "characters": 19251
+  },
+  {
+    "path": "pages/settings/114-settings-ui.js",
+    "owner": "pages/settings",
+    "heading": "Settings UI",
+    "start": 1241611,
+    "end": 1249111,
+    "characters": 7500
+  },
+  {
+    "path": "services/cloud-sync/115-persistence-merge-sync-now-full-backup.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / merge / Sync Now / Full Backup",
+    "start": 1249111,
+    "end": 1256163,
+    "characters": 7052
+  },
+  {
+    "path": "pages/library/116-v182-does-not-duplicate-the-library-configuration-introduced.js",
+    "owner": "pages/library",
+    "heading": "v182 does not duplicate the Library configuration introduced in v181.",
+    "start": 1256163,
+    "end": 1260078,
+    "characters": 3915
+  },
+  {
+    "path": "legacy/117-v183.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v183",
+    "start": 1260078,
+    "end": 1269318,
+    "characters": 9240
+  },
+  {
+    "path": "pages/settings/118-v184-settings-readability-metadata.js",
+    "owner": "pages/settings",
+    "heading": "MediaFlow v184 \u2014 Settings readability metadata",
+    "start": 1269318,
+    "end": 1270786,
+    "characters": 1468
+  },
+  {
+    "path": "legacy/119-v186.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v186",
+    "start": 1270786,
+    "end": 1297264,
+    "characters": 26478
+  },
+  {
+    "path": "legacy/120-v188.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v188",
+    "start": 1297264,
+    "end": 1320786,
+    "characters": 23522
+  },
+  {
+    "path": "pages/library/121-v189-library-sorting-unfinished-filter-dynamic.js",
+    "owner": "pages/library",
+    "heading": "MediaFlow v189 \u2014 Library sorting, unfinished filter, Dynamic",
+    "start": 1320786,
+    "end": 1325042,
+    "characters": 4256
+  },
+  {
+    "path": "pages/library/122-v53-cached-library-filtering-now-understands-the-v189.js",
+    "owner": "pages/library",
+    "heading": "v53 cached Library filtering now understands the v189 filter + sorts.",
+    "start": 1325042,
+    "end": 1338068,
+    "characters": 13026
+  },
+  {
+    "path": "services/cloud-sync/123-v189-cloud-backup-audit.js",
+    "owner": "services/cloud-sync",
+    "heading": "v189 cloud / backup audit.",
+    "start": 1338068,
+    "end": 1341217,
+    "characters": 3149
+  },
+  {
+    "path": "components/batch-toolbar/124-v190-shared-normal-dynamic-library-batch-toolbar.js",
+    "owner": "components/batch-toolbar",
+    "heading": "MediaFlow v190 \u2014 Shared Normal / Dynamic Library batch toolbar",
+    "start": 1341217,
+    "end": 1344150,
+    "characters": 2933
+  },
+  {
+    "path": "legacy/125-v190-is-a-rendering-workflow-parity-release-it.js",
+    "owner": "legacy",
+    "heading": "v190 is a rendering/workflow parity release. It adds no new persistent",
+    "start": 1344150,
+    "end": 1345694,
+    "characters": 1544
+  },
+  {
+    "path": "components/cover/126-v191-clean-covers-restorable-deleted-titles.js",
+    "owner": "components/cover",
+    "heading": "MediaFlow v191 \u2014 Clean Covers + Restorable Deleted Titles",
+    "start": 1345694,
+    "end": 1349831,
+    "characters": 4137
+  },
+  {
+    "path": "legacy/127-persistent-deleted-title-snapshots.js",
+    "owner": "legacy",
+    "heading": "Persistent deleted-title snapshots",
+    "start": 1349831,
+    "end": 1358216,
+    "characters": 8385
+  },
+  {
+    "path": "services/cloud-sync/128-persistence-cloud-backup.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / cloud / backup",
+    "start": 1358216,
+    "end": 1363318,
+    "characters": 5102
+  },
+  {
+    "path": "legacy/129-v192.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v192",
+    "start": 1363318,
+    "end": 1365096,
+    "characters": 1778
+  },
+  {
+    "path": "pages/dashboard/130-missing-covers-queue.js",
+    "owner": "pages/dashboard",
+    "heading": "Missing Covers queue",
+    "start": 1365096,
+    "end": 1373113,
+    "characters": 8017
+  },
+  {
+    "path": "pages/settings/131-settings-ui-2.js",
+    "owner": "pages/settings",
+    "heading": "Settings UI",
+    "start": 1373113,
+    "end": 1374847,
+    "characters": 1734
+  },
+  {
+    "path": "services/cloud-sync/132-persistence-cloud-backup-2.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / cloud / backup",
+    "start": 1374847,
+    "end": 1380172,
+    "characters": 5325
+  },
+  {
+    "path": "legacy/133-v194.js",
+    "owner": "legacy",
+    "heading": "MediaFlow v194",
+    "start": 1380172,
+    "end": 1391232,
+    "characters": 11060
+  },
+  {
+    "path": "features/backup/134-v196-settings-presets.js",
+    "owner": "features/backup",
+    "heading": "MediaFlow v196 \u2014 Settings Presets",
+    "start": 1391232,
+    "end": 1401700,
+    "characters": 10468
+  },
+  {
+    "path": "components/category/135-v197-category-clear-controls.js",
+    "owner": "components/category",
+    "heading": "MediaFlow v197 \u2014 Category Clear Controls",
+    "start": 1401700,
+    "end": 1408164,
+    "characters": 6464
+  },
+  {
+    "path": "components/cover/136-v200-category-default-missing-covers.js",
+    "owner": "components/cover",
+    "heading": "MediaFlow v200 \u2014 Category Default Missing Covers",
+    "start": 1408164,
+    "end": 1414732,
+    "characters": 6568
+  },
+  {
+    "path": "components/category/137-category-editor-missing-default-cover-url.js",
+    "owner": "components/category",
+    "heading": "Category editor: Missing default cover URL",
+    "start": 1414732,
+    "end": 1417173,
+    "characters": 2441
+  },
+  {
+    "path": "components/cover/138-v144-s-save-handler-is-reproduced-with-the.js",
+    "owner": "components/cover",
+    "heading": "v144's save handler is reproduced with the v200 category cover field so the",
+    "start": 1417173,
+    "end": 1419439,
+    "characters": 2266
+  },
+  {
+    "path": "pages/settings/139-settings-switch.js",
+    "owner": "pages/settings",
+    "heading": "Settings switch",
+    "start": 1419439,
+    "end": 1421796,
+    "characters": 2357
+  },
+  {
+    "path": "services/cloud-sync/140-persistence-cloud-full-backup.js",
+    "owner": "services/cloud-sync",
+    "heading": "Persistence / Cloud / Full Backup",
+    "start": 1421796,
+    "end": 1429351,
+    "characters": 7555
+  },
+  {
+    "path": "pages/settings/141-v194-owns-the-canonical-category-icon-settings-object.js",
+    "owner": "pages/settings",
+    "heading": "v194 owns the canonical category-icon settings object. Extend that object",
+    "start": 1429351,
+    "end": 1444873,
+    "characters": 15522
+  },
+  {
+    "slot": "runtime_extensions",
+    "owner": "runtime",
+    "heading": "v219 runtime extensions injected inside app scope"
+  },
+  {
+    "path": "core/runtime/999-close-app.js",
+    "owner": "core/runtime",
+    "heading": "Close legacy MediaFlow application scope"
+  }
+]
