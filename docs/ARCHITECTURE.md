@@ -388,16 +388,3 @@ The project root `favicon.ico` is the browser-facing canonical favicon. Normal P
 `scripts/pwa.py` remains the canonical worker generator. Starting with v247 it precaches app-shell assets independently instead of using one rejecting `cache.addAll(APP_SHELL)` transaction. `sw.js` exposes `GET_DIAGNOSTICS` and `RETRY_APP_SHELL_CACHE` so the running MediaFlow UI can inspect and repair the release cache without touching user data.
 
 `assets/css/116-v247-pwa-reliability-diagnostics.css` is a presentation-only layer for diagnostics and keeps the v246 tablet/mobile/tight-width behavior intact.
-
-## v260 React-era presentation architecture
-
-MediaFlow v260 begins a progressive presentation-layer migration to React + TypeScript + Tailwind + Vite while retaining the mature vanilla runtime as the compatibility/data engine. This avoids a high-risk one-release rewrite of cloud sync, backups, imports, scheduler logic, XP, History, PWA and hundreds of accumulated behaviors.
-
-- `src-v260/` contains maintainable React/TypeScript/Tailwind source.
-- `vite.v260.config.ts` defines the future component build pipeline.
-- `assets/css/127-v260-react-redesign.css` is the prebuilt zero-config design layer.
-- `assets/js/mediaflow-v260-react-ui.js` is the deployable React application chrome.
-- `src/js/components/194-v260-react-redesign-history.js` is the compatibility bridge and unified History runtime.
-- The deployable root remains static GitHub Pages output; no server/build step is required after extracting the ZIP.
-
-New UI work should prefer reusable v260 primitives/components and progressively move view ownership into React without changing established persistence schemas unless a data feature genuinely requires it.
