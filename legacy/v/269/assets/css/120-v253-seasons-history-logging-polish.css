@@ -1,0 +1,51 @@
+/* MediaFlow v253 — Seasons UI / logging shortcut / History batch tools */
+
+/* Title Details gained enough content in v252 that the v232 desktop
+   overflow:hidden rule could make lower fields unreachable. Keep the hero
+   fixed while the details body owns the scroll area. */
+@media (min-width:900px){
+  .v181-title-details-modal{display:grid!important;grid-template-rows:auto minmax(0,1fr)!important;overflow:hidden!important;min-height:0!important}
+  .v181-title-details-body{min-height:0!important;overflow:auto!important;overscroll-behavior:contain;padding-bottom:20px!important;scrollbar-gutter:stable}
+}
+/* The season manager is a child workflow of Title Details and must always
+   stack above the details overlay (which is z-index 99990). */
+.v252-season-manager-overlay,.v253-season-manager-overlay{z-index:100120!important;padding:16px!important}
+.v252-season-manager{max-height:min(90vh,900px)!important;overscroll-behavior:contain}
+
+/* Last-progress logging: do not squeeze the Seasons View card into the same
+   flex row as Library title + progress + Add. */
+.v253-log-title-builder{display:grid!important;grid-template-columns:minmax(220px,1fr) minmax(165px,220px) auto!important;gap:10px!important;align-items:end!important;margin-bottom:10px!important}
+.v253-log-title-builder>#entry-title{min-width:0!important;width:100%!important}
+.v253-log-title-builder>.v179-inline-progress{width:100%!important;min-width:0!important;max-width:none!important}
+.v253-log-title-builder>.btn{min-height:42px!important;white-space:nowrap!important}
+.v253-log-season-box{width:100%!important;margin:0 0 12px!important;padding:14px!important;background:linear-gradient(135deg,color-mix(in srgb,var(--panel-raised) 94%,var(--flow) 6%),var(--panel))!important}
+.v253-log-season-box .v252-log-season-head{padding-bottom:11px;border-bottom:1px solid var(--border-soft)}
+.v253-log-season-box .v252-log-season-head b{font-size:14px}.v253-log-season-box .v252-log-season-head small{font-size:11px;line-height:1.45}
+.v253-log-season-box .v252-log-season-fields{grid-template-columns:minmax(220px,1.15fr) minmax(150px,.7fr) minmax(180px,.85fr)!important;gap:12px!important;margin-top:12px!important}
+.v253-log-season-box .v252-log-season-fields :is(select,input){min-height:43px!important}
+.v253-log-season-box .v252-log-season-calc{min-height:43px;justify-content:center;padding:9px 12px!important}
+
+.v253-log-recommended{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 12px;padding:11px 12px;border:1px solid color-mix(in srgb,var(--flow) 34%,var(--border-soft));border-radius:13px;background:color-mix(in srgb,var(--panel-raised) 91%,var(--flow) 9%)}
+.v253-log-recommended-copy{display:flex;align-items:center;gap:11px;min-width:0}.v253-log-recommended-copy>img,.v253-rec-fallback{width:42px;height:56px;border-radius:8px;flex:0 0 auto;object-fit:cover;border:1px solid var(--border-soft);background:var(--panel);display:grid;place-items:center;overflow:hidden}
+.v253-rec-fallback :is(.v144-cat-icon-img,.v144-cat-icon-emoji){max-width:26px;max-height:26px}.v253-log-recommended-copy>div{min-width:0;display:grid;gap:2px}.v253-log-recommended-kicker{font-size:9px;letter-spacing:.13em;color:var(--flow);font-weight:900}.v253-log-recommended-copy b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.v253-log-recommended-copy small{font-size:10.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v253-log-recommended>.btn{flex:0 0 auto;white-space:nowrap}
+
+/* History controls */
+.v253-history-toolbar{grid-template-columns:minmax(0,1fr) auto!important}.v253-history-toolbar-actions{display:flex;align-items:flex-end;gap:9px;flex-wrap:wrap;justify-content:flex-end}.v253-history-page-size{display:grid;grid-template-columns:auto 78px;gap:3px 7px;align-items:center;padding:7px 9px;border:1px solid var(--border-soft);border-radius:11px;background:var(--panel);min-height:43px}.v253-history-page-size>span{font-size:10px;font-weight:800;color:var(--text-dim);white-space:nowrap}.v253-history-page-size input{width:78px!important;min-height:30px!important;height:30px!important;padding:4px 7px!important;font-size:12px!important}.v253-history-page-size small{grid-column:1/-1;font-size:8.5px;color:var(--text-mute);line-height:1}
+.v253-history-batchbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:13px;background:color-mix(in srgb,var(--panel-raised) 88%,var(--panel))}.v253-history-batch-left,.v253-history-batch-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.v253-history-batch-left>span{font-size:11px;color:var(--text-dim);padding-left:2px}.v253-delete-visible{border-color:color-mix(in srgb,var(--overused) 58%,var(--border-soft))!important;background:transparent!important}
+.v253-history-card{padding:4px 14px!important}.v253-history-row{position:relative;align-items:center!important}.v253-history-row.is-selected{background:color-mix(in srgb,var(--flow) 8%,transparent);box-shadow:inset 3px 0 color-mix(in srgb,var(--flow) 75%,transparent)}
+.v253-history-check{width:28px;height:36px;display:grid;place-items:center;flex:0 0 28px;cursor:pointer}.v253-history-check input{position:absolute;opacity:0;pointer-events:none}.v253-history-check span{width:18px;height:18px;border-radius:6px;border:1px solid var(--border-soft);background:var(--panel);display:grid;place-items:center}.v253-history-check input:checked+span{background:var(--flow);border-color:var(--flow)}.v253-history-check input:checked+span:after{content:'✓';font-size:11px;font-weight:900;color:#071018}.v253-history-check input:focus-visible+span{outline:2px solid var(--flow);outline-offset:2px}
+.v253-history-row .hist-status{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.v253-history-row-actions{display:flex;gap:4px}
+.v253-history-confirm{text-align:center}.v253-history-confirm-icon{width:48px;height:48px;margin:0 auto 12px;border-radius:15px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--overused) 58%,var(--border-soft));background:color-mix(in srgb,var(--overused) 14%,var(--panel));color:var(--overused);font-size:21px;font-weight:900}.v253-history-confirm p{margin:0 0 12px;color:var(--text-dim);font-size:13px;line-height:1.6}.v253-history-confirm-note{text-align:left;padding:11px 12px;border:1px solid var(--border-soft);border-radius:11px;background:var(--panel-raised);color:var(--text-dim);font-size:11px;line-height:1.55}.v253-history-confirm .modal-actions{margin-top:16px}
+
+@media(max-width:900px){
+  .v253-history-toolbar{grid-template-columns:1fr!important}.v253-history-toolbar-actions{justify-content:stretch}.v253-history-toolbar-actions>*{flex:1 1 auto}.v253-history-page-size{flex:1 1 160px}
+}
+@media(max-width:760px){
+  .v253-log-title-builder{grid-template-columns:minmax(0,1fr) minmax(150px,.65fr)!important}.v253-log-title-builder>.btn{grid-column:1/-1;width:100%}.v253-log-season-box .v252-log-season-fields{grid-template-columns:1fr 1fr!important}.v253-log-season-box .v252-log-season-calc{grid-column:1/-1}.v253-log-recommended{align-items:stretch}.v253-log-recommended>.btn{align-self:center}.v253-history-row{align-items:flex-start!important}.v253-history-batchbar{align-items:stretch}.v253-history-batch-left,.v253-history-batch-actions{width:100%}.v253-history-batch-actions .btn{flex:1}
+}
+@media(max-width:620px){
+  .v253-log-title-builder{grid-template-columns:1fr!important}.v253-log-title-builder>*{grid-column:1!important}.v253-log-recommended{flex-direction:column}.v253-log-recommended>.btn{width:100%;align-self:stretch}.v253-log-season-box .v252-log-season-fields{grid-template-columns:1fr!important}.v253-log-season-box .v252-log-season-calc{grid-column:1!important}.v253-history-toolbar-actions{display:grid;grid-template-columns:1fr}.v253-history-page-size{width:100%;grid-template-columns:1fr 86px}.v253-history-toolbar-actions .btn{width:100%}.v253-history-card{padding:4px 9px!important}.v253-history-row{gap:9px!important;flex-wrap:wrap}.v253-history-check{width:24px;flex-basis:24px}.v253-history-row .hist-date{width:80px}.v253-history-row .hist-main{min-width:calc(100% - 165px)}.v253-history-row .hist-status{width:100%;padding-left:33px;align-items:flex-start}.v253-history-row-actions{width:100%}.v253-history-row-actions .btn{flex:1}.v253-history-batch-left .btn,.v253-history-batch-actions .btn{flex:1 1 130px}
+}
+@media(max-width:360px){
+  .v253-history-row .hist-date{width:72px;font-size:10.5px}.v253-history-row .hist-icon{width:32px;height:32px}.v253-history-row .hist-main{min-width:calc(100% - 142px)}.v253-history-batch-left,.v253-history-batch-actions{display:grid;grid-template-columns:1fr}.v253-history-batch-left>span{text-align:center}.v253-season-manager-overlay{padding:8px!important}
+}
