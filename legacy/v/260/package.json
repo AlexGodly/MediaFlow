@@ -1,0 +1,9 @@
+{
+  "name": "mediaflow-v260",
+  "private": true,
+  "version": "260.0.0",
+  "type": "module",
+  "scripts": {"build:v260":"vite build --config vite.v260.config.ts"},
+  "dependencies": {"@vitejs/plugin-react":"latest","vite":"latest","react":"latest","react-dom":"latest","lucide-react":"latest"},
+  "devDependencies": {"tailwindcss":"^4.1.10","@tailwindcss/vite":"latest","typescript":"^5.8.3"}
+}
