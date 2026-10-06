@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0e111a;
+    --panel: #161b29;
+    --panel-raised: #1d2436;
+    --border: #2a3149;
+    --border-soft: #232a40;
+    --text: #edeff6;
+    --text-dim: #9aa3bc;
+    --text-mute: #6a7290;
+    --flow: #e8a94a;
+    --font-display: ui-serif, Georgia, serif;
+    --font-body: ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .mf260-surface {
+    @apply rounded-mf border border-mf-border bg-mf-panel text-mf-text;
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+  }
+  .mf260-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mf-flow/40;
+  }
+}

@@ -1,0 +1,49 @@
+/* ============================================================
+   MediaFlow v232 — Performance / Settings / Title Details polish
+   ============================================================ */
+
+/* Follow-source cards no longer need an empty explanatory row. */
+.v230-follow-summary:empty{display:none!important}
+
+/* Title Details: wider + denser desktop layout so normal desktop viewports do
+   not require an internal modal scrollbar. */
+@media (min-width:900px){
+  .v181-title-details-overlay{padding:10px!important;align-items:center!important}
+  .v181-title-details-modal{
+    width:min(1380px,calc(100vw - 20px))!important;
+    max-height:calc(100vh - 20px)!important;
+    overflow:hidden!important;
+  }
+  .v181-title-hero{
+    grid-template-columns:auto minmax(0,1fr) auto!important;
+    gap:14px!important;
+    padding:12px 16px!important;
+  }
+  .v181-title-hero-cover,.v181-title-hero-placeholder{width:92px!important;height:130px!important}
+  .v181-title-hero-copy h2{font-size:23px!important}
+  .v181-title-hero-meta{margin-top:6px!important;gap:5px!important}
+  .v181-title-hero-meta .pill{font-size:10.5px!important;padding:4px 8px!important}
+  .v181-title-progress{margin-top:8px!important}
+  .v181-title-details-body{padding:10px 16px 12px!important}
+  .v181-detail-section-label{margin:3px 0 6px!important;font-size:9px!important}
+  .v181-detail-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}
+  .v181-detail-card{min-height:54px!important;padding:8px 10px!important;border-radius:9px!important}
+  .v181-detail-card small{font-size:8.5px!important;line-height:1.2!important}
+  .v181-detail-card b,.v181-detail-card.v181-wide b{margin-top:3px!important;font-size:11.5px!important;line-height:1.3!important}
+  .v181-detail-card.v181-wide{grid-column:span 2!important}
+  .v181-detail-actions{margin-top:8px!important;gap:7px!important}
+  .v181-title-details-modal .btn,.v181-title-details-modal .btn.btn-sm{min-height:34px!important;padding:6px 10px!important;font-size:11.5px!important}
+}
+
+/* Detail data cards are editable fields, not action buttons; keep them clean. */
+.v181-detail-card>.v225-btn-icon{display:none!important}
+.v181-detail-card{gap:0!important}
+
+/* Keep huge Library DOM updates cheap to paint where supported. */
+#view-root .item-row,#view-root .v181-cover-tile{content-visibility:auto;contain-intrinsic-size:auto 84px}
+
+/* In Title Details, only the four action buttons keep icons. Metadata/pills do
+   not show decorative category artwork. The hero cover itself is content, not
+   a button icon, and remains unchanged. */
+.v181-title-details-modal .v181-title-hero-meta .v144-cat-icon-img,
+.v181-title-details-modal .v181-title-hero-meta .v144-cat-icon-emoji{display:none!important}
