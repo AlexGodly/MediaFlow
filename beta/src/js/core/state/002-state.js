@@ -35,7 +35,7 @@ let S = {
 
   histFilters: {category:'all', type:'all', range:'all'},
   histPage: 0,
-  histPageSize: 50,
+  histPageSize: 10,
 
   showReasonDetail: false,
 

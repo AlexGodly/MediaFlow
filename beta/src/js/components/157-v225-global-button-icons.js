@@ -38,6 +38,7 @@ const V225_BUTTON_ICONS={
   pause:v225IconSvg('<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>'),
   stop:v225IconSvg('<circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9Z"/>'),
   stopwatch:v225IconSvg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 2v3"/>'),
+  clock:v225IconSvg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
   reset:v225IconSvg('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/>'),
   normalLibrary:v225IconSvg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
   dynamicLibrary:v225IconSvg('<path d="m12 3 1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8Z"/>'),

@@ -218,6 +218,7 @@ const DEFAULT_SETTINGS = {
   highlightDefaultCategories: true, // v171: visually identify categories whose IDs belong to MediaFlow defaults
   mediaServicesImportInterface: 'advanced', // v172: normal | advanced; advanced is recommended/default
   v175PageSizes: {library:50,orderLibrary:20,loggingLibrary:20,batchLibrary:20,modifiedAt:0}, // configurable pagination for Library surfaces
+  historyPageSize: 10, // v253: persistent History entries-per-page preference
   v177CoverSizes: {library:100,order:100,modifiedAt:0}, // percentage scale for Library / Order title covers
   v179LoggingModes: {single:'amount',batch:'amount',modifiedAt:0}, // legacy v179 preference container; v181 uses a single default + temporary per-page switches
   v181Logging: {defaultMode:'progress',modifiedAt:0}, // progress is recommended/default; page switches remain temporary

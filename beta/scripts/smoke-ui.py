@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v237.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v240.bundle.js'
 CSS222=ROOT/'assets/css/93-v222-dashboard-rendering-stability.css'
 CSS=ROOT/'assets/css/92-v221-settings-polish.css'
 CSS224=ROOT/'assets/css/94-v224-library-sorting-actions.css'
@@ -20,6 +20,8 @@ CSS234=ROOT/'assets/css/104-v234-dashboard-quick-inputs.css'
 CSS235=ROOT/'assets/css/105-v235-missing-cover-live-validation.css'
 CSS236=ROOT/'assets/css/106-v236-searchable-category-filter.css'
 CSS237=ROOT/'assets/css/107-v237-cross-surface-category-filters.css'
+CSS238=ROOT/'assets/css/108-v238-status-logging-responsive-device-mode.css'
+CSS239=ROOT/'assets/css/109-v239-batch-log-editor-responsive-cleanup.css'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
@@ -48,6 +50,8 @@ css234=CSS234.read_text(encoding='utf-8')
 css235=CSS235.read_text(encoding='utf-8')
 css236=CSS236.read_text(encoding='utf-8')
 css237=CSS237.read_text(encoding='utf-8')
+css238=CSS238.read_text(encoding='utf-8')
+css239=CSS239.read_text(encoding='utf-8')
 setup_js=r'''() => {
  const store={};
  const fakeStore={
@@ -88,6 +92,8 @@ with sync_playwright() as p:
     page.add_style_tag(content=css235)
     page.add_style_tag(content=css236)
     page.add_style_tag(content=css237)
+    page.add_style_tag(content=css238)
+    page.add_style_tag(content=css239)
     page.evaluate(setup_js)
     page.add_script_tag(content=bundle)
     page.wait_for_timeout(900)
@@ -324,13 +330,16 @@ with sync_playwright() as p:
     page.wait_for_timeout(220)
     result['batchSort']=page.locator('select[aria-label="Batch Log sort field"]').input_value() if page.locator('select[aria-label="Batch Log sort field"]').count() else ''
     result['batchSortDir']=' '.join(page.locator('button[aria-label="Batch Log sort direction"]').inner_text().split()) if page.locator('button[aria-label="Batch Log sort direction"]').count() else ''
-    # Start a Dashboard session and verify logging browser sorting is immediately visible.
+    # Start a Dashboard session, open the v238 lazy Library browser, then verify logging sorting.
     page.evaluate("()=>App.setView('dashboard')")
     page.wait_for_timeout(180)
     page.evaluate("()=>App.startSession()")
     page.wait_for_timeout(220)
     page.evaluate("()=>App.openLogForm()")
     page.wait_for_timeout(220)
+    if page.locator('.v238-log-library-summary').count():
+        page.locator('.v238-log-library-summary').click()
+        page.wait_for_timeout(160)
     result['dashboardLogSort']=page.locator('select[aria-label="Dashboard logging sort field"]').input_value() if page.locator('select[aria-label="Dashboard logging sort field"]').count() else ''
     result['dashboardLogSortDir']=' '.join(page.locator('button[aria-label="Dashboard logging sort direction"]').inner_text().split()) if page.locator('button[aria-label="Dashboard logging sort direction"]').count() else ''
     result['dashboardActionIcons']=page.evaluate("()=>document.querySelectorAll('.v224-rec-action svg').length")
@@ -664,7 +673,7 @@ with sync_playwright() as p:
     browser.close()
 
 required={
-    'runtimeVersion':237,
+    'runtimeVersion':240,
     'settingsRegistered':True,
     'settingsPage':True,
     'searchExists':True,

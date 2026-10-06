@@ -142,11 +142,18 @@ function v231ScheduleSettingsActiveNav(ensureVisible=false){
 
 const v231JumpSettingsBase=App.v221JumpSettings;
 App.v221JumpSettings=function(id){
-  V231_SETTINGS_JUMP_LOCK_ID=String(id||'');
+  const lockId=String(id||'');
+  V231_SETTINGS_JUMP_LOCK_ID=lockId;
   V231_SETTINGS_JUMP_LOCK_UNTIL=Date.now()+900;
   v231SetActiveSettingsNav(id,true);
   const result=v231JumpSettingsBase(id);
-  setTimeout(()=>{V231_SETTINGS_JUMP_LOCK_ID='';V231_SETTINGS_JUMP_LOCK_UNTIL=0;v231ScheduleSettingsActiveNav(true);},920);
+  // Only clear the jump lock that belongs to this navigation request. Older
+  // delayed callbacks must never cancel a newer section click after a resize
+  // or a quick sequence of horizontal Settings navigation taps.
+  setTimeout(()=>{
+    if(V231_SETTINGS_JUMP_LOCK_ID!==lockId)return;
+    V231_SETTINGS_JUMP_LOCK_ID='';V231_SETTINGS_JUMP_LOCK_UNTIL=0;v231ScheduleSettingsActiveNav(true);
+  },920);
   return result;
 };
 

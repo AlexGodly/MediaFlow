@@ -11,10 +11,19 @@
 <title>MediaFlow by Alex Godly</title>
 
 <meta name="theme-color" content="#0E111A">
+<meta name="application-name" content="MediaFlow">
+<meta name="description" content="Media rotation, library tracking, logging, statistics and personal ordering by Alex Godly.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MediaFlow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 
 <link rel="manifest" href="manifest.json">
 
-<link rel="icon" href="https://i.ibb.co/fd1nWwnT/icon.png" type="image/png">
+<link rel="icon" href="favicon.ico" type="image/x-icon" sizes="any">
+<link rel="icon" href="assets/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" sizes="180x180">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -45,7 +54,7 @@
 
 
 
-<meta name="mediaflow-version" content="237">
+<meta name="mediaflow-version" content="260">
 
 
 <!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
@@ -137,6 +146,7 @@
 <!-- MediaFlow v234: Dashboard quick-entry field polish -->
 <!-- MediaFlow v235: Missing Covers live cover preview + direct-image validation -->
 <!-- MediaFlow v236: Searchable persistent-open Category Filter + configurable pagination -->
+<!-- MediaFlow v252: Per-title Seasons View + season-aware Last progress logging + service season imports -->
 
 <link rel="stylesheet" href="assets/css/20-dashboard-personal-order.css">
 
@@ -268,7 +278,10 @@
 
 
 
-<!-- v236 runtime architecture: v219 active runtime foundation + v221 Settings + v222 Dashboard paint stability + v223 On This Day visibility + v224 sorting/UI + v225 icon language + v226 semantic UI/library modules + v227 icon/category-row corrections + v228 Dynamic row ordering/library metadata corrections + v229 Library choice-modal polish + v230 choice/filter layout control center + v231 Settings navigation/inheritance polish + v232 Library performance/persistence/details audit + v233 Dynamic Settings/Title Details cover sizing + v234 Dashboard quick-entry field polish + v235 Missing Covers live validation/preview + v236 searchable/paginated persistent-open Category Filter; stable v201 data schemas preserved -->
+<!-- v244 runtime architecture: v219 active runtime foundation through v244 Progressive Web App install/update support; stable v201 data schemas preserved -->
+<!-- MediaFlow v245: Unified Alex Godly icon branding for website favicon, PWA install icons, maskable icon and Apple touch icon -->
+<!-- MediaFlow v246: Mobile/tablet PWA install UX + very-tight-width responsive support -->
+<!-- MediaFlow v247: PWA install reliability, diagnostics + fault-tolerant app-shell repair -->
 </head>
 
 <body>
@@ -281,7 +294,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/mediaflow-v237.bundle.js"></script>
+<script src="assets/js/mediaflow-v260.bundle.js"></script>
 
 <!-- MediaFlow v84: merge-safe cloud metadata persistence -->
 
@@ -346,6 +359,26 @@
 <link rel="stylesheet" href="assets/css/105-v235-missing-cover-live-validation.css">
 <link rel="stylesheet" href="assets/css/106-v236-searchable-category-filter.css">
 <link rel="stylesheet" href="assets/css/107-v237-cross-surface-category-filters.css">
+<link rel="stylesheet" href="assets/css/108-v238-status-logging-responsive-device-mode.css">
+<link rel="stylesheet" href="assets/css/109-v239-batch-log-editor-responsive-cleanup.css">
+<link rel="stylesheet" href="assets/css/110-v240-edit-title-cover-profile.css">
+<link rel="stylesheet" href="assets/css/111-v241-editor-history-performance.css">
+<link rel="stylesheet" href="assets/css/112-v242-logging-history-performance.css">
+<link rel="stylesheet" href="assets/css/113-v243-logging-cover-batch-filter.css">
+<link rel="stylesheet" href="assets/css/114-v244-pwa.css">
+<link rel="stylesheet" href="assets/css/115-v246-pwa-mobile-responsive.css">
+<link rel="stylesheet" href="assets/css/116-v247-pwa-reliability-diagnostics.css">
+<link rel="stylesheet" href="assets/css/117-v248-settings-update-install.css">
+<link rel="stylesheet" href="assets/css/118-v250-about-updates-data-integrity.css">
+<link rel="stylesheet" href="assets/css/119-v252-seasons-view.css">
+<link rel="stylesheet" href="assets/css/120-v253-seasons-history-logging-polish.css">
+<link rel="stylesheet" href="assets/css/121-v254-library-cover-overlays.css">
+<link rel="stylesheet" href="assets/css/122-v255-cover-status-colors.css">
+<link rel="stylesheet" href="assets/css/123-v256-cover-sizing-runtime-calculator.css">
+<link rel="stylesheet" href="assets/css/124-v257-dashboard-cloud-settings-mobile-pwa-update-backup.css">
+<link rel="stylesheet" href="assets/css/125-v258-category-editor-icons-persistence-audit.css">
+<link rel="stylesheet" href="assets/css/126-v259-category-icon-showcase-polish.css">
+<link rel="stylesheet" href="assets/css/127-v260-design-system.css">
 
 
 

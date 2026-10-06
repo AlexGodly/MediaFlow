@@ -303,3 +303,99 @@ The final runtime extension adds a panel-local searchable/paginated Category Fil
 ## v237 — Cross-surface searchable Category Filter
 
 `src/js/components/171-v237-cross-surface-category-filters.js` extends the v236 Category Filter UI to Personal Order Add Titles, Batch Log, and Dashboard logging. It reuses the canonical v230 Category Filter order/visibility resolver and the v236 `Categories per page` preference. Search/pager updates are local to the dropdown DOM; category selection refreshes are coalesced by surface through `requestAnimationFrame`.
+
+## v238 — Status reliability, logging lazy browser and responsive device mode
+
+`src/js/components/172-v238-status-logging-responsive-device-mode.js` is the final v238 runtime extension.
+
+### Status-filter reliability
+
+v238 wraps the final `v230ReorderSelect()` and explicitly preserves/restores the selected value around `<option>` DOM reordering. This fixes Chromium changing the effective selection after Choice & Filter Layout rearranges status/priority/category options. Hidden selections safely fall back to a visible option.
+
+### Logging ownership
+
+v238 installs the final `App.openLogForm()` after earlier logging wrappers, so Log & Complete initializes the draft and renders once. The Library browser is collapsed by default and `v224LogSuggestionsHtml()` returns a lightweight placeholder until the Library panel is opened. The final `renderLogForm()` wrapper moves the browser below the What You Logged summary.
+
+### Responsive device mode
+
+`settings.v238DeviceLayout = { mode, modifiedAt }` is the canonical v238 setting. `mode` is `auto`, `mobile`, `tablet` or `desktop`. `html[data-v238-layout]` drives layout overrides in `assets/css/108-v238-status-logging-responsive-device-mode.css`; Automatic resolves from viewport width without a full app render on resize.
+
+### Persistence
+
+The v238 setting is normalized by the final modern-settings normalizer, explicitly merged/verified by timestamp in cloud-state reconciliation, included in Full Backup audit metadata and Settings Preset metadata, and uses the existing complete Settings payloads. Schemas remain Cloud 201 / Full Backup 29 / Settings Preset 1.
+
+### Edit Title
+
+The final `libraryModalHtml()` is wrapped by `.v238-library-editor`. Desktop CSS uses a large multi-column workspace and compacts cover, repeat-history and rich metadata controls; smaller screens retain scrolling for safety.
+
+## v239 notes
+v239 keeps the v219 runtime-extension architecture and v201 stable feature base. The v238 manual Device & Layout override is retired; responsive presentation again follows native viewport breakpoints. The retired settings field is removed during normalization/import/merge so it is no longer written to cloud, Full Backup or Settings Presets. Batch Log, Dashboard logging and Edit Title changes remain presentation/runtime extensions and do not alter Library or History schemas.
+
+## v240 notes
+v240 remains a runtime-extension release on the v201 stable feature base. The Edit Title change is presentation-only and keeps every existing field ID/save handler intact; layout is controlled by semantic classes added after the existing modal pipeline renders. A new `settings.v181CoverSizes.loggedTitles` value extends the existing per-surface cover-size object and therefore participates in the established whole-settings cloud/backup/preset pipelines without a schema bump. The account-profile icon cleanup only changes presentation.
+
+## v241 runtime extension
+`components/175-v241-editor-history-performance.js` adds the v241 Library index/cache, Dynamic Library bucket reads, Dashboard queue reuse, Personal Order picker caching, History category/date filtering, Library History pagination, logged-cover Title Details behavior, and current persistence/export audit wrappers. `assets/css/111-v241-editor-history-performance.css` owns the corresponding Edit Title, History, logging-cover and render-containment presentation.
+
+## v242 runtime extension
+`components/176-v242-logging-history-performance-polish.js` remains inside the v219 runtime-extension slot. It reuses v241's Library index for logged-card lookups and adds a title-only logging index plus bounded query cache/prefix narrowing so Dashboard logging does not repeatedly normalize and scan every title for each keystroke. The v225 global icon observer is replaced with a subtree-scoped equivalent to avoid whole-document button rescans during logging DOM churn. No persistent schema changes are introduced; export/backup wrappers only annotate the current audit state.
+
+## v243 runtime extension
+`components/177-v243-logging-cover-batch-filter-polish.js` remains inside the v219 runtime-extension slot. It corrects v242 logging artwork so a real title cover and category fallback cannot render simultaneously, while preserving the existing Title Details click target. Batch Log category filtering keeps the shared v236/v237 filter engine but receives a late stacking/overflow safety layer so the absolute dropdown can render over following cards. No persistent schema changes are introduced; backup/preset/export wrappers only annotate the v243 audit state.
+
+## v244 Progressive Web App architecture
+
+MediaFlow v244 promotes the existing hosted manifest/service-worker concept into a release-owned PWA subsystem.
+
+### Scope and GitHub Pages
+`manifest.json` uses `start_url: "./"` and `scope: "./"`. `sw.js` is served from the project root. This deliberately scopes the installed app to the GitHub Pages `/MediaFlow/` project directory without assuming a domain-root deployment.
+
+### Runtime install/update controller
+`components/178-v244-pwa.js` owns browser-facing PWA state: deferred install prompt, installed/standalone detection, service-worker registration, update discovery, waiting-worker application, online/visibility rechecks and the PWA card injected into the existing App Updates Settings section.
+
+The older core registration point now delegates to `window.MediaFlowPWA.register()` when v244+ is present and retains a minimal fallback for older modular builds.
+
+### Service-worker strategy
+`scripts/pwa.py` generates `sw.js` from the current `VERSION` and current local assets referenced by `index.html`.
+
+- Navigation / app document: network-first, cached `index.html` fallback.
+- Manifest/version metadata: network-first.
+- Release app-shell CSS/JS/icons: versioned cache-first.
+- Cross-origin account/API/font/cover traffic: not captured by the MediaFlow app-shell cache.
+- Activation removes old `mediaflow-pwa-*` and legacy `mediaflow-v*` caches.
+- Waiting workers activate only after an explicit `SKIP_WAITING` message.
+
+### Future release contract
+Every release must advance `VERSION` before the build. `scripts/build.py` derives the versioned bundle path from `VERSION`, aligns the index release metadata, then runs `scripts/pwa.py`. The PWA cache name therefore advances with the MediaFlow release and the current entry assets are rediscovered instead of being copied into `sw.js` by hand.
+
+### Data ownership
+The PWA subsystem stores only browser cache/install state. MediaFlow user data remains owned by the existing local/cloud/full-backup/settings-preset pipelines. Cloud Sync v201, Full Backup Schema v29, Settings Preset Schema v1 and Personal Order Export v4 are unchanged.
+
+
+## v245 — Unified application icon identity
+
+v245 does not create a second PWA system. The v244 manifest/service-worker/update architecture remains authoritative. The supplied Alex Godly `.ico` becomes the canonical visual source for the browser favicon and the derived install/icon assets.
+
+The project root `favicon.ico` is the browser-facing canonical favicon. Normal PWA icons preserve the supplied logo on transparency, while the maskable variant places the same logo inside a safe opaque area to survive launcher cropping. `scripts/pwa.py` includes the favicon assets in the generated release app shell, so future VERSION bumps retain the icon identity automatically.
+
+## v246 responsive PWA layer
+`assets/css/115-v246-pwa-mobile-responsive.css` is the final viewport/PWA responsiveness layer for tablet, mobile, very tight phones and standalone safe-area handling. `components/180-v246-pwa-mobile-install-responsive.js` owns the v246 PWA card actions, install fallback instructions, always-working reload behavior and runtime viewport classification. PWA release/cache generation remains owned by `scripts/pwa.py` and is run by `scripts/build.py`.
+
+## v247 PWA reliability and diagnostics layer
+
+`src/js/components/181-v247-pwa-reliability-diagnostics.js` extends the existing v244/v246 PWA runtime rather than creating a second install system. It owns the Settings diagnostics panel, live manifest/icon/worker/app-shell probes, cache-repair action, clearer install-state messaging and the v247 public diagnostics API.
+
+`scripts/pwa.py` remains the canonical worker generator. Starting with v247 it precaches app-shell assets independently instead of using one rejecting `cache.addAll(APP_SHELL)` transaction. `sw.js` exposes `GET_DIAGNOSTICS` and `RETRY_APP_SHELL_CACHE` so the running MediaFlow UI can inspect and repair the release cache without touching user data.
+
+`assets/css/116-v247-pwa-reliability-diagnostics.css` is a presentation-only layer for diagnostics and keeps the v246 tablet/mobile/tight-width behavior intact.
+
+
+## v260 — Professional UI/UX System + React Migration Bridge
+
+`src/js/components/194-v260-professional-ui-react-bridge.js` is the final v260 runtime extension. It adds the presentation bridge, accessibility enhancement pass, Library tools collapse behavior, and Current Library Category/Status dock without adding another whole-document MutationObserver.
+
+`assets/css/127-v260-design-system.css` is loaded last and is the authoritative v260 visual layer. It derives all surfaces and accents from the existing MediaFlow theme variables so Dynamic Cover Theme remains live.
+
+`ui-v260/` is the React + TypeScript + Tailwind workspace. It intentionally does not replace the stable v201-compatible state engine in v260. Instead it establishes reusable primitives and a bridge for incremental page replacement.
+
+Persistence compatibility remains Cloud Sync v201 / Full Backup Schema v29 / Settings Preset Schema v1 / Personal Order Export v4. The Library tools collapse preference is device-local only and is not part of content state.

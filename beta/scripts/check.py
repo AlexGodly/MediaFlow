@@ -3,15 +3,16 @@ from pathlib import Path
 import json, re, subprocess, sys, hashlib
 ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'src/js'
+VERSION=int((ROOT/'VERSION').read_text(encoding='utf-8').strip())
 errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 
-if '<meta name="mediaflow-version" content="237">' not in index: errors.append('index.html version is not 237')
-if 'assets/js/mediaflow-v237.bundle.js' not in index: errors.append('index.html does not load v237 bundle')
+if f'<meta name="mediaflow-version" content="{VERSION}">' not in index: errors.append(f'index.html version is not {VERSION}')
+if f'assets/js/mediaflow-v{VERSION}.bundle.js' not in index: errors.append(f'index.html does not load v{VERSION} bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-if 'mediaflow-v237-static-v1' not in sw: errors.append('service worker cache version is not v237')
-if './assets/js/mediaflow-v237.bundle.js' not in sw: errors.append('service worker does not cache v237 bundle')
+if f'mediaflow-pwa-v{VERSION}-shell-v1' not in sw: errors.append(f'service worker cache version is not v{VERSION} PWA shell')
+if f'./assets/js/mediaflow-v{VERSION}.bundle.js' not in sw: errors.append(f'service worker does not cache v{VERSION} bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
 if 'assets/css/94-v224-library-sorting-actions.css' not in index: errors.append('index.html does not load v224 UI stylesheet')
 if './assets/css/94-v224-library-sorting-actions.css' not in sw: errors.append('service worker does not cache v224 UI stylesheet')
@@ -42,6 +43,60 @@ if 'assets/css/106-v236-searchable-category-filter.css' not in index: errors.app
 if './assets/css/106-v236-searchable-category-filter.css' not in sw: errors.append('service worker does not cache v236 stylesheet')
 if 'assets/css/107-v237-cross-surface-category-filters.css' not in index: errors.append('index.html does not load v237 stylesheet')
 if './assets/css/107-v237-cross-surface-category-filters.css' not in sw: errors.append('service worker does not cache v237 stylesheet')
+if 'assets/css/108-v238-status-logging-responsive-device-mode.css' not in index: errors.append('index.html does not load v238 stylesheet')
+if './assets/css/108-v238-status-logging-responsive-device-mode.css' not in sw: errors.append('service worker does not cache v238 stylesheet')
+if 'assets/css/109-v239-batch-log-editor-responsive-cleanup.css' not in index: errors.append('index.html does not load v239 stylesheet')
+if './assets/css/109-v239-batch-log-editor-responsive-cleanup.css' not in sw: errors.append('service worker does not cache v239 stylesheet')
+if 'assets/css/110-v240-edit-title-cover-profile.css' not in index: errors.append('index.html does not load v240 stylesheet')
+if './assets/css/110-v240-edit-title-cover-profile.css' not in sw: errors.append('service worker does not cache v240 stylesheet')
+if 'assets/css/111-v241-editor-history-performance.css' not in index: errors.append('index.html does not load v241 stylesheet')
+if './assets/css/111-v241-editor-history-performance.css' not in sw: errors.append('service worker does not cache v241 stylesheet')
+if 'assets/css/112-v242-logging-history-performance.css' not in index: errors.append('index.html does not load v242 stylesheet')
+if './assets/css/112-v242-logging-history-performance.css' not in sw: errors.append('service worker does not cache v242 stylesheet')
+if 'assets/css/113-v243-logging-cover-batch-filter.css' not in index: errors.append('index.html does not load v243 stylesheet')
+if './assets/css/113-v243-logging-cover-batch-filter.css' not in sw: errors.append('service worker does not cache v243 stylesheet')
+if 'assets/css/114-v244-pwa.css' not in index: errors.append('index.html does not load v244 PWA stylesheet')
+if './assets/css/114-v244-pwa.css' not in sw: errors.append('service worker does not cache v244 PWA stylesheet')
+if 'assets/css/115-v246-pwa-mobile-responsive.css' not in index: errors.append('index.html does not load v246 responsive PWA stylesheet')
+if './assets/css/115-v246-pwa-mobile-responsive.css' not in sw: errors.append('service worker does not cache v246 responsive PWA stylesheet')
+if 'assets/css/116-v247-pwa-reliability-diagnostics.css' not in index: errors.append('index.html does not load v247 PWA diagnostics stylesheet')
+if './assets/css/116-v247-pwa-reliability-diagnostics.css' not in sw: errors.append('service worker does not cache v247 PWA diagnostics stylesheet')
+if 'assets/css/117-v248-settings-update-install.css' not in index: errors.append('index.html does not load v248 Settings/update stylesheet')
+if './assets/css/117-v248-settings-update-install.css' not in sw: errors.append('service worker does not cache v248 Settings/update stylesheet')
+if 'assets/css/118-v250-about-updates-data-integrity.css' not in index: errors.append('index.html does not load v250 About/integrity stylesheet')
+if './assets/css/118-v250-about-updates-data-integrity.css' not in sw: errors.append('service worker does not cache v250 About/integrity stylesheet')
+manifest=json.loads((ROOT/'manifest.json').read_text(encoding='utf-8'))
+if manifest.get('display')!='standalone': errors.append('manifest is not standalone')
+if manifest.get('start_url')!='./' or manifest.get('scope')!='./': errors.append('manifest is not GitHub Pages relative-scope safe')
+manifest_icons={x.get('src') for x in manifest.get('icons',[])}
+for icon in ['./assets/icons/mediaflow-install-192.png','./assets/icons/mediaflow-install-512.png','./assets/icons/mediaflow-maskable-512.png']:
+    if icon not in manifest_icons: errors.append(f'manifest missing PWA icon: {icon}')
+if '<meta name="apple-mobile-web-app-capable" content="yes">' not in index: errors.append('missing iOS PWA meta')
+if 'assets/icons/apple-touch-icon.png' not in index: errors.append('missing local apple-touch-icon')
+
+# v245 unified Alex Godly icon branding checks.
+for rel in ['favicon.ico','assets/icons/mediaflow.ico','assets/icons/favicon-32.png',
+            'assets/icons/mediaflow-192.png','assets/icons/mediaflow-512.png',
+            'assets/icons/mediaflow-install-192.png','assets/icons/mediaflow-install-512.png',
+            'assets/icons/mediaflow-maskable-512.png','assets/icons/apple-touch-icon.png']:
+    if not (ROOT/rel).exists(): errors.append(f'missing v245 icon asset: {rel}')
+if '<link rel="icon" href="favicon.ico" type="image/x-icon" sizes="any">' not in index:
+    errors.append('website favicon is not the canonical v245 ICO')
+if 'assets/icons/favicon-32.png' not in index:
+    errors.append('website PNG favicon fallback is missing')
+if './favicon.ico' not in sw or './assets/icons/favicon-32.png' not in sw:
+    errors.append('v245 favicon assets are not in the PWA app shell')
+try:
+    if hashlib.sha256((ROOT/'favicon.ico').read_bytes()).digest()!=hashlib.sha256((ROOT/'assets/icons/mediaflow.ico').read_bytes()).digest():
+        errors.append('root favicon.ico and assets/icons/mediaflow.ico differ')
+except FileNotFoundError:
+    pass
+
+bundle_probe=(ROOT/f'assets/js/mediaflow-v{VERSION}.bundle.js').read_text(encoding='utf-8') if (ROOT/f'assets/js/mediaflow-v{VERSION}.bundle.js').exists() else ''
+if "updateViaCache:'none'" not in bundle_probe: errors.append('v244 PWA registration does not bypass stale SW HTTP cache')
+if "type:'SKIP_WAITING'" not in bundle_probe or not ("event.data?.type==='SKIP_WAITING'" in sw or "type==='SKIP_WAITING'" in sw): errors.append('PWA controlled-update handoff is incomplete')
+if "request.mode==='navigate'" not in sw or "networkFirst(request,'./index.html')" not in sw: errors.append('PWA navigation is not network-first with offline fallback')
+if "scripts/pwa.py" not in (ROOT/'scripts/build.py').read_text(encoding='utf-8'): errors.append('build.py does not synchronize future PWA releases')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
     if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
@@ -74,6 +129,18 @@ if 'components/168-v234-dashboard-input-polish.js' not in runtime_order: errors.
 if 'components/169-v235-missing-cover-live-validation.js' not in runtime_order: errors.append('missing active v235 runtime module: components/169-v235-missing-cover-live-validation.js')
 if 'components/170-v236-searchable-category-filter.js' not in runtime_order: errors.append('missing active v236 runtime module: components/170-v236-searchable-category-filter.js')
 if 'components/171-v237-cross-surface-category-filters.js' not in runtime_order: errors.append('missing active v237 runtime module: components/171-v237-cross-surface-category-filters.js')
+if 'components/172-v238-status-logging-responsive-device-mode.js' not in runtime_order: errors.append('missing active v238 runtime module: components/172-v238-status-logging-responsive-device-mode.js')
+if 'components/173-v239-batch-log-editor-responsive-cleanup.js' not in runtime_order: errors.append('missing active v239 runtime module: components/173-v239-batch-log-editor-responsive-cleanup.js')
+if 'components/174-v240-edit-title-cover-profile-audit.js' not in runtime_order: errors.append('missing active v240 runtime module')
+if 'components/175-v241-editor-history-performance.js' not in runtime_order: errors.append('missing active v241 runtime module')
+if 'components/176-v242-logging-history-performance-polish.js' not in runtime_order: errors.append('missing active v242 runtime module')
+if 'components/177-v243-logging-cover-batch-filter-polish.js' not in runtime_order: errors.append('missing active v243 runtime module')
+if 'components/178-v244-pwa.js' not in runtime_order: errors.append('missing active v244 PWA runtime module')
+if 'components/179-v245-icon-branding.js' not in runtime_order: errors.append('missing active v245 icon-branding runtime module')
+if 'components/180-v246-pwa-mobile-install-responsive.js' not in runtime_order: errors.append('missing active v246 PWA responsive runtime module')
+if 'components/181-v247-pwa-reliability-diagnostics.js' not in runtime_order: errors.append('missing active v247 PWA reliability runtime module')
+if 'components/182-v248-settings-update-install-polish.js' not in runtime_order: errors.append('missing active v248 Settings/update runtime module')
+if 'components/183-v249-pwa-update-scope-correction.js' not in runtime_order: errors.append('missing active v249 PWA/update scope correction runtime module')
 if 'pages/settings/145-v220-active-settings-page.js' in runtime_order: errors.append('v220 Settings module is still active in runtime-order.json')
 slot_indexes=[i for i,row in enumerate(order) if row.get('slot')=='runtime_extensions']
 if len(slot_indexes)!=1: errors.append('build-order must contain exactly one runtime_extensions slot')
@@ -95,9 +162,9 @@ for row in order:
     if not p.exists(): errors.append(f'missing source fragment: {rel}')
     else: parts.append(p.read_text(encoding='utf-8'))
 joined=''.join(parts)
-bundle_path=ROOT/'assets/js/mediaflow-v237.bundle.js'
+bundle_path=ROOT/f'assets/js/mediaflow-v{VERSION}.bundle.js'
 bundle=bundle_path.read_text(encoding='utf-8') if bundle_path.exists() else ''
-if not bundle: errors.append('missing v236 bundle')
+if not bundle: errors.append(f'missing v{VERSION} bundle')
 if joined!=bundle: errors.append('bundle does not exactly match build + runtime manifests')
 if not bundle.rstrip().endswith('})();'): errors.append('executable JavaScript exists after the explicit MediaFlow app closure')
 
@@ -410,6 +477,28 @@ for pat in ['.v237-category-filter','.v225-order-filter-category .v237-category-
 if not (ROOT/'scripts/smoke-v237.py').exists(): errors.append('missing v237 focused UI smoke test')
 if not (ROOT/'docs/CHANGELOG_v237.md').exists(): errors.append('missing v237 changelog')
 
+
+# v239 Batch Log / logging / editor / responsive cleanup checks.
+css239=(ROOT/'assets/css/109-v239-batch-log-editor-responsive-cleanup.css').read_text(encoding='utf-8') if (ROOT/'assets/css/109-v239-batch-log-editor-responsive-cleanup.css').exists() else ''
+required_v239=[
+    'MediaFlow v239 — Batch Log / Logging / Editor Cleanup',
+    'const V239_RUNTIME_VERSION=239;',
+    'function v239StripDeviceLayout(settings)',
+    'function v239LoggedTitlesHtml(entries)',
+    'v179ProgressEntryEditorHtml=function(){return \'\';};',
+    'v239-batch-library-tools',
+    'deviceLayoutOverrideRemoved:true',
+    'MediaFlowRuntime.version=V239_RUNTIME_VERSION;'
+]
+for pat in required_v239:
+    if pat not in bundle: errors.append(f'missing v239 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v239 feature is outside active app scope: {pat}')
+if not css239: errors.append('missing v239 UI stylesheet')
+for pat in ['.v239-batch-library-tools','.v239-log-mode-switch','.v239-logged-title-card','.v239-library-editor-shell']:
+    if pat not in css239: errors.append(f'missing v239 CSS: {pat}')
+if not (ROOT/'docs/CHANGELOG_v239.md').exists(): errors.append('missing v239 changelog')
+if not (ROOT/'scripts/smoke-v239.py').exists(): errors.append('missing v239 focused UI smoke test')
+
 if errors:
     print('CHECK FAILED')
     for e in errors: print('-',e)
@@ -550,6 +639,225 @@ for pat in ['.v235-live-cover-preview','.v235-cover-url-notice','#v235-save-cove
 if not (ROOT/'docs/CHANGELOG_v235.md').exists(): errors.append('missing v235 changelog')
 if not (ROOT/'scripts/smoke-v235.py').exists(): errors.append('missing v235 focused UI smoke test')
 
+# v238 reliability/logging/responsive/device-mode checks.
+css238=(ROOT/'assets/css/108-v238-status-logging-responsive-device-mode.css').read_text(encoding='utf-8') if (ROOT/'assets/css/108-v238-status-logging-responsive-device-mode.css').exists() else ''
+required_v238=[
+    'MediaFlow v238 — Status Filter Reliability + Logging UX + Responsive Device Mode',
+    'const V238_RUNTIME_VERSION=238;',
+    'const v238ReorderSelectBase=v230ReorderSelect;',
+    'function v238OpenLogForm()',
+    'function v238ReflowLogForm(html)',
+    'function v238SetDeviceMode(mode)',
+    'settings.v238DeviceLayout',
+    'MediaFlowRuntime.version=V238_RUNTIME_VERSION;'
+]
+for pat in required_v238:
+    if pat not in bundle: errors.append(f'missing v238 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v238 feature is outside active app scope: {pat}')
+if not css238: errors.append('missing v238 responsive/logging stylesheet')
+for pat in ['.v238-log-library','.v238-library-editor','.v238-device-settings-card','data-v238-layout']:
+    if pat not in css238: errors.append(f'missing v238 CSS: {pat}')
+if not (ROOT/'scripts/smoke-v238.py').exists(): errors.append('missing v238 focused UI smoke test')
+if not (ROOT/'docs/CHANGELOG_v238.md').exists(): errors.append('missing v238 changelog')
+
+
+# v239 Batch Log / logging / editor / responsive cleanup checks.
+css239=(ROOT/'assets/css/109-v239-batch-log-editor-responsive-cleanup.css').read_text(encoding='utf-8') if (ROOT/'assets/css/109-v239-batch-log-editor-responsive-cleanup.css').exists() else ''
+required_v239=[
+    'MediaFlow v239 — Batch Log / Logging / Editor Cleanup',
+    'const V239_RUNTIME_VERSION=239;',
+    'function v239StripDeviceLayout(settings)',
+    'function v239LoggedTitlesHtml(entries)',
+    'v179ProgressEntryEditorHtml=function(){return \'\';};',
+    'v239-batch-library-tools',
+    'deviceLayoutOverrideRemoved:true',
+    'MediaFlowRuntime.version=V239_RUNTIME_VERSION;'
+]
+for pat in required_v239:
+    if pat not in bundle: errors.append(f'missing v239 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v239 feature is outside active app scope: {pat}')
+if not css239: errors.append('missing v239 UI stylesheet')
+for pat in ['.v239-batch-library-tools','.v239-log-mode-switch','.v239-logged-title-card','.v239-library-editor-shell']:
+    if pat not in css239: errors.append(f'missing v239 CSS: {pat}')
+if not (ROOT/'docs/CHANGELOG_v239.md').exists(): errors.append('missing v239 changelog')
+if not (ROOT/'scripts/smoke-v239.py').exists(): errors.append('missing v239 focused UI smoke test')
+
+
+# v240 Edit Title / logged cover sizing / profile cleanup checks.
+css240=(ROOT/'assets/css/110-v240-edit-title-cover-profile.css').read_text(encoding='utf-8') if (ROOT/'assets/css/110-v240-edit-title-cover-profile.css').exists() else ''
+required_v240=[
+    'MediaFlow v240 — Edit Title Layout / Logged Cover Size / Profile Cleanup',
+    'const V240_RUNTIME_VERSION=240;',
+    'function v240DecorateLibraryEditor(raw)',
+    "V181_COVER_SIZE_DEFAULTS.loggedTitles=100;",
+    "V181_COVER_LABELS.loggedTitles='Logged / Batch selected covers';",
+    'function v240CleanProfileActionIcon(root=document)',
+    'loggedTitleCoverSizeV240:true',
+    'MediaFlowRuntime.version=V240_RUNTIME_VERSION;'
+]
+for pat in required_v240:
+    if pat not in bundle: errors.append(f'missing v240 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v240 feature is outside active app scope: {pat}')
+if not css240: errors.append('missing v240 Edit Title/cover/profile stylesheet')
+for pat in ['.v240-library-editor','.v240-field-category','.v240-field-progress','.v239-logged-cover','.account-profile-btn>.v225-btn-icon']:
+    if pat not in css240: errors.append(f'missing v240 CSS: {pat}')
+if not (ROOT/'docs/CHANGELOG_v240.md').exists(): errors.append('missing v240 changelog')
+if not (ROOT/'scripts/smoke-v240.py').exists(): errors.append('missing v240 focused UI smoke test')
+if 'components/174-v240-edit-title-cover-profile-audit.js' not in runtime_order: errors.append('missing active v240 runtime module')
+if 'assets/css/110-v240-edit-title-cover-profile.css' not in index: errors.append('index.html does not load v240 stylesheet')
+if './assets/css/110-v240-edit-title-cover-profile.css' not in sw: errors.append('service worker does not cache v240 stylesheet')
+
+# v241 Edit Title clarity / History / 50K optimization checks.
+css241=(ROOT/'assets/css/111-v241-editor-history-performance.css').read_text(encoding='utf-8') if (ROOT/'assets/css/111-v241-editor-history-performance.css').exists() else ''
+for pat in [
+    'MediaFlow v241 — Editor Clarity / History Filters / 50K Performance',
+    'const V241_RUNTIME_VERSION=241;',
+    'function v241EnsureLibraryIndex()',
+    'function v241LoggedCoverMarkup',
+    'function v241HistoryCategoryFilterHtml()',
+    'function v241ActivityHtml()',
+    'performance50kAuditV241:true',
+    'MediaFlowRuntime.version=V241_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v241 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v241 feature is outside active app scope: {pat}')
+for pat in ['.v241-logged-cover-button','.v241-history-toolbar','.v240-repeat-panel .v82-repeat-grid','content-visibility:auto']:
+    if pat not in css241: errors.append(f'missing v241 CSS: {pat}')
+if not (ROOT/'scripts/smoke-v241.py').exists(): errors.append('missing v241 focused UI smoke test')
+if not (ROOT/'scripts/perf-v241.py').exists(): errors.append('missing v241 50K performance test')
+if not (ROOT/'docs/CHANGELOG_v241.md').exists(): errors.append('missing v241 changelog')
+
+
+# v242 Logging clarity / History layout / logging performance checks.
+css242=(ROOT/'assets/css/112-v242-logging-history-performance.css').read_text(encoding='utf-8') if (ROOT/'assets/css/112-v242-logging-history-performance.css').exists() else ''
+for pat in [
+    'MediaFlow v242 — Logging Clarity / History Layout / Logging Performance',
+    'const V242_RUNTIME_VERSION=242;',
+    'function v242LoggedCoverMarkup',
+    'function v242EnsureLoggingIndex()',
+    'logTitleCandidates=function(query)',
+    'data-v225-iconified="1"',
+    'const V242_UI_OBSERVER=new MutationObserver',
+    'historyToolbarPolishV242:true',
+    'MediaFlowRuntime.version=V242_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v242 feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v242 feature is outside active app scope: {pat}')
+for pat in ['.v179-inline-progress span','.v242-clean-cover-button','.v242-history-toolbar','.hist-row{content-visibility:auto']:
+    if pat not in css242: errors.append(f'missing v242 CSS: {pat}')
+if not (ROOT/'scripts/smoke-v242.py').exists(): errors.append('missing v242 focused UI smoke test')
+if not (ROOT/'scripts/perf-v242.py').exists(): errors.append('missing v242 logging performance test')
+if not (ROOT/'docs/CHANGELOG_v242.md').exists(): errors.append('missing v242 changelog')
+
+# v244 Progressive Web App release checks.
+css244=(ROOT/'assets/css/114-v244-pwa.css').read_text(encoding='utf-8') if (ROOT/'assets/css/114-v244-pwa.css').exists() else ''
+for pat in [
+    'MediaFlow v244 — Progressive Web App Foundation',
+    'const V244_RUNTIME_VERSION=244;',
+    'function v244RegisterPwa()',
+    'function v244InstallPwa()',
+    'function v244ApplyPwaUpdate()',
+    'window.MediaFlowPWA=',
+    'MediaFlowRuntime.version=V244_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v244 PWA feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v244 PWA feature is outside active app scope: {pat}')
+for pat in ['.v244-pwa-card','.v244-pwa-actions','@media(display-mode:standalone)']:
+    if pat not in css244: errors.append(f'missing v244 PWA CSS: {pat}')
+if not (ROOT/'scripts/pwa.py').exists(): errors.append('missing future-release PWA synchronizer')
+if not (ROOT/'scripts/smoke-v244.py').exists(): errors.append('missing v244 PWA smoke test')
+if not (ROOT/'docs/CHANGELOG_v244.md').exists(): errors.append('missing v244 changelog')
+
+# v245 Unified App Icon Branding release checks.
+for pat in [
+    'MediaFlow v245 — Unified App Icon Branding',
+    'const V245_RUNTIME_VERSION=245;',
+    'MediaFlowRuntime.version=V245_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v245 icon-branding feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v245 icon-branding feature is outside active app scope: {pat}')
+if not (ROOT/'scripts/smoke-v245.py').exists(): errors.append('missing v245 icon-branding smoke test')
+if not (ROOT/'docs/CHANGELOG_v245.md').exists(): errors.append('missing v245 changelog')
+
+# v247 PWA install reliability + diagnostics checks.
+css247=(ROOT/'assets/css/116-v247-pwa-reliability-diagnostics.css').read_text(encoding='utf-8') if (ROOT/'assets/css/116-v247-pwa-reliability-diagnostics.css').exists() else ''
+for pat in [
+    'MediaFlow v247 — PWA Install Reliability + Diagnostics',
+    'const V247_RUNTIME_VERSION=247;',
+    'function v247RunPwaDiagnostics',
+    'function v247RepairPwaCache',
+    'GET_DIAGNOSTICS',
+    'RETRY_APP_SHELL_CACHE',
+    'MediaFlowRuntime.version=V247_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v247 PWA reliability feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v247 PWA reliability feature is outside active app scope: {pat}')
+for pat in ['.v247-pwa-diagnostics','.v247-diag-row','.v247-diag-actions']:
+    if pat not in css247: errors.append(f'missing v247 PWA diagnostics CSS: {pat}')
+for pat in ['Promise.allSettled','GET_DIAGNOSTICS','RETRY_APP_SHELL_CACHE','async function cacheShellAssets']:
+    if pat not in sw: errors.append(f'missing v247 service-worker reliability feature: {pat}')
+if 'cache.addAll(APP_SHELL' in sw: errors.append('v247 service worker still uses all-or-nothing cache.addAll(APP_SHELL)')
+if not (ROOT/'scripts/smoke-v247.py').exists(): errors.append('missing v247 PWA reliability smoke test')
+if not (ROOT/'docs/CHANGELOG_v247.md').exists(): errors.append('missing v247 changelog')
+
+# v248 Settings navigation + managed app update checks.
+css248=(ROOT/'assets/css/117-v248-settings-update-install.css').read_text(encoding='utf-8') if (ROOT/'assets/css/117-v248-settings-update-install.css').exists() else ''
+for pat in [
+    'MediaFlow v248 — Settings Navigation + Managed App Updates',
+    'const V248_RUNTIME_VERSION=248;',
+    'function v248InstallLatestUpdate',
+    'function v248ToggleAutoInstallUpdates',
+    'function v248EnableSettingsNavDragScroll',
+    'function v248UpdateBrandHtml',
+    'autoInstallUpdates',
+    'Ready to install',
+    'MediaFlowRuntime.version=V248_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v248 Settings/update feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v248 Settings/update feature is outside active app scope: {pat}')
+for pat in ['.v248-update-icon','.v248-update-brand','.v248-update-progress','.v248-drag-ready']:
+    if pat not in css248: errors.append(f'missing v248 Settings/update CSS: {pat}')
+if 'id="v244-pwa-update"' not in bundle: errors.append('v248 does not preserve legacy PWA reload element id')
+if not (ROOT/'scripts/smoke-v248.py').exists(): errors.append('missing v248 Settings/update smoke test')
+if not (ROOT/'docs/CHANGELOG_v248.md').exists(): errors.append('missing v248 changelog')
+
+# v249 PWA/update scope correction checks.
+for pat in [
+    'MediaFlow v249 — PWA / App Update Scope Correction',
+    'const V249_RUNTIME_VERSION=249;',
+    'function v249PwaSettingsHtml',
+    'function v249PwaStatus',
+    'MediaFlowRuntime.version=V249_RUNTIME_VERSION;'
+]:
+    if pat not in bundle: errors.append(f'missing v249 scope-correction feature: {pat}')
+    elif bundle.find(pat)>close_pos: errors.append(f'v249 scope-correction feature is outside active app scope: {pat}')
+if not (ROOT/'scripts/smoke-v249.py').exists(): errors.append('missing v249 scope-correction smoke test')
+if not (ROOT/'docs/CHANGELOG_v249.md').exists(): errors.append('missing v249 changelog')
+
+
+
+# v250 About update UI + persistence integrity checks.
+if VERSION>=250:
+    required_v250=[
+        'MediaFlow v250 — About Update UI + Persistence Integrity Audit',
+        'const V250_RUNTIME_VERSION=250;',
+        'function v250AboutUpdateCardHtml',
+        'function v250MergeActivityLog',
+        'function v250PersistenceAudit',
+        'function v250InstallLatestUpdate',
+        "Math.round(sessionStoredXP(s)||0)",
+        "'session_json'",
+        'MediaFlowRuntime.version=V250_RUNTIME_VERSION;'
+    ]
+    for pat in required_v250:
+        if pat not in bundle: errors.append(f'missing v250 integrity feature: {pat}')
+        elif bundle.find(pat)>close_pos: errors.append(f'v250 integrity feature is outside active app scope: {pat}')
+    css250=(ROOT/'assets/css/118-v250-about-updates-data-integrity.css').read_text(encoding='utf-8') if (ROOT/'assets/css/118-v250-about-updates-data-integrity.css').exists() else ''
+    for pat in ['.v250-about-update-card','.v250-update-summary','.v250-managed-update-panel']:
+        if pat not in css250: errors.append(f'missing v250 About CSS: {pat}')
+    if 'slice(0,1000)' in (SRC/'components/184-v250-about-update-data-integrity.js').read_text(encoding='utf-8'):
+        errors.append('v250 final integrity module reintroduced the Library History 1,000-row cap')
+
 if errors:
     print('FINAL CHECK FAILED')
     for e in errors: print('-',e)
@@ -559,7 +867,16 @@ print('v233 Dynamic Settings/title-details cover sizing: active')
 print('v234 Dashboard quick-entry polish: active')
 print('v235 Missing Covers live validation/preview: active')
 print('v236 Searchable/paginated Category Filter: active')
+print('v238 Status reliability/logging base: preserved')
+print('v239 Batch Log/logging/editor/native responsive cleanup: preserved')
+print('v240 Edit Title/logged-cover/profile polish: active')
 print('v237 Personal Order/Batch Log/Dashboard logging Category Filters: active')
+print('v244 Progressive Web App install/update foundation: active')
+print('v245 Unified Alex Godly icon branding: active')
+print('v246 Mobile/Tablet PWA responsiveness: active')
+print('v247 PWA install reliability + diagnostics: active')
+print('v248 Settings navigation + managed app updates: active')
+print('v249 PWA/app-update scope correction: active')
 print('Navigation highlight fix: preserved')
 print('Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1')
 print('JS SHA256:',hashlib.sha256(bundle.encode()).hexdigest())

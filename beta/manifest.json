@@ -1,18 +1,40 @@
 {
+  "id": "./",
   "name": "MediaFlow by Alex Godly",
   "short_name": "MediaFlow",
-  "description": "Media rotation, library, logging, statistics and personal ordering.",
-  "start_url": "./index.html",
+  "description": "Media rotation, library tracking, logging, statistics and personal ordering by Alex Godly.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0E111A",
   "theme_color": "#0E111A",
+  "categories": [
+    "entertainment",
+    "lifestyle",
+    "utilities"
+  ],
   "icons": [
     {
-      "src": "https://i.ibb.co/fd1nWwnT/icon.png",
+      "src": "./assets/icons/mediaflow-install-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/mediaflow-install-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/mediaflow-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false
 }

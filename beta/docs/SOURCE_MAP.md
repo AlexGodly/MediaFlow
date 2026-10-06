@@ -139,3 +139,76 @@ v229 changes only the selector's visual icon treatment.
 - `src/js/components/171-v237-cross-surface-category-filters.js` — searchable/paginated persistent-open category filters for Personal Order, Batch Log, and Dashboard logging.
 - `assets/css/107-v237-cross-surface-category-filters.css` — cross-surface layout/responsive polish for the v236 Category Filter design.
 - `scripts/smoke-v237.py` — focused regression coverage for the three new filter surfaces.
+
+## v238
+
+- `src/js/components/172-v238-status-logging-responsive-device-mode.js` — status-select preservation, single-render/lazy Dashboard logging, device-mode setting, Edit Title wrapper, and v238 persistence/export audit hooks.
+- `assets/css/108-v238-status-logging-responsive-device-mode.css` — logging redesign, wide/dense Edit Title, forced Auto/Mobile/Tablet/Desktop layouts and mobile/tablet performance/responsive rules.
+- `scripts/smoke-v238.py` — focused status-filter, logging, Edit Title, device-setting and mobile/tablet overflow regression coverage.
+- `docs/CHANGELOG_v238.md` — full v238 release notes.
+- generated bundle: `assets/js/mediaflow-v238.bundle.js`.
+
+## v239 runtime extension
+- `src/js/components/173-v239-batch-log-editor-responsive-cleanup.js` — Batch Log/logging UI polish, logged-title cover cards, Edit Title redesign, retirement of the v238 Device & Layout override, and persistence/export audit hooks.
+- `assets/css/109-v239-batch-log-editor-responsive-cleanup.css` — Batch Log grid, logging cards, Edit Title modal styling, and native responsive rules.
+
+## v240 runtime extension
+- `src/js/components/174-v240-edit-title-cover-profile-audit.js` — Edit Title semantic layout classes, logged-title cover-size surface, sidebar profile-icon cleanup, persistence/export audit hooks.
+- `assets/css/110-v240-edit-title-cover-profile.css` — 12-column Edit Title layout, polished form styling, logged-title cover sizing and responsive rules.
+
+## v241
+- Runtime: `src/js/components/175-v241-editor-history-performance.js`
+- Styles: `assets/css/111-v241-editor-history-performance.css`
+- Focused UI regression: `scripts/smoke-v241.py`
+- 50K performance regression: `scripts/perf-v241.py`
+- Changelog: `docs/CHANGELOG_v241.md`
+
+## v242
+- `src/js/components/176-v242-logging-history-performance-polish.js` — logging artwork cleanup, indexed/cached logging candidate lookup, scoped dynamic-button observer, History presentation hook, and persistence/export audit metadata.
+- `assets/css/112-v242-logging-history-performance.css` — readable logging progress labels, no-overlay cover buttons, History toolbar layout, responsive polish, and off-screen History paint containment.
+- `scripts/smoke-v242.py` — focused logging-label/artwork/History/audit regression coverage.
+- `scripts/perf-v242.py` — 50K logging-search performance regression.
+
+## v243
+- `src/js/components/177-v243-logging-cover-batch-filter-polish.js` — single-source logging artwork visibility, Batch Log Category Filter popover layering, and persistence/export audit metadata.
+- `assets/css/113-v243-logging-cover-batch-filter.css` — category-fallback hiding and Batch Log dropdown overflow/stacking fixes.
+- `scripts/smoke-v243.py` — focused real-cover/fallback click-through, Batch dropdown visibility, and audit regression coverage.
+
+## v244
+- `src/js/components/178-v244-pwa.js` — PWA install prompt state, service-worker registration/update lifecycle, App Updates PWA controls, update handoff and app-install status.
+- `assets/css/114-v244-pwa.css` — PWA App Updates card, responsive action layout and installed standalone safe-area polish.
+- `manifest.json` — GitHub Pages-relative install manifest with local any/maskable PWA icons.
+- `assets/icons/mediaflow-192.png` — standard 192×192 install icon.
+- `assets/icons/mediaflow-512.png` — standard 512×512 install icon.
+- `assets/icons/mediaflow-maskable-512.png` — maskable 512×512 install icon.
+- `assets/icons/apple-touch-icon.png` — iOS/iPadOS home-screen icon.
+- `sw.js` — generated v244 app-shell service worker; navigation network-first + cached shell fallback + controlled waiting-worker activation.
+- `scripts/pwa.py` — future-release PWA synchronizer; discovers current local entry assets and regenerates the versioned service worker.
+- `scripts/build.py` — now VERSION-driven and automatically invokes `scripts/pwa.py` after the JavaScript bundle build.
+- `scripts/smoke-v244.py` — PWA manifest/service-worker/runtime UI regression coverage.
+
+
+## v245
+- `favicon.ico` — canonical browser favicon copied from the user-supplied Alex Godly icon.
+- `assets/icons/mediaflow.ico` — canonical project copy of the same ICO.
+- `assets/icons/favicon-32.png` — 32×32 browser PNG fallback.
+- `assets/icons/mediaflow-192.png` — 192×192 PWA install icon generated from the supplied artwork.
+- `assets/icons/mediaflow-512.png` — 512×512 PWA install icon generated from the supplied artwork.
+- `assets/icons/mediaflow-maskable-512.png` — same logo centered inside a safe opaque maskable canvas.
+- `assets/icons/apple-touch-icon.png` — 180×180 Apple home-screen icon generated from the supplied artwork.
+- `src/js/components/179-v245-icon-branding.js` — final v245 runtime release marker; PWA behavior remains owned by v244.
+- `scripts/smoke-v245.py` — favicon/PWA icon wiring and versioned-cache regression.
+- `docs/CHANGELOG_v245.md` — v245 release notes.
+
+## v246
+- `src/js/components/180-v246-pwa-mobile-install-responsive.js` — PWA install/reload/update UX, MediaFlow icon card, mobile/tablet install fallback guidance, runtime viewport classes.
+- `assets/css/115-v246-pwa-mobile-responsive.css` — tablet/mobile/tight-width responsive + standalone PWA safe-area layer.
+- `docs/CHANGELOG_v246.md` — release notes.
+
+## v247
+- `src/js/components/181-v247-pwa-reliability-diagnostics.js` — install-state explanation, live PWA diagnostics, complete app-shell URL probing, worker diagnostic messaging and app-cache repair UI/API.
+- `assets/css/116-v247-pwa-reliability-diagnostics.css` — responsive diagnostics panel, result badges, exact failed-asset display and repair/test controls.
+- `scripts/pwa.py` — v247+ fault-tolerant per-asset app-shell caching plus worker diagnostics/repair message generation.
+- `sw.js` — generated current worker with `GET_DIAGNOSTICS`, `RETRY_APP_SHELL_CACHE`, activation retry, versioned shell and existing controlled-update/network-first behavior.
+- `scripts/smoke-v247.py` — v247 PWA reliability, diagnostic API and cache-repair regression validation.
+- `docs/CHANGELOG_v247.md` — v247 release notes.

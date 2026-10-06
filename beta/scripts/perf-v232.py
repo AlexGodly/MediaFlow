@@ -3,7 +3,7 @@ from pathlib import Path
 import json, shutil, sys
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=ROOT/'assets/js/mediaflow-v237.bundle.js'
+BUNDLE=ROOT/'assets/js/mediaflow-v240.bundle.js'
 try:
     from playwright.sync_api import sync_playwright
 except Exception as e:
