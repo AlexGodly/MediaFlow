@@ -1,0 +1,78 @@
+/* MediaFlow v283 — Category modal lifecycle + Collection card typography */
+
+/* The category modal remains scrollable, while controls never look disabled
+   after a successful action because the overlay is removed immediately. */
+#modal-root .mf282-category-editor .modal-actions .btn{pointer-events:auto}
+
+/* Main Collections Cards: make the label/title/copy read as separate lines.
+   This specifically fixes the "COLLECTIONtest" collision from v282. */
+.mf274-browser-results.mode-cards .mf274-browser-card,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card{
+  align-items:start!important;
+}
+.mf274-browser-results.mode-cards .mf274-browser-card-copy,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  align-content:start!important;
+  gap:6px!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.mf274-browser-results.mode-cards .mf274-browser-card-copy>.mf274-kicker,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy>.mf274-kicker{
+  display:block!important;
+  margin:0!important;
+  line-height:1.1!important;
+  font-size:8.5px!important;
+  letter-spacing:.16em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.mf274-browser-results.mode-cards .mf274-browser-card-copy>.mf274-title-link,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy>.mf274-title-link{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:16px!important;
+  font-weight:900!important;
+  line-height:1.18!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+.mf274-browser-results.mode-cards .mf274-browser-card-copy>p,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy>p{
+  margin:1px 0 2px!important;
+  min-height:0!important;
+  line-height:1.4!important;
+  font-size:10px!important;
+}
+.mf274-browser-results.mode-cards .mf274-browser-card-copy>.mf279-collection-progress,
+.mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy>.mf279-collection-progress{
+  margin-top:3px!important;
+  max-width:100%!important;
+}
+.mf274-browser-results.mode-cards .mf274-collection-stats,
+.mf282-batch-collection[data-mode="cards"] .mf274-collection-stats{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:4px 10px!important;
+  margin-top:2px!important;
+  min-width:0!important;
+}
+.mf274-browser-results.mode-cards .mf274-collection-stats span,
+.mf282-batch-collection[data-mode="cards"] .mf274-collection-stats span{
+  min-width:0!important;
+  font-size:9px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+@media(max-width:620px){
+  .mf274-browser-results.mode-cards .mf274-browser-card-copy>.mf274-title-link,
+  .mf282-batch-collection[data-mode="cards"] .mf274-browser-card-copy>.mf274-title-link{font-size:14px!important}
+}
