@@ -1,0 +1,72 @@
+/* ============================================================
+   MediaFlow v250 — About update UI cleanup + integrity release polish
+   ============================================================ */
+.v250-about-update-card{display:grid;gap:14px;align-content:start}
+.v250-about-update-card>h3{margin:0}
+.v250-about-update-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.v250-about-update-head>div{min-width:0}
+.v250-about-update-head h3{margin:0 0 7px}
+.v250-about-update-head p{margin:0;color:var(--text-dim);font-size:11px;line-height:1.55;max-width:760px}
+.v250-version-chip{display:inline-flex;align-items:center;justify-content:center;min-width:54px;height:28px;padding:0 10px;border:1px solid var(--border-soft);border-radius:999px;background:var(--panel-raised);color:var(--text);font-size:11px;font-weight:850;letter-spacing:.02em;flex:0 0 auto}
+
+.v250-update-summary{display:grid;grid-template-columns:38px minmax(0,1fr);gap:11px;align-items:start;padding:11px 12px;border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 78%,transparent)}
+.v250-update-summary.is-pass{border-color:color-mix(in srgb,#3ddc97 32%,var(--border-soft));background:color-mix(in srgb,#3ddc97 7%,var(--panel-raised))}
+.v250-update-summary.is-warn{border-color:color-mix(in srgb,#f2b84b 34%,var(--border-soft));background:color-mix(in srgb,#f2b84b 7%,var(--panel-raised))}
+.v250-update-summary.is-fail{border-color:color-mix(in srgb,#ff7d8b 36%,var(--border-soft));background:color-mix(in srgb,#ff7d8b 7%,var(--panel-raised))}
+.v250-update-summary-icon{width:38px;height:38px;border-radius:11px;border:1px solid var(--border-soft);background:var(--panel);display:grid;place-items:center;color:var(--flow)}
+.v250-update-summary-icon>.v248-update-icon{width:18px;height:18px;flex-basis:18px}
+.v250-update-summary.is-pass .v250-update-summary-icon{color:#3ddc97}.v250-update-summary.is-warn .v250-update-summary-icon{color:#f2b84b}.v250-update-summary.is-fail .v250-update-summary-icon{color:#ff7d8b}
+.v250-update-summary-copy{min-width:0;display:grid;gap:3px}
+.v250-update-summary-copy>b{font-size:12px;color:var(--text)}
+.v250-update-summary-copy>.v161-update-status{margin:0;padding:0;border:0;background:transparent;min-height:0;font-size:10.5px;line-height:1.45}
+.v250-update-summary-copy>.v161-update-status .v248-update-icon{display:none}
+.v250-update-summary-copy>small{color:var(--text-dim);font-size:9.5px}
+
+.v250-about-primary-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v250-about-primary-actions>.btn{min-height:36px}
+
+.v250-managed-update-panel{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--border-soft)}
+.v250-managed-update-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.v250-managed-update-identity{display:flex;align-items:center;gap:10px;min-width:0}
+.v250-managed-update-logo{width:40px;height:40px;flex:0 0 40px;border-radius:11px;padding:4px;border:1px solid var(--border-soft);background:var(--panel);display:grid;place-items:center}
+.v250-managed-update-logo img{width:100%;height:100%;object-fit:contain;border-radius:7px}
+.v250-managed-update-identity>div{display:grid;gap:2px;min-width:0}
+.v250-managed-update-identity b{font-size:11px;color:var(--text)}
+.v250-managed-update-identity span{font-size:9.5px;font-weight:800;color:#3ddc97;overflow-wrap:anywhere}
+.v250-managed-update-actions{display:flex!important;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.v250-managed-update-actions .btn{min-height:34px;width:auto!important}
+.v250-managed-update-panel>.v248-update-progress-shell{margin:0}
+
+/* Do not let the older v248 About card layout force a bulky nested brand card. */
+.v250-about-update-card .v248-update-brand{padding:0;border:0;background:transparent}
+
+@media(max-width:700px){
+  .v250-about-update-head{align-items:center}
+  .v250-managed-update-head{display:grid;grid-template-columns:1fr}
+  .v250-managed-update-actions{display:grid!important;grid-template-columns:1fr 1fr;justify-content:stretch}
+  .v250-managed-update-actions .btn{width:100%!important;justify-content:center}
+  .v250-about-primary-actions{display:grid;grid-template-columns:1fr 1fr}
+  .v250-about-primary-actions>*{width:100%!important;justify-content:center}
+}
+@media(max-width:420px){
+  .v250-about-update-head{align-items:flex-start}
+  .v250-version-chip{min-width:48px;height:26px;padding:0 8px}
+  .v250-update-summary{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:10px}
+  .v250-update-summary-icon{width:34px;height:34px;border-radius:10px}
+  .v250-about-primary-actions,.v250-managed-update-actions{grid-template-columns:1fr!important}
+}
+@media(max-width:310px){
+  .v250-about-update-head{display:grid;grid-template-columns:1fr}
+  .v250-version-chip{justify-self:start}
+  .v250-managed-update-identity{align-items:flex-start}
+  .v250-managed-update-logo{width:36px;height:36px;flex-basis:36px}
+}
+
+/* Hidden update actions must remain truly hidden even though MediaFlow buttons
+   use author-level display rules that can otherwise override the browser's
+   default [hidden] presentation. */
+.v248-install-update[hidden]{display:none!important}
+.v250-managed-update-identity .v248-update-brand-state.is-info{color:var(--text-dim)}
+.v250-managed-update-identity .v248-update-brand-state.is-pass{color:#3ddc97}
+.v250-managed-update-identity .v248-update-brand-state.is-warn{color:#f2b84b}
+.v250-managed-update-identity .v248-update-brand-state.is-fail{color:#ff7d8b}
