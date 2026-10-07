@@ -1,0 +1,107 @@
+/* MediaFlow v256 — theme-aware cover progress + cover sizes + Dashboard tools */
+
+/* ---------- On-cover control sizing ---------- */
+.v256-cover-overlay-controls{align-items:flex-start}
+.v256-cover-overlay-actions{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));width:min(760px,100%);gap:8px}
+.v256-cover-control{display:grid;gap:6px;padding:7px;border:1px solid var(--border-soft);border-radius:10px;background:color-mix(in srgb,var(--panel) 72%,transparent);min-width:0}
+.v256-cover-control>.v254-cover-overlay-toggle{width:100%;justify-content:center;min-width:0}
+.v256-cover-size{display:grid;grid-template-columns:auto minmax(60px,1fr) 40px;align-items:center;gap:6px;color:var(--text-mute);font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.v256-cover-size input[type="range"]{width:100%;min-width:0;accent-color:var(--flow)}
+.v256-cover-size output{color:var(--text-dim);font-size:9px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Independent visual scales. Keep transform origins pinned to the edge so
+   larger badges grow inward instead of wandering away from the cover corners. */
+.v254-cover-status{transform:scale(var(--v256-status-scale,1));transform-origin:top left}
+.v254-cover-category{transform:scale(var(--v256-category-scale,1));transform-origin:top right}
+.v254-cover-rating{transform:scale(var(--v256-rating-scale,1));transform-origin:bottom right}
+.v254-cover-progress{height:calc(6px * var(--v256-progress-scale,1))!important}
+
+/* Progress is now theme-driven. --flow is changed by MediaFlow themes and the
+   optional second theme accent is used when present. Track and highlight use
+   current panel/text variables so the bar stays readable in dark/light themes. */
+.v254-cover-progress{
+  background:color-mix(in srgb,var(--text) 18%,var(--panel) 82%)!important;
+  border-top:1px solid color-mix(in srgb,var(--flow) 32%,var(--border))!important;
+  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--bg) 45%,transparent);
+}
+.v254-cover-progress-fill{
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--flow) 68%,var(--text) 32%),
+    var(--flow) 72%,
+    var(--v107-accent2,var(--flow)))!important;
+  box-shadow:
+    0 0 8px color-mix(in srgb,var(--flow) 72%,transparent),
+    inset 0 1px 0 color-mix(in srgb,var(--text) 28%,transparent)!important;
+}
+
+/* ---------- Dashboard accordion ---------- */
+.v256-accordion-card{overflow:hidden;padding:0!important}
+.v256-accordion-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;cursor:pointer;user-select:none;background:linear-gradient(135deg,color-mix(in srgb,var(--flow) 7%,var(--panel)),var(--panel));border-bottom:1px solid var(--border-soft);transition:background .15s ease,border-color .15s ease}
+.v256-accordion-head:hover{background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised));border-bottom-color:color-mix(in srgb,var(--flow) 30%,var(--border))}
+.v256-accordion-head:focus-visible{outline:2px solid var(--flow);outline-offset:-2px}
+.v256-accordion-heading{display:grid;gap:3px;min-width:0}
+.v256-accordion-heading .section-label{margin:0!important;padding:0!important;border:0!important;color:var(--text)!important}
+.v256-accordion-heading>span{font-size:10.5px;color:var(--text-mute);line-height:1.4}
+.v256-accordion-toggle{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border:1px solid color-mix(in srgb,var(--flow) 34%,var(--border));border-radius:10px;background:color-mix(in srgb,var(--flow) 7%,var(--panel-raised));color:var(--flow);cursor:pointer}
+.v256-accordion-toggle .v225-btn-icon{display:grid!important;place-items:center!important;width:18px!important;height:18px!important;margin:0!important;transform:rotate(180deg);transition:transform .18s ease}.v256-accordion-toggle .v225-btn-icon svg{width:18px!important;height:18px!important}
+.v256-accordion-body{padding:16px 17px 17px}
+.v256-accordion-card.is-collapsed .v256-accordion-head{border-bottom-color:transparent}
+.v256-accordion-card.is-collapsed .v256-accordion-toggle .v225-btn-icon{transform:rotate(0deg)}
+.v256-accordion-card.is-collapsed>.v256-accordion-body{display:none}
+
+/* Existing stopwatch internals retain their design inside the new accordion. */
+.stopwatch-card.v256-accordion-card{margin-top:22px}
+.stopwatch-card.v256-accordion-card .stopwatch-display{margin-top:2px}
+
+/* ---------- Runtime Calculator ---------- */
+.v256-runtime-card{margin-top:14px}
+.v256-runtime-mode-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.v256-runtime-chain,.v256-runtime-multi{display:grid;gap:8px}
+.v256-runtime-row{display:grid;grid-template-columns:minmax(88px,120px) minmax(0,1fr) auto;gap:10px;align-items:end;padding:11px;border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 80%,transparent)}
+.v256-runtime-row-label{align-self:center;font-size:12px;font-weight:800;color:var(--text)}
+.v256-runtime-time-fields{display:grid;grid-template-columns:minmax(64px,1fr) auto minmax(64px,1fr) auto minmax(64px,1fr);gap:6px;align-items:end}
+.v256-runtime-time-fields label{display:grid;gap:4px;min-width:0}
+.v256-runtime-time-fields label>span{font-size:9px;font-weight:800;color:var(--text-mute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.v256-runtime-time-fields input{text-align:center;font-variant-numeric:tabular-nums;min-width:0;width:100%;box-sizing:border-box}
+.v256-runtime-colon{align-self:center;padding-top:17px;color:var(--text-mute);font-weight:900}
+.v256-runtime-remove{align-self:center}
+.v256-runtime-operator,.v256-runtime-equals{font-family:var(--font-display);font-size:19px;font-weight:900;color:var(--flow);text-align:center;line-height:1}
+.v256-runtime-equals{margin:10px 0}
+.v256-add-runtime-row{justify-self:start;margin-top:2px}
+.v256-runtime-result{display:grid;gap:10px;padding:13px;border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 76%,transparent)}
+.v256-runtime-result.has-result{border-color:color-mix(in srgb,var(--flow) 42%,var(--border));background:color-mix(in srgb,var(--flow) 6%,var(--panel-raised))}
+.v256-runtime-result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.v256-runtime-result-head>div{display:grid;gap:2px}
+.v256-runtime-result-head span{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-mute);font-weight:800}
+.v256-runtime-result-head b{font-family:var(--font-display);font-size:22px;color:var(--text);font-variant-numeric:tabular-nums}
+.v256-runtime-count{padding:5px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--border-soft);color:var(--text-dim)!important;text-transform:none!important;letter-spacing:0!important}
+.v256-runtime-result-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.v256-runtime-result-fields>div{display:grid;gap:4px;text-align:center;padding:9px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel)}
+.v256-runtime-result-fields span{font-size:8.5px;color:var(--text-mute);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.v256-runtime-result-fields output{font-family:var(--font-display);font-size:18px;color:var(--flow);font-variant-numeric:tabular-nums}
+.v256-runtime-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.v256-runtime-help{margin-top:10px;font-size:10.5px;color:var(--text-mute);line-height:1.5}
+
+@media(max-width:1040px){
+  .v256-cover-overlay-actions{grid-template-columns:repeat(2,minmax(150px,1fr))}
+}
+@media(max-width:760px){
+  .v256-cover-overlay-actions{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v256-runtime-row{grid-template-columns:1fr}
+  .v256-runtime-row-label{text-align:left}
+  .v256-runtime-remove{justify-self:start}
+}
+@media(max-width:460px){
+  .v256-cover-overlay-actions{grid-template-columns:1fr}
+  .v256-accordion-head{padding:13px 14px}
+  .v256-accordion-body{padding:14px}
+  .v256-runtime-time-fields{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .v256-runtime-colon{display:none}
+  .v256-runtime-result-fields{gap:5px}
+  .v256-runtime-actions>.btn{flex:1 1 calc(50% - 5px);justify-content:center}
+}
+@media(max-width:310px){
+  .v256-cover-size{grid-template-columns:1fr 36px}.v256-cover-size>span{display:none}
+  .v256-runtime-result-fields{grid-template-columns:1fr}
+  .v256-runtime-actions>.btn{flex-basis:100%}
+}
