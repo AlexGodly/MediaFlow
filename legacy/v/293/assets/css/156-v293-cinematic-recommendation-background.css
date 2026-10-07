@@ -1,0 +1,211 @@
+/* MediaFlow v293 — cinematic recommended-title background overhaul
+   ----------------------------------------------------------------
+   v292 introduced the optional cover-background mode. v293 keeps that
+   preference/data model intact and upgrades the enabled presentation so the
+   recommended artwork is intentionally visible instead of being buried under
+   the normal panel treatment. */
+
+.hero.mf292-recommendation-cover.mf293-cinematic-cover{
+  --mf293-glass:color-mix(in srgb,var(--panel) 28%,transparent);
+  --mf293-glass-strong:color-mix(in srgb,var(--panel) 48%,transparent);
+  --mf293-stroke:color-mix(in srgb,var(--flow) 34%,rgba(255,255,255,.14));
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden!important;
+  background:color-mix(in srgb,var(--panel) 72%,#09070b)!important;
+  border:1px solid color-mix(in srgb,var(--flow) 48%,var(--border))!important;
+  box-shadow:
+    0 24px 72px rgba(0,0,0,.34),
+    0 0 0 1px color-mix(in srgb,var(--flow) 8%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.055)!important;
+}
+
+/* Full-bleed blurred color field. Less blur + more saturation/contrast than
+   v292 so the artwork actually contributes to the panel's identity. */
+.hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-bg{
+  inset:-34px!important;
+  z-index:-5!important;
+  background-image:var(--mf292-recommendation-cover)!important;
+  background-size:cover!important;
+  background-position:center 30%!important;
+  filter:blur(11px) saturate(1.58) contrast(1.12) brightness(.78)!important;
+  transform:scale(1.085)!important;
+  opacity:1!important;
+}
+
+/* A second, sharper hero-art pass makes the title's cover recognizable.
+   Portrait covers are intentionally enlarged and cropped rather than stretched. */
+.hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{
+  z-index:-4!important;
+  inset:-2% -1% -2% 20%!important;
+  background-image:var(--mf292-recommendation-cover)!important;
+  background-size:cover!important;
+  background-position:center 28%!important;
+  background-repeat:no-repeat!important;
+  opacity:.76!important;
+  filter:saturate(1.42) contrast(1.14) brightness(.90)!important;
+  transform:scale(1.02)!important;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.22) 9%,rgba(0,0,0,.88) 35%,#000 58%,#000 100%)!important;
+  mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.22) 9%,rgba(0,0,0,.88) 35%,#000 58%,#000 100%)!important;
+}
+
+/* Readability layer: intentionally much lighter than v292 across the middle
+   and right side. The left content zone stays protected while artwork remains
+   vivid everywhere else. */
+.hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-scrim{
+  z-index:-3!important;
+  inset:0!important;
+  background:
+    radial-gradient(900px 360px at 72% 20%,color-mix(in srgb,var(--flow) 9%,transparent),transparent 70%),
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--panel) 86%,transparent) 0%,
+      color-mix(in srgb,var(--panel) 69%,transparent) 20%,
+      color-mix(in srgb,var(--panel) 38%,transparent) 42%,
+      color-mix(in srgb,var(--panel) 18%,transparent) 68%,
+      color-mix(in srgb,var(--panel) 25%,transparent) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--panel) 10%,transparent) 0%,
+      transparent 45%,
+      color-mix(in srgb,var(--panel) 56%,transparent) 100%)!important;
+  box-shadow:
+    inset 0 -120px 125px color-mix(in srgb,var(--panel) 36%,transparent),
+    inset 0 0 140px rgba(0,0,0,.13)!important;
+}
+
+/* Premium inner recommendation surface. It reads as glass, not as a large
+   opaque rectangle that hides the cover artwork. */
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature{
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(100deg,
+      color-mix(in srgb,var(--panel) 58%,transparent) 0%,
+      color-mix(in srgb,var(--panel) 35%,transparent) 42%,
+      color-mix(in srgb,var(--panel) 13%,transparent) 100%)!important;
+  border:1px solid color-mix(in srgb,var(--flow) 24%,rgba(255,255,255,.16))!important;
+  box-shadow:
+    0 16px 42px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.055)!important;
+  -webkit-backdrop-filter:blur(8px) saturate(1.18)!important;
+  backdrop-filter:blur(8px) saturate(1.18)!important;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:1px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--flow) 54%,transparent),transparent 74%);
+  opacity:.7;
+  pointer-events:none;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature .v50-cover{
+  box-shadow:
+    0 18px 38px rgba(0,0,0,.36),
+    0 0 0 1px rgba(255,255,255,.10),
+    0 0 24px color-mix(in srgb,var(--flow) 16%,transparent)!important;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature small{
+  color:color-mix(in srgb,var(--text) 72%,var(--flow))!important;
+  letter-spacing:.015em;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature b{
+  display:inline-block;
+  margin-top:3px;
+  font-size:clamp(20px,1.7vw,28px)!important;
+  line-height:1.12!important;
+  color:var(--text)!important;
+  text-shadow:0 2px 20px rgba(0,0,0,.52)!important;
+}
+
+/* Make secondary controls/readout chips feel like part of the cinematic glass
+   system instead of detached opaque blocks. */
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .pill{
+  background:color-mix(in srgb,var(--panel) 54%,transparent)!important;
+  border-color:color-mix(in srgb,var(--flow) 16%,rgba(255,255,255,.14))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  -webkit-backdrop-filter:blur(9px) saturate(1.12)!important;
+  backdrop-filter:blur(9px) saturate(1.12)!important;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover :is(.hero .btn,.hero-actions .btn,.btn.secondary,.btn.ghost){
+  -webkit-backdrop-filter:blur(9px) saturate(1.12);
+  backdrop-filter:blur(9px) saturate(1.12);
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover :is(.hero-name,.hero-amount,.hero-note,.hero-eyebrow,.hero-reasons,.hero-actions,.link-btn){
+  text-shadow:0 2px 16px rgba(0,0,0,.62)!important;
+}
+.hero.mf292-recommendation-cover.mf293-cinematic-cover .hero-eyebrow{
+  color:color-mix(in srgb,var(--flow) 78%,var(--text))!important;
+  letter-spacing:.12em;
+}
+
+/* A subtle entrance gives the artwork intention without adding perpetual
+   animation or performance cost. */
+@keyframes mf293CinematicReveal{
+  from{opacity:.45;transform:scale(1.105)}
+  to{opacity:1;transform:scale(1.085)}
+}
+@keyframes mf293ArtReveal{
+  from{opacity:.20;transform:scale(1.045)}
+  to{opacity:.76;transform:scale(1.02)}
+}
+@media(prefers-reduced-motion:no-preference){
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-bg{animation:mf293CinematicReveal .58s cubic-bezier(.2,.75,.2,1) both}
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{animation:mf293ArtReveal .66s cubic-bezier(.2,.75,.2,1) both}
+}
+
+/* Tablet: preserve strong artwork but protect controls. */
+@media(max-width:900px){
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{
+    inset:-2% -10% -2% 10%!important;
+    background-position:center 28%!important;
+    opacity:.67!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-scrim{
+    background:
+      linear-gradient(180deg,color-mix(in srgb,var(--panel) 59%,transparent) 0%,color-mix(in srgb,var(--panel) 26%,transparent) 42%,color-mix(in srgb,var(--panel) 68%,transparent) 100%),
+      linear-gradient(90deg,color-mix(in srgb,var(--panel) 73%,transparent),color-mix(in srgb,var(--panel) 17%,transparent) 82%)!important;
+  }
+}
+
+/* Mobile: artwork remains obvious instead of disappearing, but the vertical
+   gradient is stronger behind stacked text/actions. */
+@media(max-width:600px){
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-bg{
+    inset:-22px!important;
+    filter:blur(10px) saturate(1.46) contrast(1.10) brightness(.74)!important;
+    opacity:1!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{
+    inset:0 -34% 20% 0!important;
+    background-size:cover!important;
+    background-position:center 18%!important;
+    opacity:.55!important;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.84) 45%,transparent 100%)!important;
+    mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.84) 45%,transparent 100%)!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-scrim{
+    background:
+      linear-gradient(180deg,color-mix(in srgb,var(--panel) 50%,transparent) 0%,color-mix(in srgb,var(--panel) 36%,transparent) 42%,color-mix(in srgb,var(--panel) 80%,transparent) 100%)!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature{
+    background:color-mix(in srgb,var(--panel) 46%,transparent)!important;
+    -webkit-backdrop-filter:blur(8px) saturate(1.12)!important;
+    backdrop-filter:blur(8px) saturate(1.12)!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature b{font-size:18px!important}
+}
+
+@media(max-width:430px){
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{opacity:.47!important}
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover .pill{background:color-mix(in srgb,var(--panel) 66%,transparent)!important}
+}
+
+@media(prefers-reduced-transparency:reduce){
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-bg{
+    filter:saturate(1.25) contrast(1.08) brightness(.62)!important;
+    opacity:1!important;
+  }
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover>.mf292-recommendation-art{opacity:.48!important;filter:saturate(1.18) brightness(.72)!important}
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover .v50-title-feature,
+  .hero.mf292-recommendation-cover.mf293-cinematic-cover .pill{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
