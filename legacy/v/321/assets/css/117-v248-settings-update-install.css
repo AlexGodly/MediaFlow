@@ -1,0 +1,120 @@
+/* ============================================================
+   MediaFlow v248 — Settings navigation + managed app updates
+   ============================================================ */
+
+/* Desktop Settings layout scales with the available viewport rather than
+   holding a rigid left rail until the old tablet breakpoint. */
+@media (min-width:1181px){
+  .v221-settings-layout{grid-template-columns:clamp(188px,17vw,245px) minmax(0,1fr)}
+  .v221-settings-nav{min-width:0}
+}
+
+/* Narrow desktop / wide tablet: use the horizontal Settings navigator before
+   the app content becomes cramped. Mouse/pen drag scrolling is supplied by the
+   v248 runtime; touch keeps native horizontal panning. */
+@media (min-width:701px) and (max-width:1180px){
+  .v221-settings-layout{grid-template-columns:minmax(0,1fr)!important}
+  .v221-settings-nav{position:sticky!important;top:104px!important;z-index:20!important;max-height:none!important;display:flex!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:8px!important;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .v221-settings-nav-group{display:flex!important;align-items:center!important;gap:6px!important;flex:0 0 auto!important;margin:0!important;padding:0!important;border:0!important}
+  .v221-settings-nav-title{display:none!important}
+  .v221-settings-nav-item{width:auto!important;white-space:nowrap!important;flex:0 0 auto!important;border:1px solid var(--border-soft)!important;background:var(--panel-raised)!important;scroll-snap-align:nearest}
+}
+.v221-settings-nav.v248-drag-ready{cursor:grab;user-select:none}
+.v221-settings-nav.v248-dragging{cursor:grabbing!important;scroll-snap-type:none!important}
+.v221-settings-nav.v248-dragging .v221-settings-nav-item{pointer-events:none}
+
+/* Shared dynamic update icon */
+.v248-update-icon{display:inline-grid;place-items:center;width:17px;height:17px;flex:0 0 17px;color:currentColor}
+.v248-update-icon svg{width:100%;height:100%;display:block}
+.v248-update-icon.is-checking svg,.v248-update-icon.is-installing svg{animation:v248UpdateSpin 1s linear infinite;transform-origin:50% 50%}
+@keyframes v248UpdateSpin{to{transform:rotate(360deg)}}
+.v248-update-icon.is-available{color:#f2b84b}
+.v248-update-icon.is-ready,.v248-update-icon.is-current{color:#3ddc97}
+.v248-update-icon.is-error{color:#ff7d8b}
+
+.v248-inline-update-status{display:flex;align-items:flex-start;gap:7px;min-width:0}
+.v248-inline-update-status>span:last-child{min-width:0;overflow-wrap:anywhere}
+.v248-inline-update-status.is-pass{color:#3ddc97}
+.v248-inline-update-status.is-warn{color:#f2b84b}
+.v248-inline-update-status.is-fail{color:#ff7d8b}
+.v248-inline-update-status.is-info{color:var(--text-dim)}
+.v248-inline-update-status.is-info .v248-update-icon{color:var(--flow)}
+
+/* About / automatic-check controls */
+.v248-about-check-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.v248-check-update{display:inline-flex!important;align-items:center;gap:7px}
+.v248-check-update>[data-v248-update-icon]{display:inline-grid;place-items:center;width:17px;height:17px;flex:0 0 17px}
+.v248-check-update>[data-v248-update-icon]>.v248-update-icon{width:17px;height:17px}
+.v248-app-updates-card{display:grid;gap:14px}
+.v248-auto-update-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.v248-auto-update-main{display:flex;align-items:flex-start;gap:10px;min-width:220px;flex:1}
+.v248-auto-update-main>div{min-width:0;flex:1}
+.v248-auto-update-state-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border:1px solid var(--border-soft);border-radius:11px;background:var(--panel-raised);color:var(--flow)}
+.v248-auto-update-state-icon.is-pass{color:#3ddc97;border-color:color-mix(in srgb,#3ddc97 38%,var(--border-soft))}
+.v248-auto-update-state-icon.is-warn{color:#f2b84b;border-color:color-mix(in srgb,#f2b84b 38%,var(--border-soft))}
+.v248-auto-update-state-icon.is-fail{color:#ff7d8b;border-color:color-mix(in srgb,#ff7d8b 38%,var(--border-soft))}
+.v248-update-check-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.v248-auto-install-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px;border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 78%,transparent)}
+.v248-auto-install-row>div{min-width:0;flex:1}
+.v248-auto-install-row .toggle{flex:0 0 auto;margin-top:1px}
+.v248-update-divider{height:1px;background:var(--border-soft);margin:2px 0}
+
+/* MediaFlow-branded update/install area above Install update / Reload app. */
+.v248-update-brand{display:flex;align-items:center;gap:12px;min-width:0;padding:12px;border:1px solid color-mix(in srgb,var(--flow) 20%,var(--border-soft));border-radius:14px;background:color-mix(in srgb,var(--panel-raised) 72%,transparent)}
+.v248-update-brand-mark{position:relative;width:50px;height:50px;flex:0 0 50px;border-radius:13px;padding:4px;background:var(--panel);border:1px solid var(--border-soft)}
+.v248-update-brand-mark>img{width:100%;height:100%;display:block;object-fit:contain;border-radius:9px}
+.v248-update-brand-badge{position:absolute;right:-5px;bottom:-5px;display:grid;place-items:center;width:24px;height:24px;border-radius:999px;border:2px solid var(--panel);background:var(--panel-raised);color:var(--flow);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.v248-update-brand-badge.is-pass{color:#3ddc97}.v248-update-brand-badge.is-warn{color:#f2b84b}.v248-update-brand-badge.is-fail{color:#ff7d8b}
+.v248-update-brand-badge .v248-update-icon{width:13px;height:13px;flex-basis:13px}
+.v248-update-brand-copy{min-width:0;display:grid;gap:3px}
+.v248-update-brand-title{font-size:13px;font-weight:850;color:var(--text)}
+.v248-update-brand-title.is-ready{color:#3ddc97}
+.v248-update-brand-state{font-size:10px;font-weight:850;letter-spacing:.02em;color:var(--text-dim)}
+.v248-update-brand-state.is-pass{color:#3ddc97}.v248-update-brand-state.is-warn{color:#f2b84b}.v248-update-brand-state.is-fail{color:#ff7d8b}.v248-update-brand-state.is-info{color:var(--flow)}
+.v248-update-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v248-update-actions .btn{min-height:38px}
+
+/* Update progress / success / error */
+.v248-update-progress-shell{display:grid;gap:6px;padding:9px 10px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised)}
+.v248-update-progress-shell[hidden]{display:none!important}
+.v248-update-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:9.5px;color:var(--text-dim)}
+.v248-update-progress-head>span{min-width:0;overflow-wrap:anywhere}.v248-update-progress-head>b{flex:0 0 auto;color:var(--text)}
+.v248-update-progress-track{height:6px;overflow:hidden;border-radius:999px;background:var(--panel);border:1px solid var(--border-soft)}
+.v248-update-progress-track>span{display:block;height:100%;width:0;border-radius:inherit;background:var(--flow);transition:width .22s ease}
+.v248-update-progress-shell.is-pass{border-color:color-mix(in srgb,#3ddc97 35%,var(--border-soft))}.v248-update-progress-shell.is-pass .v248-update-progress-track>span{background:#3ddc97}
+.v248-update-progress-shell.is-fail{border-color:color-mix(in srgb,#ff7d8b 38%,var(--border-soft))}.v248-update-progress-shell.is-fail .v248-update-progress-track>span{background:#ff7d8b}
+
+/* PWA logo stays the official MediaFlow icon while the small badge changes
+   dynamically with hosted/PWA update state. */
+.v248-pwa-mark{position:relative;overflow:visible!important}
+.v248-pwa-mark-badge{position:absolute;right:-6px;bottom:-6px;width:23px;height:23px;display:grid;place-items:center;border-radius:999px;background:var(--panel-raised);border:2px solid var(--panel);box-shadow:0 4px 12px rgba(0,0,0,.24);color:var(--flow)}
+.v248-pwa-mark-badge.is-pass{color:#3ddc97}.v248-pwa-mark-badge.is-warn{color:#f2b84b}.v248-pwa-mark-badge.is-fail{color:#ff7d8b}
+.v248-pwa-mark-badge .v248-update-icon{width:12px;height:12px;flex-basis:12px}
+.v248-pwa-title.is-ready{color:#3ddc97}
+.v248-pwa-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.v248-pwa-actions .btn{width:100%;justify-content:center}
+.v248-pwa-card>.v248-update-progress-shell{width:100%}
+
+@media(max-width:700px){
+  .v248-auto-update-row,.v248-auto-install-row{display:grid;grid-template-columns:1fr}
+  .v248-update-check-actions{display:grid;grid-template-columns:auto minmax(0,1fr)}
+  .v248-update-check-actions .v248-check-update{width:100%;justify-content:center}
+  .v248-update-brand{align-items:flex-start}
+  .v248-update-actions{display:grid;grid-template-columns:1fr 1fr}
+  .v248-update-actions .btn{width:100%;justify-content:center}
+  .v248-about-check-row{display:grid;grid-template-columns:1fr 1fr}
+  .v248-about-check-row>*{width:100%;justify-content:center}
+}
+@media(max-width:420px){
+  .v248-update-brand{padding:10px;gap:10px}
+  .v248-update-brand-mark{width:43px;height:43px;flex-basis:43px;border-radius:11px}
+  .v248-update-actions,.v248-about-check-row,.v248-pwa-actions{grid-template-columns:1fr!important}
+  .v248-update-check-actions{grid-template-columns:1fr}
+  .v248-update-check-actions>.toggle{justify-self:start}
+  .v248-auto-update-main{min-width:0}
+  .v248-auto-update-state-icon{width:31px;height:31px;flex-basis:31px}
+}
+@media(max-width:310px){
+  .v248-update-brand{display:grid;grid-template-columns:auto minmax(0,1fr)}
+  .v248-update-progress-head{align-items:flex-start}
+}
