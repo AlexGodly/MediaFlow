@@ -1,0 +1,156 @@
+/* ============================================================
+   MediaFlow v225 — Personal Order clarity + global button icons
+   ============================================================ */
+
+/* --- Personal Order / Add Titles controls ------------------- */
+.v225-order-filterbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:10px!important;
+  align-items:end;
+  margin-top:12px;
+  padding:12px;
+  border:1px solid var(--border-soft);
+  border-radius:13px;
+  background:color-mix(in srgb,var(--panel-raised) 86%,transparent);
+}
+.v225-order-filter-control{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.v225-order-filter-label{
+  display:block;
+  color:var(--text-mute);
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  line-height:1.1;
+}
+.v225-order-filter-control select,
+.v225-order-filter-control .v66-cat-filter,
+.v225-order-filter-control .v66-cat-filter>summary,
+.v225-order-filter-direction .v224-sort-direction{
+  width:100%!important;
+  min-width:0!important;
+  min-height:39px;
+  box-sizing:border-box;
+}
+.v225-order-filter-category{grid-column:1/-1}
+.v225-order-filter-sort{grid-column:1}
+.v225-order-filter-direction{grid-column:2}
+.v225-order-filter-status{grid-column:1/-1}
+.v225-order-filter-priority{grid-column:1/-1}
+.v225-order-filter-footer{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  padding-top:2px;
+}
+.v225-order-filter-footer .v140-order-clear,
+.v225-order-filter-footer .v140-order-matchline{
+  grid-column:auto!important;
+  margin:0;
+}
+.v225-order-filter-footer .v140-order-matchline{font-size:11px}
+
+/* Protect Personal Order controls from old v224 generic full-width pairing. */
+.v225-order-filterbar .v224-sort-pair{display:contents!important}
+
+@media(max-width:780px){
+  .v225-order-filterbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .v225-order-filter-category{grid-column:1/-1}
+  .v225-order-filter-sort{grid-column:1}
+  .v225-order-filter-direction{grid-column:2}
+  .v225-order-filter-status,.v225-order-filter-priority{grid-column:1/-1}
+  .v225-order-filter-direction .v224-sort-direction{width:100%!important}
+}
+@media(max-width:520px){
+  .v225-order-filterbar{grid-template-columns:1fr!important;padding:10px}
+  .v225-order-filter-category,
+  .v225-order-filter-sort,
+  .v225-order-filter-direction,
+  .v225-order-filter-status,
+  .v225-order-filter-priority{grid-column:1}
+  .v225-order-filter-footer{grid-column:1;align-items:stretch}
+  .v225-order-filter-footer .btn{width:100%}
+  .v225-order-filter-footer .v140-order-matchline{text-align:center}
+}
+
+/* --- Global button icon language ---------------------------- */
+.v225-icon-button{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+.v225-btn-icon{
+  width:16px;
+  height:16px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:1;
+}
+.v225-btn-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.btn-sm.v225-icon-button .v225-btn-icon,
+.v221-settings-nav-item.v225-icon-button .v225-btn-icon{width:14px;height:14px}
+.btn-primary.v225-icon-button .v225-btn-icon{stroke-width:2.15}
+.v221-settings-nav-item.v225-icon-button{justify-content:flex-start!important}
+.v161-about-links .v225-icon-button{gap:8px}
+
+/* Existing icon-only / navigation controls keep their original layout. */
+.mtab.v225-icon-button,
+.mobile-more-item.v225-icon-button{display:flex!important}
+
+/* --- Account form polish ------------------------------------ */
+.profile-card .profile-section{
+  border-radius:14px;
+}
+.profile-card input[type="text"],
+.profile-card input[type="email"],
+.profile-card input[type="password"],
+.profile-card input[type="url"]{
+  min-height:44px;
+  width:100%;
+  box-sizing:border-box;
+  padding:10px 12px;
+  border-radius:11px;
+  border:1px solid var(--border-soft);
+  background:color-mix(in srgb,var(--panel-raised) 92%,transparent);
+  color:var(--text);
+  outline:none;
+  transition:border-color .14s ease,box-shadow .14s ease,background .14s ease;
+}
+.profile-card input[type="text"]:hover,
+.profile-card input[type="email"]:hover,
+.profile-card input[type="password"]:hover,
+.profile-card input[type="url"]:hover{
+  border-color:color-mix(in srgb,var(--flow) 42%,var(--border-soft));
+}
+.profile-card input[type="text"]:focus,
+.profile-card input[type="email"]:focus,
+.profile-card input[type="password"]:focus,
+.profile-card input[type="url"]:focus{
+  border-color:var(--flow);
+  background:var(--panel-raised);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 15%,transparent);
+}
+.profile-card .field-label{font-size:11px;letter-spacing:.02em}
+.profile-card .modal-actions{margin-top:12px}
+.profile-card .profile-avatar-actions{gap:8px;flex-wrap:wrap}
+
+@media(max-width:620px){
+  .profile-card .modal-actions .btn,
+  .profile-card .profile-avatar-actions .btn{width:100%}
+}

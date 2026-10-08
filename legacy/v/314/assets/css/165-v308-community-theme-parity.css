@@ -1,0 +1,112 @@
+/* MediaFlow v308: The Community remains exactly as designed for guests.
+   All these overrides are scoped to authenticated users only. Dynamic,
+   custom, platform and full-style themes resolve through the live Workspace
+   CSS variables, including global light/dark appearance preferences. */
+body.mf302-public-active.mf302-signed-in #mf302-root {
+  --mf308-bg:var(--bg,#0e111a);
+  --mf308-panel:var(--panel,#161b2a);
+  --mf308-raised:var(--panel-raised,var(--panel,#1c2334));
+  --mf308-text:var(--text,#f4f6fb);
+  --mf308-subtext:var(--text-dim,var(--text,#c4cbda));
+  --mf308-muted:var(--text-mute,var(--text-dim,#a4afc4));
+  --mf308-border:var(--border,#32394a);
+  --mf308-flow:var(--flow,#9384ff);
+  background:var(--mf308-bg)!important;
+  color:var(--mf308-text);
+  font-family:inherit;
+  color-scheme:normal;
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-portal {
+  color:var(--mf308-text);
+  background:radial-gradient(ellipse at 10% 0%, color-mix(in srgb,var(--mf308-flow) 12%,transparent),transparent 47%),
+             radial-gradient(ellipse at 92% 5%, color-mix(in srgb,var(--mf308-flow) 8%,transparent),transparent 44%),var(--mf308-bg);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-top {
+  background:color-mix(in srgb,var(--mf308-panel) 92%,transparent);
+  border-bottom-color:var(--mf308-border);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-mobile-nav {border-color:var(--mf308-border);background:var(--mf308-panel)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-brand,
+body.mf302-public-active.mf302-signed-in #mf302-root a.mf306-explore-tile {color:var(--mf308-text)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-brand small,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-hero p,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-heading p,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-tile p,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-title p,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-profile-main p,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-empty {color:var(--mf308-subtext)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-link {color:var(--mf308-subtext)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-link:hover,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-link.active {color:var(--mf308-text);background:color-mix(in srgb,var(--mf308-flow) 17%,var(--mf308-raised))}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-btn {
+  background:var(--mf308-raised);color:var(--mf308-text);border-color:var(--mf308-border);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-btn:hover {border-color:var(--mf308-flow);background:color-mix(in srgb,var(--mf308-flow) 12%,var(--mf308-raised))}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-btn.primary {
+  background:color-mix(in srgb,var(--mf308-flow) 23%,var(--mf308-panel));
+  border-color:var(--mf308-flow);color:var(--mf308-text);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-eyebrow,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-tile b {color:var(--mf308-flow)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-hero h1 em {
+  background:linear-gradient(95deg,var(--mf308-flow),color-mix(in srgb,var(--mf308-flow) 42%,var(--mf308-text)));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-tile,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-title,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-empty,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-profile,
+body.mf302-public-active.mf302-signed-in #mf302-root .mf304-profile-summary {
+  background:var(--mf308-panel);border-color:var(--mf308-border);color:var(--mf308-text)
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-tile:hover,
+body.mf302-public-active.mf302-signed-in #mf302-root a.mf306-explore-tile:hover {
+  border-color:var(--mf308-flow);background:var(--mf308-raised);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf303-tile-icon {
+  background:color-mix(in srgb,var(--mf308-flow) 14%,var(--mf308-raised));
+  border-color:color-mix(in srgb,var(--mf308-flow) 40%,var(--mf308-border));color:var(--mf308-flow)
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-search,
+body.mf302-public-active.mf302-signed-in #mf302-root input,
+body.mf302-public-active.mf302-signed-in #mf302-root select,
+body.mf302-public-active.mf302-signed-in #mf302-root textarea {
+  color:var(--mf308-text);background:var(--mf308-raised);border-color:var(--mf308-border)
+}
+body.mf302-public-active.mf302-signed-in #mf302-root input::placeholder {color:var(--mf308-muted)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-no-cover {background:var(--mf308-raised);color:var(--mf308-muted)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-banner {
+  background:linear-gradient(115deg,color-mix(in srgb,var(--mf308-flow) 40%,var(--mf308-panel)),var(--mf308-raised));
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-avatar {
+  background:var(--mf308-raised);border-color:var(--mf308-panel);color:var(--mf308-text)
+}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-stats button {color:var(--mf308-text)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf302-notice {
+  background:var(--mf308-raised);color:var(--mf308-text);border:1px solid var(--mf308-border);
+}
+body.mf302-public-active.mf302-signed-in #mf302-root button:focus-visible,
+body.mf302-public-active.mf302-signed-in #mf302-root a:focus-visible {outline-color:var(--mf308-flow)}
+body.mf302-public-active.mf302-signed-in #mf302-root .mf304-stats-frame {border-color:var(--mf308-border);background:var(--mf308-panel)}
+/* Signed-in messaging follows the very same Workspace theme, including when
+   Inbox and the desktop chat widget are displayed inside Workspace itself. */
+body.mf308-user-theme-active .mf302-workspace .mf302-tile,
+body.mf308-user-theme-active .mf302-workspace .mf302-form,
+body.mf308-user-theme-active .mf302-inbox,
+body.mf308-user-theme-active #mf302-chat-widget>section {
+  background:var(--panel,#161b2a);border-color:var(--border,#333b4a);color:var(--text,#f4f6fb)
+}
+body.mf308-user-theme-active .mf302-workspace .mf302-btn,
+body.mf308-user-theme-active .mf302-workspace .mf302-thread {
+  background:var(--panel-raised,var(--panel));color:var(--text);border-color:var(--border)
+}
+body.mf308-user-theme-active .mf302-workspace .mf302-thread:hover,
+body.mf308-user-theme-active .mf302-workspace .mf302-thread.active {background:color-mix(in srgb,var(--flow) 14%,var(--panel-raised))}
+body.mf308-user-theme-active .mf302-bubble {background:var(--panel-raised,var(--panel));color:var(--text)}
+body.mf308-user-theme-active .mf302-bubble.mine {background:color-mix(in srgb,var(--flow) 23%,var(--panel));color:var(--text)}
+body.mf308-user-theme-active #mf302-chat-widget .mf302-chat-trigger,
+body.mf308-user-theme-active .mf302-chat-trigger {background:var(--panel-raised,var(--panel));border-color:var(--flow);color:var(--text)}
+body.mf308-user-theme-active #mf302-chat-widget>section header button,
+body.mf308-user-theme-active #mf302-chat-widget .mf302-btn {color:var(--text)}
+body.mf308-user-theme-active #mf302-chat-widget input {background:var(--panel-raised);color:var(--text);border-color:var(--border)}
+@media(prefers-reduced-motion:reduce){body.mf302-public-active.mf302-signed-in #mf302-root .mf302-portal{scroll-behavior:auto}}
