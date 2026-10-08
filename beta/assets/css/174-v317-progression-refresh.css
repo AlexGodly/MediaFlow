@@ -1,0 +1,11 @@
+/* MediaFlow v317: theme-aware Settings and Community controls */
+.mf317-refresh-bar{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mf317-refresh{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;white-space:nowrap;border-color:var(--border,rgba(150,160,180,.24))}
+.mf317-refresh svg{width:17px;height:17px}
+.mf317-refresh.loading svg{animation:mf317Rotate 1.3s linear infinite}
+@keyframes mf317Rotate{to{transform:rotate(360deg)}}
+.mf317-refresh:disabled{opacity:.6;cursor:progress}
+.v221-settings-content .mf316-xp-settings{margin:12px 0 18px}
+.v221-settings-content .mf316-xp-grid{max-width:100%}
+@media(max-width:430px){.mf317-refresh{width:100%}.mf317-refresh-bar{width:100%}.v221-settings-content .mf316-xp-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.mf317-refresh.loading svg{animation:none}}

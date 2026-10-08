@@ -1,0 +1,120 @@
+/* ============================================================
+   MediaFlow v277 — responsive navigation breakpoint repair
+   Fixes v276 accidentally exposing mobile-tabbar at desktop widths.
+   ============================================================ */
+
+/* Desktop is the default. The mobile bar must never participate in the
+   desktop #app flex row, otherwise it stretches into giant page-height
+   navigation columns. */
+body.v260-redesign .mobile-tabbar{
+  display:none!important;
+  flex:none!important;
+  width:auto;
+  height:auto;
+  min-height:0;
+  max-height:none;
+}
+
+/* v273 intentionally moved the physical responsive breakpoint to 1080px.
+   Complete that contract here: mobile navigation is fixed to the viewport,
+   compact, and the desktop sidebar is mutually exclusive with it. */
+@media(max-width:1080px){
+  body.v260-redesign .sidebar{display:none!important;}
+  body.v260-redesign .mobile-tabbar{
+    display:flex!important;
+    position:fixed!important;
+    inset:auto 0 0 0!important;
+    z-index:90!important;
+    width:100%!important;
+    max-width:100vw!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:calc(88px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+    align-items:stretch!important;
+    justify-content:stretch!important;
+    gap:0!important;
+    overflow:visible!important;
+    padding:8px max(3px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(3px,env(safe-area-inset-right))!important;
+  }
+  body.v260-redesign .mobile-tabbar>.mtab,
+  body.v260-redesign .mobile-tabbar>.mobile-more-wrap{
+    flex:1 1 0!important;
+    min-width:0!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:72px!important;
+    align-self:stretch!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab{
+    width:100%!important;
+    height:auto!important;
+    min-height:58px!important;
+    max-height:72px!important;
+    padding:5px 3px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    overflow:hidden!important;
+    box-sizing:border-box!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab svg{
+    width:clamp(18px,2.6vw,24px)!important;
+    height:clamp(18px,2.6vw,24px)!important;
+    min-width:18px!important;
+    min-height:18px!important;
+    max-width:24px!important;
+    max-height:24px!important;
+    flex:0 0 auto!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab span{
+    display:block;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    text-align:center!important;
+    line-height:1.1!important;
+    font-size:clamp(7.5px,1.15vw,10px)!important;
+  }
+  body.v260-redesign .mobile-more-wrap{
+    position:relative!important;
+    display:flex!important;
+    align-items:stretch!important;
+  }
+  body.v260-redesign .mobile-more-wrap>.mtab{height:100%!important;}
+  body.v260-redesign .main{
+    padding-bottom:calc(96px + env(safe-area-inset-bottom))!important;
+  }
+}
+
+/* Above the responsive breakpoint the desktop shell owns navigation.
+   Explicitly keep the bottom bar out of layout even if an older rule tries
+   to restore it. */
+@media(min-width:1081px){
+  body.v260-redesign .mobile-tabbar{display:none!important;position:fixed!important;}
+}
+
+@media(max-width:430px){
+  body.v260-redesign .mobile-tabbar{
+    max-height:calc(80px + env(safe-area-inset-bottom))!important;
+    padding-top:6px!important;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom))!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab{
+    min-height:54px!important;
+    max-height:64px!important;
+  }
+  body.v260-redesign .main{padding-bottom:calc(86px + env(safe-area-inset-bottom))!important;}
+}
+
+@media(max-width:310px){
+  body.v260-redesign .mobile-tabbar .mtab span{display:none!important;}
+  body.v260-redesign .mobile-tabbar .mtab{min-height:44px!important;max-height:52px!important;}
+  body.v260-redesign .mobile-tabbar{max-height:calc(66px + env(safe-area-inset-bottom))!important;}
+  body.v260-redesign .main{padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;}
+}
