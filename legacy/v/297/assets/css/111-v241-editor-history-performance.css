@@ -1,0 +1,60 @@
+/* ============================================================
+   MediaFlow v241 — Edit Title clarity / History / performance
+   ============================================================ */
+
+/* Edit Title: larger typography/controls and a stronger visual hierarchy. */
+.modal:has(.v240-library-editor-shell){width:min(1440px,calc(100vw - 20px))!important;max-width:1440px!important}
+.v240-library-editor-shell{padding:26px 28px 20px!important}
+.v240-library-editor>.modal-title{font-size:27px!important;line-height:1.15!important;margin-bottom:2px!important}
+.v240-editor-section-label{font-size:10px!important;letter-spacing:.14em!important;margin-top:5px!important}
+.v240-library-editor .field-label{font-size:12px!important;font-weight:750!important;line-height:1.25!important;margin-bottom:7px!important;color:var(--text)!important}
+.v240-library-editor :is(input,select){height:48px!important;min-height:48px!important;padding:10px 13px!important;font-size:14px!important;line-height:1.25!important}
+.v240-library-editor textarea{min-height:140px!important;padding:13px 14px!important;font-size:14px!important;line-height:1.6!important}
+.v240-library-editor .hint,.v240-library-editor small{font-size:10.5px!important;line-height:1.45!important}
+.v240-field-cover .v44-cover-preview{width:86px!important;height:122px!important}
+.v240-field-cover .v44-cover-row{gap:15px!important;padding:13px!important;border-radius:14px!important}
+.v240-repeat-panel{padding:16px!important;border-radius:15px!important}
+.v240-repeat-panel .v82-repeat-head{font-size:11px!important;margin-bottom:10px!important}
+/* There are two summary cards; let them consume the complete row. */
+.v240-repeat-panel .v82-repeat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.v240-repeat-panel .v82-repeat-grid>div{min-height:64px!important;padding:10px 13px!important;border-radius:12px!important}
+.v240-repeat-panel .v82-repeat-grid b{font-size:19px!important}.v240-repeat-panel .v82-repeat-grid small{font-size:10px!important}
+.v240-repeat-panel .v82-repeat-current,.v240-repeat-panel .v83-repeat-source{font-size:11px!important;line-height:1.5!important}
+.v240-repeat-panel .v83-repeat-edit-title{font-size:10px!important;margin-bottom:8px!important}
+.v240-rich-editor{padding-top:4px!important}.v240-rich-editor .v178-rich-grid{gap:12px!important}
+.v240-editor-actions{position:sticky!important;bottom:-1px!important;z-index:4!important;padding:13px 0 2px!important;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--panel) 96%,transparent) 24%)!important}
+
+/* Logged/Batch artwork is always an explicit details action. */
+.v241-logged-cover-button{appearance:none;border:0;padding:0;margin:0;background:transparent;border-radius:10px;cursor:pointer;display:grid;place-items:center;align-self:center;overflow:hidden;transition:transform .14s ease,box-shadow .14s ease}
+.v241-logged-cover-button:hover{transform:translateY(-1px);box-shadow:0 0 0 2px color-mix(in srgb,var(--flow) 36%,transparent)}
+.v241-logged-cover-button:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+.v241-category-cover-fallback{display:grid!important;place-items:center!important;background:color-mix(in srgb,var(--panel-raised) 88%,var(--flow) 12%)!important}
+.v241-category-cover-fallback :is(.v144-cat-icon-img,.v144-cat-icon-emoji){width:58%!important;height:58%!important;max-width:58%!important;max-height:58%!important}
+.v241-logged-cover-button>.v239-logged-cover,.v241-logged-cover-button>.v239-batch-cover{display:block}
+
+/* History: use the same category dropdown language as Library. */
+.v241-history-toolbar{align-items:flex-start!important;gap:12px!important}
+.v241-history-toolbar .lib-filters{display:grid!important;grid-template-columns:minmax(260px,1.25fr) minmax(150px,.65fr) minmax(150px,.65fr) minmax(330px,1.45fr)!important;gap:10px!important;align-items:start!important;flex:1!important}
+.v241-history-category-filter{min-width:0!important;width:100%!important}
+.v241-history-date-filter{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.v241-history-date-filter label{display:grid;gap:4px;font-size:10px;color:var(--text-dim);font-weight:750;letter-spacing:.035em;text-transform:uppercase;min-width:130px;flex:1}
+.v241-history-date-filter input{height:42px;border-radius:10px;padding:8px 10px;background:var(--panel-raised);border:1px solid var(--border-soft);color:var(--text)}
+.v241-library-history-pager{margin:12px 0!important}
+
+/* Render isolation helps Settings/Dashboard/Library/Order on lower-power/mobile
+   devices and prevents off-screen repeated rows from dominating paint cost. */
+:is(.settings-card,.v230-surface-card,.card,.item-row,.v138-order-row,.v138-picker-row,.hist-row,.mf-activity-row){contain:layout paint style}
+@supports (content-visibility:auto){
+  :is(.item-row,.v138-order-row,.v138-picker-row,.hist-row,.mf-activity-row,.v230-layout-row){content-visibility:auto;contain-intrinsic-size:auto 72px}
+}
+
+@media(max-width:1100px){
+  .v241-history-toolbar .lib-filters{grid-template-columns:1fr 1fr!important}.v241-history-category-filter,.v241-history-date-filter{grid-column:1/-1!important}
+  .v240-library-editor .field-label{font-size:11.5px!important}.v240-library-editor :is(input,select){font-size:13.5px!important}
+}
+@media(max-width:700px){
+  .v240-library-editor-shell{padding:17px 14px 14px!important}.v240-library-editor>.modal-title{font-size:23px!important}
+  .v240-library-editor .field-label{font-size:12px!important}.v240-library-editor :is(input,select){height:47px!important;font-size:14px!important}
+  .v240-repeat-panel .v82-repeat-grid,.v240-repeat-panel .v83-repeat-edit-grid{grid-template-columns:1fr!important}
+  .v241-history-toolbar{display:block!important}.v241-history-toolbar .lib-filters{grid-template-columns:1fr!important}.v241-history-category-filter,.v241-history-date-filter{grid-column:1!important}.v241-history-toolbar>button{width:100%;margin-top:10px}
+}
