@@ -1,0 +1,12 @@
+/* v300: ensure the Logging Intensity cards remain readable across MediaFlow themes */
+.v299-intensity-card{margin-bottom:18px;position:relative;isolation:isolate}
+.v299-settings-intensity-card,.v299-intensity-xp-card{margin-bottom:22px}
+.v299-intensity-xp-card .field-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+.v299-intensity-xp-card .field{min-width:0}
+.v299-intensity-card .v299-intensity-slider{cursor:pointer;display:block;max-width:100%}
+.v299-intensity-card .v299-intensity-desc,.v299-settings-intensity-card .v299-intensity-desc{max-width:84ch}
+@media(max-width:700px){
+ .v299-intensity-card,.v299-settings-intensity-card,.v299-intensity-xp-card{min-width:0}
+ .v299-intensity-xp-card .field-row{grid-template-columns:1fr}
+ .v299-stops-row{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
