@@ -1,0 +1,8 @@
+/* MediaFlow v306: clickable native community anchors, consistent with v305 design */
+#mf302-root a.mf302-brand{text-decoration:none;color:inherit}
+#mf302-root a.mf302-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;text-decoration:none}
+#mf302-root a.mf303-workspace-button{display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;flex-shrink:0}
+#mf302-root a.mf306-explore-tile{display:block;text-decoration:none;color:inherit;cursor:pointer;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+#mf302-root a.mf306-explore-tile:hover{border-color:#a89dfc80;transform:translateY(-2px);box-shadow:0 12px 35px #0004}
+#mf302-root a.mf306-explore-tile:focus-visible{outline:2px solid #a79aff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){#mf302-root a.mf306-explore-tile{transition:none}#mf302-root a.mf306-explore-tile:hover{transform:none}}
