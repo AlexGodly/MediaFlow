@@ -1,0 +1,18 @@
+/* v303 — Guest landing and semantic public navigation. Desktop and mobile. */
+#mf302-root .mf302-brand{appearance:none;border:0;background:transparent;color:inherit;text-align:left;padding:0;min-width:0;display:inline-flex;gap:10px;align-items:center;font:inherit;cursor:pointer}
+#mf302-root .mf302-brand img{display:block;flex:0 0 42px;width:42px;height:42px;object-fit:contain;border-radius:12px}
+#mf302-root .mf302-brand>span{font-size:20px;font-weight:850;letter-spacing:-.05em;line-height:1.12}
+#mf302-root .mf302-brand small{line-height:1.4;letter-spacing:.07em}
+#mf302-root .mf302-nav .mf302-link,#mf302-root .mf302-mobile-nav .mf302-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;line-height:1.3}
+#mf302-root .mf302-link span{display:inline;color:inherit;font:inherit}
+#mf302-root .mf303-icon{display:inline-block;vertical-align:middle;flex:0 0 auto;width:18px;height:18px;stroke:currentColor}
+#mf302-root .mf302-btn{gap:8px}
+#mf302-root .mf302-btn .mf303-icon{width:17px;height:17px}
+#mf302-root .mf303-workspace-button{white-space:nowrap}
+#mf302-root .mf303-tile-icon{display:inline-flex;align-items:center;justify-content:center;width:43px;height:43px;border:1px solid #8b8fcb55;border-radius:12px;background:#a6a1f81b;color:#bdb4ff}
+#mf302-root .mf303-tile-icon>.mf303-icon{width:24px;height:24px}
+#mf302-root .mf302-tile b{display:inline-flex;align-items:center;gap:6px}
+#mf302-root .mf302-tile b .mf303-icon{width:14px;height:14px}
+#mf302-root button:focus-visible{outline:2px solid #b2a7ff;outline-offset:3px}
+@media(max-width:850px){#mf302-root .mf302-mobile-nav{justify-content:flex-start;scrollbar-width:none}#mf302-root .mf302-mobile-nav::-webkit-scrollbar{display:none}#mf302-root .mf302-top{gap:8px}#mf302-root .mf302-brand>span{font-size:17px}#mf302-root .mf303-workspace-button{padding:10px 12px}}
+@media(max-width:355px){#mf302-root .mf302-brand small{font-size:8px}#mf302-root .mf303-workspace-button .mf303-icon{display:none}}
