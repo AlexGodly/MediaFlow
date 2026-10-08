@@ -1,0 +1,18 @@
+/* MediaFlow v231 — Settings Library Mode + active navigation polish */
+.v231-library-mode-card{padding:16px 18px}
+.v231-library-mode-card .v181-setting-head{margin:0}
+
+.v221-settings-nav-item.v231-active{
+  background:color-mix(in srgb,var(--flow) 14%,var(--panel-raised));
+  color:var(--text);
+  font-weight:800;
+  box-shadow:inset 3px 0 0 var(--flow),0 0 0 1px color-mix(in srgb,var(--flow) 18%,transparent);
+  transform:none;
+}
+.v221-settings-nav-item.v231-active .v225-btn-icon{color:var(--flow)}
+
+@media(max-width:980px){
+  .v221-settings-nav-item.v231-active{
+    box-shadow:inset 0 -3px 0 var(--flow),0 0 0 1px color-mix(in srgb,var(--flow) 22%,transparent);
+  }
+}
