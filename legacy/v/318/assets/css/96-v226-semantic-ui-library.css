@@ -1,0 +1,207 @@
+/* ============================================================
+   MediaFlow v226 — Semantic UI / Settings / Library polish
+   ============================================================ */
+
+/* ---------- Purpose-aware native dropdown icons ------------- */
+select[data-v226-dropdown-icon]:not([multiple]){
+  padding-left:38px!important;
+  background-image:
+    var(--v226-dropdown-icon),
+    linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),
+    linear-gradient(135deg,var(--text-dim) 50%,transparent 50%),
+    linear-gradient(to right,var(--border-soft),var(--border-soft))!important;
+  background-position:
+    12px 50%,
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%,
+    calc(100% - 37px) 50%!important;
+  background-size:16px 16px,5px 5px,5px 5px,1px 20px!important;
+  background-repeat:no-repeat!important;
+}
+@media(max-width:640px){
+  select[data-v226-dropdown-icon]:not([multiple]){padding-left:37px!important}
+}
+
+/* ---------- Category Settings: no clipped order/delete ------- */
+.settings-categories-full .card{overflow:hidden!important}
+.settings-categories-full .cat-manage-row{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto auto auto!important;
+  grid-template-rows:auto auto!important;
+  gap:8px 9px!important;
+  align-items:center!important;
+  min-width:0!important;
+  padding:11px 4px!important;
+}
+.settings-categories-full .cat-manage-row>.hero-icon{grid-column:1!important;grid-row:1!important}
+.settings-categories-full .cat-manage-row>.name{
+  grid-column:2 / 5!important;
+  grid-row:1!important;
+  min-width:0!important;
+  width:auto!important;
+  overflow:hidden!important;
+}
+.settings-categories-full .cat-manage-row>.name .meta{white-space:normal!important;overflow-wrap:anywhere!important}
+.settings-categories-full .cat-manage-row>.toggle{grid-column:5!important;grid-row:1!important;justify-self:end!important}
+.settings-categories-full .cat-manage-row>.cat-order-controls{
+  grid-column:1 / 3!important;
+  grid-row:2!important;
+  justify-self:start!important;
+  min-width:0!important;
+  max-width:100%!important;
+  flex-wrap:nowrap!important;
+}
+.settings-categories-full .cat-manage-row>.cat-edit-btn{grid-column:3!important;grid-row:2!important}
+.settings-categories-full .cat-manage-row>.cat-clear-btn{grid-column:4!important;grid-row:2!important}
+.settings-categories-full .cat-manage-row>.cat-delete-btn{grid-column:5!important;grid-row:2!important}
+.settings-categories-full .cat-manage-row .v157-position-input{
+  width:58px!important;
+  min-width:58px!important;
+  height:34px!important;
+  padding:4px 5px!important;
+  color:var(--text)!important;
+  background:var(--panel-raised)!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  opacity:1!important;
+}
+.settings-categories-full .cat-manage-row .cat-drag-handle{
+  min-width:34px!important;
+  width:34px!important;
+  padding:5px!important;
+}
+.settings-categories-full .cat-manage-row>.cat-edit-btn,
+.settings-categories-full .cat-manage-row>.cat-clear-btn,
+.settings-categories-full .cat-manage-row>.cat-delete-btn{
+  min-width:0!important;
+  max-width:none!important;
+  white-space:nowrap!important;
+  justify-self:stretch!important;
+}
+@media(max-width:690px){
+  .settings-categories-full .cat-manage-row{
+    grid-template-columns:42px minmax(0,1fr) auto!important;
+    grid-template-rows:auto auto auto!important;
+  }
+  .settings-categories-full .cat-manage-row>.name{grid-column:2!important}
+  .settings-categories-full .cat-manage-row>.toggle{grid-column:3!important}
+  .settings-categories-full .cat-manage-row>.cat-order-controls{grid-column:1 / -1!important;grid-row:2!important}
+  .settings-categories-full .cat-manage-row>.cat-edit-btn{grid-column:1!important;grid-row:3!important}
+  .settings-categories-full .cat-manage-row>.cat-clear-btn{grid-column:2!important;grid-row:3!important}
+  .settings-categories-full .cat-manage-row>.cat-delete-btn{grid-column:3!important;grid-row:3!important}
+}
+
+/* Dynamic Library Settings rows also stay readable when the Settings page is narrow. */
+.v181-settings-card .v186-dynamic-category-row{
+  grid-template-columns:minmax(0,1fr) 74px auto!important;
+}
+.v181-settings-card .v186-dynamic-category-row>.v186-dynamic-edit-actions{
+  grid-column:1 / -1!important;
+  justify-content:flex-end!important;
+}
+.v181-settings-card .v186-dynamic-category-row>.toggle{grid-column:3!important;grid-row:1!important}
+.v181-settings-card .v186-dynamic-position{width:74px!important;min-width:74px!important;color:var(--text)!important}
+@media(max-width:620px){
+  .v181-settings-card .v186-dynamic-category-row{grid-template-columns:minmax(0,1fr) 68px auto!important}
+  .v181-settings-card .v186-dynamic-edit-actions{justify-content:stretch!important}
+}
+
+/* ---------- Dynamic category-row icon preference ------------ */
+.v226-dynamic-category-icon-setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:14px 0 4px;
+  padding:11px 12px;
+  border:1px solid var(--border-soft);
+  border-radius:11px;
+  background:color-mix(in srgb,var(--panel-raised) 82%,transparent);
+}
+.v226-dynamic-category-icon-copy{min-width:0;flex:1}
+.v226-dynamic-category-icon-copy b{display:block;font-size:12.5px;line-height:1.35}
+.v226-dynamic-category-icon-copy small{display:block;margin-top:3px;color:var(--text-mute);font-size:10.5px;line-height:1.45}
+.v226-dynamic-category-icon-setting select{width:min(230px,42%);min-width:190px}
+@media(max-width:680px){
+  .v226-dynamic-category-icon-setting{align-items:stretch;flex-direction:column}
+  .v226-dynamic-category-icon-setting select{width:100%;min-width:0}
+}
+
+/* Category buttons are text-only by default. The optional mode shows only
+   the category's actual URL image (never the emoji fallback). */
+.v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-img,
+.v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-emoji{display:none!important}
+html[data-v226-dynamic-category-icons="category-url"] .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-img{
+  display:inline-block!important;
+  width:16px!important;
+  height:16px!important;
+  object-fit:cover;
+  border-radius:4px;
+  flex:0 0 auto;
+}
+html[data-v226-dynamic-category-icons="category-url"] .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-emoji{display:none!important}
+
+/* ---------- Dynamic Library sizing parity ------------------- */
+/* Loaded after the legacy library styles so the same cover slider now wins in
+   Normal and Dynamic modes for List, Compact, Cards, Covers and Cover+Titles. */
+#view-root .v226-dynamic-library.library-view-list .item-row>.library-cover-thumb{
+  width:calc(60px * var(--v177-library-scale,1))!important;
+  height:calc(85px * var(--v177-library-scale,1))!important;
+}
+#view-root .v226-dynamic-library.library-view-compact .item-row>.library-cover-thumb{
+  width:calc(48px * var(--v177-library-scale,1))!important;
+  height:calc(68px * var(--v177-library-scale,1))!important;
+}
+#view-root .v226-dynamic-library.library-view-cards .item-row>.library-cover-thumb{
+  width:calc(72px * var(--v177-library-scale,1))!important;
+  height:calc(102px * var(--v177-library-scale,1))!important;
+}
+#view-root .v226-dynamic-library.library-view-list .item-row{
+  grid-template-columns:20px calc(60px * var(--v177-library-scale,1)) 32px minmax(220px,1fr) max-content max-content!important;
+}
+#view-root .v226-dynamic-library.library-view-compact .item-row{
+  grid-template-columns:20px calc(48px * var(--v177-library-scale,1)) 28px minmax(190px,1fr) max-content max-content!important;
+}
+#view-root .v226-dynamic-library.library-view-cards .item-row{
+  grid-template-columns:18px calc(72px * var(--v177-library-scale,1)) minmax(0,1fr)!important;
+}
+
+/* Title-text slider parity in every title-bearing display mode. */
+.v188-library-title-scope .library-view-list .item-title{
+  font-size:calc(14px * var(--v188-library-title-scale,1))!important;
+}
+.v188-library-title-scope .library-view-compact .item-title{
+  font-size:calc(13px * var(--v188-library-title-scale,1))!important;
+}
+.v188-library-title-scope .library-view-cards .item-title{
+  font-size:calc(14px * var(--v188-library-title-scale,1))!important;
+}
+.v188-library-title-scope .library-view-covers-title .item-title,
+.v188-library-title-scope .v181-dynamic-covers-title .v181-cover-tile-title{
+  font-size:calc(12px * var(--v188-library-title-scale,1))!important;
+}
+
+@media(max-width:980px){
+  #view-root .v226-dynamic-library.library-view-list .item-row,
+  #view-root .v226-dynamic-library.library-view-compact .item-row{
+    grid-template-columns:18px calc(64px * var(--v177-library-scale,1)) minmax(0,1fr) minmax(82px,auto) minmax(82px,auto)!important;
+  }
+  #view-root .v226-dynamic-library.library-view-list .item-row>.library-cover-thumb,
+  #view-root .v226-dynamic-library.library-view-compact .item-row>.library-cover-thumb{
+    width:calc(64px * var(--v177-library-scale,1))!important;
+    height:calc(90px * var(--v177-library-scale,1))!important;
+  }
+}
+@media(max-width:620px){
+  #view-root .v226-dynamic-library.library-view-list .item-row,
+  #view-root .v226-dynamic-library.library-view-compact .item-row,
+  #view-root .v226-dynamic-library.library-view-cards .item-row{
+    grid-template-columns:18px calc(74px * var(--v177-library-scale,1)) minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  #view-root .v226-dynamic-library.library-view-list .item-row>.library-cover-thumb,
+  #view-root .v226-dynamic-library.library-view-compact .item-row>.library-cover-thumb,
+  #view-root .v226-dynamic-library.library-view-cards .item-row>.library-cover-thumb{
+    width:calc(74px * var(--v177-library-scale,1))!important;
+    height:calc(105px * var(--v177-library-scale,1))!important;
+  }
+}

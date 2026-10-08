@@ -1,0 +1,10 @@
+/* MediaFlow v318 — reuse the existing Ratings freshness status bar everywhere. */
+#mf302-root .mf318-freshness{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;margin:12px 0 18px;padding:11px 15px;border-radius:12px;background:var(--mf302-panel,var(--panel,#fff1));border:1px solid var(--mf302-line,var(--border,#7773));font-size:12px;color:var(--mf302-muted,var(--text-dim,#a7a7bc));}
+#mf302-root .mf318-freshness .mf312-pulse{flex-shrink:0;}
+#mf302-root .mf318-freshness .mf318-freshness-copy{min-width:0;flex:1 1 auto;line-height:1.5;overflow-wrap:anywhere;}
+#mf302-root .mf318-freshness .mf317-refresh{margin:0 0 0 auto;flex:0 0 auto;min-height:39px;border-radius:11px;}
+#mf302-root .mf318-freshness.mf318-refreshing .mf312-pulse{animation:mf318Pulse 1.25s ease-in-out infinite;}
+@keyframes mf318Pulse{50%{opacity:.4;transform:scale(.8)}}
+@media(max-width:600px){#mf302-root .mf318-freshness{padding:12px;gap:9px}#mf302-root .mf318-freshness .mf317-refresh{width:auto;min-width:110px;padding:9px 12px}}
+@media(max-width:370px){#mf302-root .mf318-freshness .mf318-freshness-copy{flex-basis:calc(100% - 24px)}#mf302-root .mf318-freshness .mf317-refresh{margin-left:auto;width:100%}}
+@media(prefers-reduced-motion:reduce){#mf302-root .mf318-freshness.mf318-refreshing .mf312-pulse{animation:none}}
