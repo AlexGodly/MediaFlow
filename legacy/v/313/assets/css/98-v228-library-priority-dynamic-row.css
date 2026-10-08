@@ -1,0 +1,103 @@
+/* ============================================================
+   MediaFlow v228 — Library metadata + Dynamic row ordering UI
+   ============================================================ */
+
+/* Library category pills already contain the category identity (URL image or
+   configured fallback), so they should never reserve space for a generic icon. */
+#view-root .category-click:not(.v225-icon-button){gap:5px!important}
+#view-root .category-click>.v225-btn-icon{display:none!important}
+
+/* Priority pills use the same low / medium / high language as the picker. */
+#view-root .priority-click.v225-icon-button>.v225-btn-icon{
+  width:15px!important;
+  height:15px!important;
+  flex:0 0 15px!important;
+}
+
+/* Persistent order-source control mirrors the v226 icon-mode setting card. */
+.v228-dynamic-category-order-setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:10px 0 4px;
+  padding:11px 12px;
+  border:1px solid var(--border-soft);
+  border-radius:11px;
+  background:color-mix(in srgb,var(--panel-raised) 82%,transparent);
+}
+.v228-dynamic-category-order-copy{min-width:0;flex:1}
+.v228-dynamic-category-order-copy b{display:block;font-size:12.5px;line-height:1.35}
+.v228-dynamic-category-order-copy small{display:block;margin-top:3px;color:var(--text-mute);font-size:10.5px;line-height:1.45}
+.v228-dynamic-category-order-setting select{width:min(270px,46%);min-width:220px}
+
+/* Dynamic category rows regain their dedicated three-line drag handle while
+   keeping exact position, arrows, visibility and Edit/Clear/Delete readable. */
+.v181-settings-card .v186-dynamic-category-row{
+  grid-template-columns:minmax(0,1fr) 38px 74px 50px!important;
+  grid-template-areas:
+    "copy drag position toggle"
+    "orders orders actions actions"!important;
+  align-items:center!important;
+}
+.v181-settings-card .v186-dynamic-category-row>.v181-config-copy{grid-area:copy!important}
+.v181-settings-card .v186-dynamic-category-row>.v228-dynamic-drag-handle{
+  grid-area:drag!important;
+  width:34px!important;
+  min-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:5px!important;
+  cursor:grab!important;
+  font-size:16px!important;
+  line-height:1!important;
+}
+.v181-settings-card .v186-dynamic-category-row>.v228-dynamic-drag-handle:active{cursor:grabbing!important}
+.v181-settings-card .v186-dynamic-category-row>.v186-dynamic-position{grid-area:position!important;width:74px!important;min-width:74px!important}
+.v181-settings-card .v186-dynamic-category-row>.toggle{grid-area:toggle!important;justify-self:end!important}
+.v181-settings-card .v186-dynamic-category-row>.v181-order-buttons{grid-area:orders!important;justify-self:start!important}
+.v181-settings-card .v186-dynamic-category-row>.v186-dynamic-edit-actions{
+  grid-area:actions!important;
+  justify-self:end!important;
+  justify-content:flex-end!important;
+  min-width:0!important;
+}
+
+.v181-settings-card .v186-dynamic-category-row.v228-dragging{
+  opacity:.62!important;
+  border-color:var(--flow)!important;
+}
+.v181-settings-card .v186-dynamic-category-row.v228-drop-target{
+  border-color:var(--flow)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 40%,transparent)!important;
+}
+
+/* Follow mode keeps visibility and direct category actions available while
+   making it obvious that row position belongs to the main Categories order. */
+.v181-settings-card .v186-dynamic-category-row.v228-follow-category-order>.v228-dynamic-drag-handle,
+.v181-settings-card .v186-dynamic-category-row.v228-follow-category-order>.v186-dynamic-position,
+.v181-settings-card .v186-dynamic-category-row.v228-follow-category-order>.v181-order-buttons{
+  opacity:.48!important;
+}
+.v181-settings-card .v186-dynamic-category-row.v228-follow-category-order>.v228-dynamic-drag-handle{cursor:not-allowed!important}
+
+@media(max-width:760px){
+  .v228-dynamic-category-order-setting{align-items:stretch;flex-direction:column}
+  .v228-dynamic-category-order-setting select{width:100%;min-width:0}
+  .v181-settings-card .v186-dynamic-category-row{
+    grid-template-columns:minmax(0,1fr) 38px 68px 50px!important;
+  }
+}
+@media(max-width:540px){
+  .v181-settings-card .v186-dynamic-category-row{
+    grid-template-columns:minmax(0,1fr) 50px!important;
+    grid-template-areas:
+      "copy toggle"
+      "drag position"
+      "orders orders"
+      "actions actions"!important;
+  }
+  .v181-settings-card .v186-dynamic-category-row>.v186-dynamic-position{width:76px!important;min-width:76px!important;justify-self:start!important}
+  .v181-settings-card .v186-dynamic-category-row>.v186-dynamic-edit-actions{justify-self:stretch!important;justify-content:stretch!important}
+  .v181-settings-card .v186-dynamic-category-row>.v186-dynamic-edit-actions .btn{flex:1!important}
+}
