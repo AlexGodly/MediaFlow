@@ -1,4 +1,4 @@
-/* MediaFlow v318 prebuilt React application chrome. */
+/* MediaFlow v319 prebuilt React application chrome. */
 (function(){
   'use strict';
   const PAGE={dashboard:['Dashboard','Your rotation, logging and daily focus'],library:['Library','Browse, organize and manage your media'],history:['History','Consumption, recent activity, ratings and Library changes'],batch:['Batch Log','Log multiple titles in one focused workflow'],stats:['Statistics','Patterns, progress and long-term consumption'],profile:['Account','Profile, identity and account preferences'],settings:['Settings','Customize MediaFlow to fit your workflow'],order:['Personal Order','Shape your own title priority order'],oldsystem:['Old System','Legacy scheduler views and records'],about:['About','Version, updates and MediaFlow information'],'mf302-profile':['Profile','Manage your public profile and sharing preferences'],'mf302-friends':['Friends','Your followers, following and mutual connections'],'mf302-inbox':['Inbox','Private conversations and messages'],'mf302-public':['Community','Browse and explore public media']};

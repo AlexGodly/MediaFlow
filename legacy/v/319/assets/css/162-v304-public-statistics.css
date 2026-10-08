@@ -1,0 +1,6 @@
+/* MediaFlow v304 - public Statistics read-only dashboard */
+.mf304-profile-summary {border:1px solid var(--border,rgba(120,128,155,.28));border-radius:18px;padding:20px;background:var(--surface,rgba(125,135,165,.08));margin-bottom:18px}
+.mf304-profile-summary h2{margin:0 0 9px}.mf304-profile-summary p{color:var(--muted,#a6aebf)}
+.mf304-stats-page{max-width:100%;min-width:0}.mf304-stats-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}.mf304-stats-toolbar h2{margin:0 0 8px}.mf304-stats-toolbar p{color:var(--muted,#a6aebf);font-size:.85rem}
+.mf304-stats-frame{display:block;width:100%;height:min(78dvh,950px);min-height:430px;border:1px solid var(--border,rgba(150,160,180,.3));border-radius:18px;background:#10141d}
+@media(max-width:680px){.mf304-stats-toolbar{align-items:stretch}.mf304-stats-frame{height:76dvh;border-radius:12px;min-height:360px}}
