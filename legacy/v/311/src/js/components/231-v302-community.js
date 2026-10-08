@@ -1,0 +1,267 @@
+/* MediaFlow v302 — opt-in community, guest portal, public profiles and DMs. */
+const MF302={page:'home',profile:null,activeThread:null,forceAuth:false,query:'',chatOpen:false,session:null,threadList:[],data:[],userProfile:null};
+const mfEsc=x=>escapeHtml(String(x??''));
+const mfRoot=/^\/MediaFlow(?:\/|$)/i.test(location.pathname)?'/MediaFlow/':'/';
+const mfIcon=(name)=>{
+ const paths={
+ home:'<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+ browse:'<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.4 6-6 2.4 2.4-6z"/>',
+ ratings:'<path d="m12 2 3.1 6.4 7.1 1-5.1 5 .9 7-6-3.3-6 3.3.9-7-5.1-5 7.1-1z"/>',
+ collections:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ friends:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>',
+ inbox:'<path d="M22 12a9 9 0 0 1-9 9 9.7 9.7 0 0 1-4-.9L2 22l1.9-7A9.7 9.7 0 0 1 3 11a9 9 0 0 1 9-9h1a9 9 0 0 1 9 9z"/>',
+ workspace:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+ profile:'<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+ login:'<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>',
+ arrow:'<path d="M7 17 17 7M7 7h10v10"/>',
+ back:'<path d="m15 18-6-6 6-6"/>',
+ next:'<path d="m9 18 6-6-6-6"/>',
+ edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L9 17l-4 1 1-4z"/>',
+ add:'<path d="M12 5v14M5 12h14"/>',
+ chat:'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5H13a8.5 8.5 0 0 1 8 8.5z"/>',
+ book:'<path d="M12 7v14M3 18V5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H5a2 2 0 0 1-2-1zm18 0V5a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v16a2 2 0 0 1 2-2h5a2 2 0 0 0 2-1z"/>',
+ };const key=paths[name]?name:(name==='community'?'browse':name==='public profile'?'profile':name);
+ return `<svg class="mf303-icon" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]||paths.browse}</svg>`;
+};
+const mfPath=(p)=>location.protocol==='file:'?('#/'+(p||'').replace(/^\/+/, '')):mfRoot+(p||'').replace(/^\/+/, '');
+// v306: actual links for keyboard navigation and an HTML fallback. Navigation is
+// handled by a delegated DOM listener, not inline onclick attributes.
+const mfLink=(path,label,cls='')=>`<a href="${mfEsc(mfPath(path))}" class="mf302-link ${cls}" data-mf306-route="${mfEsc(path)}" data-mf303-target="${mfEsc(path)}">${mfIcon(['browse','collections','ratings','users'].includes(path)?path:(path?'profile':'home'))}<span>${mfEsc(label)}</span></a>`;
+const mfNotice=(msg)=>{const d=document.getElementById('mf302-notice');if(d){d.textContent=msg;d.hidden=false;setTimeout(()=>{d.hidden=true;},4800);}else alert(msg);};
+async function mfQuery(table,fields='*',filters=[]){if(!supabase)return [];let q=supabase.from(table).select(fields);for(const [f,v] of filters)q=q.eq(f,v);const {data,error}=await q.limit(200);if(error)throw error;return data||[];}
+function mfUrlState(){
+ const path=mfRoutePath();
+ if(!path)return 'home';
+ const part=path.split('/')[0].toLowerCase();
+ if(['browse','ratings','collections','users','friends','inbox','workspace','login'].includes(part))return part;
+ return /^[a-z][a-z0-9_]{2,23}$/.test(part)?'profile':'home';
+}
+function mfRoutePath(){
+ // GitHub Pages can serve the homepage as /MediaFlow/, /MediaFlow/index.html or 404.html.
+ // These entry filenames are NOT usernames.
+ let path=(location.protocol==='file:'?location.hash.replace(/^#\/?/,''):location.pathname.replace(/^\/MediaFlow(?=\/|$)/i,'')).replace(/^\/+|\/+$/g,'');
+ // v307: browsers that disallow history.pushState (notably file://) can use
+ // #/login or #/workspace without pretending the hash is a profile username.
+ const profileHash=String(location.hash||'').match(/^#\/([a-z][a-z0-9_]{2,23})\/Collections\/([^#?]+)$/i);
+ if(profileHash)return profileHash[1]+'/Collections/'+profileHash[2];
+ const hashRoute=String(location.hash||'').match(/^#\/(login|workspace|browse|collections|ratings|users)(?:\/|$)/i);
+ if(hashRoute)
+  return hashRoute[1].toLowerCase();
+ try{path=decodeURIComponent(path)}catch(_){return '';}
+ if(/^(?:index|404)\.html$/i.test(path)||/^\/?$/i.test(path))return '';
+ return path;
+}
+
+function mfPortalMarkup(){return `<div id="mf302-portal" class="mf302-portal"><header class="mf302-top"><a href="${mfEsc(mfPath(''))}" class="mf302-brand" aria-label="MediaFlow Community home" data-mf306-route=""><img src="assets/icons/mediaflow-192.png" alt="MediaFlow logo" width="42" height="42"><span>MediaFlow<small>by Alex Godly</small></span></a><nav class="mf302-nav" aria-label="Community navigation">${['browse','collections','ratings','users'].map(n=>mfLink(n,n[0].toUpperCase()+n.slice(1),MF302.page===n?'active':'')).join('')}</nav><a href="${mfEsc(mfPath(AUTH_USER?'workspace':'login'))}" class="mf302-btn primary mf303-workspace-button" data-mf306-route="${AUTH_USER?'workspace':'login'}">${mfIcon(AUTH_USER?'workspace':'login')}<span>${AUTH_USER?'Workspace':'Log in'}</span></a></header><nav class="mf302-mobile-nav" aria-label="Mobile community navigation">${['browse','collections','ratings','users'].map(n=>mfLink(n,n[0].toUpperCase()+n.slice(1),MF302.page===n?'active':'')).join('')}</nav><main id="mf302-content" class="mf302-content"><div class="mf302-loading">Loading MediaFlow Community…</div></main><div id="mf302-notice" class="mf302-notice" hidden></div></div>`;}
+function mf306BindNavigation(host){
+ if(host.dataset.mf306NavigationBound==='1')return;
+ host.dataset.mf306NavigationBound='1';
+ // Capture phase avoids interference from legacy delegated button handlers.
+ host.addEventListener('click',function(event){
+  const link=event.target.closest?.('[data-mf306-route]');
+  if(!link||!host.contains(link))return;
+  if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
+  event.preventDefault();event.stopPropagation();
+  const target=link.getAttribute('data-mf306-route')||'';
+  try{mfGo(target);}catch(err){
+   console.error('[MediaFlow Community] Navigation failed:',err);
+   if(target==='login'||target==='workspace'){
+    try{MF302.forceAuth=true;mfHidePortal();renderAuthScreen('login', 'Unable to open the requested page. Please try signing in again.', true);return;}
+    catch(authErr){console.error('[MediaFlow Community] Auth recovery failed:',authErr);}
+   }
+   const pane=document.getElementById('mf302-content');
+   if(pane)pane.innerHTML=mfHeading('Navigation unavailable','There was a problem opening this page. Please reload and try again.');
+  }
+ },true);
+}
+function mfShowPortal(){MF302.forceAuth=false;document.body.classList.add('mf302-public-active');document.body.classList.toggle('mf302-signed-in',!!AUTH_USER);let host=document.getElementById('mf302-root');if(!host){host=document.createElement('div');host.id='mf302-root';document.body.appendChild(host);}host.innerHTML=mfPortalMarkup();mf306BindNavigation(host);mfRenderPublic();if(AUTH_USER)mfDecorateWorkspace();}
+function mfHidePortal(){document.body.classList.remove('mf302-public-active');}
+// v307: one non-throwing navigation writer for local files, hosted pages,
+// auth entry and auth callbacks. v306's raw pushState('/login') threw a
+// SecurityError for local index.html and the generic click catch replaced the
+// portal with 'Navigation unavailable' instead of showing the login form.
+function mf307SetRoute(route,replace=false){
+ const clean=String(route||'').replace(/^\/+|\/+$/g,'');
+ if(mfUrlState() === (clean||'home'))return true;
+ if(location.protocol==='file:' || location.protocol==='about:'){
+  const hash='#/'+clean;
+  if(location.hash!==hash)location.hash=hash;
+  return true;
+ }
+ try{
+  const state=clean==='workspace'?{mfWorkspace:true}:clean==='login'?{mfLogin:true}:{mfCommunity:true};
+  (replace?history.replaceState:history.pushState).call(history,state,'',mfPath(clean));
+  return true;
+ }catch(err){
+  console.warn('[MediaFlow Community] Browser history unavailable; using hash route:',err);
+  // Avoid leaving the user on a broken navigation error screen if History API
+  // is unavailable in a restricted browser environment.
+  try{location.hash='/'+clean;return true;}catch(_){return false;}
+ }
+}
+function mfGo(path){
+ if(path==='workspace'){mfWorkspace();return;}
+ if(path==='login'){mfLogin();return;}
+ const clean=String(path||'').replace(/^\/+|\/+$/g,'');
+ // Resolve the requested destination before rendering; don't reinterpret index.html as a profile.
+ const target=(!clean||/^(?:index|404)\.html$/i.test(clean))?'home':(['browse','collections','ratings','users','friends','inbox'].includes(clean.toLowerCase())?clean.toLowerCase():'profile');
+ mf307SetRoute(clean);
+ MF302.page=target;MF302.query='';MF302.catalogOffset=0;
+ mfShowPortal();
+}
+function mfWorkspace(){
+ if(!AUTH_USER){mfLogin();return;}
+ MF302.forceAuth=false;
+ // Make Workspace the canonical route. Without this the authenticated bootstrap
+ // can read the old homepage URL and open the guest portal over the workspace.
+ mf307SetRoute('workspace');
+ mfHidePortal();
+ if(!document.querySelector('.sidebar'))renderShell();else{S.view='dashboard';render();}
+ setTimeout(mfDecorateWorkspace,120);
+}
+function mfLogin(){
+ MF302.forceAuth=true;
+ mf307SetRoute('login');
+ mfHidePortal();renderAuthScreen('login');
+}
+async function mfRenderPublic(){const root=document.getElementById('mf302-content');if(!root)return;
+ const renderId=MF302.renderId=(Number(MF302.renderId)||0)+1;
+ const loadingNames={browse:'Browse titles',ratings:'Community ratings',users:'Explore people',collections:'Public Collections',profile:'Public profile'};
+ if(loadingNames[MF302.page])root.innerHTML=mfHeading(loadingNames[MF302.page],'Loading public community information…')+'<div class="mf302-empty" role="status" aria-live="polite">Loading…</div>';
+ try{let p=MF302.page;if(p==='home')root.innerHTML=`<div class="mf302-hero"><div class="mf302-eyebrow">YOUR MEDIA. YOUR UNIVERSE.</div><h1>Discover more than a title.<br><em>Discover each other.</em></h1><p>Explore public media libraries, Collections, ratings, and the people behind them. Build your own personal media universe with MediaFlow.</p><div class="mf302-hero-actions">${mfLink('browse','Explore titles','mf302-btn primary')}${mfLink('users','Find people','mf302-btn')}</div></div><div class="mf302-grid">${[['browse','Browse Titles','Community-contributed media with verified identities.'],['collections','Collections','Explore public lists and curated media.'],['ratings','Ratings','See how the MediaFlow community rates media.'],['users','People','Find public profiles, Libraries and favorites.']].map(x=>`<a class="mf302-tile mf306-explore-tile" href="${mfEsc(mfPath(x[0]))}" data-mf306-route="${x[0]}"><span class="mf303-tile-icon">${mfIcon(x[0])}</span><h3>${x[1]}</h3><p>${x[2]}</p><b>Explore ${mfIcon('arrow')}</b></a>`).join('')}</div>`;
+else if(p==='users'){const users=await mfQuery('mf_public_profiles','user_id,username,display_name,bio,avatar_url,xp_level,is_public',[['is_public',true]]);if(renderId!==MF302.renderId)return;root.innerHTML=mfHeading('Explore people','Meet MediaFlow users and view their public media universe.')+mfSearch('Search people')+`<div class="mf302-grid">${users.filter(u=>(u.username+' '+u.display_name).toLowerCase().includes(MF302.query.toLowerCase())).map(mfUserCard).join('')||mfEmpty('No public profiles found yet.')}</div>`;}
+else if(p==='browse'||p==='ratings'){
+ const limit=60,offset=Number(MF302.catalogOffset)||0;
+ const {data,error}=supabase?await supabase.rpc('mf_browse_titles',{p_search:MF302.query,p_sort:p==='ratings'?'ratings':'popular',p_limit:limit,p_offset:offset}):{data:[],error:null};
+ if(error)throw error;
+ const titles=data||[];
+ if(renderId!==MF302.renderId)return;root.innerHTML=mfHeading(p==='ratings'?'Community ratings':'Browse titles',p==='ratings'?'Community-wide average scores and rating counts.':'Verified external IDs, library counts and watch/read status distribution.')+mfSearch('Search titles')+`<div class="mf302-results">${titles.map(mfCatalogCard).join('')||mfEmpty('No community titles yet. Users can opt in to share verified titles.')}</div><div class="mf302-actions" style="justify-content:center;margin-top:25px"><button class="mf302-btn" ${offset===0?'disabled':''} onclick="MF302.catalogPage(-1)">${mfIcon('back')} Previous</button><span>Page ${Math.floor(offset/limit)+1}</span><button class="mf302-btn" ${titles.length<limit?'disabled':''} onclick="MF302.catalogPage(1)">Next ${mfIcon('next')}</button></div>`;
+}
+else if(p==='collections'){const cols=await mfQuery('mf_public_collections','id,user_id,title,description,cover_url,items,is_public',[['is_public',true]]);if(renderId!==MF302.renderId)return;root.innerHTML=mfHeading('Public Collections','Lists curated and shared by the MediaFlow community.')+mfSearch('Search collections')+`<div class="mf302-grid">${cols.filter(c=>c.title.toLowerCase().includes(MF302.query.toLowerCase())).map(c=>`<article class="mf302-tile"><h3>${mfEsc(c.title)}</h3><p>${mfEsc(c.description)}</p><div>${Array.isArray(c.items)?c.items.length:0} titles</div><button class="mf302-btn" onclick="MF302.openCollection('${mfEsc(c.user_id)}','${mfEsc(c.id)}')">${mfIcon('collections')} View collection</button></article>`).join('')||mfEmpty('No shared Collections yet.')}</div>`;}
+else if(p==='profile'){const pathnameParts=mfRoutePath().split('/').filter(Boolean);const username=decodeURIComponent(pathnameParts[0]||'').toLowerCase();if(pathnameParts[1]?.toLowerCase()==='collections'&&pathnameParts[2]){const owner=await mfQuery('mf_public_profiles','user_id',[['username',username]]);if(owner[0])return mfCollection(owner[0].user_id,decodeURIComponent(pathnameParts[2]));}const matches=await mfQuery('mf_public_profiles','*',[['username',username]]);if(renderId!==MF302.renderId)return;const u=matches[0];if(!u||!u.is_public){root.innerHTML=mfHeading('Profile unavailable','This username does not have a public profile enabled.')+mfLink('','Community home','mf302-btn');return;}MF302.profile=u;const [follows,following]=await Promise.all([mfQuery('mf_profile_follows','follower_id,followed_id',[['followed_id',u.user_id]]),mfQuery('mf_profile_follows','follower_id,followed_id',[['follower_id',u.user_id]])]);if(renderId!==MF302.renderId)return;const own=AUTH_USER?.id===u.user_id;root.innerHTML=`<section class="mf302-profile"><div class="mf302-banner"></div><div class="mf302-profile-main"><div class="mf302-avatar">${u.avatar_url&&/^https:\/\//.test(u.avatar_url)?`<img src="${mfEsc(u.avatar_url)}" alt="">`:mfIcon('profile')}</div><div><h1>${mfEsc(u.display_name||u.username)}</h1><p>@${mfEsc(u.username)}</p><p>${mfEsc(u.bio)}</p></div></div><div class="mf302-stats">${u.show_followers?`<button onclick="MF302.follows('followers')">${follows.length} Followers</button><button onclick="MF302.follows('following')">${following.length} Following</button>`:''}${u.show_xp?`<span>Level ${Number(u.xp_level)||1} · ${Number(u.xp_total)||0} XP</span>`:''}</div><div class="mf302-hero-actions">${own?'<button class="mf302-btn primary" onclick="MF302.workspaceView(\'mf302-profile\')">Edit public profile</button>':`<button class="mf302-btn primary" onclick="MF302.follow('${mfEsc(u.user_id)}')">Follow / Unfollow</button><button class="mf302-btn" onclick="MF302.startMessage('${mfEsc(u.user_id)}')">Message</button>`}</div></section><section id="mf302-profile-data" class="mf302-results">${mfEmpty('Loading public sections…')}</section>`;await mfLoadProfileData(u);}
+else root.innerHTML=mfHeading('MediaFlow Community','Explore public titles and profiles.');
+}catch(err){if(renderId!==MF302.renderId)return;root.innerHTML=mfHeading('Community temporarily unavailable',mfEsc(err.message))+mfLink('','Back to Community home','mf302-btn');}}
+function mfHeading(title,desc){return `<div class="mf302-heading"><span class="mf302-eyebrow">MEDIAFLOW COMMUNITY</span><h1>${title}</h1><p>${desc}</p></div>`;}
+function mfSearch(placeholder){return `<input class="mf302-search" placeholder="${placeholder}" aria-label="${placeholder}" value="${mfEsc(MF302.query)}" oninput="MF302.search(this.value)">`;}
+function mfEmpty(msg){return `<div class="mf302-empty">${mfEsc(msg)}</div>`;}
+function mfUserCard(u){return `<article class="mf302-tile"><span class="mf302-profile-symbol">${mfIcon('profile')}</span><h3>${mfEsc(u.display_name||u.username)}</h3><p>@${mfEsc(u.username)}</p><p>${mfEsc(u.bio)}</p><button class="mf302-btn" onclick="MF302.go('${mfEsc(u.username)}')">${mfIcon('profile')} View profile</button></article>`;}
+function mfCatalogCard(t){const n=Number(t.users_count)||0;const avg=t.average_rating==null?null:Number(t.average_rating);const covers=Array.isArray(t.covers)?t.covers.filter(x=>/^https:\/\//.test(x)):[];const cover=covers.length?covers[Math.floor(Date.now()/300000)%covers.length]:'';return `<article class="mf302-title">${cover?`<img src="${mfEsc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="mf302-no-cover">${mfIcon('book')}</div>`}<div><h3>${mfEsc(t.title)}</h3><p>${n.toLocaleString()} ${n===1?'library':'libraries'} · ${mfEsc(t.provider)} ${mfEsc(t.provider_id)}</p><p>${mfIcon('ratings')} ${avg===null?'Not rated':avg.toFixed(2)+' / 10'} · ${Number(t.ratings_count)||0} ratings</p><p>${Object.entries(t.statuses||{}).map(([k,v])=>`${mfEsc(k)} ${n?Math.round(Number(v)/n*100):0}%`).join(' · ')}</p></div><button class="mf302-btn" onclick="MF302.quickAdd('${mfEsc(t.provider)}','${mfEsc(t.provider_id)}')">${mfIcon('add')} Quick Add</button></article>`;}
+function mfCatalogPage(direction){MF302.catalogOffset=Math.max(0,(Number(MF302.catalogOffset)||0)+60*direction);mfRenderPublic();}
+function mfTitleCard(t){const n=t.users.size;const avg=t.rates.length?t.rates.reduce((a,b)=>a+b,0)/t.rates.length:null;let cover=t.covers.length?t.covers[Math.floor(Date.now()/300000)%t.covers.length]:'';return `<article class="mf302-title">${cover?`<img src="${mfEsc(cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="mf302-no-cover">${mfIcon('book')}</div>`}<div><h3>${mfEsc(t.title)}</h3><p>${n} ${n===1?'library':'libraries'} · ${mfEsc(t.provider)} ${mfEsc(t.provider_id)}</p><p>${mfIcon('ratings')} ${avg===null?'Not rated':avg.toFixed(2)+' / 10'} · ${t.rates.length} ratings</p><p>${Object.entries(t.status).map(([k,v])=>`${mfEsc(k)} ${Math.round(v/n*100)}%`).join(' · ')}</p></div><button class="mf302-btn" onclick="MF302.quickAdd('${mfEsc(t.provider)}','${mfEsc(t.provider_id)}')">${mfIcon('add')} Quick add</button></article>`;}
+async function mfLoadProfileData(u){const el=document.getElementById('mf302-profile-data');if(!el)return;const sec=[];if(u.show_library){const lib=await mfQuery('mf_public_library','title,status,cover_url,provider,provider_id,user_id',[['user_id',u.user_id]]);sec.push(`<section><h2>Library <small>${lib.length} shared</small></h2><div class="mf302-grid">${lib.slice(0,150).map(x=>`<div class="mf302-tile"><strong>${mfEsc(x.title)}</strong><p>${mfEsc(x.status)}</p></div>`).join('')||mfEmpty('No public titles yet.')}</div><button class="mf302-btn" onclick="MF302.profileSection('library',0)">${mfIcon('book')} Browse full Library</button></section>`);}if(u.show_history){const h=await mfQuery('mf_public_history','title,category,amount,happened_at,user_id',[['user_id',u.user_id]]);sec.push(`<section><h2>History</h2>${h.map(x=>`<div class="mf302-tile">${mfEsc(x.title)} · ${mfEsc(x.amount)} <small>${mfEsc(x.happened_at?.slice(0,10))}</small></div>`).join('')||mfEmpty('No shared history.')}<button class="mf302-btn" onclick="MF302.profileSection('history',0)">${mfIcon('next')} Browse full History</button></section>`);}if(u.show_order){sec.push(`<section><h2>Personal Order</h2><div class="mf302-grid">${(Array.isArray(u.personal_order)?u.personal_order:[]).map((t,i)=>`<div class="mf302-tile">${i+1}. ${mfEsc(t)}</div>`).join('')||mfEmpty('No public Personal Order titles.')}</div></section>`);}const cs=await mfQuery('mf_public_collections','id,title,description,is_public,user_id',[['user_id',u.user_id]]);if(Array.isArray(u.favorites)&&u.favorites.length)sec.push(`<section><h2>Favorite titles</h2><div class="mf302-grid">${u.favorites.map(t=>`<div class="mf302-tile"><h3>${mfEsc(t.title||t)}</h3></div>`).join('')}</div></section>`);sec.push(`<section><h2>Collections</h2><div class="mf302-grid">${cs.filter(c=>c.is_public).map(c=>`<div class="mf302-tile"><h3>${mfEsc(c.title)}</h3><p>${mfEsc(c.description)}</p><button class="mf302-btn" onclick="MF302.openCollection('${mfEsc(c.user_id)}','${mfEsc(c.id)}')">${mfIcon('collections')} Open collection</button></div>`).join('')||mfEmpty('No public Collections yet.')}</div></section>`);if(u.show_statistics)sec.unshift(`<section class="mf304-profile-summary"><h2>Full Statistics</h2><p>Explore the complete published Statistics dashboard, including graphs, consumption insights and records.</p><button class="mf302-btn primary" onclick="MF302.profileSection('statistics')">${mfIcon('ratings')} View Full Statistics</button></section>`);el.innerHTML=sec.join('');}
+async function mfFollow(target){if(!AUTH_USER){mfLogin();return;}try{const exists=await mfQuery('mf_profile_follows','follower_id',[['follower_id',AUTH_USER.id],['followed_id',target]]);const q=exists.length?supabase.from('mf_profile_follows').delete().eq('follower_id',AUTH_USER.id).eq('followed_id',target):supabase.from('mf_profile_follows').insert({follower_id:AUTH_USER.id,followed_id:target});const {error}=await q;if(error)throw error;await mfRenderPublic();}catch(e){mfNotice(e.message);}}
+
+async function mfProfileSection(kind,page=0){const u=MF302.profile;if(!u)return;const el=document.getElementById('mf302-profile-data');if(!el)return;if(kind==='statistics'){await MF304.openStatistics(u);return;}if(kind==='library'&&!u.show_library||kind==='history'&&!u.show_history){mfNotice('This section is private.');return;}const table=kind==='library'?'mf_public_library':'mf_public_history',size=50;try{const {data,error,count}=await supabase.from(table).select('*',{count:'exact'}).eq('user_id',u.user_id).range(page*size,(page+1)*size-1);if(error)throw error;el.innerHTML=`<section><button class="mf302-btn" onclick="MF302.go('${mfEsc(u.username)}')">${mfIcon('back')} Back to profile</button><h2>Full ${kind==='library'?'Library':'History'} · ${(count||0).toLocaleString()}</h2><div class="mf302-results">${(data||[]).map(t=>`<div class="mf302-tile"><strong>${mfEsc(t.title)}</strong><p>${kind==='library'?mfEsc(t.status||''):mfEsc(t.happened_at?.slice(0,10)||'')} · ${mfEsc(t.category||'')}</p></div>`).join('')||mfEmpty('No entries on this page.')}</div><div class="mf302-actions"><button class="mf302-btn" ${page===0?'disabled':''} onclick="MF302.profileSection('${kind}',${page-1})">${mfIcon('back')} Previous</button><strong>Page ${page+1} of ${Math.max(1,Math.ceil((count||0)/size))}</strong><button class="mf302-btn" ${(page+1)*size>=count?'disabled':''} onclick="MF302.profileSection('${kind}',${page+1})">Next ${mfIcon('next')}</button></div></section>`;}catch(e){mfNotice(e.message);}}
+async function mfChooseFavorites(){const profile=await mfMyProfile();if(!profile){mfNotice('Save your public profile first.');return;}const choices=S.library.slice(0,50000).map(x=>`<option value="${mfEsc(x.id)}">${mfEsc(x.title)}</option>`).join('');const el=document.getElementById('view-root');if(!el)return;el.innerHTML=`<div class="mf302-workspace"><h1>Showcase Favorites</h1><p>Choose up to 12 Library titles to highlight on your public profile.</p><button class="mf302-btn" onclick="MF302.workspaceView('mf302-profile')">${mfIcon('back')} Profile settings</button><form onsubmit="return MF302.saveFavorites(event)" class="mf302-form"><label>Favorite titles (hold Ctrl/Cmd to choose multiple)<select name="favorites" multiple size="13" style="min-height:280px;width:100%;background:var(--card,#1b2331);color:var(--text,#fff);border:1px solid var(--border,#ffffff30);border-radius:10px">${choices}</select></label><button class="mf302-btn primary">Save Favorites</button></form></div>`;}
+async function mfSaveFavorites(e){e.preventDefault();const opts=Array.from(e.target.elements.favorites.selectedOptions).map(x=>x.value).slice(0,12);const favorites=opts.map(id=>S.library.find(x=>String(x.id)===id)).filter(Boolean).map(x=>({title:x.title,externalIds:x.externalIds||{}}));const {error}=await supabase.from('mf_public_profiles').update({favorites,updated_at:new Date().toISOString()}).eq('user_id',AUTH_USER.id);if(error)mfNotice(error.message);else{mfNotice('Favorite titles saved.');mfWorkspaceView('mf302-profile');}return false;}
+
+async function mfFollows(kind){let u=MF302.profile;if(!u)return;const rows=await mfQuery('mf_profile_follows','follower_id,followed_id',[[kind==='followers'?'followed_id':'follower_id',u.user_id]]);const ids=rows.map(r=>kind==='followers'?r.follower_id:r.followed_id);const el=document.getElementById('mf302-profile-data');if(!el)return;const users=await mfQuery('mf_public_profiles','user_id,username,display_name,bio,is_public',[['is_public',true]]);el.innerHTML=`<section><h2>${kind==='followers'?'Followers':'Following'}</h2><button class="mf302-btn" onclick="MF302.go('${mfEsc(u.username)}')">${mfIcon('back')} Back</button><div class="mf302-grid">${users.filter(x=>ids.includes(x.user_id)).map(mfUserCard).join('')||mfEmpty('No users to display.')}</div></section>`;}
+async function mfCollection(uid,id){try{if(!uid.match(/^[0-9a-f-]{36}$/)){const users=await mfQuery('mf_public_profiles','user_id',[['username',uid]]);if(!users.length)throw Error('Unknown user.');uid=users[0].user_id;}const rows=await mfQuery('mf_public_collections','*',[['user_id',uid],['id',id]]);const c=rows[0];if(!c||!c.is_public)throw Error('This Collection is private or unavailable.');const root=document.getElementById('mf302-content');root.innerHTML=mfHeading(mfEsc(c.title),mfEsc(c.description))+`<div class="mf302-results">${(Array.isArray(c.items)?c.items:[]).map((t,i)=>`<div class="mf302-tile">${i+1}. ${mfEsc(typeof t==='string'?t:t.title||t.name||'Title')}</div>`).join('')||mfEmpty('Empty Collection.')}</div>`;}catch(e){mfNotice(e.message);}}
+function mfWorkspaceView(view){if(!AUTH_USER){mfLogin();return;}mfHidePortal();App.setView(view);setTimeout(mfDecorateWorkspace,0);}
+const v302MobileTabsBase=renderMobileTabs;
+renderMobileTabs=function(){let html=v302MobileTabsBase.apply(this,arguments);const extra=[['mf302-public','Community'],['mf302-profile','Public Profile'],['mf302-friends','Friends'],['mf302-inbox','Inbox']].map(([view,name])=>`<button type="button" class="mobile-more-item v296-more-item" onclick="MF302.workspaceView('${view}')"><span class="v296-more-item-icon">${mfIcon(name.toLowerCase())}</span><span class="v296-more-item-copy"><b>${name}</b><small>MediaFlow social</small></span></button>`).join('');return html.replace(/(<div id="mobile-more-menu"[^>]*>)/,'$1'+extra);};
+function mfWorkspaceNav(){const nav=document.querySelector('.sidebar .nav');if(!nav||nav.querySelector('.mf302-side'))return;const group=document.createElement('div');group.className='mf302-side';group.innerHTML=`<div class="mf302-side-label">COMMUNITY</div>${[['mf302-public','Community'],['mf302-profile','Public Profile'],['mf302-friends','Friends'],['mf302-inbox','Inbox']].map(([v,l])=>`<button type="button" class="nav-item" data-mf302-view="${v}" onclick="MF302.workspaceView('${v}')"><span>${mfIcon(l.toLowerCase())}</span><span>${l}</span></button>`).join('')}`;nav.appendChild(group);}
+function mfDecorateWorkspace(){if(!AUTH_USER)return;mfWorkspaceNav();let chat=document.getElementById('mf302-chat-widget');if(!chat){chat=document.createElement('div');chat.id='mf302-chat-widget';chat.innerHTML=`<button class="mf302-chat-trigger" onclick="MF302.toggleChat()" aria-label="Open messages">${mfIcon('inbox')} <span>Messages</span></button><section id="mf302-chat-body" hidden><header><strong>Messages</strong><button onclick="MF302.toggleChat()">${mfIcon('back')}</button></header><div id="mf302-chat-list">Open Inbox to see messages.</div><div id="mf302-chat-conversation" hidden><button class="mf302-btn" onclick="MF302.chatRecent()">${mfIcon('back')} Conversations</button><div id="mf302-chat-messages"></div><form class="mf302-composer" onsubmit="return MF302.chatSend(event)"><input id="mf302-chat-input" required maxlength="4000" aria-label="Chat message" placeholder="Message…"><button class="mf302-btn primary">Send</button></form></div><button class="mf302-btn" onclick="MF302.workspaceView('mf302-inbox');MF302.toggleChat(false)">${mfIcon('inbox')} Go to Inbox</button></section>`;document.body.appendChild(chat);}chat.hidden=false;}
+async function mfMyProfile(){if(!AUTH_USER)return null;const rows=await mfQuery('mf_public_profiles','*',[['user_id',AUTH_USER.id]]);return rows[0]||null;}
+async function mfSaveProfile(ev){ev.preventDefault();const f=ev.target;const data=Object.fromEntries(new FormData(f));const xpInfo=mediaFlowLevelInfo();const row={user_id:AUTH_USER.id,xp_total:xpInfo.xp,xp_level:xpInfo.level,username:String(data.username||'').toLowerCase().trim(),display_name:String(data.display_name||''),bio:String(data.bio||''),avatar_url:String(data.avatar_url||''),is_public:!!f.elements.is_public.checked,allow_messages:!!f.elements.allow_messages.checked,show_library:!!f.elements.show_library.checked,show_history:!!f.elements.show_history.checked,show_xp:!!f.elements.show_xp.checked,show_statistics:!!f.elements.show_statistics.checked,show_followers:!!f.elements.show_followers.checked,show_order:!!f.elements.show_order.checked,personal_order:f.elements.show_order.checked?(S.orderPlan?.titleIds||[]).map(id=>S.library.find(t=>t.id===id)?.title).filter(Boolean):[],updated_at:new Date().toISOString()};const {error}=await supabase.from('mf_public_profiles').upsert(row,{onConflict:'user_id'});if(error)mfNotice(error.message);else{mfNotice('Public profile settings saved.');MF302.userProfile=row;mfWorkspaceView('mf302-profile');}return false;}
+function mfCheck(name,yes,label){return `<label class="mf302-check"><input type="checkbox" name="${name}" ${yes?'checked':''}> ${label}</label>`;}
+async function mfProfileEditor(){const el=document.getElementById('view-root');if(!el)return;const u=await mfMyProfile();MF302.userProfile=u;el.innerHTML=`<div class="mf302-workspace"><h1>Public Profile</h1><p>Nothing is published unless you explicitly enable it. Choose your username and what others can see.</p><form onsubmit="return MF302.saveProfile(event)" class="mf302-form"><label>Username<input name="username" required pattern="[a-z][a-z0-9_]{2,23}" placeholder="yourname" value="${mfEsc(u?.username||'')}"></label><label>Display name<input name="display_name" maxlength="60" value="${mfEsc(u?.display_name||'')}"></label><label>Bio<textarea name="bio" maxlength="500">${mfEsc(u?.bio||'')}</textarea></label><label>Avatar URL<input name="avatar_url" placeholder="https://..." value="${mfEsc(u?.avatar_url||'')}"></label>${mfCheck('is_public',u?.is_public,'Enable public profile')}${mfCheck('show_library',u?.show_library,'Make published Library visible')}${mfCheck('show_history',u?.show_history,'Make published History visible')}${mfCheck('show_order',u?.show_order,'Show public Personal Order')}${mfCheck('show_xp',u?.show_xp!==false,'Show XP and level')}${mfCheck('show_statistics',u?.show_statistics===true,'Show Full Statistics on public profile')}${mfCheck('show_followers',u?.show_followers!==false,'Show Followers and Following')}${mfCheck('allow_messages',u?.allow_messages!==false,'Allow direct messages')}<button type="button" class="mf302-btn" onclick="MF302.chooseFavorites()">Choose favorite titles</button><button type="submit" class="mf302-btn primary">Save profile</button></form><div class="mf302-publish"><h2>Publish to Community</h2><p>These are opt-in snapshots. They don't expose your private cloud state table.</p><div class="mf302-actions"><button class="mf302-btn" onclick="MF302.publish('library')">Publish Library (${S.library.length} titles)</button><button class="mf302-btn" onclick="MF302.publish('history')">Publish History (${S.sessions.length} logs)</button><button class="mf302-btn" onclick="MF304.publishStatistics()">Publish Full Statistics snapshot</button><button class="mf302-btn" onclick="MF302.publish('collections')">Choose Collections</button></div>${u?.is_public?`<p>${mfLink(u.username,'View public profile')}</p>`:''}</div></div>`;}
+async function mfPublish(which){if(!AUTH_USER)return;const u=await mfMyProfile();if(!u?.is_public){mfNotice('Enable your public profile and save it first.');return;}try{if(which==='library'){if(!confirm('Publish your Library titles, statuses and ratings? They become publicly viewable.'))return;const items=S.library.map(x=>({user_id:AUTH_USER.id,entry_id:String(x.id),title:String(x.title||''),category:String(S.categories.find(c=>c.id===x.categoryId)?.name||''),status:String(x.status||''),cover_url:String(x.coverUrl||''),provider:String(x.externalIds?.mal?'mal':x.externalIds?.simkl?'simkl':''),provider_id:String(x.externalIds?.mal||x.externalIds?.simkl||''),rating:Number.isFinite(Number(x.rating))&&x.rating!==null&&x.rating!==undefined&&x.rating!==''?Number(x.rating):null,progress:Number(x.progress)||0,total:Number(x.total)||null})).filter(x=>x.title&&x.entry_id);for(let i=0;i<items.length;i+=100){const {error}=await supabase.from('mf_public_library').upsert(items.slice(i,i+100),{onConflict:'user_id,entry_id'});if(error)throw error;}mfNotice(`Published ${items.length} Library titles.`);}if(which==='history'){if(!confirm('Publish your History entries? Other people will be able to view them.'))return;const items=S.sessions.map(x=>({user_id:AUTH_USER.id,event_id:String(x.id||x.timestamp),title:String(x.title||x.entries?.[0]?.title||''),category:String(x.categoryId||''),amount:Number(x.actualAmount)||0,minutes:Number(x.minutes)||0,happened_at:new Date(x.timestamp||Date.now()).toISOString()}));for(let i=0;i<items.length;i+=100){const {error}=await supabase.from('mf_public_history').upsert(items.slice(i,i+100),{onConflict:'user_id,event_id'});if(error)throw error;}mfNotice(`Published ${items.length} history entries.`);}if(which==='collections'){mfCollectionsEditor();}}catch(e){mfNotice(e.message);}}
+async function mfFriends(){const el=document.getElementById('view-root');if(!el)return;el.innerHTML='<div class="mf302-workspace"><h1>Friends & Following</h1><p>Loading social connections…</p></div>';const profiles=await mfQuery('mf_public_profiles','user_id,username,display_name,bio,is_public',[['is_public',true]]);const [following,followers]=await Promise.all([mfQuery('mf_profile_follows','followed_id',[['follower_id',AUTH_USER.id]]),mfQuery('mf_profile_follows','follower_id',[['followed_id',AUTH_USER.id]])]);const a=new Set(following.map(x=>x.followed_id)),b=new Set(followers.map(x=>x.follower_id));el.innerHTML=`<div class="mf302-workspace"><h1>Friends</h1><p>Friends are accounts you mutually follow. Open a profile or start a conversation.</p><h2>Mutuals · ${[...a].filter(x=>b.has(x)).length}</h2><div class="mf302-grid">${profiles.filter(x=>a.has(x.user_id)&&b.has(x.user_id)).map(mfWorkspaceUser).join('')||mfEmpty('No mutual friends yet.')}</div><h2>Following · ${a.size}</h2><div class="mf302-grid">${profiles.filter(x=>a.has(x.user_id)).map(mfWorkspaceUser).join('')||mfEmpty('Not following anyone.')}</div><h2>Followers · ${b.size}</h2><div class="mf302-grid">${profiles.filter(x=>b.has(x.user_id)).map(mfWorkspaceUser).join('')||mfEmpty('No followers yet.')}</div></div>`;}
+function mfWorkspaceUser(u){return `<div class="mf302-tile"><h3>${mfEsc(u.display_name||u.username)}</h3><p>@${mfEsc(u.username)}</p><button class="mf302-btn" onclick="MF302.go('${mfEsc(u.username)}')">${mfIcon('profile')} Profile</button><button class="mf302-btn" onclick="MF302.startMessage('${mfEsc(u.user_id)}')">Message</button></div>`;}
+async function mfStartMessage(other){if(!AUTH_USER){mfLogin();return;}try{const {data,error}=await supabase.rpc('mf_start_dm',{other_user:other});if(error)throw error;MF302.activeThread=data;mfWorkspaceView('mf302-inbox');}catch(e){mfNotice(e.message);}}
+async function mfInbox(){const el=document.getElementById('view-root');if(!el)return;el.innerHTML='<div class="mf302-workspace"><h1>Inbox</h1><p>Loading conversations…</p></div>';try{const ts=await mfQuery('mf_dm_threads','id,user_a,user_b,created_at');MF302.threadList=ts;const ps=await mfQuery('mf_public_profiles','user_id,username,display_name,is_public',[['is_public',true]]);const names=new Map(ps.map(p=>[p.user_id,p]));el.innerHTML=`<div class="mf302-workspace"><h1>Inbox</h1><p>Private messages between MediaFlow accounts.</p><div class="mf302-inbox"><aside><h3>Conversations</h3>${ts.map(t=>{const id=t.user_a===AUTH_USER.id?t.user_b:t.user_a;const p=names.get(id);return `<button class="mf302-thread ${MF302.activeThread===t.id?'active':''}" onclick="MF302.openThread('${t.id}')">${mfEsc(p?.display_name||p?.username||'User')}</button>`;}).join('')||mfEmpty('No conversations yet.')}<button class="mf302-btn" onclick="MF302.workspaceView('mf302-friends')">Find friends</button></aside><div class="mf302-messages"><div id="mf302-messages-body">${mfEmpty('Choose a conversation.')}</div><form class="mf302-composer" onsubmit="return MF302.send(event)"><input id="mf302-message-input" placeholder="Write a message…" maxlength="4000" autocomplete="off" aria-label="Message" required><button class="mf302-btn primary">Send</button></form><div class="mf302-actions"><button class="mf302-btn" onclick="MF302.deleteConversation()">Delete conversation locally</button><button class="mf302-btn" onclick="MF302.blockConversation()">Block user</button></div></div></div></div>`;if(MF302.activeThread)await mfOpenThread(MF302.activeThread);}catch(e){el.innerHTML=`<div class="mf302-workspace"><h1>Inbox</h1><p>${mfEsc(e.message)}</p></div>`;}}
+async function mfOpenThread(id){MF302.activeThread=id;mfSubscribeMessages(id);const el=document.getElementById('mf302-messages-body');if(!el)return;const msgs=await mfQuery('mf_dm_messages','id,thread_id,sender_id,body,created_at,unsent_at',[['thread_id',id]]);const prefs=await mfQuery('mf_dm_preferences','deleted_before',[['user_id',AUTH_USER.id],['thread_id',id]]);const hidden=prefs[0]?.deleted_before?new Date(prefs[0].deleted_before).getTime():0;el.innerHTML=msgs.filter(m=>new Date(m.created_at).getTime()>hidden).sort((a,b)=>a.created_at.localeCompare(b.created_at)).map(m=>`<div class="mf302-bubble ${m.sender_id===AUTH_USER.id?'mine':''}"><p>${mfEsc(m.unsent_at?'Message unsent':m.body)}</p><small>${new Date(m.created_at).toLocaleString()}</small>${m.sender_id===AUTH_USER.id&&!m.unsent_at?`<button onclick="MF302.unsend('${mfEsc(m.id)}')">Unsend</button>`:''}</div>`).join('')||mfEmpty('Start your conversation.');el.scrollTop=el.scrollHeight;}
+async function mfSend(ev){ev.preventDefault();if(!MF302.activeThread)return false;const input=document.getElementById('mf302-message-input');const body=input.value.trim();if(!body)return false;const {error}=await supabase.from('mf_dm_messages').insert({thread_id:MF302.activeThread,sender_id:AUTH_USER.id,body});if(error)mfNotice(error.message);else{input.value='';mfOpenThread(MF302.activeThread);}return false;}
+async function mfUnsend(id){const {error}=await supabase.from('mf_dm_messages').update({body:'',unsent_at:new Date().toISOString()}).eq('id',id).eq('sender_id',AUTH_USER.id);if(error)mfNotice(error.message);else mfOpenThread(MF302.activeThread);}
+async function mfDeleteConversation(){if(!MF302.activeThread||!confirm('Hide all messages in this conversation for your account?'))return;const {error}=await supabase.from('mf_dm_preferences').upsert({user_id:AUTH_USER.id,thread_id:MF302.activeThread,deleted_before:new Date().toISOString()},{onConflict:'user_id,thread_id'});if(error)mfNotice(error.message);else mfOpenThread(MF302.activeThread);}
+async function mfBlockConversation(){const t=MF302.threadList.find(x=>x.id===MF302.activeThread);if(!t||!confirm('Block this user? New messages will be disabled.'))return;const other=t.user_a===AUTH_USER.id?t.user_b:t.user_a;const {error}=await supabase.from('mf_social_blocks').upsert({blocker_id:AUTH_USER.id,blocked_id:other});if(error)mfNotice(error.message);else mfNotice('User blocked.');}
+function mfToggleChat(force){const body=document.getElementById('mf302-chat-body');if(!body)return;MF302.chatOpen=typeof force==='boolean'?force:!MF302.chatOpen;body.hidden=!MF302.chatOpen;if(MF302.chatOpen)mfChatRecent();}
+
+async function mfChatThread(id){MF302.activeThread=id;const list=document.getElementById('mf302-chat-list'),pane=document.getElementById('mf302-chat-conversation');if(!pane)return;list.hidden=true;pane.hidden=false;await mfChatRefresh();}
+async function mfChatRefresh(){const el=document.getElementById('mf302-chat-messages');if(!el||!MF302.activeThread)return;try{const msgs=await mfQuery('mf_dm_messages','sender_id,body,created_at,unsent_at',[['thread_id',MF302.activeThread]]);el.innerHTML=msgs.sort((a,b)=>a.created_at.localeCompare(b.created_at)).slice(-70).map(m=>`<div class="mf302-bubble ${m.sender_id===AUTH_USER.id?'mine':''}">${mfEsc(m.unsent_at?'Message unsent':m.body)}</div>`).join('')||mfEmpty('No messages yet.');el.scrollTop=el.scrollHeight;}catch(e){el.textContent=e.message;}}
+async function mfChatSend(event){event.preventDefault();if(!MF302.activeThread)return false;const input=document.getElementById('mf302-chat-input'),body=input?.value.trim();if(!body)return false;const {error}=await supabase.from('mf_dm_messages').insert({thread_id:MF302.activeThread,sender_id:AUTH_USER.id,body});if(error)mfNotice(error.message);else{input.value='';mfChatRefresh();}return false;}
+let mf302RealtimeChannel=null;
+function mfSubscribeMessages(thread){if(!supabase||!thread)return;try{if(mf302RealtimeChannel)supabase.removeChannel(mf302RealtimeChannel);mf302RealtimeChannel=supabase.channel('mf302-dm-'+thread).on('postgres_changes',{event:'*',schema:'public',table:'mf_dm_messages',filter:'thread_id=eq.'+thread},()=>{if(MF302.activeThread===thread){mfOpenThread(thread);if(MF302.chatOpen)mfChatRefresh();}}).subscribe();}catch(_){}}
+
+async function mfChatRecent(){const el=document.getElementById('mf302-chat-list');if(!el)return;el.hidden=false;const pane=document.getElementById('mf302-chat-conversation');if(pane)pane.hidden=true;try{const ts=await mfQuery('mf_dm_threads','id,user_a,user_b,created_at');const ps=await mfQuery('mf_public_profiles','user_id,display_name,username,is_public',[['is_public',true]]);el.innerHTML=ts.slice(0,12).map(t=>{const other=t.user_a===AUTH_USER.id?t.user_b:t.user_a;const p=ps.find(x=>x.user_id===other);return `<button class="mf302-thread" onclick="MF302.chatThread('${t.id}')">${mfEsc(p?.display_name||p?.username||'Conversation')}</button>`;}).join('')||mfEmpty('No messages yet.');}catch(e){el.textContent=e.message;}}
+async function mfQuickAdd(provider,id){if(!AUTH_USER){mfLogin();return;}try{
+ const matches=await mfQuery('mf_public_library','title,cover_url,provider,provider_id,category,status,progress,total', [['provider',provider],['provider_id',id]]);
+ if(!matches.length){mfNotice('This title is no longer available.');return;}
+ const source=matches[0];const already=S.library.find(i=>String(i.externalIds?.[provider]||'')===id);
+ if(already){mfNotice('Already in your Library.');mfHidePortal();App.setView('library');return;}
+ const categories=S.categories.filter(c=>c.enabled!==false);if(!categories.length){mfNotice('Create a Category first.');return;}
+ const overlay=document.createElement('div');overlay.className='mf302-overlay';overlay.id='mf302-add-dialog';overlay.innerHTML=`<form class="mf302-dialog mf302-form" onsubmit="return MF302.confirmAdd(event)" role="dialog" aria-modal="true" aria-label="Quick Add title"><h2>Quick Add to Library</h2><p>Add this verified title to your private workspace and choose its settings.</p><label>Title<input name="title" maxlength="500" required value="${mfEsc(source.title)}"></label><label>Category<select name="category">${categories.map(c=>`<option value="${mfEsc(c.id)}">${mfEsc(c.name)}</option>`).join('')}</select></label><label>Status<select name="status"><option value="planned">Plan to Watch / Read</option><option value="active">Watching / Reading</option><option value="paused">On Hold</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select></label><label>Priority<select name="priority"><option value="medium">Medium</option><option value="low">Low</option><option value="high">High</option></select></label><div class="mf302-actions"><button class="mf302-btn primary">Add to Library</button><button type="button" class="mf302-btn" onclick="document.getElementById('mf302-add-dialog')?.remove()">Cancel</button></div></form>`;
+ overlay.dataset.provider=provider;overlay.dataset.providerId=id;MF302.addSource=source;
+ document.body.appendChild(overlay);
+}catch(e){mfNotice(e.message);}}
+async function mfConfirmAdd(ev){ev.preventDefault();const overlay=document.getElementById('mf302-add-dialog');if(!overlay)return false;const form=ev.target;const values=Object.fromEntries(new FormData(form)),provider=overlay.dataset.provider,id=overlay.dataset.providerId,source=MF302.addSource;
+ if(S.library.some(i=>String(i.externalIds?.[provider]||'')===id)){mfNotice('This title already exists in your Library.');return false;}
+ const item={id:uid(),title:cleanTitle(values.title),categoryId:values.category,progress:0,total:Number(source.total)||null,status:values.status,priority:values.priority,coverUrl:String(source.cover_url||''),estimatedMinutes:null,tags:['community'],source:'community',createdAt:Date.now(),externalIds:{[provider]:id}};
+ S.library.push(item);awardLibraryAdditionXP(item.id);try{await persistLibrary();overlay.remove();mfHidePortal();App.setView('library');showToast('Title added to Library ✓');}catch(e){S.library=S.library.filter(x=>x.id!==item.id);mfNotice('Could not save this title: '+e.message);}return false;}
+
+async function mfCollectionsEditor(){
+  const el=document.getElementById('view-root');if(!el)return;const rows=await mfQuery('mf_public_collections','id,title,is_public',[['user_id',AUTH_USER.id]]);const pub=new Map(rows.map(x=>[x.id,x]));el.innerHTML=`<div class="mf302-workspace"><h1>Collection Sharing</h1><p>Choose which Collections people can open. Only enabled Collections are publicly readable; your original Collections stay in your private Workspace.</p><button class="mf302-btn" onclick="MF302.workspaceView('mf302-profile')">${mfIcon('back')} Public Profile</button><div class="mf302-grid">${(S.collections||[]).map(c=>`<article class="mf302-tile"><h3>${mfEsc(c.title)}</h3><p>${(c.titleIds||[]).length} titles</p><div>${pub.get(c.id)?.is_public?'Public':'Private'}</div><button class="mf302-btn" onclick="MF302.publishCollection('${mfEsc(c.id)}',${pub.get(c.id)?.is_public?'false':'true'})">${pub.get(c.id)?.is_public?'Make Private':'Make Public'}</button></article>`).join('')||mfEmpty('No Collections to publish.')}</div></div>`;
+}
+async function mfPublishCollection(id,isPublic){
+ const c=(S.collections||[]).find(x=>String(x.id)===id);if(!c)return;
+ if(isPublic&&!confirm(`Make Collection "${c.title}" public? Anyone with the link can view its titles.`))return;
+ const items=(c.titleIds||[]).map(titleId=>S.library.find(t=>String(t.id)===String(titleId))).filter(Boolean).map(t=>({title:t.title,coverUrl:t.coverUrl||'',status:t.status||'',rating:t.rating??null}));
+ const row={user_id:AUTH_USER.id,id:String(c.id),title:String(c.title||''),description:String(c.description||''),cover_url:String(c.coverUrl||''),items,is_public:isPublic,updated_at:new Date().toISOString()};
+ const {error}=await supabase.from('mf_public_collections').upsert(row,{onConflict:'user_id,id'});if(error)mfNotice(error.message);else{mfNotice(isPublic?'Collection is public.':'Collection made private.');mfCollectionsEditor();}
+}
+
+async function mfWorkspaceCommunity(){MF302.page='home';mfShowPortal();}
+const v302BaseRenderAuthScreen=renderAuthScreen;
+function mf305AuthHomeButton(){
+ const card=document.querySelector('#app .v297-auth-card');
+ if(!card||card.querySelector('.mf305-auth-home'))return;
+ const button=document.createElement('button');
+ button.type='button';button.className='mf305-auth-home';button.dataset.v225Iconified='1';
+ button.setAttribute('aria-label','Back to MediaFlow Community homepage');
+ button.innerHTML=mfIcon('back')+'<span>Back to Homepage</span>';
+ button.addEventListener('click',()=>MF302.go(''));
+ card.insertBefore(button,card.querySelector('.auth-brand')||card.firstChild);
+}
+renderAuthScreen=function(mode='login',message='',error=false){
+ if(MF302.forceAuth||mfUrlState()==='login'||mfUrlState()==='workspace'){
+  v302BaseRenderAuthScreen(mode,message,error);
+  mf305AuthHomeButton();
+  return;
+ }
+ MF302.page=mfUrlState();mfShowPortal();
+};
+window.MediaFlowAuth.show=function(mode){
+ MF302.forceAuth=true;
+ mf307SetRoute('login');
+ mfHidePortal();renderAuthScreen(mode);
+};
+const v302BaseStartApp=startAuthenticatedApp;
+startAuthenticatedApp=async function(){
+ // The login form and Supabase auth callback may both request a bootstrap.
+ // Persist the destination BEFORE awaiting storage hydration so neither callback
+ // can accidentally switch the user back to the public landing page.
+ const signedInViaLogin=MF302.forceAuth||mfUrlState()==='login';
+ if(signedInViaLogin&&AUTH_USER){
+  mf307SetRoute('workspace',true);
+ }
+ await v302BaseStartApp();
+ if(!AUTH_USER)return;
+ if(signedInViaLogin||mfUrlState()==='workspace'){
+  MF302.forceAuth=false;mfHidePortal();mfDecorateWorkspace();return;
+ }
+ MF302.page=mfUrlState();mfShowPortal();mfDecorateWorkspace();
+};
+const v302BaseRenderView=renderView;
+renderView=function(){if(['mf302-profile','mf302-friends','mf302-inbox','mf302-public'].includes(S.view)){const r=document.getElementById('view-root');if(r)r.innerHTML='<div class="mf302-workspace"><p>Loading…</p></div>';if(S.view==='mf302-profile')mfProfileEditor();if(S.view==='mf302-friends')mfFriends();if(S.view==='mf302-inbox')mfInbox();if(S.view==='mf302-public')mfWorkspaceCommunity();setTimeout(mfDecorateWorkspace,0);return;}v302BaseRenderView();setTimeout(mfDecorateWorkspace,0);};
+const v302BaseRenderShell=renderShell;
+renderShell=function(){const out=v302BaseRenderShell.apply(this,arguments);setTimeout(mfDecorateWorkspace,0);return out;};
+window.MF302=Object.assign(MF302,{go:mfGo,workspace:mfWorkspace,login:mfLogin,search(q){MF302.query=q;MF302.catalogOffset=0;clearTimeout(MF302.searchTimer);MF302.searchTimer=setTimeout(()=>{mfRenderPublic();setTimeout(()=>{const el=document.querySelector('.mf302-search');if(el){el.focus();el.setSelectionRange(q.length,q.length);}},0);},320);},openCollection:mfCollection,profileSection:mfProfileSection,chooseFavorites:mfChooseFavorites,saveFavorites:mfSaveFavorites,follow:mfFollow,follows:mfFollows,workspaceView:mfWorkspaceView,saveProfile:mfSaveProfile,publish:mfPublish,publishCollection:mfPublishCollection,startMessage:mfStartMessage,openThread:mfOpenThread,send:mfSend,unsend:mfUnsend,deleteConversation:mfDeleteConversation,blockConversation:mfBlockConversation,toggleChat:mfToggleChat,chatRecent:mfChatRecent,chatThread:mfChatThread,chatSend:mfChatSend,quickAdd:mfQuickAdd,catalogPage:mfCatalogPage,confirmAdd:mfConfirmAdd});
+window.addEventListener('popstate',()=>{
+ const next=mfUrlState();
+ if(next==='login'){mfLogin();return;}
+ if(next==='workspace'){mfWorkspace();return;}
+ MF302.page=next;MF302.query='';MF302.catalogOffset=0;mfShowPortal();
+});
+window.MediaFlowCommunity={version:307,base:301,enabled:true,privateWorkspaceUnchanged:true,publicRoutingFixed:true,authRoutingFixed:true,domNavigation:true};
