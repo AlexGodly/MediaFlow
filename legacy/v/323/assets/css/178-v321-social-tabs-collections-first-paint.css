@@ -1,0 +1,11 @@
+/* v321: intentional relationship icons, no generic legacy arrow.
+   Theme-aware Collections skeleton is rendered before saved data resolves. */
+#view-root .mf320-tab .mf321-tab-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;color:currentColor}
+#view-root .mf320-tab .mf321-tab-icon svg{display:block;width:18px;height:18px;stroke:currentColor}
+#view-root .mf320-tab.active .mf321-tab-icon{color:var(--mf320-accent)}
+#view-root .mf320-tab>.v225-btn-icon{display:none!important}
+#view-root .mf321-collection-loading{min-height:112px;cursor:progress}
+#view-root .mf321-collection-loading .mf320-collection-empty-icon{animation:mf321-pulse 1.8s ease-in-out infinite}
+@keyframes mf321-pulse{0%,100%{opacity:.65}50%{opacity:1}}
+@media(max-width:450px){#view-root .mf320-tab .mf321-tab-icon,#view-root .mf320-tab .mf321-tab-icon svg{width:16px;height:16px;flex-basis:16px}}
+@media(prefers-reduced-motion:reduce){#view-root .mf321-collection-loading .mf320-collection-empty-icon{animation:none}}
