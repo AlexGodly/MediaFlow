@@ -1,0 +1,31 @@
+/* MediaFlow v305 — official logo glow, clean public navigation and authentication return */
+body.mf302-public-active #mf302-root .mf302-brand{position:relative;isolation:isolate;gap:11px}
+body.mf302-public-active #mf302-root .mf302-brand>img{
+  width:42px;height:42px;object-fit:contain;flex:0 0 42px;
+  border-radius:12px;
+  filter:drop-shadow(0 0 5px rgba(143,137,255,.78)) drop-shadow(0 0 14px rgba(74,193,242,.36));
+  transition:filter .2s ease,transform .2s ease;
+}
+body.mf302-public-active #mf302-root .mf302-brand:hover>img,
+body.mf302-public-active #mf302-root .mf302-brand:focus-visible>img{
+  filter:drop-shadow(0 0 9px rgba(171,160,255,.95)) drop-shadow(0 0 24px rgba(84,206,244,.65));transform:translateY(-1px);
+}
+/* No extra icon or pseudo-element may precede the official logo. */
+body.mf302-public-active #mf302-root .mf302-brand:before,
+body.mf302-public-active #mf302-root .mf302-brand:after{content:none!important}
+#app .mf305-auth-home{
+ display:inline-flex;align-items:center;gap:7px;
+ position:relative;z-index:2;
+ border:1px solid var(--border,#ffffff33);
+ border-radius:10px;
+ background:var(--panel,#ffffff0c);
+ color:var(--text,#f3f2fb);
+ padding:9px 13px;margin-bottom:24px;
+ font:600 12px Manrope,system-ui,sans-serif;cursor:pointer;
+ transition:background .18s ease,border-color .18s ease;
+}
+#app .mf305-auth-home:hover{background:var(--hover,#aaa1ff22);border-color:#aa99fa}
+#app .mf305-auth-home:focus-visible{outline:2px solid #a69aff;outline-offset:3px}
+#app .mf305-auth-home .mf303-icon{width:16px;height:16px}
+@media(max-width:600px){#app .mf305-auth-home{margin-bottom:15px}}
+@media(prefers-reduced-motion:reduce){body.mf302-public-active #mf302-root .mf302-brand>img{transition:none}}
