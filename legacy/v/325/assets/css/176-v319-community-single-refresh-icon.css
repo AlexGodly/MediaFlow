@@ -1,0 +1,5 @@
+/* MediaFlow v319 — one purpose-built refresh icon in every Community button. */
+#mf302-root button.mf319-single-refresh-icon{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+#mf302-root button.mf319-single-refresh-icon > svg{display:block;width:17px;height:17px;flex:0 0 17px}
+#mf302-root button.mf319-single-refresh-icon.loading > svg{animation:mf317Rotate 1.3s linear infinite}
+@media(prefers-reduced-motion:reduce){#mf302-root button.mf319-single-refresh-icon.loading > svg{animation:none}}
