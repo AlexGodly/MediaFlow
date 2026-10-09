@@ -2,12 +2,12 @@
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v330-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v333-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v330 — Personal Edition.** A complete media-management workspace for organizing anime, manga, manhwa, manhua, films, TV series, books, novels, comics, and other media, tracking consumption and progress, planning what to enjoy next, and understanding your activity over time.
+> **MediaFlow v333 — Personal Edition.** A complete media-management workspace for organizing anime, manga, manhwa, manhua, films, TV series, books, novels, comics, and other media, tracking consumption and progress, planning what to enjoy next, and understanding your activity over time.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
