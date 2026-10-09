@@ -1,0 +1,6 @@
+/* MediaFlow v331 — Readable, theme-aware per-title logging times. */
+.mf331-added-at,.mf331-batch-added,.mf331-row-time{display:block;color:var(--text-mute,var(--text-dim));font-size:11px;line-height:1.5;font-weight:550;font-variant-numeric:tabular-nums;}
+.mf331-added-at{margin-top:4px;}
+.mf331-batch-added{margin-top:5px;margin-left:2px;}
+.mf272-log-title-copy .mf331-row-time{margin-top:2px;white-space:normal;}
+@media(max-width:480px){.mf331-added-at,.mf331-batch-added,.mf331-row-time{font-size:10.5px;}}
