@@ -1,0 +1,16 @@
+/* MediaFlow v326: original Workspace Statistics inside a read-only public profile. */
+.mf323-public .mf326-statistics .mf325-native-page{max-width:100%;width:100%;min-width:0;overflow-x:clip}
+.mf323-public .mf326-statistics .view-head{display:flex;flex-wrap:wrap;gap:14px}
+.mf323-public .mf326-statistics .card,.mf323-public .mf326-statistics .stat-box,
+.mf323-public .mf326-statistics .profile-stat-hero{max-width:100%;min-width:0;overflow-wrap:anywhere}
+.mf323-public .mf326-statistics .grid-3,.mf323-public .mf326-statistics .two-col,
+.mf323-public .mf326-statistics .v129-classic-stats-grid{min-width:0;max-width:100%}
+.mf323-public .mf326-statistics .record-row{min-width:0;flex-wrap:wrap;gap:8px}
+.mf323-public .mf326-statistics .record-row .v{overflow-wrap:anywhere}
+.mf323-public .mf326-statistics .mf316-time-stat{border-color:var(--p323-border);background:var(--p323-panel)}
+.mf323-public .mf326-statistics .stats-level-card{border-color:var(--p323-border)}
+.mf323-public .mf326-statistics .v44-timeline-pager{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.mf323-public .mf326-statistics [data-mf325-action]{cursor:pointer}
+.mf323-public .mf326-statistics .mf325-passive{pointer-events:none;opacity:.75}
+@media(max-width:760px){.mf323-public .mf326-statistics .grid-3,.mf323-public .mf326-statistics .two-col,.mf323-public .mf326-statistics .v129-classic-stats-grid{grid-template-columns:minmax(0,1fr)!important}.mf323-public .mf326-statistics .stats-level-card{margin-inline:0}}
+@media(max-width:390px){.mf323-public .mf326-statistics .mf325-native-page{padding:7px}.mf323-public .mf326-statistics .mf316-stats-cells{grid-template-columns:repeat(2,minmax(0,1fr))}}
