@@ -1,6 +1,6 @@
 MEDIAFLOW PROPRIETARY LICENSE
 Version 1.1 — October 2026
-Applies to MediaFlow v333
+Applies to MediaFlow
 
 Copyright © 2026 Alex Godly
 All Rights Reserved.
@@ -9,10 +9,10 @@ All Rights Reserved.
 1. SCOPE
 ===============================================================================
 
-This license applies to MediaFlow v333 and to all source code, original assets,
+This license applies to MediaFlow and to all source code, original assets,
 documentation, user-interface materials, configuration files, scripts,
 components, workflows, and other original materials distributed as part of
-MediaFlow v333, except where a separate license or third-party license is
+MediaFlow, except where a separate license or third-party license is
 explicitly stated.
 
 Future MediaFlow releases may be distributed under this license, an updated
@@ -304,7 +304,7 @@ constitute a permanent waiver of that provision or of any other right.
 ===============================================================================
 
 This file is MediaFlow Proprietary License Version 1.1 and is issued for
-MediaFlow v333.
+MediaFlow.
 
 A future MediaFlow release may use a later version of this license.
 
@@ -324,7 +324,7 @@ Creator and Owner of MediaFlow
 
 ===============================================================================
 
-MEDIAFLOW v333
+MEDIAFLOW
 Copyright © 2026 Alex Godly
 All Rights Reserved.
 
