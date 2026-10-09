@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>MediaFlow by Alex Godly</title>
+
+<meta name="theme-color" content="#0E111A">
+<meta name="application-name" content="MediaFlow">
+<meta name="description" content="Media rotation, library tracking, logging, statistics and personal ordering by Alex Godly.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MediaFlow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+
+<link rel="manifest" href="manifest.json">
+
+<link rel="icon" href="favicon.ico" type="image/x-icon" sizes="any">
+<link rel="icon" href="assets/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" sizes="180x180">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/00-foundation.css">
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/10-navigation-core-ui.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta name="mediaflow-version" content="332">
+
+
+<!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
+<!-- MediaFlow v119: Historical Statistics Selectors — Monthly Recap month/year + Consumption Heatmap year -->
+<!-- MediaFlow v122: Dashboard logging-search pagination fix -->
+<!-- MediaFlow v123: Dashboard Rating Queue + one-time Rating XP -->
+<!-- MediaFlow v124: Rating Queue Edit button -->
+<!-- MediaFlow v125: Persistent Rating Queue position + empty Confirm behaves as Skip -->
+<!-- MediaFlow v126: Definitive On This Day whole-day / multi-title renderer -->
+<!-- MediaFlow v127: Force On This Day final DOM replacement after every Dashboard render -->
+<!-- MediaFlow v128: On This Day fixed inside the real MediaFlow app scope -->
+<!-- MediaFlow v129: Restored v1 Category Balance, Recent Saturation & Records statistics -->
+<!-- MediaFlow v130: Desktop Statistics responsiveness + full-width classic stats section -->
+<!-- MediaFlow v131: Statistics chart stacking + adaptive SVG readability -->
+<!-- MediaFlow v132: Optional Global Appearance layer / native theme appearance -->
+<!-- MediaFlow v133: Expanded MediaFlow theme collection + native light-theme consistency -->
+<!-- MediaFlow v134: Calculate XP + Sync Now performance optimization -->
+<!-- MediaFlow v135: Editable per-title Start Date + Finish Date -->
+<!-- MediaFlow v136: MAL date-aware merge + Heatmap/On This Day lifecycle events -->
+<!-- MediaFlow v137: Automatic Start Date from genuine History + completion-date consistency -->
+<!-- MediaFlow v138: Personal Order planner with global/category views + cloud persistence -->
+<!-- MediaFlow v139: Personal Order priority for exact-title recommendations -->
+<!-- MediaFlow v140: Order Library picker filters + pagination -->
+<!-- MediaFlow v141: Fast Order pagination + active-page highlight fix -->
+<!-- MediaFlow v142: Order import/export + designed clear confirmation + restore last order -->
+<!-- MediaFlow v143: Library bulk-action confirmation dialogs -->
+<!-- MediaFlow v144: Reusable custom category icons + URL icons + custom color palette -->
+<!-- MediaFlow v145: Dynamic cover-based theme accent with recommendation / On This Day fallback -->
+<!-- MediaFlow v146: Dynamic full-cover theme mode -->
+<!-- MediaFlow v147: Dynamic Settings footer with version + Alex Godly copyright -->
+<!-- MediaFlow v148: Complete-data backup audit + modern full export/import -->
+<!-- MediaFlow v149: Day-streak XP multiplier + v149 full-backup compatibility -->
+<!-- MediaFlow v150: Streak XP performance cache + linear completion bonus indexing -->
+<!-- MediaFlow v151: Versionless Full Backup label -->
+<!-- MediaFlow v152: Automatic Backup upgraded to complete Full Backup pipeline -->
+<!-- MediaFlow v153: Old System tab — System / View / Stats -->
+<!-- MediaFlow v154: Old System hides deleted/removed categories -->
+<!-- MediaFlow v155: Complete cloud-state audit + full Sync Now -->
+<!-- MediaFlow v156: Order tab large-library performance engine -->
+<!-- MediaFlow v157: Direct numeric position controls for Categories + Order titles -->
+<!-- MediaFlow v158: Complete import metadata + safe scalable missing-cover repair -->
+<!-- MediaFlow v159: Rotating On This Day hero + richer adaptive Dynamic Cover Theme -->
+<!-- MediaFlow v160: Reliable Dynamic Cover source fallback + CORS-safe visual theme fallback -->
+<!-- MediaFlow v161: About tab + customizable navigation + complete-data persistence audit -->
+<!-- MediaFlow v162: Library Cover + Image URL theme collections + contrast-safe adaptive themes -->
+<!-- MediaFlow v163: Configurable Dynamic Cover Theme rotation interval + copy cleanup -->
+<!-- MediaFlow v164: Simkl Full Style Theme -->
+<!-- MediaFlow v165: System Respect XP + recommended-title rewards + no-skip/no-reroll multipliers -->
+<!-- MediaFlow v166: Automatic Seasonal fresh-episode detection via Jikan/MAL public episode data -->
+<!-- MediaFlow v167: Editable System Respect XP rewards and multiplier tuning -->
+<!-- MediaFlow v168: Settings cleanup — removed MAL username sync card -->
+<!-- MediaFlow v169: Advanced media-service import with forced-category and source-type mapping modes -->
+<!-- MediaFlow v170: Advanced type-level Don’t Import exclusions -->
+<!-- MediaFlow v171: Default-category recovery + last-deleted category restore + highlight controls -->
+<!-- MediaFlow v172: Unified Normal/Advanced media-services import interface switch -->
+<!-- MediaFlow v173: Order editing/pagination + dated Old System view + three new adaptive cover collections -->
+<!-- MediaFlow v174: Direct Edit control beside MediaFlow recommended titles -->
+<!-- MediaFlow v175: Configurable pagination across Library surfaces + full Batch Log Library filters -->
+<!-- MediaFlow v176: Dense responsive Library rows + imported rich title metadata -->
+<!-- MediaFlow v177: Adjustable Library and Order cover-size sliders -->
+<!-- MediaFlow v178: Editable rich imported Library metadata with manual override protection -->
+<!-- MediaFlow v179: Dual logging modes — consumed amount or final progress -->
+<!-- MediaFlow v180: Same-category title rerolls + task-local reroll history + multi-title Respect XP -->
+<!-- MediaFlow v181: Dynamic Library mode + global title details + default logging mode + unlimited per-surface cover sizing -->
+<!-- MediaFlow v182: Minimalist theme-aware Dynamic Library navigation + complete v182 backup/cloud audit -->
+<!-- MediaFlow v183: Readability pass + shared Library Overview visibility toggle + complete v183 backup/cloud audit -->
+<!-- MediaFlow v185: Title Details readability pass -->
+<!-- MediaFlow v188: Library title-size control + advanced Library Overview configuration -->
+<!-- MediaFlow v191: Clean Covers + restorable deleted-title Library History -->
+<!-- MediaFlow v193: Dashboard section visibility + Missing Covers queue + Stopwatch visibility -->
+<!-- MediaFlow v194: Global adjustable category-icon sizing + Completion Timeline URL-icon support -->
+<!-- MediaFlow v195: Rate Your Library right-aligned actions + Edit title label -->
+<!-- MediaFlow v196: Settings Preset export/import — settings-only portable configuration -->
+<!-- MediaFlow v200: Category default missing-cover URLs + configurable missing-cover fallback -->
+<!-- MediaFlow v201: Expanded category icon sizing + independent cover-placeholder icon size -->
+<!-- MediaFlow v217: Navigation active-state/default-order fix on the modular v216 architecture; cloud/data schemas intentionally unchanged -->
+<!-- MediaFlow v220: Polished Settings search + synchronized Settings navigation/page ordering -->
+<!-- MediaFlow v221: Settings hierarchy cleanup + Updates group + responsive navigation polish -->
+<!-- MediaFlow v222: Dashboard / On This Day Chromium rendering stability -->
+<!-- MediaFlow v223: On This Day Dashboard show/hide setting -->
+<!-- MediaFlow v224: Library controls, unified sorting, page naming, Dashboard recommendation actions -->
+<!-- MediaFlow v225: Personal Order clarity, global button icons, Account polish -->
+<!-- MediaFlow v226: Semantic icons/dropdowns, category layout fix, Dynamic Library sizing + category-row icon preference -->
+<!-- MediaFlow v227: Icon corrections, Dynamic category URL fix, visibility-switch polish + Dashboard poster cleanup -->
+<!-- MediaFlow v228: Library metadata icon cleanup + Dynamic category-row ordering source and drag controls -->
+<!-- MediaFlow v230: Choice/filter layout control center + inherited ordering/visibility -->
+<!-- MediaFlow v231: Library Mode Settings navigation + active Settings highlighting + expanded layout inheritance -->
+<!-- MediaFlow v232: Library performance fixes + Dynamic status independence + persistence/export audit + Title Details polish -->
+<!-- MediaFlow v234: Dashboard quick-entry field polish -->
+<!-- MediaFlow v235: Missing Covers live cover preview + direct-image validation -->
+<!-- MediaFlow v236: Searchable persistent-open Category Filter + configurable pagination -->
+<!-- MediaFlow v252: Per-title Seasons View + season-aware Last progress logging + service season imports -->
+
+<link rel="stylesheet" href="assets/css/20-dashboard-personal-order.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/30-categories-themes-navigation.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/40-system-import-tools.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/50-library-dashboard.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- v244 runtime architecture: v219 active runtime foundation through v244 Progressive Web App install/update support; stable v201 data schemas preserved -->
+<!-- MediaFlow v245: Unified Alex Godly icon branding for website favicon, PWA install icons, maskable icon and Apple touch icon -->
+<!-- MediaFlow v246: Mobile/tablet PWA install UX + very-tight-width responsive support -->
+<!-- MediaFlow v247: PWA install reliability, diagnostics + fault-tolerant app-shell repair -->
+</head>
+
+<body>
+
+<div id="app"><div class="loader-wrap">Loading MediaFlow…</div></div>
+
+
+<link rel="stylesheet" href="assets/css/60-statistics.css">
+
+
+
+<link rel="stylesheet" href="assets/css/155-v295-responsive-default-categories.css">
+
+<link rel="stylesheet" href="assets/css/156-v296-category-recovery-responsive-more.css">
+<link rel="stylesheet" href="assets/css/157-v297-auth-refresh.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/mediaflow-v332.bundle.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="assets/js/mediaflow-v261-react-ui.js"></script>
+
+<!-- MediaFlow v84: merge-safe cloud metadata persistence -->
+
+
+
+<!-- MediaFlow v87: Library-style logging filters + pagination -->
+<!-- MediaFlow v99: fixed final runtime export override + MediaFlow_Backup local timestamp filename -->
+
+<!-- MediaFlow v100: Full Style Themes collection — Netflix -->
+<link rel="stylesheet" href="assets/css/70-full-style-themes.css">
+
+<!-- MediaFlow v100: Netflix is the first Full Style Theme. -->
+<!-- MediaFlow v101: Full Style Themes selector runtime scope fix. -->
+<!-- MediaFlow v102: Netflix Full Style layout stabilization -->
+
+
+
+
+<!-- MediaFlow v103: Netflix navigation + level visibility fix -->
+
+
+
+
+<!-- MediaFlow v104: MyAnimeList Full Style Theme -->
+
+
+
+
+<!-- MediaFlow v105: Crunchyroll Full Style Theme -->
+
+
+
+<!-- MediaFlow v107: Full Style Themes expansion -->
+
+
+<!-- MediaFlow v106: Global theme-independent Light / Dark appearance -->
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/80-late-control-center.css">
+<link rel="stylesheet" href="assets/css/92-v221-settings-polish.css">
+<link rel="stylesheet" href="assets/css/93-v222-dashboard-rendering-stability.css">
+<link rel="stylesheet" href="assets/css/94-v224-library-sorting-actions.css">
+<link rel="stylesheet" href="assets/css/95-v225-icons-personal-order.css">
+<link rel="stylesheet" href="assets/css/96-v226-semantic-ui-library.css">
+<link rel="stylesheet" href="assets/css/97-v227-ui-icon-corrections.css">
+<link rel="stylesheet" href="assets/css/98-v228-library-priority-dynamic-row.css">
+<link rel="stylesheet" href="assets/css/99-v229-library-choice-modals.css">
+<link rel="stylesheet" href="assets/css/100-v230-choice-filter-layout.css">
+<link rel="stylesheet" href="assets/css/101-v231-settings-layout-inheritance.css">
+<link rel="stylesheet" href="assets/css/102-v232-performance-details-settings.css">
+<link rel="stylesheet" href="assets/css/103-v233-dynamic-settings-title-details-cover.css">
+<link rel="stylesheet" href="assets/css/104-v234-dashboard-quick-inputs.css">
+<link rel="stylesheet" href="assets/css/105-v235-missing-cover-live-validation.css">
+<link rel="stylesheet" href="assets/css/106-v236-searchable-category-filter.css">
+<link rel="stylesheet" href="assets/css/107-v237-cross-surface-category-filters.css">
+<link rel="stylesheet" href="assets/css/108-v238-status-logging-responsive-device-mode.css">
+<link rel="stylesheet" href="assets/css/109-v239-batch-log-editor-responsive-cleanup.css">
+<link rel="stylesheet" href="assets/css/110-v240-edit-title-cover-profile.css">
+<link rel="stylesheet" href="assets/css/111-v241-editor-history-performance.css">
+<link rel="stylesheet" href="assets/css/112-v242-logging-history-performance.css">
+<link rel="stylesheet" href="assets/css/113-v243-logging-cover-batch-filter.css">
+<link rel="stylesheet" href="assets/css/114-v244-pwa.css">
+<link rel="stylesheet" href="assets/css/115-v246-pwa-mobile-responsive.css">
+<link rel="stylesheet" href="assets/css/116-v247-pwa-reliability-diagnostics.css">
+<link rel="stylesheet" href="assets/css/117-v248-settings-update-install.css">
+<link rel="stylesheet" href="assets/css/118-v250-about-updates-data-integrity.css">
+<link rel="stylesheet" href="assets/css/119-v252-seasons-view.css">
+<link rel="stylesheet" href="assets/css/120-v253-seasons-history-logging-polish.css">
+<link rel="stylesheet" href="assets/css/121-v254-library-cover-overlays.css">
+<link rel="stylesheet" href="assets/css/122-v255-cover-status-colors.css">
+<link rel="stylesheet" href="assets/css/123-v256-cover-sizing-runtime-calculator.css">
+<link rel="stylesheet" href="assets/css/124-v257-dashboard-cloud-settings-mobile-pwa-update-backup.css">
+<link rel="stylesheet" href="assets/css/125-v258-category-editor-icons-persistence-audit.css">
+<link rel="stylesheet" href="assets/css/126-v259-category-icon-showcase-polish.css">
+<link rel="stylesheet" href="assets/css/127-v260-react-redesign.css">
+<link rel="stylesheet" href="assets/css/128-v261-library-history-balance-polish.css">
+<link rel="stylesheet" href="assets/css/129-v262-library-restore.css">
+<link rel="stylesheet" href="assets/css/130-v264-library-balance-order-settings-polish.css">
+<link rel="stylesheet" href="assets/css/131-v265-ux-stability-sidebar-balance.css">
+<link rel="stylesheet" href="assets/css/132-v266-title-library-settings-nav-fixes.css">
+<link rel="stylesheet" href="assets/css/133-v267-sync-order-balance-dynamic-cover-reliability.css">
+<link rel="stylesheet" href="assets/css/134-v269-consumption-history-redesign.css">
+<link rel="stylesheet" href="assets/css/135-v270-performance-version-cleanup.css">
+<link rel="stylesheet" href="assets/css/136-v271-history-ui-polish.css">
+<link rel="stylesheet" href="assets/css/137-v272-logs-covers-edit-title-fix.css">
+<link rel="stylesheet" href="assets/css/138-v273-drag-responsive-app.css">
+<link rel="stylesheet" href="assets/css/139-v274-collections-library-order.css">
+<link rel="stylesheet" href="assets/css/140-v275-order-edge-resize-collection-add.css">
+<link rel="stylesheet" href="assets/css/141-v276-collections-personal-order-polish.css">
+<link rel="stylesheet" href="assets/css/142-v277-navigation-breakpoint-fix.css">
+<link rel="stylesheet" href="assets/css/143-v278-responsive-bottom-nav-visual-parity.css">
+<link rel="stylesheet" href="assets/css/144-v279-collections-progress-background-performance.css">
+<link rel="stylesheet" href="assets/css/145-v280-collection-cover-progress-selection-hero.css">
+<link rel="stylesheet" href="assets/css/146-v281-collection-compact-card-search-sync.css">
+<link rel="stylesheet" href="assets/css/147-v282-category-collections-stability.css">
+<link rel="stylesheet" href="assets/css/148-v283-category-modal-sidebar-collection-card-fixes.css">
+<link rel="stylesheet" href="assets/css/149-v284-account-compact-progress-fix.css">
+<link rel="stylesheet" href="assets/css/150-v287-personal-order-collection-queues.css">
+<link rel="stylesheet" href="assets/css/151-v288-personal-order-queue-views.css">
+<link rel="stylesheet" href="assets/css/152-v289-personal-order-editor-choice-parity.css">
+<link rel="stylesheet" href="assets/css/153-v290-category-selector-ui-visibility.css">
+<link rel="stylesheet" href="assets/css/154-v291-searchable-category-picker.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="assets/css/158-v298-auth-layout-fix.css">
+<link rel="stylesheet" href="assets/css/159-v301-current-rerolls-responsive.css">
+<link rel="stylesheet" href="assets/css/160-v331-per-title-logging-timestamps.css">
+</body>
+
+</html>
