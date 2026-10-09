@@ -1,0 +1,25 @@
+/* MediaFlow v325: native Workspace markup rendered from owner-published data. */
+.mf323-public .mf325-native {
+  --bg: var(--p323-bg); --panel:var(--p323-panel); --panel-raised:var(--p323-panel);
+  --text:var(--p323-text); --text-dim:var(--p323-muted); --text-mute:var(--p323-muted);
+  --border:var(--p323-border); --border-soft:var(--p323-border);
+  --flow:var(--p323-accent); --accent:var(--p323-accent);
+  width:100%; max-width:100%; min-width:0; color:var(--p323-text);
+}
+.mf325-public-notice {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px 18px;padding:12px 16px;margin-bottom:18px;border:1px solid var(--p323-border);border-radius:13px;background:var(--p323-panel);font-size:12px;color:var(--p323-muted)}
+.mf325-public-notice span {font-size:13px;font-weight:750;color:var(--p323-text)}
+.mf325-public-notice strong {font-size:11px;font-weight:650;color:var(--p323-accent)}
+.mf325-native-page {background:var(--bg);padding:16px;border:1px solid var(--p323-border);border-radius:16px;min-width:0;max-width:100%;overflow-x:clip;color:var(--text)}
+.mf325-native-page > * {max-width:100%;min-width:0}
+.mf325-native-page input,.mf325-native-page select,.mf325-native-page button {max-width:100%}
+.mf325-native-page [data-mf325-action] {cursor:pointer}
+.mf325-native-page [data-library-id] {cursor:pointer}
+.mf325-native-page .view-head .view-desc,.mf325-native-page .v153-os-sub {color:var(--p323-muted)}
+.mf325-native-page .v138-order-side:empty,.mf325-native-page .mf274-tools:empty{display:none}
+.mf325-native-page img {max-width:100%}
+@media (max-width:760px){.mf325-native-page{padding:10px}.mf325-public-notice{padding:10px 12px}.mf325-native-page .view-head{gap:8px}}
+@media (max-width:390px){.mf325-native-page{padding:7px}.mf325-public-notice{margin-bottom:10px}}
+
+.mf325-public-notice .mf325-refresh {cursor:pointer; border:1px solid var(--p323-border);border-radius:8px;padding:7px 10px;background:transparent;color:var(--p323-text);font-weight:650;font-size:11px}
+.mf325-public-notice .mf325-refresh:hover{border-color:var(--p323-accent);color:var(--p323-accent)}
+.mf325-passive {cursor:default!important}
