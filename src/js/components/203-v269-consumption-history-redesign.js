@@ -102,7 +102,7 @@ function v269EventsFromSession(session){
   const rows=v269SessionRows(session),qtyTotal=rows.reduce((a,r)=>a+Math.max(0,Number(r?.qty)||0),0),mins=Math.max(0,Number(session?.minutes)||0);
   return rows.map((row,index)=>{
     const item=v269ResolveItem(session,row),cat=getCategory(item?.categoryId||session?.categoryId),qty=Math.max(0,Number(row?.qty)||0);
-    const minutes=qtyTotal>0?Math.round(mins*(qty/qtyTotal)):Math.round(mins/Math.max(1,rows.length));
+    const minutes=Number.isFinite(Number(row?.v369DurationSeconds))?Math.max(0,Number(row.v369DurationSeconds))/60:(qtyTotal>0?Math.round(mins*(qty/qtyTotal)):Math.round(mins/Math.max(1,rows.length)));
     return {session,row,item,cat,qty,minutes,index,identity:v269EventIdentity(item,row,session),date:v331EventDate(session,row)};
   });
 }
@@ -269,11 +269,28 @@ function v269DayLabel(date){
   return date.toLocaleDateString(undefined,{month:'long',day:'numeric',year:date.getFullYear()===today.getFullYear()?undefined:'numeric'});
 }
 function v269SessionSelected(id){try{return V253_HISTORY_SELECTED.has(String(id));}catch(_){return false;}}
+function v269ItemizedDetails(ev){
+  const units=Array.isArray(ev?.row?.v369Units)?ev.row.v369Units:[];
+  if(!units.length)return '';
+  const noun=String(ev?.cat?.unit||'episodes').replace(/s$/,'');
+  const toHms=seconds=>{
+    const t=Math.max(0,Math.floor(Number(seconds)||0)),p=n=>String(n).padStart(2,'0');
+    return p(Math.floor(t/3600))+':'+p(Math.floor((t%3600)/60))+':'+p(t%60);
+  };
+  const html=units.map(u=>{
+    const stamp=Number(u.loggedAt),d=Number.isFinite(stamp)&&stamp>946684800000?new Date(stamp):null;
+    const when=d?d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'}):'Unknown time';
+    const seconds=Number.isFinite(Number(u.durationSeconds))?Number(u.durationSeconds):Math.round((Number(u.minutes)||0)*60);
+    const season=u.seasonName?String(u.seasonName)+' · ':'';
+    return '<div class="v369-history-unit"><b>'+v269Esc(season+noun+' '+String(u.number||''))+'</b><span>'+v269Esc(when)+'</span><strong>'+toHms(seconds)+'</strong></div>';
+  }).join('');
+  return '<details class="v369-history-units"><summary>'+units.length+' individual '+v269Esc(noun)+(units.length===1?'':'s')+' · '+toHms(units.reduce((n,u)=>n+(Number.isFinite(Number(u.durationSeconds))?Number(u.durationSeconds):(Number(u.minutes)||0)*60),0))+'</summary><div class="v369-history-unit-list">'+html+'</div></details>';
+}
 function v269HistoryCardHtml(ev){
   const s=ev.session,u=v269UI(),selected=v269SessionSelected(s.id),title=cleanTitle(ev.item?.title||ev.row?.title||ev.cat?.name||'Media'),meta=v269EventProgressMeta(ev),year=ev.item?.year||'',repeat=!!ev.row?.repeat;
   return `<article class="mf269-history-card ${selected?'is-selected':''}">${u.selectMode?`<label class="mf269-history-select" title="Select this History log"><input type="checkbox" ${selected?'checked':''} onchange="App.v253ToggleHistorySelection('${v269Esc(String(s.id))}',this.checked)"><span></span></label>`:''}${repeat?'<span class="mf269-repeat-ribbon" title="Rewatch / reread">↻</span>':''}
     <button type="button" class="mf269-card-main" onclick="${v269OpenEvent(ev)}">${v269CoverMarkup(ev,'mf269-card-cover')}<span class="mf269-card-copy"><small>${v269Esc(ev.cat?.name||'Media')}${year?` · ${v269Esc(year)}`:''}</small><b>${v269Esc(title)}</b><strong>${v269Esc(v269EventConsumedLabel(ev))}</strong>${meta?`<em>${v269Esc(meta)}</em>`:''}<span class="mf269-card-time">${fmtMinutes(ev.minutes)} · ${v331HistoryTime(s,ev.row)}</span></span></button>
-    <details class="mf269-card-menu"><summary aria-label="History entry actions">⌄</summary><div><button type="button" onclick="App.openSessionModal('${v269Esc(String(s.id))}')">Edit log</button><button type="button" class="danger" onclick="App.deleteSession('${v269Esc(String(s.id))}')">Delete log</button></div></details>
+    ${v269ItemizedDetails(ev)}<details class="mf269-card-menu"><summary aria-label="History entry actions">⌄</summary><div><button type="button" onclick="App.openSessionModal('${v269Esc(String(s.id))}')">Edit log</button><button type="button" class="danger" onclick="App.deleteSession('${v269Esc(String(s.id))}')">Delete log</button></div></details>
   </article>`;
 }
 function v269WeekHistoryHtml(g){
