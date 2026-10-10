@@ -1,0 +1,10 @@
+/* MediaFlow v348 — visible active Leveling & XP fields */
+.v348-xp-settings{margin-top:18px;padding-top:15px;border-top:1px solid var(--border,rgba(128,128,128,.2));display:grid;gap:13px;min-width:0}
+.v348-xp-settings .v335-reward-heading{margin:9px 0 0}
+.v348-xp-settings .v335-reward-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.v348-xp-field{min-width:0}.v348-xp-field input{max-width:100%}
+.v348-streak-toggle{display:flex;align-items:flex-start;gap:12px;padding:15px;border-radius:12px;border:1px solid color-mix(in srgb,var(--flow,#79a7ed) 25%,var(--border,#445));background:color-mix(in srgb,var(--flow,#79a7ed) 6%,var(--panel,#161b25));cursor:pointer}
+.v348-streak-toggle input{width:19px;height:19px;flex-shrink:0;accent-color:var(--flow,#79a7ed);margin:2px 0 0}
+.v348-streak-toggle span{display:grid;gap:6px;min-width:0}
+.v348-streak-toggle b{font-size:13px;color:var(--text,#fff)}
+.v348-streak-toggle small{font-size:11px;line-height:1.6;color:var(--text-dim,#adb8ca)}

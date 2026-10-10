@@ -1,0 +1,10 @@
+/* v341 — Library History paging controls and reliable History tab states */
+.v260-history-tabs .v260-history-tab{cursor:pointer;position:relative;pointer-events:auto;touch-action:manipulation}
+.v341-lib-history-shell{min-width:0}
+.v341-lib-history-toolbar{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;padding:16px;margin:0 0 16px;border:1px solid var(--border,var(--v260-line,rgba(128,128,128,.2)));border-radius:14px;background:var(--panel-raised,var(--panel,#20242d))}
+.v341-lib-history-search{flex:1 1 240px;min-width:0}.v341-lib-history-size{flex:0 0 auto;min-width:142px}.v341-lib-history-toolbar label{display:block;margin:0 0 7px;font-size:11px;font-weight:750;color:var(--text-dim,var(--text-mute,#9da9b9))}
+.v341-lib-history-toolbar input,.v341-lib-history-toolbar select{height:39px;max-width:100%;width:100%;box-sizing:border-box;border-radius:9px;color:var(--text,#fff)}
+.v341-lib-history-count{margin:0 0 9px auto;white-space:nowrap;color:var(--text-dim,var(--text-mute,#9da9b9));font-size:12px;font-variant-numeric:tabular-nums}
+.v341-lib-history-results{min-width:0}.v341-lib-history-results>.v241-library-history-pager{margin:14px 0}.v341-lib-history-results .mf-activity-row{content-visibility:auto;contain-intrinsic-size:auto 94px}
+.v341-lib-history-results .mf-activity{max-height:none;overflow:visible}.v341-lib-history-results .mf-activity-row:last-child{border-bottom:0}
+@media(max-width:600px){.v341-lib-history-toolbar{gap:10px;padding:12px}.v341-lib-history-search{flex-basis:100%}.v341-lib-history-size{flex:1 1 150px;min-width:0}.v341-lib-history-count{margin:0 0 8px}.v341-lib-history-results .lib-pagination{flex-wrap:wrap;gap:8px;justify-content:center}.v341-lib-history-results .lib-pagination>span{order:-1;flex-basis:100%;text-align:center}}
