@@ -187,6 +187,13 @@ function v369AddUnit(index){
     showToast('Enter a valid episode/chapter/issue number for this title.');return;
   }
   e.v369Units=e.v369Units||[];
+  // Existing season/title progress represents confirmed consumption. A
+  // partially completed title's earlier episodes need explicit repeat handling;
+  // do not silently award new progress for them.
+  if(!e.isRepeat && number<=Math.max(0,Number(season?season.progress:item.progress)||0)){
+    showToast('That unit is already within saved progress. Rewatch handling for partially completed titles is not enabled yet.');
+    return;
+  }
   if(e.v369Units.some(x=>String(x.seasonId||'')===String(season?.id||'')&&Number(x.number)===number)){
     showToast('That unit is already in this draft.');return;
   }
@@ -256,7 +263,23 @@ App.submitLog=function(){
       showToast('Correct invalid unit timestamps or numbers before saving.');return;
     }
   }
+  // Verify that every selected season still belongs to the current title.
+  // A restored draft must never remap unknown seasons to Season 1.
+  for(const e of all){
+    const item=v369ItemTitle(e),valid=new Set((typeof v252Seasons==='function'?v252Seasons(item):[]).map(s=>String(s.id)));
+    if(e.v369Units.some(u=>valid.size ? !valid.has(String(u.seasonId||'')) : !!u.seasonId)){
+      showToast('A logged season no longer matches the Library title. Restore its season before saving.');
+      return;
+    }
+  }
   v369Sync();
+  const baseLibrary=new Map(all.map(e=>{
+    const item=v369ItemTitle(e);
+    return [String(item.id),{
+      item, status:String(item.status||''), progress:Number(item.progress)||0,
+      seasons:typeof v252Seasons==='function'?v252Seasons(item):[]
+    }];
+  }));
   const before=new Set((S.sessions||[]).map(x=>String(x.id)));
   const captured=new Map(all.map(e=>[String(e.libraryId),{
     units:e.v369Units.map(u=>({...u})),repeat:!!e.isRepeat
@@ -266,6 +289,7 @@ App.submitLog=function(){
   let changed=false;
   for(const session of S.sessions||[]){
     if(before.has(String(session.id)))continue;
+    let exactSeconds=0;
     for(const title of session.titles||[]){
       const data=captured.get(String(title.libraryId));
       if(!data)continue;
@@ -273,10 +297,51 @@ App.submitLog=function(){
       title.v369DurationSeconds=data.units.reduce((n,u)=>n+v369Seconds(u),0);
       title.v369Itemized=true;
       title.loggedAt=Math.min(...data.units.map(x=>Number(x.loggedAt)));
+      exactSeconds+=title.v369DurationSeconds;
       changed=true;
     }
+    if((session.titles||[]).some(t=>t.v369Itemized)){
+      session.v369DurationSeconds=exactSeconds;
+      session.minutes=exactSeconds/60;
+      // Calculate category rewards from this category's actual recorded
+      // durations rather than the legacy qty-weight allocation.
+      const category=getCategory(session.categoryId);
+      if(category && typeof calculateConsumptionXP==='function'){
+        session.xp=calculateConsumptionXP(category,Number(session.actualAmount)||0,
+          session.minutes,session.healthStatus).xp;
+      }
+    }
   }
-  if(changed)persistSessions();
+  // The legacy v252 submit wrapper distributes aggregate progress starting at
+  // the first season. Restore the correct per-season counts using the exact
+  // season IDs captured from this itemized draft.
+  let libraryChanged=false;
+  for(const [id,base] of baseLibrary){
+    if(!base.seasons.length)continue;
+    const row=captured.get(id);
+    if(!row||row.repeat)continue;
+    const byId=new Map(base.seasons.map(season=>[String(season.id),season]));
+    for(const unit of row.units){
+      const season=byId.get(String(unit.seasonId));
+      if(!season)continue;
+      if(Number(unit.number)>(Number(base.seasons.find(x=>String(x.id)===String(season.id))?.progress)||0)){
+        season.progress=Math.min(Number(season.total)>0?Number(season.total):Number.MAX_SAFE_INTEGER,
+          (Number(season.progress)||0)+1);
+      }
+    }
+    base.item.seasons=base.seasons;
+    v252SyncTitleFromSeasons(base.item);
+    base.item.modifiedAt=Date.now();
+    libraryChanged=true;
+  }
+  if(libraryChanged){
+    try{v53InvalidateLibraryCache();}catch(_){}
+    persistLibrary();
+  }
+  if(changed){
+    try{if(typeof v334InvalidateXP==='function')v334InvalidateXP();}catch(_){}
+    persistSessions();
+  }
   return result;
 };
 const v369SettingsRenderer=V219_PAGE_RENDERERS.get('settings');
