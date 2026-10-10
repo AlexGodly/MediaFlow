@@ -6,6 +6,7 @@ on:
       - native/flutter-installable-preview
       - native/v2-parity-development
       - native/v3-full-parity
+      - native/v3-1-library-parity
     paths:
       - 'native-preview-build/**'
       - '.github/workflows/native-installable-preview.yml'
