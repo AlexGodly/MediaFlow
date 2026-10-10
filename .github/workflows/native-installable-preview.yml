@@ -77,6 +77,10 @@ jobs:
               manifest.write_text(content)
               print('Android release network permission and MediaFlow application name ready')
           PY
+      - name: Apply native package and product branding
+        shell: bash
+        working-directory: native-preview-build/app
+        run: python scripts/brand_platforms.py
       - name: Generate branded launcher icon
         shell: bash
         working-directory: native-preview-build/app
@@ -118,6 +122,15 @@ jobs:
         shell: bash
         working-directory: native-preview-build/app
         run: flutter build apk --release
+      - name: Verify Android application ID in compiled APK
+        if: matrix.platform == 'android'
+        shell: bash
+        working-directory: native-preview-build/app
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)
+          test -n "$AAPT"
+          "$AAPT" dump badging "$APK" | grep "package: name='com.alexgodly.mediaflow'"
       - name: Upload Android APK
         if: matrix.platform == 'android'
         uses: actions/upload-artifact@v4
@@ -130,6 +143,23 @@ jobs:
         shell: bash
         working-directory: native-preview-build/app
         run: flutter build windows --release
+      - name: Verify and name Windows release executable
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        working-directory: native-preview-build/app
+        run: |
+          $dir = 'build/windows/x64/runner/Release'
+          $original = Join-Path $dir 'MediaFlow.exe'
+          if (!(Test-Path $original)) { throw "Windows MediaFlow.exe not generated" }
+          Rename-Item $original 'MediaFlow by Alex Godly.exe'
+          $renamed = Join-Path $dir 'MediaFlow by Alex Godly.exe'
+          $product = (Get-Item $renamed).VersionInfo.ProductName
+          $description = (Get-Item $renamed).VersionInfo.FileDescription
+          Write-Host "Windows name: $renamed"
+          Write-Host "Product: $product; Description: $description"
+          if ($product -ne 'MediaFlow by Alex Godly' -or $description -ne 'MediaFlow by Alex Godly') {
+            throw "Windows product branding metadata incorrect"
+          }
       - name: Upload Windows app folder
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
