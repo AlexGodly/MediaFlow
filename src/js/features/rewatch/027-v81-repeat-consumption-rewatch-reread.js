@@ -6,12 +6,12 @@ function v81RepeatTotals(){
     for(const t of (sess.titles||[])){
       const itemized=Array.isArray(t?.v369Units)&&t.v369Itemized===true;
       if(!t?.repeat&&!itemized) continue;
-      sessionHadRepeat=true;
       const item=t.libraryId?S.library.find(i=>i.id===t.libraryId):null;
       const key=item?.id||t.libraryId; if(!key) continue;
       const unit=getCategory(item?.categoryId||sess.categoryId)?.unit||sess.unit||'units';
       const amount=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:Math.max(0,Number(t.qty)||0);
       if(!amount)continue;
+      sessionHadRepeat=true;
       const rec=byTitle.get(key)||{title:cleanTitle(t.title),amount:0,loggedAmount:0,manualAmount:0,unit,total:Number(item?.total)||0,completedRepeats:0};
       rec.loggedAmount+=amount; rec.amount+=amount; rec.total=Number(item?.total)||rec.total||0; rec.unit=unit;
       byTitle.set(key,rec);
