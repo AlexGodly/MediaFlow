@@ -64,16 +64,25 @@ function v369DurationInputs(index,pos,unit){
 function v369ContiguousProgress(start,units,seasonId=null,limit=null){
   const current=Math.max(0,Math.floor(Number(start)||0));
   const relevant=new Set((units||[]).filter(u=>String(u?.seasonId||'')===String(seasonId||''))
-    .map(u=>Math.floor(Number(u.number)||0)).filter(n=>n>current));
+    .filter(u=>!u.isRepeat).map(u=>Math.floor(Number(u.number)||0)).filter(n=>n>current));
   const max=Number(limit)>0?Math.max(current,Math.floor(Number(limit))):Number.MAX_SAFE_INTEGER;
   let end=current;
   while(end<max && relevant.has(end+1))end++;
   return end;
 }
+function v369KnownUnits(item){
+  const id=String(item?.id||'');if(!id)return [];
+  const rows=[];
+  for(const session of (S.sessions||[]))for(const t of (session?.titles||[])){
+    if(String(t?.libraryId||'')!==id||t.repeat)continue;
+    for(const u of (t.v369Units||[]))if(!u.isRepeat)rows.push(u);
+  }
+  return rows;
+}
 function v369ProjectedTitleProgress(item,entry){
   const start=Math.max(0,Number(item?.progress)||0);
   if(entry?.isRepeat)return start;
-  const units=Array.isArray(entry?.v369Units)?entry.v369Units:[];
+  const units=[...v369KnownUnits(item),...(Array.isArray(entry?.v369Units)?entry.v369Units:[])];
   const seasons=typeof v252Seasons==='function'?v252Seasons(item):[];
   if(!seasons.length)return v369ContiguousProgress(start,units,null,item?.total);
   return seasons.reduce((total,s)=>total+v369ContiguousProgress(s.progress,units,s.id,s.total),0);
@@ -149,13 +158,15 @@ function v369PanelsHtml(){
         '<label>'+escapeHtml(noun)+' # <input type="number" min="1" max="999999" step="1" value="'+Number(u.number)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'number\',this.value)"></label>'+
         '<label>Logged at <input type="datetime-local" step="1" aria-label="Timestamp for '+escapeHtml(noun)+' '+Number(u.number)+'" value="'+v369DateTimeValue(u.loggedAt)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'time\',this.value)"></label>'+
         v369DurationInputs(idx,pos,u)+
+        '<button type="button" class="btn btn-sm '+(u.isRepeat?'active':'')+'" onclick="App.v369ToggleUnitRepeat('+idx+','+pos+')">↻ '+(u.isRepeat?'Repeat':'Mark repeat')+'</button>'+
         '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v369RemoveUnit('+idx+','+pos+')" aria-label="Remove '+escapeHtml(noun)+' '+Number(u.number)+'">Remove</button></div>';
     }).join('');
     const content=e.v369Collapsed?'':('<div class="v369-unit-list">'+unitRows+'</div>'+
       (units.length>40?'<button type="button" class="btn btn-sm" onclick="App.v369ToggleAll('+idx+')">'+(e.v369ShowAll?'Show recent 40':'Show all '+units.length)+'</button>':'')+
       '<div class="v369-add-row">'+seasonChoices+
       '<label>'+escapeHtml(noun)+' number <input type="number" min="1" max="999999" value="'+next+'" oninput="App.v369SetNext('+idx+',this.value)"></label>'+
-      '<button type="button" class="btn btn-primary btn-sm" onclick="App.v369AddUnit('+idx+')">+ Log '+escapeHtml(noun)+'</button></div>');
+      '<button type="button" class="btn btn-primary btn-sm" onclick="App.v369AddUnit('+idx+')">+ Log '+escapeHtml(noun)+'</button>'+ 
+      '<button type="button" class="btn btn-sm" onclick="App.v369AddUnit('+idx+',true)">↻ Log rewatch / reread</button></div>');
     return '<section class="v369-title" data-v369-title="'+idx+'">'+
       '<div class="v369-title-head"><strong>'+escapeHtml(cleanTitle(item.title))+'</strong>'+
       '<small>'+units.length+' '+escapeHtml(noun.toLowerCase())+(units.length===1?'':'s')+' in draft · '+v369Hms(units.reduce((n,u)=>n+v369Seconds(u),0))+'</small>'+
@@ -251,7 +262,7 @@ function v369SetNext(index,value){
   e.v369NextNumber=Math.max(1,Math.min(999999,Math.floor(Number(value)||1)));
   v369Touch();
 }
-function v369AddUnit(index){
+function v369AddUnit(index,forceRepeat=false){
   const e=S.logDraft?.entries?.[index],item=v369ItemTitle(e);
   if(!e||!item)return;
   const season=v369SelectedSeason(e,item),number=Math.floor(Number(e.v369NextNumber)||v369NextNumber(e,item));
@@ -262,19 +273,30 @@ function v369AddUnit(index){
   // Existing season/title progress represents confirmed consumption. A
   // partially completed title's earlier episodes need explicit repeat handling;
   // do not silently award new progress for them.
-  if(!e.isRepeat && number<=Math.max(0,Number(season?season.progress:item.progress)||0)){
+  if(!forceRepeat&&!e.isRepeat && number<=Math.max(0,Number(season?season.progress:item.progress)||0)){
     showToast('That unit is already within saved progress. Rewatch handling for partially completed titles is not enabled yet.');
     return;
   }
-  if(e.v369Units.some(x=>String(x.seasonId||'')===String(season?.id||'')&&Number(x.number)===number)){
+  if(!forceRepeat&&e.v369Units.some(x=>String(x.seasonId||'')===String(season?.id||'')&&Number(x.number)===number)){
     showToast('That unit is already in this draft.');return;
   }
   const timestamp=Date.now();
   e.v369Units.push({id:uid(),number,seasonId:season?String(season.id):null,
     seasonName:season?String(season.name||''):null,
-    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:timestamp});
+    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:timestamp,isRepeat:!!forceRepeat||!!e.isRepeat});
   e.v369UpdatedAt=timestamp;
   e.v369NextNumber=number+1;
+  v369Sync();v369Touch();v369RefreshPanels();
+}
+function v369ToggleUnitRepeat(index,pos){
+  const e=S.logDraft?.entries?.[index],u=e?.v369Units?.[pos],item=v369ItemTitle(e);
+  if(!e||!u||!item)return;
+  const repeat=!u.isRepeat;
+  const season=typeof v252Seasons==='function'?v252Seasons(item).find(s=>String(s.id)===String(u.seasonId)) :null;
+  if(!repeat&&!e.isRepeat&&Number(u.number)<=Number(season?season.progress:item.progress)){
+    showToast('Already saved progress must remain marked as repeat consumption.');return;
+  }
+  u.isRepeat=repeat;u.v369UpdatedAt=Date.now();e.v369UpdatedAt=Date.now();
   v369Sync();v369Touch();v369RefreshPanels();
 }
 function v369RemoveUnit(index,pos){
@@ -414,13 +436,8 @@ App.submitLog=function(){
     if((session.titles||[]).some(t=>t.v369Itemized)){
       session.v369DurationSeconds=exactSeconds;
       session.minutes=exactSeconds/60;
-      // Calculate category rewards from this category's actual recorded
-      // durations rather than the legacy qty-weight allocation.
-      const category=getCategory(session.categoryId);
-      if(category && typeof calculateConsumptionXP==='function'){
-        session.xp=calculateConsumptionXP(category,Number(session.actualAmount)||0,
-          session.minutes,session.healthStatus).xp;
-      }
+      // XP and repeat bonuses were already calculated in the canonical submit
+      // chain from the correct category duration; never overwrite them here.
     }
   }
   // The legacy v252 submit wrapper distributes aggregate progress starting at
@@ -431,7 +448,7 @@ App.submitLog=function(){
     const row=captured.get(id);
     if(!row||row.repeat)continue;
     if(!base.seasons.length){
-      const progress=v369ContiguousProgress(base.progress,row.units,null,base.item.total);
+      const progress=v369ContiguousProgress(base.progress,[...v369KnownUnits(base.item),...row.units],null,base.item.total);
       if(base.item.progress!==progress){
         base.item.progress=progress;
         if(base.item.status==='completed'&&Number(base.item.total)>progress)base.item.status='active';
@@ -440,8 +457,9 @@ App.submitLog=function(){
       }
       continue;
     }
+    const known=[...v369KnownUnits(base.item),...row.units];
     for(const season of base.seasons){
-      season.progress=v369ContiguousProgress(season.progress,row.units,season.id,season.total);
+      season.progress=v369ContiguousProgress(season.progress,known,season.id,season.total);
     }
     base.item.seasons=base.seasons;
     v252SyncTitleFromSeasons(base.item);
@@ -682,6 +700,6 @@ style.id='v369-logging-style';
 style.textContent='.v369-draft-conflicts{border:1px solid var(--border);padding:12px;border-radius:10px;margin:10px 0;display:grid;gap:8px}.v369-draft-conflicts p{margin:0;color:var(--text-dim);font-size:12px}.v369-interface{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;margin:0 0 16px}.v369-interface small,.v369-title-head small{display:block;color:var(--text-dim);margin-top:4px}.v369-switch,.v369-settings-choice{display:flex;flex-wrap:wrap;gap:8px}.v369-recommended{font-size:10px;color:var(--flow)}.v369-itemized .v179-log-mode-switch,.v369-itemized .v239-logged-title-list,.v369-itemized #entry-qty{display:none!important}.v369-panels{display:grid;gap:12px;margin:12px 0}.v369-title{border:1px solid var(--border);border-radius:12px;padding:14px}.v369-title-head,.v369-add-row,.v369-unit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.v369-title-head strong{flex:1}.v369-unit-list{display:grid;gap:8px;margin:12px 0}.v369-unit{background:var(--surface-2,var(--surface));border-radius:8px;padding:8px}.v369-unit-name{font-weight:600;flex:1;min-width:100px}.v369-unit label,.v369-add-row label{font-size:12px;display:grid;gap:4px}.v369-unit input,.v369-add-row input,.v369-add-row select{max-width:190px}.v369-duration{display:flex;gap:6px;flex-wrap:wrap}.v369-duration label{width:76px}.v369-duration input{width:76px}.v369-runtime-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:6px}.v369-runtime-fields label{font-size:12px;display:grid;gap:4px}.v369-runtime-fields input{min-width:0;width:100%}.v369-category-runtime{min-width:240px}.v369-history-units{border-top:1px solid var(--border);padding:8px 10px;font-size:12px}.v369-history-units summary{cursor:pointer;color:var(--text-dim);font-weight:600}.v369-history-unit-list{display:grid;gap:6px;margin-top:8px}.v369-history-unit{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--surface-2,var(--surface))}.v369-history-unit strong{font-variant-numeric:tabular-nums}@media(max-width:600px){.v369-history-unit{grid-template-columns:1fr auto}.v369-history-unit span{grid-column:1/-1;grid-row:2}}.v369-add-row{margin-top:12px}.v369-settings-control{padding:12px;border:1px solid var(--border);border-radius:10px;margin:10px 0}@media(max-width:600px){.v369-unit label{width:100%}.v369-add-row label{flex:1}.v369-settings-choice button{width:100%}}';
 document.head.appendChild(style);
 Object.assign(App,{v369SetDefaultInterface,v369SwitchInterface,v369SelectSeason,v369SetNext,
-  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll,v369ToggleTitle,v369RestoreConflict,v369DataAudit});
+  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleUnitRepeat,v369ToggleAll,v369ToggleTitle,v369RestoreConflict,v369DataAudit});
 window.MediaFlowV369={version:369,stage:'itemized logging foundation',defaultInterface:'itemized'};
 MediaFlowRuntime.version=V369_RELEASE;
