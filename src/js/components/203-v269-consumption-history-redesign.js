@@ -282,7 +282,7 @@ function v269ItemizedDetails(ev){
     const when=d?d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'}):'Unknown time';
     const seconds=Number.isFinite(Number(u.durationSeconds))?Number(u.durationSeconds):Math.round((Number(u.minutes)||0)*60);
     const season=u.seasonName?String(u.seasonName)+' · ':'';
-    return '<div class="v369-history-unit"><b>'+v269Esc(season+noun+' '+String(u.number||''))+'</b><span>'+v269Esc(when)+'</span><strong>'+toHms(seconds)+'</strong></div>';
+    return '<div class="v369-history-unit"><b>'+v269Esc(season+noun+' '+String(u.number||'')+(u.isRepeat?' · ↻ Rewatch / reread':''))+'</b><span>'+v269Esc(when)+'</span><strong>'+toHms(seconds)+'</strong></div>';
   }).join('');
   return '<details class="v369-history-units"><summary>'+units.length+' individual '+v269Esc(noun)+(units.length===1?'':'s')+' · '+toHms(units.reduce((n,u)=>n+(Number.isFinite(Number(u.durationSeconds))?Number(u.durationSeconds):(Number(u.minutes)||0)*60),0))+'</summary><div class="v369-history-unit-list">'+html+'</div></details>';
 }
