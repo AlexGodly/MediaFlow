@@ -8,6 +8,7 @@ on:
       - native/v3-full-parity
       - native/v3-1-library-parity
       - native/v3-2-cinematic-ui
+      - app/clean-branding-dashboard-tools
     paths:
       - 'native-preview-build/**'
       - '.github/workflows/native-installable-preview.yml'
