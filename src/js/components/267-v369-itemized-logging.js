@@ -377,6 +377,37 @@ App.submitLog=function(){
   }
   return result;
 };
+// v285 verifies only the draft entry count. Itemized Logging must also
+// verify identities, seasons, timestamps, durations, and edits through Sync Now.
+function v369DraftFingerprint(payload){
+  const d=payload?.resumeStateV285?.logging;
+  if(!d?.active||d?.logDraft?.v369Interface!=='itemized')return null;
+  const draft=d.logDraft;
+  const ordered=(draft.entries||[]).map(entry=>({
+    libraryId:String(entry.libraryId||''),title:String(entry.title||''),
+    units:(entry.v369Units||[]).map(u=>({
+      id:String(u.id||''),number:Number(u.number)||0,season:String(u.seasonId||''),
+      loggedAt:Number(u.loggedAt)||0,durationSeconds:v369Seconds(u)
+    })).sort((a,b)=>a.id.localeCompare(b.id))
+  })).sort((a,b)=>a.libraryId.localeCompare(b.libraryId));
+  return JSON.stringify({
+    commit:String(draft.v369CommitId||''),mode:String(draft.v369Interface||''),
+    note:String(draft.note||''),entries:ordered
+  });
+}
+if(typeof v155VerifyCloudState==='function'){
+  const v369VerifyCloudBase=v155VerifyCloudState;
+  v155VerifyCloudState=function(cloudState,expected){
+    const base=v369VerifyCloudBase.apply(this,arguments)||{ok:true,missing:[]};
+    const expectedDraft=v369DraftFingerprint(expected);
+    if(expectedDraft===null)return base;
+    const missing=Array.isArray(base.missing)?base.missing.slice():[];
+    if(v369DraftFingerprint(cloudState)!==expectedDraft){
+      missing.push('v369 itemized draft (individual units, times and durations)');
+    }
+    return {...base,ok:base.ok!==false&&missing.length===0,missing:[...new Set(missing)]};
+  };
+}
 const v369SettingsRenderer=V219_PAGE_RENDERERS.get('settings');
 if(typeof v369SettingsRenderer==='function'){
   MediaFlowRuntime.registerPageRenderer('settings',function(ctx){
