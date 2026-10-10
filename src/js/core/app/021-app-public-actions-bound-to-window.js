@@ -251,7 +251,21 @@ const App = {
 
       weight: clamp(Number(document.getElementById('m-weight').value)||3,1,5),
 
-      minutesPerUnit: Math.max(1, Number(document.getElementById('m-mpu').value)||20),
+      // v369: exact integer seconds are authoritative when the redesigned
+      // category editor is present; fractional minutes preserve old callers.
+      minutesPerUnit: document.getElementById('m-runtime-hours')
+        ?Math.max(1,
+          Math.min(9999,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-hours').value)||0)))*3600+
+          Math.min(59,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-minutes')?.value)||0)))*60+
+          Math.min(59,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-seconds')?.value)||0)))
+        )/60
+        :Math.max(1, Number(document.getElementById('m-mpu')?.value)||20),
+      secondsPerUnit: document.getElementById('m-runtime-hours')
+        ?Math.max(1,
+          Math.min(9999,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-hours').value)||0)))*3600+
+          Math.min(59,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-minutes')?.value)||0)))*60+
+          Math.min(59,Math.max(0,Math.floor(Number(document.getElementById('m-runtime-seconds')?.value)||0)))
+        ):undefined,
 
       seasonal: document.getElementById('m-seasonal').checked,
 
