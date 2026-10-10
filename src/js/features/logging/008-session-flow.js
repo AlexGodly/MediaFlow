@@ -211,7 +211,9 @@ function submitLog(){
   const totalMinutes=clamp(Number(S.logDraft.minutes)||0,0,999999);
   const entries=S.logDraft.entries||[];
   const extra=(S.logDraft.note||'').trim();
-  const timestamp=Date.now(), sessionGroupId=uid();
+  const timestamp=Date.now(), sessionGroupId=S.logDraft?.v369Interface==='itemized'
+    ?String(S.logDraft.v369CommitId||(S.logDraft.v369CommitId=uid())):uid();
+  const v369Itemized=S.logDraft?.v369Interface==='itemized';
 
   // v61: actual consumption and recommendation outcome are separate concepts.
   const groups=new Map();
@@ -232,7 +234,9 @@ function submitLog(){
   let minutesLeft=totalMinutes;
   grouped.forEach((g,index)=>{
     const actualCat=g.cat, isAssigned=actualCat.id===assignedCat.id;
-    const groupMinutes=index===grouped.length-1?minutesLeft:Math.min(minutesLeft,Math.round(totalMinutes*(g.weight/totalWeight)));
+    const groupMinutes=v369Itemized&&typeof v369Seconds==='function'
+      ?g.entries.reduce((n,e)=>n+(Array.isArray(e.v369Units)?e.v369Units.reduce((sum,u)=>sum+v369Seconds(u),0):0),0)/60
+      :(index===grouped.length-1?minutesLeft:Math.min(minutesLeft,Math.round(totalMinutes*(g.weight/totalWeight))));
     minutesLeft=Math.max(0,minutesLeft-groupMinutes);
     let status='logged';
     if(isAssigned){
@@ -249,7 +253,15 @@ function submitLog(){
       followedAssignedCategory:isAssigned,targetAmount:isAssigned?t.targetMid:g.amount,
       actualAmount:g.amount,minutes:groupMinutes,note,status,unit:actualCat.unit,
       xp:xpCalc.xp,healthStatus,source:'recommendation',
-      titles:g.entries.map(e=>({title:cleanTitle(e.title),libraryId:e.libraryId||null,qty:Number(e.qty)||0,repeat:!!e.isRepeat,loggedAt:v331ValidTimestamp(e.loggedAt)||timestamp}))
+      ...(v369Itemized?{v369Itemized:true,v369CommitId:sessionGroupId,v369DurationSeconds:Math.round(groupMinutes*60)}:{}),
+      titles:g.entries.map(e=>{
+        const units=v369Itemized&&Array.isArray(e.v369Units)?e.v369Units.map(u=>({...u})):[];
+        return {
+          title:cleanTitle(e.title),libraryId:e.libraryId||null,qty:Number(e.qty)||0,repeat:!!e.isRepeat,
+          loggedAt:units.length?Math.min(...units.map(u=>Number(u.loggedAt)||timestamp)):v331ValidTimestamp(e.loggedAt)||timestamp,
+          ...(v369Itemized?{v369Itemized:true,v369Units:units,v369DurationSeconds:units.reduce((n,u)=>n+(typeof v369Seconds==='function'?v369Seconds(u):0),0)}:{})
+        };
+      })
     });
   });
 
@@ -274,7 +286,9 @@ function submitLog(){
       if(item){
         // v81: repeat consumption counts in History/XP/stats but never pushes main Library progress past completion.
         if(e.isRepeat){ return; }
-        item.progress=(item.progress||0)+(Number(e.qty)||0);
+        if(v369Itemized&&Array.isArray(e.v369Units)&&typeof v369ProjectedTitleProgress==='function'){
+          item.progress=v369ProjectedTitleProgress(item,e);
+        }else item.progress=(item.progress||0)+(Number(e.qty)||0);
         if(item.total) item.progress=Math.min(item.progress,item.total);
         if(item.total&&item.progress>=item.total&&item.status!=='dropped'){
           item.status='completed'; item.completedAt=item.completedAt||timestamp;
