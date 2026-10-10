@@ -18,6 +18,8 @@ function build(name,items,entries,mode='itemized'){
     v285TouchLogging(){},v156EnsureOrderIndexes(){return {libraryById:new Map(S.library.map(x=>[x.id,x]))}},
     v252Seasons(item){return (item.seasons||[]).map(x=>({...x}))},
     v252SyncTitleFromSeasons(item){item.progress=item.seasons.reduce((n,x)=>n+x.progress,0);item.total=item.seasons.reduce((n,x)=>n+x.total,0)},
+    categoryModalHtml(){return '<div class="field"><label class="field-label">Minutes per unit</label><input id="m-mpu" value="24"></div>'},
+    v283ReadCategoryForm(){return {id:'fixture',minutesPerUnit:24}},
     getCategory(id){return {id,name:id,unit:id==='manga'?'chapters':'episodes',minutesPerUnit:id==='manga'?7:24}},
     v179SyncSingleFromEntries(){S.logDraft.amount=S.logDraft.entries.reduce((n,x)=>n+x.qty,0);S.logDraft.minutes=S.logDraft.amount*24},
     cleanTitle(x){return x},escapeHtml(x){return String(x)},v331ValidTimestamp(x){return Number(x)||0},v179StartProgress(x){return x.progress},
