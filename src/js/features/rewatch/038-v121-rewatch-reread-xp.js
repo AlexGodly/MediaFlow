@@ -91,7 +91,7 @@ function v121RecalculateRepeatXPHistory(){
 
     for(const t of (s.titles||[])){
       const itemized=Array.isArray(t?.v369Units)&&t.v369Itemized===true;
-      if(!t?.repeat&&!itemized)return;
+      if(!t?.repeat&&!itemized)continue;
       const qty=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:Math.max(0,Number(t.qty)||0);
       if(qty<=0)continue;
 
