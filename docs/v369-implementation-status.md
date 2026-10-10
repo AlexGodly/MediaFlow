@@ -27,6 +27,31 @@ Base: MediaFlow v368. Development branch only. Do not deploy or merge as a finis
 - Validated JavaScript parse and a focused synthetic three-episode/two-season commit harness (3 units, 4340 seconds, correct per-season progress and mock XP calculation).
 - Remaining issue: the canonical submit chain still runs before v369's final metadata corrections. Its intermediate persistence, XP ledger side effects, cloud retries, and idempotency need full integration tests; this is NOT a verified production-safe save pipeline.
 
+## Continued v369 work — October 10, 2026
+
+### Canonical save integration
+- The legacy native Dashboard submit pathway now receives actual per-category itemized runtime **before** building saved History and XP entries.
+- New sessions store a stable itemized commit identifier plus per-title unit data and exact duration seconds at the original persistence point.
+- Library progress only advances through contiguous explicitly logged episode/chapter numbers; logging episodes 12 and 14 does **not** fabricate progress for episode 13.
+- Existing Seasons View progress is corrected per season after the legacy season-distribution wrapper.
+- An already-committed session ID is rejected on repeat submission, preventing duplicate local consumption and XP.
+- Existing Quick Logging uses the original code path.
+
+### Editor, categories, History and data compatibility
+- Title panels can expand/collapse; existing unit numbers and seasons can be edited with duplicate and completed-progress validation.
+- Removing a title recalculates draft runtime; unit nouns include movies, chapters, issues, pages, books and other category types.
+- Category add/edit exposes Hours, Minutes and Seconds, storing `secondsPerUnit` alongside compatible fractional `minutesPerUnit`.
+- Consumption History has expandable per-unit timestamps/runtimes; Consumption/Logs CSV exports gain additive v369 itemized and duration columns while keeping session JSON.
+- Sync Now verification now compares individual unit IDs, timestamps and durations rather than entry counts alone.
+- Full Backup exposes itemized-data manifest counts; Settings Presets explicitly include the interface preference and category runtime metadata.
+- `App.v369DataAudit()` provides an on-demand local snapshot/backup and preference parity report.
+
+### Repeatable verification
+- Added `tests/test-v369-itemized-contract.cjs`.
+- The test passed against the branch: episode gaps, two-season crossing, mixed-category seconds and XP inputs, double-submit blocking, cloud timestamp/runtime mismatch detection, and legacy Quick Logging.
+- JavaScript syntax checks passed for the six affected feature/core/modal/History files.
+- These are synthetic execution tests, **not** authenticated cloud tests, real-browser rendering tests, automatic-update checks or production release verification.
+
 ## Not complete / release blockers
 1. Confirm chronology and progress semantics for nonconsecutive episodes (e.g. Episode 12 and Episode 14), rewatches, earlier seasons and edits. Quantity and Library progress must not silently imply Episode 13 happened.
 2. Verify the complete wrapped submit chain, including XP, stage changes, v252 season metadata, History and cloud persistence; add idempotency and partial-save recovery.
@@ -36,7 +61,7 @@ Base: MediaFlow v368. Development branch only. Do not deploy or merge as a finis
 6. Add browser-based tests for Quick Logging, itemized entries, Seasons View, reload/reconnect, and History exactness.
 7. Profile 30k and 50k Library titles; compare Personal Order v368 benchmarks with v369.
 8. Verify CSS theme variables and mobile styles at 320, 390, 820, 1280 and 1920 px.
-9. Verify correct module parse, inherited duration rendering, and XP-minute aggregation in the compiled browser runtime (not yet run).
+9. Run the full compiled-browser regression matrix, including real DOM/category runtime controls, XP-minute aggregation and resume behavior; focused synthetic tests have passed.
 10. Validate automatic and manual exports, backup/restore, Settings presets, Sync Now, and PWA update behavior end-to-end.
 11. Build full JS bundle, regenerate PWA cache and version references, and package a full v369 ZIP.
 
