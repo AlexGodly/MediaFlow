@@ -58,12 +58,33 @@ function v369DurationInputs(index,pos,unit){
     '<label>'+label+' <input type="number" min="0" max="'+(i===0?'9999':'59')+'" step="1" aria-label="'+label+' for this entry" value="'+v[i]+'" onchange="App.v369EditUnit('+index+','+pos+',\'duration-'+i+'\',this.value)"></label>'
   ).join('')+'</div>';
 }
+// Advance confirmed Library progress only through a contiguous run of
+// specifically logged unit numbers. A gap may still count as consumed in
+// History/XP, but never fabricates an unseen intermediate episode.
+function v369ContiguousProgress(start,units,seasonId=null,limit=null){
+  const current=Math.max(0,Math.floor(Number(start)||0));
+  const relevant=new Set((units||[]).filter(u=>String(u?.seasonId||'')===String(seasonId||''))
+    .map(u=>Math.floor(Number(u.number)||0)).filter(n=>n>current));
+  const max=Number(limit)>0?Math.max(current,Math.floor(Number(limit))):Number.MAX_SAFE_INTEGER;
+  let end=current;
+  while(end<max && relevant.has(end+1))end++;
+  return end;
+}
+function v369ProjectedTitleProgress(item,entry){
+  const start=Math.max(0,Number(item?.progress)||0);
+  if(entry?.isRepeat)return start;
+  const units=Array.isArray(entry?.v369Units)?entry.v369Units:[];
+  const seasons=typeof v252Seasons==='function'?v252Seasons(item):[];
+  if(!seasons.length)return v369ContiguousProgress(start,units,null,item?.total);
+  return seasons.reduce((total,s)=>total+v369ContiguousProgress(s.progress,units,s.id,s.total),0);
+}
 function v369Sync(){
   const entries=S.logDraft?.entries||[];
   for(const e of entries){
     if(!Array.isArray(e.v369Units))continue;
     e.qty=e.v369Units.length;
-    e.v179EndProgress=Math.max(0,Number(e.v179StartProgress)||0)+e.qty;
+    const item=v369ItemTitle(e);
+    e.v179EndProgress=item?v369ProjectedTitleProgress(item,e):Math.max(0,Number(e.v179StartProgress)||0)+e.qty;
   }
   if(typeof v179SyncSingleFromEntries==='function')v179SyncSingleFromEntries();
   // The canonical XP engine expects minutes. Individual timestamps and
@@ -128,6 +149,7 @@ App.openLogForm=function(){
   const r=v369OpenBase.apply(this,arguments);
   S.logDraft=S.logDraft||{};
   S.logDraft.v369Interface=v369DefaultInterface();
+  if(!S.logDraft.v369CommitId)S.logDraft.v369CommitId=uid();
   if(S.logDraft.v369Interface==='itemized')S.logDraft.v179Mode='amount';
   v369Touch();render();return r;
 };
@@ -272,6 +294,14 @@ App.submitLog=function(){
       return;
     }
   }
+  // Same logical session cannot award XP again following a double click,
+  // retry, or restore of an already-committed local draft.
+  if(!S.logDraft.v369CommitId)S.logDraft.v369CommitId=uid();
+  const commitId=String(S.logDraft.v369CommitId);
+  if((S.sessions||[]).some(x=>String(x?.sessionGroupId||x?.v369CommitId||'')===commitId && (x?.v369Itemized||x?.v369CommitId))){
+    showToast('This itemized session was already saved. It will not award duplicate XP.');
+    return;
+  }
   v369Sync();
   const baseLibrary=new Map(all.map(e=>{
     const item=v369ItemTitle(e);
@@ -317,17 +347,20 @@ App.submitLog=function(){
   // season IDs captured from this itemized draft.
   let libraryChanged=false;
   for(const [id,base] of baseLibrary){
-    if(!base.seasons.length)continue;
     const row=captured.get(id);
     if(!row||row.repeat)continue;
-    const byId=new Map(base.seasons.map(season=>[String(season.id),season]));
-    for(const unit of row.units){
-      const season=byId.get(String(unit.seasonId));
-      if(!season)continue;
-      if(Number(unit.number)>(Number(base.seasons.find(x=>String(x.id)===String(season.id))?.progress)||0)){
-        season.progress=Math.min(Number(season.total)>0?Number(season.total):Number.MAX_SAFE_INTEGER,
-          (Number(season.progress)||0)+1);
+    if(!base.seasons.length){
+      const progress=v369ContiguousProgress(base.progress,row.units,null,base.item.total);
+      if(base.item.progress!==progress){
+        base.item.progress=progress;
+        if(base.item.status==='completed'&&Number(base.item.total)>progress)base.item.status='active';
+        base.item.modifiedAt=Date.now();
+        libraryChanged=true;
       }
+      continue;
+    }
+    for(const season of base.seasons){
+      season.progress=v369ContiguousProgress(season.progress,row.units,season.id,season.total);
     }
     base.item.seasons=base.seasons;
     v252SyncTitleFromSeasons(base.item);
