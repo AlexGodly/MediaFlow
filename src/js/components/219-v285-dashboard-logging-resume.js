@@ -195,7 +195,14 @@ function v285ApplyResume(raw,{includeLocal=false}={}){
   const local=includeLocal?v285ReadLocalResume():null;
   const localNorm=local?v285NormalizeResume(local):null;
   const dashboard=localNorm?v285NewerSection(cloud.dashboard,localNorm.dashboard,v285NormalizeDashboard):cloud.dashboard;
-  const logging=localNorm?v285NewerSection(cloud.logging,localNorm.logging,v285NormalizeLogging):cloud.logging;
+  let logging=localNorm?v285NewerSection(cloud.logging,localNorm.logging,v285NormalizeLogging):cloud.logging;
+  // v369 preserves independently edited itemized units and deletion tombstones
+  // during cold-start local/cloud reconciliation rather than simply selecting
+  // whichever full draft has the newest global timestamp.
+  if(localNorm&&typeof v369MergeLogging==='function'){
+    const combined=v369MergeLogging(cloud.logging,localNorm.logging);
+    if(combined)logging=v285NormalizeLogging(combined);
+  }
   const hasDashboard=!!(dashboard.modifiedAt||settingsDashboard||localNorm?.dashboard?.modifiedAt);
   const hasLogging=!!(logging.modifiedAt&&(hasCloudResume||localNorm?.logging?.modifiedAt));
 
