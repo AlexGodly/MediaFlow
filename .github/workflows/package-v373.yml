@@ -1,0 +1,41 @@
+name: Package MediaFlow v373 development
+on:
+  workflow_dispatch:
+  push:
+    branches: [v373-logging-order]
+    paths:
+      - '.github/workflows/package-v373.yml'
+      - 'src/**'
+      - 'assets/css/**'
+      - 'assets/js/mediaflow-v373.bundle.js'
+      - 'index.html'
+      - 'version.json'
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble working source snapshot
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          root=Path('.')
+          direct=['index.html','sw.js','manifest.json','version.json','VERSION','package.json','LICENSE','favicon.ico','icon.svg']
+          paths=[root/x for x in direct if (root/x).is_file()]
+          for folder in ['src','tests','scripts','assets/css','assets/icons','assets/category-icons']:
+              d=root/folder
+              if d.is_dir(): paths += list(d.rglob('*'))
+          for name in ['mediaflow-v372.bundle.js','mediaflow-v373.bundle.js','mediaflow-v261-react-ui.js']:
+              f=root/'assets/js'/name
+              if f.exists(): paths.append(f)
+          with ZipFile('MediaFlow_v373_Development.zip','w',ZIP_DEFLATED,compresslevel=6) as z:
+              for p in paths:
+                  if p.is_file(): z.write(p,p.as_posix())
+          print('snapshot files:',len(paths))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow-v373-development-source
+          path: MediaFlow_v373_Development.zip
+          if-no-files-found: error
