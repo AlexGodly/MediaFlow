@@ -5,6 +5,7 @@ on:
     branches:
       - native/flutter-installable-preview
       - native/v2-parity-development
+      - native/v3-full-parity
     paths:
       - 'native-preview-build/**'
       - '.github/workflows/native-installable-preview.yml'
