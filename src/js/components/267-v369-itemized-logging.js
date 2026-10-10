@@ -450,6 +450,76 @@ if(typeof v155VerifyCloudState==='function'){
     return {...base,ok:base.ok!==false&&missing.length===0,missing:[...new Set(missing)]};
   };
 }
+// Explicit v369 backup/settings manifests make the new data contracts auditable.
+// Full Backup still owns session/draft data; Settings Presets remain settings only.
+if(typeof v196BuildSettingsPreset==='function'){
+  const v369PresetBase=v196BuildSettingsPreset;
+  v196BuildSettingsPreset=function(){
+    const preset=v369PresetBase.apply(this,arguments);
+    preset.settings=preset.settings||{};
+    preset.settings.v369Logging={defaultInterface:v369DefaultInterface()};
+    preset.presetManifest=preset.presetManifest||{};
+    preset.presetManifest.includes=Object.assign({},preset.presetManifest.includes||{},
+      {v369DefaultLoggingInterface:true,v369CategoryRuntimeSeconds:true});
+    return preset;
+  };
+}
+if(typeof v196NormalizeImportedSettings==='function'){
+  const v369ImportSettingsBase=v196NormalizeImportedSettings;
+  v196NormalizeImportedSettings=function(raw){
+    const settings=v369ImportSettingsBase.apply(this,arguments)||{};
+    settings.v369Logging={defaultInterface:settings.v369Logging?.defaultInterface==='quick'?'quick':'itemized'};
+    return settings;
+  };
+}
+function v369HistoryUnitRows(state){
+  return (state?.sessions||[]).flatMap(session=>(session?.titles||[]).flatMap(title=>
+    (title?.v369Units||[]).map(u=>({
+      sessionId:String(session.id||''),titleId:String(title.libraryId||''),
+      id:String(u.id||''),number:Number(u.number)||0,season:String(u.seasonId||''),
+      loggedAt:Number(u.loggedAt)||0,durationSeconds:v369Seconds(u)
+    }))
+  ));
+}
+function v369HistorySignature(state){
+  return JSON.stringify(v369HistoryUnitRows(state).sort((a,b)=>
+    a.sessionId.localeCompare(b.sessionId)||a.titleId.localeCompare(b.titleId)||a.id.localeCompare(b.id)));
+}
+if(typeof v148BuildFullBackup==='function'){
+  const v369BackupBase=v148BuildFullBackup;
+  v148BuildFullBackup=function(){
+    const backup=v369BackupBase.apply(this,arguments);
+    backup.backupManifest=backup.backupManifest||{};
+    backup.backupManifest.includes=Object.assign({},backup.backupManifest.includes||{},
+      {v369ItemizedHistory:true,v369PerUnitTimestamps:true,v369DurationSeconds:true,
+       v369ResumableDraft:true,v369CategoryRuntimeSeconds:true});
+    const units=v369HistoryUnitRows(backup);
+    backup.backupManifest.v369={
+      feature:'Itemized logging',savedUnits:units.length,
+      savedSeconds:units.reduce((n,u)=>n+u.durationSeconds,0),
+      draftUnits:(backup.resumeStateV285?.logging?.logDraft?.entries||[])
+        .reduce((n,e)=>n+(e.v369Units?.length||0),0),
+      categoriesWithSecondPrecision:(backup.categories||[]).filter(c=>Number.isFinite(Number(c?.secondsPerUnit))).length
+    };
+    return backup;
+  };
+}
+function v369DataAudit(){
+  const snapshotData=typeof snapshot==='function'?snapshot():null;
+  const backup=typeof v148BuildFullBackup==='function'?v148BuildFullBackup():null;
+  const preset=typeof v196BuildSettingsPreset==='function'?v196BuildSettingsPreset():null;
+  return {
+    releaseUnderDevelopment:369,
+    localSnapshotAvailable:!!snapshotData,fullBackupAvailable:!!backup,
+    savedUnitCount:snapshotData?v369HistoryUnitRows(snapshotData).length:0,
+    historyExact:snapshotData&&backup?v369HistorySignature(snapshotData)===v369HistorySignature(backup):null,
+    draftExact:snapshotData&&backup?v369DraftFingerprint(snapshotData)===v369DraftFingerprint(backup):null,
+    defaultInterface:v369DefaultInterface(),
+    presetDefault: preset?.settings?.v369Logging?.defaultInterface??null,
+    secondsCategoryCount:(S.categories||[]).filter(c=>Number.isFinite(Number(c?.secondsPerUnit))).length,
+    note:'Local data-path audit only; authenticate and run Sync Now to verify remote cloud readback.'
+  };
+}
 const v369SettingsRenderer=V219_PAGE_RENDERERS.get('settings');
 if(typeof v369SettingsRenderer==='function'){
   MediaFlowRuntime.registerPageRenderer('settings',function(ctx){
@@ -488,6 +558,6 @@ style.id='v369-logging-style';
 style.textContent='.v369-interface{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;margin:0 0 16px}.v369-interface small,.v369-title-head small{display:block;color:var(--text-dim);margin-top:4px}.v369-switch,.v369-settings-choice{display:flex;flex-wrap:wrap;gap:8px}.v369-recommended{font-size:10px;color:var(--flow)}.v369-itemized .v179-log-mode-switch,.v369-itemized .v239-logged-title-list,.v369-itemized #entry-qty{display:none!important}.v369-panels{display:grid;gap:12px;margin:12px 0}.v369-title{border:1px solid var(--border);border-radius:12px;padding:14px}.v369-title-head,.v369-add-row,.v369-unit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.v369-title-head strong{flex:1}.v369-unit-list{display:grid;gap:8px;margin:12px 0}.v369-unit{background:var(--surface-2,var(--surface));border-radius:8px;padding:8px}.v369-unit-name{font-weight:600;flex:1;min-width:100px}.v369-unit label,.v369-add-row label{font-size:12px;display:grid;gap:4px}.v369-unit input,.v369-add-row input,.v369-add-row select{max-width:190px}.v369-duration{display:flex;gap:6px;flex-wrap:wrap}.v369-duration label{width:76px}.v369-duration input{width:76px}.v369-runtime-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:6px}.v369-runtime-fields label{font-size:12px;display:grid;gap:4px}.v369-runtime-fields input{min-width:0;width:100%}.v369-category-runtime{min-width:240px}.v369-history-units{border-top:1px solid var(--border);padding:8px 10px;font-size:12px}.v369-history-units summary{cursor:pointer;color:var(--text-dim);font-weight:600}.v369-history-unit-list{display:grid;gap:6px;margin-top:8px}.v369-history-unit{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--surface-2,var(--surface))}.v369-history-unit strong{font-variant-numeric:tabular-nums}@media(max-width:600px){.v369-history-unit{grid-template-columns:1fr auto}.v369-history-unit span{grid-column:1/-1;grid-row:2}}.v369-add-row{margin-top:12px}.v369-settings-control{padding:12px;border:1px solid var(--border);border-radius:10px;margin:10px 0}@media(max-width:600px){.v369-unit label{width:100%}.v369-add-row label{flex:1}.v369-settings-choice button{width:100%}}';
 document.head.appendChild(style);
 Object.assign(App,{v369SetDefaultInterface,v369SwitchInterface,v369SelectSeason,v369SetNext,
-  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll,v369ToggleTitle});
+  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll,v369ToggleTitle,v369DataAudit});
 window.MediaFlowV369={version:369,stage:'itemized logging foundation',defaultInterface:'itemized'};
 MediaFlowRuntime.version=V369_RELEASE;
