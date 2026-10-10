@@ -55,7 +55,7 @@ function v369Hms(seconds){
 function v369DurationInputs(index,pos,unit){
   const t=v369Seconds(unit),v=[Math.floor(t/3600),Math.floor(t%3600/60),t%60];
   return '<div class="v369-duration" aria-label="Individual runtime">'+['Hours','Minutes','Seconds'].map((label,i)=>
-    '<label>'+label+' <input type="number" min="0" max="'+(i===0?'9999':'59')+'" step="1" aria-label="'+label+' for this entry" value="'+v[i]+'" onchange="App.v369EditUnit('+index+','+pos+',\\'duration-'+i+'\\',this.value)"></label>'
+    '<label>'+label+' <input type="number" min="0" max="'+(i===0?'9999':'59')+'" step="1" aria-label="'+label+' for this entry" value="'+v[i]+'" onchange="App.v369EditUnit('+index+','+pos+',\'duration-'+i+'\',this.value)"></label>'
   ).join('')+'</div>';
 }
 function v369Sync(){
