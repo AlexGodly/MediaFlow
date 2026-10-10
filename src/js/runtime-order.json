@@ -120,5 +120,6 @@
   "components/263-v365-settings-center.js",
   "components/264-v366-settings-registration.js",
   "components/265-v367-settings-first-paint.js",
-  "components/266-v368-performance-stability.js"
+  "components/266-v368-performance-stability.js",
+  "components/267-v369-itemized-logging.js"
 ]
