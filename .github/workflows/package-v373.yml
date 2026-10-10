@@ -10,6 +10,8 @@ on:
       - 'assets/js/mediaflow-v373.bundle.js'
       - 'index.html'
       - 'version.json'
+permissions:
+  contents: write
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -23,6 +25,8 @@ jobs:
             /version.json
             /VERSION
             /package.json
+            /README_v373.md
+            /CHANGELOG_v373.md
             /LICENSE
             /favicon.ico
             /icon.svg
@@ -33,15 +37,30 @@ jobs:
             /assets/icons/
             /assets/category-icons/
             /assets/js/mediaflow-v372.bundle.js
+            /assets/js/mediaflow-v373.bundle.js
             /assets/js/mediaflow-v261-react-ui.js
           sparse-checkout-cone-mode: false
+      - name: Verify v373 and compile the production bundle
+        run: |
+          node tests/test-v373-logging-order.cjs
+          node tests/test-v369-itemized-contract.cjs
+          python scripts/build.py
+      - name: Commit generated production bundle
+        run: |
+          git config user.name "MediaFlow Build"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/js/mediaflow-v373.bundle.js index.html sw.js manifest.json version.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Build MediaFlow v373 production bundle and PWA shell"
+            git push origin HEAD:v373-logging-order
+          fi
       - name: Assemble working source snapshot
         run: |
           python - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile, ZIP_DEFLATED
           root=Path('.')
-          direct=['index.html','sw.js','manifest.json','version.json','VERSION','package.json','LICENSE','favicon.ico','icon.svg']
+          direct=['index.html','sw.js','manifest.json','version.json','VERSION','package.json','LICENSE','favicon.ico','icon.svg','README_v373.md','CHANGELOG_v373.md']
           paths=[root/x for x in direct if (root/x).is_file()]
           for folder in ['src','tests','scripts','assets/css','assets/icons','assets/category-icons']:
               d=root/folder
