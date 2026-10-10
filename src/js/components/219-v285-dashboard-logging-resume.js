@@ -328,7 +328,9 @@ if(typeof App.v256ToggleDashboardAccordion==='function'){
 // Lifecycle actions explicitly open/close the resumable logging workspace.
 v285WrapLoggingAction('openLogForm',{active:true,immediate:true});
 v285WrapLoggingAction('cancelLogForm',{active:false,immediate:true});
-v285WrapLoggingAction('submitLog',{active:false,immediate:true});
+// Preserve an active logging draft when submitLog rejects validation or fails.
+// Using active:false here previously erased a rejected draft from the resume cache.
+v285WrapLoggingAction('submitLog',{active:null,immediate:true});
 v285WrapLoggingAction('endSession',{active:false,immediate:true});
 v285WrapLoggingAction('rotateTask',{active:false,immediate:true});
 v285WrapLoggingAction('skipTask',{active:false,immediate:true});
