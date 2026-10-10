@@ -24,7 +24,7 @@ function v369ItemTitle(entry){
 }
 function v369UnitType(item){
   const u=String(getCategory(item?.categoryId)?.unit||'').toLowerCase();
-  return /chapter/.test(u)?'Chapter':/issue/.test(u)?'Issue':/volume/.test(u)?'Volume':/book/.test(u)?'Book':'Episode';
+  return /chapter/.test(u)?'Chapter':/issue/.test(u)?'Issue':/volume/.test(u)?'Volume':/book/.test(u)?'Book':/movie|film/.test(u)?'Movie':/page/.test(u)?'Page':/track|song/.test(u)?'Track':/game/.test(u)?'Game':'Episode';
 }
 function v369ValidStamp(value){
   const n=Number(value);
@@ -162,6 +162,17 @@ App.openLogForm=function(){
   if(S.logDraft.v369Interface==='itemized')S.logDraft.v179Mode='amount';
   v369Touch();render();return r;
 };
+// Removing an entire selected title must recompute exact itemized duration;
+// the legacy remover recalculates minutes using category averages.
+const v369RemoveTitleBase=App.removeLogEntry;
+if(typeof v369RemoveTitleBase==='function'){
+  App.removeLogEntry=function(){
+    const isItemized=S.logDraft?.v369Interface==='itemized';
+    const result=v369RemoveTitleBase.apply(this,arguments);
+    if(isItemized){v369Sync();v369Touch();v369RefreshPanels();}
+    return result;
+  };
+}
 const v369AddBase=App.addLogEntry;
 App.addLogEntry=function(){
   if(S.logDraft?.v369Interface!=='itemized')return v369AddBase.apply(this,arguments);
