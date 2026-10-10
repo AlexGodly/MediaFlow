@@ -15,6 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /index.html
+            /sw.js
+            /manifest.json
+            /version.json
+            /VERSION
+            /package.json
+            /LICENSE
+            /favicon.ico
+            /icon.svg
+            /src/
+            /tests/
+            /scripts/
+            /assets/css/
+            /assets/icons/
+            /assets/category-icons/
+            /assets/js/mediaflow-v372.bundle.js
+            /assets/js/mediaflow-v261-react-ui.js
+          sparse-checkout-cone-mode: false
       - name: Assemble working source snapshot
         run: |
           python - <<'PY'
