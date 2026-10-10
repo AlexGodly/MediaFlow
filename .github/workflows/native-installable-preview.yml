@@ -71,7 +71,7 @@ jobs:
           if manifest.exists():
               content=manifest.read_text()
               if 'android.permission.INTERNET' not in content:
-                  content=content.replace('<application', '<uses-permission android:name="android.permission.INTERNET" />\\n    <application', 1)
+                  content=content.replace('<application', '<uses-permission android:name="android.permission.INTERNET" />\n    <application', 1)
               content=content.replace('android:label="mediaflow_native"','android:label="MediaFlow"')
               manifest.write_text(content)
               print('Android release network permission and MediaFlow application name ready')
