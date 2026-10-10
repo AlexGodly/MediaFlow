@@ -1,0 +1,33 @@
+CHECK OK
+Build manifest rows: 144
+Runtime extension modules: 126
+Settings page renderer: active inside app scope
+v221 Settings ordering/search polish: preserved
+v222 Dashboard rendering stability: present
+v223 On This Day visibility: preserved
+v224 Library/sorting/page naming/recommendation actions: preserved
+v225 Personal Order clarity/global button icons/Account polish: preserved
+v226 semantic icons/dropdowns/category layout/Dynamic Library sizing: preserved
+v227 icon/category-row/dashboard-cover corrections: preserved
+v228 Library metadata/Dynamic row ordering controls: preserved
+v229 Category/Status popup polish: active
+v230 Choice/Filter layout controls: active
+v231 Settings navigation/inheritance polish: active
+v232 Library performance/persistence/details audit: active
+v233 Dynamic Settings/title-details cover sizing: active
+v234 Dashboard quick-entry polish: active
+v235 Missing Covers live validation/preview: active
+v236 Searchable/paginated Category Filter: active
+v238 Status reliability/logging base: preserved
+v239 Batch Log/logging/editor/native responsive cleanup: preserved
+v240 Edit Title/logged-cover/profile polish: active
+v237 Personal Order/Batch Log/Dashboard logging Category Filters: active
+v244 Progressive Web App install/update foundation: active
+v245 Unified Alex Godly icon branding: active
+v246 Mobile/Tablet PWA responsiveness: active
+v247 PWA install reliability + diagnostics: active
+v248 Settings navigation + managed app updates: active
+v249 PWA/app-update scope correction: active
+Navigation highlight fix: preserved
+Persistent schemas: Cloud v201 / Full Backup v29 / Settings Preset v1
+JS SHA256: 4648ebf29c7c720ca61ce2dd24f3cc8a7df8679466883a2cb0a1f93a4480c68f

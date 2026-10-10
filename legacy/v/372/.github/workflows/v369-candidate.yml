@@ -1,0 +1,51 @@
+name: MediaFlow v369 development candidate
+
+on:
+  push:
+    branches:
+      - feature/v369-itemized-logging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout development branch
+        uses: actions/checkout@v4
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test itemized logging contracts
+        run: node tests/test-v369-itemized-contract.cjs
+      - name: Build modular JavaScript and release PWA shell
+        run: python3 scripts/build.py
+      - name: Audit compiled runtime and release assets
+        run: python3 scripts/check.py
+      - name: Confirm version and second-precision runtime
+        run: |
+          test "$(cat VERSION)" = "369"
+          grep -q 'mediaflow-v369.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v369-shell-v1' sw.js
+          node --check assets/js/mediaflow-v369.bundle.js
+          python3 -c "import json; d=json.load(open('version.json')); assert d['appVersion']==369"
+      - name: Package complete v369 modular source candidate
+        if: always()
+        run: |
+          mkdir -p /tmp/mediaflow-v369
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/node_modules/' --exclude='*.zip' ./ /tmp/mediaflow-v369/
+          cd /tmp/mediaflow-v369
+          zip -q -r "$GITHUB_WORKSPACE/MediaFlow_v369_Modular_Development_Candidate.zip" .
+          unzip -t "$GITHUB_WORKSPACE/MediaFlow_v369_Modular_Development_Candidate.zip" | tail -n 1
+      - name: Upload v369 candidate project ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow-v369-Modular-Development-Candidate
+          path: MediaFlow_v369_Modular_Development_Candidate.zip
+          retention-days: 30
+          if-no-files-found: warn
