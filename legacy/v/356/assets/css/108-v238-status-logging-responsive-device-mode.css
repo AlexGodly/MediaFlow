@@ -1,0 +1,148 @@
+/* ============================================================
+   MediaFlow v238 — Status / Logging / Responsive Device Mode
+   ============================================================ */
+
+/* ---------- Logging redesign ------------------------------------------ */
+.log-form{font-size:13px}
+.log-form .field-label{font-size:11.5px;line-height:1.3}
+.log-form .hint,.log-form small{font-size:11.5px;line-height:1.45}
+.v238-logged-section-head,.v238-logged-empty{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:13px 0 9px;padding:11px 13px;border:1px solid var(--border-soft);border-radius:11px;background:color-mix(in srgb,var(--panel-raised) 78%,var(--panel))}
+.v238-logged-section-head>div,.v238-logged-empty{min-width:0}
+.v238-logged-section-head span,.v238-logged-empty>span{display:block;font-size:8.5px;font-weight:900;letter-spacing:.11em;color:var(--text-mute)}
+.v238-logged-section-head b,.v238-logged-empty>b{display:block;margin-top:2px;font-size:13px;color:var(--text)}
+.v238-logged-section-head small,.v238-logged-empty small{color:var(--text-mute);text-align:right}
+.v238-logged-empty{display:grid;grid-template-columns:auto 1fr;justify-content:start}
+.v238-logged-empty>span{grid-column:1/-1}.v238-logged-empty small{text-align:left}
+.v238-log-library{margin:14px 0;border:1px solid var(--border-soft);border-radius:13px;background:color-mix(in srgb,var(--panel-raised) 76%,var(--panel));overflow:visible}
+.v238-log-library-summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 13px;cursor:pointer;color:var(--text);user-select:none}
+.v238-log-library-summary::-webkit-details-marker{display:none}
+.v238-log-library-summary-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;text-align:left}
+.v238-log-library-summary-copy>b{font-size:13px}.v238-log-library-summary-copy>small{font-size:10.5px;color:var(--text-mute);font-weight:500}
+.v238-log-library-chevron{margin-left:auto;color:var(--text-mute);transition:transform .14s ease}.v238-log-library[open] .v238-log-library-chevron{transform:rotate(180deg)}
+.v238-log-library-body{padding:0 12px 12px}
+.v238-log-library-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0 8px;border-top:1px solid var(--border-soft)}
+.v238-log-library-head b{display:block;font-size:12px}.v238-log-library-head small{display:block;margin-top:2px;color:var(--text-mute);font-size:10px}
+.v238-log-library-body>#entry-title{width:100%}
+.v238-log-library-body>.field-label{margin-top:0}
+.v238-log-library-body>div[style*="display:flex"]{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(116px,auto) auto;gap:8px!important;align-items:end}
+.v238-log-library .v224-log-tools{margin-top:9px}
+.v238-log-library .v87-log-count{font-size:11px!important}
+.v238-log-library .log-suggestion small{font-size:11px!important}
+
+/* ---------- Add/Edit Title editor ------------------------------------- */
+.modal:has(.v238-library-editor){max-width:min(1180px,96vw);width:min(1180px,96vw);padding:20px 22px;max-height:96vh}
+.v238-library-editor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 12px;align-items:start}
+.v238-library-editor>.modal-title,.v238-library-editor>.v178-rich-editor,.v238-library-editor>.modal-actions{grid-column:1/-1}
+.v238-library-editor>.modal-title{margin-bottom:2px}
+.v238-library-editor>.field-row{display:contents}
+.v238-library-editor>.field{margin:0;min-width:0}
+.v238-library-editor>.field:has(#l-title){grid-column:span 2}
+.v238-library-editor>.field:has(#l-tags){grid-column:span 2}
+.v238-library-editor input,.v238-library-editor select{min-width:0;width:100%;height:38px;padding-top:7px;padding-bottom:7px}
+.v238-library-editor .field-label{font-size:10px;margin-bottom:4px}
+.v238-library-editor .v178-rich-editor{margin-top:2px}
+.v238-library-editor .v178-rich-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px 9px}
+.v238-library-editor .v178-rich-editor>summary{padding:8px 10px}
+.v238-library-editor .v178-rich-editor-body{padding:0 10px 9px}
+.v238-library-editor .v178-rich-editor-note{margin-bottom:6px;font-size:8.5px}
+.v238-library-editor .v178-rich-wide{grid-column:1/-1}
+.v238-library-editor .v178-rich-editor textarea{min-height:62px;max-height:88px}
+.v238-library-editor>.modal-actions{margin-top:2px}
+@media(min-width:1050px) and (min-height:760px){.modal:has(.v238-library-editor){overflow:hidden}}
+@media(max-width:1049px), (max-height:759px){.modal:has(.v238-library-editor){overflow-y:auto}.v238-library-editor{grid-template-columns:repeat(2,minmax(0,1fr))}.v238-library-editor .v178-rich-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.modal:has(.v238-library-editor){width:calc(100vw - 14px);max-width:none;padding:14px;max-height:94vh}.v238-library-editor{grid-template-columns:1fr}.v238-library-editor>.field:has(#l-title),.v238-library-editor>.field:has(#l-tags){grid-column:auto}.v238-library-editor .v178-rich-grid{grid-template-columns:1fr}.v238-library-editor .v178-rich-wide{grid-column:auto}}
+
+/* ---------- Device & layout setting ----------------------------------- */
+.v238-device-settings-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,auto);gap:16px;align-items:center;margin-bottom:22px}
+.v238-device-setting-copy>b{display:block;font-size:13px;margin-bottom:5px}
+.v238-device-mode-grid{display:grid;grid-template-columns:repeat(4,minmax(92px,1fr));gap:7px}
+.v238-device-mode-grid .btn{min-height:42px;padding:8px 10px;flex-direction:column;gap:1px}
+.v238-device-mode-grid .btn.active{border-color:var(--flow);box-shadow:0 0 0 2px color-mix(in srgb,var(--flow) 12%,transparent)}
+.v238-device-mode-grid small{font-size:8px;color:var(--text-mute);text-transform:capitalize}
+.v238-device-mode-state{grid-column:1/-1;display:flex;justify-content:flex-end;gap:7px;color:var(--text-mute);font-size:10px}.v238-device-mode-state b{color:var(--flow)}
+
+/* ---------- Forced responsive layouts -------------------------------- */
+html[data-v238-layout="mobile"] #app,html[data-v238-layout="tablet"] #app{flex-direction:column!important}
+html[data-v238-layout="mobile"] .sidebar,html[data-v238-layout="tablet"] .sidebar{display:none!important}
+html[data-v238-layout="mobile"] .mobile-tabbar,html[data-v238-layout="tablet"] .mobile-tabbar{display:flex!important}
+html[data-v238-layout="mobile"] .main{width:100%!important;padding:16px 12px 96px!important}
+html[data-v238-layout="tablet"] .main{width:100%!important;padding:24px 20px 96px!important}
+html[data-v238-layout="mobile"] .container,html[data-v238-layout="tablet"] .container{width:100%!important;max-width:none!important}
+html[data-v238-layout="mobile"] .two-col,html[data-v238-layout="mobile"] .grid-2,html[data-v238-layout="mobile"] .field-row{grid-template-columns:1fr!important}
+html[data-v238-layout="mobile"] .grid-3{grid-template-columns:1fr!important}
+html[data-v238-layout="tablet"] .two-col,html[data-v238-layout="tablet"] .field-row{grid-template-columns:1fr!important}
+html[data-v238-layout="tablet"] .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html[data-v238-layout="mobile"] .view-title{font-size:22px!important}
+html[data-v238-layout="tablet"] .view-title{font-size:25px!important}
+html[data-v238-layout="mobile"] .v221-settings-layout,html[data-v238-layout="tablet"] .v221-settings-layout{grid-template-columns:1fr!important}
+html[data-v238-layout="mobile"] .v221-settings-nav,html[data-v238-layout="tablet"] .v221-settings-nav{position:relative!important;top:auto!important;max-height:none!important;display:flex!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important}
+html[data-v238-layout="mobile"] .v221-settings-nav-group,html[data-v238-layout="tablet"] .v221-settings-nav-group{display:flex!important;align-items:center!important;gap:6px!important;flex:0 0 auto!important;margin:0!important;padding:0!important;border:0!important}
+html[data-v238-layout="mobile"] .v221-settings-nav-title,html[data-v238-layout="tablet"] .v221-settings-nav-title{display:none!important}
+html[data-v238-layout="mobile"] .v221-settings-nav-item,html[data-v238-layout="tablet"] .v221-settings-nav-item{width:auto!important;white-space:nowrap!important;border:1px solid var(--border-soft)!important;background:var(--panel-raised)!important}
+
+/* Force desktop presentation even on a narrow physical viewport. The page
+   remains usable through normal browser zoom/scroll rather than silently
+   falling back to mobile when the user explicitly requested Desktop. */
+html[data-v238-device-preference="desktop"] #app{flex-direction:row!important;min-width:980px}
+html[data-v238-device-preference="desktop"] .sidebar{display:flex!important}
+html[data-v238-device-preference="desktop"] .mobile-tabbar{display:none!important}
+html[data-v238-device-preference="desktop"] .main{padding:32px 40px 90px!important}
+
+/* ---------- Mobile/tablet clarity + render-cost reductions ------------- */
+html[data-v238-layout="mobile"] :is(input,select,textarea,button,.btn),html[data-v238-layout="tablet"] :is(input,select,textarea,button,.btn){min-width:0;max-width:100%}
+html[data-v238-layout="mobile"] :is(.card,.hero,.log-form,.new-entry-box),html[data-v238-layout="tablet"] :is(.card,.hero,.log-form,.new-entry-box){max-width:100%}
+html[data-v238-layout="mobile"] :is(.library-row,.log-suggestion,.batch-log-row,.v138-order-row),html[data-v238-layout="tablet"] :is(.library-row,.log-suggestion,.batch-log-row,.v138-order-row){content-visibility:auto;contain-intrinsic-size:auto 88px}
+html[data-v238-layout="mobile"] :is(.v221-settings-toolbar,.mobile-tabbar),html[data-v238-layout="tablet"] :is(.v221-settings-toolbar,.mobile-tabbar){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-v238-layout="mobile"] :is(.btn,.nav-item,.card,.log-suggestion),html[data-v238-layout="tablet"] :is(.btn,.nav-item,.card,.log-suggestion){transition-duration:.08s!important}
+html[data-v238-layout="mobile"] .v224-log-tools,html[data-v238-layout="tablet"] .v224-log-tools{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+html[data-v238-layout="mobile"] .v224-log-tools>*{grid-column:1/-1!important}
+html[data-v238-layout="tablet"] .v224-log-tools>.v224-sort-pair,html[data-v238-layout="tablet"] .v224-log-tools>select{grid-column:auto!important}
+html[data-v238-layout="mobile"] .v238-log-library-body>div[style*="display:flex"]{grid-template-columns:1fr!important}
+html[data-v238-layout="tablet"] .v238-log-library-body>div[style*="display:flex"]{grid-template-columns:minmax(0,1fr) 130px auto!important}
+html[data-v238-layout="mobile"] .v238-logged-section-head{align-items:flex-start;flex-direction:column}.v238-logged-section-head small{text-align:left}
+html[data-v238-layout="mobile"] .v238-device-settings-card,html[data-v238-layout="tablet"] .v238-device-settings-card{grid-template-columns:1fr}
+html[data-v238-layout="mobile"] .v238-device-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+@media(max-width:680px){.v238-log-library-body>div[style*="display:flex"]{grid-template-columns:1fr!important}.v238-device-settings-card{grid-template-columns:1fr}.v238-device-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v238-logged-section-head{align-items:flex-start;flex-direction:column}.v238-logged-section-head small{text-align:left}}
+
+/* v238 editor density pass — keep full desktop editor visible without clipping. */
+@media(min-width:1050px) and (min-height:760px){
+  .v238-library-editor>.field:has(#l-cover){grid-column:span 2;align-self:stretch}
+  .v238-library-editor>.v82-repeat-panel{grid-column:span 2;margin:0;align-self:stretch}
+  .v238-library-editor .v44-cover-row{gap:9px;flex-wrap:nowrap}
+  .v238-library-editor .v44-cover-preview{width:64px;height:90px;border-radius:8px;flex:0 0 auto}
+  .v238-library-editor .v44-cover-fields{min-width:0}
+  .v238-library-editor .v44-cover-fields>div[style*="margin-top"]{margin-top:5px!important;gap:5px!important}
+  .v238-library-editor .v44-cover-fields .btn{min-height:30px;padding:5px 8px;font-size:10px}
+  .v238-library-editor .v44-cover-fields .hint{display:block;margin-top:4px;font-size:8.5px;line-height:1.25}
+  .v238-library-editor .v82-repeat-panel{padding:8px 10px;border-radius:9px}
+  .v238-library-editor .v82-repeat-head{margin-bottom:5px;font-size:9px}
+  .v238-library-editor .v82-repeat-grid{gap:6px;margin-bottom:5px}
+  .v238-library-editor .v82-repeat-grid>div{padding:6px 8px}
+  .v238-library-editor .v82-repeat-grid b{font-size:16px}
+  .v238-library-editor .v82-repeat-grid small{font-size:8.5px}
+  .v238-library-editor .v82-repeat-current{padding:4px 0;font-size:10px}
+  .v238-library-editor .v83-repeat-source{margin-top:4px;font-size:8.5px;line-height:1.25}
+  .v238-library-editor .v83-repeat-edit{margin-top:6px;padding-top:6px}
+  .v238-library-editor .v83-repeat-edit-title{margin-bottom:4px;font-size:8.5px}
+  .v238-library-editor .v83-repeat-edit-grid{gap:6px}
+  .v238-library-editor .v83-repeat-edit .hint{display:block;margin-top:4px;font-size:8px;line-height:1.2}
+  .v238-library-editor .v178-rich-editor>summary{min-height:30px;padding:6px 9px}
+  .v238-library-editor .v178-rich-editor-body{padding:0 9px 7px}
+  .v238-library-editor .v178-rich-editor-note{display:none}
+  .v238-library-editor .v178-rich-grid{gap:5px 8px}
+  .v238-library-editor .v178-rich-grid .field{margin:0}
+  .v238-library-editor .v178-rich-editor textarea{min-height:44px;max-height:54px;resize:none}
+  .v238-library-editor .modal-actions{padding-top:3px}
+}
+@media(min-width:1050px) and (min-height:760px){
+  .v238-library-editor .v83-repeat-edit>.hint{display:none}
+  .v238-library-editor .v82-repeat-grid>div{padding:4px 7px}
+  .v238-library-editor .v82-repeat-current{padding:2px 0}
+  .v238-library-editor .v83-repeat-edit{margin-top:4px;padding-top:4px}
+  .v238-library-editor .v83-repeat-source{margin-top:2px}
+  .v238-library-editor .v178-rich-editor input,
+  .v238-library-editor .v178-rich-editor select{height:30px;padding:4px 7px;font-size:10px}
+  .v238-library-editor .v178-rich-editor .field-label{font-size:8.5px;margin-bottom:2px}
+  .v238-library-editor .v178-rich-editor textarea{min-height:38px;max-height:42px;padding:5px 7px;font-size:10px;line-height:1.25}
+}
