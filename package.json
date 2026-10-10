@@ -1,10 +1,11 @@
 {
-  "name": "mediaflow-v368",
+  "name": "mediaflow-v369",
   "private": true,
-  "version": "368.0.0",
+  "version": "369.0.0",
   "type": "module",
   "scripts": {
-    "build:v265": "vite build --config vite.v261.config.ts"
+    "build:v265": "vite build --config vite.v261.config.ts",
+    "test:v369": "node tests/test-v369-itemized-contract.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

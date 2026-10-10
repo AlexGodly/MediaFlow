@@ -195,7 +195,14 @@ function v285ApplyResume(raw,{includeLocal=false}={}){
   const local=includeLocal?v285ReadLocalResume():null;
   const localNorm=local?v285NormalizeResume(local):null;
   const dashboard=localNorm?v285NewerSection(cloud.dashboard,localNorm.dashboard,v285NormalizeDashboard):cloud.dashboard;
-  const logging=localNorm?v285NewerSection(cloud.logging,localNorm.logging,v285NormalizeLogging):cloud.logging;
+  let logging=localNorm?v285NewerSection(cloud.logging,localNorm.logging,v285NormalizeLogging):cloud.logging;
+  // v369 preserves independently edited itemized units and deletion tombstones
+  // during cold-start local/cloud reconciliation rather than simply selecting
+  // whichever full draft has the newest global timestamp.
+  if(localNorm&&typeof v369MergeLogging==='function'){
+    const combined=v369MergeLogging(cloud.logging,localNorm.logging);
+    if(combined)logging=v285NormalizeLogging(combined);
+  }
   const hasDashboard=!!(dashboard.modifiedAt||settingsDashboard||localNorm?.dashboard?.modifiedAt);
   const hasLogging=!!(logging.modifiedAt&&(hasCloudResume||localNorm?.logging?.modifiedAt));
 
@@ -328,7 +335,9 @@ if(typeof App.v256ToggleDashboardAccordion==='function'){
 // Lifecycle actions explicitly open/close the resumable logging workspace.
 v285WrapLoggingAction('openLogForm',{active:true,immediate:true});
 v285WrapLoggingAction('cancelLogForm',{active:false,immediate:true});
-v285WrapLoggingAction('submitLog',{active:false,immediate:true});
+// Preserve an active logging draft when submitLog rejects validation or fails.
+// Using active:false here previously erased a rejected draft from the resume cache.
+v285WrapLoggingAction('submitLog',{active:null,immediate:true});
 v285WrapLoggingAction('endSession',{active:false,immediate:true});
 v285WrapLoggingAction('rotateTask',{active:false,immediate:true});
 v285WrapLoggingAction('skipTask',{active:false,immediate:true});

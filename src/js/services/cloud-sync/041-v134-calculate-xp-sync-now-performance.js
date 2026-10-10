@@ -171,8 +171,9 @@ function v134ProcessRepeatRow(row,ctx){
   let sessionUnits=0,sessionFull=0,sessionUnitXP=0,sessionFullXP=0;
 
   for(const t of (s.titles||[])){
-    if(!t?.repeat)continue;
-    const qty=Math.max(0,Number(t.qty)||0);
+    const itemized=Array.isArray(t?.v369Units)&&t.v369Itemized===true;
+    if(!t?.repeat&&!itemized)continue;
+    const qty=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:Math.max(0,Number(t.qty)||0);
     if(qty<=0)continue;
 
     const item=t.libraryId?ctx.libraryById.get(String(t.libraryId))||null:null;

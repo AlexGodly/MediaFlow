@@ -101,6 +101,13 @@ function emptyLibraryModalHtml(d){
 function categoryModalHtml(d){
 
   const isNew = !d.id;
+  // v369 adds seconds precision without replacing older minute-based values.
+  const unitSeconds=Number.isFinite(Number(d.secondsPerUnit))
+    ?Math.max(1,Math.round(Number(d.secondsPerUnit)))
+    :Math.max(1,Math.round((Number(d.minutesPerUnit)||20)*60));
+  const runtimeHours=Math.floor(unitSeconds/3600);
+  const runtimeMinutes=Math.floor(unitSeconds%3600/60);
+  const runtimeSeconds=unitSeconds%60;
 
    return ` 
 
@@ -146,7 +153,15 @@ function categoryModalHtml(d){
 
     <div class="field-row">
 
-      <div class="field"><label class="field-label">Minutes per unit</label><input type="number" id="m-mpu" min="1" value="${d.minutesPerUnit||20}"></div>
+      <div class="field v369-category-runtime"><label class="field-label">Default runtime per unit (HH:MM:SS)</label>
+          <div class="v369-runtime-fields">
+            <label>Hours <input type="number" id="m-runtime-hours" min="0" max="9999" step="1" value="${runtimeHours}"></label>
+            <label>Minutes <input type="number" id="m-runtime-minutes" min="0" max="59" step="1" value="${runtimeMinutes}"></label>
+            <label>Seconds <input type="number" id="m-runtime-seconds" min="0" max="59" step="1" value="${runtimeSeconds}"></label>
+          </div>
+          <input type="hidden" id="m-mpu" value="${d.minutesPerUnit||20}">
+          <small class="hint">Used as the initial runtime for every new itemized episode, chapter, issue, or other unit.</small>
+        </div>
 
       <div class="field" style="display:flex; align-items:flex-end; gap:16px; padding-bottom:9px;">
 
