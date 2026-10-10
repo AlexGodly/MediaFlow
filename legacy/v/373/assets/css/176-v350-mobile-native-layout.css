@@ -1,0 +1,334 @@
+/* MediaFlow v350 — Mobile / tablet app-like presentation.
+   All changes are width scoped: >=1024px receives zero styling changes.
+   The existing dynamic/full-theme variables remain the color authority. */
+@media screen and (max-width:1023px) {
+  :root{--mf350-gap:10px;--mf350-radius:13px;--mf350-touch:42px}
+  html,body{max-width:100%;overflow-x:clip}
+  body.v260-redesign :is(.main,.container,#view-root,.v260-react-host){min-width:0;max-width:100%;box-sizing:border-box}
+  body.v260-redesign #view-root :is(.card,.view-head,.lib-toolbar,.v138-order-view,.v260-history-page,.mf274-page,.v221-settings-page,.mf288-queue-controls){min-width:0;max-width:100%;box-sizing:border-box}
+  body.v260-redesign #view-root :is(.view-title,h1){font-size:clamp(21px,4.5vw,29px);line-height:1.18;overflow-wrap:break-word}
+  body.v260-redesign #view-root :is(.view-desc,.hint,.section-desc){font-size:clamp(12px,1.55vw,14px);line-height:1.48}
+  body.v260-redesign #view-root :is(button,.btn,input,select,textarea,summary){box-sizing:border-box;max-width:100%}
+  body.v260-redesign #view-root :is(button,.btn,summary){word-break:normal;overflow-wrap:normal;hyphens:none;line-height:1.32}
+  body.v260-redesign #view-root :is(.btn,.btn-sm){font-size:12px;min-height:35px;padding:7px 10px}
+  body.v260-redesign #view-root :is(select,input[type="text"],input[type="search"],input[type="number"],input[type="date"]){min-height:39px;max-width:100%;font-size:13px}
+  body.v260-redesign #view-root :is(.card,.modal,.modal-card){border-radius:var(--mf350-radius)}
+  body.v260-redesign #view-root :is(.view-head){display:flex;gap:9px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px}
+  body.v260-redesign #view-root :is(.view-head>div:first-child){flex:1 1 180px;min-width:0}
+  body.v260-redesign #view-root :is(.lib-pagination,.v261-history-pager,.mf274-collection-pager,.mf288-details-pagination){min-width:0;max-width:100%;flex-wrap:wrap;gap:7px;justify-content:center;font-size:12px}
+  body.v260-redesign #view-root :is(.lib-pagination>span,.v261-history-pager>span){min-width:0;text-align:center;white-space:normal;overflow-wrap:break-word}
+  body.v260-redesign #view-root :is(.two-col,.three-col){min-width:0;max-width:100%}
+  body.v260-redesign #view-root :is(.field,.settings-toggle-row,.v221-resettable-setting){min-width:0}
+  body.v260-redesign #view-root :is(.field,.settings-toggle-row,.v221-resettable-setting) :is(span,label,small,strong,b){word-break:normal;overflow-wrap:break-word;min-width:0}
+  /* Only the narrow-screen actions use the compact disclosure system. */
+  body.v260-redesign #view-root .mf350-mobile-toggle{
+    appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:var(--mf350-touch);min-width:0;border-radius:11px;
+    border:1px solid color-mix(in srgb,var(--flow) 34%,var(--border));
+    background:color-mix(in srgb,var(--panel-raised) 84%,var(--flow) 16%);
+    color:var(--text);font-size:12px;font-weight:750;line-height:1.3;font-family:inherit;padding:8px 11px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  }
+  #view-root .mf350-mobile-toggle>.v225-btn-icon{display:none!important}
+  #view-root .mf350-mobile-toggle>svg{width:16px;height:16px;flex:none}
+  #view-root .mf350-mobile-toggle>span:not(.mf350-toggle-state){flex:1;min-width:0;text-align:left}
+  #view-root .mf350-toggle-state{color:var(--text-dim);font-size:11px;font-weight:650}
+  #view-root .mf350-toggle-chevron{width:14px;height:14px;transition:transform .18s ease}
+  #view-root .mf350-mobile-toggle[aria-expanded="true"] .mf350-toggle-chevron{transform:rotate(180deg)}
+  #view-root .mf350-mobile-toggle:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+
+  /* LIBRARY: keep Search/Status/Category dock visible above the titles.
+     Advanced selection/display/sizing options collapse without changing data. */
+  #view-root .mf262-library-tools{margin:0 0 7px;border-radius:var(--mf350-radius)}
+  #view-root .mf262-library-tools-head{display:flex;align-items:center;gap:8px;padding:9px 11px;min-height:52px}
+  #view-root .mf262-library-tools-head>.mf350-mobile-toggle{margin-left:auto;flex:0 0 auto}
+  #view-root .mf262-library-tools-toggle{display:none!important}
+  html[data-mf262-library="1"] #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-body{display:none!important}
+  html[data-mf262-library="1"] #view-root .mf262-library-tools.mf350-panel-open .mf262-library-tools-body{display:grid!important;gap:9px;padding:10px!important}
+  #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-head{border-bottom:0}
+  #view-root .mf262-library-tools-body :is(.v181-display-switch,.v181-library-mode-switch,.mf-batchbar,.v254-cover-overlay-controls){min-width:0;max-width:100%;gap:7px;flex-wrap:wrap}
+  #view-root .mf262-library-tools-body :is(.lib-toolbar,.v181-dynamic-toolbar,.lib-filters){display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+  #view-root .mf262-library-tools-body :is(.lib-toolbar,.v181-dynamic-toolbar)>*,#view-root .mf262-library-tools-body .lib-filters>*{min-width:0;flex-shrink:1}
+  #view-root .mf262-library-tools-body :is(.v181-display-switch,.v181-library-mode-switch) .btn{min-height:37px}
+  #view-root .mf262-library-filter-dock,#view-root .v261-library-sticky{position:static!important;top:auto!important;backdrop-filter:none!important;box-shadow:none!important;max-width:100%;z-index:auto}
+  #view-root .mf262-library-filter-dock .mf262-filter-row{padding-inline:7px;min-width:0;min-height:37px}
+  #view-root .mf262-library-filter-dock .mf262-filter-chip{min-height:35px;padding:6px 8px;white-space:nowrap;font-size:11px;line-height:1.2}
+  #view-root .mf262-library-filter-dock .mf262-filter-label{font-size:9.5px;letter-spacing:.06em}
+  #view-root .mf262-library-filter-dock .mf262-status-row,#view-root .mf262-library-filter-dock .mf262-category-row{min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
+  #view-root .v261-library-search-row{padding:5px 9px}
+  #view-root .v261-library-search{font-size:14px!important;min-height:38px!important}
+  #view-root .v181-display-switch :is(.btn,button){white-space:nowrap;flex:0 1 auto}
+  #view-root :is(.v175-cover-display-label,.mf274-display-row>span){width:auto!important;min-width:max-content!important;writing-mode:horizontal-tb!important;word-break:normal!important;overflow-wrap:normal!important}
+  #view-root .v181-dynamic-nav{max-width:100%;overflow-x:auto}
+
+  /* PERSONAL ORDER: Lists/Tabs remains immediately accessible; advanced options
+     are available via a mobile-only button without hiding ordered content. */
+  #view-root .v138-order-view{display:flex;flex-direction:column;gap:9px}
+  #view-root .v138-order-note{margin:0;padding:9px 11px;font-size:11px;line-height:1.45}
+  #view-root .mf345-layout-switch{margin:0;padding:9px 11px;gap:8px;align-items:center}
+  #view-root .mf345-layout-switch>div:first-child{gap:2px;flex:1 1 140px}
+  #view-root .mf345-layout-switch>div:first-child .section-label{font-size:9px}
+  #view-root .mf345-layout-switch>div:first-child b{font-size:13px}
+  #view-root .mf345-layout-switch>div:first-child small{display:none}
+  #view-root .mf345-layout-buttons{flex:0 0 auto;padding:3px;gap:3px}
+  #view-root .mf345-layout-buttons .btn{min-width:57px;min-height:38px;padding:6px 8px}
+  #view-root .mf350-order-toggle-row{display:flex;justify-content:flex-end;margin:-2px 0 3px}
+  #view-root .mf350-order-toggle-row .mf350-mobile-toggle{width:100%;justify-content:space-between}
+  #view-root .v138-order-view.mf350-order-closed :is(.v138-order-toolbar,.mf288-queue-controls,.mf274-order-layout,.mf346-queue-controls){display:none!important}
+  #view-root .v138-order-grid{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:11px}
+  #view-root .v138-order-main,#view-root .v138-order-side{min-width:0}
+  #view-root .mf345-tab-head{gap:6px}
+  #view-root .mf345-tab-head h2{font-size:16px;margin-block:3px}
+  #view-root .mf345-tab-head p{font-size:11px}
+  #view-root .mf345-tab-head>span{white-space:normal;font-size:11px}
+  #view-root .mf345-tab-layout{gap:9px}
+  #view-root .mf345-main-tabs{padding:4px;gap:4px}
+  #view-root .mf345-main-tab{flex:1 1 0;min-width:0;white-space:normal;gap:6px;padding:8px 6px;min-height:44px;font-size:12px}
+  #view-root .mf345-subnav-scroll{overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}
+  #view-root .mf345-subnav{gap:6px}
+  #view-root .mf345-subtab{min-height:42px;font-size:12px;padding:7px 9px;max-width:210px}
+  #view-root .mf345-tab-label{max-width:136px}
+  #view-root .mf288-queue-controls{padding:11px;gap:8px}
+  #view-root .mf288-queue-control-groups{grid-template-columns:minmax(0,1fr)}
+  #view-root .mf346-queue-controls.card{padding:9px;gap:8px}
+  #view-root .mf346-pagination-tools,#view-root .mf346-page-size,#view-root .mf346-cover-tool{min-height:41px;flex:1 1 100%;max-width:100%;gap:6px;padding:7px 8px}
+  #view-root .mf346-control-label{font-size:12px}
+  #view-root .mf287-assignment-actions,#view-root .mf274-order-actions{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+  #view-root :is(.mf288-collection-title-row,.mf287-queue-title,.v138-order-row){max-width:100%;min-width:0}
+
+  /* HISTORY: desktop-only sticky navigation becomes naturally scrolling mobile
+     navigation. Tab labels stay visible; all filters remain one tap away. */
+  #view-root .v260-history-page .v260-history-tabs{position:static!important;top:auto!important;z-index:auto!important;display:flex!important;flex-wrap:nowrap!important;align-items:stretch;justify-content:flex-start;overflow-x:auto!important;overflow-y:hidden!important;max-width:100%;gap:4px!important;scrollbar-width:none;padding:3px 1px 6px!important;backdrop-filter:none!important}
+  #view-root .v260-history-page .v260-history-tabs::-webkit-scrollbar{display:none}
+  #view-root .v260-history-page .v260-history-tab{min-width:max-content!important;flex:0 0 auto;padding:9px 10px!important;min-height:42px;font-size:12px!important;display:flex;align-items:center;gap:6px}
+  #view-root .v260-history-page .v260-history-tab span{display:inline!important;white-space:nowrap!important}
+  #view-root .v260-history-page :is(.v261-history-toolbar,.mf269-filter-shell,.mf269-selection-bar,.v241-history-toolbar,.lib-toolbar,.v260-consumption-history .v241-history-toolbar){position:static!important;top:auto!important;z-index:auto!important;backdrop-filter:none!important}
+  #view-root .mf350-history-toggle-row{display:flex;margin:5px 0 9px}
+  #view-root .mf350-history-toggle-row .mf350-mobile-toggle{width:100%;justify-content:space-between}
+  #view-root .v260-history-page.mf350-history-closed :is(.mf269-filter-shell,.v261-history-toolbar,.v241-history-toolbar,.v348-xp-toolbar,.v348-xp-filters,.mf271-logs-filters,.lib-toolbar){display:none!important}
+  #view-root .v260-history-page .v260-page-hero{padding:12px 4px 9px!important;margin:0!important}
+  #view-root .v260-history-page .v260-page-hero h1{font-size:clamp(22px,5vw,28px)}
+  #view-root .v260-history-page .v260-history-body{padding:6px 0 0;min-width:0}
+  #view-root .v260-history-page .v261-history-toolbar{flex-direction:column;align-items:stretch;padding:9px;gap:8px}
+  #view-root .v260-history-page :is(.v261-filter-group,.mf269-filter-left,.mf269-filter-actions,.mf269-filterbar){display:flex;flex-wrap:wrap;gap:7px;min-width:0;max-width:100%}
+  #view-root .v260-history-page .v261-filter-group>*{min-width:0;flex:1 1 130px}
+  #view-root .mf269-filter-cell{flex:1 1 120px;max-width:100%;min-width:0}
+  #view-root .mf269-filter-cell select{min-width:0;width:100%}
+  #view-root .v348-xp-page{gap:9px;min-width:0}
+  #view-root .v348-xp-hero{gap:9px;padding:12px;flex-wrap:wrap}
+  #view-root .v348-xp-hero h2{font-size:19px}
+  #view-root .v348-xp-metrics{gap:7px}
+  #view-root .v348-xp-metrics>div{padding:9px;gap:5px}
+  #view-root .v348-xp-metrics strong{font-size:17px}
+  #view-root .v348-xp-toolbar{padding:10px;gap:8px}
+  #view-root .v348-xp-toolbar>label{min-width:0;flex:1 1 135px}
+  #view-root .v348-xp-entry{padding:11px;gap:8px}
+  #view-root :is(.mf269-history-card,.v340-recent-card,.v348-xp-entry){min-width:0;max-width:100%}
+  #view-root .v340-recent-name,#view-root .v348-xp-entry-title{min-width:0;overflow-wrap:anywhere}
+  #view-root .v261-history-pager{gap:8px}
+
+  /* COLLECTIONS: primary search stays in view, secondary view/sort controls
+     fold under a dedicated mobile disclosure. */
+  #view-root .mf274-collections-browser .mf274-collections-head{gap:8px}
+  #view-root .mf274-collections-browser .mf274-browser-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px}
+  #view-root .mf274-collections-browser .mf274-browser-toolbar>input[type="search"]{width:100%;min-width:0;grid-column:1/-1;min-height:42px}
+  #view-root .mf274-collections-browser .mf274-browser-toolbar>.hint{grid-column:1;font-size:11px;min-width:0}
+  #view-root .mf274-collections-browser .mf274-browser-toolbar>.mf350-mobile-toggle{grid-column:2;grid-row:2;white-space:nowrap;min-height:39px}
+  #view-root .mf274-collections-browser .mf350-collection-extras{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:7px;min-width:0;border-top:1px solid var(--border);padding-top:9px}
+  #view-root .mf274-collections-browser.mf350-collections-closed .mf350-collection-extras{display:none!important}
+  #view-root .mf350-collection-extras>*{min-width:0;max-width:100%}
+  #view-root .mf350-collection-extras select{flex:1 1 120px}
+  #view-root .mf350-collection-extras .mf274-view-switch{display:flex!important;flex:1 1 100%;flex-wrap:wrap;gap:5px}
+  #view-root .mf350-collection-extras .mf274-view-switch>.btn{flex:1 1 75px;width:auto;min-width:0}
+  #view-root .mf274-collection-tools .mf274-tools-head{align-items:center;flex-wrap:wrap;gap:7px}
+  #view-root .mf274-collection-tools .mf274-tools-head>.mf350-mobile-toggle{margin-left:auto}
+  #view-root .mf274-collection-tools .mf274-tools-head>.btn{display:none!important}
+  #view-root .mf274-collection-tools.mf350-detail-closed :is(.mf274-display-row,.mf274-advanced-grid,.mf274-display-settings,.mf274-overlay-settings){display:none!important}
+  #view-root .mf274-collection-tools.mf350-detail-closed .mf274-tools-grid>*:not(input[type="search"]){display:none!important}
+  #view-root .mf274-collection-tools .mf274-tools-grid{display:flex;gap:7px;flex-wrap:wrap}
+  #view-root .mf274-collection-tools .mf274-tools-grid>input[type="search"]{flex:1 1 100%;min-width:0}
+  #view-root .mf274-collection-tools .mf274-tools-grid>select,#view-root .mf274-collection-tools .mf274-tools-grid>details{flex:1 1 145px;max-width:100%}
+  #view-root .mf274-collection-tools .mf274-display-row{display:flex;gap:6px;flex-wrap:wrap}
+  #view-root .mf274-collection-tools .mf274-display-row>.btn{min-height:38px}
+  #view-root .mf274-hero-content,#view-root .mf274-collection-list-row{min-width:0;max-width:100%}
+  #view-root .mf274-row-actions{min-width:0;gap:6px}
+
+  /* SETTINGS: readable controls and natural word wrapping rather than
+     vertical letter-by-letter labels, especially Reset and XP controls. */
+  #view-root .v221-settings-toolbar{position:static!important;display:grid;grid-template-columns:minmax(0,1fr);padding:10px;gap:8px;margin-bottom:10px;backdrop-filter:none!important}
+  #view-root .v221-settings-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+  #view-root .v221-settings-nav{position:static!important;max-height:none!important;display:flex;align-items:stretch;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;scrollbar-width:none;padding:7px;gap:6px}
+  #view-root .v221-settings-nav-group{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:0;border-top:0!important;margin:0!important;padding:0!important}
+  #view-root .v221-settings-nav-title{display:none}
+  #view-root .v221-settings-nav-item{width:auto;min-width:max-content;padding:8px 10px;font-size:12px;white-space:nowrap}
+  #view-root .v221-settings-page-group{margin:0 0 11px;padding:11px 10px 4px;overflow:visible}
+  #view-root .v221-settings-page-group-head{margin:0 0 9px;padding-bottom:8px;gap:7px;align-items:center}
+  #view-root .v221-settings-page-group-head h2{font-size:15px;line-height:1.25}
+  #view-root .v221-settings-page-group-body>.card{padding:10px}
+  #view-root .v221-settings-page :is(.v221-setting-reset,.v225-btn-icon){flex-shrink:0}
+  #view-root .v221-settings-page .v221-setting-reset{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;min-width:max-content!important;min-height:34px;max-width:100%;padding:7px 9px;font-size:11px}
+  #view-root .v221-settings-page :is(.settings-toggle-row,.v192-dashboard-toggle-row,.v186-stat-toggle,.v186-scope-row){min-width:0;max-width:100%;gap:8px;flex-wrap:wrap}
+  #view-root .v221-settings-page :is(.settings-toggle-row,.v192-dashboard-toggle-row,.v186-stat-toggle,.v186-scope-row)>.v221-setting-reset{margin-left:auto}
+  #view-root .v221-settings-page :is(.field,.v221-resettable-setting)>label{font-size:12px;line-height:1.45}
+  #view-root .v221-settings-page :is(.settings-toggle-row,.v221-resettable-setting) :is(select,input){min-width:0}
+  #view-root .v348-xp-field{min-width:0;max-width:100%;gap:7px}
+  #view-root .v348-xp-field label{min-width:0;font-size:12px;overflow-wrap:break-word;word-break:normal}
+  #view-root .v348-xp-field :is(input[type="number"],select){width:min(100%,120px);min-width:64px}
+  #view-root .settings-categories-full :is(button,.btn),#view-root .v221-settings-page .v348-xp-field .btn{white-space:normal;word-break:normal;overflow-wrap:break-word}
+  #view-root .v221-settings-page :is(.section-label,small){line-height:1.45}
+
+  /* STATISTICS: metrics, charts and heatmaps expand into available width. */
+  #view-root :is(.stats-grid,.v260-stats-grid,.v186-stats-grid,.v336-stats-grid,.v261-insight-cards){grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
+  #view-root :is(.chart-card,.stats-chart,.v336-chart-card){min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+  #view-root :is(.chart-card,.stats-chart,.v336-chart-card) canvas{max-width:100%!important}
+  #view-root :is(.stats-grid,.v260-stats-grid,.v186-stats-grid) :is(.card,button){min-width:0}
+  #view-root .profile-stat-hero{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+  /* Dashboard, Batch Log, Account, About, Old System and dialogs. */
+  #view-root :is(.v260-dashboard,.v260-dashboard-page,.v239-log-mode,.v239-logged-title-list,.v192-rate-library,.v235-missing-cover){min-width:0;max-width:100%}
+  #view-root :is(.v239-log-mode,.v239-logged-title-list,.v256-runtime-calc,.v256-stopwatch){gap:8px}
+  #view-root :is(.v239-batch-editor,.v239-batch-toolbar,.mf274-add-tools){max-width:100%;min-width:0}
+  #view-root :is(.v239-batch-editor,.v239-batch-toolbar){flex-wrap:wrap}
+  #view-root :is(.v260-dashboard,.v260-dashboard-page) :is(.card,.v260-dashboard-card){min-width:0}
+  #view-root :is(.v260-dashboard,.v260-dashboard-page) :is(.quick-log-actions,.v235-missing-cover-actions){display:flex;gap:7px;flex-wrap:wrap}
+  #view-root :is(.v260-dashboard,.v260-dashboard-page) :is(.quick-log-actions,.v235-missing-cover-actions)>.btn{flex:1 1 115px}
+  #view-root :is(.modal-overlay,.modal-backdrop,.v240-editor-backdrop){max-width:100vw}
+  body.v260-redesign :is(.modal,.modal-card,.v240-editor-modal,.v181-title-details-modal,.v274-collection-modal){max-width:min(100% - 16px,640px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px);overflow-y:auto;overscroll-behavior:contain}
+  body.v260-redesign :is(.modal-overlay,.modal-backdrop){padding:8px}
+  body.v260-redesign :is(.modal,.modal-card) :is(.modal-actions,.modal-footer){flex-wrap:wrap;gap:7px}
+  body.v260-redesign :is(.modal,.modal-card) :is(input,select,textarea){font-size:16px;max-width:100%;min-width:0}
+  body.v260-redesign :is(.mobile-nav,.v277-bottom-nav,.v278-bottom-nav){padding-bottom:max(3px,env(safe-area-inset-bottom,0px))}
+  body.v260-redesign #view-root{padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
+
+  /* Keep unselected bulk tools one tap away rather than spending a full
+     screen on actions before the first title. The regular queue controls
+     remain accessible when Library tools is expanded. */
+  #view-root:has(.mf262-library-tools.mf350-panel-closed) .v183-library-overview-block>.mf-batchbar{display:none!important}
+  #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-head>.spacer{display:none!important}
+  #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-head{min-height:45px}
+  #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-head>.mf350-mobile-toggle{margin-left:auto}
+  #view-root .mf262-library-tools.mf350-panel-closed .mf262-library-tools-title{font-size:12px}
+  @media (min-width:360px){
+    #view-root .today-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    #view-root .today-strip>*:last-child:nth-child(odd){grid-column:1/-1}
+    #view-root .today-strip>*{padding:11px;min-width:0}
+  }
+
+  /* v350 final mobile polish for the remaining page families. No desktop rules. */
+  #view-root .view-head .view-title{letter-spacing:-.025em}
+  #view-root .view-head .view-desc{max-width:65ch}
+  #view-root :is(.field-row,.batch-number-fields,.log-field-row){min-width:0;gap:9px;flex-wrap:wrap}
+  #view-root :is(.field-row,.batch-number-fields,.log-field-row)>.field{min-width:0;flex:1 1 135px}
+  #view-root :is(.field-row,.batch-number-fields,.log-field-row)>.field :is(input,select){width:100%;min-width:0}
+  #view-root .batch-log-meta{padding:12px;margin-bottom:10px}
+  #view-root .batch-log-meta .health-note{font-size:12px;line-height:1.5;margin-top:8px}
+  #view-root .batch-log-row{min-width:0;display:flex;flex-direction:column;gap:9px;padding:12px;margin-bottom:9px}
+  #view-root .batch-log-row :is(.batch-title-field,.batch-search-wrap,.batch-suggestions,.batch-selected-title){min-width:0;max-width:100%;box-sizing:border-box}
+  #view-root .batch-log-row .batch-title-field input{width:100%;font-size:16px;min-height:44px}
+  #view-root .batch-log-row .batch-selected-title{display:flex;flex-wrap:wrap;gap:5px;align-items:center;overflow-wrap:break-word}
+  #view-root .batch-log-row .batch-number-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #view-root .batch-log-row .batch-remove{width:max-content;min-width:92px;min-height:40px;align-self:flex-end}
+  #view-root .batch-log-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 0 max(20px,env(safe-area-inset-bottom,0px))}
+  #view-root .batch-log-actions>.btn{flex:1 1 120px;min-height:43px}
+  #view-root .batch-log-actions>.hint{flex:1 1 100%;text-align:center}
+  #view-root .v179-batch-mode-wrap,#view-root .v239-batch-library-tools{max-width:100%;min-width:0}
+  #view-root .v239-batch-library-tools{padding:11px;margin-bottom:10px;border-radius:13px}
+  #view-root .v239-batch-library-tools :is(.v140-order-filterbar,.v179-batch-toolbar,.v239-batch-toolbar){display:flex;flex-wrap:wrap;gap:7px;max-width:100%}
+  #view-root .v239-batch-library-tools :is(input,select){min-width:0;max-width:100%}
+
+  /* Reduce Dashboard panel nesting without collapsing the important content. */
+  #view-root .today-strip{gap:8px;margin-bottom:10px}
+  #view-root .today-strip>*{min-width:0}
+  #view-root .hero{max-width:100%;min-width:0;padding:14px;margin-bottom:10px}
+  #view-root :is(.stopwatch-card,.v256-runtime-card,.v123-rating-queue,.v192-missing-covers,.v261-balance-card){min-width:0;padding:12px;margin-bottom:10px}
+  #view-root :is(.stopwatch-card,.v256-runtime-card,.v123-rating-queue,.v192-missing-covers) :is(.field-row,.two-col,.v256-runtime-fields){gap:8px;min-width:0}
+  #view-root .v123-rating-queue :is(.btn,button){min-width:0;overflow-wrap:break-word;white-space:normal}
+  #view-root .v123-rating-queue :is(.rating-actions,.v192-rating-actions){display:flex;flex-wrap:wrap;gap:7px}
+  #view-root .v123-rating-queue :is(.rating-actions,.v192-rating-actions)>.btn{min-width:105px;flex:1 1 120px}
+
+  /* Statistics: cards and the classic 3-column metric grids never shrink below
+     legible widths. SVG graphs use their own native responsive dimensions. */
+  #view-root .grid-3{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #view-root .two-col{grid-template-columns:minmax(0,1fr);gap:9px}
+  #view-root :is(.stats-level-card,.v335-active-card,.v336-active-card,.v337-active-card){min-width:0;padding:12px;margin-bottom:10px}
+  #view-root .profile-stat-hero{gap:9px;min-width:0;max-width:100%}
+  #view-root .profile-stat-hero :is(.profile-stat-copy,.profile-stat-details){min-width:0;flex:1 1 160px}
+  #view-root .v129-records .record-row{grid-template-columns:minmax(0,1fr);gap:3px;padding:8px 0}
+  #view-root .v129-records .record-row .v{justify-content:flex-start;text-align:left;min-width:0}
+  #view-root .chart-svg{max-width:100%;height:auto}
+
+  /* Account and About retain every action but avoid edge-to-edge dense rows. */
+  #view-root :is(.v284-account,.v161-about,.v161-account,.account-page){min-width:0;max-width:100%}
+  #view-root .v161-about :is(.v161-about-hero,.v161-about-card,.v161-about-section){min-width:0;max-width:100%;padding:12px;margin-bottom:10px}
+  #view-root .v161-about :is(.v161-about-links,.v161-about-actions){display:flex;flex-wrap:wrap;gap:7px;min-width:0}
+  #view-root .v161-about :is(.v161-about-links,.v161-about-actions)>.btn{flex:1 1 135px;white-space:normal;min-height:40px}
+  #view-root :is(.v284-account,.v161-account,.account-page) :is(.field,.field-row,.account-form,.account-actions){min-width:0;max-width:100%}
+  #view-root :is(.v284-account,.v161-account,.account-page) :is(input,select){min-width:0;max-width:100%}
+
+  /* Old System: scrollable views with usable labels and one/two-col cards. */
+  #view-root .v153-old-system{min-width:0;max-width:100%;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+  #view-root .v153-os-head{margin-bottom:9px;gap:7px}
+  #view-root .v153-os-tabs{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none;gap:4px;margin:2px 0 12px;padding:4px}
+  #view-root .v153-os-tab{flex:0 0 auto;min-width:max-content;min-height:40px;padding:9px 11px;font-size:12px}
+  #view-root .v153-os-card{padding:11px;margin-bottom:10px;min-width:0}
+  #view-root .v153-os-grid,#view-root .v153-os-category-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #view-root .v153-os-balance,#view-root .v153-os-category-toggle{min-width:0;padding:10px}
+  #view-root .v153-os-balance-name{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  #view-root .v153-os-category-toggle{overflow-wrap:break-word}
+
+  /* Mobile settings labels never collapse into a single character column. */
+  #view-root .v221-settings-page :is(.v221-resettable-setting,.v335-reward-grid,.v348-xp-field,.v348-streak-toggle){min-width:0;max-width:100%}
+  #view-root .v221-settings-page .v335-reward-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:9px}
+  #view-root .v221-settings-page :is(.v221-resettable-setting,.v348-xp-field)>:is(label,span,b,strong){min-width:0;overflow-wrap:break-word;word-break:normal}
+  #view-root .v221-settings-page .v221-setting-reset{flex:0 0 auto;min-width:62px!important;text-align:center}
+  #view-root .v221-settings-page :is(.field-row,.settings-toggle-row){gap:8px;min-width:0}
+  #view-root .v221-settings-page :is(.v221-settings-nav,.v221-settings-toolbar){scroll-margin:0}
+
+}
+@media screen and (max-width:600px){
+  body.v260-redesign #view-root .v221-settings-page .v221-setting-reset{padding:6px 9px}
+  body.v260-redesign #view-root .mf350-mobile-toggle{font-size:12px}
+  body.v260-redesign #view-root .mf274-collections-browser .mf274-collections-head>.btn{width:auto;flex:0 1 auto}
+  body.v260-redesign #view-root .mf274-hero-actions{flex-wrap:wrap;min-width:0}
+  body.v260-redesign #view-root :is(.mf274-browser-list,.mf274-browser-showcase){min-width:0}
+  body.v260-redesign #view-root .v261-history-page .v260-history-tab{padding-inline:9px!important}
+  body.v260-redesign #view-root .v138-order-view>.view-head{margin-bottom:0}
+}
+@media screen and (max-width:480px){
+  :root{--mf350-gap:7px}
+  body.v260-redesign #view-root :is(.view-title,h1){font-size:23px}
+  body.v260-redesign #view-root :is(.view-desc,.section-desc){font-size:12px}
+  body.v260-redesign #view-root .mf262-library-tools-title{font-size:11px}
+  body.v260-redesign #view-root .mf262-library-tools-head{padding:7px 8px}
+  body.v260-redesign #view-root .mf262-library-tools-head>.mf350-mobile-toggle{min-height:39px;padding:7px 8px}
+  body.v260-redesign #view-root .mf262-library-filter-dock .mf262-filter-row{gap:5px}
+  body.v260-redesign #view-root .mf345-tab-head>span{font-size:10px}
+  body.v260-redesign #view-root .mf345-main-tabs{gap:2px}
+  body.v260-redesign #view-root .mf345-main-tab{font-size:11px!important;padding:7px 5px!important}
+  body.v260-redesign #view-root .mf345-main-tab .mf346-main-icon{width:17px;height:17px}
+  body.v260-redesign #view-root .mf345-tab-label{max-width:130px}
+  body.v260-redesign #view-root .mf274-browser-toolbar>.hint{font-size:11px}
+  body.v260-redesign #view-root .mf350-collection-extras select{width:100%;flex:1 1 100%}
+  body.v260-redesign #view-root .v221-settings-page-group{padding:9px 8px 3px}
+  body.v260-redesign #view-root .v221-settings-page-group-body>.card{padding:9px}
+  body.v260-redesign #view-root .v221-settings-page :is(.v221-resettable-setting,.settings-toggle-row){min-width:0}
+  body.v260-redesign #view-root :is(.v261-insight-cards,.v261-ratings-summary){grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.v260-redesign #view-root :is(.v260-page-hero,.v260-stats-grid,.v336-stats-grid){gap:8px}
+  body.v260-redesign #view-root .v260-history-page .v260-page-hero{padding:8px 2px!important}
+  body.v260-redesign #view-root .v260-history-page .v260-history-tabs{gap:2px!important}
+}
+@media screen and (max-width:359px){
+  body.v260-redesign #view-root :is(.view-title,h1){font-size:21px}
+  body.v260-redesign #view-root .mf345-layout-switch{gap:6px}
+  body.v260-redesign #view-root .mf345-layout-buttons .btn{min-width:48px;padding:6px}
+  body.v260-redesign #view-root .mf274-collections-browser .mf274-browser-toolbar{grid-template-columns:minmax(0,1fr)}
+  body.v260-redesign #view-root .mf274-collections-browser .mf274-browser-toolbar>.mf350-mobile-toggle{grid-column:1;grid-row:auto;justify-self:stretch}
+  body.v260-redesign #view-root .v221-settings-page .v221-setting-reset{flex:0 0 auto;margin-left:auto}
+}
+@media screen and (min-width:601px) and (max-width:1023px){
+  body.v260-redesign #view-root .mf350-mobile-toggle{font-size:13px}
+  body.v260-redesign #view-root .mf350-order-toggle-row .mf350-mobile-toggle{width:auto;min-width:240px}
+  body.v260-redesign #view-root .mf350-history-toggle-row .mf350-mobile-toggle{width:auto;min-width:220px}
+  body.v260-redesign #view-root .v221-settings-page-group-body>.card{padding:14px}
+  body.v260-redesign #view-root .mf274-collections-browser .mf350-collection-extras select{min-width:150px}
+}
