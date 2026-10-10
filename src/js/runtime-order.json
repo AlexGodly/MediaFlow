@@ -124,5 +124,6 @@
   "components/267-v369-itemized-logging.js",
   "components/268-v370-logging-ui.js",
   "components/269-v371-logging-polish-stability.js",
-  "components/270-v372-logging-premium-settings-collections.js"
+  "components/270-v372-logging-premium-settings-collections.js",
+  "components/271-v373-logging-browser-ordering.js"
 ]

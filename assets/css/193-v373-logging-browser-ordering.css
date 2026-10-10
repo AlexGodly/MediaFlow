@@ -1,0 +1,88 @@
+/* MediaFlow v373 — compact responsive logging-title management.
+ * Theme-aligned; does not change the session form/XP workflows. */
+:is(.mf372-logging,.mf373-batch-order) .v373-order-summary{
+  display:flex;align-items:center;gap:11px;min-width:0;flex-wrap:wrap;
+  padding:10px 13px;margin:9px 0 11px;border:1px solid color-mix(in srgb,var(--flow) 24%,var(--border));
+  border-radius:13px;background:linear-gradient(112deg,color-mix(in srgb,var(--flow) 9%,var(--panel)),var(--panel));
+}
+.v373-order-emblem{width:33px;height:33px;flex:none;display:grid;place-items:center;color:var(--flow);
+  background:color-mix(in srgb,var(--flow) 15%,var(--panel));border:1px solid color-mix(in srgb,var(--flow) 25%,var(--border));border-radius:10px;font-size:19px;font-weight:700}
+.v373-order-copy{display:grid;gap:2px;min-width:0;flex:1 1 160px}
+.v373-order-copy strong{font-size:12px;color:var(--text);font-weight:800}
+.v373-order-copy small{font-size:11px;line-height:1.45;color:var(--text-dim)}
+:is(.mf372-logging,.mf373-batch-order) .v373-order-summary .btn{font-size:11px;padding:7px 10px;min-height:32px;white-space:normal}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools{display:flex;gap:7px;flex-wrap:wrap;align-items:center;max-width:100%;padding:9px 0}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v224-sort-pair{display:flex;gap:5px;align-items:center;min-width:0;flex:1 1 210px;max-width:400px}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v224-sort-pair select{min-width:0;width:100%;max-width:100%;font-size:12px}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools select{max-width:100%;min-height:36px}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v224-sort-direction{flex:none;min-height:36px}
+:is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v87-log-count{font-size:11px;white-space:normal}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-list{display:grid;gap:7px;min-width:0;overflow:visible}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-row{display:flex;align-items:center;flex-wrap:wrap;gap:9px;min-width:0;
+  padding:9px 10px;border:1px solid color-mix(in srgb,var(--flow) 14%,var(--border));
+  border-radius:12px;background:color-mix(in srgb,var(--flow) 3%,var(--panel));transition:border-color .12s ease,background .12s ease}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-row:hover{border-color:color-mix(in srgb,var(--flow) 42%,var(--border))}
+:is(.mf372-logging,.mf373-batch-order) .v373-rank{flex:0 0 34px;color:var(--text-dim);font-variant-numeric:tabular-nums;
+  font-size:11px;font-weight:750;text-align:center;border-radius:8px;padding:5px 2px;background:color-mix(in srgb,var(--flow) 8%,var(--panel))}
+:is(.mf372-logging,.mf373-batch-order) .v373-result{flex:1 1 220px;display:flex;align-items:center;gap:10px;min-width:0;padding:0!important}
+:is(.mf372-logging,.mf373-batch-order) .v373-result>div{min-width:0;overflow-wrap:anywhere}
+:is(.mf372-logging,.mf373-batch-order) .v373-result b{font-weight:760;font-size:12px;overflow-wrap:anywhere;line-height:1.35}
+:is(.mf372-logging,.mf373-batch-order) .v373-result small{display:block;line-height:1.5;font-size:11px;overflow-wrap:anywhere;color:var(--text-dim)}
+:is(.mf372-logging,.mf373-batch-order) .v373-result .v86-log-cover{width:34px;height:48px;object-fit:cover;border-radius:6px;flex:none}
+:is(.mf372-logging,.mf373-batch-order) .v373-use{flex:none;min-width:55px;min-height:34px}
+:is(.mf372-logging,.mf373-batch-order) .v373-reorder{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;
+  min-width:0;flex:1 1 100%;padding:7px 0 0;border-top:1px solid color-mix(in srgb,var(--flow) 13%,var(--border))}
+:is(.mf372-logging,.mf373-batch-order) .v373-reorder button{display:grid;place-items:center;width:35px;height:34px;border:1px solid var(--border);
+  color:var(--text);background:color-mix(in srgb,var(--flow) 5%,var(--panel));border-radius:9px;cursor:pointer;font-size:17px;touch-action:manipulation}
+:is(.mf372-logging,.mf373-batch-order) .v373-reorder button:hover,:is(.mf372-logging,.mf373-batch-order) .v373-reorder button:focus-visible{background:color-mix(in srgb,var(--flow) 18%,var(--panel));border-color:var(--flow)}
+:is(.mf372-logging,.mf373-batch-order) .v373-reorder .v373-grip{cursor:grab;touch-action:none;font-size:23px;line-height:1;color:var(--flow);margin-right:auto}
+:is(.mf372-logging,.mf373-batch-order) .v373-position{display:flex;align-items:center;gap:7px;margin-left:auto;min-width:0}
+:is(.mf372-logging,.mf373-batch-order) .v373-position span{font-size:10px;color:var(--text-dim);font-weight:700;white-space:nowrap}
+:is(.mf372-logging,.mf373-batch-order) .v373-position input{width:78px;min-width:0;height:34px;box-sizing:border-box;
+  border:1px solid var(--border);border-radius:8px;padding:4px 7px;color:var(--text);background:var(--panel);font-size:12px;font-weight:700;
+  font-variant-numeric:tabular-nums;text-align:center}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-row.v373-drop-target{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 17%,var(--panel));box-shadow:inset 0 2px 0 var(--flow)}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-row.v373-drop-after{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 17%,var(--panel));box-shadow:inset 0 -2px 0 var(--flow)}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-row.v373-being-dragged{opacity:.72;border-style:dashed}
+:is(.mf372-logging,.mf373-batch-order) .v373-title-list .v373-reorder :is(button,input):focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+@media(min-width:1000px){
+  :is(.mf372-logging,.mf373-batch-order) .v373-title-row{flex-wrap:nowrap;padding:9px 12px;gap:11px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-reorder{flex:0 0 auto;width:auto;padding:0 0 0 10px;border-top:0;border-left:1px solid color-mix(in srgb,var(--flow) 12%,var(--border))}
+  :is(.mf372-logging,.mf373-batch-order) .v373-reorder .v373-grip{margin-right:5px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-result{flex:1 1 230px}
+}
+@media(max-width:700px){
+  :is(.mf372-logging,.mf373-batch-order) .v373-log-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v224-sort-pair{grid-column:1/-1;max-width:none;width:100%;flex:none}
+  :is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v224-sort-pair select{flex:1}
+  :is(.mf372-logging,.mf373-batch-order) .v373-log-tools .v87-log-count{grid-column:1/-1}
+  :is(.mf372-logging,.mf373-batch-order) .v373-log-tools > :is(select,details,button){width:100%;min-width:0}
+  :is(.mf372-logging,.mf373-batch-order) .v373-order-summary{padding:9px 10px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-title-row{gap:7px;padding:8px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-rank{flex-basis:28px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-result{flex:1 1 170px;gap:7px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-position span{font-size:10px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-position input{width:64px}
+}
+@media(max-width:370px){
+  :is(.mf372-logging,.mf373-batch-order) .v373-rank{flex-basis:24px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-result{flex:1 1 143px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-use{min-width:46px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-reorder{gap:4px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-reorder button{width:32px}
+  :is(.mf372-logging,.mf373-batch-order) .v373-position span{display:none}
+  :is(.mf372-logging,.mf373-batch-order) .v373-position input{width:65px}
+}
+@media(prefers-reduced-motion:reduce){:is(.mf372-logging,.mf373-batch-order) .v373-title-row{transition:none}}
+
+/* Batch Log exposes the same sorting choices and manual controls. */
+.v373-order-summary{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0;padding:10px 12px;margin:10px 0 12px;border:1px solid color-mix(in srgb,var(--flow) 27%,var(--border));border-radius:13px;background:color-mix(in srgb,var(--flow) 7%,var(--panel))}
+.v373-order-summary .v373-order-copy{flex:1 1 140px}
+#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar .v224-sort-pair{min-width:200px;flex:1 1 225px;max-width:450px}
+#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar .v224-sort-pair select{width:100%;max-width:100%;min-width:0}
+.mf373-batch-order .v373-title-row{padding:9px 11px}
+.mf373-batch-order .v373-title-row .v175-batch-result-actions{display:flex;gap:6px;flex:none}
+@media(max-width:700px){#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar .v224-sort-pair{grid-column:1/-1;min-width:0;max-width:none}#v175-batch-library-tools.mf373-batch-order .v224-browser-filterbar>select{width:100%;min-width:0} .mf373-batch-order .v373-title-row .v175-batch-result-actions{margin-left:auto}}
+
+.v373-sort-fixed .v224-sort-direction{display:none!important}
