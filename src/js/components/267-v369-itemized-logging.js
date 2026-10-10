@@ -166,9 +166,14 @@ App.openLogForm=function(){
 // the legacy remover recalculates minutes using category averages.
 const v369RemoveTitleBase=App.removeLogEntry;
 if(typeof v369RemoveTitleBase==='function'){
-  App.removeLogEntry=function(){
+  App.removeLogEntry=function(index){
     const isItemized=S.logDraft?.v369Interface==='itemized';
+    const entry=isItemized?S.logDraft?.entries?.[Number(index)]:null;
     const result=v369RemoveTitleBase.apply(this,arguments);
+    if(entry&&!S.logDraft?.entries?.some(e=>String(e.libraryId||'')===String(entry.libraryId||''))){
+      S.logDraft.v369DeletedTitles=S.logDraft.v369DeletedTitles||{};
+      S.logDraft.v369DeletedTitles[String(entry.libraryId||'')]=Date.now();
+    }
     if(isItemized){v369Sync();v369Touch();v369RefreshPanels();}
     return result;
   };
@@ -187,7 +192,7 @@ App.addLogEntry=function(){
   const repeat=typeof v179IsComplete==='function'?v179IsComplete(item):false;
   const start=typeof v179StartProgress==='function'?v179StartProgress(item):Number(item.progress)||0;
   S.logDraft.entries=S.logDraft.entries||[];
-  S.logDraft.entries.push({title:cleanTitle(item.title),libraryId:item.id,qty:0,
+  S.logDraft.entries.push({title:cleanTitle(item.title),libraryId:item.id,qty:0,v369UpdatedAt:Date.now(),
     isRepeat:repeat,isNew:false,loggedAt:Date.now(),v179StartProgress:start,
     v179EndProgress:start,v369Units:[],v369SelectedSeasonId:''});
   S.entryDraft={title:'',qty:1,libraryId:null};
@@ -242,13 +247,18 @@ function v369AddUnit(index){
   const timestamp=Date.now();
   e.v369Units.push({id:uid(),number,seasonId:season?String(season.id):null,
     seasonName:season?String(season.name||''):null,
-    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item)});
+    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:timestamp});
+  e.v369UpdatedAt=timestamp;
   e.v369NextNumber=number+1;
   v369Sync();v369Touch();v369RefreshPanels();
 }
 function v369RemoveUnit(index,pos){
   const e=S.logDraft?.entries?.[index];if(!Array.isArray(e?.v369Units)||!e.v369Units[pos])return;
+  const deleted=e.v369Units[pos];
+  e.v369DeletedUnits=e.v369DeletedUnits||{};
+  e.v369DeletedUnits[String(deleted.id)]=Date.now();
   e.v369Units.splice(pos,1);
+  e.v369UpdatedAt=Date.now();
   v369Sync();v369Touch();v369RefreshPanels();
 }
 function v369EditUnit(index,pos,key,value){
@@ -285,6 +295,10 @@ function v369EditUnit(index,pos,key,value){
     const time=parsed.getTime();
     if(!v369ValidStamp(time)){showToast('Choose a valid past date/time.');v369RefreshPanels();return;}
     u.loggedAt=time;
+  }
+  if(key==='time'||key==='number'||key==='season'||/^duration-[012]$/.test(key)||key==='minutes'){
+    u.v369UpdatedAt=Date.now();
+    e.v369UpdatedAt=Date.now();
   }
   v369Touch();v369RefreshPanels();
 }
@@ -427,15 +441,100 @@ function v369DraftFingerprint(payload){
   const draft=d.logDraft;
   const ordered=(draft.entries||[]).map(entry=>({
     libraryId:String(entry.libraryId||''),title:String(entry.title||''),
-    units:(entry.v369Units||[]).map(u=>({
+    deletedUnits:entry.v369DeletedUnits||{},units:(entry.v369Units||[]).map(u=>({
       id:String(u.id||''),number:Number(u.number)||0,season:String(u.seasonId||''),
       loggedAt:Number(u.loggedAt)||0,durationSeconds:v369Seconds(u)
     })).sort((a,b)=>a.id.localeCompare(b.id))
   })).sort((a,b)=>a.libraryId.localeCompare(b.libraryId));
   return JSON.stringify({
     commit:String(draft.v369CommitId||''),mode:String(draft.v369Interface||''),
-    note:String(draft.note||''),entries:ordered
+    note:String(draft.note||''),deletedTitles:draft.v369DeletedTitles||{},entries:ordered
   });
+}
+// Revision-aware v369 draft merge: preserve units added on both devices,
+// respect deletion tombstones, and retain competing sessions as recoverable
+// conflicts instead of silently discarding them using last-modifiedAt-wins.
+function v369MergeUnits(left=[],right=[],deletions={}){
+  const units=new Map();
+  for(const item of [...left,...right]){
+    if(!item||!item.id)continue;
+    const key=String(item.id),old=units.get(key);
+    if(!old||(Number(item.v369UpdatedAt)||Number(item.loggedAt)||0)>=(Number(old.v369UpdatedAt)||Number(old.loggedAt)||0))
+      units.set(key,JSON.parse(JSON.stringify(item)));
+  }
+  return [...units.values()].filter(u=>(Number(deletions[String(u.id)])||0) <
+    (Number(u.v369UpdatedAt)||Number(u.loggedAt)||0)).sort((a,b)=>
+      (Number(a.loggedAt)||0)-(Number(b.loggedAt)||0)||String(a.id).localeCompare(String(b.id)));
+}
+function v369LatestTombstones(...sets){
+  const out={};
+  for(const set of sets)for(const [id,time] of Object.entries(set||{}))
+    out[id]=Math.max(Number(out[id])||0,Number(time)||0);
+  return out;
+}
+function v369MergeLogging(left,right){
+  const a=left||{},b=right||{};
+  if(!a.active||!b.active||a.logDraft?.v369Interface!=='itemized'||b.logDraft?.v369Interface!=='itemized')
+    return null;
+  const ida=String(a.logDraft.v369CommitId||''),idb=String(b.logDraft.v369CommitId||'');
+  if(!ida||!idb)return null;
+  const newer=(Number(a.modifiedAt)||0)>=(Number(b.modifiedAt)||0)?a:b;
+  const older=newer===a?b:a;
+  const chosen=JSON.parse(JSON.stringify(newer));
+  chosen.logDraft=chosen.logDraft||{};
+  if(ida!==idb){
+    const conflicts=[...(newer.logDraft?.v369Conflicts||[]),...(older.logDraft?.v369Conflicts||[])];
+    const existing=new Set(conflicts.map(x=>String(x.commitId||'')));
+    if(!existing.has(String(older.logDraft.v369CommitId))){
+      conflicts.push({commitId:String(older.logDraft.v369CommitId),capturedAt:Number(older.modifiedAt)||0,
+        draft:JSON.parse(JSON.stringify(older.logDraft)),currentTask:older.currentTask});
+    }
+    chosen.logDraft.v369Conflicts=conflicts.slice(-12);
+    return chosen;
+  }
+  const ad=a.logDraft,bd=b.logDraft,deletedTitles=v369LatestTombstones(ad.v369DeletedTitles,bd.v369DeletedTitles);
+  const byId=new Map();
+  for(const entry of [...(ad.entries||[]),...(bd.entries||[])]){
+    const id=String(entry?.libraryId||'');if(!id)continue;
+    const old=byId.get(id);
+    if(!old){byId.set(id,JSON.parse(JSON.stringify(entry)));continue;}
+    const later=(Number(old.v369UpdatedAt)||Number(old.loggedAt)||0)>=(Number(entry.v369UpdatedAt)||Number(entry.loggedAt)||0)?old:entry;
+    const updated=JSON.parse(JSON.stringify(later));
+    updated.v369DeletedUnits=v369LatestTombstones(old.v369DeletedUnits,entry.v369DeletedUnits);
+    updated.v369Units=v369MergeUnits(old.v369Units,entry.v369Units,updated.v369DeletedUnits);
+    updated.qty=updated.v369Units.length;
+    updated.v369UpdatedAt=Math.max(Number(old.v369UpdatedAt)||0,Number(entry.v369UpdatedAt)||0);
+    byId.set(id,updated);
+  }
+  chosen.logDraft.v369DeletedTitles=deletedTitles;
+  chosen.logDraft.entries=[...byId.values()].filter(e=>(Number(deletedTitles[String(e.libraryId||'')])||0)<(Number(e.v369UpdatedAt)||Number(e.loggedAt)||0));
+  chosen.logDraft.v369DurationSeconds=chosen.logDraft.entries.reduce((sum,e)=>
+    sum+(e.v369Units||[]).reduce((n,u)=>n+v369Seconds(u),0),0);
+  chosen.logDraft.minutes=chosen.logDraft.v369DurationSeconds/60;
+  chosen.logDraft.amount=chosen.logDraft.entries.reduce((sum,e)=>sum+(e.v369Units?.length||0),0);
+  return chosen;
+}
+if(typeof mergeStates==='function'){
+  const v369MergeBase=mergeStates;
+  mergeStates=function(a,b){
+    const out=v369MergeBase.apply(this,arguments)||{};
+    const merged=v369MergeLogging(a?.resumeStateV285?.logging,b?.resumeStateV285?.logging);
+    if(merged){
+      out.resumeStateV285=out.resumeStateV285||{};
+      out.resumeStateV285.logging=merged;
+      out.resumeStateV285.modifiedAt=Math.max(Number(out.resumeStateV285.modifiedAt)||0,Number(merged.modifiedAt)||0);
+    }
+    // One commit ID may travel with multiple category sessions. Never retain
+    // two copies of a committed category session following cloud reconciliation.
+    const seen=new Set();
+    out.sessions=(out.sessions||[]).filter(session=>{
+      if(!session?.v369CommitId)return true;
+      const key=String(session.v369CommitId)+'::'+String(session.categoryId||'')+'::'+String(session.status||'');
+      if(seen.has(key))return false;
+      seen.add(key);return true;
+    });
+    return out;
+  };
 }
 if(typeof v155VerifyCloudState==='function'){
   const v369VerifyCloudBase=v155VerifyCloudState;
