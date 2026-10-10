@@ -12,9 +12,15 @@ function v369Touch(){
   try{v285TouchLogging(S.logging===true,false);}catch(err){console.warn('v369 draft cache unavailable',err);}
 }
 function v369ItemTitle(entry){
-  return (entry?.libraryId?v368CollectionLibraryBase&&typeof v156EnsureOrderIndexes==='function'
-    ?v156EnsureOrderIndexes().libraryById.get(String(entry.libraryId))
-    :S.library.find(x=>String(x.id)===String(entry.libraryId)):null)||null;
+  const id=String(entry?.libraryId||'');
+  if(!id)return null;
+  if(typeof v156EnsureOrderIndexes==='function'){
+    try{
+      const found=v156EnsureOrderIndexes()?.libraryById?.get(id);
+      if(found)return found;
+    }catch(_){}
+  }
+  return (S.library||[]).find(x=>String(x?.id||'')===id)||null;
 }
 function v369UnitType(item){
   const u=String(getCategory(item?.categoryId)?.unit||'').toLowerCase();
@@ -27,7 +33,30 @@ function v369ValidStamp(value){
 function v369DateTimeValue(value){
   const d=new Date(v369ValidStamp(value)||Date.now());
   const pad=x=>String(x).padStart(2,'0');
-  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+}
+function v369Seconds(unit){
+  if(Number.isFinite(Number(unit?.durationSeconds)))return Math.max(0,Math.floor(Number(unit.durationSeconds)));
+  return Math.max(0,Math.round((Number(unit?.minutes)||0)*60));
+}
+function v369DefaultSeconds(item){
+  const cat=getCategory(item?.categoryId||'');
+  if(Number.isFinite(Number(cat?.secondsPerUnit)))return Math.max(0,Math.floor(Number(cat.secondsPerUnit)));
+  return Math.max(0,Math.round((Number(cat?.minutesPerUnit)||0)*60));
+}
+function v369TotalSeconds(){
+  return (S.logDraft?.entries||[]).reduce((total,e)=>total+(e.v369Units||[]).reduce((t,u)=>t+v369Seconds(u),0),0);
+}
+function v369Hms(seconds){
+  const t=Math.max(0,Math.floor(seconds)||0);
+  const p=x=>String(x).padStart(2,'0');
+  return p(Math.floor(t/3600))+':'+p(Math.floor(t%3600/60))+':'+p(t%60);
+}
+function v369DurationInputs(index,pos,unit){
+  const t=v369Seconds(unit),v=[Math.floor(t/3600),Math.floor(t%3600/60),t%60];
+  return '<div class="v369-duration" aria-label="Individual runtime">'+['Hours','Minutes','Seconds'].map((label,i)=>
+    '<label>'+label+' <input type="number" min="0" max="'+(i===0?'9999':'59')+'" step="1" aria-label="'+label+' for this entry" value="'+v[i]+'" onchange="App.v369EditUnit('+index+','+pos+',\\'duration-'+i+'\\',this.value)"></label>'
+  ).join('')+'</div>';
 }
 function v369Sync(){
   const entries=S.logDraft?.entries||[];
@@ -37,6 +66,10 @@ function v369Sync(){
     e.v179EndProgress=Math.max(0,Number(e.v179StartProgress)||0)+e.qty;
   }
   if(typeof v179SyncSingleFromEntries==='function')v179SyncSingleFromEntries();
+  // The canonical XP engine expects minutes. Individual timestamps and
+  // duration remain exact in integer seconds for History and data transfer.
+  S.logDraft.v369DurationSeconds=v369TotalSeconds();
+  S.logDraft.minutes=S.logDraft.v369DurationSeconds/60;
 }
 function v369NextNumber(entry,item){
   const season=v369SelectedSeason(entry,item);
@@ -62,14 +95,14 @@ function v369PanelsHtml(){
     const visible=e.v369ShowAll?units:units.slice(-40);
     const seasonChoices=seasons.length?'<label>Season <select aria-label="Season for next entry" onchange="App.v369SelectSeason('+idx+',this.value)">'+seasons.map(s=>'<option value="'+escapeHtml(String(s.id))+'" '+(String(s.id)===String(season?.id)?'selected':'')+'>'+escapeHtml(String(s.name||'Season '+s.number))+'</option>').join('')+'</select></label>':'';
     return '<section class="v369-title" data-v369-title="'+idx+'">'+
-      '<div class="v369-title-head"><strong>'+escapeHtml(cleanTitle(item.title))+'</strong><small>'+units.length+' '+escapeHtml(noun.toLowerCase())+(units.length===1?'':'s')+' in draft</small><button type="button" class="btn btn-sm btn-ghost" onclick="App.removeLogEntry('+idx+')">Remove title</button></div>'+
+      '<div class="v369-title-head"><strong>'+escapeHtml(cleanTitle(item.title))+'</strong><small>'+units.length+' '+escapeHtml(noun.toLowerCase())+(units.length===1?'':'s')+' in draft · '+v369Hms(units.reduce((n,u)=>n+v369Seconds(u),0))+'</small><button type="button" class="btn btn-sm btn-ghost" onclick="App.removeLogEntry('+idx+')">Remove title</button></div>'+
       '<div class="v369-unit-list">'+visible.map((u)=>{
         const pos=units.indexOf(u);
         const unitName=u.seasonName?escapeHtml(u.seasonName)+' · ':'';
         return '<div class="v369-unit" data-unit-id="'+escapeHtml(String(u.id))+'">'+
           '<span class="v369-unit-name">'+unitName+escapeHtml(noun)+' '+Number(u.number)+'</span>'+
-          '<label>Logged at <input type="datetime-local" aria-label="Timestamp for '+escapeHtml(noun)+' '+Number(u.number)+'" value="'+v369DateTimeValue(u.loggedAt)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'time\',this.value)"></label>'+
-          '<label>Duration (min) <input type="number" min="0" max="99999" value="'+(Number(u.minutes)||0)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'minutes\',this.value)"></label>'+
+          '<label>Logged at <input type="datetime-local" aria-label="Timestamp for '+escapeHtml(noun)+' '+Number(u.number)+'" step="1" value="'+v369DateTimeValue(u.loggedAt)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'time\',this.value)"></label>'+
+          v369DurationInputs(idx,pos,u)+
           '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v369RemoveUnit('+idx+','+pos+')" aria-label="Remove '+escapeHtml(noun)+' '+Number(u.number)+'">Remove</button>'+
           '</div>';
       }).join('')+'</div>'+
@@ -86,7 +119,7 @@ function v369RefreshPanels(){
 }
 function v369RenderInterfaceControl(){
   const itemized=S.logDraft?.v369Interface==='itemized';
-  return '<div class="v369-interface"><div><strong>Logging interface</strong><small>Choose how to record this session. '+(itemized?'Each unit captures its own timestamp.':'Original Amount Consumed / Last Progress logging.')+'</small></div><div class="v369-switch">'+
+  return '<div class="v369-interface"><div><strong>Logging interface</strong><small>Choose how to record this session. '+(itemized?'Each unit captures its own timestamp and runtime. Total '+v369Hms(v369TotalSeconds())+'.':'Original Amount Consumed / Last Progress logging.')+'</small></div><div class="v369-switch">'+
     '<button type="button" class="btn btn-sm '+(itemized?'active':'')+'" onclick="App.v369SwitchInterface(\'itemized\')">Per episode / chapter / issue <span class="v369-recommended">Recommended</span></button>'+
     '<button type="button" class="btn btn-sm '+(!itemized?'active':'')+'" onclick="App.v369SwitchInterface(\'quick\')">Quick logging</button></div></div>';
 }
@@ -160,7 +193,7 @@ function v369AddUnit(index){
   const timestamp=Date.now();
   e.v369Units.push({id:uid(),number,seasonId:season?String(season.id):null,
     seasonName:season?String(season.name||''):null,
-    seasonNumber:season?season.number:null,loggedAt:timestamp,minutes:0});
+    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item)});
   e.v369NextNumber=number+1;
   v369Sync();v369Touch();v369RefreshPanels();
 }
@@ -171,7 +204,15 @@ function v369RemoveUnit(index,pos){
 }
 function v369EditUnit(index,pos,key,value){
   const e=S.logDraft?.entries?.[index],u=e?.v369Units?.[pos];if(!u)return;
-  if(key==='minutes')u.minutes=Math.max(0,Math.min(99999,Number(value)||0));
+  if(/^duration-[012]$/.test(key)){
+    const which=Number(key.slice(-1)),t=v369Seconds(u);
+    const parts=[Math.floor(t/3600),Math.floor(t%3600/60),t%60];
+    parts[which]=Math.max(0,Math.min(which===0?9999:59,Math.floor(Number(value)||0)));
+    u.durationSeconds=parts[0]*3600+parts[1]*60+parts[2];
+    delete u.minutes;
+    v369Sync();
+  }
+  if(key==='minutes'){u.durationSeconds=Math.max(0,Math.round((Number(value)||0)*60));delete u.minutes;v369Sync();}
   if(key==='time'){
     const parsed=new Date(String(value||''));
     const time=parsed.getTime();
@@ -229,6 +270,7 @@ App.submitLog=function(){
       const data=captured.get(String(title.libraryId));
       if(!data)continue;
       title.v369Units=data.units;
+      title.v369DurationSeconds=data.units.reduce((n,u)=>n+v369Seconds(u),0);
       title.v369Itemized=true;
       title.loggedAt=Math.min(...data.units.map(x=>Number(x.loggedAt)));
       changed=true;
@@ -272,7 +314,7 @@ if(typeof v221SectionResetPlan==='function'){
 }
 const style=document.createElement('style');
 style.id='v369-logging-style';
-style.textContent='.v369-interface{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;margin:0 0 16px}.v369-interface small,.v369-title-head small{display:block;color:var(--text-dim);margin-top:4px}.v369-switch,.v369-settings-choice{display:flex;flex-wrap:wrap;gap:8px}.v369-recommended{font-size:10px;color:var(--flow)}.v369-itemized .v179-log-mode-switch,.v369-itemized .v239-logged-title-list,.v369-itemized #entry-qty{display:none!important}.v369-panels{display:grid;gap:12px;margin:12px 0}.v369-title{border:1px solid var(--border);border-radius:12px;padding:14px}.v369-title-head,.v369-add-row,.v369-unit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.v369-title-head strong{flex:1}.v369-unit-list{display:grid;gap:8px;margin:12px 0}.v369-unit{background:var(--surface-2,var(--surface));border-radius:8px;padding:8px}.v369-unit-name{font-weight:600;flex:1;min-width:100px}.v369-unit label,.v369-add-row label{font-size:12px;display:grid;gap:4px}.v369-unit input,.v369-add-row input,.v369-add-row select{max-width:190px}.v369-add-row{margin-top:12px}.v369-settings-control{padding:12px;border:1px solid var(--border);border-radius:10px;margin:10px 0}@media(max-width:600px){.v369-unit label{width:100%}.v369-add-row label{flex:1}.v369-settings-choice button{width:100%}}';
+style.textContent='.v369-interface{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;margin:0 0 16px}.v369-interface small,.v369-title-head small{display:block;color:var(--text-dim);margin-top:4px}.v369-switch,.v369-settings-choice{display:flex;flex-wrap:wrap;gap:8px}.v369-recommended{font-size:10px;color:var(--flow)}.v369-itemized .v179-log-mode-switch,.v369-itemized .v239-logged-title-list,.v369-itemized #entry-qty{display:none!important}.v369-panels{display:grid;gap:12px;margin:12px 0}.v369-title{border:1px solid var(--border);border-radius:12px;padding:14px}.v369-title-head,.v369-add-row,.v369-unit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.v369-title-head strong{flex:1}.v369-unit-list{display:grid;gap:8px;margin:12px 0}.v369-unit{background:var(--surface-2,var(--surface));border-radius:8px;padding:8px}.v369-unit-name{font-weight:600;flex:1;min-width:100px}.v369-unit label,.v369-add-row label{font-size:12px;display:grid;gap:4px}.v369-unit input,.v369-add-row input,.v369-add-row select{max-width:190px}.v369-duration{display:flex;gap:6px;flex-wrap:wrap}.v369-duration label{width:76px}.v369-duration input{width:76px}.v369-add-row{margin-top:12px}.v369-settings-control{padding:12px;border:1px solid var(--border);border-radius:10px;margin:10px 0}@media(max-width:600px){.v369-unit label{width:100%}.v369-add-row label{flex:1}.v369-settings-choice button{width:100%}}';
 document.head.appendChild(style);
 Object.assign(App,{v369SetDefaultInterface,v369SwitchInterface,v369SelectSeason,v369SetNext,
   v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll});
