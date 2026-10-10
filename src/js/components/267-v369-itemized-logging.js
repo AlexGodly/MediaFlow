@@ -107,35 +107,44 @@ function v369SelectedSeason(entry,item){
 function v369PanelsHtml(){
   const entries=S.logDraft?.entries||[];
   return '<div class="v369-panels">'+entries.map((e,idx)=>{
-    const item=v369ItemTitle(e);
-    if(!item)return '';
+    const item=v369ItemTitle(e);if(!item)return '';
     const units=Array.isArray(e.v369Units)?e.v369Units:[];
-    const season=v369SelectedSeason(e,item);
     const seasons=typeof v252Seasons==='function'?v252Seasons(item):[];
+    const season=v369SelectedSeason(e,item);
     const noun=v369UnitType(item),next=Number(e.v369NextNumber)||v369NextNumber(e,item);
     const visible=e.v369ShowAll?units:units.slice(-40);
     const seasonChoices=seasons.length?'<label>Season <select aria-label="Season for next entry" onchange="App.v369SelectSeason('+idx+',this.value)">'+seasons.map(s=>'<option value="'+escapeHtml(String(s.id))+'" '+(String(s.id)===String(season?.id)?'selected':'')+'>'+escapeHtml(String(s.name||'Season '+s.number))+'</option>').join('')+'</select></label>':'';
-    return '<section class="v369-title" data-v369-title="'+idx+'">'+
-      '<div class="v369-title-head"><strong>'+escapeHtml(cleanTitle(item.title))+'</strong><small>'+units.length+' '+escapeHtml(noun.toLowerCase())+(units.length===1?'':'s')+' in draft · '+v369Hms(units.reduce((n,u)=>n+v369Seconds(u),0))+'</small><button type="button" class="btn btn-sm btn-ghost" onclick="App.removeLogEntry('+idx+')">Remove title</button></div>'+
-      '<div class="v369-unit-list">'+visible.map((u)=>{
-        const pos=units.indexOf(u);
-        const unitName=u.seasonName?escapeHtml(u.seasonName)+' · ':'';
-        return '<div class="v369-unit" data-unit-id="'+escapeHtml(String(u.id))+'">'+
-          '<span class="v369-unit-name">'+unitName+escapeHtml(noun)+' '+Number(u.number)+'</span>'+
-          '<label>Logged at <input type="datetime-local" aria-label="Timestamp for '+escapeHtml(noun)+' '+Number(u.number)+'" step="1" value="'+v369DateTimeValue(u.loggedAt)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'time\',this.value)"></label>'+
-          v369DurationInputs(idx,pos,u)+
-          '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v369RemoveUnit('+idx+','+pos+')" aria-label="Remove '+escapeHtml(noun)+' '+Number(u.number)+'">Remove</button>'+
-          '</div>';
-      }).join('')+'</div>'+
+    const unitRows=visible.map(u=>{
+      const pos=units.indexOf(u);
+      const name=u.seasonName?escapeHtml(u.seasonName)+' · ':'';
+      const seasonEditor=seasons.length?'<label>Season <select aria-label="Season for this unit" onchange="App.v369EditUnit('+idx+','+pos+',\'season\',this.value)">'+seasons.map(sr=>'<option value="'+escapeHtml(String(sr.id))+'" '+(String(sr.id)===String(u.seasonId)?'selected':'')+'>'+escapeHtml(String(sr.name))+'</option>').join('')+'</select></label>':'';
+      return '<div class="v369-unit" data-unit-id="'+escapeHtml(String(u.id))+'">'+
+        '<span class="v369-unit-name">'+name+escapeHtml(noun)+' '+Number(u.number)+'</span>'+
+        seasonEditor+
+        '<label>'+escapeHtml(noun)+' # <input type="number" min="1" max="999999" step="1" value="'+Number(u.number)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'number\',this.value)"></label>'+
+        '<label>Logged at <input type="datetime-local" step="1" aria-label="Timestamp for '+escapeHtml(noun)+' '+Number(u.number)+'" value="'+v369DateTimeValue(u.loggedAt)+'" onchange="App.v369EditUnit('+idx+','+pos+',\'time\',this.value)"></label>'+
+        v369DurationInputs(idx,pos,u)+
+        '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v369RemoveUnit('+idx+','+pos+')" aria-label="Remove '+escapeHtml(noun)+' '+Number(u.number)+'">Remove</button></div>';
+    }).join('');
+    const content=e.v369Collapsed?'':('<div class="v369-unit-list">'+unitRows+'</div>'+
       (units.length>40?'<button type="button" class="btn btn-sm" onclick="App.v369ToggleAll('+idx+')">'+(e.v369ShowAll?'Show recent 40':'Show all '+units.length)+'</button>':'')+
-      '<div class="v369-add-row">'+seasonChoices+'<label>'+escapeHtml(noun)+' number <input type="number" min="1" max="999999" value="'+next+'" oninput="App.v369SetNext('+idx+',this.value)"></label>'+
-      '<button type="button" class="btn btn-primary btn-sm" onclick="App.v369AddUnit('+idx+')">+ Log '+escapeHtml(noun)+'</button></div>'+
-      '</section>';
+      '<div class="v369-add-row">'+seasonChoices+
+      '<label>'+escapeHtml(noun)+' number <input type="number" min="1" max="999999" value="'+next+'" oninput="App.v369SetNext('+idx+',this.value)"></label>'+
+      '<button type="button" class="btn btn-primary btn-sm" onclick="App.v369AddUnit('+idx+')">+ Log '+escapeHtml(noun)+'</button></div>');
+    return '<section class="v369-title" data-v369-title="'+idx+'">'+
+      '<div class="v369-title-head"><strong>'+escapeHtml(cleanTitle(item.title))+'</strong>'+
+      '<small>'+units.length+' '+escapeHtml(noun.toLowerCase())+(units.length===1?'':'s')+' in draft · '+v369Hms(units.reduce((n,u)=>n+v369Seconds(u),0))+'</small>'+
+      '<button type="button" class="btn btn-sm" aria-expanded="'+(!e.v369Collapsed)+'" onclick="App.v369ToggleTitle('+idx+')">'+(e.v369Collapsed?'Open':'Collapse')+'</button>'+
+      '<button type="button" class="btn btn-sm btn-ghost" onclick="App.removeLogEntry('+idx+')">Remove title</button></div>'+
+      content+'</section>';
   }).join('')+'</div>';
 }
 function v369RefreshPanels(){
   const root=document.querySelector('.v369-panels');
   if(root)root.outerHTML=v369PanelsHtml();
+  const summary=document.querySelector('.v369-interface small');
+  if(summary && S.logDraft?.v369Interface==='itemized')
+    summary.textContent='Each unit captures its own timestamp and runtime. Total '+v369Hms(v369TotalSeconds())+'.';
   try{refreshXPPreview();}catch(_){}
 }
 function v369RenderInterfaceControl(){
@@ -242,6 +251,24 @@ function v369EditUnit(index,pos,key,value){
     v369Sync();
   }
   if(key==='minutes'){u.durationSeconds=Math.max(0,Math.round((Number(value)||0)*60));delete u.minutes;v369Sync();}
+  if(key==='number'||key==='season'){
+    const item=v369ItemTitle(e);if(!item)return;
+    const seasons=typeof v252Seasons==='function'?v252Seasons(item):[];
+    const season=key==='season'?seasons.find(x=>String(x.id)===String(value))
+      :seasons.find(x=>String(x.id)===String(u.seasonId));
+    const number=key==='number'?Math.floor(Number(value)||0):Number(u.number);
+    if((seasons.length&&!season)||!(number>0&&number<=999999)||
+        (season&&Number(season.total)>0&&number>Number(season.total))||
+        (!e.isRepeat&&number<=Math.max(0,Number(season?season.progress:item.progress)||0))||
+        e.v369Units.some(x=>x!==u&&Number(x.number)===number&&String(x.seasonId||'')===String(season?.id||''))){
+      showToast('Invalid unit number, saved progress, season, or duplicate entry.');
+      v369RefreshPanels();return;
+    }
+    u.number=number;u.seasonId=season?String(season.id):null;
+    u.seasonName=season?String(season.name||''):null;
+    u.seasonNumber=season?season.number:null;
+    delete e.v369NextNumber;v369Sync();
+  }
   if(key==='time'){
     const parsed=new Date(String(value||''));
     const time=parsed.getTime();
@@ -249,6 +276,10 @@ function v369EditUnit(index,pos,key,value){
     u.loggedAt=time;
   }
   v369Touch();v369RefreshPanels();
+}
+function v369ToggleTitle(index){
+  const e=S.logDraft?.entries?.[index];if(!e)return;
+  e.v369Collapsed=!e.v369Collapsed;v369Touch();v369RefreshPanels();
 }
 function v369ToggleAll(index){
   const e=S.logDraft?.entries?.[index];if(!e)return;
@@ -446,6 +477,6 @@ style.id='v369-logging-style';
 style.textContent='.v369-interface{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;margin:0 0 16px}.v369-interface small,.v369-title-head small{display:block;color:var(--text-dim);margin-top:4px}.v369-switch,.v369-settings-choice{display:flex;flex-wrap:wrap;gap:8px}.v369-recommended{font-size:10px;color:var(--flow)}.v369-itemized .v179-log-mode-switch,.v369-itemized .v239-logged-title-list,.v369-itemized #entry-qty{display:none!important}.v369-panels{display:grid;gap:12px;margin:12px 0}.v369-title{border:1px solid var(--border);border-radius:12px;padding:14px}.v369-title-head,.v369-add-row,.v369-unit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.v369-title-head strong{flex:1}.v369-unit-list{display:grid;gap:8px;margin:12px 0}.v369-unit{background:var(--surface-2,var(--surface));border-radius:8px;padding:8px}.v369-unit-name{font-weight:600;flex:1;min-width:100px}.v369-unit label,.v369-add-row label{font-size:12px;display:grid;gap:4px}.v369-unit input,.v369-add-row input,.v369-add-row select{max-width:190px}.v369-duration{display:flex;gap:6px;flex-wrap:wrap}.v369-duration label{width:76px}.v369-duration input{width:76px}.v369-history-units{border-top:1px solid var(--border);padding:8px 10px;font-size:12px}.v369-history-units summary{cursor:pointer;color:var(--text-dim);font-weight:600}.v369-history-unit-list{display:grid;gap:6px;margin-top:8px}.v369-history-unit{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--surface-2,var(--surface))}.v369-history-unit strong{font-variant-numeric:tabular-nums}@media(max-width:600px){.v369-history-unit{grid-template-columns:1fr auto}.v369-history-unit span{grid-column:1/-1;grid-row:2}}.v369-add-row{margin-top:12px}.v369-settings-control{padding:12px;border:1px solid var(--border);border-radius:10px;margin:10px 0}@media(max-width:600px){.v369-unit label{width:100%}.v369-add-row label{flex:1}.v369-settings-choice button{width:100%}}';
 document.head.appendChild(style);
 Object.assign(App,{v369SetDefaultInterface,v369SwitchInterface,v369SelectSeason,v369SetNext,
-  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll});
+  v369AddUnit,v369RemoveUnit,v369EditUnit,v369ToggleAll,v369ToggleTitle});
 window.MediaFlowV369={version:369,stage:'itemized logging foundation',defaultInterface:'itemized'};
 MediaFlowRuntime.version=V369_RELEASE;
