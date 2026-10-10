@@ -19,6 +19,14 @@ Base: MediaFlow v368. Development branch only. Do not deploy or merge as a finis
 - Attached exact unit-duration totals to itemized title rows in newly committed sessions.
 - **This is a development-only code change; there is no completed build, browser regression result, or new release ZIP.**
 
+## Additional integration work
+- Improved v369 submit metadata: saved per-title and grouped session duration now comes from actual itemized HH:MM:SS runtimes, and category consumption XP is recalculated from those totals.
+- Added a season-specific post-submit correction for units spanning multiple seasons, restoring the correct individual season progress and aggregate title progress.
+- Added validation for unknown season references and a protective rejection of already-consumed units in partially completed titles until repeat handling can be implemented safely.
+- Consumption History cards now include expandable per-unit timestamps and exact durations; per-title minutes are no longer inferred from quantity where itemized duration exists.
+- Validated JavaScript parse and a focused synthetic three-episode/two-season commit harness (3 units, 4340 seconds, correct per-season progress and mock XP calculation).
+- Remaining issue: the canonical submit chain still runs before v369's final metadata corrections. Its intermediate persistence, XP ledger side effects, cloud retries, and idempotency need full integration tests; this is NOT a verified production-safe save pipeline.
+
 ## Not complete / release blockers
 1. Confirm chronology and progress semantics for nonconsecutive episodes (e.g. Episode 12 and Episode 14), rewatches, earlier seasons and edits. Quantity and Library progress must not silently imply Episode 13 happened.
 2. Verify the complete wrapped submit chain, including XP, stage changes, v252 season metadata, History and cloud persistence; add idempotency and partial-save recovery.
