@@ -1,0 +1,29 @@
+/* MediaFlow v342 — Recently Viewed UI polish */
+.v340-recent-day>header{align-items:center}
+.v340-recent-day>header>span{display:block!important;flex:none!important;width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;aspect-ratio:1/1;border-radius:50%!important;box-sizing:border-box}
+.v342-recent-day-stat{margin-left:auto;display:inline-flex;align-items:center;gap:8px;min-width:0}
+.v342-recent-day-badge{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--due,#78aaff) 16%,transparent);border:2px solid color-mix(in srgb,var(--due,#78aaff) 70%,white 12%);box-shadow:0 0 0 4px color-mix(in srgb,var(--due,#78aaff) 10%,transparent);color:var(--text,#fff);font-size:11px;font-weight:800;line-height:1}
+.v342-recent-day-label{font-size:10px;font-weight:650;color:var(--text-dim,var(--text-mute,#a7b2bf));text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.v340-recent-card.v342-recent-card{align-items:stretch;gap:13px}
+.v342-recent-copy{align-self:stretch;display:flex;flex-direction:column;gap:7px;min-height:77px}
+.v342-recent-overline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v342-recent-category{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;font-size:10px;font-weight:650;color:var(--text-dim,var(--text-mute,#a4abb6));line-height:1.25}
+.v342-recent-category > :first-child{display:inline-grid;place-items:center;flex:none;width:14px;height:14px;color:var(--flow,#84a7ff)}
+.v342-recent-category svg,.v342-recent-category img{display:block;max-width:100%;max-height:100%;width:14px;height:14px;object-fit:contain}
+.v342-recent-category span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v342-recent-overline>time{margin-left:auto;white-space:nowrap}
+.v342-recent-overline>time::before{content:none!important}
+.v342-recent-name{padding-right:2px}
+.v342-recent-facts{margin-top:-1px}
+.v342-recent-actions{margin-top:auto;display:flex;justify-content:flex-end;align-items:flex-end}
+.v342-recent-edit{align-self:flex-end;min-height:34px;padding:6px 10px;border-radius:10px}
+@media(max-width:860px){.v340-recent-card.v342-recent-card{gap:11px}}
+@media(max-width:600px){
+  .v342-recent-day-stat{gap:6px}
+  .v342-recent-day-badge{width:26px;height:26px;font-size:10px}
+  .v342-recent-day-label{font-size:9.5px}
+  .v340-recent-card.v342-recent-card{gap:10px}
+  .v342-recent-copy{min-height:72px}
+  .v342-recent-overline>time{margin-left:0}
+  .v342-recent-actions{justify-content:flex-end}
+}
