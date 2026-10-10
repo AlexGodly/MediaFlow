@@ -90,8 +90,9 @@ function v121RecalculateRepeatXPHistory(){
     let sessionUnits=0,sessionFull=0,sessionUnitXP=0,sessionFullXP=0;
 
     for(const t of (s.titles||[])){
-      if(!t?.repeat)continue;
-      const qty=Math.max(0,Number(t.qty)||0);
+      const itemized=Array.isArray(t?.v369Units)&&t.v369Itemized===true;
+      if(!t?.repeat&&!itemized)return;
+      const qty=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:Math.max(0,Number(t.qty)||0);
       if(qty<=0)continue;
 
       const item=t.libraryId?(S.library||[]).find(i=>String(i?.id||'')===String(t.libraryId)):null;
@@ -238,7 +239,7 @@ function v121NewSessionIds(before){
 }
 function v121HasRepeatSession(ids){
   const set=new Set(ids||[]);
-  return (S.sessions||[]).some(s=>set.has(s?.id)&&(s.titles||[]).some(t=>t?.repeat&&Number(t.qty)>0));
+  return (S.sessions||[]).some(s=>set.has(s?.id)&&(s.titles||[]).some(t=>(t?.repeat&&Number(t.qty)>0)||(t?.v369Itemized&&t?.v369Units?.some(u=>u.isRepeat))));
 }
 function v121NewRepeatSummary(ids){
   const set=new Set(ids||[]);
