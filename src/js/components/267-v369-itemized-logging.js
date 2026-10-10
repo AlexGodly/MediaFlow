@@ -662,6 +662,44 @@ function v369DataAudit(){
     note:'Local data-path audit only; authenticate and run Sync Now to verify remote cloud readback.'
   };
 }
+// The v144/v283 Category editors override the original modal and save
+// functions after the early core fragments. Patch the FINAL handlers here,
+// preserving their icon, cover URL, cancel, and no-blocking-save behavior.
+const v369CategoryModalBase=categoryModalHtml;
+categoryModalHtml=function(data){
+  const html=String(v369CategoryModalBase.apply(this,arguments)||'');
+  const sec=Number.isFinite(Number(data?.secondsPerUnit))
+    ?Math.max(1,Math.round(Number(data.secondsPerUnit)))
+    :Math.max(1,Math.round((Number(data?.minutesPerUnit)||20)*60));
+  const hours=Math.floor(sec/3600),minutes=Math.floor((sec%3600)/60),seconds=sec%60;
+  const runtime='<div class="field v369-category-runtime"><label class="field-label">Default runtime per unit (HH:MM:SS)</label>'+
+    '<div class="v369-runtime-fields">'+
+    '<label>Hours<input id="m-runtime-hours" type="number" min="0" max="9999" step="1" value="'+hours+'"></label>'+
+    '<label>Minutes<input id="m-runtime-minutes" type="number" min="0" max="59" step="1" value="'+minutes+'"></label>'+
+    '<label>Seconds<input id="m-runtime-seconds" type="number" min="0" max="59" step="1" value="'+seconds+'"></label>'+
+    '</div><input id="m-mpu" type="hidden" value="'+(sec/60)+'">'+
+    '<small class="hint">Automatically applied to each new itemized unit. Existing saved runtimes are never overwritten.</small></div>';
+  // Old v283 saver requires the legacy m-mpu element to exist. Preserve it as
+  // a hidden compatible value while showing full seconds-precision editing.
+  return html.replace(/<div class="field"><label class="field-label">Minutes per unit<\/label><input[^>]*id="m-mpu"[^>]*><\/div>/,runtime);
+};
+function v369ReadCategorySeconds(){
+  const root=document.getElementById('m-runtime-hours');if(!root)return null;
+  const read=(id,max)=>Math.max(0,Math.min(max,Math.floor(Number(document.getElementById(id)?.value)||0)));
+  return Math.max(1,read('m-runtime-hours',9999)*3600+read('m-runtime-minutes',59)*60+read('m-runtime-seconds',59));
+}
+if(typeof v283ReadCategoryForm==='function'){
+  const v369CategoryFormBase=v283ReadCategoryForm;
+  v283ReadCategoryForm=function(){
+    const data=v369CategoryFormBase.apply(this,arguments);
+    const seconds=v369ReadCategorySeconds();
+    if(seconds!==null){
+      data.secondsPerUnit=seconds;
+      data.minutesPerUnit=seconds/60;
+    }
+    return data;
+  };
+}
 const v369SettingsRenderer=V219_PAGE_RENDERERS.get('settings');
 if(typeof v369SettingsRenderer==='function'){
   MediaFlowRuntime.registerPageRenderer('settings',function(ctx){
