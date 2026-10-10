@@ -1,0 +1,91 @@
+name: MediaFlow Native Android + Windows Preview
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - native/flutter-installable-preview
+    paths:
+      - 'native-preview-build/**'
+      - '.github/workflows/native-installable-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: "${{ matrix.platform }} installable"
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: android
+            runner: ubuntu-latest
+          - platform: windows
+            runner: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Restore MediaFlow Flutter source and original app logo
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,io,tarfile,pathlib,shutil
+          root=pathlib.Path('native-preview-build/app')
+          root.mkdir(parents=True,exist_ok=True)
+          compressed=base64.b64decode(''.join(pathlib.Path('native-preview-build/source-gzip.b64').read_text().split()))
+          with tarfile.open(fileobj=io.BytesIO(compressed),mode='r:gz') as source:
+              source.extractall(root,filter='data')
+          assets=root/'assets'
+          assets.mkdir(parents=True,exist_ok=True)
+          (assets/'mediaflow.png').write_bytes(base64.b64decode(''.join(pathlib.Path('native-preview-build/logo.b64').read_text().split())))
+          icons=assets/'category-icons'
+          icons.mkdir(exist_ok=True)
+          for img in pathlib.Path('assets/category-icons').glob('*.png'):
+              shutil.copy2(img,icons/img.name)
+          print('Native source:',len(list(root.rglob('*.dart'))),'Dart files')
+          print('Category icons:',len(list(icons.glob('*.png'))))
+          PY
+      - name: Generate ${{ matrix.platform }} host project
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter create --platforms=${{ matrix.platform }} --org com.alexgodly --project-name mediaflow_native .
+      - name: Install dependencies
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter pub get
+      - name: Analyze project
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter analyze --no-fatal-infos
+      - name: Run native tests
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter test
+      - name: Build Android APK
+        if: matrix.platform == 'android'
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter build apk --release
+      - name: Upload Android APK
+        if: matrix.platform == 'android'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow-Native-Android-APK
+          path: native-preview-build/app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+      - name: Build Windows application
+        if: matrix.platform == 'windows'
+        shell: bash
+        working-directory: native-preview-build/app
+        run: flutter build windows --release
+      - name: Upload Windows app folder
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow-Native-Windows-App
+          path: native-preview-build/app/build/windows/x64/runner/Release/**
+          if-no-files-found: error
