@@ -25,6 +25,10 @@ jobs:
             runner: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            native-preview-build
+            assets/category-icons
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
