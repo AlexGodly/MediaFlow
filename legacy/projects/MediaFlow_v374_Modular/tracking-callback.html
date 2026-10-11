@@ -1,0 +1,11 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Connect tracking — MediaFlow</title><style>body{font-family:system-ui;background:#0e111a;color:#f0f3fb;display:grid;min-height:100dvh;place-items:center;margin:0;padding:16px}main{background:#1c2331;border:1px solid #313c50;border-radius:20px;padding:26px;max-width:480px;width:100%}a{color:#91bcff}h1{font-size:1.45rem}</style></head><body><main><h1>MediaFlow · Tracking Connection</h1><p id="status">Completing secure authorization…</p><a href="./">Return to MediaFlow</a></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+(async()=>{const el=document.getElementById('status');try{
+const params=new URLSearchParams(location.search);if(params.has('error'))throw Error(params.get('error_description')||params.get('error'));
+const code=params.get('code'),state=params.get('state');if(!code||!state)throw Error('Missing authorization code or state');
+const client=window.supabase.createClient('https://wgeijxfdpgehesxialxm.supabase.co','sb_publishable_d2P0qZlvGZOSqcUzEg3BNg_3wQsHY_M',{auth:{persistSession:true,autoRefreshToken:true}});
+const {data,error}=await client.functions.invoke('mediaflow-tracking-v374',{body:{action:'complete',code,state}});
+if(error||data?.error)throw Error(data?.error||error.message||'Authorization failed');
+el.textContent=(data.provider==='mal'?'MyAnimeList':'SIMKL')+' connected successfully. You may return to MediaFlow. Linking and synchronization remain disabled until you choose a title.';
+history.replaceState(null,'',location.pathname);
+}catch(e){el.textContent='Could not connect: '+String(e.message||e);} })();
+</script></body></html>

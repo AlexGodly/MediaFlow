@@ -1,0 +1,17 @@
+const fs=require('fs'),assert=require('assert'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const js=fs.readFileSync(root+'/src/js/components/272-v374-media-service-tracking.js','utf8');
+const ts=fs.readFileSync(root+'/supabase/functions/mediaflow-tracking-v374/index.ts','utf8');
+const sql=fs.readFileSync(root+'/supabase/migrations/20261011000000_mediaflow_v374_tracking.sql','utf8');
+const html=fs.readFileSync(root+'/tracking-callback.html','utf8');
+const bundle=fs.readFileSync(root+'/assets/js/mediaflow-v374.bundle.js','utf8');
+for(const x of ['libraryModalHtml=function','v181TitleDetailsHtml=function','registerPageRenderer(\'settings\'','v374SaveLibraryBase','v374SubmitLogBase','v374QueueItem','v374Flush','v374Options','v374Search'])assert(js.includes(x),'missing frontend '+x);
+for(const x of ['action===\'accounts\'','action===\'start\'','action===\'complete\'','action===\'search\'','action===\'assign\'','action===\'unlink\'','action===\'pause\'','action===\'process\'','action===\'publish\'','action===\'disconnect\'','TRACKING_TOKEN_KEY','AES-GCM'])assert(ts.includes(x),'missing backend '+x);
+for(const x of ['mf_tracking_accounts_v374','mf_tracking_links_v374','mf_tracking_jobs_v374','enable row level security','revoke all','unique (user_id, library_id, season_id, provider)'])assert(sql.includes(x),'missing migration '+x);
+assert(html.includes('mediaflow-tracking-v374')&&!html.includes('SERVICE_ROLE_KEY'));
+assert(bundle.includes('v374TrackingHtml')&&bundle.includes('v373OrderedEntries'));
+assert(ts.includes('plan_to_read')&&ts.includes("active:'reading'"),'MAL manga status mapping required');
+assert(!ts.includes("const URL=Deno.env.get('SUPABASE_URL')"),'global URL constructor must not be shadowed');
+assert(ts.includes('new URL(')&&ts.includes('const SUPABASE_URL='),'OAuth URL generation must remain valid');
+assert(!js.includes('MAL_CLIENT_SECRET')&&!js.includes('SIMKL_CLIENT_SECRET'));
+console.log('PASS v374 source contracts: isolated tracking schema, safe browser client, backend auth/OAuth, title/Logging integration');

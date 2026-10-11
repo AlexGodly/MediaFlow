@@ -1,0 +1,2 @@
+PASS v372: Collection batch deletion updates visible results, counts, selection and tombstone BEFORE async save completes {'removedImmediately': True, 'otherRetained': True, 'selected': 0, 'collections': ['beta'], 'tombstone': True, 'saved': 0, 'renders': 1} {'saved': 1, 'visible': False, 'count': '1 collection', 'overflow': 0}
+PASS v372: all 28 Settings accordions display exactly one meaningful SVG and no duplicate icon on mobile, tablet and desktop

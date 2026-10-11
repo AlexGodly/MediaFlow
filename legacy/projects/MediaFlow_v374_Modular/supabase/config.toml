@@ -1,0 +1,2 @@
+[functions.mediaflow-tracking-v374]
+verify_jwt = false # All actions except one-time OAuth callback verify Supabase user JWT inside handler.
