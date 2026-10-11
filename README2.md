@@ -1,5 +1,34 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v386 — Browse Library Real-Theme Color Repair
+
+**Release:** v386 Modular  
+**Date:** October 11, 2026  
+**Baseline:** v385 Modular  
+**Developer:** Alex Godly
+
+## 1. Confirmed defect and root cause
+
+The Browse Library remained gray in v385 even in strongly colored themes because its v383–v385 CSS relied on **`--accent`**, a variable not generally defined by MediaFlow themes. MediaFlow uses **`--flow`** as the canonical active accent. Undefined `--accent` made the newer background gradients invalid, revealing old neutral styling.
+
+Earlier tests explicitly set `--accent`, inadvertently masking this production-condition defect. v386's tests use the actual `--flow` variable instead.
+
+## 2. Corrected full Library color
+
+Added `assets/css/203-v386-logging-library-theme-repair.css`, with a **component-scoped** alias from `--flow` and new visibly colored gradients for the entire header, outer Library shell and expanded body. Theme-aware controls and icon surfaces retain suitable contrast. Both **Quick Logging and Per Unit** are covered; no shared global theme rules are changed.
+
+## 3. Better verification
+
+New `scripts/test-v386-theme.py` exercises the real `renderLogForm()` output at **320, 390, 820, 1280 and 1920 px**. It verifies actual blue pixels in screenshots, blue-to-pink color changes, expanded/collapsed controls and both Logging modes. Local Chromium tests passed. Authenticated cloud and installed-PWA updates remain unverified.
+
+## 4. Preservation and application assets
+
+No Library data, Logging draft, XP, History, Cloud Sync, or export/import schema was changed. Updated `VERSION`, `version.json`, package metadata, compiled v386 bundle and PWA app-shell cache `mediaflow-pwa-v386-shell-v1`. The complete project retains prior v385 functionality.
+
+**Detailed changelog:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md)
+
+---
+
 # MediaFlow v385 — Live Leveling, Full-Color Library & About Alignment
 
 **Release:** v385 Modular  
