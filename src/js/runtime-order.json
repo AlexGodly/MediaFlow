@@ -126,5 +126,9 @@
   "components/269-v371-logging-polish-stability.js",
   "components/270-v372-logging-premium-settings-collections.js",
   "components/271-v373-logging-order-studio.js",
-  "components/272-v376-personal-order-parity.js"
+  "components/272-v376-personal-order-parity.js",
+  "components/273-v377-ids-editor-jikan-recovery.js",
+  "components/274-v378-tenrai-import-logging-order.js",
+  "components/275-v379-logging-personal-order-stability.js",
+  "components/276-v380-providers-logging-order.js"
 ]

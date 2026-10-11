@@ -1,14 +1,14 @@
-# MediaFlow v376 — Personal Order Layout Parity & Continuous Collection Queue
+# MediaFlow v380 — Multi-Provider Detection, Logging Reliability & Order Stability
 
-**Latest local development candidate:** **v376** · October 11, 2026  
-**Developer / owner:** **Alex Godly**  
-**Application lineage:** v373 features → v375 rollback → v376 UI/queue refinement (v374 tracking canceled)  
-**Release status:** Modular source rebuilt, Chromium regression verified locally. **Not deployed to GitHub main/Pages.**  
-**Release notes:** [README2.md](./README2.md) · [Detailed v376 changelog](./docs/CHANGELOG_v376.md)
+**Latest modular candidate:** v380 · October 11, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v379 Modular · Personal Edition  
+**Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v380 changelog](./docs/CHANGELOG_v380.md)
 
-MediaFlow v376 fixes Personal Order badges and cover spacing in **Tabs / Category Titles**, **Tabs / Collection Queues**, **Lists / All Titles**, **Lists / By Category**, assigned Collection blocks, and expanded Collection orders. Position labels/inputs have room for at least three digits. In **Lists / All Titles**, the Collection Queue becomes one continuous list; in **By Category**, it stays grouped. All canonical queue data, Logging, XP and Cloud Sync contracts are preserved.
+MediaFlow v380 introduces five episode-data source adapters (Tenrai, AniZip, TVmaze, Kitsu and AniList) and Automatic Multi-Provider fallback, repairs the Logging Hide/Show and initial sorting icons, introduces **Units in Draft** sorting, updates Added/Automatic MAL Detection control icons, and preserves Personal Order scroll during title/Collection movements. The trusted fresh-title count remains protected when data are incomplete.
 
-> **Local candidate note:** Unlike the historical v375 source restoration, v376 regenerated its own **mediaflow-v376.bundle.js**, `sw.js` cache identifier, `version.json`, and PWA shell. A local package is not evidence of production deployment or authenticated multi-device verification.
+**Verification:** Local Chromium and deterministic provider-response fixture tests passed. **Live provider access, real Supabase user data, large-library responsiveness and physical-device behavior remain unverified.** AniList use is based on the owner's reported permission; API usage conditions and TVmaze CC BY-SA attribution/ShareAlike requirements apply.
 
 ---
 
@@ -16,21 +16,21 @@ MediaFlow v376 fixes Personal Order badges and cover spacing in **Tabs / Categor
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v376-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v380-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v376 — Personal Edition (v375 restored baseline + Personal Order refinements).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v380 — Personal Edition (built on v379 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v376 · October 11, 2026, based on the restored v375/v373 features. **GitHub main:** currently v375; v376 is available as a local modular candidate. **Live website:** not independently verified.
+**Current packaged candidate:** v380 · October 11, 2026, built on v379 Modular. **GitHub:** v380 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v376 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v380 Personal Edition.
 
-**v376 changelog:** [README2.md](./README2.md), [detailed v376 changelog](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v380 changelog:** [README2.md](./README2.md), [detailed v380 changelog](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
@@ -48,12 +48,13 @@ MediaFlow v376 fixes Personal Order badges and cover spacing in **Tabs / Categor
 10. [Data model, synchronization, and backups](#data-model-synchronization-and-backups)
 11. [Configuration and development](#configuration-and-development)
 12. [Compatibility, limitations, and troubleshooting](#compatibility-limitations-and-troubleshooting)
-13. [Release v376 — technical changelog](#release-v376--technical-changelog)
-14. [Release v375 — historical rollback](#release-v375--technical-changelog)
-15. [Historical release v330 — technical changelog](#historical-release-v330--technical-changelog)
-16. [The complete MediaFlow evolution](#the-complete-mediaflow-evolution)
-17. [Project roadmap and Community hiatus](#project-roadmap-and-community-hiatus)
-18. [Project ownership and contact](#project-ownership-and-contact)
+13. [Release v377 — technical changelog](#release-v377--technical-changelog)
+14. [Release v376 — technical changelog](#release-v376--technical-changelog)
+15. [Release v375 — historical rollback](#release-v375--technical-changelog)
+16. [Historical release v330 — technical changelog](#historical-release-v330--technical-changelog)
+17. [The complete MediaFlow evolution](#the-complete-mediaflow-evolution)
+18. [Project roadmap and Community hiatus](#project-roadmap-and-community-hiatus)
+19. [Project ownership and contact](#project-ownership-and-contact)
 
 ---
 
@@ -80,7 +81,7 @@ The application is intended to support a large and diverse Library. It provides 
 
 ### Interface previews
 
-These are screenshots retained from earlier personal releases. They illustrate the project, **not necessarily the current v376 UI** or a particular theme.
+These are screenshots retained from earlier personal releases. They illustrate the project, **not necessarily the current v377 UI** or a particular theme.
 
 | Dashboard | Library |
 | --- | --- |
@@ -94,21 +95,21 @@ These are screenshots retained from earlier personal releases. They illustrate t
 
 ## Release status and development direction
 
-### Current local candidate: v376 (restored v373 feature baseline plus UI refinements)
+### Current local candidate: v377 (editable IDs, Jikan recovery, Personal Order refinement)
 
-v375 is the last committed **Personal Edition** release; v376 is the latest **local development candidate**. v375 was assembled from the **v373 Git source tree** with version metadata changed to 375. v376 builds on that restored application, updates its runtime/PWA assets to 376, and adds the Personal Order UI/queue improvements described below. Neither release inherits the canceled v374 tracking branch.
+v377 is the latest packaged **local development candidate**. It builds directly on the complete v376 Personal Edition module tree and improves Jikan reliability, external identifier editing, and the Personal Order position controls. No GitHub push or deployment was performed; the owner will manage repository history. The canceled v374 tracking branch remains excluded.
 
-| Area | v376 current candidate |
+| Area | v377 current candidate |
 | --- | --- |
 | Application feature baseline | **v373**: Advanced Logging Sorting & Custom Order Studio |
 | Logging presentation | **v372**: Logging Interface 3.0, building on v369–v371 |
 | Settings | **v365–v367** Settings Center 2.0 and stability/registration improvements |
-| Community / public social systems | Historical v302–v329 research; **not part of v376** |
-| MAL/SIMKL authenticated account tracking | **Canceled v374 experiment; excluded from v376** |
+| Community / public social systems | Historical v302–v329 research; **not part of v377** |
+| MAL/SIMKL authenticated account tracking | **Canceled v374 experiment; excluded from v377** |
 | MAL/SIMKL file/data imports | Existing import workflows retained where supported; **distinct from account tracking** |
 | Database | Existing private MediaFlow cloud-state system; v374 tracking tables removed |
 | Legacy tracking Edge Function | Old implementation disabled and configured to return HTTP 410; permanent deletion and provider-secret removal not confirmed |
-| Production verification | v376 local JS/PWA rebuild and Chromium regression checks passed; authenticated cross-device testing, live Pages/PWA deployment, and physical-device checks remain outstanding |
+| Production verification | v377 local JS/PWA rebuild, mocked Jikan and Chromium UI checks passed; authenticated cross-device testing, live Jikan, Pages/PWA deployment, and physical-device checks remain outstanding |
 
 **Historical v375 release-asset mismatch (resolved in v376 candidate):** v375 had metadata version 375 but v373-named runtime and PWA assets. v376 has its own rebuilt `mediaflow-v376.bundle.js`, `sw.js` cache and consistent version metadata. Production verification remains pending.
 
@@ -123,7 +124,7 @@ v375 is the last committed **Personal Edition** release; v376 is the latest **lo
 
 The experimental Community branch explored public profiles, social relationships, discovery, shared Collections, public rankings, ratings, and cross-user analytics. Providing these as a reliable service requires adequate hosting, secure data access, operational monitoring, performance, bandwidth, and sustainable maintenance resources.
 
-The current direction is a **high-quality personal workspace**. A future Community revival is not scheduled or promised. Community functionality is **not** a runtime dependency of v376.
+The current direction is a **high-quality personal workspace**. A future Community revival is not scheduled or promised. Community functionality is **not** a runtime dependency of v377.
 
 ## Feature overview
 
@@ -656,6 +657,14 @@ MediaFlow is maintained as a personal project. Any external code or documentatio
 
 ---
 
+## Release v377 — Technical Changelog
+
+The v377 update introduces **editable MyAnimeList/SIMKL/AniList/TMDB/IMDb/Trakt/Kitsu identifiers**, MAL verification, MAL-first Jikan matching, and an **Unmatched Titles** report with cover/category fallbacks and Edit/Retry controls. Automatic Jikan now applies a conservative rolling rate limit with backoff, per-title episode ledgers and safer incomplete-check handling; retried matches can contribute to the same authoritative fresh-title calculation. The Edit/Add Title UI places Seasons View at the end of Core Details, before the dedicated External IDs section. Personal Order gains wider three-digit position inputs without changing v376 cover presentation.
+
+Full implementation scope, exact file names, compatibility, testing limitations, and deployment steps: **[docs/CHANGELOG_v377.md](./docs/CHANGELOG_v377.md)**.
+
+---
+
 ## Release v376 — technical changelog
 
 **v376 Modular, Personal Edition** · October 11, 2026 · **Local candidate**
@@ -1179,3 +1188,12 @@ MediaFlow's design draws on the broader ecosystem of personal media tracking, di
 
 **MediaFlow v376 — Personal Edition (local development candidate)**  
 *Organize what you love. Track your journey. Keep your media your own.*
+
+
+---
+
+## v378 Tenrai Episode-Data Diagnostic Repair (Local Testing Hotfix)
+
+The repair build corrects episode-list classification without advancing to the full v379 release. A successful Tenrai response with an empty episode list is not automatically an API failure. Valid **not-yet-aired** MAL titles count as zero released episodes; **finished airing** titles with a trusted total can be resolved from catalogue metadata; **currently airing** titles without episode-level data are classified as **Missing Episode Data**, not a transport failure. A separate **Retry Missing Episode Data** control allows retrying these titles. Genuine HTTP/network errors still appear under **Retry API Failures**. The last trustworthy fresh-title count stays protected while data remains incomplete.
+
+No new cloud schema, account integration, or cover changes. Tested using synthetic provider responses; **live Tenrai responses cannot be verified from the local build environment**. See `docs/TENRAI_EPISODE_DATA_REPAIR.md`.
