@@ -1,5 +1,36 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v385 — Live Leveling, Full-Color Library & About Alignment
+
+**Release:** v385 Modular  
+**Date:** October 11, 2026  
+**Baseline:** v384 Modular  
+**Developer:** Alex Godly
+
+## 1. Complete theme-colored Logging Library
+
+The entire Browse Library shell and its expanded content now inherit coordinated gradients and surfaces from the live MediaFlow theme accent. The search/workspace container joins the colored header introduced in v384 rather than appearing as a plain gray block. Both Logging modes and existing picker functionality are retained.
+
+## 2. Correct official logo alignment
+
+The About hero now places the official MediaFlow logo on the same visual row as the **MediaFlow.** wordmark, with the version subtitle directly below the heading. Responsive dimensions prevent misalignment on small screens.
+
+## 3. Live sidebar and Statistics Leveling
+
+An event-driven, short-debounced updater patches the visible sidebar and Statistics XP/level/streak fields after relevant changes. Both use existing XP and streak calculations; no formula or cloud data schema changed. No full-page rerender or periodic Library scan is introduced.
+
+## 4. Accurate cloud save status
+
+The sidebar no longer claims **Saved to cloud storage** before a confirmed successful save. It reports unverified, pending, successful or failed states based on the existing save queue.
+
+## 5. Build and validation
+
+New `281-v385-live-leveling-themed-library.js` and `202-v385-themed-library-leveling.css`, rebuilt bundle, PWA cache `mediaflow-pwa-v385-shell-v1`, refreshed metadata and documentation. Chromium tests passed at **320, 390, 820, 1280 and 1920 px**, including simulated XP changes and save success/failure. **Live cloud, installed PWA updates and real-account performance remain unverified.**
+
+**Detailed changelog:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md)
+
+---
+
 # MediaFlow v384 — Fully Themed Browse Library & Dynamic About Branding
 
 **Release:** v384 Modular  

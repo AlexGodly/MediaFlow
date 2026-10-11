@@ -1,36 +1,37 @@
-# MediaFlow v384 — Theme-Colored Browse Library & Live About Branding
+# MediaFlow v385 — Live Leveling, Full-Color Logging Library & About Alignment
 
-**Latest modular candidate:** v384 · October 11, 2026  
+**Latest modular candidate:** v385 · October 11, 2026  
 **Developer/owner:** Alex Godly  
-**Baseline:** v383 Modular  
-**Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
-**Release notes:** [README2.md](./README2.md) · [Detailed v384 changelog](./docs/CHANGELOG_v384.md)
+**Baseline:** v384 Modular  
+**Delivery:** Modular ZIP for local testing, no GitHub commit, push or deployment.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v385 changelog](./docs/CHANGELOG_v385.md)
 
-MediaFlow v384 gives the entire **Logging → Browse Library** header a vivid, edge-to-edge theme-driven color treatment. It updates the **About** branding with the official packaged MediaFlow logo, removes “Personal Edition” wording from About, and uses the current application version metadata for all About version indicators, so the displays follow future releases automatically. The v383 FAQ, Fun Facts, About Studio, and data-integrity audit remain intact.
+v385 extends the theme color across **both the collapsed header and expanded Logging Library workspace**, optically aligns the official About logo with the wordmark, and makes the sidebar and Statistics XP/level/streak indicators update automatically from the same cached values. Cloud save status no longer claims success before a confirmed save. No XP formulas or cloud data schemas are changed.
 
-**Verification:** JavaScript syntax and five Chromium responsive scenarios passed. Checks include theme accent recoloring, official logo asset load, current and simulated future version indicators, About branding, FAQ/update controls and Logging expand/collapse. **Authenticated Supabase, production PWA upgrades and physical-device testing remain unverified.**
+**Validation:** Real Chromium UI checks passed at five screen widths, including live XP updates and simulated cloud save outcomes. Authenticated Supabase, real-account performance and installed-PWA upgrades remain unverified.
 
 ---
+
 
 # MediaFlow
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v384-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v385-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v384 (built on v383 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v385 (built on v384 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v384 · October 11, 2026, built on v383 Modular. **GitHub:** v384 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v385 · October 11, 2026, built on v384 Modular. **GitHub:** v385 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v384 release.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v385 release.
 
-**v384 changelog:** [README2.md](./README2.md), [detailed v384 changelog](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v385 changelog:** [README2.md](./README2.md), [detailed v385 changelog](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 

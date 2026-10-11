@@ -134,5 +134,6 @@
   "components/277-v381-multi-provider-reliability.js",
   "components/278-v382-logging-recommended-progress-xp.js",
   "components/279-v383-about-logging-data-integrity.js",
-  "components/280-v384-theme-brand-version.js"
+  "components/280-v384-theme-brand-version.js",
+  "components/281-v385-live-leveling-themed-library.js"
 ]
