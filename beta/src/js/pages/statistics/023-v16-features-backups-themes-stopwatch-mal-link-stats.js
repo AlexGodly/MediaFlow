@@ -92,8 +92,8 @@ async function confirmEmptyLibrary(mode){
 }
 async function malFetchPage(username,type,page){
   const candidates=[
-    `https://api.jikan.moe/v4/users/${encodeURIComponent(username)}/${type}list?page=${page}&limit=300`,
-    `https://api.jikan.moe/v4/users/${encodeURIComponent(username)}/${type}list/full?page=${page}`
+    `https://api.tenrai.org/v1/users/${encodeURIComponent(username)}/${type}list?page=${page}&limit=300`,
+    `https://api.tenrai.org/v1/users/${encodeURIComponent(username)}/${type}list/full?page=${page}`
   ];
   let lastErr=null;
   for(const url of candidates){

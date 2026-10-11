@@ -1,14 +1,14 @@
-# MediaFlow v377 — External IDs, Jikan Recovery & Personal Order Refinement
+# MediaFlow v378 — Tenrai, External ID Imports, Logging 4.0 & Personal Order
 
-**Latest local development candidate:** **v377** · October 11, 2026  
-**Developer / owner:** **Alex Godly**  
-**Application lineage:** v373 features → v375 rollback → v376 queue refinement → v377 IDs and Jikan reliability (v374 tracking canceled)  
-**Release status:** Modular source rebuilt, Chromium regression verified locally. **Not deployed to GitHub main/Pages.**  
-**Release notes:** [README2.md](./README2.md) · [Detailed v377 changelog](./docs/CHANGELOG_v377.md)
+**Latest modular candidate:** v378 · October 11, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v377 Modular · Personal Edition  
+**Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v378 changelog](./docs/CHANGELOG_v378.md)
 
-MediaFlow v377 adds editable External Media IDs to Add/Edit Title, MAL verification, MAL-ID-first Automatic Jikan checking, explicit unmatched-title and API-failure reports with targeted retry, improved request throttling and count protection, Seasons View at the end of Core Details, and firmer three-digit Personal Order position lanes. **All cover presentation remains as v376.** Existing personal Logging, XP, Collections, and cloud data contracts remain in place.
+MediaFlow v378 migrates MyAnimeList-dependent features from discontinued public Jikan endpoints to the public Tenrai v1 catalogue, supports provider-normalized external IDs in imports, upgrades the Logging Library with direct/bulk Add, multiple display modes, Clean Covers and draft Collapse/Expand, and fixes 3+ digit title position inputs and assigned Collection visibility in Personal Order → All Titles. Existing cover presentation is unchanged.
 
-> **Local candidate note:** v377 regenerates **mediaflow-v377.bundle.js**, `sw.js`, `version.json`, and its PWA cache. Local browser tests use synthetic accounts and mocked Jikan responses; live Jikan, production/cloud, and physical-device checks remain outstanding. This package has not been deployed to GitHub.
+**Verification:** Local synthetic-browser regression tests passed. Live Tenrai responses, authenticated cloud sync, and physical-device testing are still outstanding.
 
 ---
 
@@ -16,21 +16,21 @@ MediaFlow v377 adds editable External Media IDs to Add/Edit Title, MAL verificat
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v377-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v378-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v377 — Personal Edition (built on v376 modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v378 — Personal Edition (built on v377 modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v377 · October 11, 2026, built on the v376 modular release. **GitHub:** v377 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v378 · October 11, 2026, built directly on the v377 modular release. **GitHub:** v378 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v377 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v378 Personal Edition.
 
-**v377 changelog:** [README2.md](./README2.md), [detailed v377 changelog](./docs/CHANGELOG_v377.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v378 changelog:** [README2.md](./README2.md), [detailed v378 changelog](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
@@ -1188,3 +1188,12 @@ MediaFlow's design draws on the broader ecosystem of personal media tracking, di
 
 **MediaFlow v376 — Personal Edition (local development candidate)**  
 *Organize what you love. Track your journey. Keep your media your own.*
+
+
+---
+
+## v378 Tenrai Episode-Data Diagnostic Repair (Local Testing Hotfix)
+
+The repair build corrects episode-list classification without advancing to the full v379 release. A successful Tenrai response with an empty episode list is not automatically an API failure. Valid **not-yet-aired** MAL titles count as zero released episodes; **finished airing** titles with a trusted total can be resolved from catalogue metadata; **currently airing** titles without episode-level data are classified as **Missing Episode Data**, not a transport failure. A separate **Retry Missing Episode Data** control allows retrying these titles. Genuine HTTP/network errors still appear under **Retry API Failures**. The last trustworthy fresh-title count stays protected while data remains incomplete.
+
+No new cloud schema, account integration, or cover changes. Tested using synthetic provider responses; **live Tenrai responses cannot be verified from the local build environment**. See `docs/TENRAI_EPISODE_DATA_REPAIR.md`.

@@ -13,7 +13,7 @@
    Fresh-title definition:
    - Seasonal Anime Library title;
    - not completed/dropped;
-   - Jikan's public MAL episode list contains an aired/released episode number
+   - Tenrai's public MAL episode list contains an aired/released episode number
      greater than MediaFlow Library progress.
 
    Performance:
@@ -25,8 +25,8 @@
    - provider failure preserves the last good seasonalFreshCount.
    ============================================================ */
 
-const V166_SEASONAL_PROVIDER='Jikan / MyAnimeList';
-const V166_JIKAN_BASE='https://api.jikan.moe/v4';
+const V166_SEASONAL_PROVIDER='Tenrai / MyAnimeList';
+const V166_JIKAN_BASE='https://api.tenrai.org/v1';
 const V166_DEFAULT_SYNC_MINUTES=60;
 const V166_MIN_SYNC_MINUTES=15;
 const V166_MAX_SYNC_MINUTES=1440;
@@ -154,7 +154,7 @@ async function v166FetchJikan(path,{force=false,ttl=V166_CACHE_TTL}={}){
         return data;
       }
 
-      lastError=new Error(`Jikan HTTP ${res.status}`);
+      lastError=new Error(`Tenrai HTTP ${res.status}`);
 
       if(![408,429,500,502,503,504].includes(res.status)){
         break;
@@ -169,7 +169,7 @@ async function v166FetchJikan(path,{force=false,ttl=V166_CACHE_TTL}={}){
     }
   }
 
-  throw lastError||new Error('Jikan request failed');
+  throw lastError||new Error('Tenrai request failed');
 }
 
 function v166CandidateYear(item){
@@ -244,38 +244,69 @@ function v166AiredEpisodeNumber(row,now=Date.now()){
   return num;
 }
 
-async function v166AvailableEpisodeCount(malId,force=false){
-  const first=await v166FetchJikan(
-    `/anime/${encodeURIComponent(malId)}/episodes?page=1`,
-    {force,ttl:V166_CACHE_TTL}
-  );
+// Tenrai can return an empty episode list for valid entries. Distinguish that
+// from a transport failure. Never claim an airing series has zero released
+// episodes just because its episode catalogue is missing.
+function v166MissingTenraiEpisodeData(malId, details){
+  const error=new Error(`Episode list unavailable for MAL #${malId}; Tenrai has not supplied usable released-episode data for this title`);
+  error.kind='episode_data_unavailable';
+  error.malId=String(malId);
+  error.catalogueStatus=String(details?.status||'unknown');
+  return error;
+}
 
+function v166KnownReleaseCountFromDetails(details,now=Date.now()){
+  const state=String(details?.status||'').toLowerCase().replace(/[_-]/g,' ').trim();
+  const start=Date.parse(details?.aired?.from||'');
+  const future=Number.isFinite(start)&&start>now+5*60*1000;
+  // Valid upcoming shows have zero *released* episodes. This is a verified
+  // zero, rather than an API failure or an assumption based on empty episodes.
+  if(/not yet aired|upcoming/.test(state) || (future && !/currently airing|airing/.test(state)))return 0;
+  // For completed series only, MAL's total episode count is a safe released
+  // count even when the provider's detailed episode directory is absent.
+  if(/finished airing|complete(?:d)?/.test(state)){
+    const total=Number(details?.episodes);
+    if(Number.isSafeInteger(total)&&total>0)return total;
+  }
+  return null;
+}
+
+async function v166AvailableEpisodeCount(malId,force=false){
+  const id=encodeURIComponent(String(malId));
+  let first;
+  try{
+    first=await v166FetchJikan(`/anime/${id}/episodes?page=1`,{force,ttl:V166_CACHE_TTL});
+  }catch(err){
+    // Some valid MAL entries do not have an episode-directory resource yet.
+    // Validate against the actual MAL entry before deciding whether it is
+    // genuinely invalid or merely missing the episode list.
+    if(Number(err?.status)!==404)throw err;
+  }
+  const data=first?.data;
+  if(first && !Array.isArray(data)){
+    throw v166MissingTenraiEpisodeData(malId,null);
+  }
   const now=Date.now();
   let available=0;
+  for(const row of (data||[]))available=Math.max(available,v166AiredEpisodeNumber(row,now));
 
-  for(const row of (first?.data||[])){
-    available=Math.max(available,v166AiredEpisodeNumber(row,now));
-  }
-
-  const lastPage=Math.max(
-    1,
-    Math.floor(Number(first?.pagination?.last_visible_page)||1)
-  );
-
-  // Seasonal titles are normally one page. For long-running titles fetch only
-  // the last page instead of walking every historical page.
+  const lastPage=Math.max(1,Math.floor(Number(first?.pagination?.last_visible_page)||1));
   if(lastPage>1){
-    const last=await v166FetchJikan(
-      `/anime/${encodeURIComponent(malId)}/episodes?page=${lastPage}`,
-      {force,ttl:V166_CACHE_TTL}
-    );
-
-    for(const row of (last?.data||[])){
-      available=Math.max(available,v166AiredEpisodeNumber(row,now));
-    }
+    const last=await v166FetchJikan(`/anime/${id}/episodes?page=${lastPage}`,{force,ttl:V166_CACHE_TTL});
+    if(!Array.isArray(last?.data))throw v166MissingTenraiEpisodeData(malId,null);
+    for(const row of last.data)available=Math.max(available,v166AiredEpisodeNumber(row,now));
   }
+  if(available>0)return available;
 
-  return available;
+  // An empty/unusable episode directory is not automatically HTTP/API failure.
+  // Catalogue details establish zero for upcoming entries, or released total
+  // for finished entries. Airing series still require trustworthy episode data.
+  const info=await v166FetchJikan(`/anime/${id}`,{force,ttl:V166_CACHE_TTL});
+  const details=info?.data;
+  if(!details || typeof details!=='object')throw v166MissingTenraiEpisodeData(malId,null);
+  const known=v166KnownReleaseCountFromDetails(details,now);
+  if(known!==null)return known;
+  throw v166MissingTenraiEpisodeData(malId,details);
 }
 
 function v166SeasonalStatusText(){
@@ -291,7 +322,7 @@ function v166SeasonalStatusText(){
   }
 
   if(r.status==='error'){
-    return `Automatic refresh failed; MediaFlow kept the last good value (${s.seasonalFreshCount}). ${r.error||'Jikan is temporarily unavailable.'}`;
+    return `Automatic refresh failed; MediaFlow kept the last good value (${s.seasonalFreshCount}). ${r.error||'Tenrai is temporarily unavailable.'}`;
   }
 
   const when=s.seasonalFreshLastSyncAt
@@ -389,7 +420,7 @@ async function v166RefreshSeasonalFresh({force=false,notify=false}={}){
 
     // If every provider lookup failed, do NOT turn a good old value into zero.
     if(rows.length>0 && successfulChecks===0 && failures>0){
-      throw new Error('Jikan did not return any usable episode data this time.');
+      throw new Error('Tenrai did not return any usable episode data this time.');
     }
 
     settings.seasonalFreshCount=V166_SEASONAL_RUNTIME.freshTitles;
@@ -506,10 +537,10 @@ function v166SeasonalSettingsHtml(){
     <div class="v166-seasonal-auto-head">
       <div>
         <label class="field-label">Seasonal — titles with fresh episodes waiting</label>
-        <div class="hint">Automatic mode uses Jikan's public MyAnimeList episode data — no AniList API, OAuth token or API key. MediaFlow compares released episode numbers with each Seasonal Anime title's Library progress.</div>
+        <div class="hint">Automatic mode uses Tenrai's public MyAnimeList episode data — no AniList API, OAuth token or API key. MediaFlow compares released episode numbers with each Seasonal Anime title's Library progress.</div>
       </div>
       <div class="v166-seasonal-auto-actions">
-        <span class="pill">${auto?'Automatic · Jikan':'Manual'}</span>
+        <span class="pill">${auto?'Automatic · Tenrai':'Manual'}</span>
         <button type="button" class="toggle ${auto?'on':''}" onclick="App.v166ToggleSeasonalAuto()" aria-label="Toggle automatic Seasonal episode detection"></button>
       </div>
     </div>

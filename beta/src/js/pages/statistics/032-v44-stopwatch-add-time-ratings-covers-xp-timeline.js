@@ -156,7 +156,7 @@ async function v44FindCover(){
     const animeLike=catId==='seasonal'||catId==='backlog'||catId==='animemovies'||/anime/i.test(cat?.name||'');
     const reading=cat?.type==='reading'||/manga|manhwa|manhua|comic/i.test(cat?.name||'');
     if(animeLike||reading){
-      try{const endpoint=reading?'manga':'anime';const r=await fetch(`https://api.jikan.moe/v4/${endpoint}?q=${encodeURIComponent(title)}&limit=8`);if(r.ok){const j=await r.json();for(const x of (j?.data||[])){add(x?.images?.jpg?.large_image_url||x?.images?.jpg?.image_url,x?.title_english||x?.title,x?.year||x?.published?.from?.slice?.(0,4)||'',`Jikan / ${reading?'Manga':'Anime'}`);}}}catch(e){console.warn('Jikan cover search failed',e);}
+      try{const endpoint=reading?'manga':'anime';const r=await fetch(`https://api.tenrai.org/v1/${endpoint}?q=${encodeURIComponent(title)}&limit=8`);if(r.ok){const j=await r.json();for(const x of (j?.data||[])){add(x?.images?.jpg?.large_image_url||x?.images?.jpg?.image_url,x?.title_english||x?.title,x?.year||x?.published?.from?.slice?.(0,4)||'',`Jikan / ${reading?'Manga':'Anime'}`);}}}catch(e){console.warn('Jikan cover search failed',e);}
     }
     if(cat?.type==='video'&&!animeLike){
       try{const r=await fetch('https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));if(r.ok){const j=await r.json();for(const row of (j||[]).slice(0,8)){const x=row.show;add(x?.image?.original||x?.image?.medium,x?.name,x?.premiered?.slice?.(0,4)||'', 'TVmaze');}}}catch(e){console.warn('TVmaze cover search failed',e);}

@@ -36,7 +36,7 @@ function v377IdsEditorHtml(item){
   Object.keys(ids).filter(key=>!known.has(key)&&/^[a-z][a-z0-9_]{0,32}$/i.test(key)).forEach(key=>providers.push([key,key.toUpperCase(),'External identifier']));
   return `<section class="mf377-external-ids" data-v377-ids-editor>
     <details><summary><span class="mf377-section-icon">⌗</span> External Media IDs <small>Optional · ${Object.values(ids).filter(v=>v!=null&&String(v).trim()).length} saved</small></summary>
-    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic Jikan uses only the MyAnimeList ID.</p>
+    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic MAL Detection uses only the MyAnimeList ID.</p>
     <div class="mf377-ids-grid">${providers.map(([key,label,placeholder])=>`<label class="field" data-v377-id-row="${escapeHtml(key)}"><span class="field-label">${escapeHtml(label)}</span><span class="mf377-id-control"><input type="text" data-v377-id="${escapeHtml(key)}" autocomplete="off" spellcheck="false" value="${escapeHtml(String(ids[key]??''))}" placeholder="${escapeHtml(placeholder)}">${key==='mal'?'<button type="button" class="btn btn-sm" onclick="App.v377VerifyMalId()">Verify</button>':''}</span></label>`).join('')}</div>
     <div class="mf377-mal-preview" id="mf377-mal-preview" aria-live="polite"></div>
     </details>
@@ -120,7 +120,7 @@ async function v377VerifyMalId(){
   if(!field||!preview)return;
   const id=String(field.value||'').trim();
   if(!v377IdValid('mal',id)||!id){preview.textContent='Enter a valid numeric MAL ID first.';return;}
-  preview.textContent='Checking MyAnimeList via Jikan…';
+  preview.textContent='Checking MyAnimeList via Tenrai…';
   try{
     const result=await v166FetchJikan(`/anime/${encodeURIComponent(id)}/full`,{force:false,ttl:60*60*1000});
     const title=result?.data?.title||result?.data?.title_english;
@@ -171,8 +171,8 @@ async function v377JikanGate(){
       const now=Date.now();
       while(V377_REQUEST_TIMES.length&&now-V377_REQUEST_TIMES[0]>=60000)V377_REQUEST_TIMES.shift();
       const latest=V377_REQUEST_TIMES[V377_REQUEST_TIMES.length-1]||0;
-      const gap=Math.max(0,1150-(now-latest));
-      const minute=V377_REQUEST_TIMES.length>=53?Math.max(0,60050-(now-V377_REQUEST_TIMES[0])):0;
+      const gap=Math.max(0,700-(now-latest));
+      const minute=V377_REQUEST_TIMES.length>=100?Math.max(0,60050-(now-V377_REQUEST_TIMES[0])):0;
       const pause=Math.max(gap,minute);
       if(pause>0){await v166Sleep(pause);continue;}
       V377_REQUEST_TIMES.push(Date.now());return;
@@ -204,7 +204,7 @@ v166FetchJikan=async function(path,{force=false,ttl=V166_CACHE_TTL}={}){
         if(json&&typeof json==='object')V166_JIKAN_CACHE.set(url,{at:Date.now(),data:json});
         return json;
       }
-      error=new Error(`Jikan HTTP ${response.status}`);
+      error=new Error(`Tenrai HTTP ${response.status}`);
       error.status=response.status;
       if(![408,429,500,502,503,504].includes(response.status))break;
       if(attempt<2){
@@ -216,7 +216,7 @@ v166FetchJikan=async function(path,{force=false,ttl=V166_CACHE_TTL}={}){
       if(attempt<2)await v166Sleep(1200*2**attempt);
     }finally{clearTimeout(timer);}
   }
-  throw error||new Error('Jikan did not respond');
+  throw error||new Error('Tenrai did not respond');
 };
 
 // An explicit MAL ID is authoritative. If absent, use the v166 strict
@@ -250,9 +250,10 @@ async function v377Identify(item,force){
 function v377EnsureJikanState(){
   const s=S.settings||DEFAULT_SETTINGS;
   if(!s.v377JikanLedger||typeof s.v377JikanLedger!=='object'||Array.isArray(s.v377JikanLedger))s.v377JikanLedger={};
-  if(!s.v377JikanResults||typeof s.v377JikanResults!=='object')s.v377JikanResults={unmatched:[],failures:[],lastCheckedAt:0,completeBaseline:false};
+  if(!s.v377JikanResults||typeof s.v377JikanResults!=='object')s.v377JikanResults={unmatched:[],failures:[],unavailable:[],lastCheckedAt:0,completeBaseline:false};
   if(!Array.isArray(s.v377JikanResults.unmatched))s.v377JikanResults.unmatched=[];
   if(!Array.isArray(s.v377JikanResults.failures))s.v377JikanResults.failures=[];
+  if(!Array.isArray(s.v377JikanResults.unavailable))s.v377JikanResults.unavailable=[];
   return s;
 }
 function v377UnmatchedReportCover(item){
@@ -278,14 +279,16 @@ function v377ShowUnmatchedReport(){
   const report=v377EnsureJikanState().v377JikanResults;
   const unmatched=report.unmatched.filter(x=>S.library.some(i=>String(i?.id)===String(x.id)));
   const failures=report.failures.filter(x=>S.library.some(i=>String(i?.id)===String(x.id)));
+  const unavailable=report.unavailable.filter(x=>S.library.some(i=>String(i?.id)===String(x.id)));
   const root=document.createElement('div');
   root.id='mf377-report-overlay';
-  root.innerHTML=`<div class="mf377-report-backdrop" onclick="if(event.target===this)App.v377CloseReport()"><section class="mf377-report-dialog" role="dialog" aria-modal="true" aria-label="Unmatched Jikan titles">
-    <header><div><h2>Unmatched Titles</h2><p>${unmatched.length.toLocaleString()} unmatched · ${failures.length.toLocaleString()} API failures</p></div><button type="button" class="btn btn-sm" onclick="App.v377CloseReport()">Close</button></header>
-    <div class="mf377-report-toolbar"><button type="button" class="btn btn-primary btn-sm" ${!unmatched.length?'disabled':''} onclick="App.v377RetryUnmatched('all')">Check All Unmatched (${unmatched.length})</button><button type="button" class="btn btn-sm" ${!unmatched.length?'disabled':''} onclick="App.v377RetryUnmatched('selected')">Check Selected</button>${failures.length?`<button type="button" class="btn btn-sm" onclick="App.v377RetryUnmatched('failed')">Retry API Failures (${failures.length})</button>`:''}</div>
+  root.innerHTML=`<div class="mf377-report-backdrop" onclick="if(event.target===this)App.v377CloseReport()"><section class="mf377-report-dialog" role="dialog" aria-modal="true" aria-label="Unmatched MAL titles">
+    <header><div><h2>Unmatched Titles</h2><p>${unmatched.length.toLocaleString()} unmatched · ${failures.length.toLocaleString()} request failures · ${unavailable.length.toLocaleString()} missing episode lists</p></div><button type="button" class="btn btn-sm" onclick="App.v377CloseReport()">Close</button></header>
+    <div class="mf377-report-toolbar"><button type="button" class="btn btn-primary btn-sm" ${!unmatched.length?'disabled':''} onclick="App.v377RetryUnmatched('all')">Check All Unmatched (${unmatched.length})</button><button type="button" class="btn btn-sm" ${!unmatched.length?'disabled':''} onclick="App.v377RetryUnmatched('selected')">Check Selected</button>${failures.length?`<button type="button" class="btn btn-sm" onclick="App.v377RetryUnmatched('failed')">Retry API Failures (${failures.length})</button>`:''}${unavailable.length?`<button type="button" class="btn btn-sm" onclick="App.v377RetryUnmatched('unavailable')">Retry Missing Episode Data (${unavailable.length})</button>`:''}</div>
     <div class="mf377-report-progress" id="mf377-report-progress" aria-live="polite"></div>
     <div class="mf377-report-list">${unmatched.length?unmatched.map(entry=>v377ReportRow(entry,'unmatched')).join(''):'<div class="hint">No unmatched titles from the last check.</div>'}</div>
     ${failures.length?`<h3>Temporary API failures</h3><div class="mf377-report-list">${failures.map(entry=>v377ReportRow(entry,'failed')).join('')}</div>`:''}
+    ${unavailable.length?`<h3>Episode lists unavailable from Tenrai</h3><p class="hint">These MAL entries were identified, but Tenrai has not supplied enough released-episode data to calculate them safely. They are not necessarily network errors.</p><div class="mf377-report-list">${unavailable.map(entry=>v377ReportRow(entry,'unavailable')).join('')}</div>`:''}
   </section></div>`;
   document.body.appendChild(root);
 }
@@ -329,7 +332,7 @@ function v377RecomputeFromLedger(candidates,ledger){
 // promoted to an authoritative total unless all candidate outcomes are known.
 async function v377RunJikan({ids=null,force=false,notify=false}={}){
   const settings=v166EnsureSeasonalSettings(v377EnsureJikanState());
-  if(V166_SEASONAL_SYNC_RUNNING){if(notify)showToast('A Seasonal Jikan check is already running.');return null;}
+  if(V166_SEASONAL_SYNC_RUNNING){if(notify)showToast('A Seasonal Tenrai check is already running.');return null;}
   const all=v166SeasonalCandidates();
   const filter=ids?new Set(ids.map(String)):null;
   const rows=filter?all.filter(i=>filter.has(String(i.id))):all;
@@ -340,13 +343,14 @@ async function v377RunJikan({ids=null,force=false,notify=false}={}){
   // A retry updates prior unresolved records; a full refresh replaces its report.
   const unresolved=new Map((full?[]:report.unmatched||[]).map(x=>[String(x.id),x]));
   const failures=new Map((full?[]:report.failures||[]).map(x=>[String(x.id),x]));
+  const unavailable=new Map((full?[]:report.unavailable||[]).map(x=>[String(x.id),x]));
   V166_SEASONAL_SYNC_RUNNING=true;
   V166_SEASONAL_RUNTIME={status:'running',checked:0,total:rows.length,matched:0,freshTitles:0,freshEpisodes:0,message:'',error:'',startedAt:Date.now(),finishedAt:0};
   let changed=false,successes=0;
   v166UpdateSeasonalStatusDOM();
   try{
     for(const item of rows){
-      const key=String(item.id);unresolved.delete(key);failures.delete(key);
+      const key=String(item.id);unresolved.delete(key);failures.delete(key);unavailable.delete(key);
       try{
         const match=await v377Identify(item,force);
         if(match.stored)changed=true;
@@ -354,7 +358,7 @@ async function v377RunJikan({ids=null,force=false,notify=false}={}){
           delete ledger[key];unresolved.set(key,{id:key,reason:match.reason||'No confident MAL match'});
         }else{
           const available=await v166AvailableEpisodeCount(match.malId,force);
-          if(!Number.isFinite(available)||available<=0)throw new Error('Jikan episode data unavailable or empty');
+          if(!Number.isFinite(available)||available<0)throw v166MissingTenraiEpisodeData(match.malId,null);
           ledger[key]={malId:String(match.malId),sourceTitle:cleanTitle(item.title||''),available,at:Date.now()};
           successes++;V166_SEASONAL_RUNTIME.matched++;
           const waiting=Math.max(0,available-(Number(item.progress)||0));
@@ -364,6 +368,7 @@ async function v377RunJikan({ids=null,force=false,notify=false}={}){
         const message=String(err?.message||err);
         const invalid=Number(err?.status)===404&&!!v166GetMalId(item);
         if(invalid){delete ledger[key];unresolved.set(key,{id:key,reason:'Invalid or unavailable MAL ID (HTTP 404)'});}
+        else if(err?.kind==='episode_data_unavailable')unavailable.set(key,{id:key,reason:message});
         else failures.set(key,{id:key,reason:message});
         console.warn('MediaFlow v377 Jikan check',item?.title,err);
       }
@@ -376,12 +381,12 @@ async function v377RunJikan({ids=null,force=false,notify=false}={}){
     // Remove ledger rows for deleted or no-longer-Seasonal items.
     const active=new Set(all.map(i=>String(i.id)));
     for(const key of Object.keys(ledger))if(!active.has(key))delete ledger[key];
-    report.unmatched=[...unresolved.values()];report.failures=[...failures.values()];report.lastCheckedAt=Date.now();
+    report.unmatched=[...unresolved.values()];report.failures=[...failures.values()];report.unavailable=[...unavailable.values()];report.lastCheckedAt=Date.now();
     const aggregate=v377RecomputeFromLedger(all,ledger);
     // Unmatched entries are known absent, not API failures. We may safely count
     // them as zero provided every OTHER active title has a usable episode count.
     const resolvedOrUnmatched=aggregate.complete||all.every(i=>v377LedgerMatches(i,ledger[String(i.id)])||unresolved.has(String(i.id)));
-    const safe=resolvedOrUnmatched&&report.failures.length===0;
+    const safe=resolvedOrUnmatched&&report.failures.length===0&&report.unavailable.length===0;
     if(safe){
       settings.seasonalFreshCount=aggregate.freshTitles;
       settings.seasonalFreshLastEpisodeTotal=aggregate.freshEpisodes;
@@ -390,21 +395,21 @@ async function v377RunJikan({ids=null,force=false,notify=false}={}){
       settings.seasonalFreshLastProvider=V166_SEASONAL_PROVIDER;
       report.completeBaseline=true;
     }
-    V166_SEASONAL_RUNTIME.status=safe?'success':(successes||report.unmatched.length?'partial':'error');
-    V166_SEASONAL_RUNTIME.message=safe?'Check completed.':`Partial check: ${report.failures.length} API failures. Last verified fresh count kept (${oldCount}).`;
+    V166_SEASONAL_RUNTIME.status=safe?'success':(successes||report.unmatched.length||report.unavailable.length?'partial':'error');
+    V166_SEASONAL_RUNTIME.message=safe?'Check completed.':`Partial check: ${report.failures.length} request failures, ${report.unavailable.length} missing episode lists. Last verified fresh count kept (${oldCount}).`;
     V166_SEASONAL_RUNTIME.error=!safe?V166_SEASONAL_RUNTIME.message:'';
     V166_SEASONAL_RUNTIME.finishedAt=Date.now();
     if(changed)try{v53InvalidateLibraryCache();}catch(_){}
     await saveState();
     if(S.view==='settings')render();else v166UpdateSeasonalStatusDOM();
     if(document.getElementById('mf377-report-overlay'))v377ShowUnmatchedReport();
-    if(notify)showToast(safe?`${settings.seasonalFreshCount} Seasonal titles with fresh episodes`:`Jikan partially checked; ${report.failures.length} API failures. Last good count kept.`);
-    return {freshTitles:settings.seasonalFreshCount,matched:aggregate.matched,unmatched:report.unmatched.length,failed:report.failures.length,complete:safe};
+    if(notify)showToast(safe?`${settings.seasonalFreshCount} Seasonal titles with fresh episodes`:`Tenrai partial check: ${report.failures.length} request failures, ${report.unavailable.length} missing episode lists. Last good count kept.`);
+    return {freshTitles:settings.seasonalFreshCount,matched:aggregate.matched,unmatched:report.unmatched.length,failed:report.failures.length,unavailable:report.unavailable.length,complete:safe};
   }catch(err){
     V166_SEASONAL_RUNTIME.status='error';V166_SEASONAL_RUNTIME.error=String(err?.message||err);
     V166_SEASONAL_RUNTIME.finishedAt=Date.now();
     settings.seasonalFreshCount=oldCount;
-    if(notify)showToast('Jikan refresh failed; last good count preserved.');
+    if(notify)showToast('Tenrai refresh failed; last good count preserved.');
     return null;
   }finally{
     V166_SEASONAL_SYNC_RUNNING=false;
@@ -416,7 +421,7 @@ v166RefreshSeasonalFresh=function(options){return v377RunJikan(options||{});};
 App.v166RefreshSeasonalFresh=function(force){return v377RunJikan({force:!!force,notify:true});};
 App.v377RetryUnmatched=function(mode){
   const report=v377EnsureJikanState().v377JikanResults;
-  const ids=mode==='failed'?report.failures.map(x=>x.id):mode==='selected'?[...V377_SELECTED_UNMATCHED]:report.unmatched.map(x=>x.id);
+  const ids=mode==='failed'?report.failures.map(x=>x.id):mode==='unavailable'?report.unavailable.map(x=>x.id):mode==='selected'?[...V377_SELECTED_UNMATCHED]:report.unmatched.map(x=>x.id);
   if(!ids.length){showToast('No titles selected for retry.');return;}
   if(mode==='selected')for(const id of ids)V377_SELECTED_UNMATCHED.delete(String(id));
   return v377RunJikan({ids,force:true,notify:true});
@@ -426,13 +431,13 @@ const v377SettingsHtmlBase=v166SeasonalSettingsHtml;
 v166SeasonalSettingsHtml=function(){
   const html=v377SettingsHtmlBase.apply(this,arguments);
   const r=v377EnsureJikanState().v377JikanResults;
-  const controls=`<div class="mf377-jikan-report-actions"><button type="button" class="btn btn-sm" ${!r.lastCheckedAt?'disabled':''} onclick="App.v377ShowUnmatchedReport()">View Unmatched Titles (${r.unmatched.length})</button><button type="button" class="btn btn-sm btn-ghost" ${!r.failures.length?'disabled':''} onclick="App.v377RetryUnmatched('failed')">Retry API Failures (${r.failures.length})</button></div><div class="mf377-jikan-report-hint hint">Jikan uses exact MAL IDs first. Unmatched names and API errors are tracked separately. Retried titles contribute to the fresh count after a reliable result.</div>`;
+  const controls=`<div class="mf377-jikan-report-actions"><button type="button" class="btn btn-sm" ${!r.lastCheckedAt?'disabled':''} onclick="App.v377ShowUnmatchedReport()">View Unmatched Titles (${r.unmatched.length})</button><button type="button" class="btn btn-sm btn-ghost" ${!r.failures.length?'disabled':''} onclick="App.v377RetryUnmatched('failed')">Retry API Failures (${r.failures.length})</button><button type="button" class="btn btn-sm btn-ghost" ${!r.unavailable.length?'disabled':''} onclick="App.v377RetryUnmatched('unavailable')">Retry Missing Episode Data (${r.unavailable.length})</button></div><div class="mf377-jikan-report-hint hint">Tenrai uses exact MAL IDs first. Unmatched names and API errors are tracked separately. Retried titles contribute to the fresh count after a reliable result.</div>`;
   return html.replace('<div id="v166-seasonal-status"',controls+'<div id="v166-seasonal-status"');
 };
 const v377StatusBase=v166SeasonalStatusText;
 v166SeasonalStatusText=function(){
   const text=v377StatusBase.apply(this,arguments),r=V166_SEASONAL_RUNTIME;
-  if(r.status==='partial')return `Partial Jikan check: ${v377EnsureJikanState().v377JikanResults.failures.length} API errors. Last trustworthy count kept (${S.settings.seasonalFreshCount}). Use Retry API Failures.`;
+  if(r.status==='partial')return `Partial Tenrai check: ${v377EnsureJikanState().v377JikanResults.failures.length} request failures, ${v377EnsureJikanState().v377JikanResults.unavailable.length} missing episode lists. Last trustworthy count kept (${S.settings.seasonalFreshCount}). Use the relevant retry button.`;
   return text;
 };
 // Current report remains available after popup close; use persisted Settings to

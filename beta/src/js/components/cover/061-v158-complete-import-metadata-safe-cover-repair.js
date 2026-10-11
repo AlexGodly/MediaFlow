@@ -1036,7 +1036,7 @@ async function v158FindJikanCover(item,kind){
 
   // Stable MAL ID = exact identity. This is the safest path.
   if(/^\d+$/.test(malId)){
-    const j=await v158FetchJson(`https://api.jikan.moe/v4/${endpoint}/${encodeURIComponent(malId)}`,'jikan',380);
+    const j=await v158FetchJson(`https://api.tenrai.org/v1/${endpoint}/${encodeURIComponent(malId)}`,'jikan',380);
     const x=j?.data;
     if(x&&String(x?.mal_id??'')===malId){
       if(kind==='anime-movie'&&String(x?.type||'').toLowerCase()!=='movie')return null;
@@ -1055,7 +1055,7 @@ async function v158FindJikanCover(item,kind){
   if(!q)return null;
 
   const j=await v158FetchJson(
-    `https://api.jikan.moe/v4/${endpoint}?q=${encodeURIComponent(q)}&limit=12`,
+    `https://api.tenrai.org/v1/${endpoint}?q=${encodeURIComponent(q)}&limit=12`,
     'jikan',380
   );
 

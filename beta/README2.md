@@ -1,5 +1,32 @@
 # MediaFlow — Latest Release Changelog
 
+## MediaFlow v378 — Tenrai Migration, Import IDs, Logging 4.0 & Personal Order
+
+**Release:** v378 Modular — Personal Edition  
+**Baseline:** v377 Modular  
+**Date:** October 11, 2026  
+**Developer:** Alex Godly  
+**Status:** Built and locally tested; not committed, pushed or deployed.
+
+### 1. Automatic MAL Detection powered by Tenrai
+Migrated MyAnimeList metadata, episode lookup, unmatched-title retries, API failure retries, and Add/Edit Title MAL verification to Tenrai's public v1 endpoints. Retains MAL-ID-first matching and trustworthy-count protection, without introducing OAuth or external account tracking.
+
+### 2. External Media IDs in imports
+Normalizes known provider identifiers in canonical Exchange Hub import flows, extracts MAL IDs from recognized URLs, preserves manually corrected IDs, rejects invalid values and presents import ID outcome counts.
+
+### 3. Logging 4.0
+Adds Collapse All/Expand All for Quick Logging and Per Unit, direct title Add, five Logging Library display modes, Clean Covers, multi-select, Select Visible, Deselect All, and one-click Add Selected. Draft entries start at zero consumption until deliberately configured.
+
+### 4. Personal Order
+Fixes narrow title position inputs (tested for 3+ digits) and includes assigned Collection blocks within Lists → All Titles, following their mixed order alongside direct titles. No existing cover presentation changes.
+
+### 5. Icons, tests and packaging
+Semantic icons for Unmatched, Retry, Verify, and External Media IDs. Built JS/PWA metadata for v378. Chromium synthetic tests at mobile/tablet/desktop widths passed; live Tenrai/cloud/physical-device testing not performed.
+
+**Complete technical changelog:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md).
+
+---
+
 ## MediaFlow v377 — External IDs, Reliable Jikan & Personal Order Positions
 
 **Release:** v377 Modular — Personal Edition  
@@ -91,3 +118,12 @@ v373 introduced the Logging Sorting & Custom Order Studio, with session insertio
 ---
 
 **Commit policy:** When an approved release is deployed to GitHub `main`, the commit message is **only the numeric version** (for v376, `376`). This local candidate has not been pushed or deployed.
+
+
+---
+
+## v378 Tenrai Episode-Data Diagnostic Repair (Local Testing Hotfix)
+
+The repair build corrects episode-list classification without advancing to the full v379 release. A successful Tenrai response with an empty episode list is not automatically an API failure. Valid **not-yet-aired** MAL titles count as zero released episodes; **finished airing** titles with a trusted total can be resolved from catalogue metadata; **currently airing** titles without episode-level data are classified as **Missing Episode Data**, not a transport failure. A separate **Retry Missing Episode Data** control allows retrying these titles. Genuine HTTP/network errors still appear under **Retry API Failures**. The last trustworthy fresh-title count stays protected while data remains incomplete.
+
+No new cloud schema, account integration, or cover changes. Tested using synthetic provider responses; **live Tenrai responses cannot be verified from the local build environment**. See `docs/TENRAI_EPISODE_DATA_REPAIR.md`.
