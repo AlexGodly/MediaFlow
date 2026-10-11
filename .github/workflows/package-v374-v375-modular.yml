@@ -1,0 +1,63 @@
+name: Package MediaFlow v374 and v375 Modular
+
+on:
+  push:
+    branches:
+      - packaging/v374-v375-modular
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout MediaFlow with historical commits
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build separate modular ZIP archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/modular"
+          for spec in \
+            "374:e4430d1f0ad75d62fc1078b0499680473330291b" \
+            "375:ee119db9b2179e6c38de2c24434e83dbd03162e8"; do
+            version="${spec%%:*}"
+            commit="${spec#*:}"
+            dest="$RUNNER_TEMP/modular/v$version"
+            mkdir -p "$dest"
+            git archive "$commit" | tar -xf - -C "$dest"
+            rm -rf "$dest/beta" "$dest/legacy"
+            test -f "$dest/index.html"
+            test -f "$dest/VERSION"
+            test ! -e "$dest/beta"
+            test ! -e "$dest/legacy"
+            (cd "$dest" && zip -q -r -9 "$GITHUB_WORKSPACE/MediaFlow_v${version}_Modular.zip" .)
+            unzip -t "$GITHUB_WORKSPACE/MediaFlow_v${version}_Modular.zip" | tail -n 1
+            if unzip -Z1 "$GITHUB_WORKSPACE/MediaFlow_v${version}_Modular.zip" | grep -E '^(beta|legacy)/'; then
+              echo "Unexpected beta or legacy content"
+              exit 1
+            fi
+            ls -lh "$GITHUB_WORKSPACE/MediaFlow_v${version}_Modular.zip"
+          done
+
+      - name: Upload MediaFlow v374 Modular ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow_v374_Modular
+          path: MediaFlow_v374_Modular.zip
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload MediaFlow v375 Modular ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFlow_v375_Modular
+          path: MediaFlow_v375_Modular.zip
+          retention-days: 30
+          if-no-files-found: error
