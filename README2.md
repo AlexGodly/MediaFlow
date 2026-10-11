@@ -1,5 +1,43 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v382 — Logging Progress Outlook, Direct Recommended Titles & XP Summary Redesign
+
+**Release:** v382 Modular · Personal Edition  
+**Date:** October 11, 2026  
+**Baseline:** v381 Modular  
+**Developer:** Alex Godly  
+**Delivery:** Complete modular ZIP, local testing only; **no GitHub commits, pushes, or deployments**.
+
+## 1. Professional Logging XP summary
+
+Replaces the legacy pale inline XP calculation with a responsive, theme-aware **Estimated Reward** card showing the total projected XP, base XP, rotation multiplier, streak multiplier, and streak days. The current rotation description is preserved. All numbers come from the existing XP estimator, and actual awards still occur only upon submission. Works in **Quick Logging and Per Unit** and refreshes with draft changes.
+
+## 2. Recommended title — one-click direct addition
+
+Fixes the longstanding shortcut that previously only filled the search field. **Use recommended title** now calls the existing canonical direct-add logic and actually inserts the recommended Library title into the current Logging draft in **both modes**. It preserves the active mode and unrelated drafts, reveals hidden Added Titles, prevents duplicates, and locates an already-added card. Only successful addition shows the confirmation message; success uses a meaningful **check-circle**, replacing the generic circle-arrow icon. The recommendation card derives its state from real draft membership, not the search input.
+
+## 3. Per Unit current and future progress
+
+Every Per Unit added title displays separate **Current progress** and **After this draft** progress bars, plus the count of staged units. Future progress uses MediaFlow's existing contiguous episode/season-aware projection: gaps and repeat units do not falsely advance the bar. Unknown totals display `?` and a neutral track rather than inventing a completion percentage. The bars update when the itemized draft changes. Quick Logging and main Library artwork/cards are unchanged.
+
+## 4. Source and compatibility
+
+- New JS module: `src/js/components/278-v382-logging-recommended-progress-xp.js`.
+- New CSS: `assets/css/199-v382-logging-xp-progress.css`.
+- Rebuilt bundle: `assets/js/mediaflow-v382.bundle.js`.
+- PWA shell: `mediaflow-pwa-v382-shell-v1`; updated `VERSION`, `version.json`, app metadata, runtime registration, and index asset references.
+- **No** database migrations, Edge Functions, new credentials, new paid services, XP formula changes, or GitHub operations.
+
+## 5. Tests and limitations
+
+Node syntax validation passed. Focused Chromium tests passed in both Logging modes at **320, 390, 820, 1280 and 1920 px**. Tests verified direct adding, idempotent repeated clicks, XP card refresh, current/proposed progress (9/14 → 12/14 for episodes 10–12), gap/repeat protection, and unknown totals.
+
+Testing used synthetic fixture state, **not a logged-in Supabase account**. Production-scale performance, cloud round-trip, and physical-device validation remain outstanding. v381 multi-provider behavior is retained but was not live-tested in this release.
+
+**Detailed source, acceptance tests and deployment guidance:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md).
+
+---
+
 # MediaFlow v381 — Multi-Provider Reliability & Detection UI Corrections
 
 **Release:** v381 Modular · Personal Edition  

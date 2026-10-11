@@ -131,5 +131,6 @@
   "components/274-v378-tenrai-import-logging-order.js",
   "components/275-v379-logging-personal-order-stability.js",
   "components/276-v380-providers-logging-order.js",
-  "components/277-v381-multi-provider-reliability.js"
+  "components/277-v381-multi-provider-reliability.js",
+  "components/278-v382-logging-recommended-progress-xp.js"
 ]

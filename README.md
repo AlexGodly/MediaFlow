@@ -1,14 +1,14 @@
-# MediaFlow v381 — Multi-Provider Reliability & Detection UI Corrections
+# MediaFlow v382 — Logging Progress Outlook, Recommended Title Direct Add & XP Redesign
 
-**Latest modular candidate:** v381 · October 11, 2026  
+**Latest modular candidate:** v382 · October 11, 2026  
 **Developer/owner:** Alex Godly  
-**Baseline:** v380 Modular · Personal Edition  
+**Baseline:** v381 Modular · Personal Edition  
 **Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
-**Release notes:** [README2.md](./README2.md) · [Detailed v381 changelog](./docs/CHANGELOG_v381.md)
+**Release notes:** [README2.md](./README2.md) · [Detailed v382 changelog](./docs/CHANGELOG_v382.md)
 
-MediaFlow v381 improves reliability across the existing five episode-data providers and Automatic Multi-Provider, including AniList query repair, rate-limit/cooldown handling, AniZip date parsing, Kitsu mapping and pagination, conservative Tenrai dates, TVmaze season matching, dynamic provider labels, diagnostics and single-icon action buttons. The trusted Fresh Titles count remains protected when scans are incomplete.
+MediaFlow v382 redesigns the Quick and Per Unit Logging XP estimate as a compact, professional theme-aware reward card. **Use recommended title** now directly adds the recommended Library title in either Logging interface (without duplicates, mode switches or draft loss) and shows a genuine check-circle confirmation. **Per Unit added title cards** show two progress bars: current saved progress and future progress after the staged units, calculated with existing contiguous-unit and season-aware rules.
 
-**Verification:** Local Chromium and deterministic provider-response fixture tests passed. **Live provider access, real Supabase user data, large-library responsiveness and physical-device behavior remain unverified.** AniList use is based on the owner's reported permission; API usage conditions and TVmaze CC BY-SA attribution/ShareAlike requirements apply.
+**Verification:** JavaScript syntax validation and 10 focused Chromium interaction tests at 320, 390, 820, 1280, and 1920 px passed. **Authenticated Supabase data, production-scale performance and physical-device behavior remain unverified.** Existing third-party provider limitations from v381 are unchanged.
 
 ---
 
@@ -16,21 +16,21 @@ MediaFlow v381 improves reliability across the existing five episode-data provid
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v381-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v382-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v381 — Personal Edition (built on v380 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v382 — Personal Edition (built on v381 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v381 · October 11, 2026, built on v380 Modular. **GitHub:** v381 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v382 · October 11, 2026, built on v381 Modular. **GitHub:** v382 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v381 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v382 Personal Edition.
 
-**v381 changelog:** [README2.md](./README2.md), [detailed v381 changelog](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v382 changelog:** [README2.md](./README2.md), [detailed v382 changelog](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
