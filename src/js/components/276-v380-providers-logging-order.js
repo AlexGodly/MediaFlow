@@ -178,18 +178,10 @@ const V380_FETCH_CACHE=new Map(),V380_FETCH_PENDING=new Map();
 const V380_SOURCE_BY_MAL=new Map();
 const V380_RESPONSE_TTL=6*60*60*1000;
 const V380_PROVIDER_LAST_REQUEST=new Map();
-const V380_PROVIDER_INTERVAL={"graphql.anilist.co":2200,"api.tvmaze.com":650,"kitsu.io":750,"api.ani.zip":550};
-let V380_PROVIDER_GATE=Promise.resolve();
-function v380GateRequest(url){
-  const hostname=new URL(url).hostname,interval=V380_PROVIDER_INTERVAL[hostname]||700;
-  const task=V380_PROVIDER_GATE.then(async()=>{
-    const wait=Math.max(0,interval-(Date.now()-(V380_PROVIDER_LAST_REQUEST.get(hostname)||0)));
-    if(wait)await v166Sleep(wait);
-    V380_PROVIDER_LAST_REQUEST.set(hostname,Date.now());
-  });
-  V380_PROVIDER_GATE=task.catch(()=>{});
-  return task;
-}
+const V380_PROVIDER_INTERVAL={"graphql.anilist.co":2500,"api.tvmaze.com":750,"kitsu.io":850,"api.ani.zip":600};
+const V381_PROVIDER_QUEUES=new Map();
+const V381_PROVIDER_COOLDOWN=new Map();
+const V381_PROVIDER_HEALTH=new Map();
 const V380_PROVIDER_SEQUENCE=['tenrai','anizip','anilist','tvmaze','kitsu'];
 function v380Unavailable(provider,message){const e=new Error(`${V380_NAMES[provider]}: ${message}`);e.kind='episode_data_unavailable';e.provider=provider;return e;}
 function v380ValidPositive(value){const n=Number(value);return Number.isSafeInteger(n)&&n>0?n:null;}
@@ -200,134 +192,214 @@ function v380AiredTimestamp(value){
   const ts=Date.parse(text);return Number.isFinite(ts)?ts:null;
 }
 function v380TodayAired(value){const t=v380AiredTimestamp(value);return t!==null&&t<=Date.now()+5*60*1000;}
+function v381RecordHealth(hostname,ok,reason=''){
+ const state=V381_PROVIDER_HEALTH.get(hostname)||{ok:0,failed:0,reason:'',last:0};
+ state[ok?'ok':'failed']++;state.reason=reason;state.last=Date.now();V381_PROVIDER_HEALTH.set(hostname,state);
+}
+async function v380GateRequest(url){
+ const hostname=new URL(url).hostname;
+ const previous=V381_PROVIDER_QUEUES.get(hostname)||Promise.resolve();
+ const current=previous.catch(()=>{}).then(async()=>{
+  const interval=V380_PROVIDER_INTERVAL[hostname]||700;
+  const cooldown=V381_PROVIDER_COOLDOWN.get(hostname)||0;
+  const gap=(V380_PROVIDER_LAST_REQUEST.get(hostname)||0)+interval;
+  const wait=Math.max(0,cooldown-Date.now(),gap-Date.now());
+  if(wait)await v166Sleep(wait);
+  V380_PROVIDER_LAST_REQUEST.set(hostname,Date.now());
+ });
+ V381_PROVIDER_QUEUES.set(hostname,current);
+ try{await current;}finally{if(V381_PROVIDER_QUEUES.get(hostname)===current)V381_PROVIDER_QUEUES.delete(hostname);}
+}
+function v381RetryAfter(response){
+ const raw=response.headers.get('Retry-After');let until=0;
+ if(raw){const sec=Number(raw);until=Number.isFinite(sec)?Date.now()+Math.max(0,sec*1000):Date.parse(raw)||0;}
+ const reset=Number(response.headers.get('X-RateLimit-Reset'));
+ if(Number.isFinite(reset)&&reset>0)until=Math.max(until,reset*1000);
+ return Math.max(0,until-Date.now());
+}
 async function v380Request(url,{method='GET',body=null,force=false,ttl=V380_RESPONSE_TTL}={}){
-  const key=method+':'+url+(body?'#'+body:'');
-  const record=V380_FETCH_CACHE.get(key);
-  if(!force&&record&&Date.now()-record.at<ttl)return record.value;
-  if(V380_FETCH_PENDING.has(key))return V380_FETCH_PENDING.get(key);
-  const promise=(async()=>{
-    let lastError;
-    for(let attempt=0;attempt<2;attempt++){
-      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),14500);
-      try{
-        await v380GateRequest(url);
-        const result=await fetch(url,{method,headers:{Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},body,signal:controller.signal});
-        if(!result.ok){const e=new Error(`HTTP ${result.status}`);e.status=result.status;
-          if((result.status===429||result.status>=500)&&attempt===0){lastError=e;const delay=Math.max(1200,Math.min(5000,Number(result.headers.get('Retry-After'))*1000||1800));await v166Sleep(delay);continue;}
-          throw e;
-        }
-        const json=await result.json();if(!json||typeof json!=='object')throw new Error('Invalid API response');
-        V380_FETCH_CACHE.set(key,{at:Date.now(),value:json});return json;
-      }catch(err){lastError=err;if(attempt===0&&(err?.name==='AbortError'||err?.status>=500)){await v166Sleep(1000);continue;}throw err;}
-      finally{clearTimeout(timer);}
+ const key=method+':'+url+(body?'#'+body:'');
+ const record=V380_FETCH_CACHE.get(key);
+ if(!force&&record&&Date.now()-record.at<ttl)return record.value;
+ if(V380_FETCH_PENDING.has(key))return V380_FETCH_PENDING.get(key);
+ const hostname=new URL(url).hostname;
+ const cooldown=V381_PROVIDER_COOLDOWN.get(hostname)||0;
+ if(cooldown>Date.now()){const e=new Error(`${hostname}: temporarily paused until ${new Date(cooldown).toLocaleTimeString()} after a provider failure/rate limit`);e.kind='provider_cooldown';e.providerHost=hostname;throw e;}
+ const promise=(async()=>{
+  let error;
+  for(let attempt=0;attempt<3;attempt++){
+   // Queue / rate-limit waiting must not consume the actual HTTP timeout.
+   await v380GateRequest(url);
+   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),18000);
+   try{
+    const result=await fetch(url,{method,headers:{Accept:hostname==='kitsu.io'?'application/vnd.api+json':'application/json',...(body?{'Content-Type':'application/json'}:{})},body,signal:controller.signal});
+    if(!result.ok){
+      const e=new Error(`${hostname} HTTP ${result.status}`);e.status=result.status;e.providerHost=hostname;
+      if(result.status===429){e.kind='rate_limited';const ms=Math.max(2500,v381RetryAfter(result)||60000);V381_PROVIDER_COOLDOWN.set(hostname,Date.now()+ms);e.retryAfterMs=ms;}
+      if(result.status===429)throw e; // Respect provider cooldown on a later check; never hammer Retry-After.
+      if(result.status>=500&&attempt<2){error=e;continue;}
+      throw e;
     }
-    throw lastError||new Error('Provider request failed');
-  })();
-  V380_FETCH_PENDING.set(key,promise);try{return await promise;}finally{V380_FETCH_PENDING.delete(key);}
+    const json=await result.json();if(!json||typeof json!=='object'){const e=new Error(`${hostname}: Invalid API response`);e.kind='invalid_response';throw e;}
+    if(hostname==='graphql.anilist.co'&&Array.isArray(json.errors)&&json.errors.length){const e=new Error('AniList GraphQL: '+String(json.errors[0].message||'validation or API error'));e.kind='graphql_error';throw e;}
+    V381_PROVIDER_COOLDOWN.delete(hostname);v381RecordHealth(hostname,true);
+    V380_FETCH_CACHE.set(key,{at:Date.now(),value:json});return json;
+   }catch(err){
+    error=err;
+    if(!err?.kind&&!err?.status){err.kind=err?.name==='AbortError'?'timeout':'network_or_cors';}
+    if(err?.kind==='network_or_cors'){
+      err.message=`${hostname}: connection or CORS blocked (${String(err.message||'network failure')})`;
+      // A browser-level block cannot be fixed by repeating the same request.
+      V381_PROVIDER_COOLDOWN.set(hostname,Date.now()+60000);
+    }
+    v381RecordHealth(hostname,false,String(err?.message||err));
+    if(attempt<2&&(err?.kind==='timeout'||Number(err?.status)>=500)){
+      await v166Sleep(600*(attempt+1));continue;
+    }
+    throw err;
+   }finally{clearTimeout(timer);}
+  }
+  throw error||new Error(`${hostname}: Request unsuccessful`);
+ })();
+ V380_FETCH_PENDING.set(key,promise);
+ try{return await promise;}finally{V380_FETCH_PENDING.delete(key);}
 }
 function v380AnimeForMal(malId){return (S.library||[]).find(item=>v166GetMalId(item)===String(malId))||null;}
 async function v380AniZip(malId,force){
   const data=await v380Request(`https://api.ani.zip/mappings?mal_id=${encodeURIComponent(malId)}`,{force});
   const matched=Number(data?.mappings?.mal_id||data?.mal_id);
   if(matched&&matched!==Number(malId))throw v380Unavailable('anizip','returned a different MAL mapping');
-  const episodes=data?.episodes;if(!episodes||typeof episodes!=='object')throw v380Unavailable('anizip','no episode catalogue');
-  let count=0,dated=0;
+  const episodes=data?.episodes;
+  if(!episodes||typeof episodes!=='object')throw v380Unavailable('anizip','no episode catalogue');
+  let count=0,dated=0,invalid=0;
   for(const [key,episode] of Object.entries(episodes)){
     if(!episode||typeof episode!=='object')continue;
-    const number=v380ValidPositive(episode.episode||episode.episodeNumber||key);
-    const aired=episode.airdate??episode.airDate??episode.aired;
-    if(aired!==null&&aired!==undefined&&aired!==''){
-      dated++;
-      if(number&&v380TodayAired(aired))count=Math.max(count,number);
-    }
+    const number=v380ValidPositive(episode.episode||episode.episodeNumber||episode.number||key);
+    // AniZip exposes airDateUtc on several catalogue representations.
+    const aired=episode.airDateUtc??episode.airdate??episode.airDate??episode.aired??episode.air_date;
+    if(aired===null||aired===undefined||aired==='')continue;
+    const timestamp=v380AiredTimestamp(aired);
+    if(timestamp===null){invalid++;continue;}
+    dated++;
+    if(number&&timestamp<=Date.now()+5*60*1000)count=Math.max(count,number);
   }
-  if(dated)return count;
-  throw v380Unavailable('anizip','episode entries have no verifiable release dates');
+  if(dated&&count)return count;
+  if(dated&&!count&&invalid===0)return 0; // Verified: all known dates are in the future.
+  throw v380Unavailable('anizip',invalid?'episode release dates are malformed or incomplete':'episode entries have no verifiable release dates');
 }
 async function v380AniList(malId,force){
-  const query=`query ($id:Int){ Media(idMal:$id,type:ANIME){ id idMal status episodes nextAiringEpisode{episode airingAt} airingSchedule(notYetAired:false,sort:TIME_DESC,perPage:1){nodes{episode airingAt}} } }`;
+  // Media.airingSchedule supports notYetAired/perPage, but not sort.
+  const query=`query ($id:Int){ Media(idMal:$id,type:ANIME){ id idMal status episodes nextAiringEpisode{episode airingAt} airingSchedule(notYetAired:false,perPage:25){nodes{episode airingAt}} } }`;
   const payload=await v380Request('https://graphql.anilist.co',{method:'POST',body:JSON.stringify({query,variables:{id:Number(malId)}}),force,ttl:3*60*60*1000});
-  if(payload.errors?.length)throw new Error('AniList GraphQL: '+String(payload.errors[0].message||'API error'));
   const media=payload.data?.Media;
   if(!media||Number(media.idMal)!==Number(malId))throw v380Unavailable('anilist','no confirmed MAL match');
   if(media.status==='NOT_YET_RELEASED')return 0;
   if(media.status==='FINISHED'){
     const total=v380ValidPositive(media.episodes);if(total)return total;
   }
-  // AniList guarantees future airing info, but not historical schedule coverage.
-  // The next episode N implies N-1 aired only if its timestamp is still future.
   const next=media.nextAiringEpisode,upcoming=v380ValidPositive(next?.episode);
-  if(upcoming&&v380AiredTimestamp(next.airingAt)>Date.now())return upcoming-1;
+  if(upcoming&&v380AiredTimestamp(next.airingAt)>Date.now()+5*60*1000)return upcoming-1;
   const schedule=media.airingSchedule?.nodes||[];
   const aired=schedule.filter(x=>v380TodayAired(x?.airingAt)&&v380ValidPositive(x?.episode)).map(x=>Number(x.episode));
   if(aired.length)return Math.max(...aired);
-  throw v380Unavailable('anilist','no verifiable released episode number');
+  throw v380Unavailable('anilist','no confirmed released episode count; AniList schedules may be incomplete');
 }
 function v380CleanMatch(value){return String(value||'').normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();}
+function v381SeasonFromTitle(item){
+ const names=[item?.title,item?.englishTitle,item?.titleEnglish].filter(Boolean).map(String);
+ for(const name of names){
+  const match=name.match(/(?:\b(?:season|series|part|cour)\s*(\d{1,2})\b|\b(\d{1,2})(?:st|nd|rd|th)\s+season\b)/i);
+  if(match){const n=Number(match[1]||match[2]);if(n>0&&n<=50)return n;}
+ }
+ return null;
+}
 async function v380TVmaze(malId,force){
-  const item=v380AnimeForMal(malId);if(!item)throw v380Unavailable('tvmaze','Library title not found');
-  const imdb=String(item.externalIds?.imdb||item.imdbId||'').trim();
-  const tvdb=String(item.externalIds?.tvdb||'').trim();
-  let show=null;
-  if(/^tt\d+$/.test(imdb))show=await v380Request(`https://api.tvmaze.com/lookup/shows?imdb=${encodeURIComponent(imdb)}`,{force});
+ const item=v380AnimeForMal(malId);if(!item)throw v380Unavailable('tvmaze','Library title not found');
+ const ids=item.externalIds||{},tvmaze=v380ValidPositive(ids.tvmaze||item.tvmazeId),imdb=String(ids.imdb||item.imdbId||'').trim(),tvdb=String(ids.tvdb||'').trim();
+ let show=null,verifiedId=!!tvmaze||/^tt\d+$/.test(imdb)||/^\d+$/.test(tvdb);
+ try{
+  if(tvmaze)show=await v380Request(`https://api.tvmaze.com/shows/${tvmaze}`,{force});
+  else if(/^tt\d+$/.test(imdb))show=await v380Request(`https://api.tvmaze.com/lookup/shows?imdb=${encodeURIComponent(imdb)}`,{force});
   else if(/^\d+$/.test(tvdb))show=await v380Request(`https://api.tvmaze.com/lookup/shows?thetvdb=${encodeURIComponent(tvdb)}`,{force});
   else{
-    const name=cleanTitle(item.title||'');
-    if(!name)throw v380Unavailable('tvmaze','cannot match title');
-    const matches=await v380Request(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(name)}`,{force});
-    if(!Array.isArray(matches))throw v380Unavailable('tvmaze','unexpected search response');
-    const expected=v380CleanMatch(name);
-    const exact=matches.filter(x=>[x?.show?.name,...(x?.show?.akas||[]).map(y=>y?.name)].some(t=>v380CleanMatch(t)===expected));
-    if(exact.length!==1)throw v380Unavailable('tvmaze',exact.length?'ambiguous exact title matches':'no exact title match');
-    show=exact[0].show;
+   const name=cleanTitle(item.title||'');if(!name)throw v380Unavailable('tvmaze','cannot match title');
+   const matches=await v380Request(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(name)}`,{force});
+   if(!Array.isArray(matches))throw v380Unavailable('tvmaze','unexpected search response');
+   const expected=v380CleanMatch(name);
+   let exact=matches.filter(x=>[x?.show?.name,...(x?.show?.akas||[]).map(y=>y?.name)].some(t=>v380CleanMatch(t)===expected));
+   if(exact.length!==1){
+    // An explicit "Season N" can be stripped for a possible show-level match;
+    // individual episodes are still restricted to that exact numbered season.
+    const season=v381SeasonFromTitle(item);
+    if(season){const series=v380CleanMatch(name.replace(/(?:\b(?:season|series|part|cour)\s*\d{1,2}\b|\b\d{1,2}(?:st|nd|rd|th)\s+season\b)/ig,''));
+      exact=matches.filter(x=>v380CleanMatch(x?.show?.name)===series);
+    }
+   }
+   if(exact.length!==1)throw v380Unavailable('tvmaze',exact.length?'ambiguous exact title matches':'no confident title match');
+   show=exact[0].show;
   }
-  if(!v380ValidPositive(show?.id))throw v380Unavailable('tvmaze','no confirmed show ID');
-  const episodes=await v380Request(`https://api.tvmaze.com/shows/${Number(show.id)}/episodes`,{force});
-  if(!Array.isArray(episodes)||!episodes.length){
-    if(show.status==='To Be Determined'&&show.premiered&&Date.parse(show.premiered)>Date.now())return 0;
-    throw v380Unavailable('tvmaze','no episode list');
-  }
-  // TVmaze seasons are often split differently from MAL seasonal entries.
-  // Only use the list when there is one numbered season; otherwise we cannot
-  // reliably map a MAL season to a TVmaze season.
-  const seasons=new Set(episodes.map(x=>Number(x.season)).filter(x=>x>0));
-  if(seasons.size!==1)throw v380Unavailable('tvmaze','multi-season show needs a verified season mapping');
-  const released=episodes.filter(x=>v380TodayAired(x.airstamp||x.airdate)&&v380ValidPositive(x.number));
-  if(released.length)return Math.max(...released.map(x=>Number(x.number)));
+ }catch(e){if(Number(e?.status)===404)throw v380Unavailable('tvmaze','no show for the supplied identifier');throw e;}
+ if(!v380ValidPositive(show?.id))throw v380Unavailable('tvmaze','no confirmed show ID');
+ const episodes=await v380Request(`https://api.tvmaze.com/shows/${Number(show.id)}/episodes`,{force});
+ if(!Array.isArray(episodes)||!episodes.length){
   if(show.premiered&&Date.parse(show.premiered)>Date.now())return 0;
-  throw v380Unavailable('tvmaze','no verified aired episode dates');
+  throw v380Unavailable('tvmaze','matched show has no episode list');
+ }
+ const allSeasons=new Set(episodes.map(x=>Number(x.season)).filter(x=>x>0));
+ let selectedSeason=null;
+ if(allSeasons.size===1)selectedSeason=[...allSeasons][0];
+ else{
+  const specified=v381SeasonFromTitle(item);
+  if(specified&&allSeasons.has(specified))selectedSeason=specified;
+  else throw v380Unavailable('tvmaze','multi-season show needs verified season identification');
+ }
+ const rows=episodes.filter(e=>Number(e.season)===selectedSeason&&v380ValidPositive(e.number));
+ const aired=rows.filter(e=>v380TodayAired(e.airstamp||e.airdate));
+ if(aired.length)return Math.max(...aired.map(e=>Number(e.number)));
+ if(rows.length&&rows.every(e=>v380AiredTimestamp(e.airstamp||e.airdate)>Date.now()))return 0;
+ throw v380Unavailable('tvmaze','matched season has no confirmed aired episode dates');
 }
 async function v380Kitsu(malId,force){
+ const item=v380AnimeForMal(malId);
+ // A user-verified Kitsu ID is more direct than a second MAL mapping request.
+ const explicit=v380ValidPositive(item?.externalIds?.kitsu||item?.kitsuId);
+ let id=explicit?String(explicit):'';
+ if(!id){
   const maps=await v380Request(`https://kitsu.io/api/edge/mappings?filter%5BexternalSite%5D=myanimelist%2Fanime&filter%5BexternalId%5D=${encodeURIComponent(malId)}&include=item`,{force});
   const rows=Array.isArray(maps.data)?maps.data:[];
   const verified=rows.filter(x=>String(x.attributes?.externalId)===String(malId)&&x.attributes?.externalSite==='myanimelist/anime');
   const ids=[...new Set(verified.map(x=>x.relationships?.item?.data).filter(x=>x?.type==='anime'&&v380ValidPositive(x.id)).map(x=>String(x.id)))];
   if(ids.length!==1)throw v380Unavailable('kitsu',ids.length?'ambiguous MAL mapping':'no MAL mapping');
-  const id=ids[0],info=await v380Request(`https://kitsu.io/api/edge/anime/${encodeURIComponent(id)}`,{force});
-  const data=info.data?.attributes||{};
-  if(String(data.status||'').toLowerCase()==='finished'){
-    const total=v380ValidPositive(data.episodeCount);if(total)return total;
+  id=ids[0];
+ }
+ const info=await v380Request(`https://kitsu.io/api/edge/anime/${encodeURIComponent(id)}`,{force});
+ const data=info.data?.attributes||{};
+ if(String(data.status||'').toLowerCase()==='finished'){
+  const total=v380ValidPositive(data.episodeCount);if(total)return total;
+ }
+ if(String(data.status||'').toLowerCase()==='tba'||(data.startDate&&Date.parse(data.startDate)>Date.now()))return 0;
+ let offset=0,available=0,dated=0,undated=0,exhausted=false;
+ const maxRecords=Math.max(2000,Math.min(20000,Number(data.episodeCount)||2000));
+ for(let page=0;page<Math.ceil(maxRecords/20)+1;page++){
+  const result=await v380Request(`https://kitsu.io/api/edge/episodes?filter%5BanimeId%5D=${encodeURIComponent(id)}&page%5Blimit%5D=20&page%5Boffset%5D=${offset}`,{force});
+  const list=Array.isArray(result?.data)?result.data:[];
+  for(const episode of list){const a=episode.attributes||{},number=v380ValidPositive(a.number);
+   const released=a.airdate??a.airDate??null;
+   if(released){dated++;if(number&&v380TodayAired(released))available=Math.max(available,number);}else undated++;
   }
-  if(String(data.status||'').toLowerCase()==='tba'||(data.startDate&&Date.parse(data.startDate)>Date.now()))return 0;
-  let offset=0,available=0,dated=false,exhausted=false;
-  for(let page=0;page<10;page++){
-    const result=await v380Request(`https://kitsu.io/api/edge/episodes?filter%5BanimeId%5D=${encodeURIComponent(id)}&page%5Blimit%5D=20&page%5Boffset%5D=${offset}`,{force});
-    const list=Array.isArray(result?.data)?result.data:[];
-    for(const e of list){const a=e.attributes||{},number=v380ValidPositive(a.number);
-      if(a.airdate){dated=true;if(number&&v380TodayAired(a.airdate))available=Math.max(available,number);}
-    }
-    if(list.length<20){exhausted=true;break;}
-    offset+=list.length;
-  }
-  if(!exhausted)throw v380Unavailable('kitsu','episode catalogue exceeds safe pagination limit');
-  if(dated)return available;
-  throw v380Unavailable('kitsu','no released-episode dates');
+  if(list.length<20){exhausted=true;break;}
+  offset+=list.length;
+ }
+ if(!exhausted)throw v380Unavailable('kitsu','episode pagination is incomplete');
+ if(available>0)return available;
+ if(dated&&!undated)return 0;
+ throw v380Unavailable('kitsu','no verifiable released-episode dates');
 }
 const v380TenraiBase=v166AvailableEpisodeCount;
 const V380_ADAPTERS={tenrai:(id,force)=>v380TenraiBase(id,force),anizip:v380AniZip,tvmaze:v380TVmaze,kitsu:v380Kitsu,anilist:v380AniList};
 v166AvailableEpisodeCount=async function(malId,force=false){
   const mode=v380Mode(),sequence=mode==='automatic'?V380_PROVIDER_SEQUENCE:[mode];
-  let failure=null,missing=null;
+  let failure=null,missing=null;const explanations=[];
   for(const source of sequence){
     try{
       const count=await V380_ADAPTERS[source](String(malId),force);
@@ -339,14 +411,16 @@ v166AvailableEpisodeCount=async function(malId,force=false){
       // it cannot establish that the MAL ID itself is invalid.
       const error=source!=='tenrai'&&Number(originalError?.status)===404
         ?v380Unavailable(source,'no record for this anime'):originalError;
+      explanations.push(`${source}: ${String(error?.message||error).slice(0,180)}`);
       if(error?.kind==='episode_data_unavailable')missing=error;
       else failure=error;
       if(mode!=='automatic')throw error;
     }
   }
   // A request error should not be converted into a definitive negative result.
-  if(missing)throw missing;
-  throw failure||v380Unavailable(mode,'all sources returned no usable data');
+  if(missing)throw v380Unavailable('automatic',explanations.join(' | ')||'all sources returned incomplete episode data');
+  if(failure){failure.message=`Automatic sources failed: ${explanations.join(' | ')}`;throw failure;}
+  throw v380Unavailable(mode,'all sources returned no usable data');
 };
 // Manual modes never silently call Tenrai to resolve a missing MAL identifier;
 // the user may provide an ID in the existing External Media IDs editor.

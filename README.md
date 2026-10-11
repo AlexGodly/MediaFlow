@@ -1,12 +1,12 @@
-# MediaFlow v380 — Multi-Provider Detection, Logging Reliability & Order Stability
+# MediaFlow v381 — Multi-Provider Reliability & Detection UI Corrections
 
-**Latest modular candidate:** v380 · October 11, 2026  
+**Latest modular candidate:** v381 · October 11, 2026  
 **Developer/owner:** Alex Godly  
-**Baseline:** v379 Modular · Personal Edition  
+**Baseline:** v380 Modular · Personal Edition  
 **Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
-**Release notes:** [README2.md](./README2.md) · [Detailed v380 changelog](./docs/CHANGELOG_v380.md)
+**Release notes:** [README2.md](./README2.md) · [Detailed v381 changelog](./docs/CHANGELOG_v381.md)
 
-MediaFlow v380 introduces five episode-data source adapters (Tenrai, AniZip, TVmaze, Kitsu and AniList) and Automatic Multi-Provider fallback, repairs the Logging Hide/Show and initial sorting icons, introduces **Units in Draft** sorting, updates Added/Automatic MAL Detection control icons, and preserves Personal Order scroll during title/Collection movements. The trusted fresh-title count remains protected when data are incomplete.
+MediaFlow v381 improves reliability across the existing five episode-data providers and Automatic Multi-Provider, including AniList query repair, rate-limit/cooldown handling, AniZip date parsing, Kitsu mapping and pagination, conservative Tenrai dates, TVmaze season matching, dynamic provider labels, diagnostics and single-icon action buttons. The trusted Fresh Titles count remains protected when scans are incomplete.
 
 **Verification:** Local Chromium and deterministic provider-response fixture tests passed. **Live provider access, real Supabase user data, large-library responsiveness and physical-device behavior remain unverified.** AniList use is based on the owner's reported permission; API usage conditions and TVmaze CC BY-SA attribution/ShareAlike requirements apply.
 
@@ -16,21 +16,21 @@ MediaFlow v380 introduces five episode-data source adapters (Tenrai, AniZip, TVm
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v380-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v381-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v380 — Personal Edition (built on v379 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v381 — Personal Edition (built on v380 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v380 · October 11, 2026, built on v379 Modular. **GitHub:** v380 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v381 · October 11, 2026, built on v380 Modular. **GitHub:** v381 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v380 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v381 Personal Edition.
 
-**v380 changelog:** [README2.md](./README2.md), [detailed v380 changelog](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v381 changelog:** [README2.md](./README2.md), [detailed v381 changelog](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 

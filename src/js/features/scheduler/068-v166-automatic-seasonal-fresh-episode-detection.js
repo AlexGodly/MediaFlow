@@ -155,6 +155,7 @@ async function v166FetchJikan(path,{force=false,ttl=V166_CACHE_TTL}={}){
       }
 
       lastError=new Error(`Tenrai HTTP ${res.status}`);
+      lastError.status=res.status;
 
       if(![408,429,500,502,503,504].includes(res.status)){
         break;
@@ -238,8 +239,8 @@ function v166AiredEpisodeNumber(row,now=Date.now()){
   // Current Jikan episode resources commonly contain aired ISO dates.
   // If the field is absent, its presence in the public episode list itself is
   // treated as the provider's released/available signal.
-  const aired=row?.aired?new Date(row.aired).getTime():0;
-  if(aired && Number.isFinite(aired) && aired>now+5*60*1000)return 0;
+  const aired=row?.aired?new Date(row.aired).getTime():null;
+  if(aired===null||!Number.isFinite(aired)||aired>now+5*60*1000)return 0;
 
   return num;
 }
