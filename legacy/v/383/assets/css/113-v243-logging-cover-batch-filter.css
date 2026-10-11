@@ -1,0 +1,42 @@
+/* ============================================================
+   MediaFlow v243 — Logging cover + Batch Category Filter fixes
+   ============================================================ */
+
+/* A real logging cover and its category fallback must never be visible at the
+   same time. This deliberately outranks the older v241 fallback display rule. */
+.v241-category-cover-fallback.v243-cover-fallback-hidden{display:none!important}
+.v243-clean-cover-button>.v225-btn-icon{display:none!important}
+
+/* Batch Log's searchable Category Filter is an absolute popover. Some card /
+   theme layers created a clipping/stacking context that hid the lower part of
+   the panel behind the next Batch Log card. Keep the browser card open to the
+   popover and temporarily raise its stacking layer while the filter is open. */
+#v175-batch-library-tools,
+.v175-batch-library-tools.v239-batch-library-tools{
+  overflow:visible!important;
+  position:relative!important;
+  contain:none!important;
+}
+#v175-batch-library-tools.v243-batch-filter-open,
+.v175-batch-library-tools.v239-batch-library-tools.v243-batch-filter-open{
+  z-index:120!important;
+}
+#v175-batch-library-tools .v237-category-filter{
+  position:relative!important;
+}
+#v175-batch-library-tools .v237-category-filter[open]{
+  z-index:130!important;
+}
+#v175-batch-library-tools .v237-category-filter-panel{
+  z-index:140!important;
+  overflow:auto!important;
+  max-height:min(620px,72vh)!important;
+  box-shadow:0 22px 56px rgba(0,0,0,.42)!important;
+}
+
+/* Keep the popover practical on compact screens while retaining v236's fixed
+   mobile sheet behavior. */
+@media (max-width:760px){
+  #v175-batch-library-tools.v243-batch-filter-open{z-index:150!important}
+  #v175-batch-library-tools .v237-category-filter-panel{max-height:70vh!important}
+}

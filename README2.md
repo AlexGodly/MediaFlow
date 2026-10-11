@@ -1,5 +1,43 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v383 — About Studio, Logging Library Redesign & Data Integrity Audit
+
+**Release:** v383 Modular · Personal Edition  
+**Date:** October 11, 2026  
+**Baseline:** v382 Modular  
+**Developer:** Alex Godly  
+**Delivery:** Complete modular ZIP, for local testing only. GitHub was not modified.
+
+## 1. Logging Library design
+
+Replaces the old plain collapsible Logging Library header with a more expressive, theme-aware **Browse Library** component, clear iconography, Library and added-title counts, a visible open/close chevron and redesigned expanded search intro. Works in Quick Logging and Per Unit while preserving title selection, filters, bulk actions and lazy Library rendering.
+
+## 2. About Studio
+
+Rebuilt the About page as a polished introduction to MediaFlow with a branded hero, current release, four account counters, six feature cards, a six-stage evolution timeline, **45 searchable FAQs** with category filters, **24 Fun Facts**, and refreshed descriptions of Logging, XP, Collections, Personal Order, five providers and PWA/cloud/export functionality. The existing Version & updates controls are retained, not replaced by a decorative mockup.
+
+## 3. Cloud Sync and data protection audit
+
+A new read-only `App.v383AuditPersistence()` preflight checks snapshot, Full Backup, settings presets, Personal Order and Collections export payloads, relevant entry-point availability, canonical state fields and backup JSON round-trip. **Sync Now** verification now also fingerprints serialized Collections, Collection tombstones and applicable newer persistent fields, in addition to the earlier Library, History, Settings, XP and Personal Order checks. The base data model and SQL schema remain unchanged.
+
+## 4. Export/import, backups, XP and PWA
+
+Full/Automatic Backup, Settings Presets, Personal Order and Collections export payloads now carry current **v383 release metadata**, retaining their previous compatible schema versions. The History, XP and automatic update entry points were checked; no XP formula or Logging submission changes were made. The v383 JavaScript bundle and versioned PWA application shell were rebuilt automatically, including the new design CSS.
+
+## 5. Source and testing
+
+- `src/js/components/279-v383-about-logging-data-integrity.js`
+- `assets/css/200-v383-about-logging-data-audit.css`
+- `assets/js/mediaflow-v383.bundle.js`
+- PWA cache: `mediaflow-pwa-v383-shell-v1`
+- JavaScript syntax and Chromium responsive UI checks at **320, 390, 820, 1280, 1920 px** passed. All expected major data fields were present in a synthetic snapshot/backup and the JSON serialization check passed.
+
+**Limitations:** Authenticated remote cloud saves, end-to-end import restores, real installed-PWA upgrades and large-account benchmarking remain unverified. The release does not claim these live behaviors were tested. No GitHub commit, push or deployment was performed.
+
+**Full changelog:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md)
+
+---
+
 # MediaFlow v382 — Logging Progress Outlook, Direct Recommended Titles & XP Summary Redesign
 
 **Release:** v382 Modular · Personal Edition  
