@@ -29,7 +29,6 @@ jobs:
           mkdir -p "$RUNNER_TEMP/mediaflow-site"
           rsync -a \
             --exclude='/legacy/' \
-            --exclude='/supabase/' \
             --exclude='/.git/' \
             --exclude='/.github/' \
             ./ "$RUNNER_TEMP/mediaflow-site/"
