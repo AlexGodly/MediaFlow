@@ -1,5 +1,32 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v384 — Fully Themed Browse Library & Dynamic About Branding
+
+**Release:** v384 Modular  
+**Date:** October 11, 2026  
+**Baseline:** v383 Modular  
+**Developer:** Alex Godly  
+
+## 1. Fully colored Logging Library header
+
+The entire **Browse Library** header now uses a rich gradient derived from the active MediaFlow theme. The background covers the entire header, not just badges or accent borders. Icon, text, counters, chevron, hover and expanded states have been visually coordinated. All existing selection, search, sorting and title-addition behavior remains unchanged across Quick Logging and Per Unit.
+
+## 2. About Studio: official branding
+
+Replaced the generic header icon with the packaged **MediaFlow logo** and removed “Personal Edition” wording from About while keeping **By Alex Godly**, FAQs, Fun Facts, evolution and existing updates UI.
+
+## 3. Dynamic About version indicators
+
+The hero and version statistic now consistently read the canonical `mediaflow-version` metadata through `v161CurrentVersion()`. A simulated future release `385` updates both indicators automatically without editing any v384 presentation strings.
+
+## 4. Build and testing
+
+New `280-v384-theme-brand-version.js` module and `201-v384-theme-brand-version.css` stylesheet, rebuilt v384 bundle and PWA shell (`mediaflow-pwa-v384-shell-v1`). Five Chromium viewport checks, theme recoloring, logo load, version-forward simulation, About content and header toggle passed. Local/synthetic testing only; live hosted PWA upgrades and authenticated cloud checks remain unverified. No data schema or XP formula changes.
+
+**Detailed notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md)
+
+---
+
 # MediaFlow v383 — About Studio, Logging Library Redesign & Data Integrity Audit
 
 **Release:** v383 Modular · Personal Edition  
