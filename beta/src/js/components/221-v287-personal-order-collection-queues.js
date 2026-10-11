@@ -157,8 +157,11 @@ function v287ReconcileCategoryQueue(categoryId){
     const existingTitleTokens=titleTokens.filter(token=>seen.has(token));
     let titleIndex=0;
     queue=queue.map(token=>token.startsWith('t:')?(existingTitleTokens[titleIndex++]||token):token);
-    for(const token of titleTokens){if(!queue.includes(token))queue.push(token);}
-    for(const token of collectionTokens){if(!queue.includes(token))queue.push(token);}
+    // v368: preserve the existing mixed ordering without quadratic includes()
+    // scans when a category contains thousands of ordered titles.
+    const queued=new Set(queue);
+    for(const token of titleTokens){if(!queued.has(token)){queued.add(token);queue.push(token);}}
+    for(const token of collectionTokens){if(!queued.has(token)){queued.add(token);queue.push(token);}}
   }
 
   p.categoryQueues=p.categoryQueues||{};

@@ -1,7 +1,7 @@
 /* MediaFlow v261 prebuilt React application chrome. */
 (function(){
   'use strict';
-  const PAGE={dashboard:['Dashboard','Your rotation, logging and daily focus'],library:['Library','Browse, organize and manage your media'],history:['History','Consumption, recent activity, ratings and Library changes'],batch:['Batch Log','Log multiple titles in one focused workflow'],stats:['Statistics','Patterns, progress and long-term consumption'],profile:['Account','Profile, identity and account preferences'],settings:['Settings','Customize MediaFlow to fit your workflow'],order:['Personal Order','Shape your own title priority order'],oldsystem:['Old System','Legacy scheduler views and records'],about:['About','Version, updates and MediaFlow information'],'mf302-profile':['Profile','Manage your public profile and sharing preferences'],'mf302-friends':['Friends','Your followers, following and mutual connections'],'mf302-inbox':['Inbox','Private conversations and messages'],'mf302-public':['Community','Browse and explore public media']};
+  const PAGE={dashboard:['Dashboard','Your rotation, logging and daily focus'],library:['Library','Browse, organize and manage your media'],history:['History','Consumption, recent activity, ratings and Library changes'],batch:['Batch Log','Log multiple titles in one focused workflow'],stats:['Statistics','Patterns, progress and long-term consumption'],profile:['Account','Profile, identity and account preferences'],settings:['Settings','Customize MediaFlow to fit your workflow'],order:['Personal Order','Shape your own title priority order'],oldsystem:['Old System','Legacy scheduler views and records'],about:['About','Version, updates and MediaFlow information']};
   const PATHS={
     dashboard:['path','M3 12l9-9 9 9|M5 10v10h14V10'],
     library:['path','M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'],
@@ -12,10 +12,6 @@
     settings:['mixed','circle:12,12,3|path:M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'],
     order:['path','M8 6h13M8 12h13M8 18h13|M3 6h.01M3 12h.01M3 18h.01'],
     oldsystem:['path','M7 7h11l-3-3|m18 7-3 3|M17 17H6l3 3|m6 17 3-3'],
-    'mf302-profile':['mixed','circle:12,8,4|path:M4 21a8 8 0 0 1 16 0'],
-    'mf302-friends':['mixed','circle:9,8,3|circle:17,10,2|path:M2 21a7 7 0 0 1 14 0|M15 17q6 0 7 5'],
-    'mf302-inbox':['path','M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1L3 21l2-5.1a8.5 8.5 0 1 1 16-4.4z'],
-    'mf302-public':['mixed','circle:12,12,9|path:M16 8l-3 6-5 2 2-5 6-3'],
     about:['mixed','circle:12,12,10|path:M12 16v-4|M12 8h.01']
   };
   function PageIcon({kind}){const spec=PATHS[kind]||PATHS.dashboard,parts=spec[1].split('|');return React.createElement('svg',{viewBox:'0 0 24 24',width:18,height:18,fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true},parts.map((p,i)=>{if(p.startsWith('circle:')){const [cx,cy,r]=p.slice(7).split(',');return React.createElement('circle',{key:i,cx,cy,r});}if(p.startsWith('rect:')){const [x,y,w,h]=p.slice(5).split(',');return React.createElement('rect',{key:i,x,y,width:w,height:h});}const d=p.startsWith('path:')?p.slice(5):p;return React.createElement('path',{key:i,d});}));}

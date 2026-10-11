@@ -57,7 +57,7 @@ function v272LogTitleRailHtml(session){
     const click=item?.id
       ?`App.v181OpenTitleDetails('${escapeHtml(String(item.id))}')`
       :`App.openSessionModal('${escapeHtml(String(session?.id||''))}')`;
-    return `<button type="button" class="mf272-log-title-card mf271-visual-card" onclick="${click}" title="${escapeHtml(title)}">${v272LogCoverHtml(item,cat,title)}<span class="mf272-log-title-copy"><b>${escapeHtml(title)}</b>${qty>0?`<small>×${qty.toLocaleString()}</small>`:''}</span></button>`;
+    return `<button type="button" class="mf272-log-title-card mf271-visual-card" onclick="${click}" title="${escapeHtml(title)}">${v272LogCoverHtml(item,cat,title)}<span class="mf272-log-title-copy"><b>${escapeHtml(title)}</b>${qty>0?`<small>×${qty.toLocaleString()}</small>`:''}<small class="mf331-row-time">${v331HistoryTime(session,row)}</small></span></button>`;
   }).join('')}</div>`;
 }
 function v272SessionIdFromHistoryRow(row){

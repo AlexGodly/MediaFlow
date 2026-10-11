@@ -5,7 +5,7 @@
    v299/v300 is NOT part of v301. No changes to recommendation logic,
    cover preferences, XP, History, or cloud state.
    ============================================================ */
-const V301_RUNTIME_VERSION=301;
+const V301_RUNTIME_VERSION=330;
 
 // The existing reroll-history renderer is the single source of truth for
 // recommendations, Respect slots, title covers and Edit actions. Decorate

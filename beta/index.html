@@ -3,12 +3,6 @@
 <html lang="en">
 
 <head>
-<!-- v304: route-safe base for GitHub Pages AND direct index.html/file:// opening. -->
-<script>(function(){
-  var base=document.createElement('base');
-  base.href=location.protocol==='file:'?'./':(/^\/MediaFlow(?:\/|$)/i.test(location.pathname)?'/MediaFlow/':'/');
-  document.head.appendChild(base);
-})();</script>
 
 <meta charset="UTF-8">
 
@@ -60,7 +54,7 @@
 
 
 
-<meta name="mediaflow-version" content="329">
+<meta name="mediaflow-version" content="377">
 
 
 <!-- MediaFlow v90: mixed-session scheduler grouping integrity -->
@@ -288,24 +282,15 @@
 <!-- MediaFlow v245: Unified Alex Godly icon branding for website favicon, PWA install icons, maskable icon and Apple touch icon -->
 <!-- MediaFlow v246: Mobile/tablet PWA install UX + very-tight-width responsive support -->
 <!-- MediaFlow v247: PWA install reliability, diagnostics + fault-tolerant app-shell repair -->
-<link rel="stylesheet" href="assets/css/166-v309-browse-views-quick-add.css">
-<link rel="stylesheet" href="assets/css/167-v310-community-collections.css">
-<link rel="stylesheet" href="assets/css/168-v311-ratings-leaderboard.css">
-<link rel="stylesheet" href="assets/css/169-v312-community-ranking.css">
-<link rel="stylesheet" href="assets/css/170-v313-community-workspace-polish.css">
-<link rel="stylesheet" href="assets/css/171-v314-provider-rankings-polish.css">
-<link rel="stylesheet" href="assets/css/172-v315-workspace-sidebar-community.css">
-<link rel="stylesheet" href="assets/css/173-v316-time-xp-statistics.css">
-<link rel="stylesheet" href="assets/css/174-v317-progression-refresh.css">
-<link rel="stylesheet" href="assets/css/175-v318-community-freshness-statistics.css">
-<link rel="stylesheet" href="assets/css/176-v319-community-single-refresh-icon.css">
-<link rel="stylesheet" href="assets/css/177-v320-social-friends-inbox-collections.css">
-<link rel="stylesheet" href="assets/css/178-v321-social-tabs-collections-first-paint.css">
-<link rel="stylesheet" href="assets/css/179-v323-public-profile-showcase.css">
-<link rel="stylesheet" href="assets/css/180-v324-workspace-public-mirrors.css">
-<link rel="stylesheet" href="assets/css/181-v325-native-workspace-public.css">
-<link rel="stylesheet" href="assets/css/182-v326-native-public-statistics.css">
-<link rel="stylesheet" href="assets/css/183-v329-public-profile-parity.css">
+<link rel="stylesheet" href="assets/css/167-v340-history-navigation-recent-titles.css">
+<link rel="stylesheet" href="assets/css/168-v341-history-tab-pagination-performance.css">
+<link rel="stylesheet" href="assets/css/169-v342-recent-view-ui-polish.css">
+<link rel="stylesheet" href="assets/css/170-v343-recent-view-spacing-daypart-icons.css">
+<link rel="stylesheet" href="assets/css/171-v344-recent-view-remove-title-and-daypart-icons.css">
+<link rel="stylesheet" href="assets/css/172-v345-personal-order-list-tab-queues.css">
+<link rel="stylesheet" href="assets/css/173-v346-queue-tab-icons-controls.css">
+<link rel="stylesheet" href="assets/css/174-v348-universal-streak-action-xp.css">
+<link rel="stylesheet" href="assets/css/175-v348-xp-history.css">
 </head>
 
 <body>
@@ -323,10 +308,10 @@
 <link rel="stylesheet" href="assets/css/157-v297-auth-refresh.css">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/mediaflow-v329.bundle.js"></script>
+<script src="assets/js/mediaflow-v377.bundle.js"></script>
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<script src="assets/js/mediaflow-v329-react-ui.js"></script>
+<script src="assets/js/mediaflow-v261-react-ui.js"></script>
 
 <!-- MediaFlow v84: merge-safe cloud metadata persistence -->
 
@@ -454,12 +439,32 @@
 
 <link rel="stylesheet" href="assets/css/158-v298-auth-layout-fix.css">
 <link rel="stylesheet" href="assets/css/159-v301-current-rerolls-responsive.css">
-<link rel="stylesheet" href="assets/css/160-v302-community.css">
-<link rel="stylesheet" href="assets/css/161-v303-community-navigation.css">
-<link rel="stylesheet" href="assets/css/162-v304-public-statistics.css">
-<link rel="stylesheet" href="assets/css/163-v305-community-navigation-auth.css">
-<link rel="stylesheet" href="assets/css/164-v306-community-click-reliability.css">
-<link rel="stylesheet" href="assets/css/165-v308-community-theme-parity.css">
+<link rel="stylesheet" href="assets/css/160-v331-per-title-logging-timestamps.css">
+<link rel="stylesheet" href="assets/css/161-v334-active-time-dashboard.css">
+<link rel="stylesheet" href="assets/css/162-v335-stats-xp-calculator.css">
+<link rel="stylesheet" href="assets/css/163-v336-dialogs-active-time-analytics.css">
+<link rel="stylesheet" href="assets/css/164-v337-active-time-dual-milestones.css">
+<link rel="stylesheet" href="assets/css/165-v338-normal-cover-selection.css">
+<link rel="stylesheet" href="assets/css/176-v350-mobile-native-layout.css" media="screen and (max-width:1023px)">
+<link rel="stylesheet" href="assets/css/177-v351-mobile-regression-repairs.css" media="screen and (max-width:1023px)">
+<link rel="stylesheet" href="assets/css/178-v352-collection-add-picker-views.css">
+<link rel="stylesheet" href="assets/css/179-v353-mobile-add-titles-tools.css">
+<link rel="stylesheet" href="assets/css/180-v354-personal-order-quick-workspace.css">
+<link rel="stylesheet" href="assets/css/181-v355-personal-order-ui-refinement.css">
+<link rel="stylesheet" href="assets/css/182-v356-personal-order-dialog-browse-layout.css">
+<link rel="stylesheet" href="assets/css/183-v357-personal-order-dialogs-tabs-icons.css">
+<link rel="stylesheet" href="assets/css/184-v358-personal-order-rebuild.css">
+<link rel="stylesheet" href="assets/css/185-v359-picker-pagination-category-tabs.css">
+<link rel="stylesheet" href="assets/css/186-v360-adaptive-personal-order-pickers.css">
+<link rel="stylesheet" href="assets/css/187-v361-collection-picker-views-sizing.css">
+<link rel="stylesheet" href="assets/css/188-v362-collection-picker-mobile-workspace.css">
+<link rel="stylesheet" href="assets/css/189-v363-personal-order-workspace-performance.css">
+<link rel="stylesheet" href="assets/css/190-v364-personal-order-cover-queue-parity.css">
+<link rel="stylesheet" href="assets/css/191-v365-settings-center.css">
+<link rel="stylesheet" href="assets/css/192-v366-settings-registry.css">
+<link rel="stylesheet" href="assets/css/193-v373-logging-order-studio.css">
+<link rel="stylesheet" href="assets/css/194-v376-personal-order-layout-parity.css">
+<link rel="stylesheet" href="assets/css/195-v377-ids-jikan-order.css">
 </body>
 
 </html>

@@ -154,11 +154,12 @@ App.importSettingsPreset=async function(file){
     updateDataProgress(72,'Saving imported settings to your MediaFlow account…');
     await saveState();
     await saveQueue;
+    if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed. Imported settings are still in memory; use Sync Now after your cloud connection recovers.');
     render();
     finishDataProgress(true,'Settings Preset imported','Settings and category configuration were applied. Library, History, XP and profile data were left untouched.');
   }catch(e){
     console.error(e);
-    finishDataProgress(false,'Settings Preset import failed','Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
+    finishDataProgress(false,'Settings Preset import failed',lastSaveFailed?'Settings were applied locally, but the cloud save failed. Keep your preset file and retry Sync Now once connected.':'Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
   }finally{
     try{const input=document.getElementById('v196-settings-preset-file');if(input)input.value='';}catch(_){ }
   }

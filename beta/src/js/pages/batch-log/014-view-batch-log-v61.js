@@ -23,7 +23,7 @@ function updateBatchSearch(i,value){
   r.query=String(value||'');
   if(r.libraryId){
     const selected=S.library.find(x=>x.id===r.libraryId);
-    if(!selected || cleanTitle(selected.title)!==r.query) r.libraryId='';
+    if(!selected || cleanTitle(selected.title)!==r.query){r.libraryId='';r.loggedAt=null;}
   }
   renderBatchSuggestions(i);
 }
@@ -41,6 +41,7 @@ function renderBatchSuggestions(i){
 function selectBatchTitle(i,id){
   ensureBatchDraft(); const r=S.batchDraft.rows[i], item=S.library.find(x=>x.id===id); if(!r||!item)return;
   const cat=getCategory(item.categoryId);
+  if(String(r.libraryId||'')!==String(item.id)||!v331ValidTimestamp(r.loggedAt))r.loggedAt=Date.now();
   r.libraryId=item.id; r.query=cleanTitle(item.title); r.qty=Math.max(1,Number(r.qty)||1);
   if(cat) r.minutes=Math.round(r.qty*(Number(cat.minutesPerUnit)||0));
   render();
@@ -70,7 +71,7 @@ function submitBatchLog(){
     const healthStatus=categoryStatus(cat).status, xpCalc=calculateConsumptionXP(cat,qty,minutes,healthStatus);
     S.sessions.push({id:uid(),timestamp,date,categoryId:cat.id,targetAmount:qty,actualAmount:qty,minutes,
       note,status:'logged',unit:cat.unit,xp:xpCalc.xp,healthStatus,source:'batch',batchGroupId:groupId,
-      titles:[{title:cleanTitle(item.title),libraryId:item.id,qty,repeat:(item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total)))}]});
+      titles:[{title:cleanTitle(item.title),libraryId:item.id,qty,repeat:(item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total))),loggedAt:v331BatchTitleTimestamp(r,S.batchDraft,date,timestamp)}]});
     const v81Repeat=item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total));
     if(v81Repeat){ return; }
     item.progress=(Number(item.progress)||0)+qty;
@@ -109,7 +110,7 @@ function renderBatchLog(){
   }).join('');
   const totalMinutes=S.batchDraft.rows.reduce((n,r)=>n+(Number(r.minutes)||0),0);
   return `<div class="view-head"><div><div class="view-title">Batch Log</div><div class="view-desc">Search your entire Library and record multiple titles at once. Every title has its own amount and time and updates its Library progress.</div></div></div>
-    <div class="card batch-log-meta"><div class="field-row"><div class="field"><label class="field-label">Consumption date</label><input type="date" value="${escapeHtml(S.batchDraft.date||todayISO())}" onchange="S.batchDraft.date=this.value"></div><div class="field"><label class="field-label">Batch note (optional)</label><input type="text" value="${escapeHtml(S.batchDraft.note||'')}" placeholder="What did you consume?" onchange="S.batchDraft.note=this.value"></div></div>
+    <div class="card batch-log-meta"><div class="field-row"><div class="field"><label class="field-label">Consumption date</label><input type="date" value="${escapeHtml(S.batchDraft.date||todayISO())}" onchange="S.batchDraft.date=this.value; S.batchDraft.v331DateOverride=true"></div><div class="field"><label class="field-label">Batch note (optional)</label><input type="text" value="${escapeHtml(S.batchDraft.note||'')}" placeholder="What did you consume?" onchange="S.batchDraft.note=this.value"></div></div>
     <div class="health-note">Batch entries use <b>Logged</b>. Their actual categories, amounts and minutes still fully count throughout MediaFlow.</div></div>
     <div class="batch-log-list">${rows||`<div class="empty-state card"><div class="em-icon">🧾</div><div class="em-title">No batch rows yet</div><div>Add a title, search your Library, and select what you consumed.</div></div>`}</div>
     <div class="batch-log-actions"><button class="btn" onclick="App.addBatchRow()">+ Add title</button><button class="btn btn-primary" ${S.batchDraft.rows.length?'':'disabled'} onclick="App.submitBatchLog()">Log batch</button>${S.batchDraft.rows.length?`<button class="btn btn-ghost" onclick="App.clearBatchLog()">Clear</button>`:''}<span id="batch-total-summary" class="hint">${S.batchDraft.rows.length} rows · ${fmtMinutes(totalMinutes)}</span></div>`;

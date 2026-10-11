@@ -45,7 +45,13 @@ renderView=function(){
     return v219LegacyRenderView.apply(this,arguments);
   }
   root.innerHTML=`<div class="fade-in">${html}</div>`;
-  setTimeout(()=>v219RunPageEnhancers(view),0);
+  // v367: Settings Center 2.0 must be the first visible Settings UI.
+  // A timer lets the browser paint the legacy v221 page before the v365/v366
+  // enhancers move its live controls into Settings Center. Complete that work
+  // in the SAME JavaScript task as the HTML insertion, before the next paint.
+  // Leave the established asynchronous schedule unchanged on other pages.
+  if(view==='settings')v219RunPageEnhancers(view);
+  else setTimeout(()=>v219RunPageEnhancers(view),0);
 };
 
 const MediaFlowRuntime={

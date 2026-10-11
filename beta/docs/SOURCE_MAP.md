@@ -219,9 +219,3 @@ v229 changes only the selector's visual icon treatment.
 - `scripts/smoke-v288.py` — functional regression for section ordering/visibility, inline Collection mirrors, Open Collection, 10-title default pagination, typed page size, export persistence and fresh-client cloud restore.
 - `scripts/responsive-v288.py` — desktop/tablet/mobile/tight-width Personal Order overflow regression with expanded Collection title lists.
 - generated bundle: `assets/js/mediaflow-v288.bundle.js`.
-
-## v319
-- `src/js/components/244-v319-community-single-refresh-icon.js`: Community-only duplicate refresh SVG prevention through the existing semantic-icon pipeline.
-- `assets/css/176-v319-community-single-refresh-icon.css`: single icon/text layout and reduced-motion loading style.
-- `scripts/test-v319-community-single-refresh-icon.py`: DOM/re-render/manual refresh validation across responsive widths.
-- generated bundle: `assets/js/mediaflow-v319.bundle.js`.

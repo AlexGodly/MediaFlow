@@ -299,6 +299,12 @@ App.importJSON=function(file){
       }
 
       v148RestorePortableExtras(data);
+      // v339: newer Full Backups preserve v155 portable merge timestamps.
+      // Restore them too, so later Sync Now cannot treat newer restored queue/UI
+      // preferences as older device-only data during multi-device merges.
+      if(data?.portableExtras?._syncMeta&&typeof v155ApplyPortableExtras==='function'){
+        v155ApplyPortableExtras(data.portableExtras);
+      }
 
       updateDataProgress(42,'Checking restored progression and completion data…');
       const info=await v46RecalculateXP(false);
@@ -310,6 +316,7 @@ App.importJSON=function(file){
       updateDataProgress(84,'Saving restored complete state to protected cloud storage…');
       await saveState();
       await saveQueue;
+      if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
 
       render();
 
@@ -323,7 +330,7 @@ App.importJSON=function(file){
       finishDataProgress(
         false,
         'Import failed',
-        'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
+        lastSaveFailed?'The backup was read but the cloud save failed. Keep your backup file and retry Sync Now.':'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
       );
     }
   };

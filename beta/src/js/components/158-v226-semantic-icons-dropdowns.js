@@ -198,16 +198,6 @@ V226_DROPDOWN_OBSERVER.observe(document.body,{childList:true,subtree:true});
    generic icon instead of leaving the first icon that happened to render. */
 function v226RefreshSemanticButtonIcon(el){
   if(!el||el.nodeType!==1||!el.matches?.('button,a.btn,label.btn,summary.btn,.v221-settings-nav-item'))return;
-  // v305: MediaFlow Community owns these semantic controls. Do not inject a
-  // legacy generic circle-arrow icon next to the actual MediaFlow logo or
-  // duplicate the Community's hand-authored navigation/authentication SVGs.
-  if(el.matches?.('#mf302-root .mf302-brand, #mf302-root .mf302-link, #mf302-root .mf303-workspace-button, #app .mf305-auth-home, #mf302-root .mf309-view, #mf302-root .mf309-quick, #mf302-root .mf309-reset, #mf302-root .mf309-pagination button, #mf309-add-dialog button')){
-    el.querySelectorAll(':scope > .v225-btn-icon').forEach(icon=>icon.remove());
-    el.classList.remove('v225-icon-button');
-    el.dataset.v225Iconified='1';
-    el.dataset.v226SemanticIcon='community-custom';
-    return;
-  }
   const name=v225ButtonIconName(el);
   const oldName=String(el.dataset?.v226SemanticIcon||'');
   if(oldName===String(name||'')&&el.querySelector(':scope > .v225-btn-icon'))return;

@@ -123,10 +123,24 @@ async function v281ImportCollections(file){
   const hasSettings=parsed?.collectionSettings&&typeof parsed.collectionSettings==='object';
   const ok=await v279Confirm({title:`Import ${incoming.length.toLocaleString()} collection${incoming.length===1?'':'s'}?`,body:`Imported collections will merge with your current Collections.${hasSettings?' Collection display/filter settings from this export will also be restored.':''} Matching IDs use the newer copy. Titles remain in your Library.`,confirmLabel:'Import collections'});if(!ok)return;
   const byId=new Map(v274EnsureCollections().map(c=>[String(c.id),c])),now=v274Now();
-  for(const c of incoming){const prev=byId.get(String(c.id));c.updatedAt=Math.max(v274Num(c.updatedAt,0),now);if(!prev||v274Num(c.updatedAt)>=v274Num(prev.updatedAt))byId.set(String(c.id),c);}
-  S.collections=[...byId.values()];const importedIds=new Set(incoming.map(c=>String(c.id)));S.collectionTombstones=(S.collectionTombstones||[]).filter(t=>!importedIds.has(String(t?.id||'')));
+  const acceptedIds=new Set();
+  // v339: compare SOURCE timestamps before mutation. v281 stamped every imported
+  // collection with `now` first, making an older export overwrite newer edits.
+  for(const c of incoming){
+    const id=String(c.id),prev=byId.get(id);
+    const source=rows.find(row=>String(row?.id||'')===id)||{};
+    const originalTime=v274Num(source.updatedAt,0);
+    if(prev&&(originalTime<=0||originalTime<v274Num(prev.updatedAt,0)))continue;
+    c.updatedAt=originalTime>0?originalTime:now;
+    byId.set(id,c);acceptedIds.add(id);
+  }
+  S.collections=[...byId.values()];
+  // Revive tombstones only for collections actually accepted from the import.
+  S.collectionTombstones=(S.collectionTombstones||[]).filter(t=>!acceptedIds.has(String(t?.id||'')));
   if(hasSettings){S.settings=S.settings||{};S.settings.v274Collections=Object.assign({},S.settings.v274Collections||{},v274Clone(parsed.collectionSettings,{}));v274EnsureSettings(S.settings);v281RestoreCollectionUiState();}
-  await saveState();V274_UI.activeId='';render();showToast(`${incoming.length.toLocaleString()} collections imported ✓`);
+  await saveState();V274_UI.activeId='';render();
+  if(lastSaveFailed||V115_STARTUP_GUARD)showToast('Collections applied locally, but cloud save is not confirmed. Retry Sync Now when connected.');
+  else showToast(`${acceptedIds.size.toLocaleString()} collections imported ✓${incoming.length>acceptedIds.size?` · ${(incoming.length-acceptedIds.size).toLocaleString()} older copies skipped`:''}`);
 }
 
 /* ---------- Card cover-size responsiveness ------------------------- */

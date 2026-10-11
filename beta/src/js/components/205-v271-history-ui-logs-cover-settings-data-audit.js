@@ -220,10 +220,10 @@ function v271CsvCell(value){
   return /[",\n\r]/.test(text)?`"${text.replace(/"/g,'""')}"`:text;
 }
 function v271ExportHistorySessions(sessions,prefix){
-  const header=['id','date','time','timestamp','category','category_id','target','actual','unit','minutes','status','note','xp','health_status','source','assigned_category_id','assigned_target','followed_assigned_category','session_group_id','batch_group_id','titles_json','mediaflow_version','session_json'];
+  const header=['id','date','time','timestamp','category','category_id','target','actual','unit','minutes','status','note','xp','health_status','source','assigned_category_id','assigned_target','followed_assigned_category','session_group_id','batch_group_id','titles_json','mediaflow_version','session_json','v369_itemized_units_json','v369_duration_seconds','v369_itemized'];
   const rows=(Array.isArray(sessions)?sessions:[]).slice().sort((a,b)=>(Number(a?.timestamp)||0)-(Number(b?.timestamp)||0)).map(s=>{
     const cat=getCategory(s.categoryId),d=new Date(Number(s.timestamp)||Date.now());
-    return [s.id||'',s.date||'',d.toLocaleTimeString(),Number(s.timestamp)||'',cat?.name||'',s.categoryId||'',s.targetAmount??'',s.actualAmount??'',s.unit||'',s.minutes??'',s.status||'',s.note||'',Math.round(sessionStoredXP(s)||0),s.healthStatus||'',s.source||'',s.assignedCategoryId||'',s.assignedTargetAmount??'',s.followedAssignedCategory??'',s.sessionGroupId||'',s.batchGroupId||'',Array.isArray(s.titles)?s.titles:[],v161CurrentVersion(),s];
+    return [s.id||'',s.date||'',d.toLocaleTimeString(),Number(s.timestamp)||'',cat?.name||'',s.categoryId||'',s.targetAmount??'',s.actualAmount??'',s.unit||'',s.minutes??'',s.status||'',s.note||'',Math.round(sessionStoredXP(s)||0),s.healthStatus||'',s.source||'',s.assignedCategoryId||'',s.assignedTargetAmount??'',s.followedAssignedCategory??'',s.sessionGroupId||'',s.batchGroupId||'',Array.isArray(s.titles)?s.titles:[],v161CurrentVersion(),s,(s.titles||[]).flatMap(t=>(t.v369Units||[]).map(u=>({title:t.title||'',libraryId:t.libraryId||'',...u}))),s.v369DurationSeconds??'',s.v369Itemized===true];
   });
   const csv=[header,...rows].map(row=>row.map(v271CsvCell).join(',')).join('\n');
   triggerDownload(new Blob([csv],{type:'text/csv;charset=utf-8'}),`${prefix}-${todayISO()}.csv`);

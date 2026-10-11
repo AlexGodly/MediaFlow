@@ -261,6 +261,7 @@ async function v142ImportOrder(file){
 
     await saveState();
     render();
+    if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Order applied locally, but cloud save is unconfirmed. Retry Sync Now when connected.');
 
     showToast(
       `Order imported: ${resolved.length.toLocaleString()} title${resolved.length===1?'':'s'}${skipped?` · ${skipped.toLocaleString()} unmatched skipped`:''} ✓`

@@ -184,7 +184,7 @@ function renderShell(){
 
       </div>
 
-      <div class="sidebar-foot"><div class="account-menu"><button type="button" class="account-avatar-btn" onclick="App.openSidebarPublicProfile()" title="View my public profile" aria-label="View my public profile">${renderAccountAvatar()}</button><button type="button" class="account-profile-btn" onclick="App.openSidebarPublicProfile()" title="View my public profile" aria-label="View my public profile"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
+      <div class="sidebar-foot"><div class="account-menu"><button class="account-avatar-btn" onclick="App.openProfile()" title="Open profile settings">${renderAccountAvatar()}</button><button class="account-profile-btn" onclick="App.openProfile()" title="Open profile settings"><span class="account-menu-email">${escapeHtml(getDisplayName())}</span></button><button class="btn btn-ghost btn-sm" onclick="window.MediaFlowAuth.logout()">Log out</button></div>
 
         ${renderLevelBlock()}
 

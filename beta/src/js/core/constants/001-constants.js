@@ -4,8 +4,8 @@
 
    ============================================================ */
 
-const SUPABASE_URL='https://zkmsvqepyraehaeydhpa.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_aXInrBauOLd2SDCm4WJOUA_oZjwErgc';
+const SUPABASE_URL='https://wgeijxfdpgehesxialxm.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_d2P0qZlvGZOSqcUzEg3BNg_3wQsHY_M';
 const SUPABASE_CONFIGURED=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('YOUR_')&&!!SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
 let supabase=null,AUTH_USER=null,AUTH_READY=false,AUTH_MODE='login';
 if(SUPABASE_CONFIGURED&&window.supabase?.createClient)supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -261,8 +261,7 @@ const DEFAULT_SETTINGS = {
     unitXP: {episodes:10, chapters:3, issues:6, movies:30},
     rotationMultiplier: {neglected:2.0, due:1.5, healthy:1.0, overused:0.5},
     libraryAdditionXP: 25,
-    completionXP: 50,
-    timeXP: {enabled:true, intervalMinutes:10, xpPerInterval:5, idleMinutes:5, useStreak:true}
+    completionXP: 50
   },
 
 };

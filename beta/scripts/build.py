@@ -33,11 +33,6 @@ index=re.sub(r'<meta name="mediaflow-version" content="\d+">',f'<meta name="medi
 index=re.sub(r'assets/js/mediaflow-v\d+\.bundle\.js',f'assets/js/mediaflow-v{VERSION}.bundle.js',index,count=1)
 index_path.write_text(index,encoding='utf-8')
 
-# v303: GitHub Pages 404 fallback is a complete application entrypoint. Keep it
-# byte-identical to index.html, otherwise deep profile/Collection URLs can boot
-# an old Community runtime with broken navigation.
-(ROOT/'404.html').write_text(index,encoding='utf-8')
-
 print(f'Built {out.relative_to(ROOT)} from {owned_count} source fragments ({len(text):,} characters)')
 print(f'Injected {len(runtime_order)} runtime extension module(s) through v{VERSION} inside the MediaFlow application scope')
 try:

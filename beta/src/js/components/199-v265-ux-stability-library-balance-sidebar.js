@@ -309,6 +309,7 @@ function v265RefreshSidebarNav(){
   const mobile=document.querySelector('.mobile-tabbar');if(mobile)mobile.innerHTML=renderMobileTabs();
 }
 function v265PatchSettings(){
+  if(typeof window.MediaFlowV365?.patchSettings==='function')return window.MediaFlowV365.patchSettings();
   if(V265_SETTINGS_PATCHING)return;
   const root=document.querySelector('#view-root>.fade-in');const current=root?.querySelector('.v221-settings-page');if(!root||!current)return false;
   V265_SETTINGS_PATCHING=true;

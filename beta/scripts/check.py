@@ -7,11 +7,6 @@ VERSION=int((ROOT/'VERSION').read_text(encoding='utf-8').strip())
 errors=[]
 index=(ROOT/'index.html').read_text(encoding='utf-8')
 sw=(ROOT/'sw.js').read_text(encoding='utf-8')
-if VERSION>=303:
-    fallback=(ROOT/'404.html').read_text(encoding='utf-8') if (ROOT/'404.html').exists() else ''
-    if fallback!=index: errors.append('404.html must match current index.html for GitHub Pages deep links')
-    if 'location.protocol' not in index or 'file:' not in index: errors.append('Missing v304 direct-file base resolution')
-    if f'assets/css/161-v303-community-navigation.css' not in index: errors.append('Missing v303 public navigation stylesheet')
 
 if f'<meta name="mediaflow-version" content="{VERSION}">' not in index: errors.append(f'index.html version is not {VERSION}')
 if f'assets/js/mediaflow-v{VERSION}.bundle.js' not in index: errors.append(f'index.html does not load v{VERSION} bundle')
@@ -104,7 +99,7 @@ if "request.mode==='navigate'" not in sw or "networkFirst(request,'./index.html'
 if "scripts/pwa.py" not in (ROOT/'scripts/build.py').read_text(encoding='utf-8'): errors.append('build.py does not synchronize future PWA releases')
 if re.search(r'<style(?:\s|>)',index,re.I): errors.append('inline <style> block remains in index.html')
 for m in re.finditer(r'<script([^>]*)>(.*?)</script>',index,re.I|re.S):
-    if 'src=' not in m.group(1).lower() and m.group(2).strip() and not ('document.createElement' in m.group(2) and 'base.href=' in m.group(2) and 'location.protocol' in m.group(2)): errors.append('unapproved inline JavaScript remains in index.html')
+    if 'src=' not in m.group(1).lower() and m.group(2).strip(): errors.append('inline JavaScript remains in index.html')
 
 order=json.loads((SRC/'build-order.json').read_text(encoding='utf-8'))
 runtime_order=json.loads((SRC/'runtime-order.json').read_text(encoding='utf-8'))

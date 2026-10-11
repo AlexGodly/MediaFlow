@@ -281,7 +281,7 @@ renderBatchLog=function(){
           <label class="field-label">Consumption date</label>
           <input type="date"
             value="${escapeHtml(S.batchDraft.date||todayISO())}"
-            onchange="S.batchDraft.date=this.value">
+            onchange="S.batchDraft.date=this.value; S.batchDraft.v331DateOverride=true">
         </div>
 
         <div class="field">
