@@ -1,15 +1,14 @@
-# MediaFlow v375 — Personal Edition Restoration & Advanced Logging
+# MediaFlow v376 — Personal Order Layout Parity & Continuous Collection Queue
 
-**Latest repository release:** **v375** · October 11, 2026  
+**Latest local development candidate:** **v376** · October 11, 2026  
 **Developer / owner:** **Alex Godly**  
-**Application lineage:** **v373 feature baseline → v375** (v374 MAL/SIMKL account tracking canceled)  
-**Repository commit:** [`375` — `ee119db9b`](https://github.com/AlexGodly/MediaFlow/commit/ee119db9b2179e6c38de2c24434e83dbd03162e8)  
-**Distribution:** Modular source, static website, and supported PWA browsers  
-**Readiness:** GitHub source rollback committed; full v375 frontend/PWA rebuild and live production validation remain unverified.
+**Application lineage:** v373 features → v375 rollback → v376 UI/queue refinement (v374 tracking canceled)  
+**Release status:** Modular source rebuilt, Chromium regression verified locally. **Not deployed to GitHub main/Pages.**  
+**Release notes:** [README2.md](./README2.md) · [Detailed v376 changelog](./docs/CHANGELOG_v376.md)
 
-MediaFlow v375 retains the **v373 Logging Sorting & Custom Order Studio**, **v372 Logging Interface 3.0**, **v369 itemized Per unit Logging**, **Settings Center 2.0**, Collections, Personal Order, responsive layouts, and the existing private Supabase cloud model. The short-lived v374 authenticated MAL/SIMKL tracking experiment was **removed** from the v375 application. Existing **MAL/SIMKL import workflows are a separate capability** and are not the canceled account-tracking system.
+MediaFlow v376 fixes Personal Order badges and cover spacing in **Tabs / Category Titles**, **Tabs / Collection Queues**, **Lists / All Titles**, **Lists / By Category**, assigned Collection blocks, and expanded Collection orders. Position labels/inputs have room for at least three digits. In **Lists / All Titles**, the Collection Queue becomes one continuous list; in **By Category**, it stays grouped. All canonical queue data, Logging, XP and Cloud Sync contracts are preserved.
 
-> **Release identity note:** The verified v375 source archive sets `VERSION` and `version.json` to **375**, but still references the **v373 JavaScript bundle and service-worker cache**. This is a version-metadata restoration, **not** evidence that the full frontend was rebuilt as v375. See [release verification](#release-v375--technical-changelog) before deployment.
+> **Local candidate note:** Unlike the historical v375 source restoration, v376 regenerated its own **mediaflow-v376.bundle.js**, `sw.js` cache identifier, `version.json`, and PWA shell. A local package is not evidence of production deployment or authenticated multi-device verification.
 
 ---
 
@@ -17,21 +16,21 @@ MediaFlow v375 retains the **v373 Logging Sorting & Custom Order Studio**, **v37
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v375-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v376-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v375 — Personal Edition (v373 feature restoration).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v376 — Personal Edition (v375 restored baseline + Personal Order refinements).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current repository source:** v375 · October 11, 2026, based on v373. **Live website:** deployment/version not independently verified; repository version and hosted/PWA version can differ.
+**Current packaged candidate:** v376 · October 11, 2026, based on the restored v375/v373 features. **GitHub main:** currently v375; v376 is available as a local modular candidate. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v375 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v376 Personal Edition.
 
-**Current feature-baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v376 changelog:** [README2.md](./README2.md), [detailed v376 changelog](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
@@ -49,11 +48,12 @@ MediaFlow v375 retains the **v373 Logging Sorting & Custom Order Studio**, **v37
 10. [Data model, synchronization, and backups](#data-model-synchronization-and-backups)
 11. [Configuration and development](#configuration-and-development)
 12. [Compatibility, limitations, and troubleshooting](#compatibility-limitations-and-troubleshooting)
-13. [Release v375 — technical changelog](#release-v375--technical-changelog)
-14. [Historical release v330 — technical changelog](#historical-release-v330--technical-changelog)
-15. [The complete MediaFlow evolution](#the-complete-mediaflow-evolution)
-16. [Project roadmap and Community hiatus](#project-roadmap-and-community-hiatus)
-17. [Project ownership and contact](#project-ownership-and-contact)
+13. [Release v376 — technical changelog](#release-v376--technical-changelog)
+14. [Release v375 — historical rollback](#release-v375--technical-changelog)
+15. [Historical release v330 — technical changelog](#historical-release-v330--technical-changelog)
+16. [The complete MediaFlow evolution](#the-complete-mediaflow-evolution)
+17. [Project roadmap and Community hiatus](#project-roadmap-and-community-hiatus)
+18. [Project ownership and contact](#project-ownership-and-contact)
 
 ---
 
@@ -80,7 +80,7 @@ The application is intended to support a large and diverse Library. It provides 
 
 ### Interface previews
 
-These are screenshots retained from earlier personal releases. They illustrate the project, **not necessarily the current v375 UI** or a particular theme.
+These are screenshots retained from earlier personal releases. They illustrate the project, **not necessarily the current v376 UI** or a particular theme.
 
 | Dashboard | Library |
 | --- | --- |
@@ -94,23 +94,23 @@ These are screenshots retained from earlier personal releases. They illustrate t
 
 ## Release status and development direction
 
-### Current release: v375 (restored v373 feature baseline)
+### Current local candidate: v376 (restored v373 feature baseline plus UI refinements)
 
-v375 is the latest committed **Personal Edition** release. It was assembled from the **v373 Git source tree**, with the `VERSION` and `version.json` release identifiers changed to 375. Its user-facing functionality is therefore intentionally the **v373 feature set**, not the v374 tracking branch.
+v375 is the last committed **Personal Edition** release; v376 is the latest **local development candidate**. v375 was assembled from the **v373 Git source tree** with version metadata changed to 375. v376 builds on that restored application, updates its runtime/PWA assets to 376, and adds the Personal Order UI/queue improvements described below. Neither release inherits the canceled v374 tracking branch.
 
-| Area | v375 position |
+| Area | v376 current candidate |
 | --- | --- |
 | Application feature baseline | **v373**: Advanced Logging Sorting & Custom Order Studio |
 | Logging presentation | **v372**: Logging Interface 3.0, building on v369–v371 |
 | Settings | **v365–v367** Settings Center 2.0 and stability/registration improvements |
-| Community / public social systems | Historical v302–v329 research; **not part of v375** |
-| MAL/SIMKL authenticated account tracking | **Canceled v374 experiment; excluded from v375** |
+| Community / public social systems | Historical v302–v329 research; **not part of v376** |
+| MAL/SIMKL authenticated account tracking | **Canceled v374 experiment; excluded from v376** |
 | MAL/SIMKL file/data imports | Existing import workflows retained where supported; **distinct from account tracking** |
 | Database | Existing private MediaFlow cloud-state system; v374 tracking tables removed |
 | Legacy tracking Edge Function | Old implementation disabled and configured to return HTTP 410; permanent deletion and provider-secret removal not confirmed |
-| Production verification | Full rebuild, authenticated cross-device testing, live Pages/PWA deployment, and physical-device checks not confirmed |
+| Production verification | v376 local JS/PWA rebuild and Chromium regression checks passed; authenticated cross-device testing, live Pages/PWA deployment, and physical-device checks remain outstanding |
 
-**Known release-asset mismatch:** In the verified modular v375 source, `VERSION` and `version.json` say 375, while `index.html`, the active `assets/js/mediaflow-v373.bundle.js`, `sw.js`, and `package.json` still identify the v373 runtime/build. Do not represent this repository state as a fully rebuilt v375 PWA. Rebuild and verify the complete asset set before a production deployment that needs unified v375 identifiers.
+**Historical v375 release-asset mismatch (resolved in v376 candidate):** v375 had metadata version 375 but v373-named runtime and PWA assets. v376 has its own rebuilt `mediaflow-v376.bundle.js`, `sw.js` cache and consistent version metadata. Production verification remains pending.
 
 ### Historical personal / Community branches
 
@@ -123,7 +123,7 @@ v375 is the latest committed **Personal Edition** release. It was assembled from
 
 The experimental Community branch explored public profiles, social relationships, discovery, shared Collections, public rankings, ratings, and cross-user analytics. Providing these as a reliable service requires adequate hosting, secure data access, operational monitoring, performance, bandwidth, and sustainable maintenance resources.
 
-The current direction is a **high-quality personal workspace**. A future Community revival is not scheduled or promised. Community functionality is **not** a runtime dependency of v375.
+The current direction is a **high-quality personal workspace**. A future Community revival is not scheduled or promised. Community functionality is **not** a runtime dependency of v376.
 
 ## Feature overview
 
@@ -209,7 +209,7 @@ Collections are curated groups of existing Library entries, not a second global 
 - Assign Collections to Personal Order when desired.
 - Transfer Collections using the supported **v2** import/export format.
 
-**Personal Edition (v375):** Community publishing, subscriptions, and public Collection discovery experiments are not part of the active personal application.
+**Personal Edition (v376):** Community publishing, subscriptions, and public Collection discovery experiments are not part of the active personal application.
 
 ### 7. History and activity review
 
@@ -335,7 +335,7 @@ The application frontend is prebuilt, so **Node.js and npm are not required simp
 
 ## How to use MediaFlow
 
-This section describes practical workflows supported by the v373 feature set restored in v375.
+This section describes workflows supported by the restored v373 baseline and v376 Personal Order UI improvements.
 
 ### A. Build your Library
 
@@ -376,7 +376,7 @@ Updating a title's general progress and recording a consumption session are rela
 4. Reorder or filter the Collection contents as needed.
 5. Optionally use it in Personal Order.
 
-In v375, these Collections remain **personal**. Historical Community publishing controls are not included.
+In v376, these Collections remain **personal**. Historical Community publishing controls are not included.
 
 ### E. Customize MediaFlow
 
@@ -431,13 +431,13 @@ The production frontend is a static website. It does not require a Node.js appli
 1. Keep the release contents at the published site root of the repository.
 2. Ensure `index.html`, `manifest.json`, `sw.js`, `version.json`, `VERSION`, `assets/`, and every referenced runtime file are deployed together. The verified v375 archive does **not** include `404.html`; do not assume it exists.
 3. The repository contains a GitHub Actions Pages workflow under `.github/workflows/deploy-pages.yml`. Follow the repository's configured Pages publishing source and workflow rather than assuming branch publishing is active.
-4. **For a unified v375 deployment**, first regenerate the JavaScript bundle, the service worker/PWA cache version, and relevant release metadata, then run project checks.
+4. **For a v376 deployment**, use the rebuilt v376 JavaScript, service worker/PWA cache, version metadata and complete modular source; run checks and verify logged-in behavior before publishing.
 5. After a successful deployment, verify loaded asset URLs and version identifiers in a fresh browser session.
 6. If an installed PWA still shows older content, use MediaFlow's update tools or appropriate browser/PWA cache-refresh mechanisms.
 
 The existing MediaFlow deployment URL uses the GitHub Pages project-site pattern: `https://alexgodly.github.io/MediaFlow/`. Change repository-specific links when deploying under a different owner or repository name.
 
-**Deployment warning:** updating `README.md`, or only the `VERSION` and `version.json` files, does not rebuild or deploy the application. The v375 source archive still uses v373-named runtime/PWA assets; verify this before publishing.
+**Deployment warning:** updating `README.md`, or only the `VERSION` and `version.json` files, does not rebuild or deploy the application. The v376 candidate has rebuilt runtime/PWA assets, but still requires user testing and deployment verification before production.
 
 ### Option 2 — Local server
 
@@ -460,9 +460,9 @@ For local frontend preview, start the server after building and open the applica
 
 ## Technologies and programming languages
 
-MediaFlow v375 remains a **hybrid modular web application** based on the v373 feature code. The main application logic is not a full React rewrite; the React presentation layer coexists with the established JavaScript runtime.
+MediaFlow v376 remains a **hybrid modular web application** based on the restored v373 feature code with v376 Personal Order UI extensions. The main application logic is not a full React rewrite; the React presentation layer coexists with the established JavaScript runtime.
 
-| Technology / language | Role in MediaFlow v375 |
+| Technology / language | Role in MediaFlow v376 |
 | --- | --- |
 | **HTML5** | Main document structure, semantic page elements, forms, and install metadata |
 | **CSS3** | Layout, responsiveness, themes, custom components, animations, and modal styling |
@@ -498,7 +498,7 @@ Modular JavaScript source (src/js/)
          +-- build-order.json + runtime-order.json
          |
          v
-  scripts/build.py  -----> assets/js/mediaflow-v373.bundle.js  (in current v375 archive)
+  scripts/build.py  -----> assets/js/mediaflow-v376.bundle.js  (v376 rebuilt application runtime)
          |
          +-- scripts/pwa.py -----> sw.js + release-aware PWA shell
          |
@@ -516,14 +516,14 @@ MediaFlow/
 ├── index.html                     # Main application page
 ├── README.md                      # Project guide
 ├── VERSION                        # GitHub release metadata: 375
-├── version.json                   # v375 metadata, compatible with earlier data schemas
+├── version.json                   # v376 metadata, compatible with earlier data schemas
 ├── package.json                   # Optional React/Vite developer dependencies
 ├── manifest.json                  # PWA install metadata
 ├── sw.js                          # Generated PWA service worker
 ├── favicon.ico                    # Website icon
 ├── assets/
 │   ├── js/
-│   │   ├── mediaflow-v373.bundle.js      # Active runtime in v375 source archive
+│   │   ├── mediaflow-v376.bundle.js      # Active runtime in v376 local candidate
 │   │   └── mediaflow-v261-react-ui.js    # Prebuilt React presentation layer
 │   ├── css/                       # Themes, application layout, release styles
 │   ├── category-icons/            # Built-in Category artwork
@@ -545,7 +545,7 @@ MediaFlow/
 └── docs/                           # Architecture notes and historical changelogs
 ```
 
-Version-specific files inside `assets/`, `src/`, and `docs/` may be retained for compatibility or historical purposes. **However, in the actual v375 source archive, `index.html` directly loads `mediaflow-v373.bundle.js` and `sw.js` declares the v373 cache**; these are active asset references, not merely historical filenames. A new v375 bundle/PWA build was not verified as part of the rollback.
+Version-specific files inside `assets/`, `src/`, and `docs/` may be retained for compatibility or historical purposes. **In the v376 candidate**, `index.html` loads `mediaflow-v376.bundle.js` and `sw.js` uses the v376 cache. The original v375 metadata-only rollback is a historical distinction.
 
 ---
 
@@ -563,12 +563,12 @@ MediaFlow uses Supabase Auth for account access and stores synchronized applicat
 
 ### Format compatibility
 
-| Artifact | v375 source state |
+| Artifact | v376 candidate state |
 | --- | --- |
-| Repository release metadata | **375** (`VERSION`, `version.json`) |
+| Local candidate release metadata | **376** (`VERSION`, `version.json`) |
 | Active feature baseline | **v373** (built on earlier Personal Edition releases) |
-| Bundled browser JS | **`mediaflow-v373.bundle.js`** (not yet rebuilt for v375) |
-| PWA service worker cache | **v373** (not yet rebuilt for v375) |
+| Bundled browser JS | **`mediaflow-v376.bundle.js`** (rebuilt) |
+| PWA service worker cache | **v376** (regenerated) |
 | Cloud Sync contract | **v201** (`cloudSyncVersion`) |
 | Full Backup schema | **v29** (`fullBackupSchema`) |
 | Settings Preset schema | **v1** (`settingsPresetSchema`) |
@@ -596,7 +596,7 @@ The source configuration is in:
 
 `src/js/core/constants/001-constants.js`
 
-It defines the Supabase project URL and a **publishable/anon key** used by browser authentication. The restored v375 application retains its previously configured Supabase backend. Developers making a separate deployment must configure a separate Supabase project and the required private-state schema and Row-Level Security policies before expecting Cloud Sync to work.
+It defines the Supabase project URL and a **publishable/anon key** used by browser authentication. The v376 candidate retains the same configured Supabase backend as v375. Developers making a separate deployment must configure a separate Supabase project and the required private-state schema and Row-Level Security policies before expecting Cloud Sync to work.
 
 - A publishable/anon key is intended for browser use, **not** a substitute for Row-Level Security.
 - **Never** commit service-role, secret, or database-password credentials into website assets.
@@ -641,7 +641,7 @@ MediaFlow is maintained as a personal project. Any external code or documentatio
 | Situation | Recommended action |
 | --- | --- |
 | **Blank page after an update** | Check the browser console and confirm all versioned JS/CSS assets were deployed together. |
-| **v375 metadata but v373 runtime/PWA** | This is the verified v375 restoration state. Regenerate and validate the application bundle, `index.html` references, service worker, PWA cache, and release metadata together before claiming a fully rebuilt v375 release. |
+| **v375 metadata but v373 runtime/PWA** | Historical v375 rollback state only. The v376 local candidate rebuilds the bundle, `index.html`, service worker, PWA cache and version metadata. |
 | **Cloud Sync appears unsuccessful** | Verify network access, login state, Supabase availability, and any cloud-protection warning before retrying. |
 | **Library unexpectedly appears empty** | Avoid clearing data or intentionally overwriting cloud state until account and synchronization status are understood. |
 | **PWA installation prompt missing** | Use the browser's manual install/Add to Home Screen workflow where available. The native prompt is not supported on every browser or in every state. |
@@ -653,6 +653,23 @@ MediaFlow is maintained as a personal project. Any external code or documentatio
 | **A new clone cannot log in** | Provision an appropriate Supabase backend and auth/RLS configuration; frontend source alone is not a complete independent cloud service. |
 
 **Browser/platform notes:** MediaFlow is a web application and PWA. Some advanced effects or PWA capabilities depend on browser support, connectivity, hardware capacity, third-party APIs, and cache state. Performance with very large Libraries varies by device and dataset.
+
+---
+
+## Release v376 — technical changelog
+
+**v376 Modular, Personal Edition** · October 11, 2026 · **Local candidate**
+
+- **Baseline:** restored v375/v373 source, not the canceled v374 tracking branch.
+- **Personal Order:** shared protective grid sizing for position badges, title/Collection covers and responsive copy in Tabs/Lists, including expanded Collection titles.
+- **Position numbers:** clean 3-digit support and space for larger labels, maintaining category-local assignment editing.
+- **Collection Queue / Lists / All Titles:** one continuous queue; **By Category** remains grouped, matching Title Order.
+- **Build:** complete v376 JS, PWA service worker and version.json generated using the modular build tooling.
+- **Data compatibility:** Cloud v201, Full Backup v29, Settings Preset v1 unchanged; no SQL migration.
+- **Testing:** synthetic Chromium viewport checks at 320, 390, 820, 1280 and 1920px. Authentication and physical devices not verified.
+- **GitHub:** local candidate only. When approved for main, commit message must be exactly `376`.
+
+[Full release notes](./README2.md) · [Detailed engineering changelog](./docs/CHANGELOG_v376.md)
 
 ---
 
@@ -1092,6 +1109,12 @@ These releases established the **v373 feature baseline that v375 restores**. Set
 
 **v375 is not a continuation of the v374 tracking feature set.** It is a continuation of the v373 Personal Edition code line.
 
+### Generation 12 — Personal Order UI unification (v376)
+
+| Version | Direction | Release notes |
+| --- | --- | --- |
+| **v376** | Protected multi-digit position badges, unified cover/number layout, continuous Collection Queue in Lists / All Titles and preserved By Category grouping. | [Changelog](./docs/CHANGELOG_v376.md) |
+
 ### Evolution summary by generation
 
 | Era | Versions | Central direction |
@@ -1107,7 +1130,8 @@ These releases established the **v373 feature baseline that v375 restores**. Set
 | Expanded personal tools | v331–v364 | Cloud, XP/time, History, responsive UX, Collections and Personal Order |
 | Settings and Logging generation | v365–v373 | Settings Center 2.0, optimizations, itemized/quick Logging and sorting studio |
 | Canceled tracking experiment | v374 | Optional MAL/SIMKL authenticated tracking — discontinued |
-| **Current Personal Edition** | **v375** | **v373 feature restoration, tracking table rollback, disabled tracking backend** |
+| Current committed Personal Edition | v375 | v373 feature restoration, tracking table rollback, disabled tracking backend |
+| **Latest local candidate** | **v376** | **Personal Order visual parity and All/By Category Collection Queue behavior** |
 
 **Historical integrity note:** Release numbering is continuous, but functional branches diverge. v330 intentionally derives from v301 without the Community experiment, and v375 intentionally derives from v373 without the canceled v374 tracking branch. The source archive includes a substantial set of personal changelogs; the Community experiments remain historical and are not included in the restored v375 runtime.
 
@@ -1153,5 +1177,5 @@ MediaFlow's design draws on the broader ecosystem of personal media tracking, di
 
 ---
 
-**MediaFlow v375 — Personal Edition**  
+**MediaFlow v376 — Personal Edition (local development candidate)**  
 *Organize what you love. Track your journey. Keep your media your own.*

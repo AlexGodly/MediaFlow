@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--panel);
+  --color-surface-raised: var(--panel-raised);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-accent: var(--flow);
+  --color-danger: var(--overused);
+  --shadow-panel: 0 12px 38px rgb(0 0 0 / .10);
+  --shadow-glow: 0 8px 28px color-mix(in srgb,var(--flow) 18%,transparent);
+}

@@ -1,0 +1,120 @@
+PASS v370 browser: confirmation cancel/accept, Quick Logging amount/progress
+PASS v370 browser: Settings naming/icons, independent cover-size setting, reset and settings persistence
+[
+  {
+    "width": 320,
+    "documentWidth": 320,
+    "viewportWidth": 320,
+    "rootWidth": 320,
+    "formWidth": 296,
+    "unitCount": 2,
+    "unitHeight": 303,
+    "runtimeWidths": [
+      71,
+      71,
+      71
+    ],
+    "runtimeY": [
+      1032,
+      1032,
+      1032
+    ],
+    "cover": true,
+    "tagCount": 3,
+    "clearButton": true,
+    "totals": true
+  },
+  {
+    "width": 390,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "rootWidth": 390,
+    "formWidth": 366,
+    "unitCount": 2,
+    "unitHeight": 303,
+    "runtimeWidths": [
+      92,
+      92,
+      92
+    ],
+    "runtimeY": [
+      1005,
+      1005,
+      1005
+    ],
+    "cover": true,
+    "tagCount": 3,
+    "clearButton": true,
+    "totals": true
+  },
+  {
+    "width": 430,
+    "documentWidth": 430,
+    "viewportWidth": 430,
+    "rootWidth": 430,
+    "formWidth": 406,
+    "unitCount": 2,
+    "unitHeight": 307,
+    "runtimeWidths": [
+      104,
+      104,
+      104
+    ],
+    "runtimeY": [
+      982,
+      982,
+      982
+    ],
+    "cover": true,
+    "tagCount": 3,
+    "clearButton": true,
+    "totals": true
+  },
+  {
+    "width": 820,
+    "documentWidth": 820,
+    "viewportWidth": 820,
+    "rootWidth": 820,
+    "formWidth": 796,
+    "unitCount": 2,
+    "unitHeight": 243,
+    "runtimeWidths": [
+      239,
+      239,
+      239
+    ],
+    "runtimeY": [
+      814,
+      814,
+      814
+    ],
+    "cover": true,
+    "tagCount": 3,
+    "clearButton": true,
+    "totals": true
+  },
+  {
+    "width": 1280,
+    "documentWidth": 1280,
+    "viewportWidth": 1280,
+    "rootWidth": 1260,
+    "formWidth": 1236,
+    "unitCount": 2,
+    "unitHeight": 177,
+    "runtimeWidths": [
+      153,
+      153,
+      153
+    ],
+    "runtimeY": [
+      740,
+      740,
+      740
+    ],
+    "cover": true,
+    "tagCount": 3,
+    "clearButton": true,
+    "totals": true
+  }
+]
+PASS v370 browser: responsive Per unit, icons, title metadata, missing cover, runtime columns, no horizontal overflow
