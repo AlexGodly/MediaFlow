@@ -212,7 +212,7 @@ v224LogSuggestionsHtml=function(){
       if(old){old.textContent=already?'Added':'Add';old.disabled=already;old.setAttribute('onclick',`App.v378QuickAdd(${JSON.stringify(id)})`);old.classList.add('mf378-add-btn');}
       if(!V378_LOG_UI.clean){
         const label=document.createElement('label');label.className='mf378-check';
-        label.innerHTML=`<input type="checkbox" aria-label="Select ${escapeHtml(cleanTitle(item.title))}" ${V378_LOG_UI.selected.has(id)?'checked':''} onchange="App.v378Pick(${JSON.stringify(id)},this.checked)">`;
+        label.innerHTML=`<input type="checkbox" aria-label="Select ${escapeHtml(cleanTitle(item.title))}" ${V378_LOG_UI.selected.has(id)?'checked':''} onchange="App.v378Pick(decodeURIComponent('${encodeURIComponent(id)}'),this.checked)">`;
         el.prepend(label);
       }
       el.dataset.mf378Id=id;

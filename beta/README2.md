@@ -1,5 +1,37 @@
 # MediaFlow — Latest Release Changelog
 
+## MediaFlow v379 — Logging Recovery, Mixed Collection Reordering & Tenrai Diagnostics
+
+**Release:** v379 Modular — Personal Edition  
+**Baseline:** v378 Tenrai Repair Modular  
+**Date:** October 11, 2026  
+**Developer:** Alex Godly  
+**Status:** Built and locally tested; no GitHub commit, push, or deployment.
+
+### 1. Logging expansion restored
+
+Removed the broken global Collapse All/Expand All actions and redundant button under each cover. Per Unit cards once again use their functional right-hand Expand/Collapse to show individual episode/chapter logging controls; Quick Logging gets a working right-hand expander that preserves draft amounts. A new **Show/Hide Added Titles** button sits beside Clear All Titles and hides only the list.
+
+### 2. Logging Library — always-on selection
+
+Removed Clean Covers entirely. Fixed malformed manual-checkbox handlers and synchronized Add Selected count and enabled state with individual selection, Select Visible and Deselect All. Integrated selection checkboxes into all five Library view layouts, slightly enlarged Logging Library covers, preserved bulk Add with duplicate prevention, and changed Added to a check-circle icon.
+
+### 3. Personal Order — mixed title/Collection reordering
+
+Fixed the reported `Anime 1 → Collection → Anime 2` issue. Moving Anime 2 above the Collection now produces `Anime 1 → Anime 2 → Collection` without displacing unrelated entries. Titles and assigned Collections share one queue-movement operation across arrows, positions and drag/drop. Added Collection dragging, touch handles, local queue repaint where applicable, and serialized/debounced order persistence.
+
+### 4. Automatic MAL Detection
+
+Incorporates the v378 Tenrai Repair episode-data safeguards, retaining a clear distinction between API request errors and unavailable episode listings. Keeps **Retry Missing Episode Data** separate and preserves the last verified fresh-title total during incomplete checks. Replaces generic circle-arrow icons on unmatched/retry controls. The previously reported nine missing lists remain provider-dependent and are **not claimed to be resolved**.
+
+### 5. Tests and delivery
+
+Compiled JavaScript checked successfully. Browser tests passed for manual selection, Quick and Per Unit expansion, title-list visibility, exact mixed-order moves and real drag events at 390/1280px. Personal Order layout checks passed at 320, 390, 820, 1280 and 1920px. Nine local Tenrai recovery tests passed. Live Tenrai, real-user cloud sync and physical-device testing remain outstanding.
+
+**Full changelog:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md).
+
+---
+
 ## MediaFlow v378 — Tenrai Migration, Import IDs, Logging 4.0 & Personal Order
 
 **Release:** v378 Modular — Personal Edition  

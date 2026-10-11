@@ -1,14 +1,14 @@
-# MediaFlow v378 — Tenrai, External ID Imports, Logging 4.0 & Personal Order
+# MediaFlow v379 — Logging Recovery, Personal Order Reordering & Tenrai Diagnostics
 
-**Latest modular candidate:** v378 · October 11, 2026  
+**Latest modular candidate:** v379 · October 11, 2026  
 **Developer/owner:** Alex Godly  
-**Baseline:** v377 Modular · Personal Edition  
+**Baseline:** v378 Tenrai Repair Modular · Personal Edition  
 **Delivery:** Complete modular ZIP for local testing; **no GitHub commit, push, or deployment**.  
-**Release notes:** [README2.md](./README2.md) · [Detailed v378 changelog](./docs/CHANGELOG_v378.md)
+**Release notes:** [README2.md](./README2.md) · [Detailed v379 changelog](./docs/CHANGELOG_v379.md)
 
-MediaFlow v378 migrates MyAnimeList-dependent features from discontinued public Jikan endpoints to the public Tenrai v1 catalogue, supports provider-normalized external IDs in imports, upgrades the Logging Library with direct/bulk Add, multiple display modes, Clean Covers and draft Collapse/Expand, and fixes 3+ digit title position inputs and assigned Collection visibility in Personal Order → All Titles. Existing cover presentation is unchanged.
+MediaFlow v379 repairs broken Logging expansion, replaces global Collapse All/Expand All with a non-destructive Show/Hide Added Titles button, fixes individual Logging Library checkboxes and bulk-add activation, permanently enables selection in every display mode, improves tile layout and cover sizing, and unifies mixed title/Collection Personal Order movement. It incorporates the v378 Tenrai episode-data diagnostic repair while retaining the last verified fresh count when source data is incomplete.
 
-**Verification:** Local synthetic-browser regression tests passed. Live Tenrai responses, authenticated cloud sync, and physical-device testing are still outstanding.
+**Verification:** Local Chromium regression tests passed for Logging and mixed queue behavior, 320–1920px Personal Order layouts, and nine Tenrai episode-data cases. Live provider data, authenticated cloud sync, and physical-device testing remain outstanding.
 
 ---
 
@@ -16,21 +16,21 @@ MediaFlow v378 migrates MyAnimeList-dependent features from discontinued public 
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v378-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v379-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v378 — Personal Edition (built on v377 modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v379 — Personal Edition (built on the v378 Tenrai Repair baseline).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v378 · October 11, 2026, built directly on the v377 modular release. **GitHub:** v378 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v379 · October 11, 2026, built directly on the v377 modular release. **GitHub:** v379 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v378 Personal Edition.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from v379 Personal Edition.
 
-**v378 changelog:** [README2.md](./README2.md), [detailed v378 changelog](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v379 changelog:** [README2.md](./README2.md), [detailed v379 changelog](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
