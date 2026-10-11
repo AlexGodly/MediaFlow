@@ -1,14 +1,20 @@
-# MediaFlow v373 — Logging Sorting & Custom Order Studio
+# MediaFlow v374 — MAL & SIMKL Opt-In Tracking
 
-**Release:** v373 Modular — Personal Edition  
-**Baseline:** v372 Modular  
-**Date:** October 10, 2026  
-**Developer:** Alex Godly
+**Release:** v374 Modular — Personal Edition  
+**Baseline:** v373 Modular  
+**Developer:** Alex Godly  
+**Release status:** Local development candidate. The external integrations require developer registration, secret setup, Supabase migration and live account testing. This ZIP is not a claim that live synchronization is already deployed.
 
-This update adds shared selected-title sorting and manual ordering across all three Dashboard Logging methods (Per unit, Quick Amount consumed, Quick Last progress), along with extended sorts in the lazy Library picker. Session insertion order is the default; personalized order is saved with the ongoing Logging draft and can be restored after trying other sorters.
+## Included
 
-Move titles with drag handles, up/down arrows, or position numbers. Responsive styling works on desktop, tablet and mobile, with no changes to canonical Library/XP/History commits, existing cloud schemas, themes, or backup formats.
+- New **Media Services Tracking** section within Settings Center.
+- Tracking panel in **Add Title**, **Edit Title**, and **Anime Details**.
+- Manual MAL and SIMKL catalog search, assignment, and season-specific links.
+- Explicitly paused new links; field-level switches for progress, status, rating.
+- Account connect/reconnect/disconnect and secure OAuth callback.
+- Backend encrypted credentials, owner-scoped associations, retry queue, unlink cleanup, and event deduplication.
+- Automatic outbound update hooks after committed MediaFlow Logging and title edits, with existing History/XP untouched.
+- Offline browser retry storage with bounded queue and user-session isolation.
+- Responsive layouts and v373 sorting preservation.
 
-**Validation:** Source/build synchronization, PWA generation, JavaScript checks, existing v369/v370/v372 regressions and the new v373 Chromium interaction/responsiveness suite. Cross-device authenticated synchronization and physical touchscreen testing are still unverified.
-
-See [CHANGELOG_v373.md](docs/CHANGELOG_v373.md) for the detailed change list, test matrix and deployment notes.
+See `docs/CHANGELOG_v374.md` and `docs/SETUP_v374_MAL_SIMKL.md` for full details.
