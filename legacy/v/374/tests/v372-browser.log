@@ -1,0 +1,55 @@
+PASS v372: Settings Center canonical rerender preserves default logging control
+PASS v372: settings selection persistence without rerender, quick-mode Library status icons, Keep titles icon, lazy expand
+[
+  {
+    "width": 320,
+    "elapsed": 7.199999999254942,
+    "expanded": "true",
+    "sameContent": true,
+    "inputPreserved": true,
+    "unitCount": 40,
+    "selected": 160,
+    "overflow": 0
+  },
+  {
+    "width": 390,
+    "elapsed": 5.800000000745058,
+    "expanded": "true",
+    "sameContent": true,
+    "inputPreserved": true,
+    "unitCount": 40,
+    "selected": 160,
+    "overflow": 0
+  },
+  {
+    "width": 430,
+    "elapsed": 4.199999999254942,
+    "expanded": "true",
+    "sameContent": true,
+    "inputPreserved": true,
+    "unitCount": 40,
+    "selected": 160,
+    "overflow": 0
+  },
+  {
+    "width": 820,
+    "elapsed": 7.900000000372529,
+    "expanded": "true",
+    "sameContent": true,
+    "inputPreserved": true,
+    "unitCount": 40,
+    "selected": 160,
+    "overflow": 0
+  },
+  {
+    "width": 1280,
+    "elapsed": 5.599999999627471,
+    "expanded": "true",
+    "sameContent": true,
+    "inputPreserved": true,
+    "unitCount": 40,
+    "selected": 160,
+    "overflow": 0
+  }
+]
+PASS v372: color styling and Library status icon; 100 fast no-rerender collapse toggles at every viewport, stable unsaved inputs
