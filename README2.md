@@ -1,3 +1,21 @@
+# MediaFlow v389 — Responsive Logging Browse Library UI
+
+**Application:** MediaFlow | **Version:** 389 Modular | **Baseline:** v388 | **Date:** October 12, 2026 | **Developer:** Alex Godly
+
+## Summary
+
+Redesigned the responsive arrangement **only inside Logging → Browse Library**. On mobile the filter picker, sort/ASC/DESC, statuses, priorities, per-page and Clear Filters controls wrap into clean rows. The selection toolbar now gives Display a full usable row, pairs Select Visible with Deselect All and places Add Selected on a full-width row. Tablet and desktop widths use balanced grid layouts without button collisions. The panel responds to its **own available width**, supporting sidebars and compact windows.
+
+The change preserves all five views (List, Compact, Cards, Covers and Covers + Titles), existing title selection/addition logic, Quick/Per Unit Logging, dynamic themes and data schemas. No database migration, API changes or cloud operations were required.
+
+**Source:** `assets/css/205-v389-logging-library-responsive.css`  
+**Testing:** `scripts/test-v389-logging-library-responsive.py`  
+**Details:** [CHANGELOG_v389.md](./docs/CHANGELOG_v389.md)
+
+**Local checks:** responsive browser validation passed at eight widths for both Logging modes and five display modes, and v388 save/navigation compatibility checks passed against the v389 bundle. Physical device and live-account checks remain outstanding. The longer ordering regression did not finish within its time budget.
+
+---
+
 # MediaFlow — Latest Release Changelog
 
 # MediaFlow v388 — Faster Logging Actions, Stable Dashboard Return & Title Save Optimization

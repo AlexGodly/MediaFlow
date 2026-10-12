@@ -1,3 +1,17 @@
+# MediaFlow v389 — Responsive Browse Library UI
+
+**Latest modular candidate:** v389 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v388 Modular  
+**Delivery:** Complete modular ZIP for local testing; no GitHub changes.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v389 changelog](./docs/CHANGELOG_v389.md)
+
+**What's fixed:** On mobile and other narrow workspaces, **Logging → Browse Library** no longer squeezes **Display**, **Select Visible**, **Deselect All**, and **Add Selected** into overlapping controls. Category/sort/status/priority/page-size filters now occupy responsive, accessible rows. The v379 removed Clean Covers switch no longer wastes layout space; all five picker views are contained within the workspace. This is a scoped layout change only; Cloud Sync, Library data, Logging behavior, draft selection, and XP are unchanged.
+
+**Validation:** Real Chromium Logging UI tests passed at 320, 360, 390, 481, 600, 820, 1280 and 1920 px in both Quick and Per Unit, with all five Library display modes. The v388 save/navigation checks also passed using the v389 bundle. Authenticated cloud testing and physical device validation remain outstanding.
+
+---
+
 # MediaFlow v388 — Dashboard Return & Faster Save Actions
 
 **Latest modular candidate:** v388 · October 12, 2026  
