@@ -43,7 +43,8 @@ function mf395DashboardRecommendationHtml(task,cat){
       <div class="mf395-rec-subline">${escapeHtml(cat?.name||'Library')}${item?.status?` · ${escapeHtml((typeof v274StatusLabel==='function'?v274StatusLabel(item.status):String(item.status))||'')}`:''}</div>
       ${progressMeta}
       ${progressBar}
-      <div class="mf395-rec-reasons">${(task.reasons||[]).map(r=>`<span class="pill">${escapeHtml(r)}</span>`).join('')}</div>
+      <div class="mf395-rec-reasons mf398-rec-original">${(task.reasons||[]).map(r=>`<span class="pill">${escapeHtml(r)}</span>`).join('')}</div>
+      <details class="mf398-rec-mobile-reasons"><summary>Why this title? <span class="mf398-rec-reason-count">${(task.reasons||[]).length} reason${(task.reasons||[]).length===1?'':'s'}</span></summary><div class="mf395-rec-reasons">${(task.reasons||[]).map(r=>`<span class="pill">${escapeHtml(r)}</span>`).join('')}</div></details>
       ${actions}
     </div>
   </section>`;

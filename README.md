@@ -1,3 +1,19 @@
+# MediaFlow v398 — Mobile & Tablet Responsive UI Repair
+
+**Current modular candidate:** v398 · October 12, 2026  
+**Developer:** Alex Godly  
+**Baseline:** MediaFlow v397 Modular  
+**Scope:** Mobile and tablet only (viewport widths up to 1023px). Desktop visual and functional baseline preserved.  
+**Documentation:** [v398 detailed changelog](./docs/CHANGELOG_v398.md) · [README2 technical notes](./README2.md)
+
+**Seven responsive repairs:** Dashboard → Next Task → Recommended Title; Advanced Logging title cards; merged/unified progress preview visibility; v397 floating + and Task Progress overlap; Collections → Add Titles; Personal Order → Add Collections; Personal Order → Add Titles. **All five picker display modes** (List, Compact, Cards, Covers, Covers+Titles) are in scope for both mobile and tablet. The update preserves existing filters, Direct Add, Multi-Select, category assignment, ordering, theme settings and all existing data/save paths. No Supabase migration, cloud structure change, or new paid service.
+
+**Testing:** v398 bundle compiled and passed Node syntax/PWA asset generation. Chromium checks passed at 320, 375, 430, 768, 820, 1023, 1280px for three popups × five display modes, category-specific scrolling, recommendation and unified-progress presentation. Prior workflow and save-path regressions passed through 1920px. v397/v398 desktop screenshot comparison: recommendation pixel-identical; Logging card geometrically identical (only a transient input-caret pixel change). Production cloud and physical-device verification are not claimed.
+
+---
+
+## Previous release — v397
+
 # MediaFlow v397 — Floating Task Progress & Quick Actions (Prototype v2)
 
 **Current modular candidate:** v397 · October 12, 2026  

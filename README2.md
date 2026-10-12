@@ -1,3 +1,19 @@
+# MediaFlow v398 — Technical Release Notes
+
+**Version:** v398 Modular · **Baseline:** v397 · **Date:** October 12, 2026 · **Developer:** Alex Godly
+
+- **Responsive-only changes:** New `assets/css/211-v398-mobile-tablet-responsive-repair.css` is registered after the v397 stylesheet and scopes all layout repair rules to `@media screen and (max-width:1023px)`. Desktop style remains unchanged. The only unscoped rule hides the duplicated mobile-only recommendation disclosure on desktop.
+- **Recommendation:** `src/js/pages/dashboard/011-view-dashboard.js` retains existing desktop reasons/action markup and appends a native `<details>` disclosure for mobile/tablet reasons. Reroll, edit, recommendation scoring and Library progress functions are unchanged.
+- **Advanced Logging:** CSS reflows `.v370-title-info` through `display:contents` on responsive Advanced Logging cards so the **existing** `v382ProgressHtml`/`.mf395-progress-stack` is rendered full-width in the title card. Existing canonical units and `v373DecorateList` ordering remain untouched; v396 protection is preserved.
+- **Three picker dialogs, five modes:** Responsive grids/scroll regions apply to Collections Add Titles (`mf352`), Personal Order Add Collections (`mf361`) and Personal Order Add Titles (`mf358`). Existing v392/v393 Direct Add, Multi-Select, Add/Added toggling, filtering, sorting, page state, and scroll preservation still own behavior. No replacement picker implementation.
+- **Floating dock:** Preserve the v397 approved Prototype v2 floating controls, while providing smaller phone/tablet dimensions, safe-area placement, and extra scrollable trailing space for important buttons.
+- **Build:** 289 fragments / 146 runtime extensions, Node syntax check, PWA app-shell discovery. No new DB or backup schema.
+- **Verification:** See `docs/CHANGELOG_v398.md` for actual viewport matrix, 15 picker-mode combinations, prior app regressions and desktop pixel-parity results. Synthetic Chromium only; production Supabase, real devices and 100k-title performance unverified.
+
+---
+
+## Previous technical release — v397
+
 # MediaFlow v397 — Technical Release Notes
 
 **Application:** MediaFlow · **Version:** v397 Modular · **Baseline:** v396 · **Date:** October 12, 2026 · **Developer:** Alex Godly
