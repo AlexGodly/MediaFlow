@@ -1,45 +1,17 @@
-# MediaFlow v396 — Technical Release Notes
+# MediaFlow v397 — Technical Release Notes
 
-**Application:** MediaFlow · **Version:** v396 Modular · **Baseline:** v395 · **Date:** October 12, 2026 · **Developer:** Alex Godly
+**Application:** MediaFlow · **Version:** v397 Modular · **Baseline:** v396 · **Date:** October 12, 2026 · **Developer:** Alex Godly
 
-## v396 regression fixes
-
-### 1. Restored advanced-logging progress renderer
-
-- **Cause:** While replacing v382's two-bar progress comparison with the merged v395 preview, the wrapper that appended `v382ProgressHtml(item, entry)` into `.v370-title-info` was inadvertently deleted. The canonical unit calculations were still present, but no progress UI could render.
-- **Fix:** Restored the wrapper in `src/js/components/278-v382-logging-recommended-progress-xp.js` *before* the v394 title method decorator runs, so the header gets the same live preview for both collapsed and expanded cards. `v382ProgressNumbers` and the v395 single-track segmentation remain the source of display values. Known totals use a progressbar; unknown totals do not show fake percentages.
-- **Scope:** Pure rendering restoration. No saved Library progress or History updates are performed by the progress preview.
-
-### 2. Persistent per-title ordering controls
-
-- **Cause:** v373 originally attached drag handles, position numbers and up/down arrows after full Logging rendering. v394's targeted `v394Paint(index)` rebuilt just one `.v370-title` node; its replacement lacked the `.mf373-row-controls` toolbar, especially on newly edited / just-added titles.
-- **Fix:** `src/js/components/289-v396-logging-card-reliability.js` reuses the existing `v373DecorateList(form)` immediately after targeted card replacement. The decorator skips already-decorated cards, reinstates controls for fresh replacements, and reapplies the active order through the existing v387 viewport-preserving pathway. The shared `v369RefreshPanels` path is also guarded to re-decorate after refresh. No new drag/drop engine or alternate manual-order store was introduced.
-- **Scope:** Both complete form renders and targeted Advanced Logging updates; Quick Logging's existing v373 ordering pathway is preserved unchanged. UI interaction still uses canonical draft entry indexes.
-
-### Changed / added files
-
-- Updated: `src/js/components/278-v382-logging-recommended-progress-xp.js`, `src/js/runtime-order.json`, `VERSION`, `version.json`, `package.json`, `index.html`, `sw.js`, `README.md`, `README2.md`.
-- Added: `src/js/components/289-v396-logging-card-reliability.js`, `scripts/test-v396-logging-rendering.py`, `docs/CHANGELOG_v396.md`.
-- Rebuilt: `assets/js/mediaflow-v396.bundle.js`. Added build-version PWA cache metadata.
-- Supplemental compatibility tests: `scripts/test-v396-v393-regression.py`, `scripts/test-v396-library-caret-compat.py`, `scripts/test-v396-history-compat.py`, `scripts/test-v396-save-dashboard-regression.py`.
-
-### Verified checks
-
-- Build/PWA discovery and Node.js syntax: PASS.
-- Real Chromium rendered DOM test at **320 / 390 / 820 / 1280 / 1920px**: progress exists and is visible; ordering controls exist on every card, including the newest; both persist after method switches, quantity edits, collapsed/expanded transitions, and unknown-total rendering: PASS.
-- Arrow and numeric position changes actually reorder the displayed nodes with a single toolbar per title: PASS.
-- Existing per-title 4→6→3 unit conversions, editable timestamps, and custom total runtimes: PASS.
-- Quick Logging title cards retain the original v373 ordering toolbar at all five tested viewport sizes: PASS.
-- v393 Collections/Personal Order picker regressions at 390/1280px: PASS.
-- Library search-caret tests across seven viewport/mode combinations: PASS.
-- History unit layout at 320/390/820/1280/1920px: PASS.
-- Synthetic Logging submissions and Dashboard return/save checks at 320/390/820/1280/1920px: PASS.
-
-**Not verified:** Production authenticated Supabase saves/sync/conflicts, physical devices, installed native wrappers, exhaustive all-app regression, or 100,000-item benchmarking. No database migration or deliberate change to user data was made.
+- **Visual baseline:** Floating action dock based specifically on `MediaFlow_v397_Floating_Widgets_Prototype_v2.html`. No v3/v4 liquid-rise implementation is present. The task progress background has subtle, continuous liquid-wave movement; the thick horizontal gradient fill tracks task progress, with animated percentage on the right.
+- **Visibility:** The + action is always mounted in authenticated application views. Task Progress requires `S.sessionActive`, `S.currentTask`, `S.logDraft`, and at least one draft entry with an associated Library title matching the exact task category. Unrelated titles never contribute.
+- **Calculation:** Advanced Logging counts canonical `v369Units.length` (including consumption repeats); Quick Logging uses each matching entry's draft `qty`. Fixed goal uses `low`; range text starts at `low`, advances with consumption to `high`, and shows an over-target state beyond `high`. Percentage and fill represent progress relative to the full `high` and cap at 100%; the minimum marker shows the initial milestone.
+- **Real UI integration:** `src/js/components/290-v397-floating-dock.js` owns dock visibility, movement, menu and delegation. Reuses `App.startSession`, `App.openLogForm`, `renderLogSuggestions`, `App.openLibraryModal`, `App.v274CreateCollection`, and existing `App.v274SaveCollection`. Collection creation retains its canonical save path and switches to Collections only after successful creation.
+- **Styling:** `assets/css/210-v397-floating-task-quick-actions.css` contains isolated responsive styles, supports dynamic MediaFlow theme variables and `prefers-reduced-motion`, and keeps the Quick Add menu above content but modal-aware. No new Supabase tables, backup schemas or account migrations.
+- **Testing:** New isolated Chromium v397 tests PASS at 375, 430, 820 and 1280 px for category-only counting (other-category drafts ignored), fixed/ranged quantity changes, statuses, Advanced/Quick modes, responsive quick fan and minimized-state behavior; tested Add to Library, Add Collection → automatic open, and Add to Logging routing with mocked persistence. Existing Advanced Logging rendering/order compatibility and Dashboard/Logging submission regression suites PASS (320–1920 px). Node syntax and PWA bundling PASS. **Limitations:** Real authenticated cloud persistence, physical Android/iOS/Windows wrappers and 100,000-title end-to-end performance remain unverified.
 
 ---
 
-# MediaFlow v395 — Technical Release Notes
+## Previous release: MediaFlow v395 — Technical Release Notes
 
 **Application:** MediaFlow · **Version:** v395 Modular · **Baseline:** v394 · **Date:** October 12, 2026 · **Developer:** Alex Godly
 

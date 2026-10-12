@@ -1,23 +1,20 @@
-# MediaFlow v396 — Advanced Logging Progress & Ordering Reliability
+# MediaFlow v397 — Floating Task Progress & Quick Actions (Prototype v2)
 
-**Current modular release:** v396 · October 12, 2026  
+**Current modular candidate:** v397 · October 12, 2026  
 **Developer:** Alex Godly  
-**Baseline:** MediaFlow v395 Modular  
-**Delivery:** Complete ZIP archive for manual publishing; no GitHub operations.  
-**Details:** [v396 changelog](./docs/CHANGELOG_v396.md) · [README2 technical notes](./README2.md)
+**Baseline:** MediaFlow v396 Modular  
+**Delivery:** Full modular ZIP for manual deployment; no GitHub operations.  
+**Details:** [v397 changelog](./docs/CHANGELOG_v397.md) · [README2 technical notes](./README2.md)
 
-### v396 fixes
+**New floating task-progress widget:** Based on the user-approved **prototype v2**, not the later v3/v4 experiments. The thick animated progress bar, prominent right-side percentage, continuously animated ambient liquid-wave background and floating quick + button follow the active MediaFlow theme variables. The widget appears only when an active task has at least one selected Logging title from the identical task category; it counts only matching-category draft consumption, across Advanced Logging and Quick Logging. Fixed task quotas and adaptive minimum-to-maximum ranges are supported. The persistent + button remains available on every authenticated page; its fan menu links to the existing Logging Library picker, Library Add Title editor and Collection creation/editor. Collections opened through that action automatically navigate to the new collection after successful save. Designed for desktop/mobile/tablet with reduced-motion handling and modal awareness. No new saved fields, History writes or database changes.
 
-- **Unified Progress Preview restored:** Fixed the v395 regression that accidentally removed the renderer integration responsible for displaying the current / after-draft progress preview. Every Advanced Logging title card now shows the single merged segmented bar, including its collapsed and expanded layouts. Values use the established consecutive-unit rules, with a safe unknown-total state.
-- **Logging title ordering controls restored:** Fixed Advanced Logging card replacements that dropped the v373 ordering toolbar. Drag handles, numeric positions, and up/down arrows are reinstated after method switching, changing quantities, timestamps, and total runtime. The existing order decorator is idempotent, so it cannot intentionally create duplicate toolbars. This also covers refreshing newly added titles.
-- **No changes to stored logging schema:** The fixes run in the existing Per Unit / Last Watched / Amount Consumed draft pipeline. Library progress, committed History, XP, categories, seasons, recommendations, cloud sync architecture, and custom manual order logic are not rewritten.
-- **Automated checks:** The rebuilt v396 bundle passed JavaScript syntax/PWA asset discovery. Focused Chromium tests passed at 320px, 390px, 820px, 1280px and 1920px, including actual DOM visibility, collapsed/expanded cards, three title methods, newly added titles, arrow/numeric reorder actions, and unknown totals. Existing v393 picker, Library caret, History layout, Logging submission, and Dashboard return tests also passed at their respective tested widths. These are synthetic offline tests, not live authenticated Supabase or physical-device benchmarks.
+**v396 continuity:** The restored merged Advanced Logging progress preview and title-ordering controls are preserved. 
 
 ---
 
-# MediaFlow v395 — Advanced Logging Polish & Dashboard Recommendation Redesign
+## Previous release: MediaFlow v395 — Advanced Logging Polish & Dashboard Recommendation Redesign
 
-**Current modular candidate:** v395 · October 12, 2026  
+**Previous modular candidate:** v395 · October 12, 2026  
 **Developer:** Alex Godly  
 **Baseline:** MediaFlow v393 Modular  
 **Delivery:** Complete ZIP for manual installation; no GitHub operations.  
