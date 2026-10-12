@@ -1,3 +1,23 @@
+# MediaFlow v391 — Performance Stability & History Layout Repair
+
+**Application:** MediaFlow | **Version:** 391 Modular | **Baseline:** v390 | **Date:** October 12, 2026 | **Developer:** Alex Godly
+
+## Summary
+
+A focused, measured performance repair rather than an unverified claim of universally freeze-free 100,000-title operation. Dynamic Library now caches filtered/sorted results while its inputs are unchanged and clears them through established Library invalidation; v189 title comparisons reuse an `Intl.Collator`. Active-time XP updates reuse the correct clean XP cache by applying their exact earned delta instead of recomputing the entire Library/History every routine tick. All other XP changes still invalidate and recompute normally.
+
+History episode details now stack beneath the title summary, with responsive unit/timestamp/duration rows that do not overlap. Card neighbors no longer inherit unnecessary height.
+
+**Local performance observations:** Repeated unchanged 100,000-title Dynamic Library calls dropped from roughly 545–664 ms (v390) to ~0–0.1 ms (v391) in a synthetic Chromium calculation test. A clean 30,000-title/13,000-session XP time update took 1.1 ms versus 113 ms for forced full recomputation. Results vary by hardware and apply only to these tested calculations.
+
+**Validation:** v391 filter/sort and XP correctness passed; History details were checked at five widths; v388 save/navigation and v390 caret compatibility suites passed. Real cloud, installed PWA, physical phones, all-page profiling and full 100,000-title rendering are not verified.
+
+**Sources:** `src/js/components/285-v391-runtime-performance.js`, `src/js/pages/library/121-v189-library-sorting-unfinished-filter-dynamic.js`, `assets/css/206-v391-history-unit-layout.css`.
+
+**Details:** [CHANGELOG_v391.md](./docs/CHANGELOG_v391.md)
+
+---
+
 # MediaFlow v390 — Library Search Caret & Selection Stability
 
 **Application:** MediaFlow | **Version:** 390 Modular | **Baseline:** v389 | **Date:** October 12, 2026 | **Developer:** Alex Godly

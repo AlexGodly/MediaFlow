@@ -72,11 +72,14 @@ v69SetLibrarySort=function(v){
 };
 App.v69SetLibrarySort=v69SetLibrarySort;
 
+// v391: reuse the locale collator instead of allocating collation options for every comparison.
+// The options match the original String.localeCompare contract exactly.
+const V391_TITLE_COLLATOR=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
 function v189CompareLibraryItems(a,b,sort){
   const ai=a?.item||a, bi=b?.item||b;
   const at=cleanTitle(ai?.title||'');
   const bt=cleanTitle(bi?.title||'');
-  const titleCmp=()=>at.localeCompare(bt,undefined,{numeric:true,sensitivity:'base'});
+  const titleCmp=()=>V391_TITLE_COLLATOR.compare(at,bt);
   const n=v=>Number.isFinite(Number(v))?Number(v):0;
   const rank={low:0,medium:1,high:2};
   let d=0;

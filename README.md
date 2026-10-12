@@ -1,3 +1,17 @@
+# MediaFlow v391 — Performance Stability & History Layout Repair
+
+**Latest modular candidate:** v391 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v390 Modular  
+**Delivery:** Modular ZIP for local testing; no GitHub changes.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v391 changelog](./docs/CHANGELOG_v391.md)
+
+**Improved:** Dynamic Library repeatedly sorting/filtering unchanged results, recurring XP recomputation during foreground-time rewards, and overlapping episode details/dates/durations in Consumption History. A 100,000-title **calculation-only** Chromium benchmark showed the unchanged-result cache makes repeat Dynamic Library queries nearly instantaneous on the tested desktop environment; this does not establish zero freezes on all devices. The 30,000-title/13,000-session XP fixture passed reward-delta and canonical recalculation parity. History card geometry passed mobile, tablet and desktop checks. No saved-data or cloud schema changes.
+
+**Regression:** v390 Library search caret tests and v388 Logging/Add/Edit Title tests passed against v391. Physical devices, authenticated cloud synchronization and real-account performance are not verified.
+
+---
+
 # MediaFlow v390 — Library Search Cursor Stability
 
 **Latest modular candidate:** v390 · October 12, 2026  
