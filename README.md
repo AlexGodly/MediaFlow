@@ -1,3 +1,21 @@
+# MediaFlow v392 — Collections & Personal Order Instant Add
+
+**Latest modular candidate:** v392 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v391 Modular  
+**Delivery:** Complete modular ZIP for manual installation. **No GitHub commits, pushes, pull requests or repository operations were performed.**  
+**Release notes:** [README2.md](./README2.md) · [Detailed v392 changelog](./docs/CHANGELOG_v392.md)
+
+**New:** Collections → Add Titles, Personal Order → Add Titles, and Personal Order → Add Collections now feature **Direct Add** by default. Each available item has an explicit **plus / Add** button, which becomes a **checkmark / Added** indicator once it joins the target. The picker **stays open** after every individual or multi-select addition, allowing you to continue adding items without repeating the open/select/confirm cycle. Duplicate title additions and duplicate Personal Order Collection assignments are prevented. No circular-arrow icon is used for Add/Added.
+
+**Ordering & organization:** Add Titles pickers default to **date added (oldest first)**. Collection picker sorts include title, priority, progress, rating, editing and logging activity, total episodes, and random; Personal Order's title picker provides a dedicated sort selector; Personal Order's Collections picker defaults to earliest-created Collection first, with its existing filters and sorting preserved. Direct additions append to Personal Order's manual queue without rearranging existing items. Existing title views and responsive controls are retained.
+
+**Fixed:** Confirmed single-title and bulk removal from a Collection now update the displayed titles and count **immediately**, ahead of the asynchronous save. Existing Collection membership is preserved while adding other titles; existing Library titles are never deleted when removed from a Collection. The active popup no longer disappears unexpectedly during Personal Order additions.
+
+**Verification:** Offline synthetic Chromium UI workflows passed at **390 px** and **1280 px**, including direct Add across all three pickers, bulk selection, Add/Added state, duplicate prevention, oldest-first title sorting, retained dialogs, search focus, and confirmed single/bulk removal. JavaScript syntax/build and PWA shell manifest checks passed. The tests do **not** validate authenticated Supabase synchronization, physical devices, offline conflict recovery, or real-world 100,000-title throughput. The pre-existing v391 performance work is carried forward, not rebenchmarked.
+
+---
+
 # MediaFlow v391 — Performance Stability & History Layout Repair
 
 **Latest modular candidate:** v391 · October 12, 2026  
@@ -106,16 +124,16 @@ v385 extends the theme color across **both the collapsed header and expanded Log
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v388 (built on v387 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v392 (built on v391 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v388 · October 12, 2026, built on v387 Modular. **GitHub:** v388 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v392 · October 12, 2026, built on v391 Modular. **GitHub:** This release was not committed, pushed, or deployed; delivery is a standalone ZIP. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v388 release.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v392 release.
 
-**v388 changelog:** [README2.md](./README2.md), [detailed v388 changelog](./docs/CHANGELOG_v388.md). **Prior v387 notes:** [docs/CHANGELOG_v387.md](./docs/CHANGELOG_v387.md). **Prior v386 notes:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v392 changelog:** [README2.md](./README2.md), [detailed v392 changelog](./docs/CHANGELOG_v392.md). **Prior v391 notes:** [docs/CHANGELOG_v391.md](./docs/CHANGELOG_v391.md). **Prior v387 notes:** [docs/CHANGELOG_v387.md](./docs/CHANGELOG_v387.md). **Prior v386 notes:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 

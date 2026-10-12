@@ -1,3 +1,37 @@
+# MediaFlow v392 — Collections & Personal Order Instant Add and Live Removal
+
+**Application:** MediaFlow | **Version:** 392 Modular | **Baseline:** v391 | **Date:** October 12, 2026 | **Developer:** Alex Godly
+
+## Summary
+
+v392 removes the extra selection/confirmation step when adding one title to a Collection or adding titles/Collections to Personal Order. Every row in these three pickers has a **plus Add** control in default Direct Add mode. After adding, it changes to **check Added**, blocks duplicate additions, and **keeps the picker open**. An optional **Multi-Select** mode retains bulk additions. Existing Library titles, assigned Collections and manually ordered Personal Order entries are not reordered or removed by these operations. The removed circular-arrow Add/Added treatment is not used.
+
+Collections → Add Titles now defaults to **Date added / Oldest first**, keeps added titles in their original positions, and offers membership filtering (all, unadded, already added), search, category/status/priority/rating filtering and alternative sorting. Personal Order → Add Titles defaults to oldest first and includes a picker-specific sorting selector. Personal Order → Add Collections defaults to earliest-created Collections first and retains existing category/priority and additional sort controls.
+
+Single and multi-select **confirmed Collection removals** now mutate the visible Collection before queuing persistence, so you should not have to navigate away or wait for a cloud round-trip to see the result. Removed titles remain intact in the Library. An unsuccessful save raises an error toast; this version does not claim a complete conflict-resolution or automatic rollback mechanism.
+
+## Implementation notes
+
+- `src/js/components/286-v392-collections-instant-add.js` — scoped picker adapters, Add/Added controls, duplicate guards, list refresh, ordered queue mutations, confirmed collection-removal path.
+- `assets/css/207-v392-collections-personal-order-instant-add.css` — themed controls, adaptive layouts, preserved List/Compact/Cards/Covers/Covers + Titles presentations.
+- `scripts/test-v392-workflows.py` — offline synthetic Chromium workflow regression on 390 px and 1280 px viewports.
+- `assets/js/mediaflow-v392.bundle.js` — rebuilt modular application bundle; `sw.js` / PWA shell cache updated for v392.
+- No cloud schema migration, new authentication provider, or Library data migration.
+
+## Validation and limitations
+
+**Passed:** v392 compiled bundle JavaScript syntax and two synthetic Chromium UI suites covering all three Direct Add surfaces, both bulk pathways, persistent modal behavior, duplicate prevention, date sorting, search focus, and single/bulk confirmed Collection removals. No metrics or performance percentages are claimed for v392.
+
+**Not independently verified:** real signed-in Supabase accounts, simultaneous edits across multiple devices, installed PWA updates on physical phones, large-account 100,000-title end-to-end profiling and error-recovery under actual network loss. The previously implemented v391 History layout and performance changes are retained as-is.
+
+## Delivery
+
+Complete ZIP: `MediaFlow_v392_Modular.zip`. Both READMEs and this detailed changelog are included. There have been **no GitHub operations**; deployment is owned by the user.
+
+**Detailed notes:** [CHANGELOG_v392.md](./docs/CHANGELOG_v392.md)
+
+---
+
 # MediaFlow v391 — Performance Stability & History Layout Repair
 
 **Application:** MediaFlow | **Version:** 391 Modular | **Baseline:** v390 | **Date:** October 12, 2026 | **Developer:** Alex Godly
