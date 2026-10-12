@@ -109,15 +109,13 @@ App.saveLibraryModal=function(id){
     ?JSON.parse(JSON.stringify(before))
     :{};
 
-  const beforeIds=new Set(
-    (S.library||[]).map(item=>String(item?.id||''))
-  );
+  // New titles are appended by the canonical title editor; avoid O(library-size) snapshots.
 
   const result=v178SaveLibraryModalBase.apply(this,arguments);
 
   // If validation failed, the Library editor is still open. Do not save rich
   // metadata independently from the rest of the title form.
-  if(document.getElementById('l-title'))return result;
+  if(S.modal?.type==='library')return result;
   if(!captured)return result;
 
   let item=null;
@@ -127,9 +125,7 @@ App.saveLibraryModal=function(id){
       row=>String(row?.id||'')===String(id)
     );
   }else{
-    item=(S.library||[]).find(
-      row=>!beforeIds.has(String(row?.id||''))
-    ) || (S.library||[])[(S.library||[]).length-1];
+    item=(S.library||[])[(S.library||[]).length-1];
   }
 
   if(!item)return result;

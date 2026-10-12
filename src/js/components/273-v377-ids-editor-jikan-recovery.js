@@ -79,10 +79,10 @@ App.saveLibraryModal=function(id){
       }
     }
   }
-  const priorIds=new Set((S.library||[]).map(row=>String(row?.id||'')));
+  // The normal Add Title saver appends new titles to S.library.
   const result=v377LibrarySaveBase.apply(this,arguments);
-  if(root&&!document.getElementById('l-title')){
-    const saved=id?(S.library||[]).find(row=>String(row.id)===String(id)):(S.library||[]).find(row=>!priorIds.has(String(row?.id||'')));
+  if(root&&S.modal?.type!=='library'){
+    const saved=id?(S.library||[]).find(row=>String(row.id)===String(id)):(S.library||[])[(S.library||[]).length-1];
     if(saved){
       saved.externalIds=nextIds;
       if(Object.prototype.hasOwnProperty.call(manual,'mal')){delete saved.malId;delete saved.mal_id;}

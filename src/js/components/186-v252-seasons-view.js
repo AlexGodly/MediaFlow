@@ -229,11 +229,11 @@ libraryModalHtml=function(d){
 const v252SaveLibraryModalBase=App.saveLibraryModal;
 App.saveLibraryModal=function(id){
   const seasons=v252CaptureRowsFrom(document);const hadEditor=!!document.querySelector('[data-v252-seasons-editor]');
-  const beforeIds=new Set((S.library||[]).map(x=>String(x?.id||'')));
+  // The base title editor appends new titles; no full-Library ID snapshot needed.
   const result=v252SaveLibraryModalBase.apply(this,arguments);
-  if(document.getElementById('l-title'))return result;
+  if(S.modal?.type==='library')return result;
   if(!hadEditor)return result;
-  let item=id?(S.library||[]).find(x=>String(x?.id||'')===String(id)):(S.library||[]).find(x=>!beforeIds.has(String(x?.id||'')))||(S.library||[])[(S.library||[]).length-1];
+  let item=id?(S.library||[]).find(x=>String(x?.id||'')===String(id)):(S.library||[])[(S.library||[]).length-1];
   if(!item)return result;
   if(seasons.length){item.seasons=v252NormalizeSeasons(seasons,'manual');item.seasonSource='manual';item.seasonViewEnabled=true;item.seasonsModifiedAt=Date.now();v252SyncTitleFromSeasons(item);}else{delete item.seasons;delete item.seasonSource;delete item.seasonViewEnabled;delete item.seasonsModifiedAt;}
   item.modifiedAt=Date.now();try{v53InvalidateLibraryCache();}catch(_){ }persistLibrary();render();return result;

@@ -1,5 +1,74 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v388 — Faster Logging Actions, Stable Dashboard Return & Title Save Optimization
+
+**Application:** MediaFlow  
+**Version:** v388 Modular  
+**Baseline:** MediaFlow v387 Modular  
+**Release date:** October 12, 2026  
+**Developer:** Alex Godly  
+**Release type:** Navigation bug fix, save-path consolidation, performance maintenance, regression testing  
+**Status:** Built and locally tested; live account performance not verified
+
+---
+
+## 1. Problems reported
+
+Closing the Dashboard Logging workspace, or clicking **Save & get next task**, could cause the Dashboard to appear scrolled far down rather than at the top near the next task. Both actions could also feel slow. The Add/Edit Title modal could take noticeable time to finish saving.
+
+The existing code paths contain nested wrappers for Library metadata, Seasons View, External IDs, XP, completed-title rewards, Logging History, draft resume state and cloud persistence. One successful user action could trigger multiple complete view renders and request multiple full-state saves.
+
+## 2. Dashboard return-scroll repair
+
+- Added a scoped Dashboard-return viewport reset when **Cancel/Close Logging** or **Save & get next task** successfully closes the Logging workspace.
+- Resets the document scroller and applicable themed app-shell scroll containers.
+- Applies an immediate reset and a two-frame confirmation after the Dashboard is mounted, using nonanimated positioning.
+- **Does not** reset scrolling if submission validation fails and Logging stays open.
+- Does not change ordinary navigation scroll behavior or v387 Added Titles reorder scroll preservation.
+
+## 3. Consolidated synchronous save actions
+
+- A new bounded action transaction covers `App.submitLog()` and `App.saveLibraryModal()` only.
+- Existing validation, XP calculations, Library mutations, completion/season logic, History generation and external-ID edits still execute synchronously through their established wrappers.
+- Redundant full-view render requests made within a single action are merged into one final render **after all synchronous mutation wrappers complete**.
+- `saveState()` requests made inside that same synchronous action are combined into one final serialized save request. The returned promises settle only after the actual save result, avoiding false optimistic cloud-save confirmation.
+- Existing save-queue serialization, recovery behavior and cloud error handling remain active.
+- The v285 local resume data is still written immediately; redundant v285/v155 deferred save timers from the action can be safely subsumed by the final complete-state save.
+- Independent later saves triggered by unrelated actions or timers are not globally disabled or suppressed.
+
+## 4. Faster Add/Edit Title modal path
+
+- The v178 rich-editor, v252 Seasons View, and v377 External IDs wrappers no longer create and search full-Library ID sets merely to identify a newly appended title.
+- Their successful-save/validation checks rely on the authoritative `S.modal` state, allowing the modal to render once after the entire save chain finishes.
+- Preserves rich title metadata, Seasons View, manual External Media IDs, XP rewards, activity and undo data.
+- Invalid external IDs still block saving, keep the editor open and do not generate a save request.
+- These adjustments avoid unnecessary work on each save; no unverified percentage speedup is claimed.
+
+## 5. Data integrity and compatibility
+
+- No XP formulas, History schemas, Library formats, Per Unit draft formats, Personal Order, Collections, export/import formats, Supabase database tables, auth policies or Edge Functions were changed.
+- Saving a log still generates the next task only after valid submission and retains all standard History, XP, progress and completion updates.
+- The Dashboard scroll reset is presentation-only.
+
+## 6. Technical changes
+
+**New:** `src/js/components/283-v388-dashboard-log-title-save-performance.js`  
+**Updated:** `src/js/components/186-v252-seasons-view.js`  
+**Updated:** `src/js/pages/library/094-add-rich-fields-to-the-normal-library-editor.js`  
+**Updated:** `src/js/components/273-v377-ids-editor-jikan-recovery.js`  
+**Registered:** `src/js/runtime-order.json`  
+**Tests:** `scripts/test-v388-save-dashboard.py`, `scripts/test-v388-order-compat.py`  
+**Compiled bundle:** `assets/js/mediaflow-v388.bundle.js`  
+**PWA cache:** `mediaflow-pwa-v388-shell-v1`  
+**Metadata:** `VERSION`, `version.json`, `package.json`, `index.html`, `manifest.json`, `sw.js`  
+**Documentation:** `README.md`, `README2.md`, `docs/CHANGELOG_v388.md`
+
+## 7. Testing and compatibility
+
+See [the full v388 changelog](./docs/CHANGELOG_v388.md) for test matrix, limitations, exact source changes, and version evolution.
+
+---
+
 # MediaFlow v387 — Logging Added Titles Scroll Stability
 
 **Release:** v387 Modular  

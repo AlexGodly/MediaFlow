@@ -1,3 +1,17 @@
+# MediaFlow v388 — Dashboard Return & Faster Save Actions
+
+**Latest modular candidate:** v388 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v387 Modular  
+**Delivery:** Complete modular ZIP for local testing; no GitHub changes.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v388 changelog](./docs/CHANGELOG_v388.md)
+
+**What's fixed:** Closing Logging or **Save & get next task** returns the Dashboard to the top instead of remaining scrolled down. v388 consolidates redundant renders and cloud-save requests made by one valid Logging/Title Save action, and removes repeated full-Library ID lookups in Add/Edit Title wrappers. The original validation, Seasons View, External IDs, History and XP logic remain in place.
+
+**Validation:** Controlled real Chromium tests passed at 320, 390, 820, 1280 and 1920 px for Dashboard return, Logging submission, Add/Edit modal saving, invalid-ID protection and the existing v387 reorder regression (re-run using the v388 bundle). Real Supabase and production-scale performance testing remain outstanding.
+
+---
+
 # MediaFlow v387 — Added Titles Ordering Scroll Stability
 
 **Latest modular candidate:** v387 · October 12, 2026  
@@ -45,21 +59,21 @@ v385 extends the theme color across **both the collapsed header and expanded Log
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v387-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v388-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v387 (built on v386 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v388 (built on v387 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v387 · October 12, 2026, built on v386 Modular. **GitHub:** v387 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v388 · October 12, 2026, built on v387 Modular. **GitHub:** v388 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v387 release.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v388 release.
 
-**v387 changelog:** [README2.md](./README2.md), [detailed v387 changelog](./docs/CHANGELOG_v387.md). **Prior v386 notes:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v388 changelog:** [README2.md](./README2.md), [detailed v388 changelog](./docs/CHANGELOG_v388.md). **Prior v387 notes:** [docs/CHANGELOG_v387.md](./docs/CHANGELOG_v387.md). **Prior v386 notes:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 
