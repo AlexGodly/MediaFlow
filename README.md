@@ -1,3 +1,20 @@
+# MediaFlow v396 — Advanced Logging Progress & Ordering Reliability
+
+**Current modular release:** v396 · October 12, 2026  
+**Developer:** Alex Godly  
+**Baseline:** MediaFlow v395 Modular  
+**Delivery:** Complete ZIP archive for manual publishing; no GitHub operations.  
+**Details:** [v396 changelog](./docs/CHANGELOG_v396.md) · [README2 technical notes](./README2.md)
+
+### v396 fixes
+
+- **Unified Progress Preview restored:** Fixed the v395 regression that accidentally removed the renderer integration responsible for displaying the current / after-draft progress preview. Every Advanced Logging title card now shows the single merged segmented bar, including its collapsed and expanded layouts. Values use the established consecutive-unit rules, with a safe unknown-total state.
+- **Logging title ordering controls restored:** Fixed Advanced Logging card replacements that dropped the v373 ordering toolbar. Drag handles, numeric positions, and up/down arrows are reinstated after method switching, changing quantities, timestamps, and total runtime. The existing order decorator is idempotent, so it cannot intentionally create duplicate toolbars. This also covers refreshing newly added titles.
+- **No changes to stored logging schema:** The fixes run in the existing Per Unit / Last Watched / Amount Consumed draft pipeline. Library progress, committed History, XP, categories, seasons, recommendations, cloud sync architecture, and custom manual order logic are not rewritten.
+- **Automated checks:** The rebuilt v396 bundle passed JavaScript syntax/PWA asset discovery. Focused Chromium tests passed at 320px, 390px, 820px, 1280px and 1920px, including actual DOM visibility, collapsed/expanded cards, three title methods, newly added titles, arrow/numeric reorder actions, and unknown totals. Existing v393 picker, Library caret, History layout, Logging submission, and Dashboard return tests also passed at their respective tested widths. These are synthetic offline tests, not live authenticated Supabase or physical-device benchmarks.
+
+---
+
 # MediaFlow v395 — Advanced Logging Polish & Dashboard Recommendation Redesign
 
 **Current modular candidate:** v395 · October 12, 2026  

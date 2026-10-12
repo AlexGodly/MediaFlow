@@ -1,3 +1,44 @@
+# MediaFlow v396 — Technical Release Notes
+
+**Application:** MediaFlow · **Version:** v396 Modular · **Baseline:** v395 · **Date:** October 12, 2026 · **Developer:** Alex Godly
+
+## v396 regression fixes
+
+### 1. Restored advanced-logging progress renderer
+
+- **Cause:** While replacing v382's two-bar progress comparison with the merged v395 preview, the wrapper that appended `v382ProgressHtml(item, entry)` into `.v370-title-info` was inadvertently deleted. The canonical unit calculations were still present, but no progress UI could render.
+- **Fix:** Restored the wrapper in `src/js/components/278-v382-logging-recommended-progress-xp.js` *before* the v394 title method decorator runs, so the header gets the same live preview for both collapsed and expanded cards. `v382ProgressNumbers` and the v395 single-track segmentation remain the source of display values. Known totals use a progressbar; unknown totals do not show fake percentages.
+- **Scope:** Pure rendering restoration. No saved Library progress or History updates are performed by the progress preview.
+
+### 2. Persistent per-title ordering controls
+
+- **Cause:** v373 originally attached drag handles, position numbers and up/down arrows after full Logging rendering. v394's targeted `v394Paint(index)` rebuilt just one `.v370-title` node; its replacement lacked the `.mf373-row-controls` toolbar, especially on newly edited / just-added titles.
+- **Fix:** `src/js/components/289-v396-logging-card-reliability.js` reuses the existing `v373DecorateList(form)` immediately after targeted card replacement. The decorator skips already-decorated cards, reinstates controls for fresh replacements, and reapplies the active order through the existing v387 viewport-preserving pathway. The shared `v369RefreshPanels` path is also guarded to re-decorate after refresh. No new drag/drop engine or alternate manual-order store was introduced.
+- **Scope:** Both complete form renders and targeted Advanced Logging updates; Quick Logging's existing v373 ordering pathway is preserved unchanged. UI interaction still uses canonical draft entry indexes.
+
+### Changed / added files
+
+- Updated: `src/js/components/278-v382-logging-recommended-progress-xp.js`, `src/js/runtime-order.json`, `VERSION`, `version.json`, `package.json`, `index.html`, `sw.js`, `README.md`, `README2.md`.
+- Added: `src/js/components/289-v396-logging-card-reliability.js`, `scripts/test-v396-logging-rendering.py`, `docs/CHANGELOG_v396.md`.
+- Rebuilt: `assets/js/mediaflow-v396.bundle.js`. Added build-version PWA cache metadata.
+- Supplemental compatibility tests: `scripts/test-v396-v393-regression.py`, `scripts/test-v396-library-caret-compat.py`, `scripts/test-v396-history-compat.py`, `scripts/test-v396-save-dashboard-regression.py`.
+
+### Verified checks
+
+- Build/PWA discovery and Node.js syntax: PASS.
+- Real Chromium rendered DOM test at **320 / 390 / 820 / 1280 / 1920px**: progress exists and is visible; ordering controls exist on every card, including the newest; both persist after method switches, quantity edits, collapsed/expanded transitions, and unknown-total rendering: PASS.
+- Arrow and numeric position changes actually reorder the displayed nodes with a single toolbar per title: PASS.
+- Existing per-title 4→6→3 unit conversions, editable timestamps, and custom total runtimes: PASS.
+- Quick Logging title cards retain the original v373 ordering toolbar at all five tested viewport sizes: PASS.
+- v393 Collections/Personal Order picker regressions at 390/1280px: PASS.
+- Library search-caret tests across seven viewport/mode combinations: PASS.
+- History unit layout at 320/390/820/1280/1920px: PASS.
+- Synthetic Logging submissions and Dashboard return/save checks at 320/390/820/1280/1920px: PASS.
+
+**Not verified:** Production authenticated Supabase saves/sync/conflicts, physical devices, installed native wrappers, exhaustive all-app regression, or 100,000-item benchmarking. No database migration or deliberate change to user data was made.
+
+---
+
 # MediaFlow v395 — Technical Release Notes
 
 **Application:** MediaFlow · **Version:** v395 Modular · **Baseline:** v394 · **Date:** October 12, 2026 · **Developer:** Alex Godly

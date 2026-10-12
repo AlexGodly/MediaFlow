@@ -118,6 +118,20 @@ function v382ProgressHtml(item,entry){
       p.unitCount&&p.delta<p.unitCount?'<p class="mf382-progress-note">Only consecutive new units advance progress; repeats and gaps are not added to the projection.</p>':''}
   </section>`;
 }
+// v396: This renderer hook was inadvertently dropped during the v395
+// unified-progress refactor. Its absence removed every progress preview.
+// Preserve it in the ORIGINAL rendering chain (before v394 per-title tabs),
+// so both collapsed and expanded cards display the same live projection.
+const v382TitlePanelBase=v370TitlePanelHtml;
+v370TitlePanelHtml=function(entry,index,forceExpanded=false){
+  const raw=String(v382TitlePanelBase.apply(this,arguments)||'');
+  if(S.logDraft?.v369Interface!=='itemized')return raw;
+  const item=v369ItemTitle(entry);if(!item)return raw;
+  const host=document.createElement('div');host.innerHTML=raw;
+  const info=host.querySelector('.v370-title-info');
+  if(info)info.insertAdjacentHTML('beforeend',v382ProgressHtml(item,entry));
+  return host.innerHTML;
+};
 function v382XPCardMarkup(x){
   const number=(v)=>Number.isFinite(Number(v))?Number(v):0;
   const award=Math.max(0,number(x?.xp)),base=Math.max(0,number(x?.base));
