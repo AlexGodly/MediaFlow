@@ -1,3 +1,31 @@
+# MediaFlow v393 — Interaction, Scrolling & Picker Workspace Stability
+
+**Application:** MediaFlow | **Version:** 393 Modular | **Baseline:** v392 | **Date:** October 12, 2026 | **Developer:** Alex Godly
+
+## Summary
+
+The Collections Add Titles dialog now uses a large near-full-viewport workspace, with the title results in an independently scrolling region. The Collection Multi-Select pathway updates checkbox states, selection counts and bulk controls in place instead of replacing the entire picker, which caused the scroll-to-top bug. Personal Order Edit Title open/save/close actions preserve document and supported nested scroll positions across Lists and Tabs.
+
+The existing **Add/Added** controls are now **reversible** in four locations: Collections title membership, Personal Order title order, Personal Order collection category assignments, and the active Logging Library draft. Add uses a plus icon; Added uses a checkmark and remains clickable. Removing from a picker changes **only** membership/assignment/draft state, not original Library titles, Collections, saved History or XP. Existing sort/filter/multi-select workflows remain intact.
+
+## Technical implementation
+
+- `src/js/components/287-v393-picker-scroll-toggle-stability.js`: late-loaded behavior overrides for Collections selection, reversible direct-add actions, category-scoped Personal Order assignment removal, logging draft-only removal, and Personal Order edit viewport capture/restoration.
+- `assets/css/208-v393-interaction-scroll-workspace.css`: near-full viewport Collections dialog and theme-aware active Added controls, responsive down to mobile widths.
+- `src/js/runtime-order.json`: register the last-loaded v393 module; `assets/js/mediaflow-v393.bundle.js` rebuilt from modular sources.
+- PWA `sw.js`, `index.html`, `VERSION`, `version.json`, package metadata and app-shell asset list updated for v393; database, auth and backup schemas unchanged.
+- `scripts/test-v393-workflows.py`, `scripts/test-v393-history-compat.py`, `scripts/test-v393-library-caret-compat.py`: included reproducible offline synthetic-browser checks.
+
+## Tests, limitations and delivery
+
+**Passed:** Modular JavaScript build/syntax, PWA manifest asset generation, two synthetic Chromium picker interaction suites (390px/1280px) covering membership toggles, scroll stability and Personal Order edit open/save/close; History layout checks (320px, 390px, 820px, 1280px, 1920px); seven Library search-caret regression scenarios. Logging Added removal was exercised using a draft with existing entries and verified to leave the Library item count unchanged.
+
+**Not independently tested:** production authenticated Supabase save/recovery, simultaneous edits across devices, installed mobile PWA gesture behavior, exhaustive full-app feature parity or 100,000-title end-to-end responsiveness. No numerical performance improvements are claimed without benchmarks.
+
+**Package:** `MediaFlow_v393_Modular.zip`; **both README files updated**. No GitHub operations performed. [Detailed changelog](./docs/CHANGELOG_v393.md).
+
+---
+
 # MediaFlow v392 — Collections & Personal Order Instant Add and Live Removal
 
 **Application:** MediaFlow | **Version:** 392 Modular | **Baseline:** v391 | **Date:** October 12, 2026 | **Developer:** Alex Godly

@@ -1,3 +1,21 @@
+# MediaFlow v393 — Expanded Pickers, Stable Scrolling & Add/Added Toggles
+
+**Latest modular candidate:** v393 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v392 Modular  
+**Delivery:** Complete modular ZIP for manual deployment; **no GitHub activity**.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v393 changelog](./docs/CHANGELOG_v393.md)
+
+**Collections:** The Add Titles popup is now wider, taller and responsive, using an independently scrollable results area. Multi-Select updates checkboxes and counts without rebuilding the entire popup, preventing unintended scroll jumps during repeated selection. Direct Add, the five display modes and all existing search/filter/sort controls remain available.
+
+**Universal Add/Added:** Buttons now act as reversible toggles in Collections → Add Titles, Personal Order → Add Titles, Personal Order → Add Collections and Logging → Library. Clicking **Add** (plus icon) adds the item; clicking **Added** (checkmark icon) removes it **only from that destination**, without deleting original Library titles, Collections, committed Logging progress or saved History. Picker dialogs stay open.
+
+**Personal Order edit stability:** Opening, saving and closing an existing title's Edit popup now preserves the underlying Personal Order scroll position in Lists and Tabs (including category views and collection queues), reducing browser focus/layout-induced jumps.
+
+**Verification:** The rebuilt bundle and PWA asset list passed local checks; focused synthetic Chromium tests passed at 390px/1280px, History layout checks at 320–1920px, and Library search-caret regressions across seven viewport/mode combinations. **Not independently tested:** authenticated Supabase sync, cloud conflict rollback, physical-device behavior or end-to-end 100,000-title performance. No schema migration is required.
+
+---
+
 # MediaFlow v392 — Collections & Personal Order Instant Add
 
 **Latest modular candidate:** v392 · October 12, 2026  
