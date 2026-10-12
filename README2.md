@@ -1,5 +1,32 @@
 # MediaFlow — Latest Release Changelog
 
+# MediaFlow v387 — Logging Added Titles Scroll Stability
+
+**Release:** v387 Modular  
+**Date:** October 12, 2026  
+**Baseline:** v386 Modular  
+**Developer:** Alex Godly
+
+## 1. The problem
+
+Changing the order of Added Titles in Quick or Per Unit could jump the page away from the current scroll position. The v373 sorter unnecessarily detached and re-appended all title cards on each refresh, and the previous Personal Order viewport guard did not cover Logging.
+
+## 2. Fix and efficiency
+
+The v373 renderer now updates only out-of-position DOM cards. v387 adds scroll and input-focus restoration to the canonical Logging ordering pipeline, including nested scroll containers. Arrow buttons, position numbers, sorting, direction toggles and custom/drag moves all share the fix. It uses short requestAnimationFrame restoration rather than a permanent polling or full-page refresh.
+
+## 3. Validation
+
+Tests through the real `renderLogForm()` and compiled v387 bundle passed at **320, 390, 820, 1280, 1920 px** in both Quick and Per Unit. A synthetic 48-title draft retained exact 1500 px viewport position after ordering operations. Repeated moves (20 in succession), numeric focus, DOM-generated button handlers, nested scrolling and no-op DOM mutation checks passed. Production device and authenticated cloud behavior remain unverified.
+
+## 4. Preservation and release files
+
+No XP formulas, Library data, Logging draft entry identities, History, cloud schema, Personal Order, Collections, or export formats changed. Added `282-v387-logging-order-scroll.js`, `204-v387-logging-order-scroll.css` and `test-v387-logging-order-scroll.py`; rebuilt bundle/PWA cache `mediaflow-pwa-v387-shell-v1` and refreshed release metadata.
+
+**Detailed changelog:** [docs/CHANGELOG_v387.md](./docs/CHANGELOG_v387.md)
+
+---
+
 # MediaFlow v386 — Browse Library Real-Theme Color Repair
 
 **Release:** v386 Modular  

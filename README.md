@@ -1,3 +1,17 @@
+# MediaFlow v387 — Added Titles Ordering Scroll Stability
+
+**Latest modular candidate:** v387 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v386 Modular  
+**Delivery:** Complete modular ZIP for local testing; no GitHub actions.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v387 changelog](./docs/CHANGELOG_v387.md)
+
+**What's fixed:** Reordering Added Titles in **Quick Logging** or **Per Unit** now keeps the user's scroll position stable through arrow moves, numeric positions, drag/custom moves, and sorting changes. The v373 ordering renderer no longer pointlessly detaches every title card, and a lightweight v387 viewport/focus guard also supports nested scrollers and numeric inputs.
+
+**Validation:** Controlled Chromium tests passed at 320, 390, 820, 1280 and 1920 px in both modes, including 20 consecutive movements and unchanged-order mutation checks. Production-account, touch-device and authenticated cloud testing remain outstanding. No XP, History, data schema or Logging draft format changed.
+
+---
+
 # MediaFlow v386 — Logging Browse Library Real-Theme Color Repair
 
 **Latest modular candidate:** v386 · October 11, 2026  
@@ -31,21 +45,21 @@ v385 extends the theme color across **both the collapsed header and expanded Log
 
 **Personal media management, tracking, planning, and analytics — by Alex Godly.**
 
-[![Version](https://img.shields.io/badge/version-v386-2563eb?style=flat-square)](./VERSION)
+[![Version](https://img.shields.io/badge/version-v387-2563eb?style=flat-square)](./VERSION)
 ![Edition](https://img.shields.io/badge/edition-Personal-374151?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20PWA-0f766e?style=flat-square)
 ![Status](https://img.shields.io/badge/community-development%20on%20hold-64748b?style=flat-square)
 
-> **MediaFlow v386 (built on v385 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
+> **MediaFlow v387 (built on v386 Modular).** Organize anime, manga, manhwa, manhua, films, TV, books, novels, comics, and other media; record itemized or quick consumption; plan your next titles; and analyze your activity. v374 provider account tracking was canceled.
 
 **Website:** https://alexgodly.github.io/MediaFlow/  
 **Repository:** https://github.com/AlexGodly/MediaFlow  
 **Creator:** Alex Godly  
-**Current packaged candidate:** v386 · October 11, 2026, built on v385 Modular. **GitHub:** v386 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
+**Current packaged candidate:** v387 · October 12, 2026, built on v386 Modular. **GitHub:** v387 has not been committed, pushed, or deployed by this release workflow. **Live website:** not independently verified.
 
-> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v386 release.
+> **Development lineage:** v330 historically restored the v301 personal application after the v302–v329 Community experiment. Personal development subsequently continued through v373. **v374** introduced experimental MAL/SIMKL account tracking, and **v375** restored v373 instead of keeping that experiment. Community/public social features remain excluded from the v387 release.
 
-**v386 changelog:** [README2.md](./README2.md), [detailed v386 changelog](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
+**v387 changelog:** [README2.md](./README2.md), [detailed v387 changelog](./docs/CHANGELOG_v387.md). **Prior v386 notes:** [docs/CHANGELOG_v386.md](./docs/CHANGELOG_v386.md). **Prior v385 notes:** [docs/CHANGELOG_v385.md](./docs/CHANGELOG_v385.md). **Prior v384 notes:** [docs/CHANGELOG_v384.md](./docs/CHANGELOG_v384.md). **Prior v383 notes:** [docs/CHANGELOG_v383.md](./docs/CHANGELOG_v383.md). **Prior v382 notes:** [docs/CHANGELOG_v382.md](./docs/CHANGELOG_v382.md). **Prior v381 notes:** [docs/CHANGELOG_v381.md](./docs/CHANGELOG_v381.md). **Prior v380 notes:** [docs/CHANGELOG_v380.md](./docs/CHANGELOG_v380.md). **Prior v379 notes:** [docs/CHANGELOG_v379.md](./docs/CHANGELOG_v379.md). **Prior v378 notes:** [docs/CHANGELOG_v378.md](./docs/CHANGELOG_v378.md). **Prior v376 notes:** [docs/CHANGELOG_v376.md](./docs/CHANGELOG_v376.md). **Earlier baseline notes:** [v373 Logging Sorting](./docs/CHANGELOG_v373.md), [v372 Logging UI 3.0](./docs/CHANGELOG_v372.md), [v369 Itemized Logging](./docs/CHANGELOG_v369.md), and the [v375 rollback summary](#release-v375--technical-changelog). Historical release notes retain the version labels under which their changes originally shipped.
 
 ---
 

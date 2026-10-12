@@ -126,7 +126,16 @@ function v373ApplyDOMOrder(root){
   if(!list)return;
   const map=new Map([...list.children].filter(x=>x.dataset.mf373Entry!==undefined).map(x=>[Number(x.dataset.mf373Entry),x]));
   const ordered=v373OrderedEntries();
-  for(const row of ordered){const el=map.get(row.index);if(el)list.appendChild(el);}
+  // v387: Keep nodes that are already in the correct place attached and in
+  // place. Re-appending EVERY card used to disturb browser scroll anchoring,
+  // focus and caret even when the order had not changed at all.
+  let cursor=list.firstElementChild;
+  for(const row of ordered){
+    const el=map.get(row.index);
+    if(!el)continue;
+    if(el===cursor)cursor=cursor.nextElementSibling;
+    else list.insertBefore(el,cursor);
+  }
   [...list.children].forEach((el,p)=>{
     const field=el.querySelector('.mf373-position-label input');if(field){field.value=String(p+1);field.max=String(ordered.length);}
     const up=el.querySelector('.mf373-move-up'),down=el.querySelector('.mf373-move-down');

@@ -1,0 +1,85 @@
+/* ============================================================
+   MediaFlow v239 — Batch Log / Logging / Edit Title polish
+   ============================================================ */
+
+/* ---------- Batch Log browser ---------------------------------------- */
+.v175-batch-library-tools.v239-batch-library-tools{padding:18px 20px;margin-bottom:16px;border-radius:16px}
+.v239-batch-library-tools>.section-label{margin-bottom:11px;font-size:10px;letter-spacing:.1em}
+.v239-batch-library-tools .v224-browser-filterbar{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:9px 10px!important;align-items:stretch;margin-top:0}
+.v239-batch-library-tools .v224-browser-filterbar>.v237-category-filter{grid-column:span 6;max-width:none!important;width:100%!important;min-width:0}
+.v239-batch-library-tools .v224-browser-filterbar>.v224-sort-pair{grid-column:span 6;width:100%;min-width:0}
+.v239-batch-library-tools .v224-browser-filterbar>select{grid-column:span 4;width:100%;min-width:0;min-height:43px}
+.v239-batch-library-tools .v224-browser-filterbar>.v175-page-size-control{grid-column:span 2;width:100%;min-width:0;min-height:43px;justify-content:space-between;padding:7px 9px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised)}
+.v239-batch-library-tools .v224-browser-filterbar>.v175-page-size-control input{width:74px!important;min-width:58px!important;height:30px!important}
+.v239-batch-library-tools .v224-browser-filterbar>button{grid-column:span 2;width:100%;min-height:43px;justify-content:center}
+.v239-batch-library-tools .v236-category-filter-summary,.v239-batch-library-tools .v224-sort-pair select,.v239-batch-library-tools .v224-sort-direction{min-height:43px}
+.v239-batch-library-tools .v175-batch-browser-note{margin-top:11px;padding-top:10px;border-top:1px solid var(--border-soft);font-size:10.5px;line-height:1.55}
+
+/* ---------- Logging method ------------------------------------------- */
+.v179-log-mode-switch.v239-log-mode-switch{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:10px 16px;align-items:center;padding:14px 15px;margin-bottom:16px;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--panel-raised) 92%,var(--flow) 8%),var(--panel-raised));box-shadow:0 1px 0 rgba(255,255,255,.025) inset}
+.v239-log-mode-heading{min-width:0}.v239-log-mode-heading .v179-mode-label{display:block;margin:0 0 3px;font-size:8.5px}.v239-log-mode-heading b{display:block;font-size:13px;line-height:1.35;color:var(--text)}
+.v239-log-mode-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;min-width:min(360px,40vw)}
+.v239-log-mode-options .btn{min-height:40px;justify-content:center;border-radius:10px;font-size:11px}
+.v179-log-mode-switch.v239-log-mode-switch .v179-log-mode-help{grid-column:1/-1;margin:0;padding-top:9px;border-top:1px solid var(--border-soft);font-size:10.5px;line-height:1.55}
+
+/* ---------- Logged-title cards --------------------------------------- */
+.v239-logged-title-list{display:flex;flex-direction:column;gap:9px;margin:10px 0 13px}
+.v239-logged-title-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;align-items:center;padding:10px 11px;border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 82%,var(--panel));min-width:0}
+.v239-logged-cover{width:48px;height:68px;object-fit:cover;border-radius:8px;border:1px solid var(--border-soft);background:var(--panel);display:block}
+.v239-logged-cover-placeholder{display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:var(--text-mute)}
+.v239-logged-title-copy{min-width:0}.v239-logged-title-copy b{display:block;font-size:12.5px;line-height:1.35;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v239-logged-title-copy small{display:block;margin-top:4px;font-size:10.5px;line-height:1.45;color:var(--text-mute);white-space:normal}
+.v239-logged-title-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;min-width:0}
+.v239-logged-progress{display:flex;align-items:center;gap:7px;color:var(--text-dim);font-size:10px;font-weight:700}.v239-logged-progress input{width:82px!important;min-width:72px!important;height:36px!important;text-align:center}
+.v239-logged-consumed{display:inline-flex;align-items:center;min-height:30px;padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--flow) 8%,var(--panel));color:var(--flow);font-size:10px;font-weight:850;white-space:nowrap}
+.v239-remove-log-title{min-height:34px}
+
+/* Batch selected title gets a real cover too. */
+.batch-selected-title{display:grid!important;grid-template-columns:auto minmax(0,1fr);column-gap:9px;row-gap:2px;align-items:center!important;padding:7px 8px;border-radius:9px;background:color-mix(in srgb,var(--panel-raised) 70%,transparent)}
+.batch-selected-title>.v239-batch-cover{grid-row:1/3;width:38px;height:54px;object-fit:cover;border:1px solid var(--border-soft);border-radius:6px;background:var(--panel)}
+.batch-selected-title>.v239-batch-cover-placeholder{display:flex;align-items:center;justify-content:center;color:var(--text-mute);font-weight:900}
+.batch-selected-title>b{font-size:11.5px;line-height:1.3}.batch-selected-title>span{font-size:10px!important;line-height:1.4}
+
+/* ---------- Edit Title ----------------------------------------------- */
+.modal:has(.v239-library-editor-shell){width:min(1240px,calc(100vw - 28px))!important;max-width:1240px!important;max-height:94vh!important;padding:0!important;overflow:hidden!important;border-radius:18px}
+.v239-library-editor-shell{max-height:94vh;overflow-y:auto;overscroll-behavior:contain;padding:22px 24px 18px;scrollbar-gutter:stable}
+.v239-library-editor-shell .v238-library-editor{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px 14px}
+.v239-library-editor-shell .modal-title{position:sticky;top:-22px;z-index:8;margin:-22px -24px 5px;padding:20px 24px 14px;background:color-mix(in srgb,var(--panel) 96%,transparent);border-bottom:1px solid var(--border-soft);backdrop-filter:blur(10px);font-size:22px}
+.v239-library-editor-shell .field{min-width:0}
+.v239-library-editor-shell .field-label{font-size:10.5px!important;font-weight:800;color:var(--text-dim);margin-bottom:5px!important}
+.v239-library-editor-shell :is(input,select,textarea){width:100%;min-width:0;border-radius:9px!important;border:1px solid var(--border-soft)!important;background:var(--panel-raised)!important;color:var(--text)!important;box-shadow:none!important;transition:border-color .12s ease,box-shadow .12s ease,background .12s ease}
+.v239-library-editor-shell :is(input,select){min-height:40px!important;height:40px!important;padding:8px 10px!important;font-size:11.5px!important}
+.v239-library-editor-shell textarea{min-height:90px!important;max-height:180px!important;padding:10px!important;font-size:11.5px!important;line-height:1.5;resize:vertical!important}
+.v239-library-editor-shell :is(input,select,textarea):focus{outline:none!important;border-color:color-mix(in srgb,var(--flow) 68%,var(--border-soft))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 12%,transparent)!important;background:color-mix(in srgb,var(--panel-raised) 92%,var(--flow) 8%)!important}
+.v239-library-editor-shell .v44-cover-row,.v239-library-editor-shell .v82-repeat-panel,.v239-library-editor-shell .v178-rich-editor{border:1px solid var(--border-soft);border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 80%,var(--panel));padding:10px}
+.v239-library-editor-shell .v178-rich-editor{padding:0;overflow:hidden;margin-top:4px}
+.v239-library-editor-shell .v178-rich-editor>summary{min-height:42px!important;padding:10px 12px!important;background:color-mix(in srgb,var(--panel-raised) 90%,var(--panel));font-size:11px;font-weight:850}
+.v239-library-editor-shell .v178-rich-editor-body{padding:10px 12px 12px!important}
+.v239-library-editor-shell .v178-rich-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px 12px!important}
+.v239-library-editor-shell .v178-rich-wide{grid-column:1/-1!important}
+.v239-library-editor-shell .modal-actions{position:sticky;bottom:-18px;z-index:7;margin:8px -24px -18px!important;padding:12px 24px 14px!important;background:color-mix(in srgb,var(--panel) 96%,transparent);border-top:1px solid var(--border-soft);backdrop-filter:blur(10px)}
+
+/* Retired Device & Layout UI is hidden defensively if stale HTML is mounted. */
+.v238-device-settings-card{display:none!important}
+
+/* ---------- Native responsive layout after device override removal ----- */
+@media(max-width:1100px){
+  .v239-batch-library-tools .v224-browser-filterbar>.v237-category-filter,.v239-batch-library-tools .v224-browser-filterbar>.v224-sort-pair{grid-column:span 12}
+  .v239-batch-library-tools .v224-browser-filterbar>select{grid-column:span 6}
+  .v239-batch-library-tools .v224-browser-filterbar>.v175-page-size-control,.v239-batch-library-tools .v224-browser-filterbar>button{grid-column:span 6}
+  .v239-library-editor-shell .v238-library-editor,.v239-library-editor-shell .v178-rich-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .v239-library-editor-shell .v238-library-editor>.field:has(#l-title),.v239-library-editor-shell .v238-library-editor>.field:has(#l-tags){grid-column:span 2}
+  :is(.library-row,.log-suggestion,.batch-log-row,.v138-order-row){content-visibility:auto;contain-intrinsic-size:auto 88px}
+  :is(.v221-settings-toolbar,.mobile-tabbar){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
+@media(max-width:760px){
+  .v179-log-mode-switch.v239-log-mode-switch{grid-template-columns:1fr;padding:12px}.v239-log-mode-options{min-width:0;width:100%}
+  .v239-logged-title-card{grid-template-columns:42px minmax(0,1fr)}.v239-logged-cover{width:42px;height:60px}.v239-logged-title-actions{grid-column:1/-1;justify-content:flex-start;padding-left:53px}
+  .v239-batch-library-tools{padding:14px}.v239-batch-library-tools .v224-browser-filterbar>select,.v239-batch-library-tools .v224-browser-filterbar>.v175-page-size-control,.v239-batch-library-tools .v224-browser-filterbar>button{grid-column:span 12}
+  .v239-library-editor-shell{padding:16px 14px 14px}.v239-library-editor-shell .modal-title{top:-16px;margin:-16px -14px 5px;padding:16px 14px 12px}.v239-library-editor-shell .modal-actions{bottom:-14px;margin:8px -14px -14px!important;padding:11px 14px 12px!important}
+  .v239-library-editor-shell .v238-library-editor,.v239-library-editor-shell .v178-rich-grid{grid-template-columns:1fr!important}.v239-library-editor-shell .v238-library-editor>.field:has(#l-title),.v239-library-editor-shell .v238-library-editor>.field:has(#l-tags),.v239-library-editor-shell .v178-rich-wide{grid-column:1!important}
+  .v221-settings-layout{grid-template-columns:1fr!important}.v221-settings-nav{position:relative!important;top:auto!important;max-height:none!important;display:flex!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important}.v221-settings-nav-group{display:flex!important;align-items:center!important;gap:6px!important;flex:0 0 auto!important;margin:0!important;padding:0!important;border:0!important}.v221-settings-nav-title{display:none!important}.v221-settings-nav-item{width:auto!important;white-space:nowrap!important}
+}
+@media(max-width:520px){
+  .v239-log-mode-options{grid-template-columns:1fr}.v239-logged-title-actions{padding-left:0}.v239-logged-progress{width:100%;justify-content:space-between}.v239-remove-log-title{width:100%}
+  .modal:has(.v239-library-editor-shell){width:calc(100vw - 10px)!important;max-height:96vh!important}.v239-library-editor-shell{max-height:96vh}
+}
