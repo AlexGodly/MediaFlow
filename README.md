@@ -1,3 +1,23 @@
+# MediaFlow v394 — Advanced Logging, Three Per-Title Methods & Batch Log Retirement
+
+**Current modular candidate:** v394 · October 12, 2026  
+**Developer:** Alex Godly  
+**Baseline:** MediaFlow v393 Modular  
+**Delivery:** Complete ZIP for manual installation; no GitHub operations.  
+**Details:** [v394 changelog](./docs/CHANGELOG_v394.md) · [README2 technical notes](./README2.md)
+
+**Advanced Logging replaces the name “Per Unit.”** It keeps the existing individual Per Unit editor as the default and adds **Last Watched** and **Amount Consumed** tabs to **each** title already in a Logging session. One title can use a different method from the next. All three tabs are views of the same *unsubmitted* per-unit draft; switching tabs does not create History or change saved Library progress. Category-based labels (Episode/Chapter/Page/Issue/etc.) and existing seasons are respected.
+
+**Bidirectional conversions:** If saved progress is Episode 10, four Per Unit entries 11–14 display Amount Consumed 4 and Last Watched 14; editing Amount to 6 generates the equivalent consecutive draft 11–16. Nonconsecutive/mixed detailed selections are retained when switching tabs; changing a summary in a way that overwrites details requires confirmation. Season selection limits the summary to that season while preserving other seasons.
+
+**When watched & runtime:** Newly added titles capture the title's time of addition to the current draft. Per Unit defaults newly recorded units to that captured time. Both summary tabs offer an editable When Watched date/time and optional custom **total** runtime in HH:MM:SS. With no manual override, runtimes are summed from available individual-unit/category duration metadata. Manual runtime is applied to the canonical unit records upon successful logging. A rejected submission restores the draft's runtime inputs.
+
+**Batch Log retired:** The standalone Batch Log page, navigation entry, and navigable route are removed. Existing historical batch-origin records, data structures needed for legacy compatibility, normal Logging, History, XP, backups and Library information remain intact. Old saved navigation preferences are normalized without Batch Log.
+
+**Validation:** Compiled bundle passed Node syntax and PWA app-shell generation. Synthetic Chromium tests passed at 390px and 1280px for independent method tabs, 4→6→3 unit conversion, timestamps, manual runtime, and Batch Log navigation removal. v393 Collections/Personal Order picker regressions also passed at both widths. **Additional validation:** Synthetic Chromium save-path regressions passed at 320, 390, 820, 1280 and 1920px, including a real in-app Advanced Logging submission with a custom total runtime and resulting Library progress. **Not yet verified:** authenticated Supabase sync, installed/physical devices, 100,000-title stress behavior, or production-account end-to-end parity. No schema migration was performed.
+
+---
+
 # MediaFlow v393 — Expanded Pickers, Stable Scrolling & Add/Added Toggles
 
 **Latest modular candidate:** v393 · October 12, 2026  
@@ -192,7 +212,7 @@ The application is intended to support a large and diverse Library. It provides 
 | **Library** | Add, edit, organize, search, sort, filter, rate, and track media titles |
 | **Dashboard** | Recommendations, activity indicators, rerolls, shortcuts, stopwatch, and runtime calculator |
 | **Personal Order** | Plan consumption using ordered titles, Categories, and Collection queues |
-| **Logging & Batch Log** | Per unit entries with editable timestamps/durations, Quick Logging, batch workflows, and customizable session ordering |
+| **Logging** | Advanced Logging (Per Unit, Last Watched, Amount Consumed per title), editable timestamps/runtimes, Quick Logging, and customizable session ordering |
 | **History** | Consumption records, recent activity, ratings, previous Library activity, and export controls |
 | **Statistics** | Completion, time, media mix, activity trends, XP, streaks, and other personal insights |
 | **Collections** | Curate groups of existing Library titles with multiple browsing modes |
@@ -292,17 +312,17 @@ Categories define how your own Library is organized. MediaFlow does not require 
 - Reorder and adjust the visibility of relevant Category, Status, and Priority controls in Settings.
 - Use the same Categories across Library, Personal Order, History, statistics, and logging.
 
-### 4. Media logging, itemized sessions, and Batch Log
+### 4. Media logging, Advanced Logging, and History
 
 Logging records actual consumption—episodes watched, chapters read, issues consumed, time spent, or other Category-defined units—and remains distinct from adding titles to the Library.
 
-- **Per unit Logging (v369):** record episode/chapter/issue entries individually with editable date, time (including seconds), and runtime; support season-aware units, rewatches/rereads, contiguous-progress safeguards, and existing XP rules.
+- **Advanced Logging (v394):** keeps Per Unit as the default, adds Last Watched and Amount Consumed as independent tabs for each title, synchronized to the same unsaved unit records. The Per Unit editor records episode/chapter/issue entries individually with editable date, time (including seconds), and runtime; support season-aware units, rewatches/rereads, contiguous-progress safeguards, and existing XP rules.
 - **Quick Logging:** use **Amount Consumed** or **Last Progress** while retaining the established workflow.
 - **Logging Interface 3.0 (v372):** theme-native selected-title panels, cover artwork, badges, richer session presentation, and responsive controls.
 - **Arrange Your Session (v373):** first-added-first-displayed order by default; sort by session addition, progress, total units, priority, alphabetical title, recent logging, edit/view dates, Library date added, or random order. Switch direction, reshuffle, or keep a persistent manual arrangement.
 - **Manual ordering:** drag titles, move them with up/down controls, or enter numeric positions without changing the global Library sequence.
-- **Across all Logging workflows:** the same selected-title organization works in Per unit, Quick Amount Consumed, and Quick Last Progress modes.
-- **Batch Log and History:** work across multiple titles, filter available Library items, and review/edit supported consumption records.
+- **Across all Logging workflows:** the same selected-title organization works in Advanced Logging and Quick Logging.
+- **History:** review/edit past consumption, including records originally produced by the retired Batch Log page; the Batch Log page itself is no longer offered.
 
 These features are part of the **v373 baseline preserved by v375**. They do **not** require MAL or SIMKL account connections.
 
@@ -423,7 +443,7 @@ The default pack includes bundled Category icon artwork under [`assets/category-
 4. On a new account, inspect the default Categories under **Settings → Categories**.
 5. Add or import titles into **Library**.
 6. Set Category, Status, Priority, progress, and any title information you want to track.
-7. Log a session from Dashboard or Batch Log to begin building activity History and Statistics.
+7. Log a session from Dashboard using Quick Logging or Advanced Logging to build activity History and Statistics.
 8. Use **Sync Now** when you want to confirm that the latest state has reached your account's cloud storage.
 9. Create a **Full Data backup** before large imports, bulk edits, or migrations.
 

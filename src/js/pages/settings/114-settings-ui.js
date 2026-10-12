@@ -148,7 +148,7 @@ function v181LoggingSettingsHtml(){
       </select>
 
       <small class="hint">
-        This only chooses the initial mode when Dashboard Logging or Batch Log
+        This only chooses the initial mode when Dashboard Logging
         first opens. You can still switch modes inside either page; that
         temporary switch does not change this Settings default.
       </small>

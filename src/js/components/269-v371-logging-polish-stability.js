@@ -83,7 +83,7 @@ App.v369SetDefaultInterface=function(value){
     });
   }
   persistSettings();
-  showToast('Default interface: '+(mode==='quick'?'Quick logging':'Per unit'));
+  showToast('Default interface: '+(mode==='quick'?'Quick logging':'Advanced Logging'));
 };
 
 // Any later full Settings render must still include the default chooser.
@@ -108,7 +108,7 @@ if(typeof v371SettingsRenderer==='function'){
           const mode=v369DefaultInterface();
           group.classList.add('v370-settings-modes');
           group.setAttribute('role','group');group.setAttribute('aria-label','Default Logging Interface');
-          group.innerHTML='<button type="button" class="btn v370-icon-btn '+(mode==='itemized'?'active':'')+'" aria-pressed="'+(mode==='itemized')+'" onclick="App.v369SetDefaultInterface(\'itemized\')">'+v370Icon('list')+'Per unit <span class="v369-recommended">Recommended</span></button>'+
+          group.innerHTML='<button type="button" class="btn v370-icon-btn '+(mode==='itemized'?'active':'')+'" aria-pressed="'+(mode==='itemized')+'" onclick="App.v369SetDefaultInterface(\'itemized\')">'+v370Icon('advanced')+'Advanced Logging <span class="v369-recommended">Recommended</span></button>'+
             '<button type="button" class="btn v370-icon-btn '+(mode==='quick'?'active':'')+'" aria-pressed="'+(mode==='quick')+'" onclick="App.v369SetDefaultInterface(\'quick\')">'+v370Icon('quick')+'Quick logging</button>';
         }
       }

@@ -141,5 +141,6 @@
   "components/284-v390-library-search-caret-stability.js",
   "components/285-v391-runtime-performance.js",
   "components/286-v392-collections-instant-add.js",
-  "components/287-v393-picker-scroll-toggle-stability.js"
+  "components/287-v393-picker-scroll-toggle-stability.js",
+  "components/288-v394-advanced-logging.js"
 ]

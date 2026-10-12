@@ -280,10 +280,10 @@ function v369AddUnit(index,forceRepeat=false){
   if(!forceRepeat&&e.v369Units.some(x=>String(x.seasonId||'')===String(season?.id||'')&&Number(x.number)===number)){
     showToast('That unit is already in this draft.');return;
   }
-  const timestamp=Date.now();
+  const timestamp=v369ValidStamp(e.loggedAt)||Date.now();
   e.v369Units.push({id:uid(),number,seasonId:season?String(season.id):null,
     seasonName:season?String(season.name||''):null,
-    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:timestamp,isRepeat:!!forceRepeat||!!e.isRepeat});
+    seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:Date.now(),isRepeat:!!forceRepeat||!!e.isRepeat});
   e.v369UpdatedAt=timestamp;
   e.v369NextNumber=number+1;
   v369Sync();v369Touch();v369RefreshPanels();
@@ -484,6 +484,8 @@ function v369DraftFingerprint(payload){
   const draft=d.logDraft;
   const ordered=(draft.entries||[]).map(entry=>({
     libraryId:String(entry.libraryId||''),title:String(entry.title||''),
+    v394Method:String(entry.v394Method||'unit'),v394When:Number(entry.v394When)||0,
+    v394RuntimeManual:!!entry.v394RuntimeManual,v394RuntimeSeconds:Number(entry.v394RuntimeSeconds)||0,
     deletedUnits:entry.v369DeletedUnits||{},units:(entry.v369Units||[]).map(u=>({
       id:String(u.id||''),number:Number(u.number)||0,season:String(u.seasonId||''),
       loggedAt:Number(u.loggedAt)||0,durationSeconds:v369Seconds(u)

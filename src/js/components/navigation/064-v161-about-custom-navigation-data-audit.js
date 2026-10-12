@@ -267,7 +267,7 @@ function v161FeatureList(){
   return [
     'Balanced media-consumption scheduler with category health, targets, weights and exact-title recommendations.',
     'Large-Library management with custom categories, custom units, covers, ratings, priority, status, start/finish dates and bulk tools.',
-    'History, Batch Log, Statistics, streaks, XP/levels, repeats, completions and On This Day.',
+    'History, Advanced Logging, Statistics, streaks, XP/levels, repeats, completions and On This Day.',
     'Personal Order planner with global/category ordering, drag controls, arrows and exact numeric positioning.',
     'Old System with independent balances, directional conversion rules, simulation and exact consumption stats.',
     'MAL, Simkl and multi-service import/export with dates, timestamps, external IDs and URL-based cover artwork.',
@@ -707,6 +707,7 @@ v148BackupManifest=function(state,extras){
 const v161SetViewBase=App.setView;
 App.setView=function(v){
   const id=String(v||'');
+  if(id==='batch'){showToast('Batch Log has been retired. Use Advanced Logging.');return v161SetViewBase.call(this,'dashboard');}
   const known=NAV_ITEMS.some(n=>n.id===id);
 
   // Programmatic routes such as profile remain allowed, but visible navigation

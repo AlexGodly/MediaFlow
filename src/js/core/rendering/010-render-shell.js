@@ -36,8 +36,6 @@ const NAV_ITEMS = [
 
   {id:'history', label:'History'},
 
-  {id:'batch', label:'Batch Log'},
-
   {id:'stats', label:'Statistics'},
 
   {id:'profile', label:'Profile settings'},
@@ -119,7 +117,7 @@ function renderLevelBlock(){
   </div>`;
 }
 
-const MOBILE_PRIMARY_NAV=['dashboard','library','history','batch','stats'];
+const MOBILE_PRIMARY_NAV=['dashboard','library','history','stats'];
 const MOBILE_MORE_NAV=['libraryhistory','profile','settings'];
 function renderMobileTabs(){
   const primary=MOBILE_PRIMARY_NAV.map(id=>NAV_ITEMS.find(n=>n.id===id)).filter(Boolean);
@@ -242,6 +240,8 @@ function computeDayStreak(){
 
 function renderView(){
 
+  if(S.view==='batch')S.view='dashboard'; // v394: retired page / old saved route
+
   const root = document.getElementById('view-root');
 
   if(!root) return;
@@ -256,7 +256,6 @@ function renderView(){
 
   else if(S.view==='history') html = renderHistory();
 
-  else if(S.view==='batch') html = renderBatchLog();
 
   else if(S.view==='stats') html = renderStats();
 

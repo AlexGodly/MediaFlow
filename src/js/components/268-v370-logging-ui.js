@@ -4,6 +4,7 @@
 const V370_RELEASE=370;
 const V370_ICONS={
   list:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h8M9 13h8M9 17h8"/><path d="m6.5 9 .5.5 1-1M6.5 13 .5.5 1-1"/>',
+  advanced:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 9 2 2 3-4M14 9h4m-11 7 2 2 3-4m2 2h4"/>',
   quick:'<path d="m13 2-9 11h7l-1 9 10-12h-7l1-8Z"/>',
   add:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/>',
   repeat:'<path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/>',
@@ -19,19 +20,19 @@ function v370Icon(name,size=16){return '<svg class="v370-icon" xmlns="http://www
 v369RenderInterfaceControl=function(){
   const itemized=S.logDraft?.v369Interface==='itemized';
   return '<section class="v369-interface v370-interface"><div class="v370-interface-copy"><strong>Logging interface</strong><small>'+(itemized?'Record individual units with timestamps and runtimes.':'Log by amount consumed or last progress.')+'</small></div><div class="v369-switch v370-mode-switch">'+
-    '<button type="button" class="btn btn-sm v370-icon-btn '+(itemized?'active':'')+'" aria-pressed="'+itemized+'" onclick="App.v369SwitchInterface(\'itemized\')">'+v370Icon('list')+'<span>Per unit</span><span class="v369-recommended">Recommended</span></button>'+ 
+    '<button type="button" class="btn btn-sm v370-icon-btn '+(itemized?'active':'')+'" aria-pressed="'+itemized+'" onclick="App.v369SwitchInterface(\'itemized\')">'+v370Icon('advanced')+'<span>Advanced Logging</span><span class="v369-recommended">Recommended</span></button>'+ 
     '<button type="button" class="btn btn-sm v370-icon-btn '+(!itemized?'active':'')+'" aria-pressed="'+(!itemized)+'" onclick="App.v369SwitchInterface(\'quick\')">'+v370Icon('quick')+'<span>Quick logging</span></button></div></section>';
 };
 App.v369SetDefaultInterface=function(value){
   S.settings=S.settings||{};
   S.settings.v369Logging={defaultInterface:value==='quick'?'quick':'itemized'};
   persistSettings();render();
-  showToast('Default interface: '+(value==='quick'?'Quick logging':'Per unit'));
+  showToast('Default interface: '+(value==='quick'?'Quick logging':'Advanced Logging'));
 };
 // Keep all other v181 cover-size controls intact. The new surface is an
 // independent, portable setting inside the existing cloud/Settings Preset object.
 V181_COVER_SIZE_DEFAULTS.v370Itemized=100;
-V181_COVER_LABELS.v370Itemized='Per unit Logging · Title covers';
+V181_COVER_LABELS.v370Itemized='Advanced Logging · Title covers';
 v181EnsureCoverSizes(DEFAULT_SETTINGS);
 v181EnsureCoverSizes(S.settings||DEFAULT_SETTINGS);
 function v370CoverWidth(){return Math.max(36,Math.min(300,Math.round(74*v181CoverSize('v370Itemized')/100)));}
@@ -182,7 +183,7 @@ if(typeof v370SettingsRender==='function'){
       if(!section)return raw;
       const container=section.querySelector('.v369-settings-choice');
       if(container){const current=v369DefaultInterface();container.classList.add('v370-settings-modes');container.innerHTML=
-        '<button type="button" class="btn v370-icon-btn '+(current==='itemized'?'active':'')+'" onclick="App.v369SetDefaultInterface(\'itemized\')">'+v370Icon('list')+'Per unit <span class="v369-recommended">Recommended</span></button>'+ 
+        '<button type="button" class="btn v370-icon-btn '+(current==='itemized'?'active':'')+'" onclick="App.v369SetDefaultInterface(\'itemized\')">'+v370Icon('list')+'Advanced Logging <span class="v369-recommended">Recommended</span></button>'+ 
         '<button type="button" class="btn v370-icon-btn '+(current==='quick'?'active':'')+'" onclick="App.v369SetDefaultInterface(\'quick\')">'+v370Icon('quick')+'Quick logging</button>';}
       return host.innerHTML;
     }catch(_){return raw;}
@@ -190,7 +191,7 @@ if(typeof v370SettingsRender==='function'){
 }
 if(typeof v366RegisterSetting==='function')v366RegisterSetting({
   id:'v370-itemized-cover-size',section:'cover-size-adjustment',selector:'#v181-cover-range-v370Itemized',
-  label:'Per unit Logging title cover size',subgroup:'Covers & Artwork',keywords:['per unit','logging','cover','title','size','mobile','artwork']
+  label:'Advanced Logging title cover size',subgroup:'Covers & Artwork',keywords:['per unit','logging','cover','title','size','mobile','artwork']
 });
 const v370Style=document.createElement('style');v370Style.id='v370-logging-style';
 v370Style.textContent=/*css*/`

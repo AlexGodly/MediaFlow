@@ -1,3 +1,26 @@
+# MediaFlow v394 — Technical Release Notes
+
+**Application:** MediaFlow · **Version:** v394 Modular · **Baseline:** v393 · **Date:** October 12, 2026 · **Developer:** Alex Godly
+
+## v394 behavior and compatibility
+
+- **Batch Log page retired:** Removed its visible desktop/mobile navigation and route, plus redirected historical Batch destinations to Dashboard. Legacy batch-related source logic is retained internally where needed for parsing older data; this is not a live Batch Log page and does not imply removal of past sessions.
+- **Advanced Logging label/icon:** Former `Per Unit` (`v369Interface: 'itemized'`) is shown as **Advanced Logging** with its own checklist icon in Logging and Settings. The serialized `itemized` identifier stays unchanged, preserving old preferences and drafts. The v372 Precision Logging hero now identifies Advanced Logging.
+- **Existing Per Unit unchanged as default:** The individual per-unit UI remains available with numbers, seasons, repeats, timestamps, durations and progress preview. Four units in this view represent the same four underlying `v369Units` when viewed in the new methods.
+- **Per-title tab state:** Each resumable logging entry may have `v394Method` (`unit`, `last`, `amount`). The tabs render a single shared unsaved `v369Units` array; switching a tab never commits anything.
+- **Bidirectional mapping:** Last Watched = highest unit in selected season (or prior progress if empty); Amount Consumed = count of its draft units. Editing either value creates a contiguous range from the title/season's saved progress, preserves stable existing entries when possible, and requires confirmation if replacing detailed nonconsecutive/mixed unit data. Entries in other seasons remain unchanged.
+- **When Watched:** On initial addition each title already has `loggedAt`; the new Per Unit default uses that captured timestamp. Summary methods show a category-aware `datetime-local` control. A manual change updates the relevant season's draft unit timestamps only; distinct existing times are preserved on tab switches and require confirmation before replacement.
+- **Total runtime:** Optional `v394RuntimeManual` + `v394RuntimeSeconds` per title overrides total runtime in the preview and is distributed deterministically across canonical units at submit. If submission is rejected, the original unit runtimes and override fields are restored; turning the override off restores automatic per-unit duration totals. This does not change permanent per-unit category metadata.
+- **Cloud/backups:** Existing v285 resumable draft serialization carries optional v394 fields; v369 draft verification now fingerprints those fields. No migrations or new Supabase tables were introduced. Live sync and conflict handling remain unverified.
+
+**New:** `src/js/components/288-v394-advanced-logging.js`, `assets/css/209-v394-advanced-logging.css`, `scripts/test-v394-advanced-logging.py`, `scripts/test-v394-v393-regression.py`, `docs/CHANGELOG_v394.md`.
+
+**Updated:** `src/js/runtime-order.json`, `src/js/components/267-v369-itemized-logging.js`, Logging UI/settings components, navigation and renderer source, `README.md`, `README2.md`, `VERSION`, `version.json`, `package.json`, `index.html`; rebuilt `assets/js/mediaflow-v394.bundle.js` and v394 `sw.js` / PWA manifest data.
+
+**Testing:** Chromium 390px and 1280px: v394 method conversion, independent tabs, when watched, total runtime, default Per Unit, Batch navigation removal: PASS. v393 picker, Collection and Personal Order regression suite against v394 bundle at 390px/1280px: PASS. Node JS syntax/PWA discovery: PASS. Synthetic in-app Advanced Logging submission with manual total runtime and correct unit records: PASS at 320–1920px. Library search caret and History layout regressions: PASS. Authenticated cloud, physical device, exhaustive production-account History submission, extreme-library benchmark: NOT VERIFIED.
+
+---
+
 # MediaFlow v393 — Interaction, Scrolling & Picker Workspace Stability
 
 **Application:** MediaFlow | **Version:** 393 Modular | **Baseline:** v392 | **Date:** October 12, 2026 | **Developer:** Alex Godly

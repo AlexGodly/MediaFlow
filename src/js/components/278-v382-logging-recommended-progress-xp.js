@@ -48,7 +48,7 @@ App.v253UseRecommendedTitle=function(){
     if(typeof App.v378QuickAdd!=='function'||!App.v378QuickAdd(id,{quiet:true})){
       showToast('Could not add the recommended title. Try again.');return false;
     }
-    showToast('Recommended title added to '+(S.logDraft.v369Interface==='itemized'?'Per Unit':'Quick Logging')+'.');
+    showToast('Recommended title added to '+(S.logDraft.v369Interface==='itemized'?'Advanced Logging':'Quick Logging')+'.');
   }
   // Only scroll the local selected-title row into view. Other draft entries,
   // timestamps, and manual order remain intact.

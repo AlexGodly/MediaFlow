@@ -48,11 +48,11 @@ renderLogForm=function(){
       :Math.max(0,Number(S.logDraft.amount)||entries.reduce((n,e)=>n+Math.max(0,Number(e.qty)||0),0));
     const seconds=perUnit?(typeof v369TotalSeconds==='function'?v369TotalSeconds():0):Math.max(0,Number(S.logDraft.minutes)||0)*60;
     const duration=typeof v369Hms==='function'?v369Hms(seconds):String(Math.round(seconds/60))+' min';
-    const kicker=perUnit?'PRECISION LOGGING':'EXPRESS LOGGING';
-    const description=perUnit?'Every chapter, episode and minute — recorded your way.':'Capture your progress in seconds, without losing the details.';
+    const kicker=perUnit?'ADVANCED LOGGING':'EXPRESS LOGGING';
+    const description=perUnit?'Choose per unit, last watched, or amount for each title — your draft stays connected.':'Capture your progress in seconds, without losing the details.';
     const banner=document.createElement('section');banner.className='mf372-session-hero';
     banner.setAttribute('aria-label','Logging session overview');
-    banner.innerHTML='<div class="mf372-hero-top"><div class="mf372-hero-copy"><span class="mf372-eyebrow">'+kicker+'</span><h2>Make every moment count.</h2><p>'+description+'</p></div><div class="mf372-hero-mark" aria-hidden="true">'+v370Icon(perUnit?'list':'quick',30)+'</div></div>'+
+    banner.innerHTML='<div class="mf372-hero-top"><div class="mf372-hero-copy"><span class="mf372-eyebrow">'+kicker+'</span><h2>Make every moment count.</h2><p>'+description+'</p></div><div class="mf372-hero-mark" aria-hidden="true">'+v370Icon(perUnit?'advanced':'quick',30)+'</div></div>'+
       '<div class="mf372-hero-stats"><div class="mf372-hero-stat"><span class="mf372-stat-symbol" aria-hidden="true">'+v370Icon('list',17)+'</span><div><strong>'+amount.toLocaleString()+'</strong><small>Units in draft</small></div></div>'+
       '<div class="mf372-hero-stat"><span class="mf372-stat-symbol" aria-hidden="true">'+v370Icon('clock',17)+'</span><div><strong>'+duration+'</strong><small>Time tracked</small></div></div>'+
       '<div class="mf372-hero-stat"><span class="mf372-stat-symbol" aria-hidden="true">'+v370Icon('add',17)+'</span><div><strong>'+entries.length.toLocaleString()+'</strong><small>Selected titles</small></div></div></div>';
