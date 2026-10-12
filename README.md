@@ -1,3 +1,17 @@
+# MediaFlow v390 — Library Search Cursor Stability
+
+**Latest modular candidate:** v390 · October 12, 2026  
+**Developer/owner:** Alex Godly  
+**Baseline:** v389 Modular  
+**Delivery:** Modular ZIP for local testing; no GitHub changes.  
+**Release notes:** [README2.md](./README2.md) · [Detailed v390 changelog](./docs/CHANGELOG_v390.md)
+
+**Fixed:** In Library search, moving the text cursor into the middle of a query and correcting a typo no longer causes older asynchronous render/focus callbacks to push the cursor back to the end. Caret position, selection range and selection direction are preserved across applicable Library search refreshes. Delayed restorations also avoid stealing focus from another field or button. No Library filtering logic, persisted data or XP system is changed.
+
+**Validation:** Headless Chromium passed seven viewport/Library-mode combinations (320–1920 px, Normal and Dynamic); tested middle-of-text insertion, backward selection, delayed search refresh, and unrelated focus. Native device keyboards, real-account performance, and authenticated cloud behavior remain unverified.
+
+---
+
 # MediaFlow v389 — Responsive Browse Library UI
 
 **Latest modular candidate:** v389 · October 12, 2026  

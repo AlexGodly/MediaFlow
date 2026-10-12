@@ -1,3 +1,21 @@
+# MediaFlow v390 — Library Search Caret & Selection Stability
+
+**Application:** MediaFlow | **Version:** 390 Modular | **Baseline:** v389 | **Date:** October 12, 2026 | **Developer:** Alex Godly
+
+## Summary
+
+When the Library search rerendered, some earlier delayed focus-restoration callbacks continued resetting the caret to an older position even after the user had clicked inside the query to correct a typo. The v390 fix now treats the actively focused input as authoritative, captures the latest selection when the delayed search actually runs, and preserves selection start/end/direction if the input is replaced. It never forcibly refocuses search when the user is interacting with another field or control.
+
+The existing filtering logic, search debounce, Library settings, Normal/Dynamic modes, data formats, and cloud system are not changed. Local Chromium regression passed seven viewport/mode combinations, including the exact `hot inhumans` → `hotel inhumans` correction and backward text selection.
+
+**Technical source:** `src/js/components/284-v390-library-search-caret-stability.js`; fixes also applied to the earlier v265 and v281 Library focus layers.  
+**Testing:** `scripts/test-v390-library-caret.py`  
+**Details:** [CHANGELOG_v390.md](./docs/CHANGELOG_v390.md)
+
+**Limitations:** Authenticated cloud, native mobile text editing, and large real Library performance were not tested.
+
+---
+
 # MediaFlow v389 — Responsive Logging Browse Library UI
 
 **Application:** MediaFlow | **Version:** 389 Modular | **Baseline:** v388 | **Date:** October 12, 2026 | **Developer:** Alex Godly

@@ -121,12 +121,16 @@ function v265FocusLibrarySearch(value,selectionStart,selectionEnd){
 function v265RestoreLibraryFocus(snapshot){
   if(!snapshot||String(S.view||'')!=='library')return;
   const apply=()=>{
-    // v281 hardening: a later restore from an older render must never put an
-    // older search value back into the input while the user is still typing.
+    const live=v265VisibleLibrarySearch(),active=document.activeElement;
+    // v390: once the new search input is already focused, its selection is
+    // user-owned. Never move it back to a stale 48ms/130ms render snapshot.
+    if(!live||active===live)return;
+    // Do not steal focus if the user clicked a filter or another field.
+    if(active&&active!==document.body&&active!==document.documentElement&&active.isConnected)return;
     const current=String(S.histFilters?.libSearch??snapshot.value);
-    const changed=current!==String(snapshot.value??'');
-    const pos=changed?current.length:snapshot.start,end=changed?current.length:snapshot.end;
-    v265FocusLibrarySearch(current,pos,end);
+    // Don't let a delayed callback overwrite a newer search query.
+    if(current!==String(snapshot.value??''))return;
+    v265FocusLibrarySearch(current,snapshot.start,snapshot.end);
   };
   // Multiple passes intentionally outlive the v262/v264 post-render dock enhancers,
   // while always resolving the newest live search state.

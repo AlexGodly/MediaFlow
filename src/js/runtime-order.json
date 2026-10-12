@@ -137,5 +137,6 @@
   "components/280-v384-theme-brand-version.js",
   "components/281-v385-live-leveling-themed-library.js",
   "components/282-v387-logging-order-scroll.js",
-  "components/283-v388-dashboard-log-title-save-performance.js"
+  "components/283-v388-dashboard-log-title-save-performance.js",
+  "components/284-v390-library-search-caret-stability.js"
 ]

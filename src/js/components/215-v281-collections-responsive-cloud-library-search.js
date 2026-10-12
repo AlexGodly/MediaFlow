@@ -166,13 +166,23 @@ function v281VisibleLibrarySearch(){
 function v281CaptureLibrarySearch(){
   if(String(S.view||'')!=='library')return null;const active=document.activeElement;if(!v281IsLibrarySearch(active))return null;
   const value=String(active.value??S.histFilters?.libSearch??''),len=value.length;
-  return {value,start:Math.max(0,Math.min(len,Number(active.selectionStart??len))),end:Math.max(0,Math.min(len,Number(active.selectionEnd??active.selectionStart??len))),seq:V281_LIBRARY_SEARCH_SEQ};
+  return {value,start:Math.max(0,Math.min(len,Number(active.selectionStart??len))),end:Math.max(0,Math.min(len,Number(active.selectionEnd??active.selectionStart??len))),direction:active.selectionDirection||'none',seq:V281_LIBRARY_SEARCH_SEQ};
 }
 function v281RestoreLibrarySearch(snapshot){
-  if(!snapshot||String(S.view||'')!=='library')return;const next=v281VisibleLibrarySearch();if(!next)return;
-  if(String(next.value)!==snapshot.value)next.value=snapshot.value;
+  if(!snapshot||String(S.view||'')!=='library'||snapshot.seq!==V281_LIBRARY_SEARCH_SEQ)return;
+  const next=v281VisibleLibrarySearch();if(!next)return;
+  const focused=document.activeElement;
+  // v390: a later microtask, rAF, or idle refresh must not overwrite a caret
+  // moved by the user after the first synchronous restore. The live search is
+  // always authoritative once it already owns focus.
+  if(focused===next)return;
+  // Never steal focus from a different input, button, or navigation control.
+  if(focused&&focused!==document.body&&focused!==document.documentElement&&focused.isConnected)return;
+  const current=String(S.histFilters?.libSearch??'');
+  if(current!==snapshot.value)return; // newer typing won over this render
+  if(String(next.value)!==current)next.value=current;
   try{next.focus({preventScroll:true});}catch(_){next.focus();}
-  try{next.setSelectionRange(snapshot.start,snapshot.end);}catch(_){ }
+  try{next.setSelectionRange(snapshot.start,snapshot.end,snapshot.direction||'none');}catch(_){ }
 }
 const v281RenderBase=render;
 render=function(){
@@ -202,7 +212,7 @@ function v281SearchLibrary(value){
   const active=document.activeElement,live=v281IsLibrarySearch(active)?active:null;
   const str=String(value??''),len=str.length;
   V281_LIBRARY_SEARCH_SEQ++;
-  const snapshot={value:str,start:Math.max(0,Math.min(len,Number(live?.selectionStart??len))),end:Math.max(0,Math.min(len,Number(live?.selectionEnd??live?.selectionStart??len))),seq:V281_LIBRARY_SEARCH_SEQ};
+  const snapshot={value:str,start:Math.max(0,Math.min(len,Number(live?.selectionStart??len))),end:Math.max(0,Math.min(len,Number(live?.selectionEnd??live?.selectionStart??len))),direction:live?.selectionDirection||'none',seq:V281_LIBRARY_SEARCH_SEQ};
   S.histFilters=S.histFilters||{};S.histFilters.libSearch=str;S.libPage=0;
   document.querySelectorAll('#view-root .lib-search').forEach(el=>{if(el!==live&&el.value!==str)el.value=str;});
   clearTimeout(V281_LIBRARY_SEARCH_TIMER);
@@ -212,10 +222,13 @@ function v281SearchLibrary(value){
       if(snapshot.seq!==V281_LIBRARY_SEARCH_SEQ)return;
       try{v53InvalidateLibraryCache();}catch(_){ }
       try{v53InvalidateLibraryFilterCache();}catch(_){ }
+      // Capture the user's current caret now, not 360ms earlier when the
+      // input event fired. They may have clicked inside the existing query.
+      const latest=v281CaptureLibrarySearch();
       render();
-      // render() performs the immediate focus restore; a final pass protects
-      // against post-render Library dock enhancers.
-      v281RestoreLibrarySearch({value:String(S.histFilters?.libSearch||''),start:Math.min(snapshot.start,String(S.histFilters?.libSearch||'').length),end:Math.min(snapshot.end,String(S.histFilters?.libSearch||'').length),seq:snapshot.seq});
+      // v390: the render wrapper restores the latest active-input selection;
+      // this fallback only runs if an enhancer replaced the focused input.
+      if(latest)v281RestoreLibrarySearch(latest);
     };
     if(typeof requestIdleCallback==='function')requestIdleCallback(work,{timeout:260});else requestAnimationFrame(work);
   },360);
