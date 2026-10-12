@@ -4,6 +4,51 @@
 
    ============================================================ */
 
+
+function mf395DashboardRecommendedItem(task){
+  if(!task?.title || !S.settings?.exactTitleRecommendations)return null;
+  if(typeof v174RecommendedLibraryItem==='function'){
+    try{const exact=v174RecommendedLibraryItem();if(exact)return exact;}catch(_){ }
+  }
+  if(typeof v50FindLibraryItem==='function')return v50FindLibraryItem(task.libraryId,task.title);
+  return null;
+}
+function mf395DashboardProgress(item){
+  const safe=n=>Math.max(0,Number.isFinite(Number(n))?Math.floor(Number(n)):0);
+  const seasons=typeof v252Seasons==='function'?v252Seasons(item):[];
+  const current=seasons.length?seasons.reduce((n,s)=>n+safe(s.progress),0):safe(item?.progress);
+  const total=Number(item?.total)>0?safe(item.total):(seasons.length&&seasons.every(s=>Number(s.total)>0)?seasons.reduce((n,s)=>n+safe(s.total),0):null);
+  const pct=total?Math.min(100,Math.max(0,current/total*100)):null;
+  const remaining=total?Math.max(0,total-current):null;
+  return {current,total,pct,remaining};
+}
+function mf395DashboardRecommendationHtml(task,cat){
+  if(!S.settings?.exactTitleRecommendations)return `<div class="hero-note">You choose the titles — pick whatever you're in the mood for.</div>`;
+  if(!task?.title)return `<div class="hero-note">No eligible title found in this category. Add one to your Library.</div>`;
+  const item=mf395DashboardRecommendedItem(task);
+  const progress=item?mf395DashboardProgress(item):null;
+  const history=typeof v180EnsureRecommendationHistory==='function'?v180EnsureRecommendationHistory(task):[];
+  const rerolls=Math.max(0,(history?.length||0)-1);
+  const cover=(item?.coverUrl&&typeof v50Cover==='function')?v50Cover(item,'mf395-rec-cover'):`<div class="mf395-rec-cover mf395-rec-cover-fallback" style="background:${escapeHtml((cat?.color||'var(--flow)'))}22;color:${escapeHtml(cat?.color||'var(--flow)')};">${v144CategoryIconHtml(cat)}</div>`;
+  const unit=String(cat?.unit||'episodes').toLowerCase();
+  const unitWord=progress?.remaining===1?unit.replace(/s$/,''):unit;
+  const progressMeta=!item?'<div class="mf395-rec-progress-meta">Add totals to this title to unlock a full progress bar.</div>':(progress?.total?`<div class="mf395-rec-progress-meta"><span>${progress.current.toLocaleString()} / ${progress.total.toLocaleString()} ${escapeHtml(unit)}</span><span>${Math.round(progress.pct)}% completed</span><span>${progress.remaining.toLocaleString()} ${escapeHtml(unitWord)} remaining</span></div>`:`<div class="mf395-rec-progress-meta"><span>Current progress: ${progress.current.toLocaleString()} ${escapeHtml(unit)}</span><span>Total unknown</span></div>`);
+  const progressBar=item&&progress?.total?`<div class="mf395-rec-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${progress.total}" aria-valuenow="${Math.min(progress.total,progress.current)}" aria-label="Recommended title progress"><span style="width:${progress.pct.toFixed(2)}%"></span></div>`:'';
+  const actions=`<div class="mf395-rec-actions">${item?.id?`<button type="button" class="btn btn-sm btn-ghost" onclick="App.v174EditRecommendedTitle()">Edit</button>`:''}<button type="button" class="btn btn-sm" onclick="App.v180RerollRecommendedTitle()">Reroll title</button><button type="button" class="btn btn-sm btn-ghost" onclick="App.v180OpenRerollHistory()">Reroll history <span class="v180-reroll-count">${rerolls}</span></button></div>`;
+  return `<section class="mf395-rec-card" aria-label="Recommended title">
+    <div class="mf395-rec-media">${cover}</div>
+    <div class="mf395-rec-body">
+      <div class="mf395-rec-kicker">MediaFlow recommends</div>
+      <h3>${escapeHtml(task.title)}</h3>
+      <div class="mf395-rec-subline">${escapeHtml(cat?.name||'Library')}${item?.status?` · ${escapeHtml((typeof v274StatusLabel==='function'?v274StatusLabel(item.status):String(item.status))||'')}`:''}</div>
+      ${progressMeta}
+      ${progressBar}
+      <div class="mf395-rec-reasons">${(task.reasons||[]).map(r=>`<span class="pill">${escapeHtml(r)}</span>`).join('')}</div>
+      ${actions}
+    </div>
+  </section>`;
+}
+
 function renderDashboard(){
 
   const today = todaysSessions();
@@ -76,13 +121,7 @@ function renderDashboard(){
 
         <div class="hero-amount">Consume <b>${amountStr}</b></div>
 
-        ${S.settings.exactTitleRecommendations ? (t.title ? `<div class="hero-note">MediaFlow recommends: <b>${escapeHtml(t.title)}</b></div>` : `<div class="hero-note">No eligible title found in this category. Add one to your Library.</div>`) : `<div class="hero-note">You choose the titles — pick whatever you're in the mood for.</div>`}
-
-        <div class="hero-reasons">
-
-          ${t.reasons.map(r=>`<span class="pill">${escapeHtml(r)}</span>`).join('')}
-
-        </div>
+        ${mf395DashboardRecommendationHtml(t,cat)}
 
          ${S.logging ? renderLogForm(t,cat) : ` 
 

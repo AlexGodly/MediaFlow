@@ -81,8 +81,8 @@ v370TitlePanelHtml=function(e,index,forceExpanded=false){
   const content=panel.querySelector('.v370-title-content');
   if(content){
     const tabs=document.createElement('div');tabs.className='mf394-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Logging method for '+cleanTitle(item.title));
-    const labels=[['unit','Per Unit'],['last','Last Watched'],['amount','Amount Consumed']];
-    tabs.innerHTML=labels.map(([id,label])=>'<button type="button" role="tab" aria-selected="'+(v394Method(e)===id)+'" class="btn btn-sm '+(v394Method(e)===id?'active':'')+'" onclick="App.v394Switch('+index+',\''+id+'\')">'+label+'</button>').join('');
+    const labels=[['unit','Per Unit','unit'],['last','Last Watched','last'],['amount','Amount Consumed','amount']];
+    tabs.innerHTML=labels.map(([id,label,icon])=>'<button type="button" role="tab" aria-selected="'+(v394Method(e)===id)+'" class="btn btn-sm '+(v394Method(e)===id?'active':'')+'" onclick="App.v394Switch('+index+',\''+id+'\')"><span class="mf394-tab-icon">'+v370Icon(icon,14)+'</span><span class="mf394-tab-label">'+label+'</span></button>').join('');
     content.insertAdjacentElement('afterbegin',tabs);
     if(v394Method(e)!=='unit'){
       content.querySelectorAll(':scope > .v370-unit-list,:scope > .v370-add-row,:scope > .v370-show-all').forEach(el=>{el.hidden=true;});

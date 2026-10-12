@@ -238,7 +238,8 @@ App.v378QuickAdd=function(id,{quiet=false,defer=false}={}){
   if(!S.logDraft){if(!quiet)showToast('Open Logging before adding titles.');return false;}
   const start=typeof v179StartProgress==='function'?v179StartProgress(item):Math.max(0,Number(item.progress)||0);
   const repeat=item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total));
-  const entry={title:cleanTitle(item.title),libraryId:item.id,qty:0,isNew:false,isRepeat:repeat,loggedAt:Date.now(),v179StartProgress:start,v179EndProgress:start};
+  const stamp=Date.now();
+  const entry={title:cleanTitle(item.title),libraryId:item.id,qty:0,isNew:false,isRepeat:repeat,loggedAt:stamp,v394When:stamp,v179StartProgress:start,v179EndProgress:start};
   if(S.logDraft.v369Interface==='itemized')Object.assign(entry,{v369Units:[],v369UpdatedAt:Date.now(),v369SelectedSeasonId:''});
   (S.logDraft.entries||(S.logDraft.entries=[])).push(entry);
   V378_LOG_UI.selected.delete(String(id));

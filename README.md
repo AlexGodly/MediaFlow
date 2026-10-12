@@ -1,10 +1,10 @@
-# MediaFlow v394 — Advanced Logging, Three Per-Title Methods & Batch Log Retirement
+# MediaFlow v395 — Advanced Logging Polish & Dashboard Recommendation Redesign
 
-**Current modular candidate:** v394 · October 12, 2026  
+**Current modular candidate:** v395 · October 12, 2026  
 **Developer:** Alex Godly  
 **Baseline:** MediaFlow v393 Modular  
 **Delivery:** Complete ZIP for manual installation; no GitHub operations.  
-**Details:** [v394 changelog](./docs/CHANGELOG_v394.md) · [README2 technical notes](./README2.md)
+**Details:** [v395 changelog](./docs/CHANGELOG_v395.md) · [README2 technical notes](./README2.md)
 
 **Advanced Logging replaces the name “Per Unit.”** It keeps the existing individual Per Unit editor as the default and adds **Last Watched** and **Amount Consumed** tabs to **each** title already in a Logging session. One title can use a different method from the next. All three tabs are views of the same *unsubmitted* per-unit draft; switching tabs does not create History or change saved Library progress. Category-based labels (Episode/Chapter/Page/Issue/etc.) and existing seasons are respected.
 
@@ -316,7 +316,7 @@ Categories define how your own Library is organized. MediaFlow does not require 
 
 Logging records actual consumption—episodes watched, chapters read, issues consumed, time spent, or other Category-defined units—and remains distinct from adding titles to the Library.
 
-- **Advanced Logging (v394):** keeps Per Unit as the default, adds Last Watched and Amount Consumed as independent tabs for each title, synchronized to the same unsaved unit records. The Per Unit editor records episode/chapter/issue entries individually with editable date, time (including seconds), and runtime; support season-aware units, rewatches/rereads, contiguous-progress safeguards, and existing XP rules.
+- **Advanced Logging (v395):** keeps the v394 three-method system, but polishes it with clearer Per Unit / Last Watched / Amount Consumed tab icons, reliable default “When watched” timestamps tied to when the title was added to Logging, and a merged progress preview that shows current progress, projected progress after the draft, and the exact gain in one cleaner block.
 - **Quick Logging:** use **Amount Consumed** or **Last Progress** while retaining the established workflow.
 - **Logging Interface 3.0 (v372):** theme-native selected-title panels, cover artwork, badges, richer session presentation, and responsive controls.
 - **Arrange Your Session (v373):** first-added-first-displayed order by default; sort by session addition, progress, total units, priority, alphabetical title, recent logging, edit/view dates, Library date added, or random order. Switch direction, reshuffle, or keep a persistent manual arrangement.

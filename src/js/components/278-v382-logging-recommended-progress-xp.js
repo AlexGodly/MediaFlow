@@ -87,28 +87,37 @@ function v382ProgressBar(label,value,total,kind){
 }
 function v382ProgressHtml(item,entry){
   const p=v382ProgressNumbers(item,entry);
-  return `<section class="mf382-progress-comparison" aria-label="Current and projected title progress">
-    <div class="mf382-progress-heading"><span>Progress outlook</span><span class="mf382-progress-draft">${p.unitCount} drafted ${p.unitCount===1?'unit':'units'}</span></div>
-    <div class="mf382-progress-grid">
-      ${v382ProgressBar('Current progress',p.current,p.total,'current')}
-      ${v382ProgressBar('After this draft',p.future,p.total,'future')}
+  const totalKnown=p.total!==null;
+  const futurePct=totalKnown&&p.total>0?Math.min(100,Math.max(0,(p.future/p.total)*100)):null;
+  const currentPct=totalKnown&&p.total>0?Math.min(100,Math.max(0,(p.current/p.total)*100)):null;
+  const remaining=totalKnown?Math.max(0,p.total-p.future):null;
+  const noun=(typeof v369UnitType==='function'?v369UnitType(item):'Unit').toLowerCase();
+  return `<section class="mf382-progress-comparison mf395-progress-preview" aria-label="Current and projected title progress">
+    <div class="mf382-progress-heading"><span>Progress preview</span><span class="mf382-progress-draft">+${p.unitCount.toLocaleString()} drafted ${p.unitCount===1?noun:noun+'s'}</span></div>
+    <div class="mf395-progress-overview">
+      <div class="mf395-progress-stat">
+        <small>Current</small>
+        <strong>${p.current.toLocaleString()}${totalKnown?` <span>/ ${p.total.toLocaleString()}</span>`:''}</strong>
+      </div>
+      <div class="mf395-progress-arrow" aria-hidden="true">→</div>
+      <div class="mf395-progress-stat">
+        <small>After draft</small>
+        <strong>${p.future.toLocaleString()}${totalKnown?` <span>/ ${p.total.toLocaleString()}</span>`:''}</strong>
+      </div>
+      <div class="mf395-progress-gain">+${p.delta.toLocaleString()}</div>
     </div>
-    ${p.total===null?'<p class="mf382-progress-note">Total unknown · progress bars appear when a total is available.</p>':
+    <div class="mf395-progress-stack ${!totalKnown?'is-unknown':''}" ${totalKnown?`role="progressbar" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${Math.min(p.total,p.future)}" aria-label="Projected progress after this draft"`:''}>
+      ${totalKnown?`<span class="mf395-progress-segment is-current" style="width:${currentPct.toFixed(2)}%"></span><span class="mf395-progress-segment is-draft" style="left:${currentPct.toFixed(2)}%;width:${Math.max(0,futurePct-currentPct).toFixed(2)}%"></span>`:''}
+    </div>
+    <div class="mf395-progress-legend">
+      <span><i class="is-current"></i>Already completed</span>
+      <span><i class="is-draft"></i>Current draft</span>
+      ${totalKnown?`<span><i class="is-remaining"></i>${remaining.toLocaleString()} ${remaining===1?noun:noun+'s'} remaining</span>`:`<span><i class="is-remaining"></i>Total unknown</span>`}
+    </div>
+    ${!totalKnown?'<p class="mf382-progress-note">Total unknown · MediaFlow shows your saved and projected progress without inventing a percentage.</p>':
       p.unitCount&&p.delta<p.unitCount?'<p class="mf382-progress-note">Only consecutive new units advance progress; repeats and gaps are not added to the projection.</p>':''}
   </section>`;
 }
-// RefreshPanels reuses v370TitlePanelHtml, so this is regenerated after
-// add/remove/edit/repeat/season changes as well as a complete Logging render.
-const v382TitlePanelBase=v370TitlePanelHtml;
-v370TitlePanelHtml=function(entry,index,forceExpanded=false){
-  const raw=String(v382TitlePanelBase.apply(this,arguments)||'');
-  if(S.logDraft?.v369Interface!=='itemized')return raw;
-  const item=v369ItemTitle(entry);if(!item)return raw;
-  const host=document.createElement('div');host.innerHTML=raw;
-  const info=host.querySelector('.v370-title-info');
-  if(info)info.insertAdjacentHTML('beforeend',v382ProgressHtml(item,entry));
-  return host.innerHTML;
-};
 function v382XPCardMarkup(x){
   const number=(v)=>Number.isFinite(Number(v))?Number(v):0;
   const award=Math.max(0,number(x?.xp)),base=Math.max(0,number(x?.base));

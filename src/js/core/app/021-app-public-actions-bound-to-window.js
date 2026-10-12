@@ -74,7 +74,8 @@ const App = {
 
     S.logDraft.entries=S.logDraft.entries||[];
     const isRepeat=match.status==='completed' || (Number(match.total)>0 && Number(match.progress)>=Number(match.total));
-    S.logDraft.entries.push({title,qty,libraryId:match.id,isNew,isRepeat,loggedAt:Date.now()});
+    const stamp=Date.now();
+    S.logDraft.entries.push({title,qty,libraryId:match.id,isNew,isRepeat,loggedAt:stamp,v394When:stamp});
     S.entryDraft={title:'',qty:1,libraryId:null};
     render();
 

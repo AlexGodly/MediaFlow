@@ -14,7 +14,11 @@ const V370_ICONS={
   expand:'<path d="m6 9 6 6 6-6"/>',
   calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  shield:'<path d="M12 2 4 6v6c0 5 3 8 8 10 5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/>'
+  shield:'<path d="M12 2 4 6v6c0 5 3 8 8 10 5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/>',
+  unit:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h8M8 12h8M8 16h8"/><path d="m6.4 8.2.6.6 1.2-1.2M6.4 12.2l.6.6 1.2-1.2M6.4 16.2l.6.6 1.2-1.2"/>',
+  last:'<path d="M5 3.5v17"/><path d="M6 4h10l-2.7 4 2.7 4H6"/><circle cx="18" cy="18" r="2.5"/>',
+  amount:'<rect x="4" y="6" width="4" height="12" rx="1.5"/><rect x="10" y="9" width="4" height="9" rx="1.5"/><rect x="16" y="4" width="4" height="14" rx="1.5"/>',
+  progress:'<path d="M4 18h16"/><path d="M4 14.5c2.3 0 3.7-5 6-5s3.7 7 6 7 2.7-3 4-3"/><circle cx="10" cy="9.5" r="1.4"/><circle cx="16" cy="16.5" r="1.4"/>'
 };
 function v370Icon(name,size=16){return '<svg class="v370-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(V370_ICONS[name]||V370_ICONS.list)+'</svg>';}
 v369RenderInterfaceControl=function(){

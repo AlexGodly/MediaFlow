@@ -1,23 +1,23 @@
-# MediaFlow v394 — Technical Release Notes
+# MediaFlow v395 — Technical Release Notes
 
-**Application:** MediaFlow · **Version:** v394 Modular · **Baseline:** v393 · **Date:** October 12, 2026 · **Developer:** Alex Godly
+**Application:** MediaFlow · **Version:** v395 Modular · **Baseline:** v394 · **Date:** October 12, 2026 · **Developer:** Alex Godly
 
-## v394 behavior and compatibility
+## v395 behavior and compatibility
 
 - **Batch Log page retired:** Removed its visible desktop/mobile navigation and route, plus redirected historical Batch destinations to Dashboard. Legacy batch-related source logic is retained internally where needed for parsing older data; this is not a live Batch Log page and does not imply removal of past sessions.
 - **Advanced Logging label/icon:** Former `Per Unit` (`v369Interface: 'itemized'`) is shown as **Advanced Logging** with its own checklist icon in Logging and Settings. The serialized `itemized` identifier stays unchanged, preserving old preferences and drafts. The v372 Precision Logging hero now identifies Advanced Logging.
 - **Existing Per Unit unchanged as default:** The individual per-unit UI remains available with numbers, seasons, repeats, timestamps, durations and progress preview. Four units in this view represent the same four underlying `v369Units` when viewed in the new methods.
-- **Per-title tab state:** Each resumable logging entry may have `v394Method` (`unit`, `last`, `amount`). The tabs render a single shared unsaved `v369Units` array; switching a tab never commits anything.
+- **Per-title tab state:** Each resumable logging entry may have `v394Method` (`unit`, `last`, `amount`). v395 keeps the same data model, but the tabs now use explicit method icons and cleaned labels so “Per Unit” always renders correctly and more clearly.
 - **Bidirectional mapping:** Last Watched = highest unit in selected season (or prior progress if empty); Amount Consumed = count of its draft units. Editing either value creates a contiguous range from the title/season's saved progress, preserves stable existing entries when possible, and requires confirmation if replacing detailed nonconsecutive/mixed unit data. Entries in other seasons remain unchanged.
 - **When Watched:** On initial addition each title already has `loggedAt`; the new Per Unit default uses that captured timestamp. Summary methods show a category-aware `datetime-local` control. A manual change updates the relevant season's draft unit timestamps only; distinct existing times are preserved on tab switches and require confirmation before replacement.
 - **Total runtime:** Optional `v394RuntimeManual` + `v394RuntimeSeconds` per title overrides total runtime in the preview and is distributed deterministically across canonical units at submit. If submission is rejected, the original unit runtimes and override fields are restored; turning the override off restores automatic per-unit duration totals. This does not change permanent per-unit category metadata.
-- **Cloud/backups:** Existing v285 resumable draft serialization carries optional v394 fields; v369 draft verification now fingerprints those fields. No migrations or new Supabase tables were introduced. Live sync and conflict handling remain unverified.
+- **Dashboard recommendation hero:** The Dashboard “Next Task” card is redesigned around a larger recommended-title hero with live Library progress, a real progress bar when totals are known, better spacing, and inline Edit / Reroll Title / Reroll History actions. The recommendation engine itself is unchanged.
 
-**New:** `src/js/components/288-v394-advanced-logging.js`, `assets/css/209-v394-advanced-logging.css`, `scripts/test-v394-advanced-logging.py`, `scripts/test-v394-v393-regression.py`, `docs/CHANGELOG_v394.md`.
+**New:** `docs/CHANGELOG_v395.md`.
 
-**Updated:** `src/js/runtime-order.json`, `src/js/components/267-v369-itemized-logging.js`, Logging UI/settings components, navigation and renderer source, `README.md`, `README2.md`, `VERSION`, `version.json`, `package.json`, `index.html`; rebuilt `assets/js/mediaflow-v394.bundle.js` and v394 `sw.js` / PWA manifest data.
+**Updated:** Dashboard renderer source, `src/js/components/267-v369-itemized-logging.js`, `src/js/components/268-v370-logging-ui.js`, `src/js/components/278-v382-logging-recommended-progress-xp.js`, `src/js/components/288-v394-advanced-logging.js`, `assets/css/50-library-dashboard.css`, `assets/css/199-v382-logging-xp-progress.css`, `assets/css/209-v394-advanced-logging.css`, `README.md`, `README2.md`, `VERSION`, `version.json`, `package.json`, `index.html`; rebuilt `assets/js/mediaflow-v395.bundle.js` and v395 `sw.js` / PWA manifest data.
 
-**Testing:** Chromium 390px and 1280px: v394 method conversion, independent tabs, when watched, total runtime, default Per Unit, Batch navigation removal: PASS. v393 picker, Collection and Personal Order regression suite against v394 bundle at 390px/1280px: PASS. Node JS syntax/PWA discovery: PASS. Synthetic in-app Advanced Logging submission with manual total runtime and correct unit records: PASS at 320–1920px. Library search caret and History layout regressions: PASS. Authenticated cloud, physical device, exhaustive production-account History submission, extreme-library benchmark: NOT VERIFIED.
+**Testing:** Node JS syntax/PWA discovery targeted for v395. Focused manual/automation verification targets: Advanced Logging method tabs, default timestamp carry-over, merged progress preview rendering, and Dashboard recommendation hero rendering. Authenticated cloud, physical device, exhaustive production-account History submission, and extreme-library benchmark remain not verified.
 
 ---
 

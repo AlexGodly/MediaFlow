@@ -228,8 +228,9 @@ App.addLogEntry=function(){
   const repeat=typeof v179IsComplete==='function'?v179IsComplete(item):false;
   const start=typeof v179StartProgress==='function'?v179StartProgress(item):Number(item.progress)||0;
   S.logDraft.entries=S.logDraft.entries||[];
-  S.logDraft.entries.push({title:cleanTitle(item.title),libraryId:item.id,qty:0,v369UpdatedAt:Date.now(),
-    isRepeat:repeat,isNew:false,loggedAt:Date.now(),v179StartProgress:start,
+  const stamp=Date.now();
+  S.logDraft.entries.push({title:cleanTitle(item.title),libraryId:item.id,qty:0,v369UpdatedAt:stamp,
+    isRepeat:repeat,isNew:false,loggedAt:stamp,v394When:stamp,v179StartProgress:start,
     v179EndProgress:start,v369Units:[],v369SelectedSeasonId:''});
   S.entryDraft={title:'',qty:1,libraryId:null};
   v369Sync();v369Touch();render();
