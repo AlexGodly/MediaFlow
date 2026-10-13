@@ -1,3 +1,22 @@
+# MediaFlow v410 — Mobile quick-actions dock refinement
+
+**Baseline:** v409 Modular · **October 13, 2026** · **Developer:** Alex Godly  
+**Delivery:** Local modular ZIP only — no GitHub commit, push or deployment.  
+**Data migration:** None.
+
+v409 fixed quick-action buttons clipped beyond the right edge; v410 addresses the remaining intrusive overlays seen in the next two mobile Dashboard screenshots.
+
+- The floating Add button and Task Progress share a *single compact row* above the bottom navigation rather than a tall, stacked obstruction.
+- Task Progress initially uses compact presentation on phone-sized viewports, and remains expandable using its existing control.
+- The three quick actions display in a coherent, centered, safely bounded action sheet on mobile, with clear headings, large tap targets and an intentional backdrop.
+- The open menu temporarily visually hides task progress without changing the active task, Logging draft, cloud data or saved preferences.
+- Short and narrow viewport constraints, dynamic theme, safe-area insets, Escape/outside click close, original action handlers, and desktop fan behavior are preserved.
+- New scoped style layer: `assets/css/222-v410-mobile-dock-sheet.css`; the only source-JS change is first-open compact mode on mobile.
+
+Verification: responsive Chromium viewport checks, floating actions open/close and progress expansion, source-built JavaScript syntax, PWA assets. Full authenticated cloud sessions are not part of this offline test.
+
+---
+
 # MediaFlow v409 — Mobile Floating Quick Actions Repair
 
 **Version:** v409 Modular  

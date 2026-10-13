@@ -33,6 +33,9 @@ function mf397Ensure(){
   const host=document.querySelector('#app .sidebar');
   if(!host){document.getElementById('mf397-dock')?.remove();document.getElementById('mf397-dimmer')?.remove();return false;}
   if(document.getElementById('mf397-dock'))return true;
+  // v410: start mobile progress minimized to avoid blocking Dashboard content.
+  // The existing progress toggle still opens the complete progress card.
+  if(!MF397.booted && window.matchMedia?.('(max-width:720px)').matches)MF397.compact=true;
   document.body.insertAdjacentHTML('beforeend',mf397Markup());
   document.getElementById('mf397-fab').addEventListener('click',()=>mf397SetMenu(!MF397.open));
   document.getElementById('mf397-dimmer').addEventListener('click',()=>mf397SetMenu(false));
