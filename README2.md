@@ -1,34 +1,36 @@
-# MediaFlow v405 — Technical Release Notes
+# MediaFlow v406 — Technical Release Notes
 
-**Version:** v405 Modular  
-**Baseline:** v404 Modular  
+**Version:** v406 Modular  
+**Baseline:** v405 Modular  
 **Date:** October 13, 2026  
 **Developer:** Alex Godly  
 **Database migration:** None  
-**Status:** Locally built modular package. No production deployment or live Supabase account mutation.
+**Status:** Locally packaged source update; no live deployment or production data modification.
 
-## What changed
+## What's new
 
-1. **Appearance → Floating Controls.** Two separately saved, default-visible switches for the floating Quick Add action button and the floating Task Progress widget. The section is registered in the current Settings Center, searchable and available on desktop, tablet and mobile. Hiding an element does not disable its underlying Logging, Library, goal or XP functionality.
-2. **More Pages overlay safety.** The More menu cannot be covered or intercepted by floating dock elements. The dock is temporarily concealed and made inert while More is expanded, then restored according to the user's saved preferences.
-3. **Persistent settings compatibility.** The new `v405ShowFloatingAdd` and `v405ShowFloatingTaskProgress` fields are part of the canonical `S.settings` object, transmitted by cloud snapshots and Sync Now, and included in Full Data and Settings Preset exports. Legacy accounts default to visible until customized; `automatic2` and v404 fresh-only preferences remain compatible.
-4. **Current transfer metadata.** Export stamps for Full Backup, Settings Presets, Personal Order and Collections are v405. Existing data shapes and import formats are preserved. The read-only `App.v405AuditDataIntegrity()` extends v402 transfer checks to include the two preferences and current version stamps.
-5. **PWA regeneration.** v405 app shell, service worker, version.json, manifest, CSS/JS inventory, cache identity and update lifecycle refreshed through the existing build pipeline.
-6. **About → MediaFlow Evolution.** Chapter 06 is now **The intelligent era** with approved description: “Smarter episode verification, adaptive recommendations, and continuous improvements to performance, stability, and reliability.”
-7. **Regression validation.** Local headless Chromium tests covered 320–1920px responsive interfaces, simulated cloud JSON readback, 1,555 History events without clipping, per-unit timestamp preservation, XP non-mutation, Collections tombstones, old-v403 verification evidence, PWA cache fallback, and 100,000-title synthetic recommendation behavior.
+1. **Personal Order / Add Titles:** `Tools & Filters → Show` offers All titles, Not added, and Already added. Membership follows the live Personal Order title queue.
+2. **Personal Order / Add Collections:** The same three-way Show filter, scoped to collections assigned to the currently selected Personal Order category.
+3. **Logging / Library:** The same three-way Show filter, scoped to the current unsubmitted Logging draft rather than historical consumption.
+4. **Library Normal + Dynamic, Collections:** Searchable bulk action pickers for Move to Category, Set Status, and Set Priority, using the real icon and saved `v230ChoiceLayout.setCategory`, `.setStatus`, and `.setPriority` orders. The original mutation handlers remain authoritative.
+5. **Responsive popups:** Viewport-positioned menus, Search without focus loss, Escape and outside-click dismissal, and narrow-screen layout controls.
+6. **Compatibility:** No persistent schema changes. v405 cloud, backups, PWA update and Fresh Episodes systems are preserved; v406 app shell and metadata regenerated.
 
-### Limits
+## Tested locally
 
-- **Cloud verification was simulated locally.** The tests do not establish that live Supabase accepted and synchronized every dataset on real devices; no live account was accessed.
-- **Installed PWA updates were simulated.** Android/iOS installation and real update transitions require separate on-device validation.
-- **100,000-title performance is not fully freeze-free.** The inherited synthetic recommendation test showed approximately 0.2 ms toggle feedback and ~2.1 s background selection, but ~254 ms occasional headless-browser pauses.
-- No paused media-service tracking, Discord or community integration was reintroduced.
+- Build/Node syntax validation; four responsive headless-browser fixture widths (320, 390, 820, 1280).
+- Exact custom ordering for categories, statuses, priorities; Search filtering; all three membership-filter semantics.
+- Collections bulk controls; inherited v405 1,555-record synthetic transfer test without XP mutations.
+- These are isolated fixture and compatibility checks, **not** authenticated live Supabase synchronization or a full installed-PWA test. Full Library page mounting requires authenticated state and was not established in this isolated fixture.
 
-**Detailed changelog:** [docs/CHANGELOG_v405.md](docs/CHANGELOG_v405.md)
+**Detailed changelog:** [docs/CHANGELOG_v406.md](docs/CHANGELOG_v406.md)
 
 ---
 
 ## Prior technical release notes
+
+- [v405 — The Data Integrity & Experience Update](docs/CHANGELOG_v405.md)
+
 
 - [v404 — The Smart Engine & Refinement Update](docs/CHANGELOG_v404.md)
 
