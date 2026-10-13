@@ -146,5 +146,6 @@
   "components/289-v396-logging-card-reliability.js",
   "components/290-v397-floating-dock.js",
   "components/291-v399-picker-workspaces.js",
-  "components/292-v400-workspaces-and-timestamps.js"
+  "components/292-v400-workspaces-and-timestamps.js",
+  "components/293-v401-fresh-episodes-recommendations.js"
 ]

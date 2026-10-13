@@ -1,3 +1,21 @@
+# MediaFlow v401 — Technical Release Notes
+
+**Baseline:** v400 Modular  
+**Date:** October 13, 2026  
+**Scope:** Comprehensive per-title Fresh Episodes verification and confirmed-fresh Seasonal Anime recommendations.
+
+- **Automatic Multi-Provider 2:** New, independent source option checks Tenrai, AniZip, AniList, TVmaze and Kitsu for each confidently identified anime, without accepting the first no-fresh result as final.
+- **Evidence reconciliation:** Compares released-episode counts against saved progress, handles contradictory values, records partial failures and marks unverifiable negatives Unknown rather than silently counting zero.
+- **Recommendations:** Optional “Only recommend titles with fresh episodes” under both MediaFlow Recommends Title and Fresh Episodes checker; same saved preference. Only available in automatic or single-provider modes, never Manual. Filters Seasonal Anime initial picks and rerolls, and respects Personal Order priority with a safe fallback.
+- **Diagnostics:** Expandable per-title provider results, source counts, disagreements and recorded errors. Current-session provider health summary supports Automatic Multi-Provider 2.
+- **Existing behavior:** Automatic 1 remains unchanged. Library progress, Logging, History, Collections, seasons, XP, themes and v400 picker UX preserved. No MAL/SIMKL account-tracking reintroduction, no Supabase schema migration.
+- **README:** Only the `MEDIAFLOW_EVOLUTION_START` to `MEDIAFLOW_EVOLUTION_END` section in root README.md updated.
+- **Verification:** Mocked-source Chromium checks for five-provider scans, partial/positive reconciliation, stored ledger evidence, recommendations and Manual gating (320–1920px); v400 Logging, picker and save regressions passed. No live API, authenticated cloud, physical-device or 100k-title benchmarking claims.
+
+**Full details:** [docs/CHANGELOG_v401.md](docs/CHANGELOG_v401.md)
+
+---
+
 # MediaFlow v400 — Technical Release Notes
 
 **Baseline:** v399 Modular  

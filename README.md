@@ -295,12 +295,14 @@ The generations below describe real shifts in MediaFlow's architecture and direc
 | **12 — Personal Order unification** | v376 | Personal Order picker and organization improvements |
 | **13 — Workflow and stability refinement** | v377–v394 | Media metadata, reliable search, large-Library performance, picker interactions, and Advanced Logging |
 | **14 — Responsive workspace milestone** | v395–v400 | Dashboard recommendations, floating task tools, responsive pickers, and per-unit timestamp independence |
+| **15 — Verified seasonal intelligence** | v401– | Multi-provider episode verification, per-title evidence, and fresh-only Seasonal Anime recommendations |
 
 ### Recent milestones
 
 | Version | Highlight | Notes |
 | --- | --- | --- |
-| **v400** | Independent Per Unit timestamps, unified Add Titles workspace, responsive picker tools, README refresh | [Release notes](docs/CHANGELOG_v400.md) |
+| **v401** | Automatic Multi-Provider 2; five-provider per-title verification and optional fresh-only Seasonal Anime recommendations | [Release notes](docs/CHANGELOG_v401.md) |
+| v400 | Independent Per Unit timestamps, unified Add Titles workspace, responsive picker tools, README refresh | [Release notes](docs/CHANGELOG_v400.md) |
 | v399 | Personal Order and Collections picker workspace overhaul | [Release notes](docs/CHANGELOG_v399.md) |
 | v398 | Mobile and tablet interface repairs | [Release notes](docs/CHANGELOG_v398.md) |
 | v397 | Floating Task Progress and quick actions | [Release notes](docs/CHANGELOG_v397.md) |

@@ -2,8 +2,8 @@
  * Patch appended after v379; underlying Library, XP and History data unchanged.
  */
 const V380_RELEASE=380;
-const V380_SOURCES=['automatic','tenrai','anizip','tvmaze','kitsu','anilist'];
-const V380_NAMES={automatic:'Automatic Multi-Provider',tenrai:'Tenrai',anizip:'AniZip',tvmaze:'TVmaze',kitsu:'Kitsu',anilist:'AniList'};
+const V380_SOURCES=['automatic','automatic2','tenrai','anizip','tvmaze','kitsu','anilist'];
+const V380_NAMES={automatic:'Automatic Multi-Provider',automatic2:'Automatic Multi-Provider 2',tenrai:'Tenrai',anizip:'AniZip',tvmaze:'TVmaze',kitsu:'Kitsu',anilist:'AniList'};
 function v380Mode(){const s=S.settings||DEFAULT_SETTINGS;return V380_SOURCES.includes(s.v380EpisodeProvider)?s.v380EpisodeProvider:'automatic';}
 function v380Svg(path){return `<span class="mf380-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>`;}
 const V380_ICONS={
@@ -427,7 +427,7 @@ v166AvailableEpisodeCount=async function(malId,force=false){
 const v380IdentifyBase=v377Identify;
 v377Identify=async function(item,force){
   const mode=v380Mode();
-  if(mode!=='automatic'&&mode!=='tenrai'&&!v166GetMalId(item))
+  if(mode!=='automatic'&&mode!=='automatic2'&&mode!=='tenrai'&&!v166GetMalId(item))
     return {malId:'',reason:`Add a MAL ID to use ${V380_NAMES[mode]} exact lookups`};
   return v380IdentifyBase.apply(this,arguments);
 };

@@ -2,7 +2,7 @@
  * v380 providers share the corrected adapters and request engine.
  */
 const V381_RELEASE=381;
-const V381_PROVIDER_LABELS={automatic:'Multi-Provider',tenrai:'Tenrai',anizip:'AniZip',anilist:'AniList',tvmaze:'TVmaze',kitsu:'Kitsu'};
+const V381_PROVIDER_LABELS={automatic:'Multi-Provider',automatic2:'Multi-Provider 2',tenrai:'Tenrai',anizip:'AniZip',anilist:'AniList',tvmaze:'TVmaze',kitsu:'Kitsu'};
 function v381CurrentLabel(){return V381_PROVIDER_LABELS[v380Mode()]||'Multi-Provider';}
 const v381SettingsBase=v166SeasonalSettingsHtml;
 v166SeasonalSettingsHtml=function(){
