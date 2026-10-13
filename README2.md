@@ -1,3 +1,20 @@
+# MediaFlow v403 — Technical Release Notes
+
+**Baseline:** v402 Modular  
+**Date:** October 13, 2026  
+**Scope:** Automatic Multi-Provider 2 evidence-qualified single-source No Fresh verification.
+
+- **Fix:** Previously, an anime with only one usable episode-data provider stayed Unknown even if AniList supplied a verified next-airing schedule or finished-series total. v403 accepts a single AniList no-fresh result **only with strong explicit evidence and matching title identity**.
+- **Evidence:** An upcoming episode with a reliable future `airingAt` and exactly matching `episode - 1` aired count, an explicit FINISHED status with verified final total, or an explicit NOT_YET_RELEASED status with zero aired. Unverified raw counts remain Unknown.
+- **Unchanged:** All five applicable providers still checked; highest verified fresh count still wins; Automatic 1 and individual modes unchanged; Unknown-eligible recommendations preserved until the title is reliably confirmed caught up.
+- **Diagnostics:** New expandable list shows titles qualified by one provider, how many episodes have aired, and why the result was accepted. Evidence is retained in the existing v377/v402 ledger format; no SQL migration.
+- **Release parity:** v403 stamps for exports/backups and PWA metadata; unchanged export schemas. README.md Evolution only.
+- **Verification:** Local Chromium confidence and regression tests at 320–1920px; an 84-title synthetic scan certified 70 fresh, 14 caught up, zero unresolved, updating the previous trusted 69 to 70. Live provider data and production cloud/device behavior remain unverified.
+
+**Full details:** [docs/CHANGELOG_v403.md](docs/CHANGELOG_v403.md)
+
+---
+
 # MediaFlow v402 — Technical Release Notes
 
 **Baseline:** v401 Modular  

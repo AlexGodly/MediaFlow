@@ -1,7 +1,7 @@
 /* MediaFlow v402 — data portability, cloud readback and release coherence.
  * This layer performs source-of-truth checks; it does not rewrite accounts,
  * trigger a cloud upload, recalculate or re-award XP during an export. */
-const V402_RELEASE=402;
+const V402_RELEASE=403; // Current release stamp; v402 schema logic is unchanged.
 const V402_ACCOUNT_FIELDS=[
   'categories','categoryOrder','library','sessions','settings','xpLedger',
   'activityLog','completionTimeline','orderPlan','collections',
