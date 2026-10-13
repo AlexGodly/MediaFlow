@@ -1,3 +1,31 @@
+# MediaFlow v409 — Mobile Floating Quick Actions Repair
+
+**Version:** v409 Modular  
+**Baseline:** v408 Modular  
+**Date:** October 13, 2026  
+**Developer:** Alex Godly  
+**Database migration:** None  
+**Deployment:** Not deployed, committed or pushed; local modular package only.
+
+## Fix
+
+1. Correct the responsive floating quick-action fan which previously appeared off the right edge of mobile screenshots, leaving only the action icons visible.
+2. Position the Logging, Library and Collections action cards as a readable, tappable vertical menu anchored above and to the left of the floating Add button.
+3. Keep the floating button in the right safe area even when Task Progress is active; place progress above the button and temporarily hide it while the action menu is open (no task state change).
+4. Respect narrow screens (320px+), reduced-height viewports, notch/safe-area insets, keyboard access, existing theme colors, and reduced-motion preference.
+5. Preserve action click handlers, outside-click / dimmer / Escape dismissal, visibility settings, cloud sync, Library, Collections, XP and Logging state.
+6. Update local version metadata and PWA app-shell assets for v409.
+
+## Files
+
+- New: `assets/css/221-v409-mobile-floating-actions.css`
+- Updated: `index.html`, `VERSION`, `version.json`, `sw.js`, `manifest.json`, `package.json`, and generated `assets/js/mediaflow-v409.bundle.js`
+- No Supabase migrations, no changes to v408 data schemas or v397 action functions.
+
+**Validation:** Source consistency, PWA shell generation, and responsive browser geometry tests (see `scripts/test-v409-mobile-fab.py`).
+
+---
+
 # MediaFlow v408 — Performance & Stability Overhaul
 
 **Version:** v408 Modular  

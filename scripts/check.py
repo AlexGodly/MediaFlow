@@ -815,7 +815,11 @@ for pat in [
     elif bundle.find(pat)>close_pos: errors.append(f'v247 PWA reliability feature is outside active app scope: {pat}')
 for pat in ['.v247-pwa-diagnostics','.v247-diag-row','.v247-diag-actions']:
     if pat not in css247: errors.append(f'missing v247 PWA diagnostics CSS: {pat}')
-for pat in ['Promise.allSettled','GET_DIAGNOSTICS','RETRY_APP_SHELL_CACHE','async function cacheShellAssets']:
+# v408 replaced Promise.allSettled with a bounded worker pool to avoid resource spikes.
+# Both approaches preserve fault-tolerant, per-file cache diagnostics.
+if not ('Promise.allSettled' in sw or 'Promise.all(Array.from({length:Math.min(8,urls.length)}' in sw):
+    errors.append('missing bounded or settled service-worker cache worker pool')
+for pat in ['GET_DIAGNOSTICS','RETRY_APP_SHELL_CACHE','async function cacheShellAssets']:
     if pat not in sw: errors.append(f'missing v247 service-worker reliability feature: {pat}')
 if 'cache.addAll(APP_SHELL' in sw: errors.append('v247 service worker still uses all-or-nothing cache.addAll(APP_SHELL)')
 if not (ROOT/'scripts/smoke-v247.py').exists(): errors.append('missing v247 PWA reliability smoke test')

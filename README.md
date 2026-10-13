@@ -46,6 +46,10 @@ A title can be saved for later, organized into a Collection, positioned in a rea
 
 **Information should remain portable.** MediaFlow provides import/export and backup workflows, local-state handling, and account-based cloud synchronization. Keeping an independent backup is recommended before large migrations or bulk changes.
 
+## v409 — Mobile floating actions
+
+The mobile Quick Actions menu is fully visible within the viewport. Its three existing actions are arranged in a compact vertical stack above the right-anchored Add button, with safe-area and short-screen handling. The Task Progress card no longer shifts the Add trigger sideways or conflicts with an open menu. No account data or backend migrations are involved. See [v409 release notes](README2.md).
+
 ## Features
 
 ### Library — the central catalog
