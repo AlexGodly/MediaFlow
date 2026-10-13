@@ -115,32 +115,57 @@ function v281ExportCollections(){
   showToast(`${payload.collections.length.toLocaleString()} collections exported`);
 }
 async function v281ImportCollections(file){
-  if(!file)return;let parsed;
+  if(!file)return;
+  let parsed;
   try{parsed=JSON.parse(await file.text());}catch(_){showToast('Could not read that Collections file.');return;}
   const rows=Array.isArray(parsed)?parsed:Array.isArray(parsed?.collections)?parsed.collections:null;
   if(!rows){showToast('That file does not contain MediaFlow Collections.');return;}
-  const incoming=v274NormalizeCollections(rows);if(!incoming.length){showToast('No valid collections were found.');return;}
+  // v402: dedicated Collections exports preserve deletion markers as well as
+  // active collections. Legacy v1/v2 imports without tombstones still work.
+  const tombRows=Array.isArray(parsed?.collectionTombstones)?parsed.collectionTombstones:[];
+  const incoming=v274NormalizeCollections(rows);
+  const deleted=tombRows.filter(x=>x&&String(x.id||'')&&Number.isFinite(Number(x.deletedAt))&&Number(x.deletedAt)>0);
+  if(!incoming.length&&!deleted.length){showToast('No valid collections were found.');return;}
   const hasSettings=parsed?.collectionSettings&&typeof parsed.collectionSettings==='object';
-  const ok=await v279Confirm({title:`Import ${incoming.length.toLocaleString()} collection${incoming.length===1?'':'s'}?`,body:`Imported collections will merge with your current Collections.${hasSettings?' Collection display/filter settings from this export will also be restored.':''} Matching IDs use the newer copy. Titles remain in your Library.`,confirmLabel:'Import collections'});if(!ok)return;
+  const ok=await v279Confirm({
+    title:`Import Collections data?`,
+    body:`Merge ${incoming.length.toLocaleString()} collection${incoming.length===1?'':'s'} with your current Collections.${deleted.length?` This file also contains ${deleted.length.toLocaleString()} deletion marker${deleted.length===1?'':'s'}; these may remove older matching collections but will never remove a newer edited copy.`:''}${hasSettings?' Collection display/filter settings from this export will also be restored.':''} Title records remain in your Library.`,
+    confirmLabel:'Import collections'
+  });
+  if(!ok)return;
   const byId=new Map(v274EnsureCollections().map(c=>[String(c.id),c])),now=v274Now();
+  const tomb=new Map((S.collectionTombstones||[]).filter(x=>x?.id).map(x=>[String(x.id),{id:String(x.id),deletedAt:v274Num(x.deletedAt,0)}]));
+  const sourceById=new Map(rows.filter(x=>x?.id).map(x=>[String(x.id),x]));
   const acceptedIds=new Set();
-  // v339: compare SOURCE timestamps before mutation. v281 stamped every imported
-  // collection with `now` first, making an older export overwrite newer edits.
   for(const c of incoming){
     const id=String(c.id),prev=byId.get(id);
-    const source=rows.find(row=>String(row?.id||'')===id)||{};
-    const originalTime=v274Num(source.updatedAt,0);
+    const source=sourceById.get(id)||{},originalTime=v274Num(source.updatedAt,0);
+    const deletion=v274Num(tomb.get(id)?.deletedAt,0);
+    if(originalTime>0&&deletion>=originalTime)continue; // never revive after a newer deletion
     if(prev&&(originalTime<=0||originalTime<v274Num(prev.updatedAt,0)))continue;
     c.updatedAt=originalTime>0?originalTime:now;
     byId.set(id,c);acceptedIds.add(id);
+    if(c.updatedAt>deletion)tomb.delete(id);
+  }
+  let removed=0;
+  for(const entry of deleted){
+    const id=String(entry.id),time=v274Num(entry.deletedAt,0);
+    if(time<=v274Num(tomb.get(id)?.deletedAt,0))continue;
+    const existing=byId.get(id);
+    if(existing&&time<=v274Num(existing.updatedAt,0))continue;
+    tomb.set(id,{id,deletedAt:time});
+    if(existing){byId.delete(id);removed++;}
   }
   S.collections=[...byId.values()];
-  // Revive tombstones only for collections actually accepted from the import.
-  S.collectionTombstones=(S.collectionTombstones||[]).filter(t=>!acceptedIds.has(String(t?.id||'')));
-  if(hasSettings){S.settings=S.settings||{};S.settings.v274Collections=Object.assign({},S.settings.v274Collections||{},v274Clone(parsed.collectionSettings,{}));v274EnsureSettings(S.settings);v281RestoreCollectionUiState();}
+  S.collectionTombstones=[...tomb.values()];
+  if(hasSettings){
+    S.settings=S.settings||{};
+    S.settings.v274Collections=Object.assign({},S.settings.v274Collections||{},v274Clone(parsed.collectionSettings,{}));
+    v274EnsureSettings(S.settings);v281RestoreCollectionUiState();
+  }
   await saveState();V274_UI.activeId='';render();
   if(lastSaveFailed||V115_STARTUP_GUARD)showToast('Collections applied locally, but cloud save is not confirmed. Retry Sync Now when connected.');
-  else showToast(`${acceptedIds.size.toLocaleString()} collections imported ✓${incoming.length>acceptedIds.size?` · ${(incoming.length-acceptedIds.size).toLocaleString()} older copies skipped`:''}`);
+  else showToast(`${acceptedIds.size.toLocaleString()} collections imported · ${removed.toLocaleString()} older collections removed${incoming.length>acceptedIds.size?` · ${(incoming.length-acceptedIds.size).toLocaleString()} older copies skipped`:''}`);
 }
 
 /* ---------- Card cover-size responsiveness ------------------------- */

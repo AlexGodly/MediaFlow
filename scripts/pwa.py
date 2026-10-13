@@ -105,10 +105,18 @@ async function cacheOne(cache,url){
 
 async function cacheShellAssets(urls=APP_SHELL){
   const cache=await caches.open(SHELL_CACHE);
-  const results=await Promise.allSettled(urls.map(url=>cacheOne(cache,url)));
-  const normalized=results.map((row,i)=>row.status==='fulfilled'
-    ? row.value
-    : {url:urls[i],ok:false,status:0,error:String(row.reason||'cache failed')});
+  // Limit concurrent cache writes on low-memory Android browsers. A several-
+  // hundred-asset Promise.all could saturate connections and kill the worker.
+  const normalized=new Array(urls.length);
+  let next=0;
+  async function worker(){
+    while(next<urls.length){
+      const i=next++;
+      try{normalized[i]=await cacheOne(cache,urls[i]);}
+      catch(err){normalized[i]={url:urls[i],ok:false,status:0,error:String(err?.message||err)};}
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(8,urls.length)},()=>worker()));
   return {
     ok:normalized.every(x=>x.ok),
     cached:normalized.filter(x=>x.ok).map(x=>x.url),
@@ -161,19 +169,25 @@ self.addEventListener('install',event=>{
 
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
-    const keys=await caches.keys();
-    await Promise.all(
-      keys
-        .filter(key=>(key.startsWith(CACHE_PREFIX)||key.startsWith('mediaflow-v'))&&key!==SHELL_CACHE)
-        .map(key=>caches.delete(key))
-    );
-
-    // Retry transient misses once on activation, while still allowing the
-    // worker to activate even if one optional asset remains unavailable.
+    // Retry missing assets first. Do not delete the previous working offline
+    // cache when a required v402 asset could not be cached. This is especially
+    // important during transient update failures on mobile networks.
+    let safeToPrune=false;
     try{
-      const diag=await shellDiagnostics();
+      let diag=await shellDiagnostics();
       if(diag.missingCached.length)await cacheShellAssets(diag.missingCached);
-    }catch(_){ }
+      diag=await shellDiagnostics();
+      const critical=APP_SHELL.filter(url=>url==='./index.html'||
+        /\/assets\/js\/mediaflow-v\d+\.bundle\.js$/.test(url)||
+        /\/assets\/css\/00-foundation\.css$/.test(url));
+      safeToPrune=critical.every(url=>!diag.missingCached.includes(url));
+    }catch(err){console.warn('[MediaFlow PWA] cache verification incomplete',err);}
+    if(safeToPrune){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(key=>
+        (key.startsWith(CACHE_PREFIX)||key.startsWith('mediaflow-v'))&&key!==SHELL_CACHE
+      ).map(key=>caches.delete(key)));
+    }
 
     await self.clients.claim();
     const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
@@ -247,9 +261,15 @@ async function networkFirst(request,fallbackUrl){
     const cached=await cache.match(request);
     if(cached)return cached;
     if(fallbackUrl){
-      const fallback=await cache.match(scopedRequest(fallbackUrl,'default'));
+      const fallbackRequest=scopedRequest(fallbackUrl,'default');
+      const fallback=await cache.match(fallbackRequest);
       if(fallback)return fallback;
+      // During a partial upgrade retain the previous version's offline page.
+      const older=await caches.match(fallbackRequest);
+      if(older)return older;
     }
+    const older=await caches.match(request);
+    if(older)return older;
     throw err;
   }
 }
@@ -262,9 +282,15 @@ async function cacheFirst(request){
   const cache=await caches.open(SHELL_CACHE);
   const cached=await cache.match(request);
   if(cached)return cached;
-  const response=await fetch(request);
-  if(response&&response.ok)eventualPut(cache,request,response.clone());
-  return response;
+  try{
+    const response=await fetch(request);
+    if(response&&response.ok)eventualPut(cache,request,response.clone());
+    return response;
+  }catch(err){
+    const older=await caches.match(request);
+    if(older)return older;
+    throw err;
+  }
 }
 
 self.addEventListener('fetch',event=>{

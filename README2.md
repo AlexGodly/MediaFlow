@@ -1,3 +1,25 @@
+# MediaFlow v402 — Technical Release Notes
+
+**Baseline:** v401 Modular  
+**Date:** October 13, 2026  
+**Scope:** Automatic Multi-Provider 2 accuracy, MAL matching, Fresh Episodes eligibility, Dashboard settings, account data persistence, protected cloud readback, transfers, XP/History audit and PWA update reliability.
+
+- **Automatic 2 identity:** Separate verified MAL/provider identity matches from availability of episode metadata. Cross-check existing MAL, AniList and Kitsu IDs where providers supply trusted mappings; use provider-native checks where MAL mapping is unavailable. MAL matching statistics no longer depend on successful episode-list retrieval.
+- **Automatic 2 episode verification:** Check all five applicable sources per title, keep source evidence, and use the **highest verified aired/unwatched fresh-episode count**. One missing catalogue no longer invalidates other sufficient source results. Actual failures, missing data and partial scans are reported separately; the previous fully trusted total remains protected.
+- **Seasonal Anime recommendations:** Fresh and Unknown titles stay eligible; only reliably confirmed caught-up titles are excluded when fresh-only mode is enabled. Added the synchronized option immediately after Prioritize Personal Order inside Dashboard → Title Recommendations, with consistent right-aligned toggles. Manual mode disables the option in both settings locations.
+- **Cloud / Sync Now:** The final protected Sync Now verifier now compares every enumerated JSON-persisted account field, including Stopwatch, runtime tools, deleted Collections, Personal Order, Fresh Episodes settings, metadata and XP; mismatches remain failures, not silent successes. Actual Supabase readback still requires authenticated production tests.
+- **Full Data / Automatic Backup:** Preserved the v257 Stopwatch `modifiedAt` timestamp that v148 Full Backup accidentally omitted; Full and Automatic Backup still share the same canonical builder. Added read-only snapshot/backup/settings/Order/Collections parity reporting (`App.v402AuditDataIntegrity()`).
+- **Full Data Import:** Validates optional modern field shapes before applying a potentially corrupted backup, while maintaining compatible legacy imports.
+- **Settings Presets:** Audited whole-setting preservation including v401 `automatic2` and the fresh-only recommendation switch. Presets remain intentionally settings-only.
+- **Collections transfer:** Export includes deletion markers/tombstones and the correct release version; import uses source modification times to avoid restoring older copies or removing newer edits. Legacy imports without deletion markers remain supported.
+- **Personal Order, History & XP:** Verified collection assignments, queue ordering, v400 unit timestamps, CSV itemized-unit JSON, XP award-ledger preservation and read-only export behavior; no XP formula or reward-trigger changes.
+- **PWA:** Generated v402 cache / manifest / version data; bounded app-shell precache concurrency to eight requests and preserved the previous offline cache when a critical new asset fails. Local service-worker lifecycle simulation passed; actual browser installation and production CDN update rollout unverified.
+- **README:** Only Evolution modified, as established in v400. No GitHub, remote database or deployment operations.
+
+**Full details:** [docs/CHANGELOG_v402.md](docs/CHANGELOG_v402.md)
+
+---
+
 # MediaFlow v401 — Technical Release Notes
 
 **Baseline:** v400 Modular  

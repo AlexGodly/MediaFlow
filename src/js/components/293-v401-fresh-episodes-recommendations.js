@@ -177,7 +177,7 @@ mf395DashboardRecommendationHtml=function(task,cat){
 function v401FilterControl(location){
  const active=v401FilterEnabled(),automatic=v401AutomaticEnabled();
  const id=`mf401-filter-${location}`;
- return `<div class="mf401-setting" data-mf401-filter="${location}"><div class="mf401-setting-copy"><label for="${id}">Only recommend titles with fresh episodes</label><small>For Seasonal Anime only. Requires verified, aired episodes you have not watched. Manual Fresh Episodes cannot use this filter.</small></div>
+ return `<div class="mf401-setting" data-mf401-filter="${location}"><div class="mf401-setting-copy"><label for="${id}">Only recommend titles with fresh episodes</label><small>For Seasonal Anime only. Excludes titles confirmed caught up with aired episodes; titles awaiting verification remain eligible. Manual Fresh Episodes cannot use this filter.</small></div>
    <button id="${id}" type="button" role="switch" class="toggle ${active?'on':''}" aria-checked="${active}" aria-label="Only recommend Seasonal Anime with fresh episodes" ${automatic?'':'disabled aria-disabled="true"'} onclick="App.v401ToggleFreshRecommendations()"></button>
    ${automatic?'':'<small class="mf401-setting-note">Select automatic detection or an individual episode provider to enable.</small>'}</div>`;
 }

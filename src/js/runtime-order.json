@@ -147,5 +147,7 @@
   "components/290-v397-floating-dock.js",
   "components/291-v399-picker-workspaces.js",
   "components/292-v400-workspaces-and-timestamps.js",
-  "components/293-v401-fresh-episodes-recommendations.js"
+  "components/293-v401-fresh-episodes-recommendations.js",
+  "components/294-v402-data-integrity-release-audit.js",
+  "components/295-v402-automatic2-verification.js"
 ]
