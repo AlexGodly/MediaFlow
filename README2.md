@@ -1,3 +1,33 @@
+# MediaFlow v408 — Performance & Stability Overhaul
+
+**Version:** v408 Modular  
+**Baseline:** v407 Modular  
+**Date:** October 13, 2026  
+**Developer:** Alex Godly  
+**Database migration:** None  
+**Status:** Local source and tested package; no production deployment.
+
+## Changes
+
+1. Indexed repeated consumption/rewatch History title lookups by Library ID, replacing repeated 30K-item scans for each session item. Reused repeat totals within one synchronous render event with microtask invalidation.
+2. Reduced duplicate Logging candidate sorting through a short-lived keyed cache, respecting the existing v406 membership modes and filter/order inputs.
+3. Reorganized Logging → Browse Library filters and selection actions with responsive, container-aware layout; the Show dropdown retains readable selected labels on mobile.
+4. Added live Search categories to the main Collections multi-select checklist and Collections → Add Titles popup; selections, configured category order/icons, and the native All behavior stay intact.
+5. Corrected legacy v405 export release stamps to 408 for Full Data/backups, Settings Presets, Personal Order and Collections without changing schemas or historic manifests.
+6. Rebuilt v408 PWA shell/cache, app bundle and version metadata; preserved preexisting Cloud Sync and import/export formats.
+
+## Verified and remaining limitations
+
+- 30,000-title/1,200-session Chromium fixture: 10 repeat-total requests went from ~1,141 ms (v407) to ~20 ms (v408); identical totals. Another run yielded 979 ms versus 26 ms.
+- 30K Library markup rendering improved from ~157 ms to ~85 ms in a controlled fixture; Logging candidates ~33 ms to ~17 ms for the repeated request.
+- 100K Library still took ~235 ms for Library markup generation, so universal freeze-free performance cannot be claimed.
+- Responsive category search and Logging filters checked at 320/390/820/1280px, preserved v407 bulk menus, data-transfer checks with 1,555 activity records and XP unchanged, and simulated PWA update tests passed.
+- Live Supabase authentication, real installed PWA devices, and the user's particular Chrome hang were not reproduced in the controlled environment.
+
+**Detailed changelog:** [docs/CHANGELOG_v408.md](docs/CHANGELOG_v408.md)
+
+---
+
 # MediaFlow v406 — Technical Release Notes
 
 **Version:** v406 Modular  

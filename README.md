@@ -301,11 +301,13 @@ The generations below describe real shifts in MediaFlow's architecture and direc
 | **18 — Data integrity & experience** | v405 | Floating-control preferences and mobile More overlay safety; verified cloud/backup/preset transfer fields, refreshed release stamps, PWA app-shell, and the “intelligent era” Evolution chapter |
 | **19 — Smart filters & organization** | v406 | Membership-aware Personal Order and Logging pickers, searchable category/status/priority bulk actions respecting Settings order and icons |
 | **20 — Cleaner bulk actions** | v407 | Searchable category moves with a single configured icon; compact, left-aligned status and priority dropdowns without search or duplicate auto-icons |
+| **21 — Performance & stability overhaul** | v408 | Indexed repeat History lookup, render-turn result reuse, more efficient Logging candidates, responsive Browse Library tools, and searchable Collections category filters |
 
 ### Recent milestones
 
 | Version | Highlight | Notes |
 | --- | --- | --- |
+| **v408** | Indexed repeat-consumption lookup and same-turn cached calculations; Logging filter layout repaired; searchable Collections category checklists and current export stamps | [Release notes](docs/CHANGELOG_v408.md) |
 | **v407** | Cleaned up Library Normal/Dynamic and Collections bulk dropdowns: status/priority without search, category still searchable, single icons and left-aligned rows | [Release notes](docs/CHANGELOG_v407.md) |
 | **v406** | Personal Order and Logging membership filters; searchable Set Category / Status / Priority batch actions matching Settings order | [Release notes](docs/CHANGELOG_v406.md) |
 | **v405** | Independent floating Quick Add and Task Progress visibility settings; fixed mobile More layering; updated About Evolution; current cloud/export and PWA contracts | [Release notes](docs/CHANGELOG_v405.md) |

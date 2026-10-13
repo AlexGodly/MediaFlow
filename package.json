@@ -1,7 +1,7 @@
 {
-  "name": "mediaflow-v407",
+  "name": "mediaflow-v408",
   "private": true,
-  "version": "4.0.7",
+  "version": "4.0.8",
   "type": "module",
   "scripts": {
     "build:v265": "vite build --config vite.v261.config.ts",

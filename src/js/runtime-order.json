@@ -154,5 +154,6 @@
   "components/297-v404-smart-engine-and-about.js",
   "components/298-v405-cloud-floating-experience.js",
   "components/299-v406-smart-filters-actions.js",
-  "components/300-v407-bulk-picker-cleanup.js"
+  "components/300-v407-bulk-picker-cleanup.js",
+  "components/301-v408-performance-stability-ui.js"
 ]

@@ -1,12 +1,15 @@
 /* MediaFlow v81 — Repeat Consumption (Rewatch / Reread) */
 function v81RepeatTotals(){
   const byTitle=new Map(); let sessions=0,minutes=0,episodes=0,chapters=0,issues=0,movies=0;
+  // v408: build one ID index per calculation. Looking up every History repeat
+  // using S.library.find() was O(History × Library) and blocked Chrome's UI.
+  const libraryById=new Map((S.library||[]).filter(i=>i?.id).map(i=>[String(i.id),i]));
   for(const sess of (S.sessions||[])){
     let sessionHadRepeat=false;
     for(const t of (sess.titles||[])){
       const itemized=Array.isArray(t?.v369Units)&&t.v369Itemized===true;
       if(!t?.repeat&&!itemized) continue;
-      const item=t.libraryId?S.library.find(i=>i.id===t.libraryId):null;
+      const item=t.libraryId?libraryById.get(String(t.libraryId)):null;
       const key=item?.id||t.libraryId; if(!key) continue;
       const unit=getCategory(item?.categoryId||sess.categoryId)?.unit||sess.unit||'units';
       const amount=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:Math.max(0,Number(t.qty)||0);
