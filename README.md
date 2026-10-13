@@ -1,3 +1,30 @@
+# MediaFlow v399 — Personal Order & Collections Picker Workspaces
+
+**Current modular release:** v399 · October 13, 2026  
+**Developer:** Alex Godly  
+**Baseline:** MediaFlow v398 Modular  
+**Scope:** Responsive picker workflows with narrowly authorized desktop improvements.  
+**Documentation:** [v399 changelog](./docs/CHANGELOG_v399.md) · [v399 technical notes](./README2.md)
+
+## What's new
+
+- **Personal Order → Add Titles:** Mobile and tablet List/Compact/Cards/Covers/Covers+Titles layout separation and more efficient browsing space. A **numeric Titles per page** field (1–1000), plus functional **Cover size** and **Text size** sliders, are located inside **Filters & Sorting** on mobile/tablet and in the desktop browsing/display toolbar. Direct Add and Multi-Select remain outside Filters & Sorting across devices.
+- **Personal Order → Add Collections:** Desktop left-sidebar stretching/oversized search corrected on first render. Mobile/tablet **Collections per page** selector enlarged to display complete values and arrows without collision.
+- **Collections → Add Titles:** On phones/tablets a single expandable **Tools & Filters** section groups filters, display modes, sizing, new numeric **Titles per page** (1–1000) and Direct Add/Multi-Select; Compact and Cards have genuinely distinct responsive designs. Desktop has a separate left tools sidebar and right browsing/results pane.
+- Uses the original v392/v393 add/remove, search, sorting, filters, paging and queue handlers. No new database migration or schema changes. MediaFlow theme tokens are inherited.
+
+## Verification
+
+- Modular bundle compiles and passes JS syntax validation; PWA cache assets regenerate.
+- Targeted Chromium picker-workspace tests passed at **320, 390, 430, 820, 1023, 1280, 1920px** including per-page changes, gallery geometry, tool positioning, desktop Collection sidebar and native per-page selector.
+- Responsive test matrix passed at **320, 375, 430, 768, 820, 1023, 1280px** across three dialogs and all five display modes.
+- v392/v393 selection/instant-add regression tests passed at 390 and 1280px; v397 floating-dock and v394 Advanced Logging rendering tests passed at their configured viewport matrices. Save/dashboard scenarios produced passes, but a long combined runner subsequently timed out; no exhaustive result is asserted.
+- Production Supabase, physical-device behavior, and 100,000-title stress performance remain unverified.
+
+---
+
+## Previous release — v398
+
 # MediaFlow v398 — Mobile & Tablet Responsive UI Repair
 
 **Current modular candidate:** v398 · October 12, 2026  

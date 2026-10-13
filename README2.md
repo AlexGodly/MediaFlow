@@ -1,3 +1,18 @@
+# MediaFlow v399 — Technical Release Notes
+
+**Version:** v399 Modular · **Baseline:** v398 · **Date:** October 13, 2026 · **Developer:** Alex Godly
+
+- **Runtime:** `src/js/components/291-v399-picker-workspaces.js` is appended last to `src/js/runtime-order.json`, reusing v274/v276/v352/v358/v359 and v392 canonical picker handlers. It adds numeric per-page editing, mobile control relocation with DOM anchors (not clones), and a restructured Collection title picker workspace. Does not modify Collection/Personal Order membership save algorithms or data schema.
+- **Responsive CSS:** `assets/css/212-v399-picker-workspaces.css` loaded after v398 CSS. Mobile/tablet ≤1023px features denser Compact layouts and card-based Cards layouts, results-first modal sizing and a collapsible Tools & Filters section (Collections→Add Titles). Desktop changes are limited to the newly requested numeric title-page control layout, Collection title picker left sidebar, and Add Collections sidebar stretch correction.
+- **Independent page settings:** Personal Order title page length uses existing `S.settings.v359PickerPagination.titles` (expanded to custom positive integers up to 1000). Collection title-add picker uses `S.settings.v399CollectionAddPageSize` in existing settings JSON; the original v276 candidates, v392 direct-add and persistent selection logic are retained. Invalid/non-integer entries are rejected and leave the previous page length unchanged.
+- **Existing controls:** v358 text/cover sliders retain their original handlers and persisted values. Mobile/tablet Personal Order settings move inside the already-existing Filters & Sorting disclosure; on desktop they remain in the browsing/display toolbar. Collection Add Titles toolbar is reassembled via DOM node moving at render time; search stays visible, results remain separately scrollable.
+- **No migration:** No new Supabase project operations or changes to cloud/backup schema. No GitHub operations.
+- **Verification:** `scripts/test-v399-picker-workspaces.py` passed at 320/390/430/820/1023/1280/1920. v399 variants of v398 responsive tests and picker/Logging/floating regressions also exercised. Chromium checks use controlled synthetic state, not real authenticated Supabase or physical devices.
+
+---
+
+## Previous release — v398
+
 # MediaFlow v398 — Technical Release Notes
 
 **Version:** v398 Modular · **Baseline:** v397 · **Date:** October 12, 2026 · **Developer:** Alex Godly
