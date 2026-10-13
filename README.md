@@ -298,11 +298,13 @@ The generations below describe real shifts in MediaFlow's architecture and direc
 | **15 — Verified seasonal intelligence** | v401 | Multi-provider episode verification, per-title evidence, and fresh-only Seasonal Anime recommendations |
 | **16 — Seasonal accuracy & data protection** | v402–v403 | Cross-provider MAL matching, highest verified Fresh Episodes selection, Unknown-safe recommendations, cloud/export integrity, PWA reliability, and confidence-qualified airing evidence |
 | **17 — The Smart Engine & refinement** | v404 | Official engine branding, repaired synchronized recommendation settings, non-blocking toggle path, progress-aware eligibility, and refreshed About FAQ/Fun Facts |
+| **18 — Data integrity & experience** | v405 | Floating-control preferences and mobile More overlay safety; verified cloud/backup/preset transfer fields, refreshed release stamps, PWA app-shell, and the “intelligent era” Evolution chapter |
 
 ### Recent milestones
 
 | Version | Highlight | Notes |
 | --- | --- | --- |
+| **v405** | Independent floating Quick Add and Task Progress visibility settings; fixed mobile More layering; updated About Evolution; current cloud/export and PWA contracts | [Release notes](docs/CHANGELOG_v405.md) |
 | **v404** | Alex Godly's Smart Fresh Episodes Engine branding; canonical Dashboard fresh-only switch; responsive toggle and chunked task refresh; new FAQ and developer-history Fun Facts | [Release notes](docs/CHANGELOG_v404.md) |
 | **v403** | Single-source AniList schedule verification for caught-up titles, reducing false Unknown results and enabling certified aggregate updates | [Release notes](docs/CHANGELOG_v403.md) |
 | **v402** | Automatic 2 identity and highest verified fresh counts; Unknown-eligible recommendations; cloud/backup parity, import/export safeguards and PWA reliability | [Release notes](docs/CHANGELOG_v402.md) |

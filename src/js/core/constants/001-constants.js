@@ -209,6 +209,9 @@ const DEFAULT_CATEGORIES = [
 ];
 
 const DEFAULT_SETTINGS = {
+  // v405: independent, cloud-portable visibility controls for the floating dock.
+  v405ShowFloatingAdd: true,
+  v405ShowFloatingTaskProgress: true,
 
   dailyMinutes: 180,
 
