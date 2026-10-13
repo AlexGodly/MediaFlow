@@ -300,11 +300,13 @@ The generations below describe real shifts in MediaFlow's architecture and direc
 | **17 — The Smart Engine & refinement** | v404 | Official engine branding, repaired synchronized recommendation settings, non-blocking toggle path, progress-aware eligibility, and refreshed About FAQ/Fun Facts |
 | **18 — Data integrity & experience** | v405 | Floating-control preferences and mobile More overlay safety; verified cloud/backup/preset transfer fields, refreshed release stamps, PWA app-shell, and the “intelligent era” Evolution chapter |
 | **19 — Smart filters & organization** | v406 | Membership-aware Personal Order and Logging pickers, searchable category/status/priority bulk actions respecting Settings order and icons |
+| **20 — Cleaner bulk actions** | v407 | Searchable category moves with a single configured icon; compact, left-aligned status and priority dropdowns without search or duplicate auto-icons |
 
 ### Recent milestones
 
 | Version | Highlight | Notes |
 | --- | --- | --- |
+| **v407** | Cleaned up Library Normal/Dynamic and Collections bulk dropdowns: status/priority without search, category still searchable, single icons and left-aligned rows | [Release notes](docs/CHANGELOG_v407.md) |
 | **v406** | Personal Order and Logging membership filters; searchable Set Category / Status / Priority batch actions matching Settings order | [Release notes](docs/CHANGELOG_v406.md) |
 | **v405** | Independent floating Quick Add and Task Progress visibility settings; fixed mobile More layering; updated About Evolution; current cloud/export and PWA contracts | [Release notes](docs/CHANGELOG_v405.md) |
 | **v404** | Alex Godly's Smart Fresh Episodes Engine branding; canonical Dashboard fresh-only switch; responsive toggle and chunked task refresh; new FAQ and developer-history Fun Facts | [Release notes](docs/CHANGELOG_v404.md) |

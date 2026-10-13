@@ -27,6 +27,45 @@
 
 ---
 
+# MediaFlow v407 — Bulk Action Dropdown Refinement
+
+**Version:** v407 Modular  
+**Baseline:** v406 Modular  
+**Date:** October 13, 2026  
+**Developer:** Alex Godly  
+**Database migration:** None  
+**Status:** Locally built and packaged; no live deployment or production data modification.
+
+## What changed
+
+1. **Set Status** (Library Normal, Library Dynamic, Collections): removed the search box, prevented the global icon enhancer from adding a second icon, and left-aligned status icons and labels with consistent row spacing.
+2. **Set Priority** (same locations): removed the search box and redundant circular-arrow icon, preserving the single correct priority icon with left-aligned rows.
+3. **Move to Category** (same locations): retained live search and the actual saved category icon, but removed the extra circular-arrow and consistently left-aligned entries.
+4. **Settings ordering/visibility:** all three pickers still read `v230VisibleIds('setCategory'/'setStatus'/'setPriority')`. No duplicate preferences or new persistence fields were introduced.
+5. **Bulk actions:** the existing Library and Collections mutation handlers remain unchanged. Personal Order and Logging membership filters introduced in v406 are preserved.
+6. **PWA and release resources:** v407 runtime, stylesheet, bundle, service worker/cache, and version metadata were generated together.
+
+## Implementation
+
+- `src/js/components/300-v407-bulk-picker-cleanup.js` — update shared picker markup, opt out of automatic generic icon decoration, preserve action dispatch.
+- `assets/css/219-v407-bulk-picker-cleanup.css` — explicit left-aligned icon/label grid, appropriate spacing and narrow-screen row sizing.
+- `scripts/test-v407-bulk-picker-cleanup.py` — targeted browser interaction, layout, icon count, custom order, search, and handler delegation tests.
+- `scripts/test-v407-regression-v406-smart-filters.py` — inherited membership and v406 action-picker fixture tests.
+- `scripts/test-v407-pwa-update.py` and `scripts/test-v407-pwa-contract.cjs` — simulated cache/asset lifecycle tests for v407.
+
+## Verification scope
+
+- v407 build and JavaScript syntax: pass.
+- Isolated Chromium UI tests at **320, 390, 820, and 1280 px**, for Library and Collections controls: pass.
+- Correct icon count, semantic left alignment, custom Settings order, category search and bulk-action handler delegation: pass.
+- v406 membership regression and v405 synthetic 1,555-History-record transfer contract: pass.
+- v407 generated app-shell asset inventory and simulated interrupted update recovery: pass.
+- **Limitations:** Tests use isolated browser fixtures rather than authenticated full-application workflows. Live Supabase, real multi-device behavior, and installed Android/iOS PWA updates were not tested.
+
+**Detailed changelog:** [docs/CHANGELOG_v407.md](docs/CHANGELOG_v407.md)
+
+---
+
 ## Prior technical release notes
 
 - [v405 — The Data Integrity & Experience Update](docs/CHANGELOG_v405.md)
