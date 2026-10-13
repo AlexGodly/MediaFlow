@@ -145,5 +145,6 @@
   "components/288-v394-advanced-logging.js",
   "components/289-v396-logging-card-reliability.js",
   "components/290-v397-floating-dock.js",
-  "components/291-v399-picker-workspaces.js"
+  "components/291-v399-picker-workspaces.js",
+  "components/292-v400-workspaces-and-timestamps.js"
 ]

@@ -22,7 +22,7 @@ function v362RestoreControl(element){
 }
 function v362CollectionMobileTools(){
   const sheet=document.querySelector('.mf354-sheet-backdrop .mf359-collection-sheet');
-  if(!sheet)return;
+  if(!sheet || sheet.classList.contains('mf400-collection-tools-sheet'))return;
   const filters=sheet.querySelector('.mf358-collection-filters');
   const size=sheet.querySelector('.mf361-collection-size-controls');
   const page=sheet.querySelector('.mf359-page-size-field');

@@ -52,8 +52,8 @@ function v394BulkPanel(e,index,item){
   const hasOther=all.length!==units.length;
   const repeatMixed=units.some(u=>!!u.isRepeat!==!!e.isRepeat);
   const duration=v394RuntimeForEntry(e), manual=!!e.v394RuntimeManual;
-  const stamp=v394StampInfo(e,units);
-  const dateValue=stamp.mixed?'':v369DateTimeValue(stamp.stamp);
+  const bulkStamp=v400BulkStamp(e,method);
+  const dateValue=v369DateTimeValue(bulkStamp);
   const opts=v394Seasons(item).map(s=>'<option value="'+escapeHtml(String(s.id))+'" '+(String(s.id)===String(season?.id)?'selected':'')+'>'+escapeHtml(String(s.name||'Season '+s.number))+'</option>').join('');
   const note=(!exact?'<p class="mf394-warning">Nonconsecutive '+escapeHtml(noun.toLowerCase())+'s are preserved. Changing this number will replace the selected season’s detailed entries after confirmation.</p>':'')+
     (repeatMixed?'<p class="mf394-warning">Mixed repeat/non-repeat entries are preserved until you explicitly replace them.</p>':'')+
@@ -65,7 +65,7 @@ function v394BulkPanel(e,index,item){
     '<label class="mf394-field">'+escapeHtml(label)+'<input type="number" inputmode="numeric" min="'+(method==='last'?base:0)+'" max="999999" value="'+value+'" onchange="App.v394SetQuantity('+index+',this.value)"></label>'+
     '<div class="mf394-summary"><span>Saved '+escapeHtml(noun.toLowerCase())+' progress: <strong>'+base+'</strong></span><span>Draft amount: <strong>'+quantity+'</strong></span><span>Highest draft '+escapeHtml(noun.toLowerCase())+': <strong>'+highest+'</strong></span></div>'+note+
     '<div class="mf394-field"><label>When '+(/chapter|page|issue|book/i.test(noun)?'Consumed':'Watched')+' <input type="datetime-local" step="1" aria-label="When watched or consumed" value="'+dateValue+'" onchange="App.v394SetWhen('+index+',this.value)"></label>'+
-    (stamp.mixed?'<small class="mf394-warning">Individual units have different timestamps. They remain unchanged unless you set a new time here.</small>':'<small>Initially uses when this title was added to the logging draft. Editable.</small>')+'</div>'+ 
+    '<small>Uses the title-added date by default. Editing this field never changes the Per Unit timestamps.</small>'+'</div>'+ 
     '<div class="mf394-runtime"><label class="mf394-runtime-toggle"><input type="checkbox" '+(manual?'checked':'')+' onchange="App.v394ToggleRuntime('+index+',this.checked)"> Customize total runtime</label>'+ 
     (manual?'<label class="mf394-field">Total runtime (HH:MM:SS) <input aria-label="Custom total runtime" type="text" inputmode="numeric" pattern="[0-9]+:[0-5][0-9]:[0-5][0-9]" value="'+v369Hms(Number(e.v394RuntimeSeconds)||0)+'" onchange="App.v394SetRuntime('+index+',this.value)"></label>':'<div class="mf394-auto-runtime">Automatic: <strong>'+v369Hms(duration)+'</strong>'+(v369DefaultSeconds(item)<=0?'<small>Duration metadata is missing; check the category runtime.</small>':'')+'</div>')+'</div>'+ 
     '<small class="mf394-hint">Switching tabs keeps the same unsaved units. Nothing is added to History until you submit Logging.</small></div>';
@@ -137,7 +137,7 @@ App.v394SetQuantity=function(index,value){
   // tombstones so a cloud draft merge cannot resurrect them.
   const previous=new Map(units.map(u=>[Number(u.number),u]));
   const keep=new Set(Array.from({length:quantity},(_,i)=>base+i+1));
-  const now=Date.now(),stamp=v394DefaultStamp(e),seconds=v369DefaultSeconds(item);
+  const now=Date.now(),stamp=v400BulkStamp(e,mode),seconds=v369DefaultSeconds(item);
   const result=[];
   for(let i=1;i<=quantity;i++){
     const number=base+i,old=previous.get(number);
@@ -156,11 +156,12 @@ App.v394SetWhen=function(index,value){
   const e=v394Entry(index);if(!e)return;
   const stamp=new Date(String(value||'')).getTime();
   if(!v369ValidStamp(stamp)){showToast('Choose a valid past date and time.');v394Paint(index);return;}
-  const {units}=v394Relevant(e,v369ItemTitle(e));
-  if(new Set(units.map(u=>Number(u.loggedAt))).size>1 && !window.confirm('This will set the same timestamp for all selected season units. Replace their individually edited times?')){v394Paint(index);return;}
-  e.v394When=stamp;
-  for(const u of units){u.loggedAt=stamp;u.v369UpdatedAt=Date.now();}
-  e.v369UpdatedAt=Date.now();v369Sync();v394Paint(index);
+  const mode=v394Method(e);
+  if(mode==='unit')return;
+  // v400: bulk method dates are separate draft metadata. Switching methods
+  // must NEVER write to individual Per Unit records or their updatedAt flags.
+  e[mode==='last'?'v400LastWhen':'v400AmountWhen']=stamp;
+  e.v369UpdatedAt=Date.now();v369Touch();v394Paint(index);
 };
 App.v394ToggleRuntime=function(index,enabled){
   const e=v394Entry(index);if(!e)return;

@@ -281,11 +281,11 @@ function v369AddUnit(index,forceRepeat=false){
   if(!forceRepeat&&e.v369Units.some(x=>String(x.seasonId||'')===String(season?.id||'')&&Number(x.number)===number)){
     showToast('That unit is already in this draft.');return;
   }
-  const timestamp=v369ValidStamp(e.loggedAt)||Date.now();
+  const timestamp=Date.now(); // v400: the moment this particular unit is logged, never the title-added timestamp
   e.v369Units.push({id:uid(),number,seasonId:season?String(season.id):null,
     seasonName:season?String(season.name||''):null,
     seasonNumber:season?season.number:null,loggedAt:timestamp,durationSeconds:v369DefaultSeconds(item),v369UpdatedAt:Date.now(),isRepeat:!!forceRepeat||!!e.isRepeat});
-  e.v369UpdatedAt=timestamp;
+  e.v369UpdatedAt=Date.now();
   e.v369NextNumber=number+1;
   v369Sync();v369Touch();v369RefreshPanels();
 }

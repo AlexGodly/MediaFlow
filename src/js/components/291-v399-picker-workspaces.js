@@ -42,7 +42,7 @@ function v399AnchorRestore(el){
 /* No cloning: the original sliders and numeric input keep their live event
  * handlers, focus semantics and settings persistence across resized windows. */
 function v399TitleMobileTools(){
-  const sheet=document.querySelector('.mf354-sheet-backdrop .mf359-title-sheet');if(!sheet)return;
+  const sheet=document.querySelector('.mf354-sheet-backdrop .mf359-title-sheet');if(!sheet || sheet.classList.contains('mf400-order-workspace'))return;
   const disclosure=sheet.querySelector('.mf356-title-filters');
   const sizes=sheet.querySelector('.mf358-size-controls');
   const paging=sheet.querySelector('.mf399-title-page-field');

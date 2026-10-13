@@ -1,3 +1,21 @@
+# MediaFlow v400 — Technical Release Notes
+
+**Baseline:** v399 Modular  
+**Date:** October 13, 2026  
+**Scope:** Independent Per Unit timestamps; bulk time isolation; Personal Order picker workspace parity; responsive Collections tools; root README documentation overhaul.
+
+- **Logging:** Each Per Unit entry timestamps the moment it is logged. Last Watched and Amount Consumed default to the title-added time and retain separate editable bulk values. Method switches do not edit canonical individual units; bulk date is applied only at accepted submission, with rollback on validation failure.
+- **Personal Order → Add Titles:** Desktop now has the same two-panel browsing/tools layout as Collections → Add Titles. Narrow devices get one collapsible Tools & Filters section; original title-add handlers remain.
+- **Collections → Add Titles:** Desktop sidebar recovers on narrow-to-wide resizing even if tools were previously collapsed, while narrow state remains restorable.
+- **Personal Order → Add Collections:** Renamed Tools & Filters, consolidated desktop view/page-size/size controls, moved phone selection/view controls, fixed mobile List cover proportions.
+- **README:** New public GitHub-oriented README. Starting with v401, only text between `MEDIAFLOW_EVOLUTION_START` and `MEDIAFLOW_EVOLUTION_END` may be changed unless an explicit documentation refresh is requested.
+- **Data:** No Supabase table migration, XP schema change, or new external tracking integration.
+- **Validation:** Build/JS/PWA checks, timestamp contracts, responsive workspaces, picker workflows, floating widgets, and Dashboard/Logging save scenarios passed in controlled local Chromium. Real account/physical-device testing and full 100,000-title throughput remain unverified.
+
+**Full details:** [docs/CHANGELOG_v400.md](docs/CHANGELOG_v400.md)
+
+---
+
 # MediaFlow v399 — Technical Release Notes
 
 **Version:** v399 Modular · **Baseline:** v398 · **Date:** October 13, 2026 · **Developer:** Alex Godly
