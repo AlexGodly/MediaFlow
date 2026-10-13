@@ -223,7 +223,7 @@ function v401DiagnosticsHtml(){
  if(v401Mode()!=='automatic2')return '';
  const checked=rows.length,withFresh=rows.filter(([,hit])=>Number(hit.available)>0).length;
  const libById=new Map((S.library||[]).map(item=>[String(item.id),item]));
- return `<details class="mf401-diagnostics"><summary>Multi-Provider 2 verification details <small>(${checked} checked)</small></summary>
+ return `<details class="mf401-diagnostics"><summary>Alex Godly's Smart Fresh Episodes Engine — Verification Details <small>(${checked} checked)</small></summary>
   <p class="hint">These are saved provider results for matched titles. A positive episode count does not automatically mean a fresh episode: Library progress is authoritative. Other providers can still be outdated.</p>
   <div class="mf401-diagnostics-list">${rows.slice(0,150).map(([id,hit])=>{
    const item=libById.get(id),results=hit.v401Providers;
@@ -241,13 +241,13 @@ v381HealthSummaryHtml=function(){
   const detail=!health?'Not checked in this session':health.failed&&(!health.ok||health.reason)?`Last error: ${health.reason}`:'Request succeeded';
   return `<div class="mf381-diagnostics-row"><b>${escapeHtml(V380_NAMES[source])}</b><small>${escapeHtml(detail)}</small></div>`;
  });
- return `<div class="mf381-diagnostics"><strong>Multi-Provider 2 request diagnostics</strong><small>Results from this browser session, not a provider uptime guarantee.</small>${lines.join('')}</div>`;
+ return `<div class="mf381-diagnostics"><strong>Alex Godly's Smart Fresh Episodes Engine — Request Diagnostics</strong><small>Results from this browser session, not a provider uptime guarantee.</small>${lines.join('')}</div>`;
 };
 // Provider source panel describes the difference without changing Automatic 1.
 const v401ProviderSummaryBase=v380ProviderSummaryHtml;
 v380ProviderSummaryHtml=function(){
  return String(v401ProviderSummaryBase.apply(this,arguments)||'').replace('Automatic uses Tenrai → AniZip → AniList → TVmaze → Kitsu as needed.',
-  'Automatic Multi-Provider uses ordered fallback (Tenrai → AniZip → AniList → TVmaze → Kitsu). Automatic Multi-Provider 2 checks all five sources per title before finalizing.');
+  "Automatic Multi-Provider uses ordered fallback (Tenrai → AniZip → AniList → TVmaze → Kitsu). Alex Godly's Smart Fresh Episodes Engine checks all five applicable sources per title before finalizing.");
 };
 window.MediaFlowV401={version:401,providers:[...V380_SOURCES],getMode:v401Mode,getFilter:v401FilterEnabled,
  eligibility:v401EpisodeOutcome,scanEvidence:()=>Object.fromEntries(V401_SCAN_EVIDENCE),getFreshRecommendation:cat=>pickLibraryTitle(cat)};

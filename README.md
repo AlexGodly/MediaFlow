@@ -297,11 +297,13 @@ The generations below describe real shifts in MediaFlow's architecture and direc
 | **14 — Responsive workspace milestone** | v395–v400 | Dashboard recommendations, floating task tools, responsive pickers, and per-unit timestamp independence |
 | **15 — Verified seasonal intelligence** | v401 | Multi-provider episode verification, per-title evidence, and fresh-only Seasonal Anime recommendations |
 | **16 — Seasonal accuracy & data protection** | v402–v403 | Cross-provider MAL matching, highest verified Fresh Episodes selection, Unknown-safe recommendations, cloud/export integrity, PWA reliability, and confidence-qualified airing evidence |
+| **17 — The Smart Engine & refinement** | v404 | Official engine branding, repaired synchronized recommendation settings, non-blocking toggle path, progress-aware eligibility, and refreshed About FAQ/Fun Facts |
 
 ### Recent milestones
 
 | Version | Highlight | Notes |
 | --- | --- | --- |
+| **v404** | Alex Godly's Smart Fresh Episodes Engine branding; canonical Dashboard fresh-only switch; responsive toggle and chunked task refresh; new FAQ and developer-history Fun Facts | [Release notes](docs/CHANGELOG_v404.md) |
 | **v403** | Single-source AniList schedule verification for caught-up titles, reducing false Unknown results and enabling certified aggregate updates | [Release notes](docs/CHANGELOG_v403.md) |
 | **v402** | Automatic 2 identity and highest verified fresh counts; Unknown-eligible recommendations; cloud/backup parity, import/export safeguards and PWA reliability | [Release notes](docs/CHANGELOG_v402.md) |
 | **v401** | Automatic Multi-Provider 2; five-provider per-title verification and optional fresh-only Seasonal Anime recommendations | [Release notes](docs/CHANGELOG_v401.md) |

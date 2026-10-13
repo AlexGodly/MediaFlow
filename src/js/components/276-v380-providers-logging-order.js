@@ -3,7 +3,7 @@
  */
 const V380_RELEASE=380;
 const V380_SOURCES=['automatic','automatic2','tenrai','anizip','tvmaze','kitsu','anilist'];
-const V380_NAMES={automatic:'Automatic Multi-Provider',automatic2:'Automatic Multi-Provider 2',tenrai:'Tenrai',anizip:'AniZip',tvmaze:'TVmaze',kitsu:'Kitsu',anilist:'AniList'};
+const V380_NAMES={automatic:'Automatic Multi-Provider',automatic2:"Alex Godly's Smart Fresh Episodes Engine",tenrai:'Tenrai',anizip:'AniZip',tvmaze:'TVmaze',kitsu:'Kitsu',anilist:'AniList'};
 function v380Mode(){const s=S.settings||DEFAULT_SETTINGS;return V380_SOURCES.includes(s.v380EpisodeProvider)?s.v380EpisodeProvider:'automatic';}
 function v380Svg(path){return `<span class="mf380-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>`;}
 const V380_ICONS={

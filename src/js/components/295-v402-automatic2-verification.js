@@ -220,7 +220,7 @@ async function v402RunAutomatic2({ids=null,force=false,notify=false}={}){
   V166_SEASONAL_RUNTIME.status=complete?'success':'partial';
   V166_SEASONAL_RUNTIME.matched=malMatched;
   V166_SEASONAL_RUNTIME.message=complete?'All applicable titles verified.':
-   `Partial Automatic Multi-Provider 2: ${verifiedFreshTitles} verified fresh titles; ${verifiedNoFresh} verified caught up; ${unknown} unresolved. Trusted total retained (${oldCount}).`;
+   `Partial Alex Godly's Smart Fresh Episodes Engine: ${verifiedFreshTitles} verified fresh titles; ${verifiedNoFresh} verified caught up; ${unknown} unresolved. Trusted total retained (${oldCount}).`;
   V166_SEASONAL_RUNTIME.error=complete?'':V166_SEASONAL_RUNTIME.message;
   V166_SEASONAL_RUNTIME.finishedAt=Date.now();
   if(changed)try{v53InvalidateLibraryCache();}catch(_){}
@@ -312,8 +312,8 @@ v401DiagnosticsHtml=function(){
   return `<details><summary>${escapeHtml(cleanTitle(item?.title||'Unknown title'))} — ${escapeHtml(row.reason||'Unverified')}</summary>${sources.length?
    sources.map(x=>`<div class="mf401-provider-line"><b>${escapeHtml(V380_NAMES[x.source]||x.source)}</b><span>${escapeHtml(x.status==='verified'?`${x.fresh} fresh (${x.available} aired)`:(x.kind||x.status)+': '+(x.reason||'Unavailable'))}</span></div>`).join(''):'<p class="hint">No safe provider identity/episode result.</p>'}</details>`;
  });
- const summary=state?`${state.malMatched}/${state.total} MAL matched · ${state.verifiedFreshTitles} fresh · ${state.verifiedNoFresh} caught up · ${state.unknown} unresolved${state.complete?' · Complete':' · Partial'}`:'Run Automatic 2 to get independent identity and episode counts.';
- return `<details class="mf402-coverage"><summary>Automatic 2 identity & verification coverage</summary><p class="hint">${escapeHtml(summary)}. Matched identities are counted separately from episode availability. Partial figures are not certified aggregate counts.</p>${rows.length?`<div class="mf401-diagnostics-list">${rows.join('')}</div>`:''}</details>`+main;
+ const summary=state?`${state.malMatched}/${state.total} MAL matched · ${state.verifiedFreshTitles} fresh · ${state.verifiedNoFresh} caught up · ${state.unknown} unresolved${state.complete?' · Complete':' · Partial'}`:"Run Alex Godly's Smart Fresh Episodes Engine to get independent identity and episode counts.";
+ return `<details class="mf402-coverage"><summary>Alex Godly's Smart Fresh Episodes Engine — Identity & Verification Coverage</summary><p class="hint">${escapeHtml(summary)}. Matched identities are counted separately from episode availability. Partial figures are not certified aggregate counts.</p>${rows.length?`<div class="mf401-diagnostics-list">${rows.join('')}</div>`:''}</details>`+main;
 };
 
 // Scan status must not label a preserved aggregate's OLD matched count as the

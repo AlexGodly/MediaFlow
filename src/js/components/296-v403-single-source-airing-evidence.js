@@ -83,7 +83,7 @@ v401DiagnosticsHtml=function(){
     `<span>${escapeHtml(source.v403Proof.reason)} · ${source.available} released, ${v401Progress(item)} watched · AniList only</span></div>`);
  }
  if(!verified.length)return html;
- return `<details class="mf402-coverage"><summary>Single-source verified airing schedules (${verified.length})</summary>`+
+ return `<details class="mf402-coverage"><summary>Alex Godly's Smart Fresh Episodes Engine — Single-Source Verified Airing Schedules (${verified.length})</summary>`+
   `<p class="hint">These titles were confirmed caught up by explicit, identity-matched AniList airing evidence even though other providers lacked usable episode lists.</p>`+
   verified.slice(0,60).join('')+(verified.length>60?`<p class="hint">Showing first 60 of ${verified.length} titles.</p>`:'')+
   '</details>'+html;
