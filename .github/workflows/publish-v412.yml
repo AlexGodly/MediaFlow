@@ -28,7 +28,7 @@ jobs:
       - name: Confirm exact v411 baseline
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           test "$(cat VERSION)" = "411"
           test -f assets/css/223-v411-library-overview-responsive.css
           test ! -f assets/css/224-v412-library-overview-live-layout.css
