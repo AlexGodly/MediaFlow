@@ -46,6 +46,10 @@ A title can be saved for later, organized into a Collection, positioned in a rea
 
 **Information should remain portable.** MediaFlow provides import/export and backup workflows, local-state handling, and account-based cloud synchronization. Keeping an independent backup is recommended before large migrations or bulk changes.
 
+## v412 — Library Overview hotfix: production layout and regression coverage
+
+Fixed the live site selector mismatch that prevented the previous Overview redesign from appearing. Category cards now separate names, stats and bars on the actual `#app` root, tested at phone, tablet, desktop, container-constrained and zoomed sizes. See [v412 release notes](docs/CHANGELOG_v412.md).
+
 ## v411 — Collision-free Library Overview across devices
 
 Category overview cards now size to the actual Library container and separate long category names, completion numbers, and progress bars into a readable responsive layout. Normal and Dynamic Library use the same fix, and progress data and settings are untouched. See [v411 notes](README2.md).

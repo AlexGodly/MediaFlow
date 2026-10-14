@@ -1,3 +1,18 @@
+# MediaFlow v412 Hotfix — Library Overview production CSS fix
+
+**October 14, 2026 · Baseline: v411 Stable · Developer: Alex Godly**
+
+- Corrected the selector mismatch that made v411 ineffective: its CSS only targeted a nonexistent `#view-root`, while MediaFlow renders within `#app`.
+- Made category cards responsive across desktop, tablets, and phones, with separate rows for icons/titles, counts and percentages, and progress bars.
+- Added real `mf412-overview-icon` / `mf412-overview-label` spans in the Overview renderer to safely wrap long category names.
+- Preserved category order, visibility, progress math, estimated totals, icon metadata, themes, and both Library modes.
+- Replaced the misleading previous test fixture with production-root Chromium regression coverage across 11 viewport widths, panel-constrained layouts, zoom, and a negative control reproducing the v411 failure.
+- No database schema changes or modifications to user data.
+
+**Files:** `assets/css/224-v412-library-overview-live-layout.css`, `src/js/legacy/120-v188.js`, `scripts/test-v412-library-overview-real-root.py`, updated version/PWA assets.
+
+---
+
 # MediaFlow v411 — Library Overview UI Repair
 
 **Baseline:** v410 Modular · **October 14, 2026** · **Developer:** Alex Godly

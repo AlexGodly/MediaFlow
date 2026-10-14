@@ -175,7 +175,7 @@ v183LibraryOverviewHtml=function(){
     const progressText=x.items===0?'0 / -':(est.estimated?`${x.done} / ≈${est.total} (~${pct}%)`:`${x.done} / ${est.total} (${pct}%)`);
     const approxTitle=est.estimated?'Approximate overview only — unknown title totals are estimated for this progress bar and are not saved to Library titles.':'';
     return `<div class="overview-row" ${approxTitle?`title="${escapeHtml(approxTitle)}"`:''}>
-      <div class="ov-name"><span>${v144CategoryIconHtml(cat)}</span> ${escapeHtml(cat.name)}</div>
+      <div class="ov-name"><span class="mf412-overview-icon">${v144CategoryIconHtml(cat)}</span><span class="mf412-overview-label">${escapeHtml(cat.name)}</span></div>
       <div class="ov-track"><div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:linear-gradient(90deg, ${cat.color}88, ${cat.color});"></div></div></div>
       <div class="ov-num">${progressText}</div>
     </div>`;
