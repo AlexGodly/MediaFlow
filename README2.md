@@ -1,3 +1,21 @@
+# MediaFlow v411 — Library Overview UI Repair
+
+**Baseline:** v410 Modular · **October 14, 2026** · **Developer:** Alex Godly
+**Scope:** Normal & Dynamic Library Overview on desktop, tablet, and mobile.
+
+- Fixed overlapping category labels, large completion totals, percentages, and progress bars on desktop/tablet.
+- Rebuilt Overview container as an intrinsic responsive grid; the number of columns adapts to actual Library panel space, not just viewport width.
+- Made each category a self-contained card with clear icon/title, numeric progress, and full-width progress bar. Long category names wrap and never paint over adjacent cards.
+- Improved small-screen spacing and made Show/Hide and overview summary wrap cleanly.
+- Kept category ordering, visibility, pagination, saved values, theme colors, percentages, and estimates unchanged.
+- No changes to the Supabase schema or stored user data.
+
+**Technical:** `assets/css/223-v411-library-overview-responsive.css`; rebuilt v411 application bundle, PWA assets, and metadata.
+
+**Validation:** Responsive Chromium layout tests and package/build integrity.
+
+---
+
 # MediaFlow v410 — Mobile quick-actions dock refinement
 
 **Baseline:** v409 Modular · **October 13, 2026** · **Developer:** Alex Godly  

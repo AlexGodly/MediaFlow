@@ -46,6 +46,10 @@ A title can be saved for later, organized into a Collection, positioned in a rea
 
 **Information should remain portable.** MediaFlow provides import/export and backup workflows, local-state handling, and account-based cloud synchronization. Keeping an independent backup is recommended before large migrations or bulk changes.
 
+## v411 — Collision-free Library Overview across devices
+
+Category overview cards now size to the actual Library container and separate long category names, completion numbers, and progress bars into a readable responsive layout. Normal and Dynamic Library use the same fix, and progress data and settings are untouched. See [v411 notes](README2.md).
+
 ## v410 — Compact mobile dock and quick-action sheet
 
 The mobile Add button and active task progress now share one compact dock row instead of overlapping two sections of content. Opening Add presents a bounded, full-width quick-action sheet with all three original actions; desktop behavior and all user/cloud data remain unchanged. See [v410 notes](README2.md).
