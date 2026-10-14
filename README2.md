@@ -1,3 +1,19 @@
+# MediaFlow v416 Stable — Library Overview hover polish
+
+**October 14, 2026 · Baseline: v415 Stable · Developer: Alex Godly**
+
+- Replaced the harsh full-accent outline on category-card hover with a subtle, category-matched border and soft elevation.
+- Added a thin accent shimmer across the card top, a gentle background tint and coordinated highlights for Total titles, status chips and progress bars.
+- Used the category's configured accent color, with theme-aware contrast and fallbacks for custom themes.
+- Restricted hover elevation to mouse/trackpad devices, preventing sticky or obstructive hover states on touch devices.
+- Respects reduced-motion preferences and preserves all counts, status order, progress math and card dimensions.
+- Added real production-bundle mouse-hover and touch/reduced-motion browser regression coverage across breakpoints and light/dark themes.
+- No user-data, Supabase, or settings migration.
+
+**Release assets:** MediaFlow_v416_Modular.zip and source archive at `legacy/v/416/`.
+
+---
+
 # MediaFlow v415 Stable — Library Overview status breakdown
 
 **October 14, 2026 · Baseline: v414 Hotfix · Developer: Alex Godly**

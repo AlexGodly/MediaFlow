@@ -1,3 +1,7 @@
+# MediaFlow v416 — Library Overview hover polish
+
+New category-colored hover appearance for Library Overview cards: soft lift, subtle accent border and sheen, coordinated status/total highlights, and mouse/touch-safe behavior. Preserves v415 status totals and existing data.
+
 # MediaFlow v415 Stable — Library Overview status breakdown
 
 **October 14, 2026 · Baseline: v414 Hotfix · Developer: Alex Godly**
