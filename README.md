@@ -411,3 +411,9 @@ MediaFlow is an independent personal project. Third-party trademarks, poster ima
 ---
 
 <div align="center"><sub>MediaFlow · A personal media workspace built to evolve.</sub></div>
+
+### v413 — Library Overview rendering fix
+- Replaces the conflicting legacy category-row markup with independently styled, semantic category cards across Library modes.
+- Keeps title, counts, and progress bar in distinct non-overlapping rows at every viewport width.
+- Uses inline fallback positioning and a dedicated v413 CSS layer for theme- and cache-resistant behavior.
+- Tests the renderer itself, not just a handwritten CSS fixture.

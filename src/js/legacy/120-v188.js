@@ -168,26 +168,37 @@ v183LibraryOverviewHtml=function(){
   }
   const overallPct=knownTotal>0?Math.min(100,Math.round(knownDone/knownTotal*100)):0;
 
+  // v413: Build the overview using its own semantic components rather than
+  // the shared .card/.overview-row/.ov-name/.ov-track CSS from v70/v262.
+  // Inline layout constraints deliberately guarantee separation even when an
+  // older, theme-injected stylesheet overrides external style rules.
   const rows=pageCats.map(cat=>{
     const x=ov.byCat.get(cat.id)||{items:0,done:0,knownDone:0,total:0,unknown:false};
     const est=v183LibraryOverviewEstimate(cat,x);
     const pct=est.pct;
     const progressText=x.items===0?'0 / -':(est.estimated?`${x.done} / ≈${est.total} (~${pct}%)`:`${x.done} / ${est.total} (${pct}%)`);
     const approxTitle=est.estimated?'Approximate overview only — unknown title totals are estimated for this progress bar and are not saved to Library titles.':'';
-    return `<div class="overview-row" ${approxTitle?`title="${escapeHtml(approxTitle)}"`:''}>
-      <div class="ov-name"><span class="mf412-overview-icon">${v144CategoryIconHtml(cat)}</span><span class="mf412-overview-label">${escapeHtml(cat.name)}</span></div>
-      <div class="ov-track"><div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:linear-gradient(90deg, ${cat.color}88, ${cat.color});"></div></div></div>
-      <div class="ov-num">${progressText}</div>
-    </div>`;
-  }).join('')||'<div class="empty-state" style="padding:18px;">No categories are currently visible in Library Overview.</div>';
+    const color=String(cat.color||'#b75c91');
+    return `<article class="mf413-overview-item" ${approxTitle?`title="${escapeHtml(approxTitle)}"`:''}
+        style="box-sizing:border-box;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;align-content:start!important;gap:10px!important;min-width:0!important;min-height:116px!important;width:100%!important;padding:14px!important;overflow:hidden!important;">
+      <div class="mf413-overview-heading" style="box-sizing:border-box;display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important;max-width:100%!important;width:100%!important;">
+        <span class="mf413-overview-icon" style="display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;">${v144CategoryIconHtml(cat)}</span>
+        <span class="mf413-overview-title" style="display:block!important;flex:1 1 auto!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.45!important;">${escapeHtml(cat.name)}</span>
+      </div>
+      <div class="mf413-overview-count" style="display:block!important;position:static!important;min-width:0!important;width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important;line-height:1.45!important;">${escapeHtml(progressText)}</div>
+      <div class="mf413-overview-meter" role="progressbar" aria-label="${escapeHtml(cat.name)} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" style="display:block!important;position:relative!important;box-sizing:border-box!important;align-self:end!important;width:100%!important;max-width:100%!important;min-width:0!important;height:8px!important;overflow:hidden!important;">
+        <div class="mf413-overview-fill" style="display:block!important;width:${pct}%!important;height:100%!important;background:linear-gradient(90deg, ${color}88, ${color})!important;"></div>
+      </div>
+    </article>`;
+  }).join('')||'<div class="mf413-overview-empty">No categories are currently visible in Library Overview.</div>';
 
   const pager=v188OverviewPager(categories.length,perPage);
-  return `<div class="v183-library-overview-block v188-library-overview-block">
+  return `<section class="v183-library-overview-block v188-library-overview-block mf413-overview" data-mf-overview-layout="413">
     <div class="section-label">OVERVIEW · ${overallPct}% of known tracked totals cleared <span style="font-weight:500;text-transform:none;letter-spacing:0;opacity:.72;">· ≈ means display-only estimate</span></div>
     ${pager}
-    <div class="card" style="margin-bottom:${pager?'12px':'26px'};">${rows}</div>
+    <div class="mf413-overview-grid" style="box-sizing:border-box;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important;align-items:stretch!important;gap:12px!important;min-width:0!important;width:100%!important;padding:12px!important;margin-bottom:${pager?'12px':'26px'};">${rows}</div>
     ${pager}
-  </div>`;
+  </section>`;
 };
 
 function v188SetOverviewOrderMode(mode){

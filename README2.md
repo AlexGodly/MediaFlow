@@ -187,3 +187,8 @@ Verification: responsive Chromium viewport checks, floating actions open/close a
 - [v402 — Comprehensive verification and data-integrity improvements](docs/CHANGELOG_v402.md)
 - [v401 — Automatic all-provider verification and recommendations](docs/CHANGELOG_v401.md)
 - [v400 — Independent timestamps and picker workspace](docs/CHANGELOG_v400.md)
+
+### MediaFlow v413 — Library Overview isolated layout repair
+- Fixes continued overlap by removing the shared `.overview-row` and `.card` classes from category cards entirely.
+- Keeps category names, completion counts and progress bars in vertically separated sections at every screen width.
+- Adds real-renderer browser regression checks; no data migration or cloud schema change.
