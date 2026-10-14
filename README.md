@@ -1,4 +1,4 @@
-## MediaFlow v418 — Collections 2.0 & Missing Cover Parity
+## MediaFlow v419 — Collections 2.0 & Missing Cover Parity
 
 - Collections detail: redesigned responsive List, Compact and Cards with configured category/status icons, progress counts and bars, and functional Details/Edit/Remove actions.
 - Covers/Covers+Titles: only those modes show on-cover ratings, and the remove X sits at top-center.
