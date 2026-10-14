@@ -192,3 +192,8 @@ Verification: responsive Chromium viewport checks, floating actions open/close a
 - Fixes continued overlap by removing the shared `.overview-row` and `.card` classes from category cards entirely.
 - Keeps category names, completion counts and progress bars in vertically separated sections at every screen width.
 - Adds real-renderer browser regression checks; no data migration or cloud schema change.
+
+### MediaFlow v414 — Normal Library Overview final-renderer hotfix
+**Baseline:** v413 Modular · **October 14, 2026** · **Developer:** Alex Godly
+
+Fixed the real Normal Library rendering path, which was still emitting the original `overview-row` HTML even after previous v411–v413 component changes. It now shares the same v188/v413 responsive Overview component as Dynamic Library. Tested the final bundled `renderLibrary()` output, not a hand-built card fixture, at mobile/tablet/desktop sizes. No user data, cloud schema or existing title records are modified.

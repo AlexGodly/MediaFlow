@@ -417,3 +417,10 @@ MediaFlow is an independent personal project. Third-party trademarks, poster ima
 - Keeps title, counts, and progress bar in distinct non-overlapping rows at every viewport width.
 - Uses inline fallback positioning and a dedicated v413 CSS layer for theme- and cache-resistant behavior.
 - Tests the renderer itself, not just a handwritten CSS fixture.
+
+### v414 — Normal Library Overview rendering correction (Hotfix)
+- Removed the obsolete v70 Normal Library Overview markup that bypassed all v411–v413 responsive fixes.
+- Normal and Dynamic Library now call the same configurable `v183LibraryOverviewHtml()` renderer, using the isolated v413 category cards.
+- Corrects collisions between long category names, totals and progress bars at desktop, tablet and mobile widths.
+- Added end-to-end bundled-renderer regression that first reproduces v413's 15 old Normal Library rows and then checks zero old rows in v414.
+- Preserves Overview visibility, order, per-page preferences, stats and user data. No database changes.

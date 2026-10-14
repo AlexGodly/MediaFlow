@@ -51,53 +51,10 @@ function renderLibrary(){
   if(v69AutoFixed) persistLibrary();
 
   const cats = S.categories;
-  const ov=v53LibraryOverview();
-
-  // v232 performance: precompute the values used by the overview estimator in
-  // one Library pass. Older code scanned the entire Library twice per category,
-  // which became expensive with tens of thousands of titles and made filter
-  // interactions feel frozen.
-  const v232OverviewMeta=new Map();
-  for(const item of (S.library||[])){
-    const id=String(item?.categoryId||'');
-    let row=v232OverviewMeta.get(id);
-    if(!row){row={knownCount:0,knownTotal:0,unknownCount:0};v232OverviewMeta.set(id,row);}
-    const total=Number(item?.total);
-    if(Number.isFinite(total)&&total>0){row.knownCount++;row.knownTotal+=total;}
-    else row.unknownCount++;
-  }
-
-  // v80: Overview-only estimates for titles whose real total is unknown.
-  // These values are presentation estimates only; item.total is never changed.
-  const v80OverviewEstimate=(cat,x)=>{
-    if(!x.items) return {total:0,pct:0,estimated:false};
-    if(!x.unknown && x.total>0) return {total:x.total,pct:Math.min(100,Math.round(x.knownDone/x.total*100)),estimated:false};
-    const meta=v232OverviewMeta.get(String(cat.id))||{knownCount:0,knownTotal:0,unknownCount:0};
-    const knownAvg=meta.knownCount ? meta.knownTotal/meta.knownCount : 0;
-    const unknownCount=meta.unknownCount;
-    const observed=Math.max(0,Number(x.done)||0);
-    const baseline=Math.max(1,Number(cat.target)||1);
-    // Prefer the category's own known-title average. If none exists, use a conservative
-    // progress-aware estimate so even all-unknown categories still get a useful bar.
-    const perUnknown=knownAvg>0 ? knownAvg : Math.max(baseline*4, observed/Math.max(1,x.items)*1.35, 12);
-    const estimatedTotal=Math.max(Math.ceil(x.total + unknownCount*perUnknown),Math.ceil(observed*1.12),observed||1);
-    return {total:estimatedTotal,pct:Math.min(99,Math.round(observed/estimatedTotal*100)),estimated:true};
-  };
-
-  const overviewRows = cats.map(cat=>{
-    const x=ov.byCat.get(cat.id)||{items:0,done:0,knownDone:0,total:0,unknown:false};
-    const est=v80OverviewEstimate(cat,x);
-    const pct=est.pct;
-    const progressText=x.items===0?'0 / -':(est.estimated?`${x.done} / ≈${est.total} (~${pct}%)`:`${x.done} / ${est.total} (${pct}%)`);
-    const approxTitle=est.estimated?'Approximate overview only — unknown title totals are estimated for this progress bar and are not saved to Library titles.':'';
-    return `<div class="overview-row" ${approxTitle?`title="${escapeHtml(approxTitle)}"`:''}>
-      <div class="ov-name"><span>${v144CategoryIconHtml(cat)}</span> ${escapeHtml(cat.name)}</div>
-      <div class="ov-track"><div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:linear-gradient(90deg, ${cat.color}88, ${cat.color});"></div></div></div>
-      <div class="ov-num">${progressText}</div>
-    </div>`;
-  }).join('');
-
-  const overallPct=ov.overallPct;
+  // v414: Normal Library must use the SAME canonical Overview renderer as
+  // Dynamic Library. v70's inline overviewRows bypassed v188-v413 and left
+  // .overview-row/.ov-name/.ov-track collisions visible in production.
+  // Keep category stats in v183LibraryOverviewHtml() and preserve its settings.
 
   let itemsHtml, pagerHtml='';
 
@@ -209,10 +166,7 @@ function renderLibrary(){
 
     ${v183LibraryOverviewToggleHtml()}
 
-    ${v183LibraryOverviewEnabled()?`<div class="v183-library-overview-block">
-      <div class="section-label">OVERVIEW · ${overallPct}% of known tracked totals cleared <span style="font-weight:500;text-transform:none;letter-spacing:0;opacity:.72;">· ≈ means display-only estimate</span></div>
-      <div class="card" style="margin-bottom:26px;">${overviewRows}</div>
-    </div>`:''}
+    ${v183LibraryOverviewEnabled()?v183LibraryOverviewHtml():''}
 
     <div class="lib-toolbar">
 
