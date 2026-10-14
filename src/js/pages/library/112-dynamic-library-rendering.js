@@ -82,27 +82,7 @@ function v181DynamicRows(){
 }
 
 function v181DynamicCoverHtml(item,placeholderClass='v181-cover-tile-placeholder'){
-  const cat=getCategory(item.categoryId);
-
-  if(item.coverUrl){
-    return `<img class="v181-cover-tile-cover"
-      data-library-id="${escapeHtml(String(item.id))}"
-      src="${escapeHtml(item.coverUrl)}"
-      alt="${escapeHtml(cleanTitle(item.title))} cover"
-      loading="lazy"
-      onclick="event.stopPropagation();App.v181OpenTitleDetails('${escapeHtml(String(item.id))}')"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-      <div class="${placeholderClass}"
-        style="display:none"
-        onclick="App.v181OpenTitleDetails('${escapeHtml(String(item.id))}')">
-        ${v144CategoryIconHtml(cat)}
-      </div>`;
-  }
-
-  return `<div class="${placeholderClass}"
-    onclick="App.v181OpenTitleDetails('${escapeHtml(String(item.id))}')">
-    ${v144CategoryIconHtml(cat)}
-  </div>`;
+  return v417LibraryTileCoverHtml(item,placeholderClass);
 }
 
 function v181DynamicFullRowHtml(item){
@@ -111,14 +91,7 @@ function v181DynamicFullRowHtml(item){
     ?` <span class="v44-rating">★ ${Number(item.rating).toFixed(1)}</span>`
     :'';
 
-  const cover=item.coverUrl
-    ?`<img class="library-cover-thumb"
-        data-library-id="${escapeHtml(String(item.id))}"
-        src="${escapeHtml(item.coverUrl)}"
-        alt="${escapeHtml(cleanTitle(item.title))} cover"
-        loading="lazy"
-        onerror="this.style.display='none'">`
-    :'';
+  const cover=v417LibraryThumbHtml(item,cat);
 
   const progress=item.total!=null
     ?`· ${Number(item.progress)||0} / ${item.total} ${unitLabel(cat.unit,Number(item.total)||0)}`

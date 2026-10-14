@@ -100,7 +100,7 @@ function renderLibrary(){
       // v71: bind cover/rating directly to THIS library item.
       // Never inject artwork later by searching/replacing rendered HTML: rows can share
       // category markup, so global replacement can attach one title's cover to another.
-      const v71Cover=i.coverUrl?`<img class="library-cover-thumb" data-library-id="${escapeHtml(i.id)}" src="${escapeHtml(i.coverUrl)}" alt="${escapeHtml(cleanTitle(i.title))} cover" loading="lazy" onerror="this.style.display='none'">`:'';
+      const v71Cover=v417LibraryThumbHtml(i,cat);
       const v71Rating=Number(i.rating)>0?` <span class="v44-rating">★ ${Number(i.rating).toFixed(1)}</span>`:'';
       const v82r=v82RepeatMap.get(i.id);
       const v82RepeatBadge=v82r&&v82r.amount>0?` <span class="v82-repeat-badge" title="${escapeHtml(v82RepeatSummary(i,v82r))}">↻ ${v82r.completedRepeats>0?v82r.completedRepeats+'×':v82r.amount+' '+unitLabel(v82r.unit,v82r.amount)}</span>`:'';

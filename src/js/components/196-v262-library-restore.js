@@ -73,7 +73,7 @@ function v262ClassicFilterDockHtml(){
   const currentStatus=String(S.histFilters?.libStatus||'all'),cats=v262CategoryFilterCategories();
   const statuses=V262_STATUS_ORDER.map(status=>{
     const active=currentStatus===status,count=statusCounts.get(status)||0;
-    return `<button type="button" class="btn btn-sm mf262-filter-chip ${active?'active':''}" aria-pressed="${active?'true':'false'}" onclick="App.v262SetClassicStatus('${escapeHtml(status)}')">${escapeHtml(v262StatusLabel(status))}<span class="v181-dynamic-count">${count.toLocaleString()}</span></button>`;
+    return `<button type="button" data-v225-iconified="1" class="btn btn-sm mf262-filter-chip ${active?'active':''}" aria-pressed="${active?'true':'false'}" onclick="App.v262SetClassicStatus('${escapeHtml(status)}')">${escapeHtml(v262StatusLabel(status))}<span class="v181-dynamic-count">${count.toLocaleString()}</span></button>`;
   }).join('');
   const catButtons=[
     `<button type="button" class="btn btn-sm mf262-filter-chip ${selected.size?'':'active'}" aria-pressed="${selected.size?'false':'true'}" onclick="App.v262ClearClassicCategories()">All<span class="v181-dynamic-count">${(S.library||[]).length.toLocaleString()}</span></button>`,

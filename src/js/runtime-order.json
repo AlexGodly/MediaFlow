@@ -155,5 +155,6 @@
   "components/298-v405-cloud-floating-experience.js",
   "components/299-v406-smart-filters-actions.js",
   "components/300-v407-bulk-picker-cleanup.js",
-  "components/301-v408-performance-stability-ui.js"
+  "components/301-v408-performance-stability-ui.js",
+  "components/302-v417-library-icons-fallback.js"
 ]

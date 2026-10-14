@@ -66,7 +66,7 @@ function v261SetNormalStatus(id){
 }
 function v261StatusButtonHtml(id,label,active,onclick){
   const icon={all:'◉',planned:'▣',active:'▶',paused:'Ⅱ',completed:'✓',dropped:'⊗'}[id]||'•';
-  return `<button type="button" class="v261-library-chip ${active?'active':''}" onclick="${onclick}" aria-pressed="${active?'true':'false'}"><span class="v261-chip-icon">${icon}</span><span>${v261Esc(label)}</span></button>`;
+  return `<button type="button" class="v261-library-chip mf417-single-status-icon" data-v225-iconified="1" onclick="${onclick}" aria-pressed="${active?'true':'false'}"><span class="v261-chip-icon">${icon}</span><span>${v261Esc(label)}</span></button>`;
 }
 function v261CategoryButtonHtml(cat,active,onclick){
   return `<button type="button" class="v261-library-chip v261-category-chip ${active?'active':''}" onclick="${onclick}" aria-pressed="${active?'true':'false'}"><span class="v261-chip-icon">${v144CategoryIconHtml(cat)}</span><span>${v261Esc(cat.name)}</span></button>`;

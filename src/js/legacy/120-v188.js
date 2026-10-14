@@ -206,7 +206,7 @@ v183LibraryOverviewHtml=function(){
       const count=perCategory.statuses.get(status)||0;
       const label=typeof v199StatusLabel==='function'?v199StatusLabel(status):status;
       return `<li class="mf415-status" data-status="${escapeHtml(status)}" aria-label="${escapeHtml(label)}: ${count.toLocaleString()} titles">
-          <span class="mf415-status-label">${escapeHtml(label)}</span>
+          <span class="mf415-status-label"><span class="mf417-count-icon" aria-hidden="true">${v229StatusChoiceIcon(status)}</span><span>${escapeHtml(label)}</span></span>
           <strong class="mf415-status-count">${count.toLocaleString()}</strong>
         </li>`;
     });
@@ -218,7 +218,7 @@ v183LibraryOverviewHtml=function(){
         <span class="mf413-overview-icon" style="display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;">${v144CategoryIconHtml(cat)}</span>
         <span class="mf413-overview-title" style="display:block!important;flex:1 1 auto!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.45!important;">${escapeHtml(cat.name)}</span>
       </div>
-      <div class="mf415-overview-total" aria-label="${escapeHtml(cat.name)}: ${totalLabel} total titles"><span>Total titles</span><strong>${totalLabel}</strong></div>
+      <div class="mf415-overview-total" aria-label="${escapeHtml(cat.name)}: ${totalLabel} total titles"><span class="mf417-total-label"><span class="mf417-count-icon" aria-hidden="true">${V225_BUTTON_ICONS.allTitles}</span><span>Total titles</span></span><strong>${totalLabel}</strong></div>
       <ul class="mf415-overview-statuses" aria-label="Title counts by status, in Dynamic Status order">${statusList.join('')}</ul>
       <div class="mf413-overview-count" style="display:block!important;position:static!important;min-width:0!important;width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important;line-height:1.45!important;">Progress · ${escapeHtml(progressText)}</div>
       <div class="mf413-overview-meter" role="progressbar" aria-label="${escapeHtml(cat.name)} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" style="display:block!important;position:relative!important;box-sizing:border-box!important;align-self:end!important;width:100%!important;max-width:100%!important;min-width:0!important;height:8px!important;overflow:hidden!important;">
