@@ -33,7 +33,7 @@ jobs:
           test -f assets/css/223-v411-library-overview-responsive.css
           test ! -f assets/css/224-v412-library-overview-live-layout.css
           test ! -e legacy/v/412
-          test "$(git hash-object index.html)" = "251130c2c46b1645e95e5d86f001586ad9c4e87"
+          test "$(git hash-object index.html)" = "251130c2c46b1645e95e5d86f001586ad9c4e87f"
           test "$(git hash-object README.md)" = "2bc0bc9b85fbb993eca753cefe00a2dcf1e010f6"
           test "$(git hash-object src/js/legacy/120-v188.js)" = "8dcced981fa8bfa8e2e188805bd8ebce77db94b7"
           ! git show-ref --tags --verify --quiet refs/tags/412
