@@ -560,12 +560,12 @@ jobs:
           git add -A -- . ':!legacy' ':!beta'
           git commit -m 'MediaFlow v412: fix production Library Overview card layout'
           mkdir -p "$RUNNER_TEMP/mediaflow-412-source"
-          rsync -a \\
-            --exclude='/.git/' \\
-            --exclude='/.github/' \\
-            --exclude='/legacy/' \\
-            --exclude='/beta/' \\
-            --exclude='/node_modules/' \\
+          rsync -a \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            --exclude='/legacy/' \
+            --exclude='/beta/' \
+            --exclude='/node_modules/' \
             ./ "$RUNNER_TEMP/mediaflow-412-source/"
           test -f "$RUNNER_TEMP/mediaflow-412-source/index.html"
           test -f "$RUNNER_TEMP/mediaflow-412-source/assets/css/224-v412-library-overview-live-layout.css"
@@ -606,10 +606,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh release create 412 "$RUNNER_TEMP/MediaFlow_v412_Modular.zip" \\
-            --repo "$GITHUB_REPOSITORY" \\
-            --title 'v412 Hotfix' \\
-            --notes-file docs/CHANGELOG_v412.md \\
+          gh release create 412 "$RUNNER_TEMP/MediaFlow_v412_Modular.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v412 Hotfix' \
+            --notes-file docs/CHANGELOG_v412.md \
             --verify-tag
           gh release view 412 --repo "$GITHUB_REPOSITORY" --json tagName,name,assets,url
 
@@ -618,11 +618,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/mediaflow-412-site"
-          rsync -a \\
-            --exclude='/legacy/' \\
-            --exclude='/beta/' \\
-            --exclude='/.git/' \\
-            --exclude='/.github/' \\
+          rsync -a \
+            --exclude='/legacy/' \
+            --exclude='/beta/' \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
             ./ "$RUNNER_TEMP/mediaflow-412-site/"
           test -f "$RUNNER_TEMP/mediaflow-412-site/index.html"
           test -f "$RUNNER_TEMP/mediaflow-412-site/assets/css/224-v412-library-overview-live-layout.css"
