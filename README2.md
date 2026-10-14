@@ -1,3 +1,10 @@
+## v418 — Collections 2.0 and missing-cover polish
+- Responsive title layouts in Collections List, Compact and Cards; category/status metadata, progress bars and Details/Edit/Remove.
+- Ratings appear only on cover-focused Collection views, with the Remove X at the top-center.
+- Centered category icon missing-cover fallback scales with poster size; respects per-category cover URL.
+- Better text and completion statistics in all five Collections main-page views; reordered display buttons.
+- Updated PWA cache and version references; no database migration.
+
 # MediaFlow v417 Stable — Overview Icons & Library Missing Covers
 
 **Baseline:** v416 Stable · **Date:** October 14, 2026 · **Developer:** Alex Godly

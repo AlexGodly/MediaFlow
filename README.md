@@ -1,3 +1,11 @@
+## MediaFlow v418 — Collections 2.0 & Missing Cover Parity
+
+- Collections detail: redesigned responsive List, Compact and Cards with configured category/status icons, progress counts and bars, and functional Details/Edit/Remove actions.
+- Covers/Covers+Titles: only those modes show on-cover ratings, and the remove X sits at top-center.
+- Missing cover category icons are centered and scale with cover dimensions; configured missing-cover URLs take precedence without modifying title data.
+- Collections main browser: larger readable metadata across Covers, Compact, List, Cards and Showcase, clear completion statistics, and reordered display selectors (Compact, List, Cards, Showcase, Covers).
+- Tested responsive geometry at 320–1600px and 25–400% collection cover scaling, with read-only data handling.
+
 # MediaFlow v417 Stable — Overview Icons & Library Missing Covers
 
 **Baseline:** v416 Stable · **Date:** October 14, 2026 · **Developer:** Alex Godly
