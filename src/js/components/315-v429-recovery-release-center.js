@@ -32,7 +32,8 @@ function overview(){
  if(s.queued?.length)return {name:s.queued.length+' process'+(s.queued.length===1?'':'es')+' queued',state:'queued'};
  if(['cover','metadata','fresh'].some(k=>phase(k)==='review'))return {name:'Results waiting for review',state:'review'};
  if(['cover','metadata','fresh'].some(k=>phase(k)==='paused'))return {name:'Recovery progress saved',state:'paused'};
- let seconds=Math.ceil((Number(s.cooldownUntil)||0-Date.now())/1000);
+ const remaining=Math.max(0,(Number(s.cooldownUntil)||0)-Date.now());
+ let seconds=Math.ceil(remaining/1000);
  if(seconds>0)return {name:'Cooldown · '+seconds+'s',state:'cooldown'};
  return {name:'All systems ready',state:'idle'};
 }
@@ -52,7 +53,7 @@ function row(kind){
 function queueHTML(){
  return '<div class="mf429-tab-heading"><strong>Process Queue</strong><small>One network-intensive job at a time. Preserve checkpoints and reviews.</small></div>'+row('cover')+row('metadata')+row('fresh');
 }
-const PORTALS={covers:'mf424-modal',metadata:'mf428-metadata-modal',fresh:'mf428-fresh-config'};
+const PORTALS={covers:'mf424-modal',metadata:'mf428-metadata-modal',fresh:'mf428-fresh-config',seasonal:'mf429-seasonal-form'};
 function discardPortals(tab){
  for(const [kind,id] of Object.entries(PORTALS)){
   if(tab&&kind!==tab)continue;
@@ -76,7 +77,7 @@ function removePortals(){
 function restorePortal(tab){
  const id=PORTALS[tab],node=document.getElementById(id);
  if(!node||node.dataset.mf429Stashed!=='1')return false;
- const target=state.content?.querySelector('.mf429-feature-port');
+ const target=state.content?.querySelector(tab==='seasonal'?'.mf429-seasonal-port':'.mf429-feature-port');
  if(!target)return false;
  target.appendChild(node);
  node.style.removeProperty('display');
@@ -113,8 +114,14 @@ function renderCurrent(){
  }else if(state.tab==='fresh'){
   let html='';
   try{html=typeof v166SeasonalSettingsHtml==='function'?String(v166SeasonalSettingsHtml()):'';}catch(e){console.warn('v429 seasonal settings reuse',e);}
-  state.content.innerHTML='<div class="mf429-tab-heading"><strong>Fresh Episodes & Releases</strong><small>The original Fresh Episodes settings and Smart Engine.</small></div><section class="mf429-anime-settings">'+(html||'<p>Anime provider settings are unavailable.</p>')+'</section>'+
+  state.content.innerHTML='<div class="mf429-tab-heading"><strong>Fresh Episodes & Releases</strong><small>The original Fresh Episodes settings and Smart Engine.</small></div><div class="mf429-seasonal-port"></div>'+ 
   '<div class="mf429-tab-heading mf429-scan-heading"><strong>Other media releases</strong><small>Verified TV, manga, and existing release feeds.</small></div><div class="mf429-scan-actions"><button data-action="universal">Configure universal scan</button><button data-action="report">View results</button></div><div class="mf429-feature-port"></div>';
+  if(!restorePortal('seasonal')){
+   const seasonal=document.createElement('section');seasonal.id='mf429-seasonal-form';seasonal.className='mf429-anime-settings';
+   seasonal.innerHTML=html||'<p>Anime provider settings are unavailable.</p>';
+   state.content.querySelector('.mf429-seasonal-port')?.appendChild(seasonal);
+  }
+  if(restorePortal('fresh'))embed('mf428-fresh-config');
  }
 }
 function html(){
@@ -125,7 +132,7 @@ function html(){
 function render(){
  if(!document.body)return;switchAccount();
  const mode=visibility(),s=overview(),idle=s.state==='idle';
- if(mode==='hidden'||(mode==='auto'&&idle&&!state.expanded)){
+ if((mode==='hidden'&&!state.expanded)||(mode==='auto'&&idle&&!state.expanded)){
   if(state.root){removePortals();state.root.remove();state.root=null;state.content=null;}
   return;
  }
@@ -167,7 +174,7 @@ function onClick(e){
 }
 function tick(){
  const mode=visibility();
- if(mode==='hidden'||(mode==='auto'&&overview().state==='idle'&&!state.expanded)){if(state.root)render();return;}
+ if((mode==='hidden'&&!state.expanded)||(mode==='auto'&&overview().state==='idle'&&!state.expanded)){if(state.root)render();return;}
  if(state.account!==account()){state.account='';render();return;}
  if(!state.root?.isConnected){state.root=null;render();return;}
  const next=overview(),sub=state.root.querySelector('.mf429-launch-copy small'),dot=state.root.querySelector('.mf429-indicator');
@@ -206,7 +213,8 @@ if(typeof v366RegisterSetting==='function'){
 }
 function setVisibility(value){
  if(!['hidden','auto','always'].includes(value))return;
- savePreference({visibility:value});render();
+ if(value==='hidden')state.expanded=false;
+ savePreference({visibility:value,...(value==='hidden'?{expanded:false}:{})});render();
 }
 // Route existing Library, Title Details, Settings and editor entry points to
 // the identical original recovery form, preserving their scoped arguments.
