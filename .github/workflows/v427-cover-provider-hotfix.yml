@@ -1,0 +1,67 @@
+name: v427 Cover Provider Hotfix Checks
+
+on:
+  push:
+    branches: [fix/v427-cover-provider-reliability]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v427-cover-hotfix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v427 from original modular source
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 427
+          node --check src/js/components/309-v424-advanced-cover-recovery.js
+          node --check src/js/components/310-v425-cover-recovery-integration.js
+          python scripts/build.py
+          node scripts/test-v424-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v427-recovery.cjs
+          python scripts/check.py
+          test -s assets/js/mediaflow-v427.bundle.js
+          grep -q 'mediaflow-pwa-v427-shell-v2' sw.js
+          grep -q "mf425RetryProvider" assets/js/mediaflow-v427.bundle.js
+      - name: Commit rebuilt v427 bundle and refreshed PWA cache to hotfix branch
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- assets/js/mediaflow-v427.bundle.js sw.js index.html version.json manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build(v427): cover provider hotfix bundle and refreshed PWA [skip ci]"
+            git push origin HEAD:fix/v427-cover-provider-reliability
+          fi
+      - name: Upload hotfix candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: v427-cover-provider-hotfix
+          path: |
+            assets/js/mediaflow-v427.bundle.js
+            index.html
+            sw.js
+            version.json

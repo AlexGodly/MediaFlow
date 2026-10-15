@@ -53,3 +53,13 @@ html body #mf427-confirm {position:fixed;inset:0;z-index:100110;display:grid;pla
  #mf424-indicator .mf427-action-group>small,#mf424-indicator .mf427-main-controls>button:first-of-type{grid-column:1;}
 }
 @media(prefers-reduced-motion:reduce){#mf427-confirm *{transition:none!important;animation:none!important;}}
+
+/* Find Cover reuses the exact Cover Recovery registry, with a responsive source picker. */
+.mf427-search .mf427-provider-picker{display:flex;align-items:end;gap:10px;flex-wrap:wrap;padding:12px 15px;margin:4px 0 12px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);color:var(--text)}
+.mf427-search .mf427-provider-picker label{flex:1 1 210px;min-width:0;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:650;color:var(--text)}
+.mf427-search .mf427-provider-picker select{width:100%;min-width:0;min-height:40px;padding:7px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);color:var(--text);font:inherit}
+.mf427-search .mf427-provider-picker button{flex:0 1 auto;min-height:40px}
+.mf427-search .mf427-provider-summary{margin-top:12px;padding:10px 13px;border:1px solid var(--border-soft);border-radius:11px;background:var(--panel);color:var(--text)}
+.mf427-search .mf427-provider-summary summary{cursor:pointer;font-weight:650}
+.mf427-search .mf427-provider-summary p{margin:8px 0;line-height:1.45;color:var(--text-dim);overflow-wrap:anywhere}
+@media(max-width:540px){.mf427-search .mf427-provider-picker{display:grid;grid-template-columns:minmax(0,1fr)}.mf427-search .mf427-provider-picker button{width:100%}}

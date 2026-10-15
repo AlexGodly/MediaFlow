@@ -66902,9 +66902,9 @@ const MF424_PROVIDER_META = [
   {id:'anilist',name:'AniList',types:['anime','anime-movie','manga'],limit:18,gap:3400,credentials:false,level:'experimental'},
   {id:'kitsu',name:'Kitsu',types:['anime','anime-movie','manga'],limit:30,gap:2400,credentials:false,level:'experimental'},
   {id:'tvmaze',name:'TVmaze',types:['tv'],limit:50,gap:1200,credentials:false,level:'existing'},
-  {id:'mangadex',name:'MangaDex',types:['manga'],limit:20,gap:3500,credentials:false,level:'experimental'},
+  {id:'mangadex',name:'MangaDex',types:['manga'],limit:0,gap:3500,credentials:false,level:'browser CORS blocked'},
   {id:'openlibrary',name:'Open Library',types:['book','comic','reading'],limit:20,gap:3500,credentials:false,level:'existing'},
-  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:15,gap:4500,credentials:false,level:'experimental'},
+  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:0,gap:4500,credentials:true,level:'requires API key'},
   {id:'simkl',name:'SIMKL',types:['anime','anime-movie','tv','movie'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'malofficial',name:'MyAnimeList Official',types:['anime','anime-movie','manga'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'tmdb',name:'TMDB',types:['movie','tv'],limit:0,gap:0,credentials:true,level:'setup'},
@@ -66926,8 +66926,8 @@ const MF424_PROVIDER_META = [
   {id:'crossref',name:'Crossref',types:['book'],limit:0,gap:0,credentials:false,level:'bibliographic'}
 ];
 const MF424_DEFAULT = {mode:'parts',partSize:100,continuation:'automatic',selection:'hybrid',protection:'safe',autoResume:true,
-  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks'],
-  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks']};
+  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','openlibrary'],
+  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','openlibrary']};
 const MF424 = {db:null,job:null,running:false,runner:null,leaseTimer:0,leaseToken:'',timer:0,overlay:false,expanded:false,
   history:[],rate:{},cache:new Map(),account:'',ready:false,status:'idle',toastAt:0};
 function mf424Account(){return String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');}
@@ -67008,6 +67008,8 @@ function mf424HasID(item,provider){const x=item.externalIds||{};const keys={tenr
 async function mf424Request(provider,url,options={}){
   const def=mf424Provider(provider),settings=mf424Defaults();if(!def||!def.limit)throw new Error('Provider is unavailable without authorization');
   const state=MF424.rate[provider]||{at:[],next:0,cooldown:0,fails:0,count:0};MF424.rate[provider]=state;
+  // A repeatedly unreachable API must not freeze an entire Library recovery for every title.
+  if(Number(state.unavailableUntil)>Date.now())throw new Error(provider+' temporarily unreachable; other cover sources will be checked');
   const limit=Math.min(def.limit,Math.max(1,Math.floor(def.limit*(settings.protection==='safe'?.75:settings.protection==='balanced'?.9:1))));
   const gap=def.gap*(settings.protection==='safe'?1.5:settings.protection==='balanced'?1.15:1);
   const cacheKey=provider+':'+url+':'+(options.body||'');const hit=MF424.cache.get(cacheKey);
@@ -67022,14 +67024,16 @@ async function mf424Request(provider,url,options={}){
     if(MF424.job)MF424.job.requestCount++;
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),14500);
     try{
-      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
-      if(res.ok){const data=await res.json();if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
+      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':provider==='kitsu'?'application/vnd.api+json':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
+      if(res.ok){const data=await res.json();
+        if(provider==='anilist'&&Array.isArray(data?.errors)&&data.errors.length)throw Object.assign(new Error('AniList API: '+String(data.errors[0]?.message||'GraphQL error').slice(0,100)),{permanent:true});
+        if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
         MF424.cache.set(cacheKey,{until:Date.now()+3600000,data});state.fails=0;mf424State('running');return data;}
       if(res.status===429||res.status===503){state.cooldown=Date.now()+Math.max(mf424RetryAfter(res.headers),res.status===429?90000:30000);state.fails++;if(MF424.job)MF424.job.rate=MF424.rate;
         mf424Note('cooldown',provider+' '+res.status+' — cooling down');if(MF424.job)MF424.job.cooldownEvents++;await mf424SaveJob();continue;}
       if(res.status>=500){state.fails++;await mf424Delay(1200*(attempt+1));continue;}
       throw Object.assign(new Error(provider+' HTTP '+res.status),{permanent:true});
-    }catch(e){if(e.permanent)throw e;state.fails++;if(attempt>=3)throw e;await mf424Delay(900*(attempt+1)+Math.random()*550);}
+    }catch(e){if(e.permanent)throw e;state.fails++;if(attempt>=3){state.unavailableUntil=Date.now()+90000;throw e;}await mf424Delay(900*(attempt+1)+Math.random()*550);}
     finally{clearTimeout(timer);}
   }
   if(state.fails>=6)state.cooldown=Date.now()+5*60000;
@@ -67127,7 +67131,7 @@ async function mf424Candidates(item){const found=[],dedupe=new Set();const order
   }
   return found;
 }
-function mf424Review(item,candidates){MF424.job.reviews.push({id:String(item.id),title:String(cleanTitle(item.title||'')),
+function mf424QueueReview(item,candidates){MF424.job.reviews.push({id:String(item.id),title:String(cleanTitle(item.title||'')),
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
@@ -67174,9 +67178,9 @@ async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;re
   const mode=mf424Defaults().selection;
   const best=candidates.sort((a,b)=>b.confidence-a.confidence)[0];
   if(mode==='manual'||mode==='hybrid'&&best.confidence<.95){
-    mf424Review(item,candidates);return;
+    mf424QueueReview(item,candidates);return;
   }
-  if(best.confidence<.95){mf424Review(item,candidates);return;}
+  if(best.confidence<.95){mf424QueueReview(item,candidates);return;}
   if(await mf424Apply(item,best,expected)){MF424.job.fixed++;mf424Note('recovered',best.provider,item.id);}
   else{MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
 }
@@ -67449,18 +67453,18 @@ renderLibrary=function(){let h=String(mf425OldLibrary.apply(this,arguments)||'')
 // Dashboard's existing validated paste/save UI stays untouched.
 const mf425OldMissing=v192MissingCoversHtml;
 v192MissingCoversHtml=function(){let h=String(mf425OldMissing.apply(this,arguments)||'');if(!h.includes('v192-cover-url-input'))return h;
- const btn='<div class="mf425-dashboard-cover-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button><button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'dashboard\',String(v192CurrentMissingCoverItem()?.id||\'\'))">'+mf425Icon('settings')+' Advanced Recovery</button></div>';
+ const btn='<div class="mf425-dashboard-cover-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button></div>';
  return h.replace('<div class="v123-rating-actions v192-cover-actions">',btn+'<div class="v123-rating-actions v192-cover-actions">');};
 
 // Preserve the established fast cover picker and improve its entire contrast layer.
 const mf425OldPicker=coverPickerModalHtml;
 coverPickerModalHtml=function(data){const h=String(mf425OldPicker.apply(this,arguments)||'');return '<div class="mf425-legacy-picker"><p class="mf425-picker-explain">'+mf425Icon('shield')+' Compare the matched title, source and media type before choosing. The selected cover URL is not saved until you confirm the title.</p>'+h+'</div>';};
 
-// Add both actions to Add/Edit Title without removing Find Cover Automatically.
+// Keep Find Cover Automatically in Add/Edit Title; advanced jobs remain available in Library and Settings.
 const mf425OldEditor=libraryModalHtml;
 libraryModalHtml=function(data){let h=String(mf425OldEditor.apply(this,arguments)||'');if(!h||h.includes('mf425-editor-tools'))return h;
  const extra=h.includes('Find cover automatically')?'':'<button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'editor\')">'+mf425Icon('search')+' Find cover automatically</button>';
- const controls='<div class="mf425-editor-tools">'+extra+'<button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'editor\',String(S.modal?.data?.id||\'\'))">'+mf425Icon('settings')+' Advanced Recovery</button></div>';
+ const controls=extra?'<div class="mf425-editor-tools">'+extra+'</div>':'';
  const marker='</div>';const coverLabel=/(<label[^>]*>\s*(?:Cover art|Cover URL|Cover image)\s*<\/label>)/i;
  if(coverLabel.test(h))h=h.replace(coverLabel,'$1'+controls);
  else h=h.replace(/(<div class="modal-title">[^<]*<\/div>)/,'$1'+controls);
@@ -67478,18 +67482,27 @@ async function mf425Instant(entry){if(MF425.quickBusy)return;MF425.quickBusy=tru
  const item=MF425.draft;if(!item.title){MF425.quickBusy=false;showToast('Enter the title before searching for artwork.');return;}
  document.getElementById('mf425-instant-modal')?.remove();
  const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal';
- root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf425Icon('settings')+' Advanced Recovery</button></div></section>';
+ const availableProviders=mf424Order(item),activeProvider=MF425.providerPick||'';
+ root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div class="mf425-instant-provider-picker" style="display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0"><label style="flex:1;min-width:180px">Search source<select id="mf425-source-choice" class="mf425-source-choice"><option value="">All enabled providers</option>'+availableProviders.map(p=>'<option value="'+mf425Esc(p)+'" '+(activeProvider===p?'selected':'')+'>'+mf425Esc(mf424Provider(p)?.name||p)+'</option>').join('')+'</select></label><button type="button" class="btn btn-ghost" onclick="App.mf425RetryProvider()">Search selected source</button></div><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
  document.body.append(root);
- const found=[],seen=new Set(),ordered=mf424Order(item);const byId=ordered.filter(p=>mf424HasID(item,p)),rest=ordered.filter(p=>!mf424HasID(item,p));
+ const found=[],seen=new Set(),ordered=availableProviders.filter(p=>!activeProvider||p===activeProvider),outcomes=[];const byId=ordered.filter(p=>mf424HasID(item,p)),rest=ordered.filter(p=>!mf424HasID(item,p));
  try{for(const provider of byId.concat(rest)){
   if(!root.isConnected)break;
-  try{for(const c of await mf424Discover(item,provider)){if(!c||c.confidence<.55||seen.has(c.url))continue;seen.add(c.url);if(await mf424Image(c.url,c.provider)){found.push(c);MF425.quick={candidates:found};}}}
-  catch(e){console.warn('v425 quick cover provider',provider,e);}
-  const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item);
+  let count=0,matched=0,failed='';
+  try{const candidates=await mf424Discover(item,provider);matched=candidates.length;
+   for(const c of candidates){if(!c||c.confidence<.55||seen.has(c.url))continue;seen.add(c.url);if(await mf424Image(c.url,c.provider)){found.push(c);count++;MF425.quick={candidates:found};}}}
+  catch(e){failed=String(e?.message||e).slice(0,120);console.warn('v425 quick cover provider',provider,e);}
+  outcomes.push({name:mf424Provider(provider)?.name||provider,count,matched,failed});
+  const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item)+mf425ProviderStatuses(outcomes);
   if(found.length>=16)break;
- }}finally{const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item);MF425.quickBusy=false;}
+ }}finally{const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item)+mf425ProviderStatuses(outcomes);MF425.quickBusy=false;}
 }
-function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf425-no-results">No validated candidates yet. You can try Advanced Recovery or paste a cover URL.</div>';
+function mf425ProviderStatuses(rows){return '<details open><summary>Provider results ('+rows.length+' checked)</summary><div class="mf424-note" role="status">'+rows.map(x=>'<div><strong>'+mf425Esc(x.name)+'</strong>: '+(x.failed?'Unavailable — '+mf425Esc(x.failed):x.count?x.count+' verified image'+(x.count===1?'':'s'):x.matched?'Records found but artwork could not be validated':'No matching record for this title')+'</div>').join('')+'</div></details>';}
+function mf425RetryProvider(){if(MF425.quickBusy){showToast('Cover search is still checking its current sources.');return;}
+ const chosen=document.getElementById('mf425-source-choice')?.value||'';
+ if(chosen&&!mf424Order(MF425.draft||{}).includes(chosen)){showToast('This provider is not available for the selected media type.');return;}
+ MF425.providerPick=chosen;return mf425Instant(MF425.quickEntry||'editor');}
+function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf425-no-results">No validated candidates yet. Try a different enabled provider or paste a cover URL.</div>';
  return '<div class="mf425-found-count">'+found.length+' verified-loading image candidates · choose the correct title and edition</div><div class="mf425-candidate-grid">'+found.map((c,i)=>{
  const id=mf425IdText(item,c.provider,c);return '<article class="mf425-candidate"><img src="'+mf425Esc(c.url)+'" alt="'+mf425Esc(c.title||item.title)+' poster" loading="lazy"><div class="mf425-candidate-copy"><strong>'+mf425Esc(c.title||'Untitled provider record')+'</strong><small>Library: '+mf425Esc(item.title)+'</small><span class="mf425-source">'+mf425Icon('database')+' '+mf425Esc(c.provider)+'</span><small>'+mf425Esc(id)+'</small><small>'+mf425Esc(c.reason||'Title match')+'</small>'+(c.recordUrl?'<a href="'+mf425Esc(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">'+mf425Icon('external')+' Provider record</a>':'')+'<button class="btn btn-primary" onclick="App.mf425ChooseInstant('+i+')">'+mf425Icon('check')+' Use this cover</button></div></article>';
  }).join('')+'</div>';}
@@ -67510,15 +67523,15 @@ function mf425ChooseInstant(index){const candidate=MF425.quick?.candidates?.[Num
  mf425CloseInstant();}
 function mf425CloseInstant(){document.getElementById('mf425-instant-modal')?.remove();MF425.quick=null;MF425.quickBusy=false;}
 function mf425InstantAdvanced(){const entry=MF425.quickEntry||'editor',id=MF425.draft?.id==='draft'?'':MF425.draft?.id||'';mf425CloseInstant();mf425OpenConfig(entry,id);}
-App.mf425Instant=function(entry){MF425.quick=null;MF425.quickEntry=entry;return mf425Instant(entry);};
-Object.assign(App,{mf425ChooseInstant,mf425CloseInstant,mf425InstantAdvanced});
+App.mf425Instant=function(entry){MF425.quick=null;MF425.quickEntry=entry;MF425.providerPick='';return mf425Instant(entry);};
+Object.assign(App,{mf425ChooseInstant,mf425CloseInstant,mf425InstantAdvanced,mf425RetryProvider});
 
-// The existing Title Details quick Cover URL editor gets the same two actions.
+// The Title Details Quick Cover URL editor only offers Find Cover Automatically.
 const mf425OldOpenQuick=App.v181QuickEditDetail;
 App.v181QuickEditDetail=function(id,key){const result=mf425OldOpenQuick.apply(this,arguments);if(key!=='coverUrl')return result;
  const field=document.querySelector('#v181-quick-detail-overlay .field');if(!field)return result;
  MF425.oneId=String(id);
- field.insertAdjacentHTML('afterend','<div class="mf425-editor-tools"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'details\')">'+mf425Icon('search')+' Find cover automatically</button><button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'details\',String(MF425.oneId))">'+mf425Icon('settings')+' Advanced Recovery</button></div>');
+ field.insertAdjacentHTML('afterend','<div class="mf425-editor-tools"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'details\')">'+mf425Icon('search')+' Find cover automatically</button></div>');
  return result;};
 const mf425OldSaveQuick=App.v181SaveQuickDetail;
 App.v181SaveQuickDetail=function(id,key){if(key!=='coverUrl')return mf425OldSaveQuick.apply(this,arguments);
@@ -67759,39 +67772,51 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
   MF425.quickBusy=true;MF425.quick=null;MF425.quickEntry=entry;
   MF425.draft={...current,externalIds:{...(current.externalIds||{})}};
   const serial=++MF427.requestSerial;
+  // The same provider registry, enabled order, capabilities and adapters power both cover workflows.
+  const available=mf424Order(current),chosen=providers?new Set(providers):null;
+  const allowed=available.filter(p=>!chosen||chosen.has(p));
   document.getElementById('mf425-instant-modal')?.remove();
   const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal mf427-above-editor mf427-search';
   root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search">'+
     '<header class="mf425-instant-head"><div><small>COVER SEARCH</small><h2>'+mf427Icon('image',23)+' Cover matches for '+mf427Escape(current.title)+'</h2><p>Library title: <strong>'+mf427Escape(current.title)+'</strong> · Verify matched titles and external IDs before selecting.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Close</button></header>'+
-    '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+
-    '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf427Icon('sliders')+' Advanced Recovery</button></div></section>';
+    '<div class="mf427-provider-picker"><label for="mf427-provider-select">Cover source</label><select id="mf427-provider-select"><option value="">All enabled providers</option>'+allowed.map(p=>'<option value="'+mf427Escape(p)+'" '+(allowed.length===1?'selected':'')+'>'+mf427Escape(mf424Provider(p)?.name||p)+'</option>').join('')+'</select><button type="button" class="btn btn-ghost" onclick="App.mf427RetryProvider()">Search source</button></div>'+ 
+    '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+ 
+    '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
   document.body.appendChild(root);mf427CleanAdvancedIcons(root);
-  const found=[],seen=new Set(),all=mf424Order(current),chosen=providers?new Set(providers):null;
-  const allowed=all.filter(p=>!chosen||chosen.has(p));
+  const found=[],seen=new Set(),outcomes=[];
   const ordered=allowed.filter(p=>mf424HasID(current,p)).concat(allowed.filter(p=>!mf424HasID(current,p)));
   try{
     for(const provider of ordered){
       if(!root.isConnected||serial!==MF427.requestSerial)break;
+      let checked=0,validated=0,failed='';
       try{
-        for(const c of await mf424Discover(current,provider)){
+        const candidates=await mf424Discover(current,provider);checked=candidates.length;
+        for(const c of candidates){
           if(!root.isConnected||serial!==MF427.requestSerial)break;
           if(!c||c.confidence<.55||seen.has(c.url))continue;
           seen.add(c.url);
-          if(await mf424Image(c.url,c.provider))found.push(c);
+          if(await mf424Image(c.url,c.provider)){found.push(c);validated++;}
         }
-      }catch(e){console.warn('Cover search provider temporarily unavailable',provider,e);}
+      }catch(e){failed=String(e?.message||e).slice(0,160);console.warn('Cover search provider temporarily unavailable',provider,e);}
+      outcomes.push({name:mf424Provider(provider)?.name||provider,checked,validated,failed});
       if(!root.isConnected||serial!==MF427.requestSerial)break;
       MF425.quick={candidates:found};
-      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current);
+      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
       if(found.length>=16)break;
     }
   }finally{
     if(serial===MF427.requestSerial){
       MF425.quick={candidates:found};MF425.quickBusy=false;
-      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current);
+      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
     }
   }
 }
+function mf427ProviderSummary(rows){return '<details class="mf427-provider-summary"><summary>Provider checks ('+rows.length+')</summary><div>'+rows.map(r=>'<p><strong>'+mf427Escape(r.name)+'</strong> — '+(r.failed?'Unavailable: '+mf427Escape(r.failed):r.validated?r.validated+' verified image'+(r.validated===1?'':'s'):r.checked?'Records found, but images did not validate':'No matching records')+'</p>').join('')+'</div></details>';}
+App.mf427RetryProvider=function(){if(MF425.quickBusy){showToast('Current cover-source checks are still running.');return;}
+ const choice=document.getElementById('mf427-provider-select')?.value||'';
+ if(choice&&!mf424Order(MF425.draft||{}).includes(choice)){showToast('Source is not enabled for this media type.');return;}
+ return mf427OpenSearch(MF425.quickEntry||'editor',MF425.draft,choice?[choice]:null);
+};
 const mf427OldCloseInstant=App.mf425CloseInstant;
 App.mf425CloseInstant=function(){++MF427.requestSerial;MF425.quickBusy=false;return mf427OldCloseInstant.apply(this,arguments);};
 App.mf425Instant=function(entry='editor'){return mf427OpenSearch(entry);};
