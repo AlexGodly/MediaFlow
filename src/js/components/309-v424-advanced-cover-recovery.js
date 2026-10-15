@@ -130,7 +130,7 @@ async function mf424Request(provider,url,options={}){
     if(MF424.job)MF424.job.requestCount++;
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),14500);
     try{
-      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
+      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':provider==='kitsu'?'application/vnd.api+json':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
       if(res.ok){const data=await res.json();if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
         MF424.cache.set(cacheKey,{until:Date.now()+3600000,data});state.fails=0;mf424State('running');return data;}
       if(res.status===429||res.status===503){state.cooldown=Date.now()+Math.max(mf424RetryAfter(res.headers),res.status===429?90000:30000);state.fails++;if(MF424.job)MF424.job.rate=MF424.rate;
