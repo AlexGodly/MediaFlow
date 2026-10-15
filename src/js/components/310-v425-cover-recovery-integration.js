@@ -65,8 +65,8 @@ function mf425UpdateCount(){const root=document.getElementById('mf425-scope');if
  const start=document.querySelector('#mf424-modal .mf424-actions .btn-primary');if(start){start.disabled=!counts.eligible;start.title=counts.eligible?'Start recovery for the selected scope':'No missing covers in this scope';}}
 function mf425DecorateConfig(){const modal=document.getElementById('mf424-modal');if(!modal||modal.dataset.mf425Ready==='1')return;modal.dataset.mf425Ready='1';modal.classList.add('mf425-themed');
  const form=modal.querySelector('#mf424-config');if(!form)return;form.insertAdjacentHTML('afterbegin',mf425ScopeFields());
- const head=modal.querySelector('.mf424-heading small');if(head)head.textContent='MEDIAFLOW · ARTWORK RECOVERY';
- const h=modal.querySelector('.mf424-heading h2');if(h)h.innerHTML=mf425Icon('images',24)+' Advanced Cover Recovery';
+ const head=modal.querySelector('.mf424-heading small');if(head)head.textContent='COVER RECOVERY';
+ const h=modal.querySelector('.mf424-heading h2');if(h)h.innerHTML=mf425Icon('images',24)+' Cover Recovery';
  const providerHeading=form.querySelector('h3');if(providerHeading)providerHeading.innerHTML=mf425Icon('database')+' 3. Cover providers & priorities';
  const options=form.querySelector('.mf424-options');if(options)options.insertAdjacentHTML('beforebegin','<h3 class="mf425-section-title">'+mf425Icon('settings')+' 2. Processing & matching</h3>');
  const footer=modal.querySelector('.mf424-actions');if(footer){for(const b of footer.querySelectorAll('button')){if(b.textContent.includes('Start Recovery'))b.innerHTML=mf425Icon('play')+' Start Recovery';else if(b.textContent.includes('Cancel'))b.innerHTML=mf425Icon('x')+' Cancel';}}
@@ -252,6 +252,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 // Existing v365 Settings Center: inject a real Library subgroup, not a popup
 // pretending to be settings. Preferences use S.settings and existing cloud sync.
 function mf425SettingsMarkup(){const prefs=mf424Defaults(),xp=S.settings?.leveling?.coverChangeXP??DEFAULT_SETTINGS.leveling.coverChangeXP;
+ const sources=MF424_PROVIDER_META.filter(p=>p.limit).sort((a,b)=>(prefs.priorities.indexOf(a.id)<0?999:prefs.priorities.indexOf(a.id))-(prefs.priorities.indexOf(b.id)<0?999:prefs.priorities.indexOf(b.id)));
+ const providerUi='<fieldset class="mf430-settings-providers" data-mf-setting-id="cover-providers"><legend>'+mf425Icon('database')+' Enabled cover providers & priority</legend><p class="mf425-settings-note">All supported sources can search every Library category. Their individual APIs may still return no match. Reorder searches with the up/down arrows.</p><div class="mf430-settings-provider-list">'+sources.map(p=>'<div class="mf430-settings-provider" data-mf430-provider="'+mf425Esc(p.id)+'"><label><input type="checkbox" value="'+mf425Esc(p.id)+'" data-mf430-provider-enabled '+(prefs.enabled.includes(p.id)?'checked':'')+' onchange="App.mf430SaveSettingsProviders()"><span><strong>'+mf425Esc(p.name)+'</strong><small>'+mf425Esc(p.level||'Public')+'</small></span></label><div class="mf430-settings-provider-order"><button class="btn btn-ghost" type="button" onclick="App.mf430MoveSettingsProvider(\''+p.id+'\',-1)" title="Move '+mf425Esc(p.name)+' higher" aria-label="Move '+mf425Esc(p.name)+' higher">'+mf425Icon('chevronUp')+'</button><button class="btn btn-ghost" type="button" onclick="App.mf430MoveSettingsProvider(\''+p.id+'\',1)" title="Move '+mf425Esc(p.name)+' lower" aria-label="Move '+mf425Esc(p.name)+' lower">'+mf425Icon('chevronDown')+'</button></div></div>').join('')+'</div></fieldset>';
  const option=(v,label,current)=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+label+'</option>';
  return '<section class="mf425-settings-card" aria-label="Cover Recovery Settings"><div class="mf425-settings-lead">'+mf425Icon('images',21)+'<div><strong>Recovery preferences</strong><p>Default processing, providers, background recovery and XP rewards.</p></div></div>'+ 
  '<div class="mf425-settings-grid"><label data-mf-setting-id="cover-mode">Recovery mode<select onchange="App.mf425SavePref(\'mode\',this.value)">'+option('parts','Part-by-Part',prefs.mode)+option('one','One-Go',prefs.mode)+'</select></label>'+ 
@@ -261,6 +263,7 @@ function mf425SettingsMarkup(){const prefs=mf424Defaults(),xp=S.settings?.leveli
  '<label data-mf-setting-id="cover-protection">Rate-limit protection<select onchange="App.mf425SavePref(\'protection\',this.value)">'+option('safe','Safe',prefs.protection)+option('balanced','Balanced',prefs.protection)+option('custom','Custom',prefs.protection)+'</select></label>'+ 
  '<label data-mf-setting-id="cover-xp">Cover XP per changed URL<input type="number" min="0" max="100000" value="'+Number(xp)+'" onchange="App.mf425SaveCoverXP(this.value)"></label></div>'+ 
  '<label class="mf425-settings-check" data-mf-setting-id="cover-auto-resume"><input type="checkbox" '+(prefs.autoResume?'checked':'')+' onchange="App.mf425SavePref(\'autoResume\',this.checked)"> Resume background recovery when MediaFlow reopens</label>'+ 
+ providerUi+
  '<p class="mf425-settings-note">A saved cover change earns XP whether manual or automatic. Previews, retries, unchanged URLs and cloud sync do not award XP again. Provider limits remain enforced.</p>'+ 
  '<div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf425OpenConfig(\'settings\')">'+mf425Icon('settings')+' Configure & Start Recovery</button></div></section>';}
 function mf425SettingsEnhance(){
@@ -281,6 +284,7 @@ function mf425SettingsEnhance(){
      ['cover-protection','Rate-limit protection','providers cooldown'],
      ['cover-xp','Cover XP per changed URL','leveling rewards'],
      ['cover-auto-resume','Resume background recovery','reopen resume'],
+     ['cover-providers','Enabled cover providers','priority enabled configuration'],
      ['cover-confirm','Confirm before applying a selected cover','review confirmation']
    ])reg.registerSetting({id,section:'v221-settings-cover-recovery',selector:'[data-mf-setting-id="'+id+'"]',label,keywords:[keywords]});
  }
@@ -296,6 +300,22 @@ function mf425SettingsEnhance(){
  });
 }
 MediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance);
+function mf430SaveSettingsProviders(){
+ const root=document.querySelector('.mf430-settings-provider-list');if(!root)return;
+ const inputs=[...root.querySelectorAll('[data-mf430-provider-enabled]')];
+ const priorities=inputs.map(n=>n.value),enabled=inputs.filter(n=>n.checked).map(n=>n.value);
+ S.settings=S.settings||{};
+ S.settings.v424Covers={...mf424Defaults(),priorities,enabled};
+ Promise.resolve(saveState()).catch(e=>console.warn('Cover recovery providers could not be saved',e));
+}
+function mf430MoveSettingsProvider(id,delta){
+ const node=[...document.querySelectorAll('.mf430-settings-provider')].find(n=>n.dataset.mf430Provider===id);
+ const sibling=delta<0?node?.previousElementSibling:node?.nextElementSibling;
+ if(!node||!sibling)return;
+ if(delta<0)node.parentElement.insertBefore(node,sibling);else node.parentElement.insertBefore(sibling,node);
+ mf430SaveSettingsProviders();
+}
+Object.assign(App,{mf430SaveSettingsProviders,mf430MoveSettingsProvider});
 function mf425SavePref(key,value){if(!['mode','partSize','continuation','selection','protection','autoResume'].includes(key))return;
  S.settings=S.settings||DEFAULT_SETTINGS;S.settings.v424Covers={...mf424Defaults(),[key]:key==='partSize'?Math.min(10000,Math.max(1,Number(value)||100)):value};saveState().catch(e=>console.warn('v425 settings',e));}
 function mf425SaveCoverXP(value){const xp=Math.min(100000,Math.max(0,Math.round(Number(value)||0)));S.settings.leveling=S.settings.leveling||{};S.settings.leveling.coverChangeXP=xp;saveState().catch(e=>console.warn('v425 cover xp',e));}
