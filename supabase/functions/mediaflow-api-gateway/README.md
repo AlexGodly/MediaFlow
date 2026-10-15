@@ -1,16 +1,13 @@
-# MediaFlow API Gateway — v433 staged foundation
+# MediaFlow v434 — Secure provider gateway
 
-**Not deployed and not activated in v433.** Cover Recovery and Find Cover continue using their already-tested browser providers.
+This source is for **Personal MediaFlow only**. The Edge Function accepts an authenticated JWT from MediaFlow's Supabase session and strict JSON operations (status or search). It never accepts arbitrary request URLs, mutates user data, or returns provider credentials.
 
-This one modular function will eventually host authenticated, provider-specific routes for key-dependent metadata/artwork searches. v433 only provides an authenticated **status** action and fail-closed placeholders. It does **not** load TMDB, OMDb, Fanart.tv, Trakt or other provider secrets or call their APIs.
+Migration: supabase/migrations/20261015_v434_gateway_quota.sql. The atomic quota uses daily global and user/provider limits; Watchmode is capped at 15 total searches/day and 4 per user/day to preserve credits. No search titles are stored.
 
-## v434 activation gates
-1. Verify each provider's API terms, rate limits, commercial-use and artwork attribution conditions.
-2. Verify needed Edge Function Secrets were added directly in the Supabase dashboard, without ever committing values.
-3. Implement per-provider adapters with exact allowed destinations; never accept arbitrary user-supplied target URLs.
-4. Add authenticated user-scoped quotas, global rate-limit storage/cooldowns, bounded requests, and small JSON responses.
-5. Test with live representative real titles under controlled quotas. Keep adapter disabled on errors.
-6. Deploy with JWT verification enabled. Add a separate authenticated browser client only after passing integration tests.
-7. Ensure original image URLs are used only where the provider permits direct access; never bulk proxy images.
+Search-enabled cover adapters: TMDB, OMDb, Fanart.tv (known ID required), MAL Official, AnimeSchedule, EpisoDate, Gutendex.
 
-The v433 deployment deliberately does **not** create or change any Supabase Edge Function or database tables.
+Search-enabled mapping adapters (ID-only, not artwork): Trakt, Metron, Watchmode. Hardcover remains in schema/credential-ready status pending review of its GraphQL query access and permissions. Restricted Comic Vine, SIMKL, AniDB, Marvel, TheTVDB and direct MangaDex remain disabled. Podcast Index is excluded by user request.
+
+Images remain direct HTTPS references to approved artwork hosts. Gate access, copyright, image use, attribution, individual subscription/licensing and commercial limitations must be respected before enabling automated bulk queries.
+
+Deploy with **verify_jwt=true**, never disable it. Supabase-provided service role and configured API key secrets stay server side. Endpoint: POST /functions/v1/mediaflow-api-gateway. Default UI policy: manual provider testing and explicit opt-in before bulk use.

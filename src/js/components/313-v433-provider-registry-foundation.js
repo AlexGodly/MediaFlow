@@ -12,7 +12,6 @@ const MF433_PROVIDER_CATALOG=[
   {id:'comicvine',name:'Comic Vine',capabilities:'cover,id,metadata,releases',access:'restricted'},
   {id:'metron',name:'Metron',capabilities:'cover,id,metadata,releases',access:'key'},
   {id:'hardcover',name:'Hardcover',capabilities:'cover,id,metadata',access:'key'},
-  {id:'podcastindex',name:'Podcast Index',capabilities:'cover,id,releases',access:'key'},
   {id:'thetvdb',name:'TheTVDB',capabilities:'cover,id,metadata,releases',access:'restricted'},
   {id:'simkl',name:'SIMKL',capabilities:'id,metadata,releases',access:'restricted'},
   {id:'malofficial',name:'MyAnimeList Official',capabilities:'id,metadata',access:'restricted'},
@@ -50,7 +49,7 @@ const MF433_NATIVE_ID_KEYS={
   animeschedule:'animeschedule',watchmode:'watchmode',
   episodate:'episodate',mangaupdates:'mangaupdates',
   livechart:'livechart',trakt:'trakt',hardcover:'hardcover_book',
-  gutendex:'gutendex',podcastindex:'podcastindex_feed',royalroad:'royalroad',
+  gutendex:'gutendex',royalroad:'royalroad',
   wikidata:'wikidata',comicvine:'comicvine_volume',metron:'metron_series'
 };
 const MF433_ALLOWED_ID_KEYS=new Set(V377_ID_PROVIDERS.map(row=>row[0]).concat(['openlibrary','googlebooks','tvmaze','mal','imdb']));
@@ -69,6 +68,7 @@ function mf433ValidId(key,value){
   return typeof v377IdValid==='function'&&v377IdValid(key,value.trim());
 }
 function mf433NativeKey(candidate){
+  if(MF433_ALLOWED_ID_KEYS.has(String(candidate?.externalIdKey||'')))return candidate.externalIdKey;
   if(candidate?.provider==='openlibrary'){
     if(/^OL\d+W$/i.test(candidate.recordId||''))return 'openlibrary_work';
     if(/^OL\d+M$/i.test(candidate.recordId||''))return 'openlibrary_edition';
@@ -117,7 +117,7 @@ function mf433CandidateLinks(item,candidate){
     if(row?.key&&row?.value&&row?.evidence)push(row.key,row.value);
   }
   const native=mf433NativeKey(candidate);
-  if(native&&candidate.recordId)push(native,candidate.recordId);
+  if(native&&candidate.recordId&&!links.some(l=>l.key===native))push(native,candidate.recordId);
   // v427 legacy candidate representation and existing single-ID adapters.
   if(candidate.externalIdKey&&candidate.externalIdValue)push(candidate.externalIdKey,candidate.externalIdValue);
   return links;
