@@ -100,11 +100,12 @@ assert.equal(join(a,[{status:'unknown',available:0},{status:'none',available:5,p
  assert(src.includes('if(result===null)j.legacyError'),'Seasonal engine may return undefined on success; only explicit unavailable return marks Unknown');
 
  const manga={title:'A Manga',categoryId:'manga',progress:11,externalIds:{mangadex:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'}};
- const fresh=await engine.evidence(manga,'automatic2','mangadex');
- assert.equal(fresh.status,'fresh');
- assert.equal(fresh.available,12,'Future chapter 14 excluded');
- assert.equal(fresh.evidence[0].observedCount,2,'Duplicate translated chapter deduplicated');
- assert.equal((await engine.evidence({...manga,progress:12},'automatic2','mangadex')).status,'unknown','Partial manga feed cannot prove caught up');
+ const unavailable=await engine.evidence(manga,'automatic2','mangadex');
+ assert.equal(unavailable.status,'unknown','Browser-blocked MangaDex must not be advertised as working');
+ const partial=await vm.runInContext('adapters.mangadex',sandbox)(manga);
+ assert.equal(partial.status,'fresh','Dormant MangaDex parser is retained for future CORS-safe integration');
+ assert.equal(partial.available,12,'Future chapter 14 excluded');
+ assert.equal(partial.observedCount,2,'Duplicate translated chapters deduplicated');
  const unsupported=await engine.evidence({title:'Book',categoryId:'books',progress:0},'automatic2','tvmaze');
  assert.equal(unsupported.status,'unknown','Do not pretend Books have a configured release source');
  const rssAbsent=await engine.evidence({title:'Podcast',categoryId:'podcast',progress:0},'automatic2','tvmaze');
