@@ -264,7 +264,18 @@ function mf425SettingsMarkup(){const prefs=mf424Defaults(),xp=S.settings?.leveli
  '<p class="mf425-settings-note">A saved cover change earns XP whether manual or automatic. Previews, retries, unchanged URLs and cloud sync do not award XP again. Provider limits remain enforced.</p>'+ 
  '<div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf425OpenConfig(\'settings\')">'+mf425Icon('settings')+' Configure & Start Recovery</button></div></section>';}
 function mf425SettingsEnhance(){if(S.view!=='settings')return;const lib=document.querySelector('.mf365-detail[data-mf365-category="library"] [data-mf365-content-for="library"]');if(!lib||lib.querySelector('.mf425-settings-card'))return;
- const group=document.createElement('div');group.className='mf366-subgroup mf425-settings-group';group.dataset.mf366Subgroup='cover-recovery';group.innerHTML='<h3 class="mf366-subgroup-heading">Cover Recovery</h3><div class="mf366-subgroup-content">'+mf425SettingsMarkup()+'</div>';lib.appendChild(group);}
+ // Follow Settings Center's existing accordion markup and toggle, rather than
+ // placing a permanently expanded card outside its section architecture.
+ // The later v427 confirmation checkbox is part of mf425SettingsMarkup(), so
+ // it collapses together with every Cover Recovery preference and action.
+ const group=document.createElement('div');group.className='mf366-subgroup mf425-settings-group';group.dataset.mf366Subgroup='cover-recovery';
+ group.innerHTML='<h3 class="mf366-subgroup-heading">Cover Recovery</h3><div class="mf366-subgroup-content">'+
+   '<section class="mf365-section mf425-settings-section" data-mf365-section="cover-recovery">'+
+     '<div class="mf365-section-top"><button type="button" class="mf365-section-toggle" aria-expanded="false" aria-controls="mf425-settings-body" onclick="App.v365ToggleSection(\'cover-recovery\')">'+
+       '<span class="mf365-expand-caret">'+v365Icon('chevron',17)+'</span><span>Cover Recovery</span></button></div>'+
+     '<div class="mf365-section-body" id="mf425-settings-body" hidden>'+mf425SettingsMarkup()+'</div>'+
+   '</section></div>';
+ lib.appendChild(group);}
 MediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance);
 function mf425SavePref(key,value){if(!['mode','partSize','continuation','selection','protection','autoResume'].includes(key))return;
  S.settings=S.settings||DEFAULT_SETTINGS;S.settings.v424Covers={...mf424Defaults(),[key]:key==='partSize'?Math.min(10000,Math.max(1,Number(value)||100)):value};saveState().catch(e=>console.warn('v425 settings',e));}
