@@ -111,7 +111,7 @@ function v365BuildSection(item){
   const star=document.createElement('button');star.type='button';star.className='mf365-favorite-button';star.dataset.mf365Favorite=item.id;star.title='Pin or unpin this section';star.setAttribute('aria-label',`Favorite ${item.displayTitle}`);star.innerHTML=v365Icon('star',18);
   head.append(title,star);
   const body=document.createElement('div');body.className='mf365-section-body';body.hidden=true;
-  for(const node of item.nodes)if(node&&node.parentNode)body.appendChild(node);
+  for(const node of item.nodes)if(node&&node.nodeType===1)body.appendChild(node); // Mount newly created, detached settings controls.
   // The heading inside the existing Settings section remains its own original
   // DOM node, but is visually hidden because the accessible section header is
   // now the toggle above it. Do not remove it: other controls reference it.

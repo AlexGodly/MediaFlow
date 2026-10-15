@@ -1330,17 +1330,16 @@ renderSettings=function(){
   );
 
   const card=`<div class="section-label">COVER MAINTENANCE</div>
-    <div class="card" style="margin-bottom:22px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap">
-        <div style="min-width:220px;flex:1">
+    <div class="card mf430-maintenance-card">
+      <div class="mf430-maintenance-layout">
+        <div class="mf430-maintenance-copy">
           <b>Fix missing Library covers</b>
           <div class="profile-note">
             ${missing.toLocaleString()} title${missing===1?'':'s'} currently ${missing===1?'has':'have'} no cover URL.
-            MediaFlow uses external IDs first and only accepts exact, disambiguated title matches.
-            Ambiguous matches are skipped instead of guessed. Images are never stored in MediaFlow — only their external URL.
+            MediaFlow searches every enabled public cover source using saved external IDs first. Uncertain matches wait for your manual review. Only cover URLs are saved, not image files.
           </div>
         </div>
-        <button class="btn btn-primary" onclick="App.v158FixMissingCovers()" ${missing?'':'disabled'}>
+        <button class="btn btn-primary mf430-maintenance-action" onclick="App.v158FixMissingCovers()" ${missing?'':'disabled'}>
           Fix missing covers
         </button>
       </div>

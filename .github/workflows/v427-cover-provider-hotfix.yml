@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   verify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'fix/v427') || github.head_ref == 'feature/v427-category-independent-cover-id-linking'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
