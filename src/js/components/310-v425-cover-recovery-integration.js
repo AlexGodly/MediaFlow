@@ -253,29 +253,48 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 // pretending to be settings. Preferences use S.settings and existing cloud sync.
 function mf425SettingsMarkup(){const prefs=mf424Defaults(),xp=S.settings?.leveling?.coverChangeXP??DEFAULT_SETTINGS.leveling.coverChangeXP;
  const option=(v,label,current)=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+label+'</option>';
- return '<section class="mf425-settings-card" aria-label="Cover Recovery Settings"><div class="mf425-settings-lead">'+mf425Icon('images',21)+'<div><strong>Cover Recovery</strong><p>Default processing, providers, background recovery and XP rewards.</p></div></div>'+ 
- '<div class="mf425-settings-grid"><label>Recovery mode<select onchange="App.mf425SavePref(\'mode\',this.value)">'+option('parts','Part-by-Part',prefs.mode)+option('one','One-Go',prefs.mode)+'</select></label>'+ 
- '<label>Titles per part<input type="number" min="1" max="10000" value="'+Number(prefs.partSize||100)+'" onchange="App.mf425SavePref(\'partSize\',this.value)"></label>'+ 
- '<label>Continuation<select onchange="App.mf425SavePref(\'continuation\',this.value)">'+option('automatic','Automatic',prefs.continuation)+option('manual','Manual',prefs.continuation)+'</select></label>'+ 
- '<label>Cover selection<select onchange="App.mf425SavePref(\'selection\',this.value)">'+option('hybrid','Hybrid',prefs.selection)+option('smart','Smart Automatic',prefs.selection)+option('priority','Provider Priority',prefs.selection)+option('manual','Manual Selection',prefs.selection)+'</select></label>'+ 
- '<label>Rate-limit protection<select onchange="App.mf425SavePref(\'protection\',this.value)">'+option('safe','Safe',prefs.protection)+option('balanced','Balanced',prefs.protection)+option('custom','Custom',prefs.protection)+'</select></label>'+ 
- '<label>Cover XP per changed URL<input type="number" min="0" max="100000" value="'+Number(xp)+'" onchange="App.mf425SaveCoverXP(this.value)"></label></div>'+ 
- '<label class="mf425-settings-check"><input type="checkbox" '+(prefs.autoResume?'checked':'')+' onchange="App.mf425SavePref(\'autoResume\',this.checked)"> Resume background recovery when MediaFlow reopens</label>'+ 
+ return '<section class="mf425-settings-card" aria-label="Cover Recovery Settings"><div class="mf425-settings-lead">'+mf425Icon('images',21)+'<div><strong>Recovery preferences</strong><p>Default processing, providers, background recovery and XP rewards.</p></div></div>'+ 
+ '<div class="mf425-settings-grid"><label data-mf-setting-id="cover-mode">Recovery mode<select onchange="App.mf425SavePref(\'mode\',this.value)">'+option('parts','Part-by-Part',prefs.mode)+option('one','One-Go',prefs.mode)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-part-size">Titles per part<input type="number" min="1" max="10000" value="'+Number(prefs.partSize||100)+'" onchange="App.mf425SavePref(\'partSize\',this.value)"></label>'+ 
+ '<label data-mf-setting-id="cover-continuation">Continuation<select onchange="App.mf425SavePref(\'continuation\',this.value)">'+option('automatic','Automatic',prefs.continuation)+option('manual','Manual',prefs.continuation)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-selection">Cover selection<select onchange="App.mf425SavePref(\'selection\',this.value)">'+option('hybrid','Hybrid',prefs.selection)+option('smart','Smart Automatic',prefs.selection)+option('priority','Provider Priority',prefs.selection)+option('manual','Manual Selection',prefs.selection)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-protection">Rate-limit protection<select onchange="App.mf425SavePref(\'protection\',this.value)">'+option('safe','Safe',prefs.protection)+option('balanced','Balanced',prefs.protection)+option('custom','Custom',prefs.protection)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-xp">Cover XP per changed URL<input type="number" min="0" max="100000" value="'+Number(xp)+'" onchange="App.mf425SaveCoverXP(this.value)"></label></div>'+ 
+ '<label class="mf425-settings-check" data-mf-setting-id="cover-auto-resume"><input type="checkbox" '+(prefs.autoResume?'checked':'')+' onchange="App.mf425SavePref(\'autoResume\',this.checked)"> Resume background recovery when MediaFlow reopens</label>'+ 
  '<p class="mf425-settings-note">A saved cover change earns XP whether manual or automatic. Previews, retries, unchanged URLs and cloud sync do not award XP again. Provider limits remain enforced.</p>'+ 
  '<div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf425OpenConfig(\'settings\')">'+mf425Icon('settings')+' Configure & Start Recovery</button></div></section>';}
-function mf425SettingsEnhance(){if(S.view!=='settings')return;const lib=document.querySelector('.mf365-detail[data-mf365-category="library"] [data-mf365-content-for="library"]');if(!lib||lib.querySelector('.mf425-settings-card'))return;
- // Follow Settings Center's existing accordion markup and toggle, rather than
- // placing a permanently expanded card outside its section architecture.
- // The later v427 confirmation checkbox is part of mf425SettingsMarkup(), so
- // it collapses together with every Cover Recovery preference and action.
- const group=document.createElement('div');group.className='mf366-subgroup mf425-settings-group';group.dataset.mf366Subgroup='cover-recovery';
- group.innerHTML='<h3 class="mf366-subgroup-heading">Cover Recovery</h3><div class="mf366-subgroup-content">'+
-   '<section class="mf365-section mf425-settings-section" data-mf365-section="cover-recovery">'+
-     '<div class="mf365-section-top"><button type="button" class="mf365-section-toggle" aria-expanded="false" aria-controls="mf425-settings-body" onclick="App.v365ToggleSection(\'cover-recovery\')">'+
-       '<span class="mf365-expand-caret">'+v365Icon('chevron',17)+'</span><span>Cover Recovery</span></button></div>'+
-     '<div class="mf365-section-body" id="mf425-settings-body" hidden>'+mf425SettingsMarkup()+'</div>'+
-   '</section></div>';
- lib.appendChild(group);}
+function mf425SettingsEnhance(){
+ if(S.view!=='settings')return;
+ const center=window.MediaFlowSettingsCenter;
+ if(!center?.mountSection)return;
+ // Use the very same Settings Center component, registry and styles as
+ // Library Integrity / Library Maintenance (header, caret, Pin, search).
+ // Never inject a custom accordion or a separate Cover Recovery subgroup.
+ if(document.querySelector('.mf365-section[data-mf365-section="v221-settings-cover-recovery"]'))return;
+ const reg=window.MediaFlowSettingsRegistry;
+ if(reg?.registerSetting){
+   for(const [id,label,keywords] of [
+     ['cover-mode','Recovery mode','batch processing'],
+     ['cover-part-size','Titles per part','batch size'],
+     ['cover-continuation','Continuation','automatic manual'],
+     ['cover-selection','Cover selection','hybrid priority manual'],
+     ['cover-protection','Rate-limit protection','providers cooldown'],
+     ['cover-xp','Cover XP per changed URL','leveling rewards'],
+     ['cover-auto-resume','Resume background recovery','reopen resume'],
+     ['cover-confirm','Confirm before applying a selected cover','review confirmation']
+   ])reg.registerSetting({id,section:'v221-settings-cover-recovery',selector:'[data-mf-setting-id="'+id+'"]',label,keywords:[keywords]});
+ }
+ const body=document.createElement('div');body.className='mf425-settings-content';
+ body.innerHTML=mf425SettingsMarkup();
+ center.mountSection({
+   id:'v221-settings-cover-recovery',
+   title:'Cover Recovery',
+   category:'library',
+   subgroup:'Library maintenance',
+   keywords:['cover','poster','artwork','recovery','providers','XP','background'],
+   nodes:[body]
+ });
+}
 MediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance);
 function mf425SavePref(key,value){if(!['mode','partSize','continuation','selection','protection','autoResume'].includes(key))return;
  S.settings=S.settings||DEFAULT_SETTINGS;S.settings.v424Covers={...mf424Defaults(),[key]:key==='partSize'?Math.min(10000,Math.max(1,Number(value)||100)):value};saveState().catch(e=>console.warn('v425 settings',e));}

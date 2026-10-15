@@ -217,6 +217,45 @@ function v365EnhanceSettings(){
   page.querySelectorAll('[data-mf365-favorite]').forEach(btn=>{const pinned=v365Prefs().favorites.includes(btn.dataset.mf365Favorite);btn.classList.toggle('mf365-pinned',pinned);btn.setAttribute('aria-pressed',String(pinned));});
   v365UpdateView({preserveScroll:true});
 }
+// Canonical extension point for post-v365 settings. New features should add
+// their controls here, not append custom cards/accordions to category DOM.
+// The same renderer supplies the section header, expand/collapse, Pin, search
+// and theme/mobile styling used by every built-in Settings section.
+function v365MountRegisteredSection(input){
+  if(!input||typeof input!=='object')throw new TypeError('Settings section registration is required');
+  const id=String(input.id||'').trim(),title=String(input.title||'').trim();
+  const category=String(input.category||'').trim(),subgroup=String(input.subgroup||'General').trim()||'General';
+  if(!/^[a-z0-9][a-z0-9._:-]{0,119}$/i.test(id)||!title)throw new TypeError('A stable id and title are required');
+  if(!V365_CATEGORIES.some(c=>c.id===category))throw new Error('Settings section needs a registered category');
+  if(!Array.isArray(input.nodes)||!input.nodes.length||!input.nodes.every(n=>n&&n.nodeType===1))
+    throw new TypeError('Settings controls must be existing DOM elements');
+  const page=V365_CURRENT_PAGE;
+  if(String(S.view||'')!=='settings'||!page?.isConnected||page.dataset.mf365Ready!=='1')return null;
+  const target=page.querySelector('[data-mf365-content-for="'+category+'"]');
+  if(!target)return null;
+  // A section is not recreated on every enhancer pass.
+  if(V365_SECTION_MAP.has(id)&&page.querySelector('.mf365-section[data-mf365-section="'+id+'"]'))
+    return page.querySelector('.mf365-section[data-mf365-section="'+id+'"]');
+  const meta=v366RegisterSection({id,title,category,subgroup,keywords:input.keywords||[]});
+  const item={id,title,displayTitle:title,nodes:input.nodes,category:meta.category,subgroup:meta.subgroup,keywords:meta.keywords};
+  V365_SECTION_MAP.set(id,item);
+  const slug=v221Slug(meta.subgroup);
+  let group=[...target.children].find(el=>el.dataset?.mf366Subgroup===slug);
+  if(!group){
+    group=document.createElement('div');group.className='mf366-subgroup';group.dataset.mf366Subgroup=slug;
+    const heading=document.createElement('h3');heading.className='mf366-subgroup-heading';heading.textContent=meta.subgroup;
+    const body=document.createElement('div');body.className='mf366-subgroup-content';
+    group.append(heading,body);target.appendChild(group);
+  }
+  const section=v365BuildSection(item);
+  group.querySelector('.mf366-subgroup-content').appendChild(section);
+  const pinned=v365Prefs().favorites.includes(id);
+  const favorite=section.querySelector('.mf365-favorite-button');
+  if(favorite){favorite.classList.toggle('mf365-pinned',pinned);favorite.setAttribute('aria-pressed',String(pinned));}
+  v365BuildIndex([...V365_SECTION_MAP.values()]);
+  return section;
+}
+window.MediaFlowSettingsCenter=Object.freeze({mountSection:v365MountRegisteredSection});
 // v265's legacy Settings morph used an old v221 renderer, which drops v335+
 // XP Settings and reopens the old all-sections layout after any settings edit.
 // Replace it with the currently registered canonical v348 renderer; restore

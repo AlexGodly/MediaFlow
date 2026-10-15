@@ -24,34 +24,54 @@ const subset={mode:'selected',ids:Array.from({length:5000},(_,i)=>String(i))};
 ctx.subset=subset;const began=Date.now();const x=vm.runInContext('mf425Counts(subset)',ctx);assert.equal(x.all,5000);assert.ok(x.eligible>0);
 const catCount=vm.runInContext('mf425Counts({mode:"categoryStatus",pairs:{anime:["completed"]}})',ctx);assert.ok(catCount.all>0&&catCount.eligible>0);
 
-// Cover Recovery must use the existing Settings Center accordion; the v427
-// appended confirmation control must stay inside its collapsible body.
-const accordionStart=source.indexOf('function mf425SettingsEnhance(){');
-const accordionEnd=source.indexOf("\nMediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance)",accordionStart);
-assert(accordionStart>=0&&accordionEnd>accordionStart,'Settings enhancer exists');
-const accordionFn=source.slice(accordionStart,accordionEnd);
-const settingsBody='<section class="mf425-settings-card">Existing recovery controls</section><label class="mf427-settings-confirm">Confirmation setting</label>';
-let appended=null;
-const libraryTarget={
- querySelector(selector){return appended&&selector==='.mf425-settings-card'?{}:null;},
- appendChild(element){appended=element;}
-};
-const settingsCtx={S:{view:'settings'},document:{
- querySelector:selector=>selector.includes('data-mf365-category="library"')?libraryTarget:null,
- createElement:()=>({dataset:{},className:'',innerHTML:''})
-},mf425SettingsMarkup:()=>settingsBody,v365Icon:()=>'<svg></svg>'};
+// New options must mount through the same v365 Settings Center registry,
+// not create a separate fake accordion or duplicate category heading.
+const sectionStart=source.indexOf('function mf425SettingsEnhance(){');
+const sectionEnd=source.indexOf("\nMediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance)",sectionStart);
+assert(sectionStart>=0&&sectionEnd>sectionStart,'Settings enhancer exists');
+const sectionFn=source.slice(sectionStart,sectionEnd);
+const settingsBody='<section class="mf425-settings-card">Existing recovery controls</section><label data-mf-setting-id="cover-confirm">Confirmation setting</label>';
+const registrations=[];let mounted=null;
+const settingsCtx={S:{view:'settings'},window:{
+ MediaFlowSettingsCenter:{mountSection:obj=>{mounted=obj;return obj;}},
+ MediaFlowSettingsRegistry:{registerSetting:obj=>registrations.push(obj)}
+},document:{
+ querySelector:()=>null,
+ createElement:()=>({nodeType:1,className:'',innerHTML:''})
+},mf425SettingsMarkup:()=>settingsBody};
 vm.createContext(settingsCtx);
-vm.runInContext(accordionFn,settingsCtx);
+vm.runInContext(sectionFn,settingsCtx);
 settingsCtx.mf425SettingsEnhance();
-assert(appended,'Cover Recovery subgroup is inserted');
-assert.equal(appended.dataset.mf366Subgroup,'cover-recovery');
-assert.match(appended.innerHTML,/class="mf365-section mf425-settings-section"/);
-assert.match(appended.innerHTML,/class="mf365-section-toggle" aria-expanded="false" aria-controls="mf425-settings-body"/);
-assert(appended.innerHTML.includes("App.v365ToggleSection('cover-recovery')"),'Accordion uses same Settings Center toggle');
-assert.match(appended.innerHTML,/class="mf365-section-body" id="mf425-settings-body" hidden/);
-assert(appended.innerHTML.indexOf('mf427-settings-confirm')>appended.innerHTML.indexOf('id="mf425-settings-body" hidden'),'Confirmation is hidden with other settings');
-assert(appended.innerHTML.includes('Existing recovery controls'),'Original settings remain available');
+assert(mounted,'Cover Recovery section is mounted');
+assert.equal(mounted.id,'v221-settings-cover-recovery');
+assert.equal(mounted.title,'Cover Recovery');
+assert.equal(mounted.category,'library');
+assert.equal(mounted.subgroup,'Library maintenance','Existing Library Maintenance group is reused');
+assert.equal(mounted.nodes.length,1);
+assert(mounted.nodes[0].innerHTML.includes('Existing recovery controls'),'Original preferences remain');
+assert(mounted.nodes[0].innerHTML.includes('cover-confirm'),'Confirmation remains in the same settings body');
+assert(!sectionFn.includes('mf366-subgroup-heading'),'Custom subgroup wrappers are forbidden');
+assert(!sectionFn.includes('mf365-section-top'),'Settings Center owns all section styling');
+assert.equal(registrations.length,8,'Eight stable Cover Recovery settings can be searched/pinned');
+for(const setting of registrations){
+ assert.equal(setting.section,'v221-settings-cover-recovery');
+ assert(setting.selector.startsWith('[data-mf-setting-id='),'Settings are indexed by stable IDs');
+}
 settingsCtx.mf425SettingsEnhance();
-assert(appended,'Settings injection is stable and non-duplicating');
+assert.equal(registrations.length,16,'A rerender re-registers metadata idempotently');
+
+const centerSrc=fs.readFileSync('src/js/components/263-v365-settings-center.js','utf8');
+for(const requirement of [
+ 'function v365MountRegisteredSection(input)',
+ 'window.MediaFlowSettingsCenter=Object.freeze({mountSection:v365MountRegisteredSection})',
+ 'const section=v365BuildSection(item)',
+ 'V365_SECTION_MAP.set(id,item)',
+ 'v366RegisterSection({id,title,category,subgroup',
+ 'v365BuildIndex([...V365_SECTION_MAP.values()])'
+])assert(centerSrc.includes(requirement),'Future Settings use native styles/search/pins: '+requirement);
+// Live callbacks are handled by the canonical renderer, not a copied copycat.
+assert(centerSrc.includes("title.addEventListener('click',()=>v365ToggleSection(item.id))"));
+assert(centerSrc.includes("star.addEventListener('click',()=>v365Favorite(item.id))"));
+
 
 console.log('v425 scoped recovery and 100k title contract checks passed in',Date.now()-began,'ms');

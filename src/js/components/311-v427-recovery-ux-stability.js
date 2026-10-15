@@ -293,7 +293,7 @@ App.mf424Confirm=async function(index){
 };
 const mf427PreviousSettings=mf425SettingsMarkup;
 mf425SettingsMarkup=function(){return mf427PreviousSettings()+
-  '<label class="mf427-settings-confirm"><input type="checkbox" '+(mf427PrefConfirm()?'checked':'')+' onchange="App.mf427SetConfirmation(this.checked)"><span><b>Confirm before applying a selected cover</b><small>Off by default: Use This Cover saves immediately. Turn on to review each selection before saving.</small></span></label>';};
+  '<label class="mf427-settings-confirm" data-mf-setting-id="cover-confirm"><input type="checkbox" '+(mf427PrefConfirm()?'checked':'')+' onchange="App.mf427SetConfirmation(this.checked)"><span><b>Confirm before applying a selected cover</b><small>Off by default: Use This Cover saves immediately. Turn on to review each selection before saving.</small></span></label>';};
 // The v425 painter is the single source for counts and actions. Reorganize its elements only.
 const mf427PreviousPaint=mf424Paint;
 mf424Paint=function(){mf427PreviousPaint.apply(this,arguments);
