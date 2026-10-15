@@ -46,7 +46,15 @@ async function request(provider,url){const row=M.rate[provider]||(M.rate[provide
  }
  throw Error(provider+' could not recover after rate limiting');
 }
-function cleanHtml(t){const div=document.createElement('div');div.innerHTML=String(t||'').replace(/<script[\s\S]*?<\/script>/gi,'');return String(div.textContent||'').trim().slice(0,5000);}
+function cleanHtml(value){
+ // DOMParser's inert HTML document avoids mounting untrusted HTML in MediaFlow.
+ const raw=String(value||'');
+ if(typeof DOMParser==='function'){
+  const parsed=new DOMParser().parseFromString(raw,'text/html');
+  return String(parsed.body?.textContent||'').trim().slice(0,5000);
+ }
+ return raw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,5000);
+}
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
@@ -64,6 +72,7 @@ async function discover(item){
   const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
   let d=path?await request('tvmaze',path):null;
   if(!d){const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));if(exact.length!==1)return {reason:'No unique TVmaze match'};d=exact[0];}
+  if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
   return {title:d.name||'',synopsis:cleanHtml(d.summary),genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
  if(t==='books'&&ids.isbn){
@@ -148,6 +157,7 @@ async function start(){
  }
  if(!ids.length){showToast('No eligible Library titles.');return;}
  if(M.job&&!['complete','stopped','failed'].includes(M.job.status)){showToast('A Metadata Recovery is still pending. Resume or review it before starting a new batch.');return;}
+ M.reviews=[];
  M.job={account:account(),ids,cursor:0,part,method,fields:fieldChoices,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
  await persist();
  if(!window.MediaFlowV428Hub?.enqueue('metadata',{})){M.job.status='paused';await persist();showToast('Metadata was not queued. Resume the existing process when available.');return;}
@@ -271,7 +281,7 @@ if(typeof v181TitleDetailsHtml==='function'){
 }
 if(typeof App.v181QuickEditDetail==='function'){const old=App.v181QuickEditDetail;App.v181QuickEditDetail=function(id,key){const result=old.apply(this,arguments);if(key==='coverUrl'){const el=document.querySelector('#v181-quick-detail-overlay .mf425-editor-tools');if(el&&!el.querySelector('.mf428-edit-action'))el.insertAdjacentHTML('beforeend','<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'details\',\''+esc(id)+'\')">Fix Metadata</button>');}return result;};}
 Object.assign(App,{mf428MetadataOpen:open,mf428MetadataClose:close,mf428MetadataStart:start,mf428MetadataControl:control,mf428MetadataReview:review,mf428MetadataCloseReview:closeReview,mf428MetadataSkip:skip,mf428MetadataApply:apply,mf428MetadataUndo:undo});
-window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',schema,review,open,previewFields:diff,detectMediaKind:kind,captureDraft};
+window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',pending:()=>M.job?.reviews?.length||M.reviews.length||0,schema,review,open,previewFields:diff,detectMediaKind:kind,captureDraft};
 window.MediaFlowV428Hub?.registerMetadata(worker);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
