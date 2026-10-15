@@ -64,3 +64,17 @@
 #mf428-hub .mf428-process-actions button[aria-label]{min-width:31px;min-height:29px}
 @media(max-width:720px){#mf428-hub[data-position="left"]{left:max(10px,env(safe-area-inset-left));right:auto}}
 @media(max-width:380px){#mf428-hub[data-position="left"]{left:9px;right:auto}}
+
+/* v428 Phase 3: compact theme-matched metadata selection, review and details actions. */
+.mf428-meta-fieldset{margin:14px 0 0;padding:12px;border:1px solid var(--border-soft,var(--mf428-line));border-radius:13px;min-width:0}
+.mf428-meta-fieldset legend{padding:0 5px;color:var(--text);font-size:12px;font-weight:750}
+.mf428-meta-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.mf428-meta-field{display:flex;align-items:center;gap:7px;min-width:0;padding:9px;border-radius:9px;background:var(--panel-raised);font-size:12px;color:var(--text)}
+.mf428-meta-field input{accent-color:var(--flow);flex-shrink:0}
+.mf428-meta-field span{overflow-wrap:anywhere}
+.mf428-category-chooser{display:grid;gap:7px;margin-top:12px;font-size:12px;font-weight:750;color:var(--text)}
+.mf428-category-chooser select{min-height:40px;max-width:100%;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised);color:var(--text);padding:8px}
+.mf428-details-action{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.mf428-meta-dialog footer .btn{min-height:37px}
+@media(max-width:720px){.mf428-meta-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:370px){.mf428-meta-fields{grid-template-columns:1fr}}
