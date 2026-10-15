@@ -11,7 +11,7 @@ const x=(s)=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER&&AUTH_USER.id)||'local');
 const key=()=> 'mf428-background:'+account(),leaseKey=()=> 'mf428-worker:'+account();
 const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right'};
-const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{}};
+const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:''};
 function prefs(){const s=(typeof S!=='undefined'&&S.settings&&S.settings.v428Background)||{};return {...defaults,...s};}
 function persistPrefs(p){S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v428 widget preference',e));}catch(e){console.warn(e);}paint();}
 function load(){if(HUB.loadedFor===account())return;HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};try{const data=JSON.parse(localStorage.getItem(key())||'{}');if(Array.isArray(data.queue))HUB.queue=data.queue.filter(q=>KINDS.includes(q.kind)).slice(0,20).map(q=>({kind:q.kind,at:q.at||Date.now(),params:q.params||{}}));HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};}catch(e){console.warn('v428 queue restoration',e);}}
@@ -97,12 +97,13 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  '</div></article>';
 }
 function paint(){if(!document.body)return;load();const v=prefs().visibility,exists=HUB.active||HUB.queue.length||Date.now()<HUB.cooldownUntil||KINDS.some(k=>['paused','review','running'].includes(phase(k)));
- let el=document.getElementById('mf428-hub');if(v==='hidden'||(v==='auto'&&!exists)){el?.remove();return;}
+ let el=document.getElementById('mf428-hub');if(v==='hidden'||(v==='auto'&&!exists)){el?.remove();HUB.lastMarkup='';return;}
  if(!el){el=document.createElement('aside');el.id='mf428-hub';el.setAttribute('aria-label','Background Processes');document.body.appendChild(el);}
  const cooldown=Math.max(0,Math.ceil((HUB.cooldownUntil-Date.now())/1000));
  el.className='mf428-hub'+(HUB.expanded?' mf428-open':'');
- el.innerHTML='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
+ const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
  (HUB.expanded?'<section class="mf428-panel" aria-label="Process controls"><div class="mf428-panel-title"><strong>Recovery & Release Center</strong><small>Only one process runs at a time</small></div>'+KINDS.map(row).join('')+'<div class="mf428-footer"><span>◈ '+(cooldown?'Shared cooldown: '+cooldown+'s':'Smart rate-limit scheduling')+'</span><button type="button" onclick="App.mf428SetVisibility(\'hidden\')">Hide widget</button></div></section>':'');
+ if(HUB.lastMarkup!==markup){const panel=el.querySelector('.mf428-panel'),scroll=panel?.scrollTop||0;el.innerHTML=markup;const next=el.querySelector('.mf428-panel');if(next)next.scrollTop=scroll;HUB.lastMarkup=markup;}
 }
 function settingsHtml(){const selected=prefs().visibility;
  return '<div class="mf428-widget-settings"><strong>Background Processes Widget</strong><p>Monitor Cover Recovery, Metadata Recovery and Fresh Releases, or start them from an always-visible launcher.</p><label for="mf428-visibility">Widget visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+[['hidden','Hidden'],['auto','Automatic — show for background work'],['always','Always Show — launcher and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select><p class="hint">Hiding does not stop tasks. Browser-closed work resumes from saved checkpoints when supported.</p></div>';
