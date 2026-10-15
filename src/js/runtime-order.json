@@ -161,5 +161,6 @@
   "components/304-v419-recommendations-cover-logging-sidebar.js",
   "components/305-v420-covers-dashboard-sidebar-fixes.js",
   "components/306-v421-adaptive-navigation-filter.js",
-  "components/307-v422-adaptive-navigation-details-support.js"
+  "components/307-v422-adaptive-navigation-details-support.js",
+  "components/308-v423-navigation-restore-donation-polish.js"
 ]
