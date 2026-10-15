@@ -19,7 +19,9 @@ async function main(){
   assert.equal(context.App.v158FixMissingCovers,context.App.mf424OpenConfig);
   assert.equal(await run('mf424Provider("anilist").limit'),18);
   assert.equal(await run('mf424Provider("simkl").limit'),0);
-  assert.equal(await run('MF424_PROVIDER_META.filter(p=>p.limit).length'),8);
+  assert.equal(await run('MF424_PROVIDER_META.filter(p=>p.limit).length'),7);
+  assert.equal(await run('mf424Provider("googlebooks").limit'),0,'Google Books API credentials are required by official documentation');
+  assert.equal(await run('mf424Provider("googlebooks").credentials'),true);
   assert.equal(await run('mf424Match({title:"Foo",year:2014},{title:"Foo",year:2014},false).confidence'),.96);
   assert.equal(await run('mf424Match({title:"Foo",year:2014},{title:"Foo",year:2017},false).confidence'),.35);
   assert.equal(await run('mf424Match({title:"Foo"},{title:"Bar"},false).confidence'),0);
