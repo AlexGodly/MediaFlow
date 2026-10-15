@@ -44,7 +44,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck authenticated gateway source
-        run: deno check supabase/functions/mediaflow-api-gateway/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/mediaflow-api-gateway/index.ts
       - name: Verify cover validation, navigation and existing recovery features
         run: |
           node scripts/test-v431-cover-autosave.cjs
