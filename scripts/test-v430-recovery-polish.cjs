@@ -11,7 +11,7 @@ const nav=src('src/js/components/306-v421-adaptive-navigation-filter.js');
 const css=src('assets/css/240-v430-recovery-dashboard-navigation.css');
 const html=src('index.html');
 const eq=(s,part,msg)=>assert(s.includes(part),msg);
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'430');
+assert(['430','431'].includes(fs.readFileSync('VERSION','utf8').trim()));
 eq(html,'assets/css/240-v430-recovery-dashboard-navigation.css','New stylesheet is included');
 eq(settings,'if(node&&node.nodeType===1)body.appendChild(node)','Native section must attach DETACHED nodes');
 assert(!settings.includes('if(node&&node.parentNode)body.appendChild(node)'),'Detached nodes must not be ignored');
@@ -32,7 +32,7 @@ eq(dashboard,'persistSettings()','Dashboard saves preference with existing Setti
 eq(integration,'mf430-find-cover','Find Cover resides inside the same Dashboard toolbar');
 eq(picker,"entry==='dashboard'&&S.settings?.v430MissingCoversAutoSave&&found.length===1",'Only unambiguous verified results automatically advance');
 eq(picker,'selected.idMatch&&Number(selected.confidence)>=.95','Require ID verification before auto-save');
-eq(picker,'await Promise.resolve(App.v192SaveMissingCover())','Advance via the existing XP-safe validated queue saver');
+eq(picker,'App.v235ValidateMissingCover?.(selected.url)','Defer provider auto-save until image validation');
 eq(picker,'exhausted=true','Search all eligible providers before deciding');
 eq(nav,'<div role="button" tabindex="0" class="mf421-dock-progress"','Initial navigation never renders eligible generic-action button');
 assert(!nav.includes('<button type="button" class="mf421-dock-progress"'),'No first-load icon flash');

@@ -192,11 +192,12 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
         const stillSame=live&&String(live.id)===String(current.id);
         if(stillSame&&selected.idMatch&&Number(selected.confidence)>=.95){
           const input=document.getElementById('v192-cover-url-input');
-          if(input){input.value=selected.url;
-            try{
-              await Promise.resolve(App.v192SaveMissingCover());
-              App.mf425CloseInstant();
-            }catch(error){console.error('Verified cover auto-save failed',error);showToast('Could not automatically save this cover. Review it manually.');}
+          if(input){
+            // v431: the v235 image probe is asynchronous. Never invoke the
+            // guarded Save action until it reports that this URL actually loaded.
+            input.value=selected.url;
+            App.v235ValidateMissingCover?.(selected.url);
+            App.mf425CloseInstant();
           }
         }
       }
@@ -320,9 +321,14 @@ App.mf425ChooseInstant=async function(index){
     if(!input){showToast('Missing Covers panel changed. Reopen the title.');return;}
     const before=v192CurrentMissingCoverItem()?.id;
     if(before&&String(before)!==String(item.id)){showToast('The queue changed. Please reopen cover search.');return;}
-    const live=mf424Lookup(String(item.id||''));input.value=url;
-    try{await Promise.resolve(App.v192SaveMissingCover());await mf427LinkAfterExternalSave(live,candidate,url,linkId);App.mf425CloseInstant();}
-    catch(e){console.error(e);showToast('Unable to save the selected cover.');}
+    const live=mf424Lookup(String(item.id||''));
+    try{
+      // v431 waits for direct-image validation instead of calling the
+      // v235 guarded saver prematurely and silently leaving a URL in the bar.
+      const saved=await App.mf431UseDashboardCover(url,String(item.id));
+      if(saved){await mf427LinkAfterExternalSave(live,candidate,url,linkId);App.mf425CloseInstant();}
+      else showToast('The selected cover was not saved. Check its URL or try again.');
+    }catch(e){console.error('Dashboard cover selection',e);showToast('Unable to save the selected cover.');}
     return;
   }
   if(entry==='details'){
