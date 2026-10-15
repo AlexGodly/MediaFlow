@@ -199,7 +199,7 @@ async function worker(params={}){await init();
    }else job.skipped++;}catch(e){job.errors.push({id,reason:String(e.message||e)});}}
   job.cursor++;processed++;await persist();
   if(job.reviews.length>=250){job.status='waiting-review';break;}
-  if(processed>=job.part&&job.cursor<job.ids.length){job.status='waiting-part';break;}
+  if(processed>=job.part&&job.cursor<job.ids.length){job.status=job.stopAfterPart?'stopped':'waiting-part';job.stopped=!!job.stopAfterPart;break;}
  }
  if(job.cursor>=job.ids.length)job.status=job.reviews.length?'waiting-review':'complete';
  await persist();
@@ -266,13 +266,14 @@ async function apply(){
 }
 async function undo(){await init();if(window.MediaFlowV428Hub?.status()?.active){showToast('Finish or pause background work before undoing metadata.');return;}const last=M.history[M.history.length-1];if(!last){showToast('No metadata change available to undo.');return;}const item=lookup(last.id);if(!item||Number(item.modifiedAt||0)!==Number(last.changedAt)){showToast('Title changed after recovery; unsafe to undo automatically.');return;}if(last.after&&last.fields.some(field=>JSON.stringify(item[field]??null)!==JSON.stringify(last.after[field]??null))){showToast('Recovered metadata was edited after saving. Undo is unsafe.');return;}const newer={};for(const field of last.fields){newer[field]=item[field];if(last.previous[field]===undefined)delete item[field];else item[field]=last.previous[field];}const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();try{await saveState();M.history.pop();localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));showToast('Last metadata recovery reversed.');}catch(e){for(const field of last.fields){if(newer[field]===undefined)delete item[field];else item[field]=newer[field];}item.modifiedAt=oldStamp;showToast('Unable to undo metadata safely.');}}
 function control(cmd){if(!M.job)return;
+ if(cmd==='stop-part'){M.job.stopAfterPart=true;persist();return;}
  if(cmd==='pause'||cmd==='stop'||cmd==='cancel'){M.job[cmd==='pause'||cmd==='cancel'?'paused':'stopped']=true;
   if(cmd==='cancel')M.job.status='paused';persist();
  }
  if(cmd==='review')review();
  if(cmd==='resume'&&['paused','stopped','waiting-part','waiting-review'].includes(M.job.status)){
    if(M.running)return;
-   M.job.paused=false;M.job.stopped=false;M.job.status='queued';
+   M.job.paused=false;M.job.stopped=false;M.job.stopAfterPart=false;M.job.status='queued';
    persist().then(()=>window.MediaFlowV428Hub?.enqueue('metadata',{})).catch(e=>console.warn('Metadata resume failed',e));
  }}
 function injectEditor(html){if(!html||html.includes('mf428-edit-action'))return html;const at=html.indexOf('class="mf425-editor-tools"');if(at<0)return html;const close=html.indexOf('</div>',at);if(close<0)return html;
