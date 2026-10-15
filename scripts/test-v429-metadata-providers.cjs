@@ -17,13 +17,22 @@ const media={
 const mock={
  window:{MediaFlowV428Hub:{registerMetadata(){},paint(){}},addEventListener(){}},
  document:{readyState:'loading',body:null,addEventListener(){},getElementById(){return null},querySelectorAll(){return []}},
- S:{library:[],categories:[{id:'anime',name:'Anime'},{id:'comic',name:'Comics'}],settings:{}},
+ S:{library:[],categories:[{id:'anime',name:'Anime'},{id:'manga',name:'Manga'},{id:'books',name:'Books'},{id:'comic',name:'Comics'}],settings:{}},
  App:{},AUTH_USER:{id:'test-user'},
  MediaFlowRuntime:{registerPageEnhancer(){}},
  showToast(){},console,Math,Date,JSON,URL,AbortController,Event:function(){},
  localStorage:{getItem(){return null},setItem(){}},
  setTimeout,clearTimeout,
  fetch:async(url,options)=>{
+  if(url.startsWith('https://api.mangadex.org/manga/'))return {ok:true,json:async()=>({data:{attributes:{
+    title:{en:'Example Manga'},description:{en:'An official synopsis'},
+    year:2024,originalLanguage:'ja',publicationDemographic:'shounen',
+    tags:[{attributes:{group:'genre',name:{en:'Fantasy'}}},{attributes:{group:'theme',name:{en:'Adventure'}}}]
+   }}}),headers:{get(){return null;}}};
+  if(url.startsWith('https://openlibrary.org/works/'))return {ok:true,json:async()=>({
+    key:'/works/OL123W',title:'Example Book',description:{value:'Book description'},
+    first_publish_date:'2001',subjects:['Literature','Fiction']
+   }),headers:{get(){return null;}}};
   assert.equal(url,'https://graphql.anilist.co');
   assert.equal(options.method,'POST');
   const body=JSON.parse(options.body);queries.push(body);
@@ -57,5 +66,14 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  assert(!changes.some(x=>x.field==='genres'),'Manually edited genre remains protected');
  assert(!changes.some(x=>x.field==='total'),'Personal progress prevents total overwrite');
  assert.equal(engine.detectMediaKind({categoryId:'comic'}),'comics');
+ const manga=await engine.lookupEvidence({title:'Example Manga',categoryId:'manga',externalIds:{mangadex:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'}},['mangadex']);
+ assert.equal(manga.source,'MangaDex');
+ assert.equal(manga.year,2024);
+ assert.deepEqual([...manga.genres],['Fantasy']);
+ assert.equal(manga.total,undefined,'MangaDex partial chapters must never overwrite Library totals');
+ const books=await engine.lookupEvidence({title:'Example Book',categoryId:'books',externalIds:{openlibrary:'OL123W'}},['openlibrary']);
+ assert.equal(books.source,'Open Library');
+ assert.equal(books.year,2001);
+ assert.equal(books.recordId,'/works/OL123W');
  console.log('v429 metadata public adapter passed: exact AniList ID, rich fields, manual-field/total protection and comic type');
 })().catch(e=>{console.error(e);process.exitCode=1;});
