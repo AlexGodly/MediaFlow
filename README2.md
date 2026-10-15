@@ -1,3 +1,11 @@
+## MediaFlow v421 — Adaptive Navigation & Logging Filter Fix
+
+- Four desktop navigation styles: resizable Sidebar, icon-only Mini, responsive Top bar and Bottom bar, with drag-to-dock logo and tab selection in Settings → Interface → Navigation.
+- Fixed sidebar resize grip and short-height overflow by scrolling only navigation pages, not the entire sidebar; profile/level/streak/sync remain accessible.
+- Added smart overflow to More in horizontal navigation, maintaining your configured order and an unobstructed floating task dock.
+- Fixed Logging → Browse Library's Show filter: one arrow, no stray boxed glyph, proper selected-label spacing in every membership state.
+- Added v421 browser regression tests; existing data, cloud sync, mobile/tablet navigation and previously delivered features remain unchanged.
+
 ## MediaFlow v420 — Missing Cover Repair & Responsive UI
 
 - Fixed actual missing-cover rendering (centered category icons that resize with the poster) inside Collections and Normal/Dynamic Library Covers and Covers + Titles.
