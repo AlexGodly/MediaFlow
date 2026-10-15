@@ -57,9 +57,10 @@ function syncQueue(){
  }catch(e){console.warn('v428 queue sync',e);}
 }
 function leaseHeld(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner===HUB.owner&&v.until>Date.now());}catch(_){return false;}}
-function foreignLease(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner!==HUB.owner&&v.until>Date.now());}catch(_){return false;}}
-function acquire(){try{const k=leaseKey(),old=JSON.parse(localStorage.getItem(k)||'null');if(old&&old.until>Date.now()&&old.owner!==HUB.owner)return false;localStorage.setItem(k,JSON.stringify({owner:HUB.owner,until:Date.now()+LOCK_MS}));return leaseHeld();}catch(_){return false;}}
-function renew(){if(!HUB.active)return;try{if(!leaseHeld()){HUB.active.leaseLost=true;if(MF424&&MF424.job&&HUB.active.kind==='cover')MF424.job.pauseRequested=true;return;}localStorage.setItem(leaseKey(),JSON.stringify({owner:HUB.owner,until:Date.now()+15000}));}catch(_){}}
+function foreignLeaseInfo(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return v&&v.owner!==HUB.owner&&v.until>Date.now()?v:null;}catch(_){return null;}}
+function foreignLease(){return !!foreignLeaseInfo();}
+function acquire(){try{const k=leaseKey(),old=JSON.parse(localStorage.getItem(k)||'null');if(old&&old.until>Date.now()&&old.owner!==HUB.owner)return false;localStorage.setItem(k,JSON.stringify({owner:HUB.owner,kind:HUB.queue[0]?.kind||null,until:Date.now()+LOCK_MS}));return leaseHeld();}catch(_){return false;}}
+function renew(){if(!HUB.active)return;try{if(!leaseHeld()){HUB.active.leaseLost=true;if(MF424&&MF424.job&&HUB.active.kind==='cover')MF424.job.pauseRequested=true;return;}localStorage.setItem(leaseKey(),JSON.stringify({owner:HUB.owner,kind:HUB.active.kind,until:Date.now()+LOCK_MS}));}catch(_){}}
 function release(){try{if(leaseHeld())localStorage.removeItem(leaseKey());}catch(_){}}
 function note(kind,status,message){HUB.last[kind]={status,message:String(message||''),at:Date.now()};save();paint();}
 function enqueue(kind,params){load();syncQueue();if(!KINDS.includes(kind)||HUB.loadedFor!==account())return false;
@@ -171,7 +172,7 @@ function phase(kind){
  if(kind==='cover'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
  if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(m==='waiting-review')return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
  if(kind==='fresh'&&window.MediaFlowV428Fresh){const f=window.MediaFlowV428Fresh.status();if(['paused','stopped'].includes(f))return 'paused';}
- if(foreignLease()&&!HUB.active)return 'other-tab';
+ if(foreignLeaseInfo()?.kind===kind&&!HUB.active)return 'other-tab';
  return HUB.last[kind]?.status||'idle';
 }
 function progress(kind){
@@ -199,7 +200,7 @@ function paint(){if(!document.body)return;load();const v=prefs().visibility,exis
  const cooldown=Math.max(0,Math.ceil((HUB.cooldownUntil-Date.now())/1000));
  el.className='mf428-hub'+(HUB.expanded?' mf428-open':'');
  el.dataset.position=prefs().position==='left'?'left':'right';
- const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
+ const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':foreignLease()?'Another tab: '+(LABELS[foreignLeaseInfo()?.kind]||'processing'):cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
  (HUB.expanded?'<section class="mf428-panel" aria-label="Process controls"><div class="mf428-panel-title"><strong>Recovery & Release Center</strong><small>Only one process runs at a time</small></div>'+KINDS.map(row).join('')+'<div class="mf428-footer"><span>◈ '+(cooldown?'Shared cooldown: '+cooldown+'s':'Smart rate-limit scheduling')+'</span><button type="button" onclick="App.mf428SetVisibility(\'hidden\')">Hide widget</button></div></section>':'');
  if(HUB.lastMarkup!==markup){
   const panel=el.querySelector('.mf428-panel'),scroll=panel?.scrollTop||0;
