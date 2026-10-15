@@ -38,9 +38,19 @@ async function read(p:string,url:string,headers:Record<string,string>={},body?:u
  const c=new AbortController(),timer=setTimeout(()=>c.abort(),8500);
  try{const r=await fetch(url,{method:body?"POST":"GET",headers:{"Accept":"application/json",...headers,...(body?{"Content-Type":"application/json"}:{})},
   body:body?JSON.stringify(body):undefined,redirect:"error",signal:c.signal});
- if(!r.ok)throw Error(p+" returned HTTP "+r.status);
  const s=await r.text();if(s.length>1100000)throw Error("Provider payload too large");
- return JSON.parse(s);
+ let data:any;try{data=JSON.parse(s);}catch(_){throw Error(p+" returned an invalid JSON response");}
+ if(p==="omdb"&&String(data?.Response).toLowerCase()==="false"){
+  const reason=String(data?.Error||"").toLowerCase();
+  if(/invalid api key|no api key|not activated|not verified/.test(reason))
+   throw Error("OMDb API key rejected. Check email activation and the OMDB_API_KEY Supabase secret.");
+  if(/daily request limit|request limit|rate limit|quota/.test(reason))
+   throw Error("OMDb API daily request limit reached. Please retry after the quota resets.");
+  if(!/movie not found|series not found|episode not found|incorrect imdb id/.test(reason))
+   throw Error("OMDb returned a provider-side error. Verify the API account.");
+ }
+ if(!r.ok)throw Error(p+" returned HTTP "+r.status);
+ return data;
  }finally{clearTimeout(timer);}
 }
 function record(p:Provider,title:string,ids:IdMap,year:number,v:{
@@ -79,11 +89,21 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
  }
  if(p==="omdb"){
   const q=new URL("https://www.omdbapi.com/");q.searchParams.set("apikey",secret);
-  if(/^tt\d{7,12}$/i.test(ids.imdb||""))q.searchParams.set("i",ids.imdb);
+  const known=/^tt\d{7,12}$/i.test(ids.imdb||"");
+  if(known)q.searchParams.set("i",ids.imdb);
   else q.searchParams.set("s",title);
   const d=await read(p,q.href);
-  for(const r of (Array.isArray(d.Search)?d.Search:[d]).slice(0,8))
-   if(r?.imdbID)add({id:r.imdbID,name:r.Title,image:r.Poster,link:"https://www.imdb.com/title/"+r.imdbID+"/",year:r.Year,key:"imdb"});
+  const append=(payload:any)=>{for(const r of (Array.isArray(payload?.Search)?payload.Search:[payload]).slice(0,8))
+    if(r?.imdbID)add({id:r.imdbID,name:r.Title,image:r.Poster,
+     link:"https://www.imdb.com/title/"+r.imdbID+"/",year:r.Year,key:"imdb"});};
+  append(d);
+  // OMDb's 's' search and 't' direct-title endpoints can return different
+  // matches. Only spend an additional request if search found no exact title.
+  if(!known&&!rows.length){
+   q.searchParams.delete("s");q.searchParams.set("t",title);
+   const direct=await read(p,q.href);
+   append(direct);
+  }
  }
  if(p==="fanart"){
   const type=/^[1-9]\d*$/.test(ids.tmdb||"")?"movies":/^[1-9]\d*$/.test(ids.tvdb_series||"")?"tv":"";
@@ -212,6 +232,6 @@ Deno.serve(async(req:Request)=>{
   return reply(200,{provider:p,results,cached:false});
  }catch(e){
   const msg=String((e as Error)?.message||"");
-  return reply(502,{error:/^[a-z]+ returned HTTP \d{3}$/.test(msg)?msg:"Provider request failed or returned an unexpected response"});
+  return reply(502,{error:msg.startsWith("OMDb ")?msg:/^[a-z]+ returned HTTP \d{3}$/.test(msg)?msg:"Provider request failed or returned an unexpected response"});
  }
 });
