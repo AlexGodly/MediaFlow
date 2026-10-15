@@ -1,3 +1,11 @@
+## MediaFlow v422 — Navigation 2.0 & Library Details
+
+- Clicking title covers (including missing covers) or names in Normal and Dynamic Library opens the existing Title Details popup in every display mode.
+- Mini Sidebar expansion restores a readable width; navigation-style tabs are visible in Settings Center > Appearance > Navigation.
+- Top and Bottom navigation use the real MediaFlow logo, centered page tabs, theme-aware floating logo, and a level/streak progression popup; Account navigation is exclusive to Profile.
+- Account disables image file selection in favor of direct URL, with an optional Ko-fi support notice. About gains a Support MediaFlow section.
+- Added v422 browser tests covering the actual Settings Center, navigation/dock behavior, Title Details interactions, Account/About, and missing-cover regression.
+
 ## MediaFlow v421 — Adaptive Navigation & Logging Filter Fix
 
 - Four desktop navigation styles: resizable Sidebar, icon-only Mini, responsive Top bar and Bottom bar, with drag-to-dock logo and tab selection in Settings → Interface → Navigation.
