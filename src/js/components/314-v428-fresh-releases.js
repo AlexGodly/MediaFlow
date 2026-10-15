@@ -123,5 +123,6 @@ if(typeof MediaFlowRuntime!=='undefined')MediaFlowRuntime.registerPageEnhancer('
 Object.assign(App,{mf428FreshOpen:open,mf428FreshClose:close,mf428FreshBegin:begin,mf428FreshReport:report,mf428FreshCloseReport:closeReport,mf428FreshResume:resume,mf428FreshControl:control});
 window.MediaFlowV428Fresh={status:()=>F.job?.status||'idle',progress:()=>({at:F.job?.cursor||0,total:F.job?.ids?.length||0}),open,worker};
 window.MediaFlowV428Hub?.registerFresh(worker);
+if(typeof MediaFlowRuntime!=='undefined')MediaFlowRuntime.version=428;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
