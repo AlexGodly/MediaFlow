@@ -87,6 +87,8 @@ function v225CleanActionText(el){
 }
 
 function v225ButtonIconName(el){
+  // v426: the Level/Streak badge owns its content, never attach a generic action glyph.
+  if(el?.matches?.('.mf421-dock-progress'))return null;
   const explicit=String(el.dataset?.v225Icon||'').trim();
   if(explicit&&V225_BUTTON_ICONS[explicit])return explicit;
   const t=v225CleanActionText(el);
@@ -174,6 +176,8 @@ function v225ButtonIconName(el){
 
 function v225IconEligible(el){
   if(!el||el.nodeType!==1)return false;
+  // Prevent the global icon system injecting its default circled arrow.
+  if(el.matches?.('.mf421-dock-progress'))return false;
   if(el.dataset?.v225Iconified==='1')return false;
   if(el.matches?.('.toggle,.v144-swatch-main,.v45-cover-choice,.account-avatar-btn,.v161-nav-grip'))return false;
   if(el.matches?.('button,a.btn,label.btn,summary.btn,.v221-settings-nav-item'))return true;

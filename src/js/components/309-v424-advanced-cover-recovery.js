@@ -145,7 +145,7 @@ async function mf424Request(provider,url,options={}){
 }
 function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
-  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch)};}
+  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId:String(entry?.mal_id??entry?.id??entry?.idMal??'')};}
 async function mf424Discover(item,provider){
   const title=String(cleanTitle(item.title||'')).trim();const kind=v158ItemKind(item);
   if(provider==='tenrai'||provider==='jikan'){
@@ -166,7 +166,7 @@ async function mf424Discover(item,provider){
     const payload=await mf424Request(provider,'https://graphql.anilist.co',{body});
     return (payload?.data?.Page?.media||[]).map(x=>{
       const known=Boolean(aid&&x.id===aid||!aid&&mal&&x.idMal===mal);
-      const entry={title:x.title?.romaji,titles:[x.title?.english,x.title?.native,...(x.synonyms||[])],year:x.startDate?.year};
+      const entry={id:x.id,idMal:x.idMal,title:x.title?.romaji,titles:[x.title?.english,x.title?.native,...(x.synonyms||[])],year:x.startDate?.year};
       const match=mf424Match(item,entry,known);return mf424AsCandidate(entry,x.coverImage?.extraLarge||x.coverImage?.large,provider,known,x.siteUrl,match.reason,match.confidence);
     }).filter(Boolean);
   }
@@ -174,7 +174,7 @@ async function mf424Discover(item,provider){
     const id=mf424Id(item,'kitsu'),type=kind==='manga'?'manga':'anime';
     const data=await mf424Request(provider,'https://kitsu.io/api/edge/'+type+(id?'/'+encodeURIComponent(id):'?filter%5Btext%5D='+encodeURIComponent(title)+'&page%5Blimit%5D=8'));
     return (id?[data?.data]:(data?.data||[])).filter(Boolean).map(x=>{
-      const a=x.attributes||{},entry={title:a.canonicalTitle,titles:Object.values(a.titles||{}),year:Number(String(a.startDate||'').slice(0,4))};
+      const a=x.attributes||{},entry={id:x.id,title:a.canonicalTitle,titles:Object.values(a.titles||{}),year:Number(String(a.startDate||'').slice(0,4))};
       const match=mf424Match(item,entry,Boolean(id&&x.id===id));
       return mf424AsCandidate(entry,a.posterImage?.original||a.posterImage?.large||a.posterImage?.medium,provider,Boolean(id&&x.id===id),'https://kitsu.io/'+type+'/'+x.id,match.reason,match.confidence);
     }).filter(Boolean);
@@ -185,7 +185,7 @@ async function mf424Discover(item,provider){
     const data=await mf424Request(provider,url);
     return (Array.isArray(data)?data.map(x=>x.show):[data]).filter(Boolean).map(x=>{const direct=Boolean(tvmaze&&String(x.id)===tvmaze||!tvmaze&&imdb&&x.externals?.imdb===imdb);
       const match=mf424Match(item,{title:x.name,year:Number(String(x.premiered||'').slice(0,4))},direct);
-      return mf424AsCandidate({title:x.name},x.image?.original||x.image?.medium,provider,direct,x.url,match.reason,match.confidence);
+      return mf424AsCandidate({id:x.id,title:x.name},x.image?.original||x.image?.medium,provider,direct,x.url,match.reason,match.confidence);
     }).filter(Boolean);
   }
   if(provider==='mangadex'){
@@ -195,7 +195,7 @@ async function mf424Discover(item,provider){
     return (id?[data?.data]:(data?.data||[])).filter(Boolean).map(x=>{
       const attrs=x.attributes||{},cover=x.relationships?.find(r=>r.type==='cover_art');const file=cover?.attributes?.fileName;
       const url=file?'https://uploads.mangadex.org/covers/'+x.id+'/'+file:'';
-      const entry={title:Object.values(attrs.title||{})[0],titles:Object.values(attrs.altTitles||[]).flatMap(o=>Object.values(o)),year:attrs.year};
+      const entry={id:x.id,title:Object.values(attrs.title||{})[0],titles:Object.values(attrs.altTitles||[]).flatMap(o=>Object.values(o)),year:attrs.year};
       const match=mf424Match(item,entry,Boolean(id&&x.id===id));
       return mf424AsCandidate(entry,url,provider,Boolean(id&&x.id===id),'https://mangadex.org/title/'+x.id,match.reason,match.confidence);
     }).filter(Boolean);
@@ -246,7 +246,7 @@ async function mf424Apply(item,candidate,expected){
   if(!await mf424Image(candidate.url,candidate.provider))return false;
   if(!mf424Missing(item)||Number(item.modifiedAt||0)!==Number(expected||0))return false;
   item.coverUrl=candidate.url;item.coverSource='auto:'+candidate.provider+':'+(candidate.idMatch?'external-id':'verified');
-  item.modifiedAt=Date.now();MF424.job.dirty++;
+  item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
 async function mf424Flush(){if(!MF424.job?.dirty)return;
@@ -325,16 +325,16 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
   finally{MF424.running=false;mf424Release();mf424Paint();}
 }
 async function mf424Start(){if(MF424.running)return;const settings=mf424ReadForm();
-  if(!MF424.ready){alert('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}
+  if(!MF424.ready){showToast('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}
   const missing=[];const lib=S.library||[];
   for(let i=0;i<lib.length;i+=1000){
-    for(const item of lib.slice(i,i+1000))if(mf424Missing(item))missing.push(String(item.id));
+    for(const item of lib.slice(i,i+1000))if(mf424Missing(item)&&(typeof mf425ScopeAllows!=='function'||mf425ScopeAllows(item)))missing.push(String(item.id));
     if(i%10000===0)await mf424Delay(0);
   }
   if(!missing.length){showToast('Every Library title already has a cover URL.');return;}
-  if(MF424.job&&!['complete','stopped'].includes(MF424.job.status)&&!confirm('Replace your existing recovery job? Pending confirmations will be lost.'))return;
+  if(MF424.job&&!['complete','stopped'].includes(MF424.job.status)&&!await mf427ConfirmJobReplace())return;
   MF424.job={id:'mf424-'+Date.now(),account:mf424Account(),created:Date.now(),updated:Date.now(),ended:0,
-    ids:missing,cursor:0,mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,
+    ids:missing,cursor:0,scope:(typeof MF425!=='undefined'&&MF425.active?MF425.active:null),mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,
     status:'ready',fixed:0,unresolved:0,skipped:0,failed:0,pending:0,processed:0,dirty:0,
     requestCount:0,cooldownEvents:0,rate:{},unresolvedIds:[],results:[],reviews:[],stopRequested:false,pauseRequested:false,stopAfterPart:false};
   S.settings.v424Covers=settings;await saveState();await mf424SaveJob();mf424CloseModal();mf424Run();
@@ -423,8 +423,8 @@ async function mf424RetryUnresolved(){if(!MF424.job||MF424.running)return;
   const old=MF424.job;const ids=[...new Set([...(old.unresolvedIds||[]),...old.results.filter(x=>x.type==='unresolved'||x.type==='provider-error'||x.type==='error').map(x=>x.id).filter(Boolean)])]
     .filter(id=>mf424Missing(mf424Item(id)));
   if(!ids.length){showToast('No unresolved missing-cover titles to retry.');return;}
-  if(old.pending&&!confirm('Pending confirmations will remain only in the exported previous report. Continue?'))return;
-  if(!confirm('Retry '+ids.length+' unresolved titles as a new recovery job?'))return;
+  if(old.pending&&!await mf427ConfirmRetryPending())return;
+  if(!await mf427ConfirmRetry(ids.length))return;
   await mf424Storage('put','history:'+mf424Account()+':'+old.id,{...old,ids:undefined});
   MF424.job={...old,id:'mf424-'+Date.now(),ids,cursor:0,created:Date.now(),ended:0,status:'ready',fixed:0,unresolved:0,skipped:0,failed:0,pending:0,processed:0,dirty:0,
     requestCount:0,cooldownEvents:0,rate:{},unresolvedIds:[],results:[],reviews:[],stopRequested:false,pauseRequested:false,stopAfterPart:false};
