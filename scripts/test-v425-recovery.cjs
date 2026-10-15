@@ -23,4 +23,35 @@ S.library=Array.from({length:100000},(_,i)=>({id:String(i),categoryId:i%2?'anime
 const subset={mode:'selected',ids:Array.from({length:5000},(_,i)=>String(i))};
 ctx.subset=subset;const began=Date.now();const x=vm.runInContext('mf425Counts(subset)',ctx);assert.equal(x.all,5000);assert.ok(x.eligible>0);
 const catCount=vm.runInContext('mf425Counts({mode:"categoryStatus",pairs:{anime:["completed"]}})',ctx);assert.ok(catCount.all>0&&catCount.eligible>0);
+
+// Cover Recovery must use the existing Settings Center accordion; the v427
+// appended confirmation control must stay inside its collapsible body.
+const accordionStart=source.indexOf('function mf425SettingsEnhance(){');
+const accordionEnd=source.indexOf("\nMediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance)",accordionStart);
+assert(accordionStart>=0&&accordionEnd>accordionStart,'Settings enhancer exists');
+const accordionFn=source.slice(accordionStart,accordionEnd);
+const settingsBody='<section class="mf425-settings-card">Existing recovery controls</section><label class="mf427-settings-confirm">Confirmation setting</label>';
+let appended=null;
+const libraryTarget={
+ querySelector(selector){return appended&&selector==='.mf425-settings-card'?{}:null;},
+ appendChild(element){appended=element;}
+};
+const settingsCtx={S:{view:'settings'},document:{
+ querySelector:selector=>selector.includes('data-mf365-category="library"')?libraryTarget:null,
+ createElement:()=>({dataset:{},className:'',innerHTML:''})
+},mf425SettingsMarkup:()=>settingsBody,v365Icon:()=>'<svg></svg>'};
+vm.createContext(settingsCtx);
+vm.runInContext(accordionFn,settingsCtx);
+settingsCtx.mf425SettingsEnhance();
+assert(appended,'Cover Recovery subgroup is inserted');
+assert.equal(appended.dataset.mf366Subgroup,'cover-recovery');
+assert.match(appended.innerHTML,/class="mf365-section mf425-settings-section"/);
+assert.match(appended.innerHTML,/class="mf365-section-toggle" aria-expanded="false" aria-controls="mf425-settings-body"/);
+assert(appended.innerHTML.includes("App.v365ToggleSection('cover-recovery')"),'Accordion uses same Settings Center toggle');
+assert.match(appended.innerHTML,/class="mf365-section-body" id="mf425-settings-body" hidden/);
+assert(appended.innerHTML.indexOf('mf427-settings-confirm')>appended.innerHTML.indexOf('id="mf425-settings-body" hidden'),'Confirmation is hidden with other settings');
+assert(appended.innerHTML.includes('Existing recovery controls'),'Original settings remain available');
+settingsCtx.mf425SettingsEnhance();
+assert(appended,'Settings injection is stable and non-duplicating');
+
 console.log('v425 scoped recovery and 100k title contract checks passed in',Date.now()-began,'ms');
