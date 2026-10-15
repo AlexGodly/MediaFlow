@@ -125,7 +125,7 @@ function html(){
 function render(){
  if(!document.body)return;switchAccount();
  const mode=visibility(),s=overview(),idle=s.state==='idle';
- if(mode==='hidden'||(mode==='auto'&&idle)){
+ if(mode==='hidden'||(mode==='auto'&&idle&&!state.expanded)){
   if(state.root){removePortals();state.root.remove();state.root=null;state.content=null;}
   return;
  }
@@ -134,7 +134,7 @@ function render(){
  state.content=state.root.querySelector('.mf429-tab-body');
  if(state.expanded)renderCurrent();
 }
-function choose(tab){if(!TABS.includes(tab))return;state.context=null;state.tab=tab;state.expanded=true;savePreference({tab,expanded:true});render();}
+function choose(tab){if(!TABS.includes(tab))return;if(state.expanded&&state.tab===tab&&state.root?.isConnected)return;state.context=null;state.tab=tab;state.expanded=true;savePreference({tab,expanded:true});render();}
 function openScoped(tab,entry='settings',id=''){
  if(!TABS.includes(tab))return;
  discardPortals(tab);
@@ -167,7 +167,7 @@ function onClick(e){
 }
 function tick(){
  const mode=visibility();
- if(mode==='hidden'||(mode==='auto'&&overview().state==='idle')){if(state.root)render();return;}
+ if(mode==='hidden'||(mode==='auto'&&overview().state==='idle'&&!state.expanded)){if(state.root)render();return;}
  if(state.account!==account()){state.account='';render();return;}
  if(!state.root?.isConnected){state.root=null;render();return;}
  const next=overview(),sub=state.root.querySelector('.mf429-launch-copy small'),dot=state.root.querySelector('.mf429-indicator');
