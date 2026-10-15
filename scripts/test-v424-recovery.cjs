@@ -42,8 +42,8 @@ async function main(){
   assert.equal(await run('mf424TotalParts({mode:"parts",ids:Array(100001),partSize:100})'),1001);
   assert.equal(await run('mf424Part({mode:"parts",ids:Array(250),partSize:100,cursor:125})'),2);
   assert.equal(await run('mf424Part({mode:"one",ids:Array(250),partSize:100,cursor:125})'),1);
-  assert.equal((src.match(/function mf424QueueReview\\(/g)||[]).length,1,'Queue review and dialog have independent names');
-  assert.equal((src.match(/function mf424Review\\(/g)||[]).length,1,'Review dialog can be opened without overriding queue logic');
+  assert.equal((src.match(/function mf424QueueReview\(/g)||[]).length,1,'Queue review and dialog have independent names');
+  assert.equal((src.match(/function mf424Review\(/g)||[]).length,1,'Review dialog can be opened without overriding queue logic');
   assert(src.includes("state.unavailableUntil=Date.now()+90000"),'API outage skips later per-title retries safely');
   await run('MF424.rate.jikan={at:[],next:0,cooldown:0,fails:3,unavailableUntil:Date.now()+90000}');
   await assert.rejects(run('mf424Request("jikan","https://api.jikan.moe/v4/anime/1")'),/temporarily unreachable/);
