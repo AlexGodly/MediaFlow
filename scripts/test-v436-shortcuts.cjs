@@ -22,7 +22,7 @@ assert(source.includes('data-action="coverRecovery"'),'Fourth floating shortcut 
 assert(source.includes("App.mf425OpenConfig('floating')"),'Shortcut launches existing recovery configuration, not a job');
 assert(!source.includes('App.mf424Start()'),'Opening shortcut never starts recovery');
 const fake={
- console,Map,Set,Date,JSON,Object,Number,String,Array,Math,Error,Promise,
+ console,Map,Set,Date,JSON,Object,Number,String,Array,Math,Error,Promise,window:{},
  S:{library:[{id:'1',title:'One',coverUrl:''},{id:'2',title:'Two',coverUrl:'cover'},{id:'3',title:'Three',coverUrl:''}],librarySelection:{'1':true,'2':true}},
  MF425:{selected:[],oneId:'',locked:false},MF424:{ready:true},
  MF397:{open:false},AUTH_USER:{id:'test'},
