@@ -9,6 +9,7 @@ const escapeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const state={root:null,content:null,tab:'queue',expanded:false,account:'',started:false};
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');
 const pref=()=>S.settings?.v429Center||{};
+const visibility=()=>['hidden','auto','always'].includes(pref().visibility)?pref().visibility:'always';
 function savePreference(p){
  S.settings=S.settings||{};S.settings.v429Center={...pref(),...p};
  try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v429 center settings',e));}catch(e){console.warn(e);}
@@ -90,6 +91,11 @@ function html(){
 }
 function render(){
  if(!document.body)return;switchAccount();
+ const mode=visibility(),s=overview(),idle=s.state==='idle';
+ if(mode==='hidden'||(mode==='auto'&&idle)){
+  if(state.root){removePortals();state.root.remove();state.root=null;state.content=null;}
+  return;
+ }
  if(!state.root){state.root=document.createElement('aside');state.root.id='mf429-center';state.root.setAttribute('aria-label','Recovery and Release Center');state.root.addEventListener('click',onClick);document.body.appendChild(state.root);}
  removePortals();state.root.classList.toggle('open',state.expanded);state.root.innerHTML=html();
  state.content=state.root.querySelector('.mf429-tab-body');
@@ -119,6 +125,8 @@ function onClick(e){
  if(kind&&cmd)queueCommand(kind,cmd);
 }
 function tick(){
+ const mode=visibility();
+ if(mode==='hidden'||(mode==='auto'&&overview().state==='idle')){if(state.root)render();return;}
  if(state.account!==account()){state.account='';render();return;}
  if(!state.root?.isConnected){state.root=null;render();return;}
  const next=overview(),sub=state.root.querySelector('.mf429-launch-copy small'),dot=state.root.querySelector('.mf429-indicator');
@@ -135,7 +143,31 @@ function init(){
  render();
  setInterval(tick,1600);
 }
-Object.assign(App,{mf429CenterTab:choose,mf429CenterToggle:toggle,mf429CenterQueue:queueCommand});
+function centerSettingsHtml(){
+ const mode=visibility();
+ return '<section class="mf429-center-settings" aria-label="Recovery and Release Center preferences">'+
+ '<strong>Recovery and Release Center</strong><p>Choose when the elegant bottom-left Center appears. All three recovery engines stay active regardless of visibility.</p>'+
+ '<label for="mf429-visibility">Floating widget visibility</label><select id="mf429-visibility" onchange="App.mf429CenterVisibility(this.value)">'+
+ [['hidden','Hidden'],['auto','Automatic — when work needs attention'],['always','Always Show — quick launch available']].map(x=>'<option value="'+x[0]+'" '+(mode===x[0]?'selected':'')+'>'+x[1]+'</option>').join('')+'</select>'+
+ '<small>Position: bottom-left. Remembers the last tab and minimized state.</small></section>';
+}
+if(typeof v405FloatingSettingsHtml==='function'){
+ const before=v405FloatingSettingsHtml;
+ v405FloatingSettingsHtml=function(){
+  const html=String(before.apply(this,arguments)||''),end=html.lastIndexOf('</div>');
+  return end>=0?html.slice(0,end)+centerSettingsHtml()+html.slice(end):html+centerSettingsHtml();
+ };
+}
+if(typeof v366RegisterSetting==='function'){
+ v366RegisterSetting({id:'v429-center-visibility',section:'v221-settings-floating-controls',
+  selector:'#mf429-visibility',label:'Recovery and Release Center visibility',
+  subgroup:'Background Operations',keywords:['recovery','release','bottom-left','floating','queue','metadata','covers','fresh','widget']});
+}
+function setVisibility(value){
+ if(!['hidden','auto','always'].includes(value))return;
+ savePreference({visibility:value});render();
+}
+Object.assign(App,{mf429CenterTab:choose,mf429CenterToggle:toggle,mf429CenterQueue:queueCommand,mf429CenterVisibility:setVisibility});
 window.MediaFlowV429Center={version:429,open(){if(!state.expanded)toggle();},tab:choose,toggle,status:()=>({tab:state.tab,expanded:state.expanded})};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
