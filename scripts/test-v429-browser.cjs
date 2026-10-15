@@ -117,6 +117,11 @@ async function pageReady(cdp,label){
      'Switching tabs/minimizing lost unsubmitted original form values: '+JSON.stringify(editing));
    assert(editing.scopedSettings&&!editing.looseModal,'Legacy Cover Recovery settings entry escaped Center: '+JSON.stringify(editing));
    console.log(d.label,'native recovery draft preservation:',JSON.stringify(editing));
+   const freshPreservation=await cdp.evaluate("(()=>{App.mf429CenterTab('fresh');const seasonal=document.getElementById('mf429-seasonal-form');const present=!!seasonal;App.mf429CenterTab('queue');App.mf429CenterTab('fresh');const sameNode=document.getElementById('mf429-seasonal-form')===seasonal;return {present,sameNode};})()");
+   assert(freshPreservation?.present&&freshPreservation.sameNode,'Fresh Episodes settings draft DOM was recreated: '+JSON.stringify(freshPreservation));
+   const hiddenShortcut=await cdp.evaluate("(()=>{App.mf429CenterVisibility('hidden');const initiallyHidden=!document.getElementById('mf429-center');App.mf428MetadataOpen('settings');const opened=!!document.querySelector('#mf429-center #mf428-metadata-modal');App.mf429CenterToggle();const hiddenWhenMinimized=!document.getElementById('mf429-center');App.mf429CenterVisibility('always');return {initiallyHidden,opened,hiddenWhenMinimized};})()");
+   assert(hiddenShortcut?.initiallyHidden&&hiddenShortcut.opened&&hiddenShortcut.hiddenWhenMinimized,'Hidden visibility blocked recovery shortcut: '+JSON.stringify(hiddenShortcut));
+   console.log(d.label,'Fresh Episodes preservation and hidden-shortcut access:',JSON.stringify({freshPreservation,hiddenShortcut}));
 
    const img=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
    assert(img.data,'No screenshot from '+d.label);
