@@ -108,6 +108,9 @@ async function pageReady(cdp,label){
    assert(center.x<d.width/2,'Recovery Center not anchored to bottom-left on '+d.label);
    const opened=await cdp.evaluate("(()=>{App.mf429CenterTab('queue');const root=document.querySelector('#mf429-center');return {hasQueue:!!root?.querySelector('.mf429-job'),tabs:root?.querySelectorAll('[role=tab]').length,expanded:root?.classList.contains('open')};})()");
    assert(opened?.hasQueue&&opened.tabs===4&&opened.expanded,'Queue tab failed '+d.label+': '+JSON.stringify(opened));
+   const surfaces=await cdp.evaluate("(()=>{const test={};for(const [tab,id] of [['covers','mf424-modal'],['metadata','mf428-metadata-modal']]){try{App.mf429CenterTab(tab);test[tab]=!!document.querySelector('#mf429-center #'+id);}catch(e){test[tab]='error: '+e.message;}}try{App.mf429CenterTab('fresh');test.fresh=!!document.querySelector('#mf429-center .mf429-anime-settings');test.freshProvider=!!document.querySelector('#mf429-center .mf380-provider-select');}catch(e){test.fresh='error: '+e.message;}return test;})()");
+   assert(surfaces?.covers===true&&surfaces?.metadata===true&&surfaces?.fresh===true,'Existing recovery UI portal failed on '+d.label+': '+JSON.stringify(surfaces));
+   console.log(d.label,'reused recovery interfaces:',JSON.stringify(surfaces));
    const img=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
    assert(img.data,'No screenshot from '+d.label);
    fs.writeFileSync(path.join(screens,d.label+'.png'),Buffer.from(img.data,'base64'));
