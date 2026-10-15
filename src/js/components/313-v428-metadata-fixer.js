@@ -166,11 +166,13 @@ async function worker(params={}){await init();
  if(params.draftPreview){if(params.account!==account())throw Error('Unsaved title account changed');if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview,params.account,params);return;}
  const job=M.job;if(!job||job.account!==account())return;
  job.status='running';M.running=true;await persist();
+ const index=new Map((S.library||[]).filter(i=>i?.id).map(i=>[String(i.id),i]));
  try{let processed=0;while(job.cursor<job.ids.length){
   if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status=job.stopped?'stopped':'paused';break;}
-  const id=job.ids[job.cursor],item=lookup(id);if(item){const version=Number(item.modifiedAt)||0;
-   try{const found=await discover({...item});if(found.source){const differences=diff(item,found).filter(d=>job.method==='review'||d.selected);
-    if(differences.length){job.reviews.push({itemId:id,version,found,differences});}else job.skipped++;
+  const id=job.ids[job.cursor],item=index.get(id);if(item){const version=Number(item.modifiedAt)||0;
+   try{const found=await discover({...item});if(found.source){if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status='paused';break;}
+    const differences=diff(item,found).filter(d=>job.fields?.includes(d.field)!==false&&(job.method!=='missing'||d.selected));
+    if(differences.length){if(job.method==='refresh')differences.forEach(d=>d.selected=true);job.reviews.push({itemId:id,version,found,differences});}else job.skipped++;
    }else job.skipped++;}catch(e){job.errors.push({id,reason:String(e.message||e)});}}
   job.cursor++;processed++;await persist();
   if(job.reviews.length>=250){job.status='waiting-review';break;}
@@ -197,12 +199,30 @@ async function apply(){
  if(!current.draft&&(!item||Number(item.modifiedAt||0)!==Number(current.version))){showToast('Title changed since lookup. Recheck metadata before applying.');return;}
  if(!current.draft&&account()!==M.job?.account){showToast('Account changed. No metadata saved.');return;}
  const selected=checked.map(i=>current.differences[i]).filter(Boolean);
- if(current.draft){if(current.owner!==account()){showToast('Account changed. Draft metadata was not applied.');return;}let applied=0;for(const d of selected){
-   const aliases={description:['l-description','l-synopsis'],total:['l-total'],year:['l-year'],genres:['l-genres']};
-   const el=(aliases[d.field]||[]).map(id=>document.getElementById(id)).find(Boolean);
-   if(el){el.value=Array.isArray(d.found)?d.found.join(', '):String(d.found);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));applied++;}}
-   showToast(applied?'Metadata added to unsaved draft. Save title when ready.':'No matching editable draft fields. Nothing changed.');
+ if(current.draft){
+   if(current.owner!==account()||S.modal?.type!=='library'){
+    showToast('Title editor or account changed. Reopen Fix Metadata.');return;
+   }
+   const editor=draftItem('editor',current.itemId);
+   if(snapshot(editor)!==current.fingerprint){
+    showToast('Title editor changed after metadata lookup. Recheck it before applying.');return;
+   }
+   let applied=0;
+   for(const d of selected){
+    const el=document.getElementById(editorIds[d.field]);
+    if(!el)continue;
+    el.value=LIST_FIELDS.has(d.field)?d.found.join(', '):String(d.found);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+    if(typeof el.closest==='function')el.closest('details')&&(el.closest('details').open=true);
+    applied++;
+   }
+   showToast(applied?'Metadata applied to title editor. Save the title to keep these changes.':'No editable metadata fields found. Nothing was saved.');
  }else{
+  const protectedManual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
+  if(selected.some(d=>protectedManual[d.field]===true||d.field==='total'&&(Number(item.total)>0||Number(item.progress)>0||item.seasons?.length))){
+   showToast('A field was manually protected or progress/season totals changed. Recheck this title.');return;
+  }
   const previous={};for(const d of selected){previous[d.field]=item[d.field];item[d.field]=d.found;}
   const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();
   try{if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();await saveState();
@@ -219,7 +239,11 @@ function control(cmd){if(!M.job)return;
   if(cmd==='cancel')M.job.status='paused';persist();
  }
  if(cmd==='review')review();
- if(cmd==='resume'&&['paused','waiting-part','waiting-review'].includes(M.job.status)){M.job.paused=false;M.job.stopped=false;M.job.status='queued';persist().then(()=>window.MediaFlowV428Hub?.enqueue('metadata',{}));}}
+ if(cmd==='resume'&&['paused','stopped','waiting-part','waiting-review'].includes(M.job.status)){
+   if(M.running)return;
+   M.job.paused=false;M.job.stopped=false;M.job.status='queued';
+   persist().then(()=>window.MediaFlowV428Hub?.enqueue('metadata',{})).catch(e=>console.warn('Metadata resume failed',e));
+ }}
 function injectEditor(html){if(!html||html.includes('mf428-edit-action'))return html;const at=html.indexOf('class="mf425-editor-tools"');if(at<0)return html;const close=html.indexOf('</div>',at);if(close<0)return html;
  return html.slice(0,close)+'<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'editor\',String(S.modal?.data?.id||\'\'))">Fix Metadata</button>'+html.slice(close);}
 if(typeof libraryModalHtml==='function'){const prior=libraryModalHtml;libraryModalHtml=function(){return injectEditor(String(prior.apply(this,arguments)||''));};}
