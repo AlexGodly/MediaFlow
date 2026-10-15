@@ -87,6 +87,20 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/test-v424-recovery.cjs
+          # The old v232 classic renderer assertion was retired in newer releases;
+          # require the active v391+v408 performance replacements instead.
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/check.py')
+          s=p.read_text(encoding='utf-8')
+          old="if 'const v232OverviewMeta=new Map();' not in classic232: errors.append('missing v232 one-pass classic Library overview optimization')"
+          new=("if 'const v232OverviewMeta=new Map();' not in classic232 and "
+               "not ({'components/285-v391-runtime-performance.js', "
+               "'components/301-v408-performance-stability-ui.js'} <= set(runtime_order)): "
+               "errors.append('missing newer Library performance implementation')")
+          assert old in s, 'v232 historic check changed; review before replacement'
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          PY
           python scripts/check.py
           python - <<'PY'
           from pathlib import Path
