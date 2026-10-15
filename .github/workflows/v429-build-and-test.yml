@@ -58,6 +58,9 @@ jobs:
           test -s assets/js/mediaflow-v429.bundle.js
           grep -q 'mf429CenterTab' assets/js/mediaflow-v429.bundle.js
           grep -q 'registerFresh' assets/js/mediaflow-v429.bundle.js
+      - name: Probe existing public providers (observational; no credentials)
+        continue-on-error: true
+        run: node scripts/probe-v429-public-providers.cjs
       - name: Commit generated bundle and cache to development branch only
         if: github.event_name == 'push'
         run: |
@@ -78,3 +81,4 @@ jobs:
             version.json
             scripts/test-v429-recovery.cjs
             artifacts/v429-browser-smoke/
+            artifacts/v429-provider-probe/
