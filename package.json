@@ -1,7 +1,7 @@
 {
-  "name": "mediaflow-v428",
+  "name": "mediaflow-v429",
   "private": true,
-  "version": "4.2.8",
+  "version": "4.2.9",
   "type": "module",
   "scripts": {
     "build:v265": "vite build --config vite.v261.config.ts",
@@ -10,7 +10,8 @@
     "test:v371": "node tests/test-v369-itemized-contract.cjs",
     "test:v372": "node tests/test-v369-itemized-contract.cjs",
     "test:v428": "node scripts/test-v428-recovery.cjs && node scripts/test-v428-metadata.cjs && node scripts/test-v428-fresh.cjs && node scripts/test-v428-scheduler.cjs && node scripts/test-v428-widget.cjs && node scripts/test-v428-multitab.cjs && node scripts/test-v428-scale.cjs",
-    "test:v428:browser": "node scripts/test-v428-browser.cjs"
+    "test:v428:browser": "node scripts/test-v428-browser.cjs",
+    "test:v429": "node scripts/test-v429-center.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
