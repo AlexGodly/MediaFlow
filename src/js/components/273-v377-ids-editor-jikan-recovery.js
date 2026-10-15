@@ -7,12 +7,70 @@ const V377_ID_PROVIDERS=[
  ['mal','MyAnimeList','Numeric MAL ID'],['simkl','SIMKL','SIMKL ID'],
  ['anilist','AniList','Numeric AniList ID'],['tmdb','TMDB','Numeric TMDB ID'],
  ['imdb','IMDb','tt1234567'],['trakt','Trakt','Trakt ID / slug'],
- ['kitsu','Kitsu','Kitsu ID'],['isbn','ISBN','ISBN']
+ ['kitsu','Kitsu','Kitsu ID'],['isbn','ISBN','ISBN'],
+ ['episodate','EpisoDate Show','TV show ID'],
+ ['tvdb_series','TheTVDB Series','Series ID'],
+ ['tvdb_season','TheTVDB Season','Season ID'],
+ ['tvdb_episode','TheTVDB Episode','Episode ID'],
+ ['tvdb_movie','TheTVDB Movie','Movie ID'],
+ ['simkl_movie','SIMKL Movie','Movie record ID'],
+ ['simkl_show','SIMKL Show','TV show ID'],
+ ['mangadex','MangaDex','Manga UUID'],
+ ['gcd_series','Grand Comics Database Series','Series ID'],
+ ['gcd_issue','Grand Comics Database Issue','Issue ID'],
+ ['royalroad','Royal Road Fiction','Fiction ID'],
+ ['royalroad_rss','Royal Road RSS','https://.../fiction/syndication/...'],
+ ['mangaupdates','MangaUpdates Series','Series ID'],
+ ['livechart','LiveChart Anime','Anime ID'],
+ ['wikidata','Wikidata','Q123456'],
+ ['anidb','AniDB','Anime ID'],
+ ['animeschedule','AnimeSchedule','Anime ID'],
+ ['watchmode','Watchmode','Title ID'],
+ ['marvel_comic','Marvel Comic','Comic ID'],
+ ['marvel_series','Marvel Series','Series ID'],
+ ['marvel_issue','Marvel Issue','Issue ID'],
+ ['lccn','Library of Congress LCCN','LCCN'],
+ ['oclc','OCLC Control Number','OCLC ID'],
+ ['gnd','German National Library GND','GND ID'],
+ ['dnb','German National Library Record','DNB record ID'],
+ ['bnf','BnF Record','BnF record ID'],
+ ['doi','Crossref DOI','10.XXXX/...'],
+ ['comicvine_volume','Comic Vine Volume','Volume ID'],
+ ['comicvine_issue','Comic Vine Issue','Issue ID'],
+ ['comicvine_character','Comic Vine Character','Character ID'],
+ ['metron_series','Metron Series','Series ID'],
+ ['metron_issue','Metron Issue','Issue ID'],
+ ['metron_publisher','Metron Publisher','Publisher ID'],
+ ['hardcover_book','Hardcover Book','Book ID'],
+ ['hardcover_edition','Hardcover Edition','Edition ID'],
+ ['podcastindex_feed','Podcast Index Feed','Feed ID'],
+ ['podcastindex_episode','Podcast Index Episode','Episode ID'],
+ ['podcast_rss','Podcast Feed URL','https://.../feed.xml'],
+ ['openlibrary_work','Open Library Work','OL123W'],
+ ['openlibrary_edition','Open Library Edition','OL123M'],
+ ['inventaire_work','Inventaire Work','Inventaire work ID'],
+ ['inventaire_edition','Inventaire Edition','Inventaire edition ID'],
+ ['gutendex','Gutendex Book','Gutenberg ID'],
+ ['isbn10','ISBN-10','10-character ISBN'],
+ ['isbn13','ISBN-13','13-digit ISBN'],
+ ['ean','EAN','13-digit EAN'],
+ ['youtube_video','YouTube Video','11-character video ID'],
+ ['youtube_playlist','YouTube Playlist','Playlist ID'],
+ ['tmdb_tv','TMDB TV','TV series ID'],
+ ['loc','Library of Congress Record','Library of Congress ID'],
+ ['crossref','Crossref Record','DOI'],
+ ['fribb_mapping','Fribb Mapping Reference','Optional source record ID']
 ];
 let V377_REOPEN_JIKAN_REPORT=false;
 const v377IdValid=(key,value)=>{
   if(!value)return true;
-  if(value.length>120)return false;
+  if(value.length>(['royalroad_rss','podcast_rss'].includes(key)?512:120))return false;
+  if(['royalroad_rss','podcast_rss'].includes(key)){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname.length>3;}catch(_){return false;}}
+  if(key==='doi'||key==='crossref')return /^10\.\d{4,9}\/\S{1,100}$/i.test(value);
+  if(key==='wikidata')return /^Q[1-9]\d*$/i.test(value);
+  if(key==='mangadex')return /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
+  if(key==='isbn10')return /^\d{9}[\dXx]$/.test(value.replace(/[-\s]/g,''));
+  if(['isbn13','ean'].includes(key))return /^\d{13}$/.test(value.replace(/[-\s]/g,''));
   if(key==='mal'||key==='anilist'||key==='tmdb'||key==='kitsu'||key==='simkl')return /^[1-9]\d*$/.test(value);
   if(key==='imdb')return /^tt\d{7,12}$/i.test(value);
   if(key==='isbn')return /^(?:[\dXx-]{10,20})$/.test(value);
@@ -36,7 +94,8 @@ function v377IdsEditorHtml(item){
   Object.keys(ids).filter(key=>!known.has(key)&&/^[a-z][a-z0-9_]{0,32}$/i.test(key)).forEach(key=>providers.push([key,key.toUpperCase(),'External identifier']));
   return `<section class="mf377-external-ids" data-v377-ids-editor>
     <details><summary><span class="mf377-section-icon">⌗</span> External Media IDs <small>Optional · ${Object.values(ids).filter(v=>v!=null&&String(v).trim()).length} saved</small></summary>
-    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic MAL Detection uses only the MyAnimeList ID.</p>
+    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic MAL Detection uses only the MyAnimeList ID. Expanded provider and work/edition identifiers are staged for v434 live API testing.</p>
+    <label class="mf433-id-search">Find an ID field <input type="search" placeholder="Search providers or identifiers…" oninput="App.mf433FilterExternalIds(this.value)" autocomplete="off"></label>
     <div class="mf377-ids-grid">${providers.map(([key,label,placeholder])=>`<label class="field" data-v377-id-row="${escapeHtml(key)}"><span class="field-label">${escapeHtml(label)}</span><span class="mf377-id-control"><input type="text" data-v377-id="${escapeHtml(key)}" autocomplete="off" spellcheck="false" value="${escapeHtml(String(ids[key]??''))}" placeholder="${escapeHtml(placeholder)}">${key==='mal'?'<button type="button" class="btn btn-sm" onclick="App.v377VerifyMalId()">Verify</button>':''}</span></label>`).join('')}</div>
     <div class="mf377-mal-preview" id="mf377-mal-preview" aria-live="polite"></div>
     </details>

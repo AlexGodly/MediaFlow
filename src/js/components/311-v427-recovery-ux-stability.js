@@ -236,6 +236,8 @@ function mf427SelectedLinkId(index){
   return document.querySelector('#mf425-instant-modal [data-mf425-cover-link-id="'+Number(index)+'"]')?.checked===true;
 }
 function mf427FillDraftExternalId(candidate){
+  if(typeof mf433FillDraftExternalIds==='function')
+    return mf433FillDraftExternalIds(candidate);
   const live=MF425.draft||{},link=mf424LinkableCoverId(live,candidate);
   if(!link||link.conflict||link.existing===link.value)return false;
   const root=document.querySelector('#modal-root [data-v377-ids-editor]');
@@ -257,7 +259,9 @@ async function mf427SaveExisting(item,url,candidate,linkId=false){
   if(!item||!url)return false;
   const provider=candidate?.provider||'unknown',before=String(item.coverUrl||'');
   const link=linkId?mf424LinkableCoverId(item,candidate):null;
-  const shouldLink=!!(link&&!link.conflict&&link.existing!==link.value);
+  const shouldLink=!!(linkId&&(typeof mf433CandidateLinks==='function'
+    ?mf433CandidateLinks(item,candidate).some(x=>!x.conflict&&x.existing!==x.value)
+    :link&&!link.conflict&&link.existing!==link.value));
   if(before===url&&!shouldLink){showToast('This cover and its provider ID are already saved.');return true;}
   if(MF427.busySave)return false;
   MF427.busySave=true;
@@ -279,7 +283,7 @@ async function mf427SaveExisting(item,url,candidate,linkId=false){
     if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();
     await saveState();
     mf427FillEditor(url);
-    showToast('Cover saved'+(linked?' · '+link.key.toUpperCase()+' ID linked':'')+(earned?' · +'+earned.toLocaleString()+' XP':'')+' ✓');
+    showToast('Cover saved'+(linked?' · verified External IDs linked':'')+(earned?' · +'+earned.toLocaleString()+' XP':'')+' ✓');
     return true;
   }catch(e){
     item.coverUrl=old.coverUrl;item.coverSource=old.coverSource;item.modifiedAt=old.modifiedAt;
@@ -291,11 +295,13 @@ async function mf427SaveExisting(item,url,candidate,linkId=false){
 async function mf427LinkAfterExternalSave(item,candidate,url,linkId){
   if(!linkId||!item||String(item.coverUrl||'')!==String(url))return false;
   const link=mf424LinkableCoverId(item,candidate);
-  if(!link||link.conflict||link.existing===link.value)return false;
+  if(!(typeof mf433CandidateLinks==='function'
+    ?mf433CandidateLinks(item,candidate).some(x=>!x.conflict&&x.existing!==x.value)
+    :link&&!link.conflict&&link.existing!==link.value))return false;
   const oldIds={...(item.externalIds||{})},oldOverrides={...(item.v377ManualExternalIds||{})},oldModified=item.modifiedAt;
   if(!mf424LinkSelectedCoverId(item,candidate,{manual:true}))return false;
   item.modifiedAt=Date.now();
-  try{await saveState();showToast(link.key.toUpperCase()+' external ID linked');return true;}
+  try{await saveState();showToast('Verified provider External IDs linked');return true;}
   catch(e){
     item.externalIds=oldIds;item.v377ManualExternalIds=oldOverrides;item.modifiedAt=oldModified;
     console.error('Cover provider ID sync failed',e);
@@ -351,7 +357,7 @@ App.mf425ChooseInstant=async function(index){
   // Unsaved Add Title is intentionally a draft: never create cloud data early.
   if(!mf427FillEditor(url)){showToast('Cover URL field could not be found in the Add Title draft.');return;}
   const linked=linkId&&mf427FillDraftExternalId(candidate);
-  showToast(linked?'Cover and provider ID added to the draft. Save the title when ready.':'Cover added to the draft. Save the title when ready.');
+  showToast(linked?'Cover and verified provider IDs added to the draft. Save the title when ready.':'Cover added to the draft. Save the title when ready.');
   App.mf425CloseInstant();
 };
 App.mf425InstantAdvanced=function(){
