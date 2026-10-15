@@ -8,23 +8,41 @@ const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const normalize=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const sourceKinds={tvmaze:['tv','anime'],episodate:['tv'],mangadex:['manga']};
+const sourceKinds={tvmaze:['tv'],episodate:['tv'],mangadex:['manga'],feed:['podcasts','webnovels','webseries']};
+const types={anime:'Anime episodes',tv:'TV episodes',manga:'translated chapters',comics:'comic issues',books:'books / volumes',webnovels:'web novel chapters',webseries:'web series episodes',podcasts:'podcast episodes',movies:'movie installments',other:'releases'};
 function media(item){const c=(S.categories||[]).find(x=>String(x.id)===String(item.categoryId)),v=String(c?.name||item.categoryId||'').toLowerCase();
- if(/manga|manhwa|manhua|comic.*asian/.test(v))return 'manga';if(/anime|seasonal/.test(v))return 'anime';if(/tv|television|series/.test(v))return 'tv';if(/comic/.test(v))return 'comics';if(/book|novel/.test(v))return 'books';if(/movie|film/.test(v))return 'movies';if(/podcast|audio/.test(v))return 'podcasts';return 'other';}
+ if(/manga|manhwa|manhua/.test(v))return 'manga';
+ if(/anime|seasonal/.test(v))return 'anime';
+ if(/podcast|audio\s*series/.test(v))return 'podcasts';
+ if(/web.?novel|web.?fiction|serial\s*fiction|royal road|scribble hub/.test(v))return 'webnovels';
+ if(/web.?series|youtube|peertube|online\s*video/.test(v))return 'webseries';
+ if(/comic|graphic novel/.test(v))return 'comics';
+ if(/book|novel|light novel/.test(v))return 'books';
+ if(/movie|film/.test(v))return 'movies';
+ if(/tv|television|series/.test(v))return 'tv';
+ return 'other';}
 async function db(){return new Promise((ok,no)=>{const r=indexedDB.open('mediaflow-fresh-v428',1);r.onupgradeneeded=()=>r.result.createObjectStore('data');r.onerror=()=>no(r.error);r.onsuccess=()=>ok(r.result);});}
 async function record(op,val,owner=account()){const d=await db();return new Promise((ok,no)=>{const tx=d.transaction('data',op==='get'?'readonly':'readwrite');const r=op==='get'?tx.objectStore('data').get('scan:'+owner):tx.objectStore('data').put(val,'scan:'+owner);r.onerror=()=>no(r.error);r.onsuccess=()=>ok(r.result);tx.oncomplete=()=>d.close();});}
 async function save(){if(F.job)await record('put',F.job,F.job.account);window.MediaFlowV428Hub?.paint();}
-async function request(source,url){const key=source+' '+url,now=Date.now(),hit=F.cache.get(key);if(hit&&hit.until>now)return hit.data;
- const rate=F.rate[source]||(F.rate[source]={next:0,wait:0});let wait=Math.max(rate.next-Date.now(),rate.wait-Date.now(),0);
- if(wait)await sleep(wait);rate.next=Date.now()+(source==='mangadex'?2600:1700);
- for(let attempt=0;attempt<3;attempt++){const ctrl=new AbortController(),clock=setTimeout(()=>ctrl.abort(),15000);
+async function request(source,url,format='json'){const key=source+' '+url,now=Date.now(),hit=F.cache.get(key);if(hit&&hit.until>now)return hit.data;
+ const rate=F.rate[source]||(F.rate[source]={next:0,wait:0});
+ for(let attempt=0;attempt<3;attempt++){
+  const wait=Math.max(rate.next-Date.now(),rate.wait-Date.now(),0);if(wait)await sleep(wait);
+  rate.next=Date.now()+(source==='mangadex'?2600:1700);
+  const ctrl=new AbortController(),clock=setTimeout(()=>ctrl.abort(),15000);
   try{const r=await fetch(url,{signal:ctrl.signal,headers:{Accept:'application/json'}});
-   if(r.ok){const data=await r.json();if(F.cache.size>250)F.cache.delete(F.cache.keys().next().value);F.cache.set(key,{data,until:Date.now()+3600000});return data;}
+   if(r.ok){const data=format==='xml'?await r.text():await r.json();if(F.cache.size>250)F.cache.delete(F.cache.keys().next().value);F.cache.set(key,{data,until:Date.now()+3600000});return data;}
    if(r.status===404)return null;
-   if(r.status===429||r.status===503){const n=Number(r.headers.get('Retry-After'));rate.wait=Date.now()+(Number.isFinite(n)&&n>0?Math.min(300000,n*1000):45000*(attempt+1));await sleep(rate.wait-Date.now());continue;}
+   if(r.status===429||r.status===503||r.status>=500){
+    const h=String(r.headers.get('Retry-After')||'');
+    const n=Number(h),absolute=Date.parse(h);
+    const wait=Number.isFinite(n)&&n>0?n*1000:Number.isFinite(absolute)?Math.max(0,absolute-Date.now()):45000*(attempt+1);
+    rate.wait=Date.now()+Math.max(1000,Math.min(300000,wait));continue;
+   }
    throw Error(source+' HTTP '+r.status);
-  }finally{clearTimeout(clock);}
- }throw Error(source+' temporarily rate limited');
+  }catch(e){if(attempt>=2||!(e?.name==='AbortError'||e instanceof TypeError))throw e;rate.wait=Date.now()+1500*(attempt+1);}
+   finally{clearTimeout(clock);}
+ }throw Error(source+' temporarily unavailable');
 }
 function aired(date,precise){if(!date)return false;let t=NaN;
  if(precise)t=Date.parse(date);
