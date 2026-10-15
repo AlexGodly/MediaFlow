@@ -31,6 +31,7 @@ const context={
  console,Set,Map,Date,Promise,Math,URL,
  App:{},window:{},S:{settings:{}},AUTH_USER:{id:'account-a'},supabase:null,
  mf424Escape:x=>String(x),mf424Defaults:()=>({}),
+ mf425Icon:()=>'<svg></svg>',
  mf433ReadinessMarkup:()=>'<div>pending</div>',
  mf425SettingsMarkup:()=>'<section><div>pending</div></section>',
  v377IdsEditorHtml:()=>'<section><div class="mf377-mal-preview"></div></section>',
