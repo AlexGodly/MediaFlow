@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - feature/v428-universal-recovery
-  pull_request:
-    branches: [main]
+  # v428 is published. Run the legacy workflow only on its own maintenance branch.
+  # v429 PR validation is handled by v429-build-and-test.yml.
   workflow_dispatch:
 
 permissions:
