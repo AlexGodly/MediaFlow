@@ -262,7 +262,7 @@ const DEFAULT_SETTINGS = {
     enabled: true,
     minuteXP: 1,
     unitXP: {episodes:10, chapters:3, issues:6, movies:30},
-    rotationMultiplier: {neglected:2.0, due:1.5, healthy:1.0, overused:0.5},
+    rotationMultiplier: {neglected:10, due:8, healthy:5, overused:2},
     libraryAdditionXP: 25,
     completionXP: 50
   },
