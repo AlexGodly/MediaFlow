@@ -239,17 +239,27 @@ function mf424Review(item,candidates){MF424.job.reviews.push({id:String(item.id)
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
+function mf428CoverOwnsScheduler(){
+  const hub=window.MediaFlowV428Hub;
+  if(!MF424.running||!hub)return true;
+  if(hub.ownsLease())return true;
+  if(MF424.job)MF424.job.pauseRequested=true;
+  return false;
+}
 async function mf424Apply(item,candidate,expected){
+  if(!mf428CoverOwnsScheduler())return false;
   if(mf424Account()!==MF424.account)throw new Error('Account changed; recovery suspended');
   if(!mf424Missing(item))return false;
   if(Number(item.modifiedAt||0)!==Number(expected||0))return false;
   if(!await mf424Image(candidate.url,candidate.provider))return false;
+  if(!mf428CoverOwnsScheduler())return false;
   if(!mf424Missing(item)||Number(item.modifiedAt||0)!==Number(expected||0))return false;
   item.coverUrl=candidate.url;item.coverSource='auto:'+candidate.provider+':'+(candidate.idMatch?'external-id':'verified');
   item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
 async function mf424Flush(){if(!MF424.job?.dirty)return;
+  if(!mf428CoverOwnsScheduler())throw Object.assign(new Error('Shared scheduler ownership changed'),{paused:true});
   if(mf424Account()!==MF424.account)throw new Error('Account changed before saving');
   if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();
   await saveState();MF424.job.dirty=0;MF424.byId=null;mf424BuildIndex();
@@ -276,8 +286,10 @@ function mf424Lease(){const key=mf424LeaseKey();try{
 function mf424Release(){clearInterval(MF424.leaseTimer);MF424.leaseTimer=0;
   if(mf424OwnLease()){try{localStorage.removeItem(mf424LeaseKey());}catch(_){}}
   MF424.leaseToken='';}
-async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;return;}
+async function mf424Process(item){if(!mf428CoverOwnsScheduler())return;
+  if(!mf424Missing(item)){MF424.job.skipped++;return;}
   const expected=Number(item.modifiedAt)||0;const candidates=await mf424Candidates(item);
+  if(!mf428CoverOwnsScheduler())return;
   if(!candidates.length){MF424.job.unresolved++;mf424Note('unresolved','No verified cover found',item.id);return;}
   const mode=mf424Defaults().selection;
   const best=candidates.sort((a,b)=>b.confidence-a.confidence)[0];
@@ -286,7 +298,7 @@ async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;re
   }
   if(best.confidence<.95){mf424Review(item,candidates);return;}
   if(await mf424Apply(item,best,expected)){MF424.job.fixed++;mf424Note('recovered',best.provider,item.id);}
-  else{MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
+  else if(!MF424.job.pauseRequested){MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
 }
 async function mf424Run(){if(MF424.running||!MF424.job)return;
   try{await mf424WaitForLibrary();}catch(e){mf424State('paused');MF424.job.pauseRequested=true;await mf424SaveJob();return;}
