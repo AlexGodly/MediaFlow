@@ -169,29 +169,70 @@ async function discoverOpenLibrary(item,ids,title){
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item,allowed){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
+ const notices=[];
+ // A broken or rate-limited provider must not prevent independent, verified sources
+ // from returning evidence. Never accept a fuzzy match or infer missing values.
+ const attempted=async(name,fn)=>{
+  try{return await fn();}catch(e){notices.push(name+' unavailable: '+String(e?.message||e).slice(0,140));return null;}
+ };
  if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('jikan'))){
-  const isManga=t==='manga',prefix=isManga?'manga':'anime',mal=ids.mal||item.malId;
-  if(mal&&/^\d+$/.test(String(mal))){const data=await request('jikan','https://api.jikan.moe/v4/'+prefix+'/'+encodeURIComponent(mal)+'/full');
-    if(data?.data){const d=mapJikan(data.data,t);if(norm(d.title)===norm(title)||[data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])].some(t=>norm(t)===norm(title)))return d;return {reason:'MAL record title does not match; review manually'};}}
-  const search=await request('jikan','https://api.jikan.moe/v4/'+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
-  const exact=(search?.data||[]).filter(v=>[v.title,v.title_english,v.title_japanese,...(v.title_synonyms||[])].some(n=>norm(n)===norm(title)));
-  if(exact.length===1)return mapJikan(exact[0],t);
-  if(exact.length>1)return {reason:'Ambiguous Jikan title; no automatic match'};
+  const found=await attempted('Jikan',async()=>{
+   const prefix=t==='manga'?'manga':'anime',mal=ids.mal||item.malId;
+   if(mal&&/^\d+$/.test(String(mal))){
+    const data=await request('jikan','https://api.jikan.moe/v4/'+prefix+'/'+encodeURIComponent(mal)+'/full');
+    if(data?.data){
+     const d=mapJikan(data.data,t),names=[d.title,data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])];
+     if(names.some(name=>norm(name)===norm(title)))return d;
+     notices.push('Jikan MAL identifier title mismatch');
+     return null;
+    }
+   }
+   const search=await request('jikan','https://api.jikan.moe/v4/'+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
+   const exact=(search?.data||[]).filter(v=>[v.title,v.title_english,v.title_japanese,...(v.title_synonyms||[])].some(n=>norm(n)===norm(title)));
+   if(exact.length===1)return mapJikan(exact[0],t);
+   if(exact.length>1)notices.push('Jikan title is ambiguous');
+   return null;
+  });
+  if(found?.source)return found;
  }
- if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('anilist'))){const data=await discoverAniList(item,t,ids,title);if(data?.source)return data;if(allowed?.length===1)return data;}
- if(t==='manga'&&(!allowed||allowed.includes('mangadex'))&&ids.mangadex){const d=await discoverMangaDex(item,ids,title);if(d?.source)return d;if(allowed?.length===1)return d;}
+ if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('anilist'))){
+  const found=await attempted('AniList',()=>discoverAniList(item,t,ids,title));
+  if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
+ }
+ if(t==='manga'&&(!allowed||allowed.includes('mangadex'))&&ids.mangadex){
+  const found=await attempted('MangaDex',()=>discoverMangaDex(item,ids,title));
+  if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
+ }
  if(t==='tv'&&(!allowed||allowed.includes('tvmaze'))){
-  const tm=String(ids.tvmaze||'').trim(),imdb=String(ids.imdb||'').trim();
-  const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
-  let d=path?await request('tvmaze',path):null;
-  if(!d){const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));if(exact.length!==1)return {reason:'No unique TVmaze match'};d=exact[0];}
-  if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
-  return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
+  const found=await attempted('TVmaze',async()=>{
+   const tm=String(ids.tvmaze||'').trim(),imdb=String(ids.imdb||'').trim(),tvdb=String(ids.thetvdb||ids.tvdb||'').trim();
+   const path=/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm
+    :/^tt\d{7,10}$/i.test(imdb)?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb)
+    :/^\d+$/.test(tvdb)?'https://api.tvmaze.com/lookup/shows?thetvdb='+encodeURIComponent(tvdb):'';
+   let d=path?await request('tvmaze',path):null;
+   if(!d){
+    const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));
+    const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));
+    if(exact.length!==1)return {reason:'No unique TVmaze match'};
+    d=exact[0];
+   }
+   if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different title; review required'};
+   return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,
+    genres:d.genres||[],communityScore:Number(d.rating?.average)||null,
+    year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',
+    mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
+  });
+  if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
  }
  if((t==='books'||t==='comics')&&(!allowed||allowed.includes('openlibrary'))){
-  return discoverOpenLibrary(item,ids,title);
+  const found=await attempted('Open Library',()=>discoverOpenLibrary(item,ids,title));
+  if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
  }
- return {reason:'No compatible configured public provider or verified ID for this category'};
+ return {reason:notices.length?notices.slice(0,4).join('; '):'No compatible public provider or verified ID for this category'};
 }
 function normalizedValue(field,value){
  if(LIST_FIELDS.has(field)){const a=Array.isArray(value)?value:String(value||'').split(',');return [...new Set(a.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);}
