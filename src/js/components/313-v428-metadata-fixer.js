@@ -26,7 +26,7 @@ function captureDraft(item){const next={...item};for(const field of fields){cons
  next.externalIds=ids;return next;}
 function snapshot(item){return fields.map(f=>JSON.stringify(item[f]??null)).join('|')+'|'+String(item.title||'')+'|'+String(item.categoryId||'');}
 const safeIds=o=>o&&typeof o==='object'?o:{};
-const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},anilist:{requiresSetup:false,capabilities:['anime','manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books','comics']}};
+const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},anilist:{requiresSetup:false,capabilities:['anime','manga']},mangadex:{requiresSetup:false,capabilities:['manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books','comics']}};
 async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('IndexedDB is required to preserve metadata jobs'));return;}const req=indexedDB.open('mediaflow-metadata-v428',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);});}
 async function store(op,value,owner=account()){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+owner):tx.objectStore('records').put(value,'job:'+owner);req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
 async function persist(){if(M.job)await store('put',M.job,M.job.account);window.MediaFlowV428Hub?.paint();}
@@ -34,7 +34,7 @@ function kind(item){const cat=String(item.categoryId||'').toLowerCase();const la
  const v=String(label).toLowerCase();return /manga|manhwa|manhua/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/comics|comic|graphic novel/.test(v)?'comics':/book|novel/.test(v)?'books':'other';}
 async function request(provider,url){const row=M.rate[provider]||(M.rate[provider]={next:0,cooldown:0});
  for(let attempt=0;attempt<3;attempt++){
-  const gap=provider==='jikan'?2500:1300;
+  const gap=provider==='mangadex'?3500:provider==='jikan'?2500:1300;
   const wait=Math.max(0,row.next-Date.now(),row.cooldown-Date.now());if(wait)await sleep(wait);
   row.next=Date.now()+gap;
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),14000);
@@ -123,6 +123,49 @@ async function discoverAniList(item,type,ids,title){
  return mapAniList(matches[0],type);
 }
 
+function mangaDexTitles(attributes){
+ const names=[...Object.values(attributes?.title||{})];
+ for(const row of attributes?.altTitles||[])names.push(...Object.values(row||{}));
+ return names.filter(x=>typeof x==='string').map(norm);
+}
+async function discoverMangaDex(item,ids,title){
+ const id=String(ids.mangadex||'');
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+  return {reason:'An exact MangaDex UUID is required for metadata recovery'};
+ const body=await request('mangadex','https://api.mangadex.org/manga/'+encodeURIComponent(id));
+ const attributes=body?.data?.attributes;
+ if(!attributes||!mangaDexTitles(attributes).includes(norm(title)))
+  return {reason:'MangaDex identifier does not verify the existing title'};
+ const tags=attributes.tags||[],names=group=>tags.filter(t=>t.attributes?.group===group)
+  .map(t=>t.attributes?.name?.en||Object.values(t.attributes?.name||{})[0]).filter(Boolean);
+ return {title:attributes.title?.en||Object.values(attributes.title||{})[0]||'',
+  synopsis:attributes.description?.en||Object.values(attributes.description||{})[0]||'',
+  genres:names('genre'),themes:names('theme'),demographic:attributes.publicationDemographic||'',
+  year:Number(attributes.year)||0,mediaFormat:'Manga',
+  source:'MangaDex',recordId:id,url:'https://mangadex.org/title/'+id};
+}
+function openLibraryId(ids){
+ const raw=String(ids.openlibrary||ids.openLibrary||ids.openlibraryWork||'').trim();
+ const match=/^(?:\/(?:works|books)\/)?(OL\d+[WM])$/i.exec(raw);
+ return match?match[1].toUpperCase():'';
+}
+async function discoverOpenLibrary(item,ids,title){
+ const isbn=String(ids.isbn||'').trim(),olid=openLibraryId(ids);
+ const path=/^(?:97[89]\d{10}|\d{9}[\dXx])$/.test(isbn)
+  ?'/isbn/'+encodeURIComponent(isbn)+'.json'
+  :olid?'/'+(olid.endsWith('W')?'works':'books')+'/'+olid+'.json':'';
+ if(!path)return {reason:'Open Library ISBN or Work/Edition ID needed for verified recovery'};
+ const d=await request('openlibrary','https://openlibrary.org'+path);
+ if(!d?.title||norm(d.title)!==norm(title))
+  return {reason:'Open Library record identity differs from title; no automatic changes'};
+ const description=typeof d.description==='string'?d.description:d.description?.value||'';
+ const published=String(d.publish_date||d.first_publish_date||'');
+ const year=Number(published.match(/\b(?:1[5-9]\d{2}|20\d{2}|21\d{2})\b/)?.[0])||0;
+ const genres=(d.subjects||d.genres||[]).filter(x=>typeof x==='string').slice(0,30);
+ return {title:d.title,synopsis:description,genres,year,source:'Open Library',
+  url:'https://openlibrary.org'+String(d.key||path.replace(/\.json$/,'')),recordId:d.key||olid||isbn};
+}
+
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item,allowed){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
@@ -136,6 +179,7 @@ async function discover(item,allowed){
   if(exact.length>1)return {reason:'Ambiguous Jikan title; no automatic match'};
  }
  if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('anilist'))){const data=await discoverAniList(item,t,ids,title);if(data?.source)return data;if(allowed?.length===1)return data;}
+ if(t==='manga'&&(!allowed||allowed.includes('mangadex'))&&ids.mangadex){const d=await discoverMangaDex(item,ids,title);if(d?.source)return d;if(allowed?.length===1)return d;}
  if(t==='tv'&&(!allowed||allowed.includes('tvmaze'))){
   const tm=String(ids.tvmaze||'').trim(),imdb=String(ids.imdb||'').trim();
   const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
@@ -144,11 +188,8 @@ async function discover(item,allowed){
   if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
   return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
- if((t==='books'||t==='comics')&&ids.isbn&&(!allowed||allowed.includes('openlibrary'))){
-  const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
-  if(d&&!norm(d.title||''))return {reason:'Open Library ISBN record did not supply a title'};
-  if(d&&norm(d.title)!==norm(title))return {reason:'Open Library ISBN record title differs; verify the ISBN before recovery'};
-  if(d)return {title:d.title||'',synopsis:typeof d.description==='string'?d.description:d.description?.value||'',genres:(d.subjects||[]).filter(x=>typeof x==='string').slice(0,20),year:Number(String(d.publish_date||'').match(/\d{4}/)?.[0])||0,total:0,source:'Open Library',url:'https://openlibrary.org'+String(d.key||''),recordId:d.key};
+ if((t==='books'||t==='comics')&&(!allowed||allowed.includes('openlibrary'))){
+  return discoverOpenLibrary(item,ids,title);
  }
  return {reason:'No compatible configured public provider or verified ID for this category'};
 }
@@ -373,7 +414,7 @@ if(typeof v181TitleDetailsHtml==='function'){
 }
 if(typeof App.v181QuickEditDetail==='function'){const old=App.v181QuickEditDetail;App.v181QuickEditDetail=function(id,key){const result=old.apply(this,arguments);if(key==='coverUrl'){const el=document.querySelector('#v181-quick-detail-overlay .mf425-editor-tools');if(el&&!el.querySelector('.mf428-edit-action'))el.insertAdjacentHTML('beforeend','<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'details\',\''+esc(id)+'\')">Fix Metadata</button>');}return result;};}
 Object.assign(App,{mf428MetadataOpen:open,mf428MetadataClose:close,mf428MetadataStart:start,mf428MetadataControl:control,mf428MetadataReview:review,mf428MetadataCloseReview:closeReview,mf428MetadataSkip:skip,mf428MetadataApply:apply,mf428MetadataUndo:undo});
-window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',pending:()=>M.job?.reviews?.length||M.reviews.length||0,schema,review,open,previewFields:diff,detectMediaKind:kind,captureDraft,lookupEvidence:discover,mapAniList};
+window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',pending:()=>M.job?.reviews?.length||M.reviews.length||0,schema,review,open,previewFields:diff,detectMediaKind:kind,captureDraft,lookupEvidence:discover,mapAniList,discoverOpenLibrary,discoverMangaDex};
 window.MediaFlowV428Hub?.registerMetadata(worker);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
