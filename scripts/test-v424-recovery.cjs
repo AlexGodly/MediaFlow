@@ -19,7 +19,9 @@ async function main(){
   assert.equal(context.App.v158FixMissingCovers,context.App.mf424OpenConfig);
   assert.equal(await run('mf424Provider("anilist").limit'),18);
   assert.equal(await run('mf424Provider("simkl").limit'),0);
-  assert.equal(await run('MF424_PROVIDER_META.filter(p=>p.limit).length'),8);
+  assert.equal(await run('MF424_PROVIDER_META.filter(p=>p.limit).length'),6);
+  assert.equal(await run('mf424Provider("mangadex").limit'),0,'MangaDex does not allow browser CORS');
+  assert.equal(await run('mf424Provider("googlebooks").limit'),0,'Google Books requires an API identifier');
   assert.equal(await run('mf424Match({title:"Foo",year:2014},{title:"Foo",year:2014},false).confidence'),.96);
   assert.equal(await run('mf424Match({title:"Foo",year:2014},{title:"Foo",year:2017},false).confidence'),.35);
   assert.equal(await run('mf424Match({title:"Foo"},{title:"Bar"},false).confidence'),0);
@@ -44,6 +46,19 @@ async function main(){
   let captured='';context.fetch=async(url)=>{captured=String(url);return {ok:true,json:async()=>({data:{mal_id:123,title:'Test',images:{jpg:{large_image_url:'https://example.org/test.jpg'}}}}),headers:new Map()}};
   const direct=await run('mf424Discover({title:"Test",type:"anime",externalIds:{mal:"123"}},"jikan")');
   assert.equal(direct.length,1);assert.ok(direct[0].idMatch);assert.ok(captured.includes('/anime/123'));
+  // Kitsu serves JSON:API; sending regular Accept: application/json may cause HTTP 406.
+  context.fetch=async(url,opts={})=>{
+    assert.equal(opts.headers.Accept,'application/vnd.api+json');
+    assert.ok(String(url).includes('kitsu.io/api/edge/anime/15'));
+    return {ok:true,json:async()=>({data:{id:'15',attributes:{
+      canonicalTitle:'Example Anime',titles:{en:'Example Anime'},startDate:'2022-04-01',
+      posterImage:{original:'https://example.org/kitsu.jpg'}
+    }}}),headers:new Map()};
+  };
+  const kitsu=await run('mf424Discover({title:"Example Anime",type:"anime",externalIds:{kitsu:"15"}},"kitsu")');
+  assert.equal(kitsu.length,1);
+  assert.ok(kitsu[0].idMatch);
+  assert.equal(kitsu[0].provider,'kitsu');
   // A book lookup by ISBN must request the edition-specific cover, not a title search.
   const isbn=await run('mf424Discover({title:"Edition",type:"book",externalIds:{isbn:"9780123456789"}},"openlibrary")');
   assert.equal(isbn.length,1);assert.ok(isbn[0].url.includes('default=false'));
