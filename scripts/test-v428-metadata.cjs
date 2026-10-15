@@ -21,7 +21,7 @@ vm.runInContext(src,ctx);
 const metadata=mock.window.MediaFlowV428Metadata;
 assert(metadata,'Metadata fixer exported');
 assert.equal(metadata.detectMediaKind({categoryId:'anime'}),'anime');
-assert.equal(metadata.detectMediaKind({categoryId:'comics'}),'other','Comics must not query manga API by accident');
+assert.equal(metadata.detectMediaKind({categoryId:'comics'}),'comics','Comics have an independent ISBN-capable metadata category, never the MangaDex anime/manga adapter');
 const draft=metadata.captureDraft({title:'Original',categoryId:'anime'});
 assert.equal(draft.synopsis,'Personal summary');
 assert.equal(draft.year,2023);
