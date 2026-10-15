@@ -44,7 +44,7 @@ vm.runInContext(sectionFn,settingsCtx);
 settingsCtx.mf425SettingsEnhance();
 assert(mounted,'Cover Recovery section is mounted');
 assert.equal(mounted.id,'v221-settings-cover-recovery');
-assert.equal(mounted.title,'Cover Recovery');
+assert.equal(mounted.title,'COVER RECOVERY');
 assert.equal(mounted.category,'library');
 assert.equal(mounted.subgroup,'Library maintenance','Existing Library Maintenance group is reused');
 assert.equal(mounted.nodes.length,1);
