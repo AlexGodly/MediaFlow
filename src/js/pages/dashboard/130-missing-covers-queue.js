@@ -73,11 +73,22 @@ function v192MissingCoversHtml(){
             <button type="button" class="btn btn-primary" onclick="App.v192SaveMissingCover()">Save cover & Next</button>
           </div>
         </div>
-        <div class="v123-rating-xp">Paste a cover URL directly here, or use Edit title for MediaFlow's full cover search/editor. Skip moves this title behind the rest of the missing-cover queue.</div>
+        <label class="mf430-missing-auto">
+          <input type="checkbox" id="mf430-missing-auto-save" ${S.settings?.v430MissingCoversAutoSave?'checked':''} onchange="App.mf430SetMissingAutoSave(this.checked)">
+          <span><strong>Automatically save a uniquely verified cover &amp; go next</strong><small>When Find cover automatically locates one confidently ID-verified result, save it and advance. Ambiguous or title-only matches always require your choice.</small></span>
+        </label>
+        <div class="v123-rating-xp">Review the selected cover before saving, or enable automatic save for a uniquely verified ID match. Skip moves this title behind the rest of the queue.</div>
       </div>
     </div>
   </div>`;
 }
+function mf430SetMissingAutoSave(enabled){
+ S.settings=S.settings||{};
+ S.settings.v430MissingCoversAutoSave=Boolean(enabled);
+ try{Promise.resolve(persistSettings()).catch(e=>console.warn('Missing Covers auto-save setting',e));}
+ catch(error){console.warn('Missing Covers auto-save setting',error);}
+}
+App.mf430SetMissingAutoSave=mf430SetMissingAutoSave;
 function v192SkipMissingCover(){
   v192SyncMissingCoverQueue();
   if(!V192_MISSING_COVER_QUEUE.length)return;
