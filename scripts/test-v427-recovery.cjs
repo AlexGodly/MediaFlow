@@ -16,6 +16,12 @@ match(source,"App.v181SaveQuickDetail(live.id,'coverUrl')",'Quick Edit immediate
 match(source,'await saveState();','Existing saved Library update persists');
 match(source,'const mf427PreviousReviewConfirm=App.mf424Confirm','Review confirmation follows setting');
 match(source,"App.mf425Instant=function(entry='editor')",'all automatic searches use unified UI');
+match(source,'const available=mf424Order(current)','Find Cover reads Cover Recovery enabled/compatible providers');
+match(source,'const candidates=await mf424Discover(current,provider)','Find Cover uses the same cover discovery adapter');
+match(source,'allowed.map(p=>','Newly integrated and enabled providers are displayed automatically');
+match(source,'App.mf427RetryProvider=function','Find Cover can inspect a single provider');
+match(source,'mf427ProviderSummary(outcomes)','Provider diagnostics explain zero results and errors');
+match(css,'.mf427-provider-picker','Per-provider search uses theme-native responsive controls');
 match(source,'ev.stopImmediatePropagation()','legacy Add/Edit picker intercepted');
 match(source,"MF425.oneId=ctx.id||'draft'",'unsaved draft scoped to current item');
 match(source,"start.setAttribute('onclick','App.mf427StartSingle()')",'draft never starts all-Library job');
