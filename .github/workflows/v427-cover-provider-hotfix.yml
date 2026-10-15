@@ -46,7 +46,7 @@ jobs:
           test -s assets/css/239-v427-on-this-day-restoration.css
           python scripts/check.py
           test -s assets/js/mediaflow-v427.bundle.js
-          grep -q 'mediaflow-pwa-v427-shell-v6' sw.js
+          grep -q 'mediaflow-pwa-v427-shell-v7' sw.js
           grep -q "mf425RetryProvider" assets/js/mediaflow-v427.bundle.js
       - name: Commit rebuilt v427 bundle and refreshed PWA cache to hotfix branch
         if: github.event_name == 'push'
