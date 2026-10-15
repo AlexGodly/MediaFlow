@@ -116,6 +116,8 @@ function mf424HasID(item,provider){const x=item.externalIds||{};const keys={tenr
 async function mf424Request(provider,url,options={}){
   const def=mf424Provider(provider),settings=mf424Defaults();if(!def||!def.limit)throw new Error('Provider is unavailable without authorization');
   const state=MF424.rate[provider]||{at:[],next:0,cooldown:0,fails:0,count:0};MF424.rate[provider]=state;
+  // A repeatedly unreachable API must not freeze an entire Library recovery for every title.
+  if(Number(state.unavailableUntil)>Date.now())throw new Error(provider+' temporarily unreachable; other cover sources will be checked');
   const limit=Math.min(def.limit,Math.max(1,Math.floor(def.limit*(settings.protection==='safe'?.75:settings.protection==='balanced'?.9:1))));
   const gap=def.gap*(settings.protection==='safe'?1.5:settings.protection==='balanced'?1.15:1);
   const cacheKey=provider+':'+url+':'+(options.body||'');const hit=MF424.cache.get(cacheKey);
@@ -131,13 +133,15 @@ async function mf424Request(provider,url,options={}){
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),14500);
     try{
       const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':provider==='kitsu'?'application/vnd.api+json':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
-      if(res.ok){const data=await res.json();if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
+      if(res.ok){const data=await res.json();
+        if(provider==='anilist'&&Array.isArray(data?.errors)&&data.errors.length)throw Object.assign(new Error('AniList API: '+String(data.errors[0]?.message||'GraphQL error').slice(0,100)),{permanent:true});
+        if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
         MF424.cache.set(cacheKey,{until:Date.now()+3600000,data});state.fails=0;mf424State('running');return data;}
       if(res.status===429||res.status===503){state.cooldown=Date.now()+Math.max(mf424RetryAfter(res.headers),res.status===429?90000:30000);state.fails++;if(MF424.job)MF424.job.rate=MF424.rate;
         mf424Note('cooldown',provider+' '+res.status+' — cooling down');if(MF424.job)MF424.job.cooldownEvents++;await mf424SaveJob();continue;}
       if(res.status>=500){state.fails++;await mf424Delay(1200*(attempt+1));continue;}
       throw Object.assign(new Error(provider+' HTTP '+res.status),{permanent:true});
-    }catch(e){if(e.permanent)throw e;state.fails++;if(attempt>=3)throw e;await mf424Delay(900*(attempt+1)+Math.random()*550);}
+    }catch(e){if(e.permanent)throw e;state.fails++;if(attempt>=3){state.unavailableUntil=Date.now()+90000;throw e;}await mf424Delay(900*(attempt+1)+Math.random()*550);}
     finally{clearTimeout(timer);}
   }
   if(state.fails>=6)state.cooldown=Date.now()+5*60000;
