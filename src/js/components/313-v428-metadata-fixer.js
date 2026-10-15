@@ -3,14 +3,28 @@
 (function(){
 'use strict';
 if(window.MediaFlowV428Metadata)return;
-const M={job:null,ready:false,running:false,reviews:[],draft:null,modal:null,rate:{},stop:false,account:'',progress:{at:0,total:0},history:[]};
+const M={job:null,ready:false,running:false,reviews:[],draft:null,scope:null,modal:null,rate:{},stop:false,account:'',progress:{at:0,total:0},history:[]};
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const lookup=id=>(S.library||[]).find(i=>String(i?.id)===String(id));
 const idSet=()=>typeof mf425Selection==='function'?mf425Selection():Object.keys(S.librarySelection||{}).filter(k=>S.librarySelection[k]);
 const sleep=ms=>new Promise(done=>setTimeout(done,ms));
-const fields=['description','genres','year','total'];
+// Use MediaFlow's canonical v178 rich-metadata schema, not a shadow description field.
+const fields=['synopsis','genres','year','studios','producers','themes','releaseDate','mediaFormat','total'];
+const LIST_FIELDS=new Set(['genres','studios','producers','themes']);
+const SAFE_RICH_FIELDS=new Set(fields.filter(f=>f!=='total'));
+const editorIds={synopsis:'l-rich-synopsis',genres:'l-rich-genres',year:'l-rich-year',studios:'l-rich-studios',producers:'l-rich-producers',themes:'l-rich-themes',releaseDate:'l-rich-release-date',mediaFormat:'l-rich-format',total:'l-total'};
+function editorValue(field){const el=document.getElementById(editorIds[field]);if(!el)return undefined;
+ if(LIST_FIELDS.has(field))return [...new Set(String(el.value||'').split(',').map(s=>s.trim()).filter(Boolean))];
+ if(field==='year'||field==='total')return String(el.value||'').trim()?Number(el.value):null;
+ return String(el.value||'').trim();
+}
+function captureDraft(item){const next={...item};for(const field of fields){const value=editorValue(field);if(value!==undefined)next[field]=value;}
+ next.title=String(document.getElementById('l-title')?.value||next.title||'').trim();next.categoryId=String(document.getElementById('l-category')?.value||next.categoryId||'');
+ const ids={...(next.externalIds||{})};for(const el of document.querySelectorAll('[data-v377-id]')){const key=el.dataset.v377Id,value=String(el.value||'').trim();if(key&&value)ids[key]=value;}
+ next.externalIds=ids;return next;}
+function snapshot(item){return fields.map(f=>JSON.stringify(item[f]??null)).join('|')+'|'+String(item.title||'')+'|'+String(item.categoryId||'');}
 const safeIds=o=>o&&typeof o==='object'?o:{};
 const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books']}};
 async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('IndexedDB is required to preserve metadata jobs'));return;}const req=indexedDB.open('mediaflow-metadata-v428',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);});}
@@ -33,7 +47,7 @@ async function request(provider,url){const row=M.rate[provider]||(M.rate[provide
  throw Error(provider+' could not recover after rate limiting');
 }
 function cleanHtml(t){const div=document.createElement('div');div.innerHTML=String(t||'').replace(/<script[\s\S]*?<\/script>/gi,'');return String(div.textContent||'').trim().slice(0,5000);}
-function mapJikan(src,type){return {title:src?.title||'',description:src?.synopsis||'',genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
+function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
  if(t==='anime'||t==='manga'){
@@ -50,22 +64,32 @@ async function discover(item){
   const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
   let d=path?await request('tvmaze',path):null;
   if(!d){const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));if(exact.length!==1)return {reason:'No unique TVmaze match'};d=exact[0];}
-  return {title:d.name||'',description:cleanHtml(d.summary),genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
+  return {title:d.name||'',synopsis:cleanHtml(d.summary),genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
  if(t==='books'&&ids.isbn){
   const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
-  if(d)return {title:d.title||'',description:typeof d.description==='string'?d.description:d.description?.value||'',genres:d.subjects||[],year:Number(String(d.publish_date||'').match(/\d{4}/)?.[0])||0,total:0,source:'Open Library',url:'https://openlibrary.org'+String(d.key||''),recordId:d.key};
+  if(d)return {title:d.title||'',synopsis:typeof d.description==='string'?d.description:d.description?.value||'',genres:(d.subjects||[]).filter(x=>typeof x==='string').slice(0,20),year:Number(String(d.publish_date||'').match(/\d{4}/)?.[0])||0,total:0,source:'Open Library',url:'https://openlibrary.org'+String(d.key||''),recordId:d.key};
  }
  return {reason:'No compatible configured public provider or verified ID for this category'};
 }
-function diff(item,result){if(!result||!result.source)return [];
- const entries=[];
- for(const f of fields){const found=result[f],old=item[f];if(found==null||found===''||Array.isArray(found)&&!found.length||f==='total'&&item.seasons?.length)continue;
-  const equal=JSON.stringify(old??null)===JSON.stringify(found);
-  if(equal)continue;
-  const oldMissing=old==null||old===''||Array.isArray(old)&&!old.length||(f==='total'&&Number(old)===0);
-  entries.push({field:f,old,found:typeof old==='string'&&Array.isArray(found)?found.join(', '):found,selected:oldMissing});}
- return entries;
+function normalizedValue(field,value){
+ if(LIST_FIELDS.has(field)){const a=Array.isArray(value)?value:String(value||'').split(',');return [...new Set(a.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);}
+ if(field==='year'||field==='total'){const n=Number(value);return Number.isFinite(n)&&n>0&&Number.isSafeInteger(n)?n:null;}
+ if(field==='releaseDate'){const s=String(value||'').trim().slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:'';}
+ return String(value||'').trim().slice(0,field==='synopsis'?6000:160);
+}
+function missing(field,value){return value==null||value===''||(LIST_FIELDS.has(field)&&!normalizedValue(field,value).length)||(field==='year'||field==='total')&&!(Number(value)>0);}
+function diff(item,result){if(!result?.source)return [];
+ const changes=[],manual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
+ for(const field of fields){
+  if(manual[field]===true)continue;
+  // A title's progress and per-season totals are personal state; never adjust an existing total implicitly.
+  if(field==='total'&&(item.seasons?.length||Number(item.total)>0||Number(item.progress)>0))continue;
+  const found=normalizedValue(field,result[field]),old=normalizedValue(field,item[field]);
+  if(missing(field,found)||JSON.stringify(found)===JSON.stringify(old))continue;
+  changes.push({field,old:item[field],found,selected:missing(field,item[field])});
+ }
+ return changes;
 }
 async function init(){
  if(M.account&&M.account!==account()&&!M.running){M.initPromise=null;M.job=null;M.history=[];M.ready=false;}
