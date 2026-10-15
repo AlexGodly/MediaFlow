@@ -140,14 +140,21 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
   MF425.quickBusy=true;MF425.quick=null;MF425.quickEntry=entry;
   MF425.draft={...current,externalIds:{...(current.externalIds||{})}};
   const serial=++MF427.requestSerial;
-  // The same provider registry, enabled order, capabilities and adapters power both cover workflows.
-  const available=mf424Order(current),chosen=providers?new Set(providers):null;
-  const allowed=available.filter(p=>!chosen||chosen.has(p));
+  // Use the live shared Recovery registry, including provider modules added
+  // later. Saved bulk preferences determine "All enabled", but users can
+  // search any supported public source individually without rewriting prefs.
+  const catalog=mf424CoverProviderChoices(current),eligible=catalog.filter(p=>p.usable&&p.compatible);
+  const enabled=eligible.filter(p=>p.enabled),chosen=providers?new Set(providers):null;
+  const allowed=(chosen?eligible.filter(p=>chosen.has(p.id)):(enabled.length?enabled:eligible)).map(p=>p.id);
+  const sourceOptions=catalog.map(p=>{
+    const reason=!p.usable?(p.credentials?'requires configuration':p.level||'unavailable in browser'):!p.compatible?'not for this media type':p.enabled?'':'off for background recovery';
+    return '<option value="'+mf427Escape(p.id)+'" '+(!p.usable||!p.compatible?'disabled':'')+'>'+mf427Escape(p.name+(reason?' — '+reason:''))+'</option>';
+  }).join('');
   document.getElementById('mf425-instant-modal')?.remove();
   const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal mf427-above-editor mf427-search';
   root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search">'+
     '<header class="mf425-instant-head"><div><small>COVER SEARCH</small><h2>'+mf427Icon('image',23)+' Cover matches for '+mf427Escape(current.title)+'</h2><p>Library title: <strong>'+mf427Escape(current.title)+'</strong> · Verify matched titles and external IDs before selecting.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Close</button></header>'+
-    '<div class="mf427-provider-picker"><label for="mf427-provider-select">Cover source</label><select id="mf427-provider-select"><option value="">All enabled providers</option>'+allowed.map(p=>'<option value="'+mf427Escape(p)+'" '+(allowed.length===1?'selected':'')+'>'+mf427Escape(mf424Provider(p)?.name||p)+'</option>').join('')+'</select><button type="button" class="btn btn-ghost" onclick="App.mf427RetryProvider()">Search source</button></div>'+ 
+    '<div class="mf427-provider-picker"><label for="mf427-provider-select">Cover source</label><select id="mf427-provider-select"><option value="">'+(enabled.length?'All enabled compatible providers':'All compatible public providers')+'</option>'+sourceOptions+'</select><button type="button" class="btn btn-ghost" onclick="App.mf427RetryProvider()">Search source</button><p class="mf427-provider-hint">'+(eligible.length?eligible.length+' supported source'+(eligible.length===1?'':'s')+' for this category. Disabled background sources can be searched individually.':'No browser-ready source supports this media category yet. Providers needing keys or restricted browser access are unavailable.')+'</p></div>'+ 
     '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+ 
     '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
   document.body.appendChild(root);mf427CleanAdvancedIcons(root);
@@ -182,7 +189,9 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
 function mf427ProviderSummary(rows){return '<details class="mf427-provider-summary"><summary>Provider checks ('+rows.length+')</summary><div>'+rows.map(r=>'<p><strong>'+mf427Escape(r.name)+'</strong> — '+(r.failed?'Unavailable: '+mf427Escape(r.failed):r.validated?r.validated+' verified image'+(r.validated===1?'':'s'):r.checked?'Records found, but images did not validate':'No matching records')+'</p>').join('')+'</div></details>';}
 App.mf427RetryProvider=function(){if(MF425.quickBusy){showToast('Current cover-source checks are still running.');return;}
  const choice=document.getElementById('mf427-provider-select')?.value||'';
- if(choice&&!mf424Order(MF425.draft||{}).includes(choice)){showToast('Source is not enabled for this media type.');return;}
+ if(choice&&!mf424CoverProviderChoices(MF425.draft||{}).some(p=>p.id===choice&&p.usable&&p.compatible)){
+   showToast('This cover source is unavailable or incompatible with the selected media type.');return;
+ }
  return mf427OpenSearch(MF425.quickEntry||'editor',MF425.draft,choice?[choice]:null);
 };
 const mf427OldCloseInstant=App.mf425CloseInstant;

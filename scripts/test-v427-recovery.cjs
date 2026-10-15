@@ -34,12 +34,22 @@ match(source,"App.v181SaveQuickDetail(live.id,'coverUrl')",'Quick Edit immediate
 match(source,'await saveState();','Existing saved Library update persists');
 match(source,'const mf427PreviousReviewConfirm=App.mf424Confirm','Review confirmation follows setting');
 match(source,"App.mf425Instant=function(entry='editor')",'all automatic searches use unified UI');
-match(source,'const available=mf424Order(current)','Find Cover reads Cover Recovery enabled/compatible providers');
+match(source,'const catalog=mf424CoverProviderChoices(current)','Find Cover reads the entire dynamic provider registry');
 match(source,'const candidates=await mf424Discover(current,provider)','Find Cover uses the same cover discovery adapter');
-match(source,'allowed.map(p=>','Newly integrated and enabled providers are displayed automatically');
+match(source,'catalog.map(p=>','Newly integrated and inactive providers are all listed with truthful availability');
 match(source,'App.mf427RetryProvider=function','Find Cover can inspect a single provider');
+match(source,"(enabled.length?enabled:eligible)",'No active enabled sources no longer means an empty Find Cover list');
+match(source,"p.usable&&p.compatible",'Provider capability and readiness are checked before searches');
+match(source,"off for background recovery",'Individual search works without silently editing Recovery settings');
+match(core,"MF424_EXTRA_COVER_ADAPTERS",'Future provider adapters share both workflows');
+match(core,"root.className='mf424-modal mf425-themed mf427-manual-review'",'Manual review uses the same dynamic theme surface');
+match(core,'mf424ReviewIcon(\'check\')','Manual-review buttons use meaningful icons');
 match(source,'mf427ProviderSummary(outcomes)','Provider diagnostics explain zero results and errors');
 match(css,'.mf427-provider-picker','Per-provider search uses theme-native responsive controls');
+match(css,'#mf424-review.mf427-manual-review .mf424-dialog','Manual review uses theme-native surface');
+match(css,'#mf424-review.mf427-manual-review .mf424-heading h2','Manual review heading always has readable text');
+match(css,'#mf424-review.mf427-manual-review .btn-ghost','Manual review actions are readable in light/dark modes');
+
 match(source,'ev.stopImmediatePropagation()','legacy Add/Edit picker intercepted');
 match(source,"MF425.oneId=ctx.id||'draft'",'unsaved draft scoped to current item');
 match(source,"start.setAttribute('onclick','App.mf427StartSingle()')",'draft never starts all-Library job');

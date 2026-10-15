@@ -63,3 +63,77 @@ html body #mf427-confirm {position:fixed;inset:0;z-index:100110;display:grid;pla
 .mf427-search .mf427-provider-summary summary{cursor:pointer;font-weight:650}
 .mf427-search .mf427-provider-summary p{margin:8px 0;line-height:1.45;color:var(--text-dim);overflow-wrap:anywhere}
 @media(max-width:540px){.mf427-search .mf427-provider-picker{display:grid;grid-template-columns:minmax(0,1fr)}.mf427-search .mf427-provider-picker button{width:100%}}
+
+/* v427: Manual review uses the same theme surfaces as Find Cover, never a
+   dark legacy card paired with light-theme text. Icons are intentional. */
+html body #mf424-review.mf427-manual-review .mf424-dialog{
+  width:min(900px,100%);background:var(--panel)!important;color:var(--text)!important;
+  border:1px solid var(--border-soft)!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.3);max-height:min(92dvh,960px);
+  border-radius:clamp(14px,2vw,21px);
+}
+#mf424-review.mf427-manual-review .mf424-heading{
+  padding-bottom:15px;border-bottom:1px solid var(--border-soft);margin-bottom:16px;
+}
+#mf424-review.mf427-manual-review .mf424-heading h2{
+  color:var(--text)!important;font-weight:800;line-height:1.2;overflow-wrap:anywhere;
+}
+#mf424-review.mf427-manual-review .mf424-heading small{
+  color:var(--flow)!important;font-weight:800;letter-spacing:.1em;
+}
+#mf424-review.mf427-manual-review .mf424-heading p{
+  color:var(--text-dim)!important;opacity:1!important;font-size:12px;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates article{
+  background:var(--panel-raised)!important;color:var(--text)!important;
+  border:1px solid var(--border-soft)!important;border-radius:13px;
+  padding:13px;align-items:flex-start;gap:13px;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates article>div{gap:7px;flex:1;min-width:0}
+#mf424-review.mf427-manual-review .mf424-review-candidates img{
+  width:90px;max-height:155px;object-fit:contain;box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates b{
+  font-size:14px;line-height:1.4;color:var(--text)!important;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates small,
+#mf424-review.mf427-manual-review .mf424-review-candidates p{
+  font-size:12px;line-height:1.5;color:var(--text-dim)!important;opacity:1!important;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates a{
+  font-size:12px;color:var(--flow)!important;text-underline-offset:3px;
+}
+#mf424-review.mf427-manual-review .mf424-actions{
+  border-top:1px solid var(--border-soft);padding-top:15px;
+  background:var(--panel)!important;position:sticky;bottom:-1px;
+}
+#mf424-review.mf427-manual-review .mf424-actions .btn,
+#mf424-review.mf427-manual-review .mf424-heading .btn,
+#mf424-review.mf427-manual-review .mf424-review-candidates .btn{
+  opacity:1!important;visibility:visible!important;min-height:39px;
+  display:inline-flex!important;align-items:center;justify-content:center;gap:8px;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  border-radius:10px;padding:9px 13px;text-shadow:none!important;
+}
+#mf424-review.mf427-manual-review .btn-ghost{
+  color:var(--text)!important;background:var(--panel-raised)!important;
+  border:1px solid var(--border-soft)!important;
+}
+#mf424-review.mf427-manual-review .btn-primary{
+  color:var(--bg)!important;background:var(--flow)!important;border-color:var(--flow)!important;
+}
+#mf424-review.mf427-manual-review button:focus-visible,
+#mf424-review.mf427-manual-review a:focus-visible{
+  outline:2px solid var(--flow)!important;outline-offset:3px;
+}
+#mf424-review.mf427-manual-review .v225-btn-icon{display:none!important}
+#mf424-review.mf427-manual-review .btn>svg{width:16px;height:16px;flex:none}
+.mf427-search .mf427-provider-hint{flex-basis:100%;margin:1px 0 0!important;
+  font-size:11px;line-height:1.5;color:var(--text-dim)!important}
+.mf427-search .mf427-provider-picker option:disabled{color:var(--text-dim);opacity:.72}
+@media(max-width:540px){
+ #mf424-review.mf427-manual-review .mf424-heading{align-items:flex-start}
+ #mf424-review.mf427-manual-review .mf424-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #mf424-review.mf427-manual-review .mf424-actions .btn{min-width:0;white-space:normal}
+ #mf424-review.mf427-manual-review .mf424-review-candidates img{width:76px}
+}

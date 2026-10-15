@@ -33,6 +33,29 @@ async function main(){
   assert.equal(await run('mf424Order({type:"anime",externalIds:{mal:"123"}})[0]'), 'tenrai');
   assert.ok(await run('mf424HasID({externalIds:{isbn:"9781234567890"}},"openlibrary")'));
   assert.ok(!await run('mf424HasID({externalIds:{isbn:"9781234567890"}},"tvmaze")'));
+  // Custom or imported categories previously removed every Cover Recovery source.
+  context.getCategory=()=>({name:'Unclassified',type:'other'});
+  assert.equal((await run('mf424CoverProviderChoices({type:"other",categoryId:"custom-123"}).filter(p=>p.usable&&p.compatible).length')),6,
+    'Unknown categories must show the six actual browser-ready cover providers');
+  assert.equal((await run('mf424Order({type:"other",categoryId:"custom-123"}).length')),6);
+  await run('S.settings.v424Covers={enabled:[],priorities:[]}');
+  assert.equal((await run('mf424Order({type:"other",categoryId:"custom-123"}).length')),0,
+    'Background Recovery honors the disabled list');
+  assert.equal((await run('mf424CoverProviderChoices({type:"other",categoryId:"custom-123"}).filter(p=>p.usable).length')),6,
+    'Find Cover must list available providers even if bulk Recovery has all unchecked');
+  await run('delete S.settings.v424Covers');
+  context.getCategory=()=>({name:'Anime'});
+  const api=context.window.MediaFlowCoverProviders;
+  assert.equal(typeof api.register,'function');
+  assert.throws(()=>api.register({id:'tenrai',name:'Duplicate',types:['anime'],limit:5},async()=>[]),/unique ID/);
+  api.register({id:'newart',name:'New Cover Provider',types:['anime'],limit:10,gap:0},async()=>[{
+    url:'https://example.org/cover.jpg',provider:'newart',confidence:.7,title:'Test'
+  }]);
+  assert.equal(await run('mf424Provider("newart").name'),'New Cover Provider');
+  assert.equal((await run('mf424CoverProviderChoices({type:"anime"}).some(p=>p.id==="newart"&&p.usable&&p.compatible)')),true,
+    'Future registered adapters automatically appear in Find Cover');
+  assert.equal((await run('mf424Discover({type:"anime",title:"Test"},"newart")')).length,1,
+    'Future registered cover adapters are actually called by the shared discovery function');
   const rows=100000; context.S.library=Array.from({length:rows},(_,i)=>({id:String(i),title:'Sample '+i,coverUrl:i%3?'':'https://assets.example/'+i+'.jpg',type:'anime'}));
   await run('mf424BuildIndex()');
   assert.equal(await run('MF424.byId.size'),rows);
