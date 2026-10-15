@@ -190,7 +190,7 @@ function start(kind){
  if(kind==='fresh'){if(typeof App.mf428FreshOpen==='function')App.mf428FreshOpen();else enqueue('fresh',{});return;}
 }
 function control(kind,cmd){
- if(kind==='cover'&&MF424.job){if(cmd==='pause')App.mf424Pause();if(cmd==='stop')App.mf424StopTitle();if(cmd==='resume')App.mf424Resume();if(cmd==='review')App.mf424Review();return;}
+ if(kind==='cover'&&MF424.job){if(cmd==='pause')App.mf424Pause();if(cmd==='stop')App.mf424StopTitle();if(cmd==='stop-part')App.mf424StopPart();if(cmd==='resume')App.mf424Resume();if(cmd==='review')App.mf424Review();return;}
  if(kind==='metadata'&&typeof App.mf428MetadataControl==='function'){App.mf428MetadataControl(cmd);return;}
  if(kind==='fresh'&&typeof App.mf428FreshControl==='function'){if(cmd==='resume')App.mf428FreshResume();else App.mf428FreshControl(cmd);return;}
  if(cmd==='cancel')cancel(kind);
@@ -222,7 +222,7 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  '<div class="mf428-process-actions">'+
  (state==='idle'||state==='complete'||state==='failed'?'<button type="button" onclick="App.mf428Start(\''+kind+'\')">Start</button>':'')+
  (state==='queued'?'<button type="button" onclick="App.mf428Move(\''+kind+'\',-1)" aria-label="Move earlier">↑</button><button type="button" onclick="App.mf428Move(\''+kind+'\',1)" aria-label="Move later">↓</button><button type="button" onclick="App.mf428Cancel(\''+kind+'\')">Remove</button>':'')+
- (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop safely</button>':'')+
+ (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop after title</button>'+(kind==='cover'||kind==='metadata'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop-part\')">Finish part &amp; stop</button>':''):'')+
  (state==='paused'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'resume\')">Resume</button>':'')+
  (state==='review'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'review\')">Review</button>':'')+
  (kind==='metadata'&&state==='paused'&&window.MediaFlowV428Metadata?.pending()>0?'<button type="button" onclick="App.mf428Control(\'metadata\',\'review\')">Review Pending</button>':'')+
