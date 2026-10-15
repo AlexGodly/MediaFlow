@@ -6,7 +6,7 @@ const TABS=['queue','covers','metadata','fresh'];
 const icons={queue:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',covers:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m3 17 5-5 4 4 3-3 6 6"/>',metadata:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 2 16 2 16 0V5M4 12c0 2 16 2 16 0"/>',fresh:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M7 3v4m10-4v4m-8 9 2 2 4-4"/>'};
 const ico=(type,size=18)=>'<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[type]+'</svg>';
 const escapeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={root:null,content:null,tab:'queue',expanded:false,account:'',started:false};
+const state={root:null,content:null,tab:'queue',expanded:false,account:'',started:false,context:null};
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');
 const pref=()=>S.settings?.v429Center||{};
 const visibility=()=>['hidden','auto','always'].includes(pref().visibility)?pref().visibility:'always';
@@ -23,6 +23,7 @@ const titles={cover:'Cover Recovery',metadata:'Metadata Recovery',fresh:'Fresh E
 function switchAccount(){
  if(state.account===account())return;
  state.account=account();state.tab=TABS.includes(pref().tab)?pref().tab:'queue';state.expanded=pref().expanded===true;
+ state.context=null;
  if(state.root)removePortals();
 }
 function overview(){
@@ -65,17 +66,22 @@ function embed(id){
  const dialog=modal.querySelector('[role="dialog"]');dialog?.setAttribute('aria-modal','false');
  return true;
 }
+const originalCoverOpen=typeof App.mf425OpenConfig==='function'?App.mf425OpenConfig:null;
+const originalMetadataOpen=typeof App.mf428MetadataOpen==='function'?App.mf428MetadataOpen:null;
+const originalFreshOpen=typeof App.mf428FreshOpen==='function'?App.mf428FreshOpen:null;
 function renderCurrent(){
  if(!state.content)return;
  removePortals();
  if(state.tab==='queue'){state.content.innerHTML=queueHTML();return;}
  if(state.tab==='covers'){
   state.content.innerHTML='<div class="mf429-tab-heading"><strong>Advanced Cover Recovery</strong><small>Original v428 recovery controls, scopes and providers.</small></div><div class="mf429-feature-port"></div>';
-  App.mf425OpenConfig?.('settings');
+  const ctx=state.context?.tab==='covers'?state.context:null;
+  originalCoverOpen?.(ctx?.entry||'settings',ctx?.id||'');
   if(!embed('mf424-modal'))state.content.insertAdjacentHTML('beforeend','<p class="mf429-message">Cover Recovery is unavailable. Try the Library Tools shortcut.</p>');
  }else if(state.tab==='metadata'){
   state.content.innerHTML='<div class="mf429-tab-heading"><strong>Advanced Metadata Recovery</strong><small>Choose fields and review before saving personal data.</small></div><div class="mf429-feature-port"></div>';
-  App.mf428MetadataOpen?.('settings');
+  const ctx=state.context?.tab==='metadata'?state.context:null;
+  originalMetadataOpen?.(ctx?.entry||'settings',ctx?.id||'');
   if(!embed('mf428-metadata-modal'))state.content.insertAdjacentHTML('beforeend','<p class="mf429-message">Metadata Recovery is unavailable.</p>');
  }else if(state.tab==='fresh'){
   let html='';
@@ -101,7 +107,13 @@ function render(){
  state.content=state.root.querySelector('.mf429-tab-body');
  if(state.expanded)renderCurrent();
 }
-function choose(tab){if(!TABS.includes(tab))return;state.tab=tab;state.expanded=true;savePreference({tab,expanded:true});render();}
+function choose(tab){if(!TABS.includes(tab))return;state.context=null;state.tab=tab;state.expanded=true;savePreference({tab,expanded:true});render();}
+function openScoped(tab,entry='settings',id=''){
+ if(!TABS.includes(tab))return;
+ state.context={tab,entry:String(entry||'settings'),id:String(id||'')};
+ state.tab=tab;state.expanded=true;
+ savePreference({tab,expanded:true});render();
+}
 function toggle(){state.expanded=!state.expanded;savePreference({expanded:state.expanded});render();}
 function queueCommand(kind,cmd){
  if(!['cover','metadata','fresh'].includes(kind))return;
@@ -111,7 +123,7 @@ function queueCommand(kind,cmd){
  return App.mf428Control?.(kind,cmd);
 }
 function universal(){
- App.mf428FreshOpen?.();
+ originalFreshOpen?.();
  embed('mf428-fresh-config');
 }
 function onClick(e){
@@ -122,6 +134,7 @@ function onClick(e){
  if(action==='toggle'){toggle();return;}
  if(action==='universal'){universal();return;}
  if(action==='report'){App.mf428FreshReport?.();return;}
+ if(action==='reopen'){renderCurrent();return;}
  if(kind&&cmd)queueCommand(kind,cmd);
 }
 function tick(){
@@ -167,6 +180,11 @@ function setVisibility(value){
  if(!['hidden','auto','always'].includes(value))return;
  savePreference({visibility:value});render();
 }
+// Route existing Library, Title Details, Settings and editor entry points to
+// the identical original recovery form, preserving their scoped arguments.
+if(originalCoverOpen)App.mf425OpenConfig=function(entry='settings',id=''){openScoped('covers',entry,id);};
+if(originalMetadataOpen)App.mf428MetadataOpen=function(entry='settings',id=''){openScoped('metadata',entry,id);};
+if(originalFreshOpen)App.mf428FreshOpen=function(){openScoped('fresh');universal();};
 Object.assign(App,{mf429CenterTab:choose,mf429CenterToggle:toggle,mf429CenterQueue:queueCommand,mf429CenterVisibility:setVisibility});
 window.MediaFlowV429Center={version:429,open(){if(!state.expanded)toggle();},tab:choose,toggle,status:()=>({tab:state.tab,expanded:state.expanded})};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
