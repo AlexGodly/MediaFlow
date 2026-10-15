@@ -275,7 +275,7 @@ async function worker(params={}){await init();if(!params.universal)return window
    if(item){const type=media(item);if(type==='anime'){const state=typeof v401EpisodeOutcome==='function'?v401EpisodeOutcome(item):'unknown';if(state==='fresh')j.fresh++;else if(state==='none')j.none++;else j.unknown++;if(j.results.length<5000)j.results.push({id,title:item.title,status:state==='fresh'?'fresh':state==='none'?'none':'unknown',reason:j.legacyError||'Original seasonal verification result',source:'Alex Godly Smart Engine',unit:'episodes'});}
     else{const r=await one(item,j.mode,j.provider);if(j.paused||j.stopped||account()!==j.account||!window.MediaFlowV428Hub?.ownsLease()){j.status='paused';break;}j[r.status==='fresh'?'fresh':r.status==='none'?'none':'unknown']++;if((r.status==='fresh'||r.status==='unknown')&&j.results.length<5000)j.results.push({id,title:item.title,...r});}
    }
-   j.cursor++;if(j.cursor%10===0)await save();
+   j.cursor++;if(j.cursor%200===0||Date.now()-Number(j.checkpointAt||0)>30000){j.checkpointAt=Date.now();await save();}
   }
   if(j.cursor>=j.ids.length)j.status='complete';await save();
  }catch(e){j.status='paused';j.errors.push(String(e.message||e));await save();throw e;}
