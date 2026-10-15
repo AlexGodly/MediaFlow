@@ -10,9 +10,9 @@ const MF424_PROVIDER_META = [
   {id:'anilist',name:'AniList',types:['anime','anime-movie','manga'],limit:18,gap:3400,credentials:false,level:'experimental'},
   {id:'kitsu',name:'Kitsu',types:['anime','anime-movie','manga'],limit:30,gap:2400,credentials:false,level:'experimental'},
   {id:'tvmaze',name:'TVmaze',types:['tv'],limit:50,gap:1200,credentials:false,level:'existing'},
-  {id:'mangadex',name:'MangaDex',types:['manga'],limit:20,gap:3500,credentials:false,level:'experimental'},
+  {id:'mangadex',name:'MangaDex',types:['manga'],limit:0,gap:3500,credentials:false,level:'browser CORS blocked'},
   {id:'openlibrary',name:'Open Library',types:['book','comic','reading'],limit:20,gap:3500,credentials:false,level:'existing'},
-  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:15,gap:4500,credentials:false,level:'experimental'},
+  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:0,gap:4500,credentials:true,level:'requires API key'},
   {id:'simkl',name:'SIMKL',types:['anime','anime-movie','tv','movie'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'malofficial',name:'MyAnimeList Official',types:['anime','anime-movie','manga'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'tmdb',name:'TMDB',types:['movie','tv'],limit:0,gap:0,credentials:true,level:'setup'},
@@ -34,8 +34,8 @@ const MF424_PROVIDER_META = [
   {id:'crossref',name:'Crossref',types:['book'],limit:0,gap:0,credentials:false,level:'bibliographic'}
 ];
 const MF424_DEFAULT = {mode:'parts',partSize:100,continuation:'automatic',selection:'hybrid',protection:'safe',autoResume:true,
-  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks'],
-  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks']};
+  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','openlibrary'],
+  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','openlibrary']};
 const MF424 = {db:null,job:null,running:false,runner:null,leaseTimer:0,leaseToken:'',timer:0,overlay:false,expanded:false,
   history:[],rate:{},cache:new Map(),account:'',ready:false,status:'idle',toastAt:0};
 function mf424Account(){return String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');}
@@ -130,7 +130,7 @@ async function mf424Request(provider,url,options={}){
     if(MF424.job)MF424.job.requestCount++;
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),14500);
     try{
-      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
+      const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':provider==='kitsu'?'application/vnd.api+json':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
       if(res.ok){const data=await res.json();if(MF424.cache.size>400)MF424.cache.delete(MF424.cache.keys().next().value);
         MF424.cache.set(cacheKey,{until:Date.now()+3600000,data});state.fails=0;mf424State('running');return data;}
       if(res.status===429||res.status===503){state.cooldown=Date.now()+Math.max(mf424RetryAfter(res.headers),res.status===429?90000:30000);state.fails++;if(MF424.job)MF424.job.rate=MF424.rate;
