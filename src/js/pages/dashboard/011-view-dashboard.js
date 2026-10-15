@@ -50,6 +50,24 @@ function mf395DashboardRecommendationHtml(task,cat){
   </section>`;
 }
 
+/* v427 On This Day restoration.
+ * The anniversary engine survived the Dashboard redesign, but the rendered
+ * Dashboard stopped calling it. Use its original data/rotation components
+ * without rewriting History, library milestones, or visibility preferences. */
+function mf427OnThisDayDashboardHtml(){
+  const cfg=typeof v192EnsureDashboardSettings==='function'
+    ?v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS):null;
+  if(cfg?.showOnThisDay===false)return ''; // Respect explicit Dashboard visibility.
+  let content='';
+  try{
+    if(typeof renderOnThisDay==='function')content=String(renderOnThisDay()||'');
+  }catch(error){console.warn('MediaFlow: On This Day rendering failed',error);}
+  const today=new Date().toLocaleDateString(undefined,{month:'long',day:'numeric'});
+  const icon='<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>';
+  const body=content||'<div class="mf427-otd-empty"><strong>No anniversaries for '+escapeHtml(today)+' yet</strong><p>Past History activity and Library start or finish milestones will appear here when they match today’s date in a previous year. Your existing records are preserved.</p><button type="button" class="btn btn-ghost" onclick="App.setView(\'history\')">Browse History</button></div>';
+  return '<section class="mf427-otd-section" aria-label="On This Day"><div class="mf427-otd-heading"><span class="mf427-otd-heading-icon">'+icon+'</span><div><div class="section-label">ON THIS DAY</div><p>Memories and milestones from previous years</p></div></div>'+body+'</section>';
+}
+
 function renderDashboard(){
 
   const today = todaysSessions();
@@ -231,6 +249,7 @@ function renderDashboard(){
       </section>
     </div>
 
+    ${mf427OnThisDayDashboardHtml()}
     ${heroHtml}
     ${stopwatchHtml()}
 
