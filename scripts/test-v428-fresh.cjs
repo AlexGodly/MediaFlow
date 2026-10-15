@@ -13,6 +13,28 @@ const category=[
  {id:'webseries',name:'Web Series'},{id:'movies',name:'Movies'}
 ];
 const urls=[];
+const items=[
+ {guid:'ep-2',date:'2026-06-01T08:00:00Z',title:'Episode 2',ep:'2',enclosure:true},
+ {guid:'ep-3',date:'2026-09-01T08:00:00Z',title:'Episode 3',ep:'3',enclosure:true},
+ {guid:'ep-3',date:'2026-09-01T08:00:00Z',title:'Episode 3 duplicate',ep:'3',enclosure:true},
+ {guid:'ep-future',date:'2026-12-01T08:00:00Z',title:'Episode 4',ep:'4',enclosure:true}
+];
+class FakeDOMParser{
+ parseFromString(){
+  const elements=items.map(row=>{
+   const children=[
+    {localName:'guid',textContent:row.guid,prefix:''},
+    {localName:'pubDate',textContent:row.date,prefix:''},
+    {localName:'title',textContent:row.title,prefix:''},
+    {localName:'episode',textContent:row.ep,prefix:'itunes'}
+   ];
+   if(row.enclosure)children.push({localName:'enclosure',textContent:'',prefix:''});
+   return {children};
+  });
+  return {querySelector(){return null},getElementsByTagName(name){return name==='item'?elements:[]}};
+ }
+}
+
 async function fetchMock(url){
  urls.push(String(url));
  let data=null;
@@ -31,6 +53,7 @@ async function fetchMock(url){
    {id:'3',attributes:{chapter:'14',publishAt:'2026-12-01T12:00:00Z'}},
    {id:'4',attributes:{chapter:'9',publishAt:'2025-04-01T12:00:00Z'}}
  ]};
+ else if(url==='https://example.org/podcast.xml')return {ok:true,text:async()=>'<rss>fixture</rss>',headers:{get(){return null;}}};
  else return {ok:false,status:404,headers:{get(){return null;}}};
  return {ok:true,json:async()=>data,headers:{get(){return null;}}};
 }
@@ -38,7 +61,7 @@ const window={MediaFlowV428Hub:{registerFresh(){},paint(){},runLegacyFresh:async
 const document={body:null,readyState:'loading',addEventListener(){}};
 const S={library:[],categories:category,settings:{},view:'library'};
 const App={};const sandbox=vm.createContext({S,App,window,document,Date:FixedDate,Math,JSON,console,URL,AbortController,fetch:fetchMock,
- AUTH_USER:{id:'test'},MediaFlowRuntime:{registerPageEnhancer(){}},setTimeout:fn=>0,clearTimeout(){},showToast(){},localStorage:{getItem(){return null},setItem(){}}});
+ AUTH_USER:{id:'test'},DOMParser:FakeDOMParser,MediaFlowRuntime:{registerPageEnhancer(){}},setTimeout:fn=>0,clearTimeout(){},showToast(){},localStorage:{getItem(){return null},setItem(){}}});
 vm.runInContext(src,sandbox);
 const engine=window.MediaFlowV428Fresh;
 assert(engine&&engine.evidence,'Public pure evidence API exposed');
@@ -78,6 +101,12 @@ assert.equal(join(a,[{status:'unknown',available:0},{status:'none',available:5,p
  assert.equal(unsupported.status,'unknown','Do not pretend Books have a configured release source');
  const rssAbsent=await engine.evidence({title:'Podcast',categoryId:'podcast',progress:0},'automatic2','tvmaze');
  assert.equal(rssAbsent.status,'unknown');
+ const podcast={title:'My Podcast',categoryId:'podcast',progress:2,externalIds:{feed:'https://example.org/podcast.xml'}};
+ const feedResult=await engine.evidence(podcast,'automatic2','tvmaze');
+ assert.equal(feedResult.status,'fresh','An already-linked numbered HTTPS feed can verify a later released podcast episode');
+ assert.equal(feedResult.available,3,'Future RSS entries and duplicate GUIDs excluded');
+ assert.equal(feedResult.evidence[0].observedCount,2);
+ assert.equal((await engine.evidence({...podcast,progress:3},'automatic2','tvmaze')).status,'unknown','Partial RSS cannot prove a user is caught up');
  assert.equal(urls.some(x=>x.includes('mangadex.org/manga')),true);
  console.log('v428 Fresh Releases passed: media types, TV specials, provider union, manga dedup/future, unknown vs none, no-key dormant sources');
 })().catch(e=>{console.error(e);process.exitCode=1;});
