@@ -94,7 +94,15 @@ async function pageReady(cdp,label){
    await cdp.send('Emulation.setDeviceMetricsOverride',{width:d.width,height:d.height,deviceScaleFactor:1,mobile:d.mobile});
    await cdp.send('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/?v429-smoke='+d.label});
    await pageReady(cdp,d.label);
-   const center=await cdp.evaluate("(()=>{const n=document.querySelector('#mf429-center .mf429-launch');if(!n)return null;const r=n.getBoundingClientRect();return {x:r.x,width:r.width,viewport:innerWidth,label:n.innerText};})()");
+   let center=null;
+   for(let attempt=0;attempt<30&&!center;attempt++){
+    center=await cdp.evaluate("(()=>{const n=document.querySelector('#mf429-center .mf429-launch');if(!n)return null;const r=n.getBoundingClientRect();return {x:r.x,width:r.width,viewport:innerWidth,label:n.innerText};})()");
+    if(!center)await sleep(350);
+   }
+   if(!center){
+    const diagnostic=await cdp.evaluate("(()=>({ready:document.readyState,body:!!document.body,center:!!document.getElementById('mf429-center'),className:document.body?.className,state:window.MediaFlowV429Center?.status?.(),app:typeof App?.mf429CenterToggle,settings:typeof S==='undefined'?'missing':JSON.stringify(S.settings?.v429Center),error:window.__mf429Error||''}))()");
+    console.error('v429 Center initialization diagnostic:',JSON.stringify(diagnostic));
+   }
    assert(center,'Recovery and Release Center launcher missing in '+d.label);
    assert(center.x>=-1&&center.x+center.width<=d.width+1,'Bottom-left launcher overflows '+d.label);
    assert(center.x<d.width/2,'Recovery Center not anchored to bottom-left on '+d.label);
