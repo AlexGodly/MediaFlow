@@ -52,13 +52,13 @@ assert(mounted.nodes[0].innerHTML.includes('Existing recovery controls'),'Origin
 assert(mounted.nodes[0].innerHTML.includes('cover-confirm'),'Confirmation remains in the same settings body');
 assert(!sectionFn.includes('mf366-subgroup-heading'),'Custom subgroup wrappers are forbidden');
 assert(!sectionFn.includes('mf365-section-top'),'Settings Center owns all section styling');
-assert.equal(registrations.length,8,'Eight stable Cover Recovery settings can be searched/pinned');
+assert.equal(registrations.length,10,'All ten Cover Recovery settings, including providers and auto-save, can be searched');
 for(const setting of registrations){
  assert.equal(setting.section,'v221-settings-cover-recovery');
  assert(setting.selector.startsWith('[data-mf-setting-id='),'Settings are indexed by stable IDs');
 }
 settingsCtx.mf425SettingsEnhance();
-assert.equal(registrations.length,16,'A rerender re-registers metadata idempotently');
+assert.equal(registrations.length,20,'Metadata is re-registered safely on Settings refresh');
 
 const centerSrc=fs.readFileSync('src/js/components/263-v365-settings-center.js','utf8');
 for(const requirement of [
