@@ -48,3 +48,18 @@
 - Added deterministic offline behavioral regression tests for queue exclusivity, FIFO ordering, cooldown, cancel/restart, widget preferences, and cross-tab pending-job preservation.
 
 **Still not a Stable release:** Full native-browser integration and provider validation are outstanding. Browser-exited processing remains checkpoint-based rather than a continuously running server-side job. The v428 draft pull request is intentionally not merged or deployed.
+
+## Phase 3 — Metadata Fixer Integration (development)
+
+- **Canonical metadata mapping:** Jikan, TVmaze and ISBN-backed Open Library records now map into MediaFlow's actual v178 fields (`synopsis`, `genres`, `themes`, `studios`, `producers`, `year`, `releaseDate`, `mediaFormat`). This avoids losing imported descriptions in an unrelated `description` field.
+- **Add/Edit Title:** Fix Metadata snapshots the unsaved title editor (including rich metadata fields and visible provider IDs), runs the lookup in the shared scheduler, and applies approved changes **to the open form only**. The user must still save the title. Stale editor drafts or changed accounts block application.
+- **Title Details:** Direct Fix Metadata button is generated in the native Title Details action row. It opens a one-title recovery job.
+- **Library Tools:** Fix Metadata is available alongside Fix Missing Covers. Selected Library IDs are captured as an immutable job scope; Settings can run full-Library or category-scoped recovery.
+- **Settings:** A Metadata Recovery subgroup is placed next to Cover Recovery under the Library Settings category. Controls include Fill Missing, Review Differences and Refresh Outdated (manual field review), fields to scan, category scope and per-part size.
+- **Human approval:** Before/after field previews show the matched provider identity and link to the source record where safe. No Library title metadata changes without checkbox selection and explicit Apply.
+- **Data protection:** Respect `richMetadataManual` flags, avoid modifying personal ratings, notes, statuses, watched progress, seasons or already known totals. Missing totals require explicit opt-in; no updates apply when matched metadata or title field values have become stale.
+- **Recovery & undo:** Checkpoint after each title, support resumable part-by-part jobs and pending review in the floating widget. Guard undo against intervening title edits and preserve the original changed fields.
+- **Network safety:** Retry temporary network failures and honor provider Retry-After/backoffs. Never classify unknown provider results as zero releases.
+- **Tests:** `scripts/test-v428-metadata.cjs` exercises the actual editor/Library/Details extension hooks and canonical field/progress/manual-lock contracts. The development GitHub Actions workflow runs it alongside v424/v425/v427 regressions.
+
+**Limitations:** This phase uses the available public-source adapters rather than registering/configuring credential-dependent providers. Full cross-device locks, live API verification, comprehensive browser UI/real-account sync tests and general media-type provider expansion remain pending before the final v428 release.
