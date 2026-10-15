@@ -192,6 +192,7 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop safely</button>':'')+
  (state==='paused'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'resume\')">Resume</button>':'')+
  (state==='review'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'review\')">Review</button>':'')+
+ (kind==='metadata'&&state==='paused'&&window.MediaFlowV428Metadata?.pending()>0?'<button type="button" onclick="App.mf428Control(\'metadata\',\'review\')">Review Pending</button>':'')+
  '</div></article>';
 }
 function paint(){if(!document.body)return;load();const v=prefs().visibility,exists=HUB.active||HUB.queue.length||foreignLease()||Date.now()<HUB.cooldownUntil||KINDS.some(k=>['paused','review','running'].includes(phase(k)));
