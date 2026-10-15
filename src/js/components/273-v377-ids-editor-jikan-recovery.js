@@ -43,9 +43,6 @@ const V377_ID_PROVIDERS=[
  ['metron_publisher','Metron Publisher','Publisher ID'],
  ['hardcover_book','Hardcover Book','Book ID'],
  ['hardcover_edition','Hardcover Edition','Edition ID'],
- ['podcastindex_feed','Podcast Index Feed','Feed ID'],
- ['podcastindex_episode','Podcast Index Episode','Episode ID'],
- ['podcast_rss','Podcast Feed URL','https://.../feed.xml'],
  ['openlibrary_work','Open Library Work','OL123W'],
  ['openlibrary_edition','Open Library Edition','OL123M'],
  ['inventaire_work','Inventaire Work','Inventaire work ID'],
@@ -64,8 +61,8 @@ const V377_ID_PROVIDERS=[
 let V377_REOPEN_JIKAN_REPORT=false;
 const v377IdValid=(key,value)=>{
   if(!value)return true;
-  if(value.length>(['royalroad_rss','podcast_rss'].includes(key)?512:120))return false;
-  if(['royalroad_rss','podcast_rss'].includes(key)){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname.length>3;}catch(_){return false;}}
+  if(value.length>(['royalroad_rss'].includes(key)?512:120))return false;
+  if(['royalroad_rss'].includes(key)){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname.length>3;}catch(_){return false;}}
   if(key==='doi'||key==='crossref')return /^10\.\d{4,9}\/\S{1,100}$/i.test(value);
   if(key==='wikidata')return /^Q[1-9]\d*$/i.test(value);
   if(key==='mangadex')return /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
@@ -94,7 +91,7 @@ function v377IdsEditorHtml(item){
   Object.keys(ids).filter(key=>!known.has(key)&&/^[a-z][a-z0-9_]{0,32}$/i.test(key)).forEach(key=>providers.push([key,key.toUpperCase(),'External identifier']));
   return `<section class="mf377-external-ids" data-v377-ids-editor>
     <details><summary><span class="mf377-section-icon">⌗</span> External Media IDs <small>Optional · ${Object.values(ids).filter(v=>v!=null&&String(v).trim()).length} saved</small></summary>
-    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic MAL Detection uses only the MyAnimeList ID. Expanded provider and work/edition identifiers are staged for v434 live API testing.</p>
+    <p class="hint">Edit service IDs without changing progress, ratings, History, or Collections. Automatic MAL Detection uses only the MyAnimeList ID. Provider and work/edition identifiers are available for verified provider matching. New sources require explicit testing before use.</p>
     <label class="mf433-id-search">Find an ID field <input type="search" placeholder="Search providers or identifiers…" oninput="App.mf433FilterExternalIds(this.value)" autocomplete="off"></label>
     <div class="mf377-ids-grid">${providers.map(([key,label,placeholder])=>`<label class="field" data-v377-id-row="${escapeHtml(key)}"><span class="field-label">${escapeHtml(label)}</span><span class="mf377-id-control"><input type="text" data-v377-id="${escapeHtml(key)}" autocomplete="off" spellcheck="false" value="${escapeHtml(String(ids[key]??''))}" placeholder="${escapeHtml(placeholder)}">${key==='mal'?'<button type="button" class="btn btn-sm" onclick="App.v377VerifyMalId()">Verify</button>':''}</span></label>`).join('')}</div>
     <div class="mf377-mal-preview" id="mf377-mal-preview" aria-live="polite"></div>

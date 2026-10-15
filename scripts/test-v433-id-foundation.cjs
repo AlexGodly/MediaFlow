@@ -2,7 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const read=path=>fs.readFileSync(path,'utf8');
-assert.equal(read('VERSION').trim(),'433');
+assert(['433','434'].includes(read('VERSION').trim());
 const src=read('src/js/components/313-v433-provider-registry-foundation.js');
 const legacy=read('src/js/components/309-v424-advanced-cover-recovery.js');
 const edit=read('src/js/components/273-v377-ids-editor-jikan-recovery.js');
@@ -41,7 +41,8 @@ const fake={
 vm.createContext(fake);vm.runInContext(src,fake);
 const run=s=>vm.runInContext(s,fake);
 const registry=JSON.parse(JSON.stringify(run('window.MediaFlowV433.list()')));
-assert(registry.length>=38,'Provider inventory is complete');
+assert(registry.length>=37,'Provider inventory is complete');
+assert(!registry.some(p=>p.id==='podcastindex'),'Podcast Index is not supported');
 for(const id of ['tmdb','omdb','fanart','animeschedule','trakt','comicvine','metron','hardcover','podcastindex',
  'episodate','thetvdb','simkl','malofficial','mangadex','gcd','royalroad','mangaupdates','livechart',
  'anilist','wikidata','anidb','marvel','loc','dnb','bnf','crossref','watchmode','fribb',
