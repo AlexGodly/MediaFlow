@@ -43,7 +43,7 @@ const sandbox={
  MF424:{job:null,running:false},
  MediaFlowRuntime:{registerPageEnhancer(){}},
  libraryModalHtml:()=>'<div class="mf425-editor-tools"><button>Cover</button></div>',
- renderLibrary:()=>'<div class="mf425-tools-button">Cover</div>',
+ renderLibrary:()=>'<button class="mf425-tools-button">Cover</button>',
  localStorage:{data:new Map(),getItem(k){return this.data.get(k)||null;},setItem(k,v){this.data.set(k,v);},removeItem(k){this.data.delete(k);}},
  persistSettings:()=>Promise.resolve(),saveState:()=>Promise.resolve(),showToast:()=>{},
  setTimeout,clearTimeout,setInterval:()=>0,clearInterval:()=>{},
