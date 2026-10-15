@@ -13,11 +13,11 @@ assert(legacy.includes("typeof mf433LinkCandidateIds==='function'"),'Core cover 
 assert(legacy.includes("typeof mf433CoverIdMarkup==='function'"),'Cover picker and review provider ID preview');
 assert(picker.includes("typeof mf433FillDraftExternalIds==='function'"),'Add Title editor multi ID linking');
 assert(picker.includes("mf433CandidateLinks(item,candidate).some"),'Find Cover detects new IDs beyond first');
-assert(edit.includes("['royalroad_rss','podcast_rss']"),'RSS URL validation');
+assert(edit.includes("['royalroad_rss']"),'Royal Road RSS URL validation');
 assert(edit.includes('mf433FilterExternalIds(this.value)'),'Searchable IDs editor');
 assert(gateway.includes('getUser(jwt)'),"Gateway requires authenticated user");
-assert(gateway.includes('staged for v434'),'Gateway fails closed');
-assert(!gateway.includes('TMDB_API_TOKEN'),'No live provider credentials consumed in v433');
+assert(read('VERSION').trim()==='434'?gateway.includes('mediaflow_gateway_claim'):gateway.includes('staged for v434'),'Gateway fails closed until authenticated/quota checked');
+assert(read('VERSION').trim()==='434'?gateway.includes('TMDB_API_TOKEN'):!gateway.includes('TMDB_API_TOKEN'),'Gateway provider activation is version gated');
 const keys=Array.from(edit.matchAll(/\['([a-z0-9_]+)','[^']+','[^']+'\]/g),r=>r[1]);
 const fake={
  V377_ID_PROVIDERS:keys.map(k=>[k,k,'']),MF424_PROVIDER_META:[
@@ -43,7 +43,7 @@ const run=s=>vm.runInContext(s,fake);
 const registry=JSON.parse(JSON.stringify(run('window.MediaFlowV433.list()')));
 assert(registry.length>=37,'Provider inventory is complete');
 assert(!registry.some(p=>p.id==='podcastindex'),'Podcast Index is not supported');
-for(const id of ['tmdb','omdb','fanart','animeschedule','trakt','comicvine','metron','hardcover','podcastindex',
+for(const id of ['tmdb','omdb','fanart','animeschedule','trakt','comicvine','metron','hardcover',
  'episodate','thetvdb','simkl','malofficial','mangadex','gcd','royalroad','mangaupdates','livechart',
  'anilist','wikidata','anidb','marvel','loc','dnb','bnf','crossref','watchmode','fribb',
  'inventaire','gutendex','youtube']){
@@ -72,7 +72,7 @@ const cross=JSON.parse(JSON.stringify(run("mf433EnrichCoverCandidate({id:4,exter
 assert(cross.externalIdCandidates.some(x=>x.key==='wikidata'&&x.value==='Q42'));
 assert(!cross.externalIdCandidates.some(x=>x.key==='untrusted'));
 assert(!run("mf433ValidId('mangadex','not-a-uuid')"),'Invalid IDs rejected');
-assert(!run("mf433ValidId('podcast_rss','javascript:alert(1)')"),'Dangerous URL rejected');
+assert(!run("mf433ValidId('royalroad_rss','javascript:alert(1)')"),'Dangerous URL rejected');
 assert(run("mf433SettingsMarkupBase")!==undefined,'Existing Settings markup preserved');
 assert(run('mf425SettingsMarkup()').includes('v434 activation pending'),'Readiness shown in real Settings renderer');
 const malicious={externalIdCandidates:[{key:'__proto__',value:'poison',evidence:'test'},{key:'imdb',value:'evil',evidence:'fake'}]};
