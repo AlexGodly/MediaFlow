@@ -235,7 +235,7 @@ async function mf424Candidates(item){const found=[],dedupe=new Set();const order
   }
   return found;
 }
-function mf424Review(item,candidates){MF424.job.reviews.push({id:String(item.id),title:String(cleanTitle(item.title||'')),
+function mf424QueueReview(item,candidates){MF424.job.reviews.push({id:String(item.id),title:String(cleanTitle(item.title||'')),
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
@@ -282,9 +282,9 @@ async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;re
   const mode=mf424Defaults().selection;
   const best=candidates.sort((a,b)=>b.confidence-a.confidence)[0];
   if(mode==='manual'||mode==='hybrid'&&best.confidence<.95){
-    mf424Review(item,candidates);return;
+    mf424QueueReview(item,candidates);return;
   }
-  if(best.confidence<.95){mf424Review(item,candidates);return;}
+  if(best.confidence<.95){mf424QueueReview(item,candidates);return;}
   if(await mf424Apply(item,best,expected)){MF424.job.fixed++;mf424Note('recovered',best.provider,item.id);}
   else{MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
 }
