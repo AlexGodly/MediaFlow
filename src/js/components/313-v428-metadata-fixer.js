@@ -94,37 +94,76 @@ function diff(item,result){if(!result?.source)return [];
 async function init(){
  if(M.account&&M.account!==account()&&!M.running){M.initPromise=null;M.job=null;M.history=[];M.ready=false;}
  if(M.initPromise)return M.initPromise;M.initPromise=(async()=>{M.account=account();try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}try{const raw=JSON.parse(localStorage.getItem('mf428-metadata-history:'+account())||'[]');M.history=Array.isArray(raw)?raw.slice(-100):[];}catch(_){}M.ready=true;window.MediaFlowV428Hub?.paint();})();return M.initPromise;}
-function draftItem(entry,id){const saved=lookup(id||S.modal?.data?.id);if(saved)return {...saved};
- const d=S.modal?.data||{};return {...d,id:'',title:document.getElementById('l-title')?.value||d.title||'',categoryId:document.getElementById('l-category')?.value||d.categoryId||'',externalIds:{...(d.externalIds||{})}};}
+function draftItem(entry,id){
+ const saved=lookup(id||S.modal?.data?.id),d=S.modal?.data||{};
+ return captureDraft({...d,...(saved||{}),externalIds:{...(saved?.externalIds||d.externalIds||{})}});
+}
 function close(){document.getElementById('mf428-metadata-modal')?.remove();}
+function fieldOptions(){
+ return fields.map(field=>'<label class="mf428-meta-field"><input type="checkbox" data-mf428-field value="'+field+'" '+(field==='total'?'':'checked')+'><span>'+esc(field==='synopsis'?'Synopsis / description':field==='total'?'Total units (only when empty)':field)+'</span></label>').join('');
+}
 function open(entry='settings',id=''){
- close();const one=id?lookup(id):entry==='editor'?draftItem(entry,id):null;
- const selection=entry==='library'?idSet().map(String).filter(id=>lookup(id)):null;
- M.draft=one&&!one.id?one:null;
+ close();
+ const one=id?lookup(id):entry==='editor'?draftItem(entry,id):null;
+ const selection=entry==='library'?idSet().map(String).filter(v=>lookup(v)):[];
+ M.scope={entry,id:String(id||''),selected:selection,owner:account()};
  const parent=document.createElement('div');parent.id='mf428-metadata-modal';parent.className='mf428-metadata-overlay';
- const label=one?'This Title':selection?.length?'Selected '+selection.length+' Titles':'All Library';
- parent.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428MetadataClose()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true" aria-label="Fix Metadata"><header><div><small>LIBRARY MAINTENANCE</small><h2>Fix Metadata</h2><p>Find verified data, compare fields, and preserve manual information.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataClose()">Close</button></header>'+
- '<div class="mf428-meta-config"><label>Recovery scope<select id="mf428-meta-scope" '+(one||selection?.length?'disabled':'')+'><option value="'+(one?'single':selection?.length?'selected':'all')+'">'+esc(label)+'</option></select></label><label>Method<select id="mf428-meta-method"><option value="missing">Fill Missing Fields</option><option value="review">Review All Differences</option></select></label><label>Part size<input id="mf428-meta-part" type="number" min="1" max="1000" value="100"></label></div>'+
- '<div class="mf428-meta-note">A verified provider record is needed before any change. Personal ratings, progress, status, seasons and notes are never modified. Manual changes require approval.</div><footer><button type="button" class="btn btn-primary" onclick="App.mf428MetadataStart(\''+esc(entry)+'\',\''+esc(id)+'\')">Find Metadata</button></footer></section>';
+ const fixed=entry==='editor'||!!one?.id||selection.length>0;
+ const label=entry==='editor'?'Current title editor':one?'This Title':selection.length?'Selected '+selection.length+' Titles':'All Library';
+ const categories=(S.categories||[]).filter(cat=>cat?.id);
+ parent.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428MetadataClose()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true" aria-label="Fix Metadata"><header><div><small>LIBRARY MAINTENANCE</small><h2>Fix Metadata</h2><p>Identify the title, preview field changes, then apply only approved metadata.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataClose()">Close</button></header>'+
+ '<div class="mf428-meta-config"><label>Recovery scope<select id="mf428-meta-scope" '+(fixed?'disabled':'')+'><option value="'+(entry==='editor'?'draft':one?'single':selection.length?'selected':'all')+'">'+esc(label)+'</option>'+(!fixed?'<option value="category">By Category</option>':'')+'</select></label>'+
+ '<label>Method<select id="mf428-meta-method"><option value="missing">Fill Missing Fields</option><option value="review">Review Differences</option><option value="refresh">Refresh Outdated Metadata (review first)</option></select></label>'+
+ '<label>Titles per part<input id="mf428-meta-part" type="number" min="1" max="1000" value="100"></label></div>'+
+ (!fixed?'<label class="mf428-category-chooser">Category filter <select id="mf428-meta-category"><option value="">Choose category</option>'+categories.map(cat=>'<option value="'+esc(cat.id)+'">'+esc(cat.name)+'</option>').join('')+'</select></label>':'')+
+ '<fieldset class="mf428-meta-fieldset"><legend>Metadata fields to check</legend><div class="mf428-meta-fields">'+fieldOptions()+'</div></fieldset>'+
+ '<div class="mf428-meta-note">Existing personal information and manually locked rich metadata are protected. Episode/chapter total is opt-in and never changes watched progress or season structures. Every change requires review before saving.</div>'+
+ '<footer><button type="button" class="btn btn-primary" onclick="App.mf428MetadataStart()">Find Metadata</button></footer></section>';
  document.body.appendChild(parent);parent.querySelector('.mf428-meta-dialog button')?.focus();
 }
-async function start(entry,id){await init();const item=id?lookup(id):entry==='editor'?draftItem(entry,id):null,selected=entry==='library'?idSet().map(String).filter(id=>lookup(id)):null;
+async function start(){
+ await init();
+ const scope=M.scope;if(!scope||scope.owner!==account()){showToast('Account changed. Reopen Fix Metadata.');return;}
  const part=Math.max(1,Math.min(1000,Number(document.getElementById('mf428-meta-part')?.value)||100));
  const method=document.getElementById('mf428-meta-method')?.value||'missing';
- if(item&&!item.id){close();
-  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:item,account:account()}))showToast('Metadata lookup queued for this unsaved draft.');
-  else showToast('A Metadata Recovery is already active or queued. Save the draft before running bulk recovery.');
+ const fieldChoices=[...document.querySelectorAll('#mf428-metadata-modal [data-mf428-field]:checked')].map(e=>e.value).filter(field=>fields.includes(field));
+ if(!fieldChoices.length){showToast('Choose at least one metadata field.');return;}
+ if(scope.entry==='editor'){
+  const draft=draftItem('editor',scope.id);
+  if(!draft.title){showToast('Enter a title before searching metadata.');return;}
+  const fingerprint=snapshot(draft);
+  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:draft,account:account(),fingerprint,method,fields:fieldChoices}))
+   {close();showToast('Metadata lookup queued for the current title editor.');}
+  else showToast('Metadata Recovery is already running or queued.');
   return;
  }
- const ids=item?[String(item.id)]:selected?.length?selected:(S.library||[]).filter(i=>i?.id).map(i=>String(i.id));
+ let ids=scope.id&&lookup(scope.id)?[scope.id]:scope.selected.length?scope.selected.slice():[];
+ if(!ids.length){
+  const mode=document.getElementById('mf428-meta-scope')?.value||'all';
+  const category=String(document.getElementById('mf428-meta-category')?.value||'');
+  if(mode==='category'&&!category){showToast('Choose a category for metadata recovery.');return;}
+  ids=(S.library||[]).filter(i=>i?.id&&(mode!=='category'||String(i.categoryId)===category)).map(i=>String(i.id));
+ }
  if(!ids.length){showToast('No eligible Library titles.');return;}
- if(M.job&&!['complete','stopped','failed'].includes(M.job.status)){showToast('A Metadata Recovery already exists. Pause or finish it before replacing its queue.');return;}
- M.job={account:account(),ids,cursor:0,part,method,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
- await persist();close();if(!window.MediaFlowV428Hub?.enqueue('metadata',{}))showToast('Metadata Recovery is already queued.');
+ if(M.job&&!['complete','stopped','failed'].includes(M.job.status)){showToast('A Metadata Recovery is still pending. Resume or review it before starting a new batch.');return;}
+ M.job={account:account(),ids,cursor:0,part,method,fields:fieldChoices,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
+ await persist();
+ if(!window.MediaFlowV428Hub?.enqueue('metadata',{})){M.job.status='paused';await persist();showToast('Metadata was not queued. Resume the existing process when available.');return;}
+ close();showToast(ids.length+' title(s) added to Metadata Recovery.');
 }
-async function previewDraft(item,owner=account()){try{const data=await discover(item);if(owner!==account())throw Error('Account changed during unsaved draft search');if(!data.source){showToast(data.reason||'No source record');return;}M.reviews=[{draft:true,itemId:'',item,owner,found:data,differences:diff(item,data),version:0}];renderReview();}catch(e){showToast('Metadata lookup failed: '+String(e.message||e));}}
+async function previewDraft(item,owner=account(),params={}){
+ try{
+  const data=await discover(item);
+  if(owner!==account())throw Error('Account changed during editor metadata search');
+  if(!data.source){showToast(data.reason||'No matching metadata record');return;}
+  const differences=diff(item,data).filter(d=>params.fields?.includes(d.field)!==false&&(params.method!=='missing'||d.selected));
+  if(!differences.length){showToast('No safe metadata differences found.');return;}
+  M.reviews=[{draft:true,itemId:String(item.id||''),item,owner,found:data,differences,version:0,fingerprint:params.fingerprint||snapshot(item)}];
+  renderReview();
+ }catch(e){showToast('Metadata lookup failed: '+String(e.message||e));}
+}
 async function worker(params={}){await init();
- if(params.draftPreview){if(params.account!==account())throw Error('Unsaved title account changed');if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview,params.account);return;}
+ if(params.draftPreview){if(params.account!==account())throw Error('Unsaved title account changed');if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview,params.account,params);return;}
  const job=M.job;if(!job||job.account!==account())return;
  job.status='running';M.running=true;await persist();
  try{let processed=0;while(job.cursor<job.ids.length){
