@@ -34,3 +34,12 @@ No production Supabase changes. Do not modify MediaFlow Plus or MediaFlowApp. Do
 - No production Supabase writes, schema changes, Provider secrets, paid services, or deployment in this development round.
 
 **Further release blockers:** wider verified provider coverage across the three features, complete import field mapping beyond the current persisted schema, authenticated browser/provider integration and production-like 100k-title UI/sync testing. `v429` remains a **draft development update**, not a published GitHub Release.
+
+## Development hardening follow-up (October 15, 2026)
+- Fixed cooldown countdown math: show **remaining** cooldown seconds, never an epoch-sized duration.
+- The native Fresh Episodes settings now remain the **same DOM node** across Queue/Covers/Metadata tab switches, preserving in-progress selections; the universal fresh-release configuration modal is also restored on return.
+- **Hidden** widget visibility hides the passive launcher without disabling explicit Library, Title Details or Settings recovery shortcuts. Minimizing an explicitly opened Center returns it to hidden. Automatic/Always Show modes retain their intended behavior.
+- Metadata retries are now **provider-isolated** for Jikan, AniList, MangaDex, TVmaze and Open Library. A rate-limit/network/HTTP failure in one selected source does not prevent a different selected source from returning independently verified evidence.
+- Public TVmaze metadata now supports exact TheTVDB lookup IDs in addition to its own IDs and IMDb lookups; community ratings are mapped to the separately stored community score rather than overwriting personal ratings. Unresolved supplied IDs are never replaced with a guessed title-only result.
+- Added offline provider fallback, TheTVDB identity, failed-ID protection and desktop/360px Chromium preservation/shortcut regressions to the existing v429 development workflow.
+- These changes are **development-only**. Automated checks and production-like tests must pass before release. Provider capability verification, imported custom fields, legacy archive and numeric GitHub Release remain incomplete.
