@@ -24,6 +24,13 @@ jobs:
         with:
           ref: feature/v428-universal-recovery
           persist-credentials: true
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -31,7 +38,8 @@ jobs:
         run: |
           set -euo pipefail
           test "$(cat VERSION)" = 428
-          test -d legacy/v/427
+          # Historical archives are omitted from this fast development checkout.
+          # The guarded release workflow validates the actual legacy/v/427 tree.
           python scripts/build.py
           node scripts/test-v428-recovery.cjs
           node scripts/test-v428-metadata.cjs
