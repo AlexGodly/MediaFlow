@@ -371,7 +371,8 @@ function mf424OpenConfig(){const existing=document.getElementById('mf424-modal')
     '<label>Rate-limit protection<select name="protection">'+opts('protection',[['safe','Safe'],['balanced','Balanced'],['custom','Custom (provider maximums enforced)']])+'</select></label>'+
     '<label class="mf424-check"><input type="checkbox" name="autoResume" '+(cfg.autoResume?'checked':'')+'> Resume when app reopens</label></div>'+
     '<h3>Enabled cover providers</h3><div class="mf424-provider-grid">'+available.map(x=>'<label class="mf424-provider"><input type="checkbox" data-mf424-provider value="'+x.id+'" '+(cfg.enabled.includes(x.id)?'checked':'')+'><strong>'+x.name+'</strong><span class="mf424-provider-order"><button type="button" onclick="event.preventDefault();event.stopPropagation();App.mf424MoveProvider(\''+x.id+'\',-1)">↑</button><button type="button" onclick="event.preventDefault();event.stopPropagation();App.mf424MoveProvider(\''+x.id+'\',1)">↓</button></span><small>'+x.types.join(' · ')+' · '+x.level+'</small></label>').join('')+'</div>'+
-    '<details><summary>Other researched providers (not available without credentials / additional verification)</summary><p class="mf424-note">Not presented as working APIs. Their current limitations are documented in the provider report.</p>'+other.map(x=>'<span class="mf424-unavailable">'+x.name+' — '+x.level+'</span>').join('')+'</details>'+
+    // Providers requiring credentials or verification stay source-only in v429.
+
     '<p class="mf424-note">Jobs run while the app is active and resume after reopening. Closing the browser suspends processing. Broken existing URLs are not scanned.</p>'+ 
     '<div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424CloseModal()">Cancel</button><button class="btn btn-primary" onclick="App.mf424Start()">Start Recovery</button></div></div></section>';
   document.body.appendChild(el);
