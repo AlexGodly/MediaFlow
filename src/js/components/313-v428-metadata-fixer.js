@@ -11,13 +11,13 @@ const lookup=id=>(S.library||[]).find(i=>String(i?.id)===String(id));
 const idSet=()=>typeof mf425Selection==='function'?mf425Selection():Object.keys(S.librarySelection||{}).filter(k=>S.librarySelection[k]);
 const sleep=ms=>new Promise(done=>setTimeout(done,ms));
 // Use MediaFlow's canonical v178 rich-metadata schema, not a shadow description field.
-const fields=['synopsis','genres','year','studios','producers','themes','releaseDate','mediaFormat','total'];
+const fields=['synopsis','genres','year','studios','producers','themes','releaseDate','mediaFormat','durationMinutes','seasonLabel','ageRating','communityScore','mediaSource','demographic','total'];
 const LIST_FIELDS=new Set(['genres','studios','producers','themes']);
 const SAFE_RICH_FIELDS=new Set(fields.filter(f=>f!=='total'));
-const editorIds={synopsis:'l-rich-synopsis',genres:'l-rich-genres',year:'l-rich-year',studios:'l-rich-studios',producers:'l-rich-producers',themes:'l-rich-themes',releaseDate:'l-rich-release-date',mediaFormat:'l-rich-format',total:'l-total'};
+const editorIds={synopsis:'l-rich-synopsis',genres:'l-rich-genres',year:'l-rich-year',studios:'l-rich-studios',producers:'l-rich-producers',themes:'l-rich-themes',releaseDate:'l-rich-release-date',mediaFormat:'l-rich-format',durationMinutes:'l-rich-duration',seasonLabel:'l-rich-season',ageRating:'l-rich-age-rating',communityScore:'l-rich-community-score',mediaSource:'l-rich-source',demographic:'l-rich-demographic',total:'l-total'};
 function editorValue(field){const el=document.getElementById(editorIds[field]);if(!el)return undefined;
  if(LIST_FIELDS.has(field))return [...new Set(String(el.value||'').split(',').map(s=>s.trim()).filter(Boolean))];
- if(field==='year'||field==='total')return String(el.value||'').trim()?Number(el.value):null;
+ if(['year','total','durationMinutes','communityScore'].includes(field))return String(el.value||'').trim()?Number(el.value):null;
  return String(el.value||'').trim();
 }
 function captureDraft(item){const next={...item};for(const field of fields){const value=editorValue(field);if(value!==undefined)next[field]=value;}
@@ -65,7 +65,7 @@ function cleanHtml(value){
  }
  return raw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,5000);
 }
-function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
+function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
  if(t==='anime'||t==='manga'){
@@ -83,7 +83,7 @@ async function discover(item){
   let d=path?await request('tvmaze',path):null;
   if(!d){const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));if(exact.length!==1)return {reason:'No unique TVmaze match'};d=exact[0];}
   if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
-  return {title:d.name||'',synopsis:cleanHtml(d.summary),genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
+  return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
  if(t==='books'&&ids.isbn){
   const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
@@ -95,11 +95,12 @@ async function discover(item){
 }
 function normalizedValue(field,value){
  if(LIST_FIELDS.has(field)){const a=Array.isArray(value)?value:String(value||'').split(',');return [...new Set(a.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);}
- if(field==='year'||field==='total'){const n=Number(value);return Number.isFinite(n)&&n>0&&Number.isSafeInteger(n)?n:null;}
+ if(['year','total','durationMinutes'].includes(field)){const n=Number(value);return Number.isFinite(n)&&n>0&&Number.isSafeInteger(n)?n:null;}
+ if(field==='communityScore'){const n=Number(value);return Number.isFinite(n)&&n>0&&n<=10?Math.round(n*100)/100:null;}
  if(field==='releaseDate'){const s=String(value||'').trim().slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:'';}
  return String(value||'').trim().slice(0,field==='synopsis'?6000:160);
 }
-function missing(field,value){return value==null||value===''||(LIST_FIELDS.has(field)&&!normalizedValue(field,value).length)||(field==='year'||field==='total')&&!(Number(value)>0);}
+function missing(field,value){return value==null||value===''||(LIST_FIELDS.has(field)&&!normalizedValue(field,value).length)||(['year','total','durationMinutes','communityScore'].includes(field))&&!(Number(value)>0);}
 function diff(item,result){if(!result?.source)return [];
  const changes=[],manual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
  for(const field of fields){
