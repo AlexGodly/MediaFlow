@@ -284,7 +284,7 @@ async function worker(params={}){await init();if(!params.universal)return window
   }
   if(j.cursor>=j.ids.length)j.status='complete';await save();
  }catch(e){j.status='paused';j.errors.push(String(e.message||e));await save();throw e;}
- finally{F.running=false;window.MediaFlowV428Hub?.paint();if(j.status==='complete')showToast('Fresh Releases scan complete. '+j.fresh+' titles have verified new content.');}
+ finally{F.running=false;window.MediaFlowV428Hub?.paint();}
 }
 async function resume(){await init();if(!F.job||F.job.account!==account()||F.running)return;F.job.paused=false;F.job.stopped=false;F.job.status='queued';await save();window.MediaFlowV428Hub?.enqueue('fresh',{universal:true});}
 async function init(){
