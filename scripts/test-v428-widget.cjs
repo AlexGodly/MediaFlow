@@ -13,7 +13,7 @@ const App={},S={settings:{v428Background:{visibility:'always',compact:false,posi
 let el=null,seenToast=[];
 const fakeNode=()=>({
  id:'',className:'',dataset:{},style:{data:{},setProperty(k,v){this.data[k]=v;}},inert:false,attributes:{},
- innerHTML:'',scrollTop:0,
+ innerHTML:'',scrollTop:0,remove(){el=null;},
  classList:{toggle(){},contains(){return false;}},
  setAttribute(k,v){this.attributes[k]=v;},
  querySelector(){return null;},querySelectorAll(){return [];},contains(){return false;}
