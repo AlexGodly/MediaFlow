@@ -24,7 +24,7 @@ function switchAccount(){
  if(state.account===account())return;
  state.account=account();state.tab=TABS.includes(pref().tab)?pref().tab:'queue';state.expanded=pref().expanded===true;
  state.context=null;
- if(state.root)removePortals();
+ if(state.root)discardPortals();
 }
 function overview(){
  const s=status();
@@ -52,16 +52,43 @@ function row(kind){
 function queueHTML(){
  return '<div class="mf429-tab-heading"><strong>Process Queue</strong><small>One network-intensive job at a time. Preserve checkpoints and reviews.</small></div>'+row('cover')+row('metadata')+row('fresh');
 }
-function removePortals(){
- for(const id of ['mf424-modal','mf428-metadata-modal','mf428-fresh-config']){
-  const node=document.getElementById(id);if(node?.closest?.('#mf429-center'))node.remove();
+const PORTALS={covers:'mf424-modal',metadata:'mf428-metadata-modal',fresh:'mf428-fresh-config'};
+function discardPortals(tab){
+ for(const [kind,id] of Object.entries(PORTALS)){
+  if(tab&&kind!==tab)continue;
+  const node=document.getElementById(id);
+  if(node&&(node.dataset.mf429Stashed==='1'||node.closest?.('#mf429-center')))node.remove();
  }
+}
+function removePortals(){
+ // Keep real native inputs, selections and text drafts when the user switches
+ // tabs or temporarily minimizes this Center. No form is cloned.
+ for(const [kind,id] of Object.entries(PORTALS)){
+  const node=document.getElementById(id);
+  if(!node?.closest?.('#mf429-center'))continue;
+  node.dataset.mf429Stashed='1';
+  node.dataset.mf429Tab=kind;
+  node.setAttribute('aria-hidden','true');
+  document.body.appendChild(node);
+  node.style.setProperty('display','none','important');
+ }
+}
+function restorePortal(tab){
+ const id=PORTALS[tab],node=document.getElementById(id);
+ if(!node||node.dataset.mf429Stashed!=='1')return false;
+ const target=state.content?.querySelector('.mf429-feature-port');
+ if(!target)return false;
+ target.appendChild(node);
+ node.style.removeProperty('display');
+ node.removeAttribute('aria-hidden');
+ delete node.dataset.mf429Stashed;
+ return true;
 }
 function embed(id){
  const modal=document.getElementById(id);
  if(!modal||!state.content)return false;
  const target=state.content.querySelector('.mf429-feature-port')||state.content;
- target.appendChild(modal);modal.classList.add('mf429-embedded');
+ target.appendChild(modal);modal.classList.add('mf429-embedded');modal.style.removeProperty('display');modal.removeAttribute('aria-hidden');delete modal.dataset.mf429Stashed;
  const shade=modal.querySelector('.mf424-shade,.mf428-meta-shade');if(shade)shade.hidden=true;
  const dialog=modal.querySelector('[role="dialog"]');dialog?.setAttribute('aria-modal','false');
  return true;
@@ -76,12 +103,12 @@ function renderCurrent(){
  if(state.tab==='covers'){
   state.content.innerHTML='<div class="mf429-tab-heading"><strong>Advanced Cover Recovery</strong><small>Original v428 recovery controls, scopes and providers.</small></div><div class="mf429-feature-port"></div>';
   const ctx=state.context?.tab==='covers'?state.context:null;
-  originalCoverOpen?.(ctx?.entry||'settings',ctx?.id||'');
+  if(!restorePortal('covers'))originalCoverOpen?.(ctx?.entry||'settings',ctx?.id||'');
   if(!embed('mf424-modal'))state.content.insertAdjacentHTML('beforeend','<p class="mf429-message">Cover Recovery is unavailable. Try the Library Tools shortcut.</p>');
  }else if(state.tab==='metadata'){
   state.content.innerHTML='<div class="mf429-tab-heading"><strong>Advanced Metadata Recovery</strong><small>Choose fields and review before saving personal data.</small></div><div class="mf429-feature-port"></div>';
   const ctx=state.context?.tab==='metadata'?state.context:null;
-  originalMetadataOpen?.(ctx?.entry||'settings',ctx?.id||'');
+  if(!restorePortal('metadata'))originalMetadataOpen?.(ctx?.entry||'settings',ctx?.id||'');
   if(!embed('mf428-metadata-modal'))state.content.insertAdjacentHTML('beforeend','<p class="mf429-message">Metadata Recovery is unavailable.</p>');
  }else if(state.tab==='fresh'){
   let html='';
@@ -110,6 +137,7 @@ function render(){
 function choose(tab){if(!TABS.includes(tab))return;state.context=null;state.tab=tab;state.expanded=true;savePreference({tab,expanded:true});render();}
 function openScoped(tab,entry='settings',id=''){
  if(!TABS.includes(tab))return;
+ discardPortals(tab);
  state.context={tab,entry:String(entry||'settings'),id:String(id||'')};
  state.tab=tab;state.expanded=true;
  savePreference({tab,expanded:true});render();
@@ -182,7 +210,7 @@ function setVisibility(value){
 }
 // Route existing Library, Title Details, Settings and editor entry points to
 // the identical original recovery form, preserving their scoped arguments.
-if(originalCoverOpen)App.mf425OpenConfig=function(entry='settings',id=''){openScoped('covers',entry,id);};
+if(originalCoverOpen){App.mf425OpenConfig=function(entry='settings',id=''){openScoped('covers',entry,id);};App.mf424OpenConfig=function(){openScoped('covers','settings');};}
 if(originalMetadataOpen)App.mf428MetadataOpen=function(entry='settings',id=''){openScoped('metadata',entry,id);};
 if(originalFreshOpen)App.mf428FreshOpen=function(){openScoped('fresh');universal();};
 Object.assign(App,{mf429CenterTab:choose,mf429CenterToggle:toggle,mf429CenterQueue:queueCommand,mf429CenterVisibility:setVisibility});
