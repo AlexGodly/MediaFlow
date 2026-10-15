@@ -26,12 +26,12 @@ function captureDraft(item){const next={...item};for(const field of fields){cons
  next.externalIds=ids;return next;}
 function snapshot(item){return fields.map(f=>JSON.stringify(item[f]??null)).join('|')+'|'+String(item.title||'')+'|'+String(item.categoryId||'');}
 const safeIds=o=>o&&typeof o==='object'?o:{};
-const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books']}};
+const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},anilist:{requiresSetup:false,capabilities:['anime','manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books','comics']}};
 async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('IndexedDB is required to preserve metadata jobs'));return;}const req=indexedDB.open('mediaflow-metadata-v428',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);});}
 async function store(op,value,owner=account()){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+owner):tx.objectStore('records').put(value,'job:'+owner);req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
 async function persist(){if(M.job)await store('put',M.job,M.job.account);window.MediaFlowV428Hub?.paint();}
 function kind(item){const cat=String(item.categoryId||'').toLowerCase();const label=(S.categories||[]).find(c=>String(c.id)===cat)?.name||cat;
- const v=String(label).toLowerCase();return /manga|manhwa|manhua/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/book|novel/.test(v)?'books':'other';}
+ const v=String(label).toLowerCase();return /manga|manhwa|manhua/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/comics|comic|graphic novel/.test(v)?'comics':/book|novel/.test(v)?'books':'other';}
 async function request(provider,url){const row=M.rate[provider]||(M.rate[provider]={next:0,cooldown:0});
  for(let attempt=0;attempt<3;attempt++){
   const gap=provider==='jikan'?2500:1300;
@@ -65,6 +65,64 @@ function cleanHtml(value){
  }
  return raw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,5000);
 }
+async function aniListQuery(query,variables){
+ const row=M.rate.anilist||(M.rate.anilist={next:0,cooldown:0});
+ for(let attempt=0;attempt<3;attempt++){
+  const wait=Math.max(0,row.next-Date.now(),row.cooldown-Date.now());
+  if(wait>0)await sleep(wait);
+  row.next=Date.now()+3400;
+  const ctrl=new AbortController(),timeout=setTimeout(()=>ctrl.abort(),15000);
+  try{
+   const result=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({query,variables}),signal:ctrl.signal});
+   if(result.ok){const body=await result.json();if(body.errors?.length)throw Error('AniList query rejected');return body.data;}
+   if(result.status===404)return null;
+   if(result.status===429||result.status>=500){
+    const raw=String(result.headers.get('Retry-After')||''),seconds=Number(raw);
+    const duration=Number.isFinite(seconds)&&seconds>0?seconds*1000:Math.min(300000,40000*(attempt+1));
+    row.cooldown=Date.now()+Math.max(2000,Math.min(300000,duration));continue;
+   }
+   throw Error('AniList HTTP '+result.status);
+  }catch(err){
+   if(attempt>=2||!(err?.name==='AbortError'||err instanceof TypeError))throw err;
+   row.cooldown=Date.now()+2000*(attempt+1);
+  }finally{clearTimeout(timeout);}
+ }
+ throw Error('AniList temporarily unavailable');
+}
+const ANILIST_MEDIA_FIELDS='id idMal type format description(asHtml: false) source seasonYear duration episodes chapters volumes averageScore startDate {year month day} title {romaji english native userPreferred} genres tags {name rank} studios {nodes {name}}';
+function aniListNames(m){return [m?.title?.romaji,m?.title?.english,m?.title?.native,m?.title?.userPreferred].map(norm).filter(Boolean);}
+function mapAniList(m,type){
+ const date=m?.startDate||{};
+ const day=date.year&&date.month&&date.day?String(date.year).padStart(4,'0')+'-'+String(date.month).padStart(2,'0')+'-'+String(date.day).padStart(2,'0'):'';
+ return {title:m?.title?.userPreferred||m?.title?.romaji||'',synopsis:cleanHtml(m?.description||''),
+  mediaSource:m?.source||'',durationMinutes:Number(m?.duration)||null,
+  communityScore:m?.averageScore!=null?Math.round(Number(m.averageScore))/10:null,
+  genres:Array.isArray(m?.genres)?m.genres:[],
+  themes:(m?.tags||[]).filter(t=>t.rank>=70).map(t=>t.name),
+  studios:(m?.studios?.nodes||[]).map(t=>t.name).filter(Boolean),
+  year:Number(m?.seasonYear)||Number(date.year)||0,releaseDate:day,mediaFormat:m?.format||'',
+  total:Number(type==='manga'?m?.chapters:m?.episodes)||0,
+  source:'AniList',url:'https://anilist.co/'+(type==='manga'?'manga':'anime')+'/'+Number(m?.id),
+  recordId:m?.id};
+}
+async function discoverAniList(item,type,ids,title){
+ const id=/^\d+$/.test(String(ids.anilist||''))?Number(ids.anilist):null;
+ const idMal=/^\d+$/.test(String(ids.mal||item.malId||''))?Number(ids.mal||item.malId):null;
+ const mediaType=type==='manga'?'MANGA':'ANIME';
+ if(id||idMal){
+  const q='query ($id:Int,$idMal:Int,$type:MediaType){Media(id:$id,idMal:$idMal,type:$type){'+ANILIST_MEDIA_FIELDS+'}}';
+  const data=await aniListQuery(q,{id,idMal:id?null:idMal,type:mediaType});
+  const record=data?.Media;
+  if(!record||!aniListNames(record).includes(norm(title)))return {reason:'AniList identifier record could not verify the title'};
+  return mapAniList(record,type);
+ }
+ const q='query ($search:String,$type:MediaType){Page(perPage:8){media(search:$search,type:$type){'+ANILIST_MEDIA_FIELDS+'}}}';
+ const data=await aniListQuery(q,{search:title,type:mediaType});
+ const matches=(data?.Page?.media||[]).filter(m=>aniListNames(m).includes(norm(title)));
+ if(matches.length!==1)return {reason:'AniList title match was not unique; no fields will be changed'};
+ return mapAniList(matches[0],type);
+}
+
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
 async function discover(item,allowed){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
@@ -75,8 +133,9 @@ async function discover(item,allowed){
   const search=await request('jikan','https://api.jikan.moe/v4/'+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
   const exact=(search?.data||[]).filter(v=>[v.title,v.title_english,v.title_japanese,...(v.title_synonyms||[])].some(n=>norm(n)===norm(title)));
   if(exact.length===1)return mapJikan(exact[0],t);
-  return {reason:exact.length>1?'Ambiguous Jikan title; no automatic match':'No exact title match'};
+  if(exact.length>1)return {reason:'Ambiguous Jikan title; no automatic match'};
  }
+ if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('anilist'))){const data=await discoverAniList(item,t,ids,title);if(data?.source)return data;if(allowed?.length===1)return data;}
  if(t==='tv'&&(!allowed||allowed.includes('tvmaze'))){
   const tm=String(ids.tvmaze||'').trim(),imdb=String(ids.imdb||'').trim();
   const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
@@ -85,7 +144,7 @@ async function discover(item,allowed){
   if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
   return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
- if(t==='books'&&ids.isbn&&(!allowed||allowed.includes('openlibrary'))){
+ if((t==='books'||t==='comics')&&ids.isbn&&(!allowed||allowed.includes('openlibrary'))){
   const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
   if(d&&!norm(d.title||''))return {reason:'Open Library ISBN record did not supply a title'};
   if(d&&norm(d.title)!==norm(title))return {reason:'Open Library ISBN record title differs; verify the ISBN before recovery'};
