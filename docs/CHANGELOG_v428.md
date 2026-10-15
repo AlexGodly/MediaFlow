@@ -63,3 +63,18 @@
 - **Tests:** `scripts/test-v428-metadata.cjs` exercises the actual editor/Library/Details extension hooks and canonical field/progress/manual-lock contracts. The development GitHub Actions workflow runs it alongside v424/v425/v427 regressions.
 
 **Limitations:** This phase uses the available public-source adapters rather than registering/configuring credential-dependent providers. Full cross-device locks, live API verification, comprehensive browser UI/real-account sync tests and general media-type provider expansion remain pending before the final v428 release.
+
+## Phase 4 — Universal Fresh Releases (development)
+
+- **Anime:** Continues using the existing Seasonal Anime scan and `v401EpisodeOutcome`, respecting the account's saved provider detection mode, including the original `automatic2` Smart Engine. Does not rewrite anime progress or scan history.
+- **TV episodes:** TVmaze and EpisoDate adapters verify exact show identities and actual air dates. TVmaze's specials are counted separately from numbered regular episodes; future episodes never count as released.
+- **Manga / manhwa:** MangaDex uses an existing verified MangaDex UUID, English-translation chapter feed, published timestamps, and unique numeric chapter numbers. Latest feed pages are **partial**: they can establish a higher released chapter but cannot conclusively show the reader is caught up. Multiple scanlation group updates never double-count the same chapter number.
+- **Podcast, web novel, web series, comics:** A pre-existing trusted HTTPS title RSS/Atom URL may provide timestamped release evidence using unique GUIDs and explicit episode/chapter/issue numbers. A partial or unnumbered feed returns Unknown when it cannot prove a count. No additional provider connection/setup UI is exposed.
+- **Books, standalone movies, other media:** Capability classification and future provider manifests are retained, but results remain Unknown where no verified unit-level release source exists. No invented 'caught up' assertions, blanket genre support claims, or unlicensed scraping.
+- **Evidence policy:** One valid positive can establish Fresh. `automatic` stops at a verified provider result; `automatic2` compares applicable independent provider evidence and chooses the highest verified released count rather than summing duplicate observations. Any negative inference remains Unknown if required providers fail or the evidence is partial.
+- **Identity & date:** Exact title / external-ID matching before counting released units, no future releases, no unverified title guesses. Special handling for seasons and translated editions.
+- **UI:** Universal scan accepts all Library titles, selected Library titles, or a specific category. Results show release date, source URL when safe, conflicting provider counts, partial-vs-complete evidence, and Unknown outcomes.
+- **Reliability:** Shared scheduler queue, provider-specific cooldown/retry-after handling, checkpointed scans, account ownership guards, and large-Library lookup indexes. Progress writes are throttled to reduce storage churn in 100k-title workloads.
+- **Tests:** `scripts/test-v428-fresh.cjs` checks verified-vs-unknown results, duplicate chapter evidence, future-date rejection, TV specials, highest-verified multi-source aggregation, media-category routing, and hidden/unconfigured source behavior.
+
+**Remaining prior to release:** Real-browser verification, provider rate-limit/CORS smoke testing, full media-category provider coverage (only lawful configured sources), performance benchmark, and final release/rollback procedure. This phase is not itself a completed v428 GitHub release.
