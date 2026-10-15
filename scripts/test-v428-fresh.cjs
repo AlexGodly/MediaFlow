@@ -38,7 +38,8 @@ class FakeDOMParser{
 async function fetchMock(url){
  urls.push(String(url));
  let data=null;
- if(url.includes('tvmaze.com/search/shows'))data=[{show:{id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'}}];
+ if(url.includes('tvmaze.com/lookup/shows?thetvdb=12345'))data={id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'};
+ elseif(url.includes('tvmaze.com/search/shows'))data=[{show:{id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'}}];
  else if(url.includes('tvmaze.com/shows/42/episodes'))data=[
    {id:1,season:1,number:1,airstamp:'2026-01-01T01:00:00Z'},
    {id:2,season:1,number:2,airstamp:'2026-03-01T01:00:00Z'},
@@ -91,6 +92,13 @@ assert.equal(join(a,[{status:'unknown',available:0},{status:'none',available:5,p
  assert(urls.some(x=>x.includes('episodes?specials=1')),'TVmaze specials fetched separately');
  const seriesCaughtUp=await engine.evidence({...series,progress:2},'automatic2','tvmaze');
  assert.equal(seriesCaughtUp.status,'none');
+ const autoConservative=await engine.evidence({...series,progress:2},'automatic','tvmaze');
+ assert.equal(autoConservative.evidence.length,2,'Automatic mode checks both public TV providers before claiming no new releases');
+ const viaTvdb=await engine.evidence({...series,externalIds:{thetvdb:'12345'}},'individual','tvmaze');
+ assert.equal(viaTvdb.status,'fresh','A verified TheTVDB cross-reference must work without extra credentials');
+ assert(urls.some(x=>x.includes('lookup/shows?thetvdb=12345')));
+ assert(src.includes('if(result===null)j.legacyError'),'Seasonal engine may return undefined on success; only explicit unavailable return marks Unknown');
+
  const manga={title:'A Manga',categoryId:'manga',progress:11,externalIds:{mangadex:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'}};
  const fresh=await engine.evidence(manga,'automatic2','mangadex');
  assert.equal(fresh.status,'fresh');
