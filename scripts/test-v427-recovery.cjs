@@ -7,6 +7,24 @@ const core=fs.readFileSync('src/js/components/309-v424-advanced-cover-recovery.j
 const first=fs.readFileSync('src/js/components/157-v225-global-button-icons.js','utf8');
 const second=fs.readFileSync('src/js/components/158-v226-semantic-icons-dropdowns.js','utf8');
 const match=(s,q,label)=>assert(s.includes(q),label+': '+q);
+
+const coverIntegration=fs.readFileSync('src/js/components/310-v425-cover-recovery-integration.js','utf8');
+function section(text,start,end){const at=text.indexOf(start);assert(at>=0,'Missing section: '+start);const stop=text.indexOf(end,at+start.length);assert(stop>at,'Missing boundary: '+end);return text.slice(at,stop);}
+const dashboard=section(coverIntegration,'v192MissingCoversHtml=function','// Preserve the established fast cover picker');
+const editor=section(coverIntegration,'libraryModalHtml=function','function mf425DraftItem');
+const quickCover=section(coverIntegration,'App.v181QuickEditDetail=function','const mf425OldSaveQuick');
+const olderPicker=section(coverIntegration,'root.innerHTML=','document.body.append(root)');
+const unifiedPicker=section(source,'root.innerHTML=','document.body.appendChild(root)');
+for(const [name,markup] of [['Dashboard Missing Covers',dashboard],['Add/Edit Title',editor],['Quick Cover action',quickCover],['older Find Cover picker',olderPicker],['unified Find Cover picker',unifiedPicker]]){
+ assert(!markup.includes(' Advanced Recovery</button>'),name+' must not display the removed Advanced Recovery shortcut');
+ assert(!markup.includes('App.mf425InstantAdvanced()'),name+' must not launch advanced recovery');
+}
+assert(dashboard.includes("App.mf425Instant("),'Dashboard retains Find Cover Automatically');
+assert(editor.includes("App.mf425Instant("),'Add/Edit retains Find Cover Automatically');
+assert(quickCover.includes("App.mf425Instant("),'Quick Cover retains Find Cover Automatically');
+assert(coverIntegration.includes("App.mf425OpenConfig(\\'library\\')"),'Library retains bulk Cover Recovery');
+assert(coverIntegration.includes("App.mf425OpenConfig(\\'settings\\')"),'Settings retains Cover Recovery');
+
 match(css,'z-index:100050','Quick Edit overlays recovered');
 match(css,'z-index:100110','confirmation dialog above search');
 match(css,'.mf427-settings-confirm','theme settings');
