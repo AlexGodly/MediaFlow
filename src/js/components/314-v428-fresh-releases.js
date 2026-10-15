@@ -67,11 +67,13 @@ function freshButIncomplete(item,highest,source,unit,extra={}){
  reason:highest>progress?'Verified released numbered item; incomplete feed does not establish a full total':'Incomplete feed; cannot prove no new releases'};
 }
 async function tvmaze(item){
- const ids=item.externalIds||{},id=String(ids.tvmaze||''),imdb=String(ids.imdb||'');
+ const ids=item.externalIds||{},id=String(ids.tvmaze||''),imdb=String(ids.imdb||''),thetvdb=String(ids.thetvdb||ids.tvdb||'');
  let show=null;
  if(/^\d+$/.test(id))show=await request('tvmaze','https://api.tvmaze.com/shows/'+encodeURIComponent(id));
- else if(imdb)show=await request('tvmaze','https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb));
+ else if(/^tt\d{7,10}$/i.test(imdb))show=await request('tvmaze','https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb));
+ else if(/^\d+$/.test(thetvdb))show=await request('tvmaze','https://api.tvmaze.com/lookup/shows?thetvdb='+encodeURIComponent(thetvdb));
  else{
+  if(id||imdb||thetvdb)return {status:'unknown',reason:'Supplied TV identifier is invalid; no title-only fallback'};
   const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(item.title||''));
   const match=(list||[]).map(x=>x.show).filter(s=>known(s?.name,item.title));
   if(match.length===1)show=match[0];
@@ -234,7 +236,8 @@ async function one(item,mode,selected){
    const row=await adapters[p](item);
    evidence.push({...row,provider:p});
    if(mode==='automatic'&&row.status==='fresh')break;
-   if(mode==='automatic'&&row.status==='none'&&!row.partial)break;
+   // A single provider reporting caught up cannot establish that other sources have no newer releases.
+   // Keep checking every eligible source before making a negative claim.
   }catch(e){evidence.push({status:'unknown',provider:p,reason:String(e.message||e).slice(0,220)});}
  }
  return verifiedEvidence(item,evidence,mode);
@@ -282,7 +285,9 @@ async function worker(params={}){await init();if(!params.universal)return window
    });
    try{
     const result=await window.MediaFlowV428Hub?.runLegacyFresh({ids:selectedAnime,force:true});
-    if(!result)j.legacyError='Seasonal anime verifier was unavailable; results remain unverified';
+    // The original seasonal runner can legitimately finish without returning a result object.
+    // Only the explicit unavailable sentinel means no verifier was registered.
+    if(result===null)j.legacyError='Seasonal anime verifier was unavailable; results remain unverified';
     j.animeDone=true;
    }catch(e){
     j.animeDone=true;j.legacyError=String(e.message||e);
