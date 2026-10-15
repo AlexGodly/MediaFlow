@@ -242,7 +242,7 @@ function report(){const j=F.job;if(!j){showToast('No Fresh Releases results yet.
  (r.releasedAt?'<small>Released: '+esc(r.releasedAt)+'</small>':'')+
  (safeSourceLink(r.url)?'<a href="'+esc(safeSourceLink(r.url))+'" target="_blank" rel="noopener noreferrer">Source evidence</a>':'')+
  (r.disagreement?'<small>Provider counts disagree; largest verified count used</small>':'')+
- (r.evidence?.length?'<small>Checks: '+esc(r.evidence.map(e=>e.provider+': '+e.status+(e.available!=null?' ('+e.available+')':'')).join(' · '))+'</small>':'')+'</article>').join('')+'</div><footer><button type="button" class="btn btn-ghost" onclick="App.mf428FreshResume()">Continue Scan</button></footer></section>';document.body.appendChild(root);
+ (r.evidence?.length?'<small>Checks: '+esc(r.evidence.map(e=>e.provider+': '+e.status+(e.available!=null?' ('+e.available+')':'')).join(' · '))+'</small>':'')+'</article>').join('')+'</div><footer>'+(j.status==='paused'||j.status==='stopped'?'<button type="button" class="btn btn-primary" onclick="App.mf428FreshResume()">Resume Scan</button>':'')+'<button type="button" class="btn btn-ghost" onclick="App.mf428FreshCloseReport()">Close</button></footer></section>';document.body.appendChild(root);
 }
 function closeReport(){document.getElementById('mf428-fresh-report')?.remove();}
 function open(){document.getElementById('mf428-fresh-config')?.remove();const el=document.createElement('div');el.id='mf428-fresh-config';el.className='mf428-metadata-overlay';
