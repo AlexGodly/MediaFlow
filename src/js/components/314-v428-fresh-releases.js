@@ -10,7 +10,7 @@ const normalize=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[^\p{L
 const safeSourceLink=raw=>{try{const url=new URL(String(raw||''));return url.protocol==='https:'||url.protocol==='http:'?url.href:'';}catch(_){return '';}};
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const sourceKinds={tvmaze:['tv'],episodate:['tv'],mangadex:['manga'],feed:['podcasts','webnovels','webseries']};
+const sourceKinds={tvmaze:['tv'],episodate:['tv'],mangadex:['manga'],feed:['podcasts','webnovels','webseries','comics']};
 const types={anime:'Anime episodes',tv:'TV episodes',manga:'translated chapters',comics:'comic issues',books:'books / volumes',webnovels:'web novel chapters',webseries:'web series episodes',podcasts:'podcast episodes',movies:'movie installments',other:'releases'};
 function media(item){const c=(S.categories||[]).find(x=>String(x.id)===String(item.categoryId)),v=String(c?.name||item.categoryId||'').toLowerCase();
  if(/manga|manhwa|manhua/.test(v))return 'manga';
@@ -173,7 +173,7 @@ function feedItems(raw,type){
   seen.add(guid);
   const text=child(item,'title');
   const explicit=[...item.children].find(x=>x.localName==='episode'&&/itunes/i.test(x.prefix||''))?.textContent;
-  const titleNumber=/(?:episode|ep\.?|chapter|ch\.?|part)\s*#?\s*(\d{1,6})\b/i.exec(text);
+  const titleNumber=/(?:episode|ep\.?|chapter|ch\.?|part|issue)\s*#?\s*(\d{1,6})\b/i.exec(text);
   const num=Number(explicit||titleNumber?.[1]);
   items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null});
  }
@@ -189,7 +189,7 @@ async function feed(item){
  const numbered=parsed.items.filter(x=>x.number!=null),highest=Math.max(0,...numbered.map(x=>x.number));
  const latest=parsed.items.map(x=>x.date).sort().at(-1)||'';
  return freshButIncomplete(item,highest,'RSS / Atom',
-  kind==='podcasts'?'podcast episodes':kind==='webnovels'?'web novel chapters':'web series episodes',
+  kind==='podcasts'?'podcast episodes':kind==='webnovels'?'web novel chapters':kind==='comics'?'comic issues':'web series episodes',
   {url,recordId:url,observedCount:parsed.items.length,releasedAt:latest,
    evidenceScope:'Existing per-title feed; released unique GUIDs with explicit unit numbers'});
 }
