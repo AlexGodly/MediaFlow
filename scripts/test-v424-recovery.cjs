@@ -42,6 +42,12 @@ async function main(){
   assert.equal(await run('mf424TotalParts({mode:"parts",ids:Array(100001),partSize:100})'),1001);
   assert.equal(await run('mf424Part({mode:"parts",ids:Array(250),partSize:100,cursor:125})'),2);
   assert.equal(await run('mf424Part({mode:"one",ids:Array(250),partSize:100,cursor:125})'),1);
+  assert.equal((src.match(/function mf424QueueReview\\(/g)||[]).length,1,'Queue review and dialog have independent names');
+  assert.equal((src.match(/function mf424Review\\(/g)||[]).length,1,'Review dialog can be opened without overriding queue logic');
+  assert(src.includes("state.unavailableUntil=Date.now()+90000"),'API outage skips later per-title retries safely');
+  context.MF424.rate.jikan={at:[],next:0,cooldown:0,fails:3,unavailableUntil:Date.now()+90000};
+  await assert.rejects(run('mf424Request("jikan","https://api.jikan.moe/v4/anime/1")'),/temporarily unreachable/);
+  delete context.MF424.rate.jikan;
   // Direct MAL ID path must never use a search endpoint.
   let captured='';context.fetch=async(url)=>{captured=String(url);return {ok:true,json:async()=>({data:{mal_id:123,title:'Test',images:{jpg:{large_image_url:'https://example.org/test.jpg'}}}}),headers:new Map()}};
   const direct=await run('mf424Discover({title:"Test",type:"anime",externalIds:{mal:"123"}},"jikan")');
