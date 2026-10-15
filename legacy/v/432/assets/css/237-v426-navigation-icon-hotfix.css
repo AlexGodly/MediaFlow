@@ -1,0 +1,6 @@
+/* v426: ignore previously cached v225 generic-action badges.
+   All Level/Streak content and the adjacent profile remain clickable. */
+.mf421-dock-progress > .v225-btn-icon,
+.mf421-dock-progress .v225-btn-icon { display: none !important; }
+.mf421-dock-progress::before,
+.mf421-dock-progress::after { content: none !important; display: none !important; }
