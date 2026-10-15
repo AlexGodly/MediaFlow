@@ -12,8 +12,8 @@ const sourceKinds={tvmaze:['tv','anime'],episodate:['tv'],mangadex:['manga']};
 function media(item){const c=(S.categories||[]).find(x=>String(x.id)===String(item.categoryId)),v=String(c?.name||item.categoryId||'').toLowerCase();
  if(/manga|manhwa|manhua|comic.*asian/.test(v))return 'manga';if(/anime|seasonal/.test(v))return 'anime';if(/tv|television|series/.test(v))return 'tv';if(/comic/.test(v))return 'comics';if(/book|novel/.test(v))return 'books';if(/movie|film/.test(v))return 'movies';if(/podcast|audio/.test(v))return 'podcasts';return 'other';}
 async function db(){return new Promise((ok,no)=>{const r=indexedDB.open('mediaflow-fresh-v428',1);r.onupgradeneeded=()=>r.result.createObjectStore('data');r.onerror=()=>no(r.error);r.onsuccess=()=>ok(r.result);});}
-async function record(op,val){const d=await db();return new Promise((ok,no)=>{const tx=d.transaction('data',op==='get'?'readonly':'readwrite');const r=op==='get'?tx.objectStore('data').get('scan:'+account()):tx.objectStore('data').put(val,'scan:'+account());r.onerror=()=>no(r.error);r.onsuccess=()=>ok(r.result);tx.oncomplete=()=>d.close();});}
-async function save(){if(F.job)await record('put',F.job);window.MediaFlowV428Hub?.paint();}
+async function record(op,val,owner=account()){const d=await db();return new Promise((ok,no)=>{const tx=d.transaction('data',op==='get'?'readonly':'readwrite');const r=op==='get'?tx.objectStore('data').get('scan:'+owner):tx.objectStore('data').put(val,'scan:'+owner);r.onerror=()=>no(r.error);r.onsuccess=()=>ok(r.result);tx.oncomplete=()=>d.close();});}
+async function save(){if(F.job)await record('put',F.job,F.job.account);window.MediaFlowV428Hub?.paint();}
 async function request(source,url){const key=source+' '+url,now=Date.now(),hit=F.cache.get(key);if(hit&&hit.until>now)return hit.data;
  const rate=F.rate[source]||(F.rate[source]={next:0,wait:0});let wait=Math.max(rate.next-Date.now(),rate.wait-Date.now(),0);
  if(wait)await sleep(wait);rate.next=Date.now()+(source==='mangadex'?2600:1700);
@@ -116,8 +116,15 @@ async function worker(params={}){await init();if(!params.universal)return window
  finally{F.running=false;window.MediaFlowV428Hub?.paint();if(j.status==='complete')showToast('Fresh Releases scan complete. '+j.fresh+' titles have verified new content.');}
 }
 async function resume(){if(!F.job)return;F.job.paused=false;F.job.stopped=false;F.job.status='queued';await save();window.MediaFlowV428Hub?.enqueue('fresh',{universal:true});}
-async function init(){if(F.initPromise)return F.initPromise;F.initPromise=(async()=>{F.account=account();try{const saved=await record('get');if(saved?.account===account()){F.job=saved;if(['running','ready','cooldown'].includes(saved.status)){F.job.status='paused';await save();}}}catch(e){console.warn('v428 fresh checkpoint unavailable',e);}F.ready=true;})();return F.initPromise;}
-function control(cmd){if(!F.job)return;if(cmd==='pause'||cmd==='stop'){F.job[cmd==='pause'?'paused':'stopped']=true;save();}}
+async function init(){
+ if(F.account&&F.account!==account()&&!F.running){F.initPromise=null;F.job=null;F.ready=false;F.cache.clear();F.rate={};}
+ if(F.initPromise)return F.initPromise;F.initPromise=(async()=>{F.account=account();try{const saved=await record('get');if(saved?.account===account()){F.job=saved;if(['running','ready','cooldown'].includes(saved.status)){F.job.status='paused';await save();}}}catch(e){console.warn('v428 fresh checkpoint unavailable',e);}F.ready=true;})();return F.initPromise;}
+function control(cmd){if(!F.job)return;
+ if(cmd==='pause'||cmd==='stop'||cmd==='cancel'){
+  F.job[cmd==='pause'||cmd==='cancel'?'paused':'stopped']=true;
+  if(cmd==='cancel')F.job.status='paused';save();
+ }
+}
 function settingsEnhance(){if(S.view!=='settings')return;const existing=document.querySelector('.mf428-settings-group');if(!existing||document.querySelector('.mf428-fresh-settings'))return;existing.insertAdjacentHTML('afterend','<div class="mf366-subgroup mf428-fresh-settings"><h3 class="mf366-subgroup-heading">Fresh Releases</h3><div class="mf366-subgroup-content"><section class="mf425-settings-card"><strong>Universal Fresh Releases</strong><p>Check episodes, chapters and other release types from available public providers.</p><div class="mf425-settings-actions"><button class="btn btn-primary" onclick="App.mf428FreshOpen()">Configure & Start</button><button class="btn btn-ghost" onclick="App.mf428FreshReport()">View Results</button></div></section></div></div>');}
 if(typeof MediaFlowRuntime!=='undefined')MediaFlowRuntime.registerPageEnhancer('settings',settingsEnhance);
 Object.assign(App,{mf428FreshOpen:open,mf428FreshClose:close,mf428FreshBegin:begin,mf428FreshReport:report,mf428FreshCloseReport:closeReport,mf428FreshResume:resume,mf428FreshControl:control});
