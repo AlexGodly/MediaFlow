@@ -33,6 +33,11 @@ const mock={
     key:'/works/OL123W',title:'Example Book',description:{value:'Book description'},
     first_publish_date:'2001',subjects:['Literature','Fiction']
    }),headers:{get(){return null;}}};
+  if(url.startsWith('https://api.jikan.moe/v4/'))return {ok:false,status:403,headers:{get(){return null;}}};
+  if(url.startsWith('https://api.tvmaze.com/lookup/shows?thetvdb='))return {ok:true,json:async()=>({
+   id:920,name:'Example TV',summary:'<b>Official</b> TV description',runtime:44,
+   genres:['Drama'],premiered:'2023-02-10',type:'Scripted',rating:{average:8.4},url:'https://www.tvmaze.com/shows/920/example-tv'
+  }),headers:{get(){return null;}}};
   assert.equal(url,'https://graphql.anilist.co');
   assert.equal(options.method,'POST');
   const body=JSON.parse(options.body);queries.push(body);
@@ -61,6 +66,14 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  assert.equal(found.source,'AniList');
  assert.equal(found.recordId,321);
  assert.equal(queries.length,1,'Exactly one verified ID query');
+ const fallback=await engine.lookupEvidence({title:'Example Anime',categoryId:'anime',externalIds:{anilist:'321'}},['jikan','anilist']);
+ assert.equal(fallback.source,'AniList','Offline Jikan cannot block independent AniList evidence');
+ assert.equal(queries.length,2,'AniList is reached after the first public provider fails');
+ const tv=await engine.lookupEvidence({title:'Example TV',categoryId:'tv',externalIds:{thetvdb:'12345'}},['tvmaze']);
+ assert.equal(tv.source,'TVmaze','TVDB external identity resolves through free TVmaze lookup');
+ assert.equal(tv.recordId,920);
+ assert.equal(tv.communityScore,8.4);
+ assert.equal(tv.total,0,'TVmaze must not overwrite personal episodic totals');
  const changes=engine.previewFields({title:'Example Anime',synopsis:'',total:12,progress:6,richMetadataManual:{genres:true}},found);
  assert(changes.some(x=>x.field==='synopsis'));
  assert(!changes.some(x=>x.field==='genres'),'Manually edited genre remains protected');
@@ -75,5 +88,5 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  assert.equal(books.source,'Open Library');
  assert.equal(books.year,2001);
  assert.equal(books.recordId,'/works/OL123W');
- console.log('v429 metadata public adapter passed: exact AniList ID, rich fields, manual-field/total protection and comic type');
+ console.log('v429 metadata public adapter passed: provider fallback, AniList, MangaDex, Open Library, TVmaze/TheTVDB and protected rich fields');
 })().catch(e=>{console.error(e);process.exitCode=1;});
