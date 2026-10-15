@@ -11,15 +11,51 @@ const x=(s)=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER&&AUTH_USER.id)||'local');
 const key=(id)=>'mf428-background:'+(id||HUB.loadedFor||account()),leaseKey=(id)=>'mf428-worker:'+(id||HUB.loadedFor||account());
 const LOCK_MS=16000;
+const queueSlot=(kind,id)=>'mf428-pending:'+(id||HUB.loadedFor||account())+':'+kind;
+function writeSlot(kind,job){
+ try{if(job)localStorage.setItem(queueSlot(kind),JSON.stringify(job));
+ else localStorage.removeItem(queueSlot(kind));}
+ catch(e){console.warn('v428 individual queue slot',kind,e);return false;}
+ return true;
+}
 const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right'};
 const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:'',pumping:false};
 function prefs(){const s=(typeof S!=='undefined'&&S.settings&&S.settings.v428Background)||{};return {...defaults,...s};}
 function persistPrefs(p){S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v428 widget preference',e));}catch(e){console.warn(e);}paint();}
 function load(){if(HUB.loadedFor===account())return;
  if(HUB.active){HUB.active.leaseLost=true;HUB.active.accountChanged=true;if(HUB.active.kind==='cover'&&typeof MF424!=='undefined'&&MF424.job)MF424.job.pauseRequested=true;return;}
- HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};try{const data=JSON.parse(localStorage.getItem(key())||'{}');if(Array.isArray(data.queue))HUB.queue=data.queue.filter(q=>KINDS.includes(q.kind)).slice(0,20).map(q=>({kind:q.kind,at:q.at||Date.now(),params:q.params||{}}));HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};}catch(e){console.warn('v428 queue restoration',e);}}
-function save(){try{localStorage.setItem(key(HUB.loadedFor),JSON.stringify({queue:HUB.queue,cooldownUntil:HUB.cooldownUntil,last:HUB.last}));}catch(e){console.warn('v428 queue persistence',e);}}
-function syncQueue(){try{const data=JSON.parse(localStorage.getItem(key())||'{}');if(Array.isArray(data.queue))HUB.queue=data.queue.filter(q=>KINDS.includes(q.kind)).slice(0,20);HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(data.cooldownUntil)||0);if(data.last&&typeof data.last==='object')HUB.last=data.last;}catch(_){}}
+ HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};
+ try{const data=JSON.parse(localStorage.getItem(key())||'{}');
+  HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};
+  // Migrate earlier v428 branch snapshots exactly once. Production v427 never had these keys.
+  if(Array.isArray(data.queue)){
+   for(const row of data.queue.filter(r=>KINDS.includes(r?.kind))){
+    if(!localStorage.getItem(queueSlot(row.kind)))writeSlot(row.kind,{kind:row.kind,at:row.at||Date.now(),params:row.params||{}});
+   }
+   localStorage.setItem(key(),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last}));
+  }
+ }catch(e){console.warn('v428 queue restoration',e);}
+ syncQueue();
+}
+function save(){
+ try{const current=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
+  HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(current.cooldownUntil)||0);
+  localStorage.setItem(key(HUB.loadedFor),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last}));
+ }catch(e){console.warn('v428 queue state persistence',e);}
+}
+function syncQueue(){
+ try{
+  const found=[];
+  for(const kind of KINDS){
+   const value=JSON.parse(localStorage.getItem(queueSlot(kind))||'null');
+   if(value?.kind===kind)found.push({kind,at:Number(value.at)||Date.now(),params:value.params||{}});
+  }
+  HUB.queue=found.sort((a,b)=>a.at-b.at||KINDS.indexOf(a.kind)-KINDS.indexOf(b.kind));
+  const state=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
+  HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(state.cooldownUntil)||0);
+  if(state.last&&typeof state.last==='object')HUB.last=state.last;
+ }catch(e){console.warn('v428 queue sync',e);}
+}
 function leaseHeld(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner===HUB.owner&&v.until>Date.now());}catch(_){return false;}}
 function foreignLease(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner!==HUB.owner&&v.until>Date.now());}catch(_){return false;}}
 function acquire(){try{const k=leaseKey(),old=JSON.parse(localStorage.getItem(k)||'null');if(old&&old.until>Date.now()&&old.owner!==HUB.owner)return false;localStorage.setItem(k,JSON.stringify({owner:HUB.owner,until:Date.now()+LOCK_MS}));return leaseHeld();}catch(_){return false;}}
@@ -29,12 +65,13 @@ function note(kind,status,message){HUB.last[kind]={status,message:String(message
 function enqueue(kind,params){load();syncQueue();if(!KINDS.includes(kind)||HUB.loadedFor!==account())return false;
  if(HUB.active&&HUB.active.kind===kind){showToast(LABELS[kind]+' is already running.');return false;}
  if(HUB.queue.some(q=>q.kind===kind)){showToast(LABELS[kind]+' is already queued.');return false;}
- HUB.queue.push({kind,at:Date.now(),params:params||{}});save();paint();pump();return true;
+ if(!writeSlot(kind,{kind,at:Date.now(),params:params||{}}))return false;
+ syncQueue();save();paint();pump();return true;
 }
 function cancel(kind){
- syncQueue();const n=HUB.queue.length;
- HUB.queue=HUB.queue.filter(q=>q.kind!==kind);
- if(n===HUB.queue.length)return;
+ syncQueue();if(!HUB.queue.some(q=>q.kind===kind))return;
+ if(!writeSlot(kind,null))return;
+ syncQueue();
  if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job){
   MF424.job.pauseRequested=true;MF424.job.status='paused';
   if(typeof mf424SaveJob==='function')Promise.resolve(mf424SaveJob()).catch(e=>console.warn('v428 cover checkpoint',e));
@@ -43,7 +80,14 @@ function cancel(kind){
  if(kind==='fresh')App.mf428FreshControl?.('cancel');
  save();paint();
 }
-function move(kind,by){syncQueue();const i=HUB.queue.findIndex(q=>q.kind===kind),j=i+by;if(i<0||j<0||j>=HUB.queue.length)return;const a=HUB.queue.splice(i,1)[0];HUB.queue.splice(j,0,a);save();paint();}
+function move(kind,by){
+ syncQueue();const i=HUB.queue.findIndex(q=>q.kind===kind),j=i+by;
+ if(i<0||j<0||j>=HUB.queue.length)return;
+ const a=HUB.queue[i],b=HUB.queue[j],old=a.at;
+ if(!writeSlot(a.kind,{...a,at:b.at}))return;
+ if(!writeSlot(b.kind,{...b,at:old}))return;
+ syncQueue();save();paint();
+}
 const nativeCoverRun=typeof mf424Run==='function'?mf424Run:null;
 const nativeFresh=typeof v377RunJikan==='function'?v377RunJikan:null;
 async function execute(job){
@@ -64,7 +108,9 @@ async function execute(job){
 async function runNext(){
  if(!acquire())return;
  syncQueue();if(!HUB.queue.length||Date.now()<HUB.cooldownUntil){release();return;}
- const next=HUB.queue.shift(),jobAccount=HUB.loadedFor;
+ const next=HUB.queue[0],jobAccount=HUB.loadedFor;
+ if(!writeSlot(next.kind,null)){release();return;}
+ syncQueue();
  HUB.active={kind:next.kind,params:next.params,started:Date.now(),leaseLost:false,account:jobAccount};
  HUB.working=true;save();paint();
  try{
@@ -181,7 +227,7 @@ window.MediaFlowV428Hub={enqueue,paint,phase,progress,ownsLease:leaseHeld,regist
 function init(){load();if(!HUB.ticker)HUB.ticker=setInterval(()=>{if(HUB.loadedFor!==account())load();renew();pump();if(!HUB.renderQueued){HUB.renderQueued=true;paint();HUB.renderQueued=false;}},1500);paint();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 window.addEventListener('storage',e=>{
- if(e.key===key(HUB.loadedFor)){syncQueue();paint();}
+ if(e.key===key(HUB.loadedFor)||KINDS.some(k=>e.key===queueSlot(k,HUB.loadedFor))){syncQueue();paint();}
  if(e.key===leaseKey(HUB.loadedFor)&&HUB.active&&!leaseHeld()){HUB.active.leaseLost=true;if(HUB.active.kind==='cover'&&typeof MF424!=='undefined'&&MF424.job)MF424.job.pauseRequested=true;}
 });
 window.addEventListener('pagehide',()=>{
