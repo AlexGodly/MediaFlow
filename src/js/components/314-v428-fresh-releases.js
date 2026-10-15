@@ -272,20 +272,27 @@ async function worker(params={}){await init();if(!params.universal)return window
  const index=new Map((S.library||[]).filter(i=>i?.id).map(i=>[String(i.id),i]));
  try{
   if(!j.animeDone&&j.ids.some(id=>{const item=index.get(id);return item&&media(item)==='anime';})){
-   // Original seasonal refresh has global scope. Never run it for selected
-   // or category scans, which only inspect saved evidence for the requested IDs.
-   const allAnime=(S.library||[]).filter(item=>item?.id&&media(item)==='anime').map(item=>String(item.id));
-   const chosen=new Set(j.ids.filter(id=>media(index.get(id)||{})==='anime'));
-   const globalScope=j.scope==='all'&&allAnime.every(id=>chosen.has(id));
-   if(globalScope){
-    try{await window.MediaFlowV428Hub?.runLegacyFresh({force:true});j.animeDone=true;}
-    catch(e){j.animeDone=true;j.legacyError=String(e.message||e);console.warn('Original seasonal engine unavailable',e);}
-   }else{j.animeDone=true;j.cachedAnimeOnly=true;}
+   // v377RunJikan({ids}) supports a strictly scoped seasonal refresh, and
+   // v401 preserves the original automatic2 evidence/account semantics.
+   // Pass only this saved job's selected anime IDs: never run an unrelated
+   // global scan from Selected Titles / Category / media-specific requests.
+   const selectedAnime=j.ids.filter(id=>{
+    const item=index.get(id);
+    return item&&media(item)==='anime';
+   });
+   try{
+    const result=await window.MediaFlowV428Hub?.runLegacyFresh({ids:selectedAnime,force:true});
+    if(!result)j.legacyError='Seasonal anime verifier was unavailable; results remain unverified';
+    j.animeDone=true;
+   }catch(e){
+    j.animeDone=true;j.legacyError=String(e.message||e);
+    console.warn('Scoped Seasonal Smart Engine verification failed',e);
+   }
    await save();
   }
   while(j.cursor<j.ids.length){if(j.paused||j.stopped||account()!==j.account||!window.MediaFlowV428Hub?.ownsLease()){j.status=j.stopped?'stopped':'paused';break;}
    const id=j.ids[j.cursor],item=index.get(id);
-   if(item){const type=media(item);if(type==='anime'){const state=typeof v401EpisodeOutcome==='function'?v401EpisodeOutcome(item):'unknown';if(state==='fresh')j.fresh++;else if(state==='none')j.none++;else j.unknown++;if(j.results.length<5000)j.results.push({id,title:item.title,status:state==='fresh'?'fresh':state==='none'?'none':'unknown',reason:j.legacyError||(j.cachedAnimeOnly?'Cached anime evidence; scoped scan did not refresh unrelated titles':'Original seasonal verification result'),source:'Alex Godly Smart Engine',unit:'episodes'});}
+   if(item){const type=media(item);if(type==='anime'){const state=j.legacyError?'unknown':typeof v401EpisodeOutcome==='function'?v401EpisodeOutcome(item):'unknown';if(state==='fresh')j.fresh++;else if(state==='none')j.none++;else j.unknown++;if(j.results.length<5000)j.results.push({id,title:item.title,status:state==='fresh'?'fresh':state==='none'?'none':'unknown',reason:j.legacyError||'Identity-checked seasonal evidence refreshed only for selected anime IDs',source:'Alex Godly Smart Engine',unit:'episodes'});}
     else{const r=await one(item,j.providerMode||j.mode,j.provider);if(j.paused||j.stopped||account()!==j.account||!window.MediaFlowV428Hub?.ownsLease()){j.status='paused';break;}j[r.status==='fresh'?'fresh':r.status==='none'?'none':'unknown']++;if((r.status==='fresh'||r.status==='unknown')&&j.results.length<5000)j.results.push({id,title:item.title,...r});}
    }
    j.cursor++;if(j.cursor%200===0||Date.now()-Number(j.checkpointAt||0)>30000){j.checkpointAt=Date.now();await save();}
