@@ -13,9 +13,9 @@
 - All v428 background jobs/checkpoints, Library/Settings shortcuts, data protection, and existing MediaFlow features remain in place.
 - Development-only regression checks, four-tab contract tests, Chromium desktop/mobile boot and actual launcher position checks.
 
-## Not yet completed
-- Universal metadata for creator credits, aliases, publication hierarchy, seasons, volumes and custom imported fields not covered by the current v178 schema; implement only after defining tested persistence/export compatibility.
-- A genuine shared implementation for all cover, metadata and release providers. Some providers do not have all three capabilities; never invent unavailable endpoints. API credential-dependent providers remain hidden and dormant.
+## Deferred by user for a later update
+- Creator credits, aliases, publication hierarchy, seasons, volumes, and extra custom imported metadata fields beyond the existing rich schema.
+- Credential-dependent API integration, new provider setup, and a hypothetical single API shared across all media types. Each provider retains only its real supported capabilities.
 - Full real-account provider CORS, rate-limit, error/undo and multi-tab validation, and full active-theme visual inspection on devices.
 - Large-library full UI and Supabase sync benchmarks. Earlier 100,000-title test exercises synthetic indexing and checkpoints, not production network load.
 - Final release archive, numeric tag `429`, ZIP and GitHub Pages deployment. These must be gated by follow-up verification.
@@ -33,7 +33,7 @@ No production Supabase changes. Do not modify MediaFlow Plus or MediaFlowApp. Do
 - New browser regressions cover real form-value persistence across tab changes/minimization and the original Cover Recovery settings entry point. Offline source tests verify AniList/MangaDex/Open Library identity evidence and manual/progress protection.
 - No production Supabase writes, schema changes, Provider secrets, paid services, or deployment in this development round.
 
-**Further release blockers:** wider verified provider coverage across the three features, complete import field mapping beyond the current persisted schema, authenticated browser/provider integration and production-like 100k-title UI/sync testing. `v429` remains a **draft development update**, not a published GitHub Release.
+**Revised release gate:** Only Cover Recovery, Metadata Recovery, Fresh Episodes & Releases, and their existing usable public APIs need verified compatibility, safe fallbacks, UI/browser integration and regression checks. Expanded metadata schemas and credential-dependent providers are **explicitly deferred** and must not block v429. `v429` remains a draft until the narrowed release gates pass.
 
 ## Development hardening follow-up (October 15, 2026)
 - Fixed cooldown countdown math: show **remaining** cooldown seconds, never an epoch-sized duration.
@@ -43,3 +43,12 @@ No production Supabase changes. Do not modify MediaFlow Plus or MediaFlowApp. Do
 - Public TVmaze metadata now supports exact TheTVDB lookup IDs in addition to its own IDs and IMDb lookups; community ratings are mapped to the separately stored community score rather than overwriting personal ratings. Unresolved supplied IDs are never replaced with a guessed title-only result.
 - Added offline provider fallback, TheTVDB identity, failed-ID protection and desktop/360px Chromium preservation/shortcut regressions to the existing v429 development workflow.
 - These changes are **development-only**. Automated checks and production-like tests must pass before release. Provider capability verification, imported custom fields, legacy archive and numeric GitHub Release remain incomplete.
+
+## Revised no-configuration API audit (October 15, 2026)
+- **Covers** (browser-enabled): Tenrai, Jikan, AniList, Kitsu (JSON:API Accept header fixed), TVmaze, Open Library. Matching and manual review remain conservative.
+- **Metadata** (existing rich fields only): Tenrai and Jikan (Jikan-compatible catalogue mapping), AniList, Kitsu, TVmaze (including verified TheTVDB/IMDb ID lookups), Open Library. Individual failures fall through to other allowed providers.
+- **Fresh Releases**: Original anime seasonal verification, TVmaze, EpisoDate, and existing per-title HTTPS RSS/Atom. A negative TV result is not accepted prematurely when another public TV source has not been checked. Media without verified accessible sources explicitly reports Unknown.
+- **MangaDex**: Public read requests require no key, but the tested public API response currently lacks browser CORS permission. Direct GitHub Pages use cannot be treated as working. The future adapter remains in source, and Cover/Metadata/Fresh automatic choices do not enable it until a CORS-safe, user-approved integration exists.
+- **Google Books**: Official public API requests require an API key or access token. Corrected the no-setup classification; the adapter is dormant until the user chooses to configure it.
+- The development pipeline includes an observational CORS/network probe for each existing no-key service and documents successes and failures without claiming that a single provider observation guarantees future uptime.
+- No additional secrets or Supabase migration required for this narrowed v429 scope.
