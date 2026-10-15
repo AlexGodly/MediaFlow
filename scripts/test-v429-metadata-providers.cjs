@@ -33,6 +33,13 @@ const mock={
     key:'/works/OL123W',title:'Example Book',description:{value:'Book description'},
     first_publish_date:'2001',subjects:['Literature','Fiction']
    }),headers:{get(){return null;}}};
+  if(url.startsWith('https://api.tenrai.org/v1/'))return {ok:true,status:200,json:async()=>({data:{
+   mal_id:78,title:'Example Anime',title_english:'Example Anime',synopsis:'Tenrai verified summary',
+   type:'TV',episodes:12,score:8.2,year:2025,genres:[{name:'Fantasy'}],themes:[],studios:[],producers:[]
+  }}),headers:{get(){return null;}}};
+  if(url.startsWith('https://kitsu.io/api/edge/'))return {ok:true,status:200,json:async()=>({data:{
+   id:url.endsWith('/15')?'15':'16',attributes:{canonicalTitle:'Example Anime',titles:{en:'Example Anime'},synopsis:'Kitsu description',subtype:'TV',startDate:'2025-04-03',episodeCount:12,episodeLength:24,averageRating:'84.5',ageRating:'PG'}
+  }}),headers:{get(){return null;}}};
   if(url.startsWith('https://api.jikan.moe/v4/'))return {ok:false,status:403,headers:{get(){return null;}}};
   if(url.includes('thetvdb=999'))return {ok:false,status:404,headers:{get(){return null;}}};
   if(url.startsWith('https://api.tvmaze.com/lookup/shows?thetvdb='))return {ok:true,json:async()=>({
@@ -51,6 +58,8 @@ const mock={
 vm.runInNewContext(source,mock,{timeout:4000});
 const engine=mock.window.MediaFlowV428Metadata;
 assert(engine.schema.anilist&&!engine.schema.anilist.requiresSetup);
+assert(engine.schema.tenrai&&!engine.schema.tenrai.requiresSetup);
+assert(engine.schema.kitsu&&!engine.schema.kitsu.requiresSetup);
 assert(engine.schema.openlibrary.capabilities.includes('comics'));
 const mapped=engine.mapAniList(media,'anime');
 assert.equal(mapped.source,'AniList');
@@ -70,6 +79,19 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  const fallback=await engine.lookupEvidence({title:'Example Anime',categoryId:'anime',externalIds:{anilist:'321'}},['jikan','anilist']);
  assert.equal(fallback.source,'AniList','Offline Jikan cannot block independent AniList evidence');
  assert.equal(queries.length,2,'AniList is reached after the first public provider fails');
+ const tenrai=await engine.lookupEvidence({title:'Example Anime',categoryId:'anime',externalIds:{mal:'78'}},['tenrai']);
+ assert.equal(tenrai.source,'Tenrai');
+ assert.equal(tenrai.recordId,78,'MAL ID verified from Tenrai');
+ const wrongTenrai=await engine.lookupEvidence({title:'Wrong Title',categoryId:'anime',externalIds:{mal:'78'}},['tenrai']);
+ assert(!wrongTenrai.source,'MAL ID title mismatch must never cause a different title to be saved');
+ const kitsu=await engine.lookupEvidence({title:'Example Anime',categoryId:'anime',externalIds:{kitsu:'15'}},['kitsu']);
+ assert.equal(kitsu.source,'Kitsu');
+ assert.equal(kitsu.total,12);
+ assert.equal(kitsu.communityScore,8.5);
+ assert.equal(kitsu.releaseDate,'2025-04-03');
+ const invalidKitsu=await engine.lookupEvidence({title:'Example Anime',categoryId:'anime',externalIds:{kitsu:'bad-id'}},['kitsu']);
+ assert(!invalidKitsu.source,'Invalid Kitsu IDs must be rejected');
+
  const tv=await engine.lookupEvidence({title:'Example TV',categoryId:'tv',externalIds:{thetvdb:'12345'}},['tvmaze']);
  assert.equal(tv.source,'TVmaze','TVDB external identity resolves through free TVmaze lookup');
  assert.equal(tv.recordId,920);
@@ -91,5 +113,5 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  assert.equal(books.source,'Open Library');
  assert.equal(books.year,2001);
  assert.equal(books.recordId,'/works/OL123W');
- console.log('v429 metadata public adapter passed: provider fallback, AniList, MangaDex, Open Library, TVmaze/TheTVDB and protected rich fields');
+ console.log('v429 metadata public adapter passed: Tenrai, Jikan fallback, AniList, Kitsu, MangaDex, Open Library, TVmaze and protected rich fields');
 })().catch(e=>{console.error(e);process.exitCode=1;});
