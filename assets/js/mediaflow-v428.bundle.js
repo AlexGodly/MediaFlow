@@ -67973,15 +67973,22 @@ function writeSlot(kind,job){
  catch(e){console.warn('v428 individual queue slot',kind,e);return false;}
  return true;
 }
-const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right'};
-const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:'',pumping:false};
+const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right',notifications:true};
+const HUB={queue:[],active:null,cooldownUntil:0,last:{},notices:[],expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:'',pumping:false};
 function prefs(){const s=(typeof S!=='undefined'&&S.settings&&S.settings.v428Background)||{};return {...defaults,...s};}
-function persistPrefs(p){S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v428 widget preference',e));}catch(e){console.warn(e);}paint();}
+function persistPrefs(p){
+ S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};
+ try{
+  const result=typeof persistSettings==='function'?persistSettings():saveState();
+  Promise.resolve(result).catch(e=>{console.warn('v428 widget preference',e);if(typeof showSaveError==='function')showSaveError();});
+ }catch(e){console.warn(e);if(typeof showSaveError==='function')showSaveError();}
+ paint();
+}
 function load(){if(HUB.loadedFor===account())return;
  if(HUB.active){HUB.active.leaseLost=true;HUB.active.accountChanged=true;if(HUB.active.kind==='cover'&&typeof MF424!=='undefined'&&MF424.job)MF424.job.pauseRequested=true;return;}
- HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};
+ HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};HUB.notices=[];
  try{const data=JSON.parse(localStorage.getItem(key())||'{}');
-  HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};
+  HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};HUB.notices=Array.isArray(data.notices)?data.notices.filter(n=>KINDS.includes(n.kind)).slice(-18):[];
   // Migrate earlier v428 branch snapshots exactly once. Production v427 never had these keys.
   if(Array.isArray(data.queue)){
    for(const row of data.queue.filter(r=>KINDS.includes(r?.kind))){
@@ -67995,7 +68002,7 @@ function load(){if(HUB.loadedFor===account())return;
 function save(){
  try{const current=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
   HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(current.cooldownUntil)||0);
-  localStorage.setItem(key(HUB.loadedFor),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last}));
+  localStorage.setItem(key(HUB.loadedFor),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last,notices:HUB.notices.slice(-18)}));
  }catch(e){console.warn('v428 queue state persistence',e);}
 }
 function syncQueue(){
@@ -68008,7 +68015,7 @@ function syncQueue(){
   HUB.queue=found.sort((a,b)=>a.at-b.at||KINDS.indexOf(a.kind)-KINDS.indexOf(b.kind));
   const state=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
   HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(state.cooldownUntil)||0);
-  if(state.last&&typeof state.last==='object')HUB.last=state.last;
+  if(state.last&&typeof state.last==='object')HUB.last=state.last;if(Array.isArray(state.notices))HUB.notices=state.notices.filter(n=>KINDS.includes(n.kind)).slice(-18);
  }catch(e){console.warn('v428 queue sync',e);}
 }
 function leaseHeld(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner===HUB.owner&&v.until>Date.now());}catch(_){return false;}}
@@ -68017,7 +68024,31 @@ function foreignLease(){return !!foreignLeaseInfo();}
 function acquire(){try{const k=leaseKey(),old=JSON.parse(localStorage.getItem(k)||'null');if(old&&old.until>Date.now()&&old.owner!==HUB.owner)return false;localStorage.setItem(k,JSON.stringify({owner:HUB.owner,kind:HUB.queue[0]?.kind||null,until:Date.now()+LOCK_MS}));return leaseHeld();}catch(_){return false;}}
 function renew(){if(!HUB.active)return;try{if(!leaseHeld()){HUB.active.leaseLost=true;if(MF424&&MF424.job&&HUB.active.kind==='cover')MF424.job.pauseRequested=true;return;}localStorage.setItem(leaseKey(),JSON.stringify({owner:HUB.owner,kind:HUB.active.kind,until:Date.now()+LOCK_MS}));}catch(_){}}
 function release(){try{if(leaseHeld())localStorage.removeItem(leaseKey());}catch(_){}}
-function note(kind,status,message){HUB.last[kind]={status,message:String(message||''),at:Date.now()};save();paint();}
+function notificationText(kind,status,message){
+ if(status==='complete')return LABELS[kind]+' finished.';
+ if(status==='review')return LABELS[kind]+' has results waiting for review.';
+ if(status==='failed')return LABELS[kind]+' needs attention: '+String(message||'Unexpected error').slice(0,160);
+ return '';
+}
+function note(kind,status,message){
+ const now=Date.now(),text=notificationText(kind,status,message);
+ HUB.last[kind]={status,message:String(message||''),at:now};
+ if(text){
+  HUB.notices.push({kind,status,text,at:now,read:false});
+  if(HUB.notices.length>18)HUB.notices.splice(0,HUB.notices.length-18);
+  if(prefs().notifications&&typeof showToast==='function'&&HUB.loadedFor===account())showToast(text);
+ }
+ save();paint();
+}
+function noticeCount(){return HUB.notices.reduce((n,x)=>n+(x.read?0:1),0);}
+function markNoticesRead(){HUB.notices.forEach(n=>n.read=true);save();paint();}
+function clearNotices(){HUB.notices=[];save();paint();}
+function noticeRows(){
+ const notices=HUB.notices.slice(-5).reverse();
+ return '<div class="mf428-notices" role="region" aria-label="Recent background activity"><div class="mf428-notices-title"><strong>Recent activity</strong><button type="button" onclick="App.mf428ClearNotices()">Clear</button></div>'+
+ (notices.length?notices.map(n=>'<div class="mf428-notice" data-state="'+x(n.status)+'"><span>'+icon(n.kind)+'</span><small>'+x(n.text)+'</small></div>').join(''):'<small class="mf428-empty-notices">No recent alerts.</small>')+'</div>';
+}
+
 function enqueue(kind,params){load();syncQueue();if(!KINDS.includes(kind)||HUB.loadedFor!==account())return false;
  if(HUB.active&&HUB.active.kind===kind){showToast(LABELS[kind]+' is already running.');return false;}
  if(HUB.queue.some(q=>q.kind===kind)){showToast(LABELS[kind]+' is already queued.');return false;}
@@ -68083,6 +68114,8 @@ async function runNext(){
  }
 }
 function actualOutcome(kind){
+ if(kind==='metadata'&&window.MediaFlowV428Metadata?.pending?.()>0)return 'review';
+ if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job?.pending>0)return 'review';
  const raw=kind==='cover'?(typeof MF424!=='undefined'?MF424.job?.status:null):kind==='metadata'?window.MediaFlowV428Metadata?.status():window.MediaFlowV428Fresh?.status();
  if(raw==='waiting-review')return 'review';
  if(['paused','stopped','waiting-part','other-tab'].includes(raw))return 'paused';
@@ -68112,7 +68145,7 @@ function start(kind){
  if(kind==='fresh'){if(typeof App.mf428FreshOpen==='function')App.mf428FreshOpen();else enqueue('fresh',{});return;}
 }
 function control(kind,cmd){
- if(kind==='cover'&&MF424.job){if(cmd==='pause')App.mf424Pause();if(cmd==='stop')App.mf424StopTitle();if(cmd==='resume')App.mf424Resume();if(cmd==='review')App.mf424Review();return;}
+ if(kind==='cover'&&MF424.job){if(cmd==='pause')App.mf424Pause();if(cmd==='stop')App.mf424StopTitle();if(cmd==='stop-part')App.mf424StopPart();if(cmd==='resume')App.mf424Resume();if(cmd==='review')App.mf424Review();return;}
  if(kind==='metadata'&&typeof App.mf428MetadataControl==='function'){App.mf428MetadataControl(cmd);return;}
  if(kind==='fresh'&&typeof App.mf428FreshControl==='function'){if(cmd==='resume')App.mf428FreshResume();else App.mf428FreshControl(cmd);return;}
  if(cmd==='cancel')cancel(kind);
@@ -68123,15 +68156,15 @@ function phase(kind){
   return 'running';
  }
  if(HUB.queue.some(q=>q.kind===kind))return 'queued';
- if(kind==='cover'&&MF424.job?.pending)return 'review';
- if(kind==='cover'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
- if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(m==='waiting-review')return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
+ if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job?.pending)return 'review';
+ if(kind==='cover'&&typeof MF424!=='undefined'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
+ if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(window.MediaFlowV428Metadata.pending?.()>0)return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
  if(kind==='fresh'&&window.MediaFlowV428Fresh){const f=window.MediaFlowV428Fresh.status();if(['paused','stopped'].includes(f))return 'paused';}
  if(foreignLeaseInfo()?.kind===kind&&!HUB.active)return 'other-tab';
  return HUB.last[kind]?.status||'idle';
 }
 function progress(kind){
- if(kind==='cover'&&MF424.job){const j=MF424.job;return {at:j.cursor||0,total:j.ids?.length||0};}
+ if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job){const j=MF424.job;return {at:j.cursor||0,total:j.ids?.length||0};}
  if(kind==='metadata'&&window.MediaFlowV428Metadata)return window.MediaFlowV428Metadata.progress();
  if(kind==='fresh'&&window.MediaFlowV428Fresh)return window.MediaFlowV428Fresh.progress();
  return {at:0,total:0};
@@ -68140,15 +68173,25 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  const order=HUB.queue.findIndex(q=>q.kind===kind);
  const detail=state==='queued'?'Queue position '+(order+1):state==='running'?(p.total?p.at.toLocaleString()+' / '+p.total.toLocaleString():'Checking providers'):state==='review'?'Manual review pending':state==='paused'?'Progress saved':state==='other-tab'?'Another tab is processing':state==='cooldown'?'Respecting API limits':HUB.last[kind]?.message||'Ready to start';
  return '<article class="mf428-process" data-kind="'+kind+'"><div class="mf428-process-head"><span class="mf428-process-icon">'+icon(kind)+'</span><span class="mf428-process-copy"><strong>'+LABELS[kind]+'</strong><small>'+x(detail)+'</small></span><span class="mf428-state" data-state="'+state+'">'+x(state)+'</span></div>'+
- (p.total&&['running','paused','queued','review','cooldown'].includes(state)?'<div class="mf428-bar" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+percent+'%"></i></div>':'')+
+ (p.total&&['running','paused','queued','review','cooldown'].includes(state)?'<div class="mf428-progress-meta"><span>'+x(LABELS[kind])+' progress</span><strong>'+percent+'%</strong></div><div class="mf428-bar" role="progressbar" aria-label="'+x(LABELS[kind])+' progress" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+percent+'%"></i></div>':'')+
  '<div class="mf428-process-actions">'+
  (state==='idle'||state==='complete'||state==='failed'?'<button type="button" onclick="App.mf428Start(\''+kind+'\')">Start</button>':'')+
  (state==='queued'?'<button type="button" onclick="App.mf428Move(\''+kind+'\',-1)" aria-label="Move earlier">↑</button><button type="button" onclick="App.mf428Move(\''+kind+'\',1)" aria-label="Move later">↓</button><button type="button" onclick="App.mf428Cancel(\''+kind+'\')">Remove</button>':'')+
- (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop safely</button>':'')+
+ (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop after title</button>'+(kind==='cover'||kind==='metadata'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop-part\')">Finish part &amp; stop</button>':''):'')+
  (state==='paused'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'resume\')">Resume</button>':'')+
  (state==='review'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'review\')">Review</button>':'')+
  (kind==='metadata'&&state==='paused'&&window.MediaFlowV428Metadata?.pending()>0?'<button type="button" onclick="App.mf428Control(\'metadata\',\'review\')">Review Pending</button>':'')+
  '</div></article>';
+}
+function dockBottomOffset(position){
+ const dock=document.getElementById?.('mf397-dock');
+ const viewport=typeof window.innerHeight==='number'?window.innerHeight:0;
+ const fallback=typeof window.innerWidth==='number'&&window.innerWidth<=720?120:98;
+ if(!dock||!viewport||!dock.getBoundingClientRect||dock.classList?.contains('hide'))return fallback;
+ const rect=dock.getBoundingClientRect();
+ if(rect.width<1||rect.height<1||rect.top<0||rect.top>viewport)return fallback;
+ const sameSide=position!=='left'||(rect.left<Math.max(90,(window.innerWidth||0)*.38));
+ return sameSide?Math.max(fallback,Math.ceil(viewport-rect.top)+14):fallback;
 }
 function paint(){if(!document.body)return;load();const v=prefs().visibility,exists=HUB.active||HUB.queue.length||foreignLease()||Date.now()<HUB.cooldownUntil||KINDS.some(k=>['paused','review','running'].includes(phase(k)));
  let el=document.getElementById('mf428-hub');if(v==='hidden'||(v==='auto'&&!exists)){el?.remove();HUB.lastMarkup='';return;}
@@ -68156,8 +68199,18 @@ function paint(){if(!document.body)return;load();const v=prefs().visibility,exis
  const cooldown=Math.max(0,Math.ceil((HUB.cooldownUntil-Date.now())/1000));
  el.className='mf428-hub'+(HUB.expanded?' mf428-open':'');
  el.dataset.position=prefs().position==='left'?'left':'right';
- const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':foreignLease()?'Another tab: '+(LABELS[foreignLeaseInfo()?.kind]||'processing'):cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
- (HUB.expanded?'<section class="mf428-panel" aria-label="Process controls"><div class="mf428-panel-title"><strong>Recovery & Release Center</strong><small>Only one process runs at a time</small></div>'+KINDS.map(row).join('')+'<div class="mf428-footer"><span>◈ '+(cooldown?'Shared cooldown: '+cooldown+'s':'Smart rate-limit scheduling')+'</span><button type="button" onclick="App.mf428SetVisibility(\'hidden\')">Hide widget</button></div></section>':'');
+ el.dataset.size=prefs().compact?'compact':'comfortable';
+ el.dataset.state=HUB.active?'running':HUB.queue.length?'queued':'idle';
+ el.style.setProperty('--mf428-bottom',dockBottomOffset(el.dataset.position)+'px');
+ const obscured=typeof v405MoreMenuOpen==='function'&&v405MoreMenuOpen();
+ el.inert=!!obscured;
+ el.classList.toggle('mf428-obscured',!!obscured);
+ const unread=noticeCount(),activity=unread?'<span class="mf428-notice-count" aria-label="'+unread+' unread process alerts">'+unread+'</span>':'';
+ const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'" aria-controls="mf428-panel"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':foreignLease()?'Another tab: '+(LABELS[foreignLeaseInfo()?.kind]||'processing'):cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span>'+activity+'<span class="mf428-chevron" aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
+ (HUB.expanded?'<section id="mf428-panel" class="mf428-panel" role="region" aria-label="Process controls"><div class="mf428-panel-title"><span><strong>Recovery & Release Center</strong><small>One active process · protected provider cooldowns</small></span><button type="button" class="mf428-size-button" onclick="App.mf428ToggleSize()" title="Switch compact / comfortable size">'+(prefs().compact?'Expand size':'Compact size')+'</button></div>'+KINDS.map(row).join('')+
+ (cooldown?'<div class="mf428-cooldown" role="status">Shared cooldown: '+cooldown+' seconds</div>':'')+
+ noticeRows()+
+ '<div class="mf428-footer"><span>✓ Smart rate-limit scheduling</span><button type="button" onclick="App.mf428SetVisibility(\'hidden\')">Hide widget</button></div></section>':'');
  if(HUB.lastMarkup!==markup){
   const panel=el.querySelector('.mf428-panel'),scroll=panel?.scrollTop||0;
   const selected=el.contains(document.activeElement)?document.activeElement:null;
@@ -68170,16 +68223,45 @@ function paint(){if(!document.body)return;load();const v=prefs().visibility,exis
   HUB.lastMarkup=markup;
  }
 }
-function settingsHtml(){const selected=prefs().visibility,pos=prefs().position;
- return '<div class="mf428-widget-settings"><strong>Background Processes Widget</strong><p>Monitor Cover Recovery, Metadata Recovery and Fresh Releases, or start them from an always-visible launcher.</p>'+
-  '<label for="mf428-visibility">Widget visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+[['hidden','Hidden'],['auto','Automatic — show for background work'],['always','Always Show — launcher and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select>'+
-  '<label for="mf428-position">Widget position</label><select id="mf428-position" onchange="App.mf428SetPosition(this.value)"><option value="right" '+(pos!=='left'?'selected':'')+'>Bottom right</option><option value="left" '+(pos==='left'?'selected':'')+'>Bottom left</option></select>'+
-  '<p class="hint">Expand or collapse the widget with its heading. Hiding the widget never stops processing. Browser-closed work resumes from saved checkpoints when supported.</p></div>';
+function settingsHtml(){
+ const set=prefs(),selected=set.visibility,pos=set.position;
+ return '<div class="mf428-widget-settings" data-mf428-setting="widget">'+
+  '<div class="mf405-group-kicker">BACKGROUND OPERATIONS</div>'+
+  '<div class="mf428-widget-intro"><strong>Background Processes</strong><p>Track and launch Cover Recovery, Metadata Recovery and Fresh Releases from one MediaFlow-themed widget.</p></div>'+
+  '<label for="mf428-visibility">Visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+
+  [['hidden','Hidden'],['auto','Automatic — when work needs attention'],['always','Always Show — quick launch and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select>'+
+  '<div class="mf428-widget-options">'+
+  '<label for="mf428-position">Position</label><select id="mf428-position" onchange="App.mf428SetPosition(this.value)"><option value="right" '+(pos!=='left'?'selected':'')+'>Bottom right</option><option value="left" '+(pos==='left'?'selected':'')+'>Bottom left</option></select>'+
+  '<label for="mf428-size">Size</label><select id="mf428-size" onchange="App.mf428SetSize(this.value)"><option value="comfortable" '+(!set.compact?'selected':'')+'>Comfortable</option><option value="compact" '+(set.compact?'selected':'')+'>Compact</option></select>'+
+  '</div>'+
+  '<label class="mf428-widget-check"><input type="checkbox" id="mf428-notify" '+(set.notifications?'checked':'')+' onchange="App.mf428SetNotifications(this.checked)"><span>Process notifications <small>Completion, errors and pending manual reviews</small></span></label>'+
+  '<p class="hint">Your preferences follow the current account settings. Hiding the widget never stops a task. Browser-closed processing resumes from saved checkpoints.</p></div>';
 }
 if(typeof v405FloatingSettingsHtml==='function'){
- const previous=v405FloatingSettingsHtml;v405FloatingSettingsHtml=function(){return previous.apply(this,arguments)+settingsHtml();};
+ const previous=v405FloatingSettingsHtml;
+ v405FloatingSettingsHtml=function(){
+  const base=String(previous.apply(this,arguments)||'');
+  const closing=base.lastIndexOf('</div>');
+  if(closing<0)return base+settingsHtml();
+  return base.slice(0,closing)+'<div class="mf405-floating-divider"></div>'+settingsHtml()+base.slice(closing);
+ };
 }
-Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428SetPosition:p=>{if(['left','right'].includes(p))persistPrefs({position:p});},mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
+// The existing Settings Center owns this appearance/floating-controls group.
+// Register explicit settings so search and section navigation find these values.
+if(typeof v366RegisterSetting==='function'){
+ for(const [id,label,keywords] of [
+  ['widget','Background Processes Widget',['floating','background','recovery','fresh','widget']],
+  ['visibility','Background Processes Visibility',['floating','hide','always show','automatic']],
+  ['position','Background Processes Position',['left','right','widget']],
+  ['size','Background Processes Size',['compact','comfortable','floating']],
+  ['notify','Background Process Notifications',['alerts','notifications','review','complete']]
+ ]){
+  v366RegisterSetting({id:'v428-background-'+id,section:'v221-settings-floating-controls',
+   selector:id==='widget'?'.mf428-widget-settings':id==='visibility'?'#mf428-visibility':id==='position'?'#mf428-position':id==='size'?'#mf428-size':'#mf428-notify',
+   label,subgroup:'Background Operations',keywords});
+ }
+}
+Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;if(HUB.expanded&&noticeCount())markNoticesRead();else paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428SetPosition:p=>{if(['left','right'].includes(p))persistPrefs({position:p});},mf428SetSize:s=>{if(['compact','comfortable'].includes(s))persistPrefs({compact:s==='compact'});},mf428ToggleSize:()=>persistPrefs({compact:!prefs().compact}),mf428SetNotifications:enabled=>persistPrefs({notifications:!!enabled}),mf428ClearNotices:clearNotices,mf428ReadNotices:markNoticesRead,mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
 window.MediaFlowV428Hub={enqueue,paint,phase,progress,ownsLease:leaseHeld,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},registerFresh:(fn)=>{HUB.freshRunner=fn;pump();},runLegacyFresh:(options)=>nativeFresh?nativeFresh(options||{force:true}):Promise.resolve(null),status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil,otherTab:foreignLease()})};
 function init(){load();if(!HUB.ticker)HUB.ticker=setInterval(()=>{if(HUB.loadedFor!==account())load();renew();pump();if(!HUB.renderQueued){HUB.renderQueued=true;paint();HUB.renderQueued=false;}},1500);paint();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -68392,12 +68474,12 @@ async function worker(params={}){await init();
    }else job.skipped++;}catch(e){job.errors.push({id,reason:String(e.message||e)});}}
   job.cursor++;processed++;await persist();
   if(job.reviews.length>=250){job.status='waiting-review';break;}
-  if(processed>=job.part&&job.cursor<job.ids.length){job.status='waiting-part';break;}
+  if(processed>=job.part&&job.cursor<job.ids.length){job.status=job.stopAfterPart?'stopped':'waiting-part';job.stopped=!!job.stopAfterPart;break;}
  }
  if(job.cursor>=job.ids.length)job.status=job.reviews.length?'waiting-review':'complete';
  await persist();
  }catch(e){job.status='paused';job.errors.push({id:'job',reason:String(e.message||e)});await persist();throw e;}
- finally{M.running=false;window.MediaFlowV428Hub?.paint();if(job.reviews.length)showToast(job.reviews.length+' metadata titles ready for review.');}
+ finally{M.running=false;window.MediaFlowV428Hub?.paint();}
 }
 function review(){
  if(M.account&&M.account!==account()){showToast('Account changed. Reopen Metadata Recovery.');return;}
@@ -68459,13 +68541,14 @@ async function apply(){
 }
 async function undo(){await init();if(window.MediaFlowV428Hub?.status()?.active){showToast('Finish or pause background work before undoing metadata.');return;}const last=M.history[M.history.length-1];if(!last){showToast('No metadata change available to undo.');return;}const item=lookup(last.id);if(!item||Number(item.modifiedAt||0)!==Number(last.changedAt)){showToast('Title changed after recovery; unsafe to undo automatically.');return;}if(last.after&&last.fields.some(field=>JSON.stringify(item[field]??null)!==JSON.stringify(last.after[field]??null))){showToast('Recovered metadata was edited after saving. Undo is unsafe.');return;}const newer={};for(const field of last.fields){newer[field]=item[field];if(last.previous[field]===undefined)delete item[field];else item[field]=last.previous[field];}const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();try{await saveState();M.history.pop();localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));showToast('Last metadata recovery reversed.');}catch(e){for(const field of last.fields){if(newer[field]===undefined)delete item[field];else item[field]=newer[field];}item.modifiedAt=oldStamp;showToast('Unable to undo metadata safely.');}}
 function control(cmd){if(!M.job)return;
+ if(cmd==='stop-part'){M.job.stopAfterPart=true;persist();return;}
  if(cmd==='pause'||cmd==='stop'||cmd==='cancel'){M.job[cmd==='pause'||cmd==='cancel'?'paused':'stopped']=true;
   if(cmd==='cancel')M.job.status='paused';persist();
  }
  if(cmd==='review')review();
  if(cmd==='resume'&&['paused','stopped','waiting-part','waiting-review'].includes(M.job.status)){
    if(M.running)return;
-   M.job.paused=false;M.job.stopped=false;M.job.status='queued';
+   M.job.paused=false;M.job.stopped=false;M.job.stopAfterPart=false;M.job.status='queued';
    persist().then(()=>window.MediaFlowV428Hub?.enqueue('metadata',{})).catch(e=>console.warn('Metadata resume failed',e));
  }}
 function injectEditor(html){if(!html||html.includes('mf428-edit-action'))return html;const at=html.indexOf('class="mf425-editor-tools"');if(at<0)return html;const close=html.indexOf('</div>',at);if(close<0)return html;
@@ -68666,9 +68749,11 @@ function feedItems(raw,type){
   seen.add(guid);
   const text=child(item,'title');
   const explicit=[...item.children].find(x=>x.localName==='episode'&&/itunes/i.test(x.prefix||''))?.textContent;
+  const rawSeason=[...item.children].find(x=>x.localName==='season'&&/itunes/i.test(x.prefix||''))?.textContent;
+  const season=rawSeason&&Number.isSafeInteger(Number(rawSeason))?Number(rawSeason):null;
   const titleNumber=/(?:episode|ep\.?|chapter|ch\.?|part|issue)\s*#?\s*(\d{1,6})\b/i.exec(text);
   const num=Number(explicit||titleNumber?.[1]);
-  items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null});
+  items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null,season});
  }
  return {items,total:nodes.length};
 }
@@ -68681,6 +68766,9 @@ async function feed(item){
  if(parsed.error)return {status:'unknown',reason:parsed.error};
  const numbered=parsed.items.filter(x=>x.number!=null),highest=Math.max(0,...numbered.map(x=>x.number));
  const latest=parsed.items.map(x=>x.date).sort().at(-1)||'';
+ if(parsed.items.some(x=>x.season!==null&&x.season>0))
+  return {status:'unknown',source:'RSS / Atom',url,unit:types[kind],observedCount:parsed.items.length,releasedAt:latest,partial:true,
+   reason:'Season-numbered episodes in a partial feed cannot be compared safely against aggregate Library progress'};
  return freshButIncomplete(item,highest,'RSS / Atom',
   kind==='podcasts'?'podcast episodes':kind==='webnovels'?'web novel chapters':kind==='comics'?'comic issues':'web series episodes',
   {url,recordId:url,observedCount:parsed.items.length,releasedAt:latest,
@@ -68772,7 +68860,7 @@ async function worker(params={}){await init();if(!params.universal)return window
   }
   if(j.cursor>=j.ids.length)j.status='complete';await save();
  }catch(e){j.status='paused';j.errors.push(String(e.message||e));await save();throw e;}
- finally{F.running=false;window.MediaFlowV428Hub?.paint();if(j.status==='complete')showToast('Fresh Releases scan complete. '+j.fresh+' titles have verified new content.');}
+ finally{F.running=false;window.MediaFlowV428Hub?.paint();}
 }
 async function resume(){await init();if(!F.job||F.job.account!==account()||F.running)return;F.job.paused=false;F.job.stopped=false;F.job.status='queued';await save();window.MediaFlowV428Hub?.enqueue('fresh',{universal:true});}
 async function init(){
