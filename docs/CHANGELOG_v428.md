@@ -78,3 +78,17 @@
 - **Tests:** `scripts/test-v428-fresh.cjs` checks verified-vs-unknown results, duplicate chapter evidence, future-date rejection, TV specials, highest-verified multi-source aggregation, media-category routing, and hidden/unconfigured source behavior.
 
 **Remaining prior to release:** Real-browser verification, provider rate-limit/CORS smoke testing, full media-category provider coverage (only lawful configured sources), performance benchmark, and final release/rollback procedure. This phase is not itself a completed v428 GitHub release.
+
+## Phase 5 — Floating Background Widget & Recovery Polish (development)
+
+- **Native themed widget:** The Background Processes floating hub now inherits the selected MediaFlow theme's panels, accents, text, borders, translucent surfaces and shadows. No independent hardcoded theme, smooth subtle activity animation, accessible focus states and reduced-motion support.
+- **Display preferences in existing Settings:** Visibility (Hidden / Automatic / Always Show), position (left/right), compact or comfortable sizing and optional completion/error/manual-review notifications are grouped *within* Appearance → Floating Controls alongside the original Floating Add and Task Progress preferences. Registered controls can be found through the Settings Center search. Values persist with account settings.
+- **Launcher:** Always Show retains three launch buttons when idle. Automatic hides when no actionable work, but continues displaying while jobs run, queue, cool down, pause or need review. Hidden affects visibility only and never cancels a job.
+- **Layout:** The floating hub dynamically moves clear of the existing MediaFlow floating dock; mobile and narrow-screen panels have bounded scrollable heights and safe-area positioning. The widget becomes inert/hidden while the mobile More menu is open, avoiding covered actions and focus conflicts.
+- **Compact and comfortable modes:** The user can toggle size from the floating panel itself or Settings; left/right placement and icon styling follow the active theme.
+- **Recent activity:** Keeps an account-scoped, locally persisted bounded history of 18 process completion, manual-review and error alerts (the latest five are visible in the panel). Unread counts, clear action, optional toasts and single-notification de-duplication per task outcome. No browser notification permissions requested.
+- **Manual review:** Shows queued metadata review results even for unsaved title lookups, and keeps pending recovery review accessible in the same floating panel.
+- **Safe stop controls:** Cover Recovery and Metadata Recovery provide Pause, Stop After Current Title and Finish Current Part & Stop when running, preserving checkpoints; other processes keep their supported safe-stop controls.
+- **Testing:** Added `scripts/test-v428-widget.cjs` to the isolated development build's required checks. Existing v424/v425/v427 checks and all Phase 2–4 regressions remain active.
+
+**Scope limitations:** Server-run jobs after browser closure and cross-device global API locks are not enabled; this is browser-checkpointed work. Real-provider live API validation, full browser/phone/tablet visual inspection and 100k title load benchmarking remain release blockers. PR #3 stays draft; do not merge or deploy before final release verification.
