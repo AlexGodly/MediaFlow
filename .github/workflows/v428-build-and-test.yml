@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: mediaflow-v428-development
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
