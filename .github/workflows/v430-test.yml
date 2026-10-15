@@ -43,6 +43,7 @@ jobs:
           node scripts/test-v427-on-this-day.cjs
           node scripts/check-settings-style.cjs
           node scripts/test-v430-recovery-polish.cjs
+          node scripts/test-v430-browser.cjs
           python scripts/check.py
           node --check assets/js/mediaflow-v430.bundle.js
           test -s assets/css/240-v430-recovery-dashboard-navigation.css
@@ -68,3 +69,4 @@ jobs:
             sw.js
             version.json
             assets/js/mediaflow-v430.bundle.js
+            artifacts/v430-browser-smoke/
