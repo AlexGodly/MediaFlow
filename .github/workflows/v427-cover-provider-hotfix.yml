@@ -2,7 +2,7 @@ name: v427 Cover Provider Hotfix Checks
 
 on:
   push:
-    branches: [fix/v427-cover-provider-reliability]
+    branches: [fix/v427-cover-provider-reliability, fix/v427-cover-settings-accordion]
   pull_request:
     branches: [main]
   workflow_dispatch:
