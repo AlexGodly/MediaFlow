@@ -39,7 +39,7 @@ async function fetchMock(url){
  urls.push(String(url));
  let data=null;
  if(url.includes('tvmaze.com/lookup/shows?thetvdb=12345'))data={id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'};
- elseif(url.includes('tvmaze.com/search/shows'))data=[{show:{id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'}}];
+ else if(url.includes('tvmaze.com/search/shows'))data=[{show:{id:42,name:'Verified Show',url:'https://www.tvmaze.com/shows/42'}}];
  else if(url.includes('tvmaze.com/shows/42/episodes'))data=[
    {id:1,season:1,number:1,airstamp:'2026-01-01T01:00:00Z'},
    {id:2,season:1,number:2,airstamp:'2026-03-01T01:00:00Z'},
