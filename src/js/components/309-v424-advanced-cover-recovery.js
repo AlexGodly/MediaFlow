@@ -382,10 +382,12 @@ async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;re
   if(!candidates.length){MF424.job.unresolved++;mf424Note('unresolved','No verified cover found',item.id);return;}
   const mode=mf424Defaults().selection;
   const best=candidates.sort((a,b)=>b.confidence-a.confidence)[0];
-  if(mode==='manual'||mode==='hybrid'&&best.confidence<.95){
+  // With user-defined categories, a title-only match cannot establish media
+  // identity. Queue it for the owner's choice rather than overwriting artwork.
+  // Automatic application requires a verified saved provider ID AND title.
+  if(mode==='manual'||!best.idMatch||best.confidence<.95){
     mf424QueueReview(item,candidates);return;
   }
-  if(best.confidence<.95){mf424QueueReview(item,candidates);return;}
   if(await mf424Apply(item,best,expected)){MF424.job.fixed++;mf424Note('recovered',best.provider,item.id);}
   else{MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
 }
