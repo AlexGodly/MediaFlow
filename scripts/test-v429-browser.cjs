@@ -94,6 +94,12 @@ async function pageReady(cdp,label){
    await cdp.send('Emulation.setDeviceMetricsOverride',{width:d.width,height:d.height,deviceScaleFactor:1,mobile:d.mobile});
    await cdp.send('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/?v429-smoke='+d.label});
    await pageReady(cdp,d.label);
+   const center=await cdp.evaluate("(()=>{const n=document.querySelector('#mf429-center .mf429-launch');if(!n)return null;const r=n.getBoundingClientRect();return {x:r.x,width:r.width,viewport:innerWidth,label:n.innerText};})()");
+   assert(center,'Recovery and Release Center launcher missing in '+d.label);
+   assert(center.x>=-1&&center.x+center.width<=d.width+1,'Bottom-left launcher overflows '+d.label);
+   assert(center.x<d.width/2,'Recovery Center not anchored to bottom-left on '+d.label);
+   const opened=await cdp.evaluate("(()=>{App.mf429CenterTab('queue');const root=document.querySelector('#mf429-center');return {hasQueue:!!root?.querySelector('.mf429-job'),tabs:root?.querySelectorAll('[role=tab]').length,expanded:root?.classList.contains('open')};})()");
+   assert(opened?.hasQueue&&opened.tabs===4&&opened.expanded,'Queue tab failed '+d.label+': '+JSON.stringify(opened));
    const img=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
    assert(img.data,'No screenshot from '+d.label);
    fs.writeFileSync(path.join(screens,d.label+'.png'),Buffer.from(img.data,'base64'));
@@ -101,6 +107,6 @@ async function pageReady(cdp,label){
   console.log('v429 Chromium smoke passed: local bundle boots with visible body on desktop and 360px mobile, screenshots saved');
  }finally{
   cdp?.close();proc.kill('SIGKILL');server.close();
-  fs.rmSync(profile,{recursive:true,force:true});
+  try{fs.rmSync(profile,{recursive:true,force:true,maxRetries:8,retryDelay:200});}catch(e){console.warn('Temporary Chromium profile cleanup:',e.message);}
  }
 })().catch(e=>{console.error(e);process.exitCode=1;});
