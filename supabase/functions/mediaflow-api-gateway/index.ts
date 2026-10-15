@@ -100,7 +100,7 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
   // OMDb's 's' search and 't' direct-title endpoints can return different
   // matches. Only spend an additional request if search found no exact title.
   if(!known&&!rows.length){
-   q.delete("s");q.set("t",title);
+   q.searchParams.delete("s");q.searchParams.set("t",title);
    const direct=await read(p,q.href);
    append(direct);
   }
