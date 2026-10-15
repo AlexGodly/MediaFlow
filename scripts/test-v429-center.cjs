@@ -24,6 +24,10 @@ assert(center.includes('originalFreshOpen?.()'),'Original universal scanner acce
 assert(center.includes("App.mf425OpenConfig=function(entry='settings',id='')"),'Existing cover entry points routed into Center');
 assert(center.includes("App.mf428MetadataOpen=function(entry='settings',id='')"),'Existing metadata entry points routed into Center');
 assert(center.includes('state.context={tab,entry:'),'Existing selected-title/editor scope preserved');
+assert(center.includes("restorePortal('seasonal')"),'Fresh Episodes form values are preserved across tab switches');
+assert(center.includes("restorePortal('fresh')"),'Universal scanner configuration is preserved across tab switches');
+assert(center.includes('(Number(s.cooldownUntil)||0)-Date.now()'),'Cooldown subtracts current time instead of displaying a Unix timestamp');
+assert(center.includes("mode==='hidden'&&!state.expanded"),'Hidden launcher can still be opened explicitly by Library/Settings shortcuts');
 assert(css.includes("left:max(15px,env(safe-area-inset-left))"),'Default bottom left');
 assert(css.includes('body.mf429-center-enabled #mf428-hub'),'Legacy launcher visually suppressed, scheduler retained');
 assert(css.includes('mf429-embedded'),'Original recovery dialogs portaled without duplicate implementation');
