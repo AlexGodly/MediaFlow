@@ -192,9 +192,14 @@ function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
   const externalIdKey=({tenrai:'mal',jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',mangadex:'mangadex',openlibrary:'openlibrary',googlebooks:'googlebooks'})[provider]||'';
   const recordId=String((provider==='openlibrary'?entry?.key:null)??entry?.mal_id??entry?.id??entry?.idMal??'').trim().replace(provider==='openlibrary'?/^\/works\//:/^\u0000/,'');
-  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId,externalIdKey,externalIdValue:recordId};
+  const candidate={url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId,externalIdKey,externalIdValue:recordId};
+  return typeof mf433EnrichCoverCandidate==='function'?mf433EnrichCoverCandidate(entry,candidate):candidate;
 }
 function mf424LinkableCoverId(item,candidate){
+  if(typeof mf433CandidateLinks==='function'){
+    const links=mf433CandidateLinks(item,candidate);
+    if(links.length)return links.find(link=>!link.conflict&&link.existing!==link.value)||links[0];
+  }
   const key=String(candidate?.externalIdKey||'').trim(),value=String(candidate?.externalIdValue||candidate?.recordId||'').trim();
   if(!/^[a-z][a-z0-9_]{0,32}$/.test(key)||!value||value.length>120||!(/^[\w.:-]+$/.test(value)||key==='openlibrary'&&/^\/works\/OL\d+W$/.test(value)))return null;
   const existing=String(item?.externalIds?.[key]??'').trim();
@@ -202,6 +207,8 @@ function mf424LinkableCoverId(item,candidate){
   return {key,value,existing,conflict:false};
 }
 function mf424LinkSelectedCoverId(item,candidate,{manual=false}={}){
+  if(typeof mf433LinkCandidateIds==='function')
+    return mf433LinkCandidateIds(item,candidate,{manual})>0;
   const link=mf424LinkableCoverId(item,candidate);
   if(!link||link.conflict||link.existing===link.value)return false;
   // Respect an intentional manual clearing of IDs during automatic recovery.
@@ -249,7 +256,7 @@ async function mf424DiscoverKind(item,provider,kind){
     const data=await mf424Request(provider,url);
     return (Array.isArray(data)?data.map(x=>x.show):[data]).filter(Boolean).map(x=>{const direct=Boolean(tvmaze&&String(x.id)===tvmaze||!tvmaze&&imdb&&x.externals?.imdb===imdb);
       const match=mf424Match(item,{title:x.name,year:Number(String(x.premiered||'').slice(0,4))},direct);
-      return mf424AsCandidate({id:x.id,title:x.name},x.image?.original||x.image?.medium,provider,direct,x.url,match.reason,match.confidence);
+      return mf424AsCandidate({id:x.id,title:x.name,externals:x.externals},x.image?.original||x.image?.medium,provider,direct,x.url,match.reason,match.confidence);
     }).filter(Boolean);
   }
   if(provider==='mangadex'){
@@ -512,6 +519,8 @@ function mf424ReviewIcon(name){const shapes={
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m3 17 6-6 4 4 3-3 5 5"/>'
 };return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.image)+'</svg>';}
 function mf424CoverIdControl(item,candidate,index,scope='mf424'){
+  if(typeof mf433CoverIdMarkup==='function')
+    return mf433CoverIdMarkup(item,candidate,index,scope);
   const link=mf424LinkableCoverId(item,candidate);
   if(!link)return '<small class="mf424-cover-id-note">No usable external record ID supplied by this cover source.</small>';
   const name=mf424Escape(link.key==='mal'?'MAL':link.key.toUpperCase());
