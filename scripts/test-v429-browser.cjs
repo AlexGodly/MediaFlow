@@ -111,6 +111,13 @@ async function pageReady(cdp,label){
    const surfaces=await cdp.evaluate("(()=>{const test={};for(const [tab,id] of [['covers','mf424-modal'],['metadata','mf428-metadata-modal']]){try{App.mf429CenterTab(tab);test[tab]=!!document.querySelector('#mf429-center #'+id);}catch(e){test[tab]='error: '+e.message;}}try{App.mf429CenterTab('fresh');test.fresh=!!document.querySelector('#mf429-center .mf429-anime-settings');test.freshProvider=!!document.querySelector('#mf429-center .mf380-provider-select');}catch(e){test.fresh='error: '+e.message;}return test;})()");
    assert(surfaces?.covers===true&&surfaces?.metadata===true&&surfaces?.fresh===true,'Existing recovery UI portal failed on '+d.label+': '+JSON.stringify(surfaces));
    console.log(d.label,'reused recovery interfaces:',JSON.stringify(surfaces));
+
+   const editing=await cdp.evaluate("(()=>{App.mf429CenterTab('covers');const cover=document.querySelector('#mf429-center #mf424-config select[name=selection]');if(!cover)return {error:'Cover select missing'};cover.value='manual';App.mf429CenterTab('metadata');const mode=document.querySelector('#mf429-center #mf428-meta-method');if(!mode)return {error:'Metadata method missing'};mode.value='refresh';App.mf429CenterTab('covers');const keptCover=document.querySelector('#mf429-center #mf424-config select[name=selection]')?.value;App.mf429CenterTab('metadata');const keptMetadata=document.querySelector('#mf429-center #mf428-meta-method')?.value;App.mf429CenterToggle();App.mf429CenterToggle();const afterMinimize=document.querySelector('#mf429-center #mf428-meta-method')?.value;App.mf424OpenConfig();const scopedSettings=!!document.querySelector('#mf429-center #mf424-modal');const looseModal=!!document.querySelector('body > #mf424-modal');return {keptCover,keptMetadata,afterMinimize,scopedSettings,looseModal}})()");
+   assert(editing?.keptCover==='manual'&&editing.keptMetadata==='refresh'&&editing.afterMinimize==='refresh',
+     'Switching tabs/minimizing lost unsubmitted original form values: '+JSON.stringify(editing));
+   assert(editing.scopedSettings&&!editing.looseModal,'Legacy Cover Recovery settings entry escaped Center: '+JSON.stringify(editing));
+   console.log(d.label,'native recovery draft preservation:',JSON.stringify(editing));
+
    const img=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
    assert(img.data,'No screenshot from '+d.label);
    fs.writeFileSync(path.join(screens,d.label+'.png'),Buffer.from(img.data,'base64'));
