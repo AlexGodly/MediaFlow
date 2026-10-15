@@ -294,7 +294,7 @@ function mf425SettingsEnhance(){
  body.innerHTML=mf425SettingsMarkup();
  center.mountSection({
    id:'v221-settings-cover-recovery',
-   title:'Cover Recovery',
+   title:'COVER RECOVERY',
    category:'library',
    subgroup:'Library maintenance',
    keywords:['cover','poster','artwork','recovery','providers','XP','background'],

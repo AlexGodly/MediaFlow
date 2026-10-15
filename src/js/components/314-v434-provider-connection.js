@@ -155,7 +155,7 @@ function mf434IdsEditorLookupHtml(item){
  '<p>Review a provider record and choose Link IDs. Existing values will never be replaced, and nothing is saved until you save this title.</p>'+
  '<div class="mf434-lookup-tools"><input id="mf434-lookup-title" aria-label="Search title" value="'+title+'" placeholder="Title to identify" maxlength="110">'+
  '<select id="mf434-lookup-provider" aria-label="ID provider">'+options+'</select>'+
- '<button type="button" class="btn btn-ghost" onclick="App.mf434SearchIds()">Find IDs</button></div>'+
+ '<button type="button" class="btn btn-ghost mf436-find-ids" data-v225-icon="search" data-v225-iconified="1" onclick="App.mf434SearchIds()">'+mf425Icon('search',16)+'<span>Find IDs</span></button></div>'+
  '<div id="mf434-lookup-results" aria-live="polite"></div></div>';
 }
 const mf434EditorBase=v377IdsEditorHtml;

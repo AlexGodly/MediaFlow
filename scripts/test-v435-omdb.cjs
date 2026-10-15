@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const read=path=>fs.readFileSync(path,'utf8');
-assert.equal(read('VERSION').trim(),'435');
+assert(['435','436'].includes(read('VERSION').trim()));
 const g=read('supabase/functions/mediaflow-api-gateway/index.ts');
 const ui=read('src/js/components/314-v434-provider-connection.js');
 assert(g.includes('OMDb API key rejected. Check email activation'),'Activation vs missing titles distinguished');

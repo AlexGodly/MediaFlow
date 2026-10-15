@@ -168,5 +168,6 @@
   "components/311-v427-recovery-ux-stability.js",
   "components/312-v431-dashboard-auto-save-navigation.js",
   "components/313-v433-provider-registry-foundation.js",
-  "components/314-v434-provider-connection.js"
+  "components/314-v434-provider-connection.js",
+  "components/315-v436-selected-recovery-shortcut.js"
 ]

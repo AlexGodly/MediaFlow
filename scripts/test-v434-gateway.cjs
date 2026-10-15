@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const read=p=>fs.readFileSync(p,'utf8');
-assert(['434','435'].includes(read('VERSION').trim()));
+assert(['434','435','436'].includes(read('VERSION').trim()));
 const code=read('src/js/components/314-v434-provider-connection.js');
 const gateway=read('supabase/functions/mediaflow-api-gateway/index.ts');
 const prior=read('src/js/components/313-v433-provider-registry-foundation.js');
@@ -31,6 +31,7 @@ const context={
  console,Set,Map,Date,Promise,Math,URL,
  App:{},window:{},S:{settings:{}},AUTH_USER:{id:'account-a'},supabase:null,
  mf424Escape:x=>String(x),mf424Defaults:()=>({}),
+ mf425Icon:()=>'<svg></svg>',
  mf433ReadinessMarkup:()=>'<div>pending</div>',
  mf425SettingsMarkup:()=>'<section><div>pending</div></section>',
  v377IdsEditorHtml:()=>'<section><div class="mf377-mal-preview"></div></section>',
