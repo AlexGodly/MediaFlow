@@ -187,3 +187,7 @@
  #mf428-hub,#mf428-hub .mf428-bar i{transition:none!important}
  #mf428-hub .mf428-pulse{animation:none!important}
 }
+
+#mf428-hub .mf428-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 1px 0;color:var(--mf428-muted);font-size:10px}
+#mf428-hub .mf428-progress-meta strong{font-size:11px;color:var(--mf428-primary);font-variant-numeric:tabular-nums}
+#mf428-hub .mf428-progress-meta+.mf428-bar{margin-top:4px}
