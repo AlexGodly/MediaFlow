@@ -39,7 +39,9 @@ match(source,'const candidates=await mf424Discover(current,provider)','Find Cove
 match(source,'catalog.map(p=>','Newly integrated and inactive providers are all listed with truthful availability');
 match(source,'App.mf427RetryProvider=function','Find Cover can inspect a single provider');
 match(source,"(enabled.length?enabled:eligible)",'No active enabled sources no longer means an empty Find Cover list');
-match(source,"p.usable&&p.compatible",'Provider capability and readiness are checked before searches');
+match(source,"catalog.filter(p=>p.usable)",'All configured public providers can be searched regardless of category');
+match(source,"mf427SelectedLinkId(index)",'Cover selection offers source-ID linking');
+match(source,"mf427LinkAfterExternalSave",'Dashboard and Quick Cover link only following successful cover save');
 match(source,"off for background recovery",'Individual search works without silently editing Recovery settings');
 match(core,"MF424_EXTRA_COVER_ADAPTERS",'Future provider adapters share both workflows');
 match(core,"root.className='mf424-modal mf425-themed mf427-manual-review'",'Manual review uses the same dynamic theme surface');
