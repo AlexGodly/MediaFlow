@@ -2,11 +2,13 @@
    Accepts manually pasted and explicitly selected URLs AFTER the existing v235
    real-image validation. Does not loosen background provider auto-match rules,
    create Library records, or bypass the existing XP-safe queue saver. */
-const MF431_AUTO={busy:false,waiters:[],account:'',completed:new Set()};
+const MF431_AUTO={busy:false,waiters:[],account:''};
 function mf431Account(){return String(typeof AUTH_USER!=='undefined'&&AUTH_USER?.id||'local');}
 function mf431Current(){
-  const item=v192CurrentMissingCoverItem?.(),input=document.getElementById('v192-cover-url-input');
-  return {item,input,id:String(item?.id||''),url:String(input?.value||'').trim()};
+  const input=document.getElementById('v192-cover-url-input');
+  if(!input)return {item:null,input:null,id:'',url:''};
+  const item=v192CurrentMissingCoverItem?.();
+  return {item,input,id:String(item?.id||''),url:String(input.value||'').trim()};
 }
 function mf431Validated(id,url){
   const state=V235_MISSING_STATE,live=mf431Current();
@@ -30,15 +32,12 @@ function mf431SaveValidated(id,url,explicit=false){
   if(mf431Account()!==MF431_AUTO.account)return false;
   const live=mf431Current();
   if(!live.item||String(live.item.coverUrl||'').trim())return false;
-  const key=mf431Account()+'|'+id+'|'+url;
-  if(MF431_AUTO.completed.has(key))return false;
   MF431_AUTO.busy=true;
   try{
     // Existing saver checks the same v235 state, updates XP and queues,
     // writes Library state, and redraws the next title exactly once.
     App.v192SaveMissingCover();
     if(String(live.item.coverUrl||'').trim()!==url)throw Error('Cover save was not accepted');
-    MF431_AUTO.completed.add(key);
     return true;
   }catch(error){
     console.error('v431 Dashboard auto-save failed',error);
@@ -79,6 +78,7 @@ async function mf431UseDashboardCover(raw,id){
   if(MF431_AUTO.busy)return false;
   MF431_AUTO.account=mf431Account();
   let finish;
+  const originalAccount=mf431Account();
   const promise=new Promise(resolve=>{
     const entry={id:String(id),url,finish:(ok)=>{
       clearTimeout(timer);
@@ -92,7 +92,7 @@ async function mf431UseDashboardCover(raw,id){
   live.input.value=url;
   App.v235ValidateMissingCover?.(url);
   const valid=await promise;
-  if(!valid||mf431Account()!==MF431_AUTO.account)return false;
+  if(!valid||mf431Account()!==originalAccount)return false;
   // Validation may have already triggered the opt-in automatic saver.
   const saved=(S.library||[]).find(x=>String(x?.id)===String(id));
   if(String(saved?.coverUrl||'').trim()===url)return true;
@@ -105,7 +105,6 @@ const mf431OldApplyState=v46ApplyState;
 v46ApplyState=function(){
   const result=mf431OldApplyState.apply(this,arguments);
   MF431_AUTO.account=mf431Account();
-  MF431_AUTO.completed.clear();
   MF431_AUTO.waiters.splice(0).forEach(w=>w.finish(false));
   return result;
 };
