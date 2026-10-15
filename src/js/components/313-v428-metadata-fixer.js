@@ -26,7 +26,7 @@ function captureDraft(item){const next={...item};for(const field of fields){cons
  next.externalIds=ids;return next;}
 function snapshot(item){return fields.map(f=>JSON.stringify(item[f]??null)).join('|')+'|'+String(item.title||'')+'|'+String(item.categoryId||'');}
 const safeIds=o=>o&&typeof o==='object'?o:{};
-const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},anilist:{requiresSetup:false,capabilities:['anime','manga']},mangadex:{requiresSetup:false,capabilities:['manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books','comics']}};
+const schema={tenrai:{requiresSetup:false,capabilities:['anime','manga']},jikan:{requiresSetup:false,capabilities:['anime','manga']},anilist:{requiresSetup:false,capabilities:['anime','manga']},kitsu:{requiresSetup:false,capabilities:['anime','manga']},mangadex:{requiresSetup:false,capabilities:['manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books','comics']}};
 async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('IndexedDB is required to preserve metadata jobs'));return;}const req=indexedDB.open('mediaflow-metadata-v428',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);});}
 async function store(op,value,owner=account()){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+owner):tx.objectStore('records').put(value,'job:'+owner);req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
 async function persist(){if(M.job)await store('put',M.job,M.job.account);window.MediaFlowV428Hub?.paint();}
@@ -167,6 +167,26 @@ async function discoverOpenLibrary(item,ids,title){
 }
 
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
+function kitsuNames(row){const a=row?.attributes||{};return [a.canonicalTitle,...Object.values(a.titles||{}),...(a.abbreviatedTitles||[])].filter(x=>typeof x==='string').map(norm);}
+async function discoverKitsu(item,type,ids,title){
+ const raw=String(ids.kitsu||'').trim();
+ if(raw&&!/^\\d+$/.test(raw))return {reason:'Kitsu identifier must be numeric'};
+ const category=type==='manga'?'manga':'anime';
+ const url='https://kitsu.io/api/edge/'+category+(raw?'/'+encodeURIComponent(raw):'?filter%5Btext%5D='+encodeURIComponent(title)+'&page%5Blimit%5D=8');
+ const body=await request('kitsu',url);
+ const rows=raw?[body?.data]:(Array.isArray(body?.data)?body.data:[]);
+ const matches=rows.filter(row=>row&&(!raw||String(row.id)===raw)&&kitsuNames(row).includes(norm(title)));
+ if(matches.length!==1)return {reason:raw?'Kitsu identifier does not verify the title':'Kitsu title match is not unique'};
+ const row=matches[0],a=row.attributes||{},date=String(a.startDate||'').slice(0,10);
+ const count=Number(type==='manga'?a.chapterCount:a.episodeCount);
+ const score=Number(a.averageRating);
+ return {title:a.canonicalTitle||'',synopsis:cleanHtml(a.synopsis||a.description||''),
+  communityScore:Number.isFinite(score)&&score>0&&score<=100?Math.round(score)/10:null,
+  year:Number(date.slice(0,4))||0,releaseDate:/^\\d{4}-\\d{2}-\\d{2}$/.test(date)?date:'',
+  mediaFormat:a.subtype||a.mangaType||a.showType||'',durationMinutes:Number(a.episodeLength)||null,
+  ageRating:a.ageRating||'',total:Number.isSafeInteger(count)&&count>0?count:0,
+  source:'Kitsu',url:'https://kitsu.io/'+category+'/'+encodeURIComponent(row.id),recordId:row.id};
+}
 async function discover(item,allowed){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
  const notices=[];
@@ -175,28 +195,35 @@ async function discover(item,allowed){
  const attempted=async(name,fn)=>{
   try{return await fn();}catch(e){notices.push(name+' unavailable: '+String(e?.message||e).slice(0,140));return null;}
  };
- if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('jikan'))){
-  const found=await attempted('Jikan',async()=>{
-   const prefix=t==='manga'?'manga':'anime',mal=ids.mal||item.malId;
-   if(mal&&/^\d+$/.test(String(mal))){
-    const data=await request('jikan','https://api.jikan.moe/v4/'+prefix+'/'+encodeURIComponent(mal)+'/full');
+ for(const provider of ['tenrai','jikan']){
+  if((t!=='anime'&&t!=='manga')||(allowed&&!allowed.includes(provider)))continue;
+  const found=await attempted(provider,async()=>{
+   const prefix=t==='manga'?'manga':'anime',mal=String(ids.mal||item.malId||'');
+   const base=provider==='tenrai'?'https://api.tenrai.org/v1/':'https://api.jikan.moe/v4/';
+   if(mal&&/^\\d+$/.test(mal)){
+    const data=await request(provider,base+prefix+'/'+encodeURIComponent(mal)+'/full');
     if(data?.data){
      const d=mapJikan(data.data,t),names=[d.title,data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])];
-     if(names.some(name=>norm(name)===norm(title)))return d;
-     notices.push('Jikan MAL identifier title mismatch');
-     return null;
+     if(String(data.data.mal_id)===mal&&names.some(name=>norm(name)===norm(title)))return {...d,source:provider==='tenrai'?'Tenrai':'Jikan'};
+     return {reason:provider+' identifier/title mismatch; no title-only substitution'};
     }
+    return {reason:provider+' supplied identifier was not found'};
    }
-   const search=await request('jikan','https://api.jikan.moe/v4/'+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
+   const search=await request(provider,base+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
    const exact=(search?.data||[]).filter(v=>[v.title,v.title_english,v.title_japanese,...(v.title_synonyms||[])].some(n=>norm(n)===norm(title)));
-   if(exact.length===1)return mapJikan(exact[0],t);
-   if(exact.length>1)notices.push('Jikan title is ambiguous');
-   return null;
+   if(exact.length===1)return {...mapJikan(exact[0],t),source:provider==='tenrai'?'Tenrai':'Jikan'};
+   return {reason:exact.length>1?provider+' title match ambiguous':provider+' exact title not found'};
   });
   if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
  }
  if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('anilist'))){
   const found=await attempted('AniList',()=>discoverAniList(item,t,ids,title));
+  if(found?.source)return found;
+  if(found?.reason)notices.push(found.reason);
+ }
+ if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('kitsu'))){
+  const found=await attempted('Kitsu',()=>discoverKitsu(item,t,ids,title));
   if(found?.source)return found;
   if(found?.reason)notices.push(found.reason);
  }
