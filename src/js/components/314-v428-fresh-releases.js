@@ -7,6 +7,8 @@ const F={job:null,running:false,ready:false,rate:{},cache:new Map(),account:''};
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const normalize=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+const safeSourceLink=raw=>{try{const url=new URL(String(raw||''));return url.protocol==='https:'||url.protocol==='http:'?url.href:'';}catch(_){return '';}};
+
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const sourceKinds={tvmaze:['tv'],episodate:['tv'],mangadex:['manga'],feed:['podcasts','webnovels','webseries']};
 const types={anime:'Anime episodes',tv:'TV episodes',manga:'translated chapters',comics:'comic issues',books:'books / volumes',webnovels:'web novel chapters',webseries:'web series episodes',podcasts:'podcast episodes',movies:'movie installments',other:'releases'};
@@ -234,8 +236,13 @@ async function one(item,mode,selected){
 }
 function report(){const j=F.job;if(!j){showToast('No Fresh Releases results yet.');return;}
  document.getElementById('mf428-fresh-report')?.remove();const root=document.createElement('div');root.id='mf428-fresh-report';root.className='mf428-metadata-overlay';
- const lines=(j.results||[]).filter(r=>r.status==='fresh'||r.status==='unknown').slice(-250);
- root.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428FreshCloseReport()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true"><header><div><small>FRESH RELEASE EVIDENCE</small><h2>Release Scan Results</h2><p>'+esc(j.cursor)+' / '+esc(j.ids.length)+' scanned · '+esc(j.fresh||0)+' fresh · '+esc(j.unknown||0)+' unknown · '+esc(j.none||0)+' caught up</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428FreshCloseReport()">Close</button></header><div class="mf428-fresh-list">'+lines.map(r=>'<article class="mf428-fresh-row"><strong>'+esc(r.title)+'</strong><small>'+esc(r.status)+' · '+esc(r.source||r.reason||'Unverified')+'</small>'+(r.unwatched?'<b>'+esc(r.unwatched)+' '+esc(r.unit||'releases')+(r.partial?' (partial)':'')+'</b>':'')+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener noreferrer">Source</a>':'')+(r.evidence?.length?'<small>'+esc(r.evidence.map(e=>e.provider+': '+e.status).join(' · '))+'</small>':'')+'</article>').join('')+'</div><footer><button type="button" class="btn btn-ghost" onclick="App.mf428FreshResume()">Continue Scan</button></footer></section>';document.body.appendChild(root);
+ const lines=(j.results||[]).slice(-250);
+ root.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428FreshCloseReport()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true"><header><div><small>FRESH RELEASE EVIDENCE</small><h2>Release Scan Results</h2><p>'+esc(j.cursor)+' / '+esc(j.ids.length)+' scanned · '+esc(j.fresh||0)+' fresh · '+esc(j.unknown||0)+' unknown · '+esc(j.none||0)+' caught up</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428FreshCloseReport()">Close</button></header><div class="mf428-fresh-list">'+lines.map(r=>'<article class="mf428-fresh-row"><strong>'+esc(r.title)+'</strong><small>'+esc(r.status)+' · '+esc(r.source||r.reason||'Unverified')+'</small>'+
+ (r.unwatched?'<b>'+esc(r.unwatched)+' '+esc(r.unit||'releases')+(r.partial?' (partial)':'')+'</b>':'')+
+ (r.releasedAt?'<small>Released: '+esc(r.releasedAt)+'</small>':'')+
+ (safeSourceLink(r.url)?'<a href="'+esc(safeSourceLink(r.url))+'" target="_blank" rel="noopener noreferrer">Source evidence</a>':'')+
+ (r.disagreement?'<small>Provider counts disagree; largest verified count used</small>':'')+
+ (r.evidence?.length?'<small>Checks: '+esc(r.evidence.map(e=>e.provider+': '+e.status+(e.available!=null?' ('+e.available+')':'')).join(' · '))+'</small>':'')+'</article>').join('')+'</div><footer><button type="button" class="btn btn-ghost" onclick="App.mf428FreshResume()">Continue Scan</button></footer></section>';document.body.appendChild(root);
 }
 function closeReport(){document.getElementById('mf428-fresh-report')?.remove();}
 function open(){document.getElementById('mf428-fresh-config')?.remove();const el=document.createElement('div');el.id='mf428-fresh-config';el.className='mf428-metadata-overlay';
