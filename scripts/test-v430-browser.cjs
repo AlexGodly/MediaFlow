@@ -68,13 +68,13 @@ async function pageReady(cdp,label){
   let result;
   try{result=await cdp.evaluate("({v:document.querySelector('meta[name=mediaflow-version]')?.content, loaded:document.readyState==='complete'||document.readyState==='interactive', text:(document.body?.innerText||'').length, title:document.title, script:!!document.querySelector('script[src*=\"mediaflow-v430.bundle.js\"]')})");}
   catch(e){await sleep(400);continue;}
-  if(result?.v==='428'&&result.loaded&&result.script&&result.text>30){console.log(label,'browser boot:',JSON.stringify(result));return result;}
+  if(result?.v==='430'&&result.loaded&&result.script&&result.text>30){console.log(label,'browser boot:',JSON.stringify(result));return result;}
   if(i===44)throw Error(label+' failed browser boot: '+JSON.stringify(result));
   await sleep(350);
  }
 }
 (async()=>{
- const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mf428-browser-')),screens=path.join(root,'artifacts','v430-browser-smoke');
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mf430-browser-')),screens=path.join(root,'artifacts','v430-browser-smoke');
  fs.mkdirSync(screens,{recursive:true});
  const server=await startServer();
  const chrome=binary();
