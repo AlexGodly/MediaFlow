@@ -75,9 +75,9 @@ function v192MissingCoversHtml(){
         </div>
         <label class="mf430-missing-auto">
           <input type="checkbox" id="mf430-missing-auto-save" ${S.settings?.v430MissingCoversAutoSave?'checked':''} onchange="App.mf430SetMissingAutoSave(this.checked)">
-          <span><strong>Automatically save a uniquely verified cover &amp; go next</strong><small>When Find cover automatically locates one confidently ID-verified result, save it and advance. Ambiguous or title-only matches always require your choice.</small></span>
+          <span><strong>Automatically save a valid cover URL &amp; go next</strong><small>After a cover URL loads successfully, save it and advance automatically. Search results must be selected manually unless exactly one confidently ID-verified match is found.</small></span>
         </label>
-        <div class="v123-rating-xp">Review the selected cover before saving, or enable automatic save for a uniquely verified ID match. Skip moves this title behind the rest of the queue.</div>
+        <div class="v123-rating-xp">Turn on automatic save to advance as soon as a pasted or selected cover URL validates. Skip moves this title behind the rest of the queue.</div>
       </div>
     </div>
   </div>`;

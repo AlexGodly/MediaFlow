@@ -29,7 +29,7 @@ match(css,'z-index:100050','Quick Edit overlays recovered');
 match(css,'z-index:100110','confirmation dialog above search');
 match(css,'.mf427-settings-confirm','theme settings');
 match(source,'App.mf425ChooseInstant=async function','save-on-select');
-match(source,'App.v192SaveMissingCover()','Dashboard immediately saves');
+match(source,'App.mf431UseDashboardCover(url,String(item.id))','Dashboard waits for v431 validated save');
 match(source,"App.v181SaveQuickDetail(live.id,'coverUrl')",'Quick Edit immediately saves');
 match(source,'await saveState();','Existing saved Library update persists');
 match(source,'const mf427PreviousReviewConfirm=App.mf424Confirm','Review confirmation follows setting');
