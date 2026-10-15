@@ -60,7 +60,7 @@ match(source,'mf427ConfirmJobReplace','themed replace dialog');
 match(core,"await mf427ConfirmJobReplace()",'native confirm removed from replace');
 match(core,"await mf427ConfirmRetryPending()",'native confirm removed from pending retry');
 match(core,"await mf427ConfirmRetry(ids.length)",'native confirm removed from retry');
-match(first,"if(el?.matches?.('.mf421-dock-progress'))return null",'old Level/Streak icon guard remains');
+match(first,"if(el?.matches?.('.mf421-dock-progress,.mf421-dock-account'))return null",'Level/Streak and avatar icon guards remain');
 match(second,'explicit mf425/mf427 svg', 'global semantic icon refuses custom SVG');
 for(const [name,p] of [['v427 source','src/js/components/311-v427-recovery-ux-stability.js']]){
  assert(fs.existsSync(p),name+' missing');
