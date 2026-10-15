@@ -170,7 +170,7 @@ function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis|
 function kitsuNames(row){const a=row?.attributes||{};return [a.canonicalTitle,...Object.values(a.titles||{}),...(a.abbreviatedTitles||[])].filter(x=>typeof x==='string').map(norm);}
 async function discoverKitsu(item,type,ids,title){
  const raw=String(ids.kitsu||'').trim();
- if(raw&&!/^\\d+$/.test(raw))return {reason:'Kitsu identifier must be numeric'};
+ if(raw&&!/^\d+$/.test(raw))return {reason:'Kitsu identifier must be numeric'};
  const category=type==='manga'?'manga':'anime';
  const url='https://kitsu.io/api/edge/'+category+(raw?'/'+encodeURIComponent(raw):'?filter%5Btext%5D='+encodeURIComponent(title)+'&page%5Blimit%5D=8');
  const body=await request('kitsu',url);
@@ -182,7 +182,7 @@ async function discoverKitsu(item,type,ids,title){
  const score=Number(a.averageRating);
  return {title:a.canonicalTitle||'',synopsis:cleanHtml(a.synopsis||a.description||''),
   communityScore:Number.isFinite(score)&&score>0&&score<=100?Math.round(score)/10:null,
-  year:Number(date.slice(0,4))||0,releaseDate:/^\\d{4}-\\d{2}-\\d{2}$/.test(date)?date:'',
+  year:Number(date.slice(0,4))||0,releaseDate:/^\d{4}-\d{2}-\d{2}$/.test(date)?date:'',
   mediaFormat:a.subtype||a.mangaType||a.showType||'',durationMinutes:Number(a.episodeLength)||null,
   ageRating:a.ageRating||'',total:Number.isSafeInteger(count)&&count>0?count:0,
   source:'Kitsu',url:'https://kitsu.io/'+category+'/'+encodeURIComponent(row.id),recordId:row.id};
@@ -200,7 +200,7 @@ async function discover(item,allowed){
   const found=await attempted(provider,async()=>{
    const prefix=t==='manga'?'manga':'anime',mal=String(ids.mal||item.malId||'');
    const base=provider==='tenrai'?'https://api.tenrai.org/v1/':'https://api.jikan.moe/v4/';
-   if(mal&&/^\\d+$/.test(mal)){
+   if(mal&&/^\d+$/.test(mal)){
     const data=await request(provider,base+prefix+'/'+encodeURIComponent(mal)+'/full');
     if(data?.data){
      const d=mapJikan(data.data,t),names=[d.title,data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])];
