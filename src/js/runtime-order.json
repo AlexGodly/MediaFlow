@@ -162,5 +162,6 @@
   "components/305-v420-covers-dashboard-sidebar-fixes.js",
   "components/306-v421-adaptive-navigation-filter.js",
   "components/307-v422-adaptive-navigation-details-support.js",
-  "components/308-v423-navigation-restore-donation-polish.js"
+  "components/308-v423-navigation-restore-donation-polish.js",
+  "components/309-v424-advanced-cover-recovery.js"
 ]

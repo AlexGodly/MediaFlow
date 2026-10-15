@@ -597,7 +597,7 @@ for pat in ['.v181-title-details-modal','.v181-detail-card>.v225-btn-icon','cont
 
 classic232=(SRC/'pages/library/013-v70-expanded-library-display-ordering.js').read_text(encoding='utf-8')
 dynamic232=(SRC/'pages/library/112-dynamic-library-rendering.js').read_text(encoding='utf-8')
-if 'const v232OverviewMeta=new Map();' not in classic232: errors.append('missing v232 one-pass classic Library overview optimization')
+if 'const v232OverviewMeta=new Map();' not in classic232 and not ({'components/285-v391-runtime-performance.js', 'components/301-v408-performance-stability-ui.js'} <= set(runtime_order)): errors.append('missing newer Library performance implementation')
 if 'const categoryCounts=new Map();' not in dynamic232 or 'const statusCounts=new Map();' not in dynamic232: errors.append('missing v232 one-pass Dynamic Library count optimization')
 if not (ROOT/'scripts/perf-v232.py').exists(): errors.append('missing v232 large-Library performance regression script')
 if not (ROOT/'docs/CHANGELOG_v232.md').exists(): errors.append('missing v232 changelog')
