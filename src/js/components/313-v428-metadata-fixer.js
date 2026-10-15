@@ -113,7 +113,7 @@ function diff(item,result){if(!result?.source)return [];
  return changes;
 }
 async function init(){
- if(M.account&&M.account!==account()&&!M.running){M.initPromise=null;M.job=null;M.history=[];M.ready=false;}
+ if(M.account&&M.account!==account()&&!M.running){M.initPromise=null;M.job=null;M.history=[];M.reviews=[];M.draft=null;M.scope=null;M.ready=false;}
  if(M.initPromise)return M.initPromise;M.initPromise=(async()=>{M.account=account();try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}try{const raw=JSON.parse(localStorage.getItem('mf428-metadata-history:'+account())||'[]');M.history=Array.isArray(raw)?raw.slice(-100):[];}catch(_){}M.ready=true;window.MediaFlowV428Hub?.paint();})();return M.initPromise;}
 function draftItem(entry,id){
  const saved=lookup(id||S.modal?.data?.id),d=S.modal?.data||{};
@@ -124,6 +124,7 @@ function fieldOptions(){
  return fields.map(field=>'<label class="mf428-meta-field"><input type="checkbox" data-mf428-field value="'+field+'" '+(field==='total'?'':'checked')+'><span>'+esc(field==='synopsis'?'Synopsis / description':field==='total'?'Total units (only when empty)':field)+'</span></label>').join('');
 }
 function open(entry='settings',id=''){
+ if(M.account&&M.account!==account()){M.reviews=[];M.scope=null;M.job=null;init().catch(e=>console.warn('Metadata account refresh',e));}
  close();
  const one=id?lookup(id):entry==='editor'?draftItem(entry,id):null;
  const selection=entry==='library'?idSet().map(String).filter(v=>lookup(v)):[];
@@ -206,6 +207,7 @@ async function worker(params={}){await init();
  finally{M.running=false;window.MediaFlowV428Hub?.paint();if(job.reviews.length)showToast(job.reviews.length+' metadata titles ready for review.');}
 }
 function review(){
+ if(M.account&&M.account!==account()){showToast('Account changed. Reopen Metadata Recovery.');return;}
  if(M.reviews.length){renderReview();return;}
  if(!M.job?.reviews?.length){showToast('No metadata changes waiting for review.');return;}
  M.reviews=M.job.reviews;renderReview();
@@ -220,6 +222,7 @@ function renderReview(){document.getElementById('mf428-meta-review')?.remove();c
 function closeReview(){document.getElementById('mf428-meta-review')?.remove();}
 async function skip(){const same=M.job&&M.reviews===M.job.reviews;M.reviews.shift();if(same){if(!M.job.reviews.length&&M.job.cursor>=M.job.ids.length)M.job.status='complete';await persist();}closeReview();if(M.reviews.length)renderReview();}
 async function apply(){
+ if(M.account&&M.account!==account()){showToast('Account changed. Reopen Metadata Recovery.');return;}
  const current=M.reviews[0],checked=[...document.querySelectorAll('#mf428-meta-review [data-index]:checked')].map(x=>Number(x.dataset.index));
  if(!current||!checked.length){showToast('Select at least one field, or skip this result.');return;}
  const item=current.draft?null:lookup(current.itemId);
