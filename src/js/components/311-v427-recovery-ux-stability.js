@@ -140,39 +140,51 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
   MF425.quickBusy=true;MF425.quick=null;MF425.quickEntry=entry;
   MF425.draft={...current,externalIds:{...(current.externalIds||{})}};
   const serial=++MF427.requestSerial;
+  // The same provider registry, enabled order, capabilities and adapters power both cover workflows.
+  const available=mf424Order(current),chosen=providers?new Set(providers):null;
+  const allowed=available.filter(p=>!chosen||chosen.has(p));
   document.getElementById('mf425-instant-modal')?.remove();
   const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal mf427-above-editor mf427-search';
   root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search">'+
     '<header class="mf425-instant-head"><div><small>COVER SEARCH</small><h2>'+mf427Icon('image',23)+' Cover matches for '+mf427Escape(current.title)+'</h2><p>Library title: <strong>'+mf427Escape(current.title)+'</strong> · Verify matched titles and external IDs before selecting.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Close</button></header>'+
-    '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+
+    '<div class="mf427-provider-picker"><label for="mf427-provider-select">Cover source</label><select id="mf427-provider-select"><option value="">All enabled providers</option>'+allowed.map(p=>'<option value="'+mf427Escape(p)+'" '+(allowed.length===1?'selected':'')+'>'+mf427Escape(mf424Provider(p)?.name||p)+'</option>').join('')+'</select><button type="button" class="btn btn-ghost" onclick="App.mf427RetryProvider()">Search source</button></div>'+ 
+    '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+ 
     '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf427Icon('sliders')+' Advanced Recovery</button></div></section>';
   document.body.appendChild(root);mf427CleanAdvancedIcons(root);
-  const found=[],seen=new Set(),all=mf424Order(current),chosen=providers?new Set(providers):null;
-  const allowed=all.filter(p=>!chosen||chosen.has(p));
+  const found=[],seen=new Set(),outcomes=[];
   const ordered=allowed.filter(p=>mf424HasID(current,p)).concat(allowed.filter(p=>!mf424HasID(current,p)));
   try{
     for(const provider of ordered){
       if(!root.isConnected||serial!==MF427.requestSerial)break;
+      let checked=0,validated=0,failed='';
       try{
-        for(const c of await mf424Discover(current,provider)){
+        const candidates=await mf424Discover(current,provider);checked=candidates.length;
+        for(const c of candidates){
           if(!root.isConnected||serial!==MF427.requestSerial)break;
           if(!c||c.confidence<.55||seen.has(c.url))continue;
           seen.add(c.url);
-          if(await mf424Image(c.url,c.provider))found.push(c);
+          if(await mf424Image(c.url,c.provider)){found.push(c);validated++;}
         }
-      }catch(e){console.warn('Cover search provider temporarily unavailable',provider,e);}
+      }catch(e){failed=String(e?.message||e).slice(0,160);console.warn('Cover search provider temporarily unavailable',provider,e);}
+      outcomes.push({name:mf424Provider(provider)?.name||provider,checked,validated,failed});
       if(!root.isConnected||serial!==MF427.requestSerial)break;
       MF425.quick={candidates:found};
-      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current);
+      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
       if(found.length>=16)break;
     }
   }finally{
     if(serial===MF427.requestSerial){
       MF425.quick={candidates:found};MF425.quickBusy=false;
-      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current);
+      const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
     }
   }
 }
+function mf427ProviderSummary(rows){return '<details class="mf427-provider-summary"><summary>Provider checks ('+rows.length+')</summary><div>'+rows.map(r=>'<p><strong>'+mf427Escape(r.name)+'</strong> — '+(r.failed?'Unavailable: '+mf427Escape(r.failed):r.validated?r.validated+' verified image'+(r.validated===1?'':'s'):r.checked?'Records found, but images did not validate':'No matching records')+'</p>').join('')+'</div></details>';}
+App.mf427RetryProvider=function(){if(MF425.quickBusy){showToast('Current cover-source checks are still running.');return;}
+ const choice=document.getElementById('mf427-provider-select')?.value||'';
+ if(choice&&!mf424Order(MF425.draft||{}).includes(choice)){showToast('Source is not enabled for this media type.');return;}
+ return mf427OpenSearch(MF425.quickEntry||'editor',MF425.draft,choice?[choice]:null);
+};
 const mf427OldCloseInstant=App.mf425CloseInstant;
 App.mf425CloseInstant=function(){++MF427.requestSerial;MF425.quickBusy=false;return mf427OldCloseInstant.apply(this,arguments);};
 App.mf425Instant=function(entry='editor'){return mf427OpenSearch(entry);};
