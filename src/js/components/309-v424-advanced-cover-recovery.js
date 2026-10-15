@@ -191,7 +191,7 @@ async function mf424Request(provider,url,options={}){
 function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
   const externalIdKey=({tenrai:'mal',jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',mangadex:'mangadex',openlibrary:'openlibrary',googlebooks:'googlebooks'})[provider]||'';
-  const recordId=String((provider==='openlibrary'?entry?.key:null)??entry?.mal_id??entry?.id??entry?.idMal??'').trim();
+  const recordId=String((provider==='openlibrary'?entry?.key:null)??entry?.mal_id??entry?.id??entry?.idMal??'').trim().replace(provider==='openlibrary'?/^\/works\//:/^\u0000/,'');
   return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId,externalIdKey,externalIdValue:recordId};
 }
 function mf424LinkableCoverId(item,candidate){
@@ -207,6 +207,7 @@ function mf424LinkSelectedCoverId(item,candidate,{manual=false}={}){
   // Respect an intentional manual clearing of IDs during automatic recovery.
   if(!manual&&Object.prototype.hasOwnProperty.call(item?.v377ManualExternalIds||{},link.key))return false;
   item.externalIds={...(item.externalIds||{}),[link.key]:link.value};
+  if(manual)item.v377ManualExternalIds={...(item.v377ManualExternalIds||{}),[link.key]:link.value};
   return true;
 }
 async function mf424DiscoverKind(item,provider,kind){
