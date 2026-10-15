@@ -271,7 +271,7 @@ async function mf424DiscoverKind(item,provider,kind){
     }
     const data=await mf424Request(provider,'https://openlibrary.org/search.json?title='+encodeURIComponent(title)+'&limit=8&fields=key,title,first_publish_year,cover_i');
     return (data?.docs||[]).filter(x=>x.cover_i).map(x=>{const m=mf424Match(item,{title:x.title,year:x.first_publish_year},false);
-      return mf424AsCandidate({title:x.title},'https://covers.openlibrary.org/b/id/'+x.cover_i+'-L.jpg?default=false',provider,false,'https://openlibrary.org'+x.key,m.reason,m.confidence);
+      return mf424AsCandidate({title:x.title,key:x.key},'https://covers.openlibrary.org/b/id/'+x.cover_i+'-L.jpg?default=false',provider,false,'https://openlibrary.org'+x.key,m.reason,m.confidence);
     }).filter(Boolean);
   }
   if(provider==='googlebooks'){
@@ -284,17 +284,51 @@ async function mf424DiscoverKind(item,provider,kind){
   }
   return [];
 }
-async function mf424Candidates(item){const found=[],dedupe=new Set();const ordered=mf424Order(item);
+// Search each provider's own supported catalogues, not MediaFlow category names.
+// A provider may return no matching record, but it is never blocked by the
+// user's chosen category. Existing IDs get first chance; name search follows
+// if the saved ID is missing, stale, or identifies a differently named work.
+async function mf424Discover(item,provider){
+  if(MF424_EXTRA_COVER_ADAPTERS.has(provider))
+    return MF424_EXTRA_COVER_ADAPTERS.get(provider)(item,{request:mf424Request,validate:mf424AsCandidate,cover:mf424Cover,match:mf424Match});
+  const kinds=['tenrai','jikan','anilist','kitsu'].includes(provider)
+    ?(mf424Kind(item)==='manga'?['manga','anime']:['anime','manga'])
+    :[mf424Kind(item)];
+  const all=[],seen=new Set(),issues=[];
+  const append=rows=>{for(const c of rows||[]){if(!c?.url||seen.has(c.url))continue;seen.add(c.url);all.push(c);}};
+  for(const kind of kinds){
+    let direct=[];
+    try{direct=await mf424DiscoverKind(item,provider,kind);append(direct);}
+    catch(error){issues.push(error);}
+    if(mf424HasID(item,provider)&&!direct.some(c=>c.idMatch&&c.confidence>=.95)){
+      const ids={...(item.externalIds||{})};
+      if(provider==='tenrai'||provider==='jikan')delete ids.mal;
+      if(provider==='anilist'){delete ids.anilist;delete ids.mal;}
+      if(provider==='kitsu')delete ids.kitsu;
+      if(provider==='tvmaze'){delete ids.tvmaze;delete ids.imdb;}
+      if(provider==='openlibrary')delete ids.isbn;
+      try{append(await mf424DiscoverKind({...item,externalIds:ids},provider,kind));}
+      catch(error){issues.push(error);}
+    }
+  }
+  if(!all.length&&issues.length)throw issues[0];
+  return all;
+}
+async function mf424Candidates(item){
+  const found=[],dedupe=new Set(),ordered=mf424Order(item),manual=mf424Defaults().selection==='manual';
   const idFirst=ordered.filter(p=>mf424HasID(item,p)),search=ordered.filter(p=>!mf424HasID(item,p));
-  for(const p of idFirst.concat(search)){
-    try{for(const candidate of await mf424Discover(item,p)){
-      if(!candidate||candidate.confidence<.65||dedupe.has(candidate.url))continue;
-      dedupe.add(candidate.url);if(!await mf424Image(candidate.url,candidate.provider))continue;
-      found.push(candidate);
-      if(candidate.idMatch&&candidate.confidence>=.95&&mf424Defaults().selection!=='manual')return [candidate];
-      if(found.length>=4)return found;
-      if(mf424Defaults().selection==='smart'&&candidate.confidence>=.95)return found;
-    }}catch(e){if(e.paused)break;mf424Note('provider-error',p+': '+String(e.message||e),item.id);}
+  for(const provider of idFirst.concat(search)){
+    try{
+      for(const candidate of await mf424Discover(item,provider)){
+        if(!candidate||dedupe.has(candidate.url)||(!manual&&candidate.confidence<.65))continue;
+        dedupe.add(candidate.url);
+        if(!await mf424Image(candidate.url,candidate.provider))continue;
+        found.push(candidate);
+        if(!manual&&candidate.idMatch&&candidate.confidence>=.95&&mf424Defaults().selection!=='manual')return [candidate];
+        if(found.length>=(manual?16:4))return found;
+        if(!manual&&mf424Defaults().selection==='smart'&&candidate.idMatch&&candidate.confidence>=.95)return found;
+      }
+    }catch(error){if(error.paused)break;mf424Note('provider-error',provider+': '+String(error.message||error),item.id);}
   }
   return found;
 }
@@ -302,13 +336,17 @@ function mf424QueueReview(item,candidates){MF424.job.reviews.push({id:String(ite
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
-async function mf424Apply(item,candidate,expected){
+async function mf424Apply(item,candidate,expected,{manual=false}={}){
   if(mf424Account()!==MF424.account)throw new Error('Account changed; recovery suspended');
   if(!mf424Missing(item))return false;
   if(Number(item.modifiedAt||0)!==Number(expected||0))return false;
   if(!await mf424Image(candidate.url,candidate.provider))return false;
   if(!mf424Missing(item)||Number(item.modifiedAt||0)!==Number(expected||0))return false;
   item.coverUrl=candidate.url;item.coverSource='auto:'+candidate.provider+':'+(candidate.idMatch?'external-id':'verified');
+  // A selected cover can safely link a record ID, but existing IDs are sacred.
+  // Auto jobs link only a verified direct ID; explicit user selection may link
+  // a title-search record after the user has reviewed the provider's title.
+  if(manual||candidate.idMatch&&candidate.confidence>=.95)mf424LinkSelectedCoverId(item,candidate,{manual});
   item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
@@ -484,7 +522,7 @@ async function mf424Confirm(i){if(!MF424.job?.reviews.length)return;const x=MF42
   if(!candidate||!item||!mf424Missing(item)||Number(item.modifiedAt||0)!==x.expectedModified){
     showToast('This title changed after review was queued. Its cover was not overwritten.');return;
   }
-  if(await mf424Apply(item,candidate,x.expectedModified)){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
+  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true})){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
     MF424.job.reviews.shift();MF424.job.pending--;await mf424ReviewSave();}else showToast('Unable to validate this cover safely.');
 }
 async function mf424ReviewSave(){if(MF424.job.cursor>=MF424.job.ids.length&&!MF424.job.pending)mf424State('complete');
