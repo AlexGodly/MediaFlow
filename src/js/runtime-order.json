@@ -163,10 +163,5 @@
   "components/306-v421-adaptive-navigation-filter.js",
   "components/307-v422-adaptive-navigation-details-support.js",
   "components/308-v423-navigation-restore-donation-polish.js",
-  "components/309-v424-advanced-cover-recovery.js",
-  "components/310-v425-cover-recovery-integration.js",
-  "components/311-v427-recovery-ux-stability.js",
-  "components/312-v428-background-hub.js",
-  "components/313-v428-metadata-fixer.js",
-  "components/314-v428-fresh-releases.js"
+  "components/309-v424-advanced-cover-recovery.js"
 ]
