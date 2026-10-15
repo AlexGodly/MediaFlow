@@ -182,3 +182,22 @@ jobs:
       - name: Deploy v428 Beta to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify live v428 app-shell after deployment
+        shell: bash
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          test -n "$SITE_URL"
+          live=0
+          for attempt in $(seq 1 12); do
+            if curl -fsSL --max-time 20 "${SITE_URL}version.json?version-check=428" -o "$RUNNER_TEMP/v428-live-version.json" \
+              && python -c "import json,sys; assert json.load(open(sys.argv[1]))['appVersion']==428" "$RUNNER_TEMP/v428-live-version.json" \
+              && curl -fsSL --max-time 20 "${SITE_URL}index.html?version-check=428" | grep -q 'mediaflow-v428.bundle.js'; then
+              live=1
+              echo "Live Pages reports MediaFlow v428 with the correct JS entry point."
+              break
+            fi
+            sleep 12
+          done
+          test "$live" -eq 1
