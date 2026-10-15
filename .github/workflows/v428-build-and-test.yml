@@ -35,6 +35,7 @@ jobs:
           python scripts/build.py
           node scripts/test-v428-recovery.cjs
           node scripts/test-v428-metadata.cjs
+          node scripts/test-v428-fresh.cjs
           node scripts/test-v428-scheduler.cjs
           node scripts/test-v428-multitab.cjs
           node scripts/test-v427-recovery.cjs
