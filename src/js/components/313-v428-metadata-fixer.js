@@ -14,8 +14,8 @@ const fields=['description','genres','year','total'];
 const safeIds=o=>o&&typeof o==='object'?o:{};
 const schema={jikan:{requiresSetup:false,capabilities:['anime','manga']},tvmaze:{requiresSetup:false,capabilities:['tv']},openlibrary:{requiresSetup:false,capabilities:['books']}};
 async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('IndexedDB is required to preserve metadata jobs'));return;}const req=indexedDB.open('mediaflow-metadata-v428',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);});}
-async function store(op,value){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+account()):tx.objectStore('records').put(value,'job:'+account());req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
-async function persist(){if(M.job)await store('put',M.job);window.MediaFlowV428Hub?.paint();}
+async function store(op,value,owner=account()){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+owner):tx.objectStore('records').put(value,'job:'+owner);req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
+async function persist(){if(M.job)await store('put',M.job,M.job.account);window.MediaFlowV428Hub?.paint();}
 function kind(item){const cat=String(item.categoryId||'').toLowerCase();const label=(S.categories||[]).find(c=>String(c.id)===cat)?.name||cat;
  const v=String(label).toLowerCase();return /manga|manhwa|manhua|comic/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/book|novel/.test(v)?'books':'other';}
 async function request(provider,url){const row=M.rate[provider]||(M.rate[provider]={next:0,cooldown:0});
@@ -67,7 +67,9 @@ function diff(item,result){if(!result||!result.source)return [];
   entries.push({field:f,old,found:typeof old==='string'&&Array.isArray(found)?found.join(', '):found,selected:oldMissing});}
  return entries;
 }
-async function init(){if(M.initPromise)return M.initPromise;M.initPromise=(async()=>{M.account=account();try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}try{const raw=JSON.parse(localStorage.getItem('mf428-metadata-history:'+account())||'[]');M.history=Array.isArray(raw)?raw.slice(-100):[];}catch(_){}M.ready=true;window.MediaFlowV428Hub?.paint();})();return M.initPromise;}
+async function init(){
+ if(M.account&&M.account!==account()&&!M.running){M.initPromise=null;M.job=null;M.history=[];M.ready=false;}
+ if(M.initPromise)return M.initPromise;M.initPromise=(async()=>{M.account=account();try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}try{const raw=JSON.parse(localStorage.getItem('mf428-metadata-history:'+account())||'[]');M.history=Array.isArray(raw)?raw.slice(-100):[];}catch(_){}M.ready=true;window.MediaFlowV428Hub?.paint();})();return M.initPromise;}
 function draftItem(entry,id){const saved=lookup(id||S.modal?.data?.id);if(saved)return {...saved};
  const d=S.modal?.data||{};return {...d,id:'',title:document.getElementById('l-title')?.value||d.title||'',categoryId:document.getElementById('l-category')?.value||d.categoryId||'',externalIds:{...(d.externalIds||{})}};}
 function close(){document.getElementById('mf428-metadata-modal')?.remove();}
@@ -82,10 +84,14 @@ function open(entry='settings',id=''){
  '<div class="mf428-meta-note">A verified provider record is needed before any change. Personal ratings, progress, status, seasons and notes are never modified. Manual changes require approval.</div><footer><button type="button" class="btn btn-primary" onclick="App.mf428MetadataStart(\''+esc(entry)+'\',\''+esc(id)+'\')">Find Metadata</button></footer></section>';
  document.body.appendChild(parent);parent.querySelector('.mf428-meta-dialog button')?.focus();
 }
-async function start(entry,id){const item=id?lookup(id):entry==='editor'?draftItem(entry,id):null,selected=entry==='library'?idSet().map(String).filter(id=>lookup(id)):null;
+async function start(entry,id){await init();const item=id?lookup(id):entry==='editor'?draftItem(entry,id):null,selected=entry==='library'?idSet().map(String).filter(id=>lookup(id)):null;
  const part=Math.max(1,Math.min(1000,Number(document.getElementById('mf428-meta-part')?.value)||100));
  const method=document.getElementById('mf428-meta-method')?.value||'missing';
- if(item&&!item.id){close();showToast('Searching metadata for the unsaved title draft…');await previewDraft(item);return;}
+ if(item&&!item.id){close();
+  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:item}))showToast('Metadata lookup queued for this unsaved draft.');
+  else showToast('A Metadata Recovery is already active or queued. Save the draft before running bulk recovery.');
+  return;
+ }
  const ids=item?[String(item.id)]:selected?.length?selected:(S.library||[]).filter(i=>i?.id).map(i=>String(i.id));
  if(!ids.length){showToast('No eligible Library titles.');return;}
  if(M.job&&!['complete','stopped','failed'].includes(M.job.status)){showToast('A Metadata Recovery already exists. Pause or finish it before replacing its queue.');return;}
@@ -93,7 +99,9 @@ async function start(entry,id){const item=id?lookup(id):entry==='editor'?draftIt
  await persist();close();if(!window.MediaFlowV428Hub?.enqueue('metadata',{}))showToast('Metadata Recovery is already queued.');
 }
 async function previewDraft(item){try{const data=await discover(item);if(!data.source){showToast(data.reason||'No source record');return;}M.reviews=[{draft:true,itemId:'',item,found:data,differences:diff(item,data),version:0}];renderReview();}catch(e){showToast('Metadata lookup failed: '+String(e.message||e));}}
-async function worker(){await init();const job=M.job;if(!job||job.account!==account())return;
+async function worker(params={}){await init();
+ if(params.draftPreview){if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview);return;}
+ const job=M.job;if(!job||job.account!==account())return;
  job.status='running';M.running=true;await persist();
  try{let processed=0;while(job.cursor<job.ids.length){
   if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status=job.stopped?'stopped':'paused';break;}
@@ -143,7 +151,11 @@ async function apply(){
  await skip();window.MediaFlowV428Hub?.paint();
 }
 async function undo(){await init();if(window.MediaFlowV428Hub?.status()?.active){showToast('Finish or pause background work before undoing metadata.');return;}const last=M.history[M.history.length-1];if(!last){showToast('No metadata change available to undo.');return;}const item=lookup(last.id);if(!item||Number(item.modifiedAt||0)!==Number(last.changedAt)){showToast('Title changed after recovery; unsafe to undo automatically.');return;}const newer={};for(const field of last.fields){newer[field]=item[field];if(last.previous[field]===undefined)delete item[field];else item[field]=last.previous[field];}const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();try{await saveState();M.history.pop();localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));showToast('Last metadata recovery reversed.');}catch(e){for(const field of last.fields){if(newer[field]===undefined)delete item[field];else item[field]=newer[field];}item.modifiedAt=oldStamp;showToast('Unable to undo metadata safely.');}}
-function control(cmd){if(!M.job)return;if(cmd==='pause'||cmd==='stop'){M.job[cmd==='pause'?'paused':'stopped']=true;persist();}if(cmd==='review')review();
+function control(cmd){if(!M.job)return;
+ if(cmd==='pause'||cmd==='stop'||cmd==='cancel'){M.job[cmd==='pause'||cmd==='cancel'?'paused':'stopped']=true;
+  if(cmd==='cancel')M.job.status='paused';persist();
+ }
+ if(cmd==='review')review();
  if(cmd==='resume'&&['paused','waiting-part','waiting-review'].includes(M.job.status)){M.job.paused=false;M.job.stopped=false;M.job.status='queued';persist().then(()=>window.MediaFlowV428Hub?.enqueue('metadata',{}));}}
 function injectEditor(html){if(!html||html.includes('mf428-edit-action'))return html;const at=html.indexOf('class="mf425-editor-tools"');if(at<0)return html;const close=html.indexOf('</div>',at);if(close<0)return html;
  return html.slice(0,close)+'<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'editor\',String(S.modal?.data?.id||\'\'))">Fix Metadata</button>'+html.slice(close);}
