@@ -56,3 +56,11 @@
 @media(max-width:720px){#mf428-hub{right:max(10px,env(safe-area-inset-right));bottom:calc(120px + env(safe-area-inset-bottom));width:min(355px,calc(100vw - 20px))}#mf428-hub .mf428-panel{max-height:60dvh}.mf428-meta-dialog{padding:14px;border-radius:14px}.mf428-meta-config{grid-template-columns:1fr}.mf428-meta-dialog h2{font-size:19px}}
 @media(max-width:380px){#mf428-hub{width:calc(100vw - 18px);right:9px}#mf428-hub .mf428-pill{min-height:48px;padding:9px}#mf428-hub .mf428-panel{padding:10px}}
 @media(prefers-reduced-motion:reduce){#mf428-hub .mf428-bar i{transition:none}.mf428-meta-shade{backdrop-filter:none}}
+
+/* v428 scheduler hardening: user-controlled placement without breaking theme surfaces. */
+#mf428-hub[data-position="left"]{left:max(14px,env(safe-area-inset-left));right:auto}
+#mf428-hub[data-position="left"] .mf428-panel{left:0;right:auto}
+#mf428-hub .mf428-state[data-state="other-tab"]{color:var(--text-dim,#abb9cf)}
+#mf428-hub .mf428-process-actions button[aria-label]{min-width:31px;min-height:29px}
+@media(max-width:720px){#mf428-hub[data-position="left"]{left:max(10px,env(safe-area-inset-left));right:auto}}
+@media(max-width:380px){#mf428-hub[data-position="left"]{left:9px;right:auto}}
