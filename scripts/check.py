@@ -11,7 +11,7 @@ sw=(ROOT/'sw.js').read_text(encoding='utf-8')
 if f'<meta name="mediaflow-version" content="{VERSION}">' not in index: errors.append(f'index.html version is not {VERSION}')
 if f'assets/js/mediaflow-v{VERSION}.bundle.js' not in index: errors.append(f'index.html does not load v{VERSION} bundle')
 if 'assets/css/92-v221-settings-polish.css' not in index: errors.append('index.html does not load v221 Settings stylesheet')
-cache_rev = 6 if VERSION == 427 else 1
+cache_rev = 7 if VERSION == 427 else 1
 if f'mediaflow-pwa-v{VERSION}-shell-v{cache_rev}' not in sw: errors.append(f'service worker cache version is not v{VERSION} PWA shell')
 if f'./assets/js/mediaflow-v{VERSION}.bundle.js' not in sw: errors.append(f'service worker does not cache v{VERSION} bundle')
 if './assets/css/92-v221-settings-polish.css' not in sw: errors.append('service worker does not cache v221 Settings stylesheet')
