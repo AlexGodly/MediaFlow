@@ -237,20 +237,21 @@ async function apply(){
    showToast(applied?'Metadata applied to title editor. Save the title to keep these changes.':'No editable metadata fields found. Nothing was saved.');
  }else{
   const protectedManual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
+  if(selected.some(d=>JSON.stringify(item[d.field]??null)!==JSON.stringify(d.old??null))){showToast('Metadata field changed after lookup. Recheck this title.');return;}
   if(selected.some(d=>protectedManual[d.field]===true||d.field==='total'&&(Number(item.total)>0||Number(item.progress)>0||item.seasons?.length))){
    showToast('A field was manually protected or progress/season totals changed. Recheck this title.');return;
   }
   const previous={};for(const d of selected){previous[d.field]=item[d.field];item[d.field]=d.found;}
   const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();
   try{if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();await saveState();
-   const record={id:item.id,title:item.title,fields:selected.map(d=>d.field),previous,changedAt:item.modifiedAt,source:current.found.source};M.history.push(record);if(M.history.length>100)M.history.shift();
+   const record={id:item.id,title:item.title,fields:selected.map(d=>d.field),previous,after:Object.fromEntries(selected.map(d=>[d.field,item[d.field]])),changedAt:item.modifiedAt,source:current.found.source};M.history.push(record);if(M.history.length>100)M.history.shift();
    try{localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));}catch(_){}
    if(M.job)M.job.completed++;showToast('Metadata saved for '+String(item.title||'title'));
   }catch(e){for(const d of selected){if(previous[d.field]===undefined)delete item[d.field];else item[d.field]=previous[d.field];}item.modifiedAt=oldStamp;showToast('Save failed; metadata restored.');return;}
  }
  await skip();window.MediaFlowV428Hub?.paint();
 }
-async function undo(){await init();if(window.MediaFlowV428Hub?.status()?.active){showToast('Finish or pause background work before undoing metadata.');return;}const last=M.history[M.history.length-1];if(!last){showToast('No metadata change available to undo.');return;}const item=lookup(last.id);if(!item||Number(item.modifiedAt||0)!==Number(last.changedAt)){showToast('Title changed after recovery; unsafe to undo automatically.');return;}const newer={};for(const field of last.fields){newer[field]=item[field];if(last.previous[field]===undefined)delete item[field];else item[field]=last.previous[field];}const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();try{await saveState();M.history.pop();localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));showToast('Last metadata recovery reversed.');}catch(e){for(const field of last.fields){if(newer[field]===undefined)delete item[field];else item[field]=newer[field];}item.modifiedAt=oldStamp;showToast('Unable to undo metadata safely.');}}
+async function undo(){await init();if(window.MediaFlowV428Hub?.status()?.active){showToast('Finish or pause background work before undoing metadata.');return;}const last=M.history[M.history.length-1];if(!last){showToast('No metadata change available to undo.');return;}const item=lookup(last.id);if(!item||Number(item.modifiedAt||0)!==Number(last.changedAt)){showToast('Title changed after recovery; unsafe to undo automatically.');return;}if(last.after&&last.fields.some(field=>JSON.stringify(item[field]??null)!==JSON.stringify(last.after[field]??null))){showToast('Recovered metadata was edited after saving. Undo is unsafe.');return;}const newer={};for(const field of last.fields){newer[field]=item[field];if(last.previous[field]===undefined)delete item[field];else item[field]=last.previous[field];}const oldStamp=item.modifiedAt;item.modifiedAt=Date.now();try{await saveState();M.history.pop();localStorage.setItem('mf428-metadata-history:'+account(),JSON.stringify(M.history));showToast('Last metadata recovery reversed.');}catch(e){for(const field of last.fields){if(newer[field]===undefined)delete item[field];else item[field]=newer[field];}item.modifiedAt=oldStamp;showToast('Unable to undo metadata safely.');}}
 function control(cmd){if(!M.job)return;
  if(cmd==='pause'||cmd==='stop'||cmd==='cancel'){M.job[cmd==='pause'||cmd==='cancel'?'paused':'stopped']=true;
   if(cmd==='cancel')M.job.status='paused';persist();
