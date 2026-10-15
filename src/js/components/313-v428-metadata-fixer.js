@@ -66,9 +66,9 @@ function cleanHtml(value){
  return raw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,5000);
 }
 function mapJikan(src,type){return {title:src?.title||'',synopsis:src?.synopsis||'',mediaSource:src?.source||'',durationMinutes:Number(String(src?.duration||'').match(/(\d+)\s*min/)?.[1])||null,ageRating:src?.rating||'',communityScore:src?.score!=null?Math.max(0,Math.min(10,Number(src.score))):null,genres:(src?.genres||[]).map(g=>g.name).filter(Boolean),themes:(src?.themes||[]).map(g=>g.name).filter(Boolean),studios:(src?.studios||[]).map(g=>g.name).filter(Boolean),producers:(src?.producers||[]).map(g=>g.name).filter(Boolean),year:Number(src?.year)||(Number(String(src?.published?.from||src?.aired?.from||'').slice(0,4))||0),releaseDate:String(src?.aired?.from||src?.published?.from||'').slice(0,10),mediaFormat:src?.type||'',total:Number(type==='manga'?src?.chapters:src?.episodes)||0,source:'Jikan',url:src?.url||'',recordId:src?.mal_id};}
-async function discover(item){
+async function discover(item,allowed){
  const t=kind(item),ids=safeIds(item.externalIds),title=String(item.title||'').trim();if(!title)return {reason:'Title is missing'};
- if(t==='anime'||t==='manga'){
+ if((t==='anime'||t==='manga')&&(!allowed||allowed.includes('jikan'))){
   const isManga=t==='manga',prefix=isManga?'manga':'anime',mal=ids.mal||item.malId;
   if(mal&&/^\d+$/.test(String(mal))){const data=await request('jikan','https://api.jikan.moe/v4/'+prefix+'/'+encodeURIComponent(mal)+'/full');
     if(data?.data){const d=mapJikan(data.data,t);if(norm(d.title)===norm(title)||[data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])].some(t=>norm(t)===norm(title)))return d;return {reason:'MAL record title does not match; review manually'};}}
@@ -77,7 +77,7 @@ async function discover(item){
   if(exact.length===1)return mapJikan(exact[0],t);
   return {reason:exact.length>1?'Ambiguous Jikan title; no automatic match':'No exact title match'};
  }
- if(t==='tv'){
+ if(t==='tv'&&(!allowed||allowed.includes('tvmaze'))){
   const tm=String(ids.tvmaze||'').trim(),imdb=String(ids.imdb||'').trim();
   const path=tm&&/^\d+$/.test(tm)?'https://api.tvmaze.com/shows/'+tm:imdb?'https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb):'';
   let d=path?await request('tvmaze',path):null;
@@ -85,7 +85,7 @@ async function discover(item){
   if(norm(d.name)!==norm(title))return {reason:'TVmaze identifier points to a different displayed title; manual verification required'};
   return {title:d.name||'',synopsis:cleanHtml(d.summary),durationMinutes:Number(d.runtime)||Number(d.averageRuntime)||null,genres:d.genres||[],year:Number(String(d.premiered||'').slice(0,4))||0,releaseDate:d.premiered||'',mediaFormat:d.type||'',total:0,source:'TVmaze',url:d.url||'',recordId:d.id};
  }
- if(t==='books'&&ids.isbn){
+ if(t==='books'&&ids.isbn&&(!allowed||allowed.includes('openlibrary'))){
   const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
   if(d&&!norm(d.title||''))return {reason:'Open Library ISBN record did not supply a title'};
   if(d&&norm(d.title)!==norm(title))return {reason:'Open Library ISBN record title differs; verify the ISBN before recovery'};
@@ -137,9 +137,12 @@ function open(entry='settings',id=''){
  parent.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428MetadataClose()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true" aria-label="Fix Metadata"><header><div><small>LIBRARY MAINTENANCE</small><h2>Fix Metadata</h2><p>Identify the title, preview field changes, then apply only approved metadata.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataClose()">Close</button></header>'+
  '<div class="mf428-meta-config"><label>Recovery scope<select id="mf428-meta-scope" '+(fixed?'disabled':'')+'><option value="'+(entry==='editor'?'draft':one?'single':selection.length?'selected':'all')+'">'+esc(label)+'</option>'+(!fixed?'<option value="category">By Category</option>':'')+'</select></label>'+
  '<label>Method<select id="mf428-meta-method"><option value="missing">Fill Missing Fields</option><option value="review">Review Differences</option><option value="refresh">Refresh Outdated Metadata (review first)</option></select></label>'+
- '<label>Titles per part<input id="mf428-meta-part" type="number" min="1" max="1000" value="100"></label></div>'+
+ '<label>Titles per part<input id="mf428-meta-part" type="number" min="1" max="1000" value="100"></label>'+
+  '<label>Processing mode<select id="mf429-meta-runmode"><option value="parts">Part-by-Part</option><option value="one">One-Go</option></select></label>'+
+  '<label>After each part<select id="mf429-meta-continuation"><option value="manual">Wait for my confirmation</option><option value="automatic">Automatically queue next part</option></select></label></div>'+
  (!fixed?'<label class="mf428-category-chooser">Category filter <select id="mf428-meta-category"><option value="">Choose category</option>'+categories.map(cat=>'<option value="'+esc(cat.id)+'">'+esc(cat.name)+'</option>').join('')+'</select></label>':'')+
- '<fieldset class="mf428-meta-fieldset"><legend>Metadata fields to check</legend><div class="mf428-meta-fields">'+fieldOptions()+'</div></fieldset>'+
+ '<fieldset class="mf428-meta-fieldset"><legend>Enabled metadata sources</legend><div class="mf428-meta-fields">'+Object.entries(schema).map(([id,info])=>'<label class="mf428-meta-field"><input type="checkbox" data-mf429-meta-provider value="'+esc(id)+'" checked><span>'+esc(id)+' · '+esc(info.capabilities.join(', '))+'</span></label>').join('')+'</div></fieldset>'+
+  '<fieldset class="mf428-meta-fieldset"><legend>Metadata fields to check</legend><div class="mf428-meta-fields">'+fieldOptions()+'</div></fieldset>'+
  '<div class="mf428-meta-note">Existing personal information and manually locked rich metadata are protected. Episode/chapter total is opt-in and never changes watched progress or season structures. Every change requires review before saving.</div>'+
  '<footer><button type="button" class="btn btn-primary" onclick="App.mf428MetadataStart()">Find Metadata</button></footer></section>';
  document.body.appendChild(parent);parent.querySelector('.mf428-meta-dialog button')?.focus();
@@ -149,13 +152,17 @@ async function start(){
  const scope=M.scope;if(!scope||scope.owner!==account()){showToast('Account changed. Reopen Fix Metadata.');return;}
  const part=Math.max(1,Math.min(1000,Number(document.getElementById('mf428-meta-part')?.value)||100));
  const method=document.getElementById('mf428-meta-method')?.value||'missing';
+  const runMode=document.getElementById('mf429-meta-runmode')?.value==='one'?'one':'parts';
+  const continuation=document.getElementById('mf429-meta-continuation')?.value==='automatic'?'automatic':'manual';
+  const providers=[...document.querySelectorAll('#mf428-metadata-modal [data-mf429-meta-provider]:checked')].map(el=>el.value).filter(p=>schema[p]&&!schema[p].requiresSetup);
+  if(!providers.length){showToast('Enable at least one compatible public metadata source.');return;}
  const fieldChoices=[...document.querySelectorAll('#mf428-metadata-modal [data-mf428-field]:checked')].map(e=>e.value).filter(field=>fields.includes(field));
  if(!fieldChoices.length){showToast('Choose at least one metadata field.');return;}
  if(scope.entry==='editor'){
   const draft=draftItem('editor',scope.id);
   if(!draft.title){showToast('Enter a title before searching metadata.');return;}
   const fingerprint=snapshot(draft);
-  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:draft,account:account(),fingerprint,method,fields:fieldChoices}))
+  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:draft,account:account(),fingerprint,method,fields:fieldChoices,providers}))
    {close();showToast('Metadata lookup queued for the current title editor.');}
   else showToast('Metadata Recovery is already running or queued.');
   return;
@@ -170,14 +177,14 @@ async function start(){
  if(!ids.length){showToast('No eligible Library titles.');return;}
  if(M.job&&!['complete','stopped','failed'].includes(M.job.status)){showToast('A Metadata Recovery is still pending. Resume or review it before starting a new batch.');return;}
  M.reviews=[];
- M.job={account:account(),ids,cursor:0,part,method,fields:fieldChoices,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
+ M.job={account:account(),ids,cursor:0,part,runMode,continuation,method,providers,fields:fieldChoices,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
  await persist();
  if(!window.MediaFlowV428Hub?.enqueue('metadata',{})){M.job.status='paused';await persist();showToast('Metadata was not queued. Resume the existing process when available.');return;}
  close();showToast(ids.length+' title(s) added to Metadata Recovery.');
 }
 async function previewDraft(item,owner=account(),params={}){
  try{
-  const data=await discover(item);
+  const data=await discover(item,params.providers);
   if(owner!==account())throw Error('Account changed during editor metadata search');
   if(!data.source){showToast(data.reason||'No matching metadata record');return;}
   const differences=diff(item,data).filter(d=>params.fields?.includes(d.field)!==false&&(params.method!=='missing'||d.selected));
@@ -194,18 +201,28 @@ async function worker(params={}){await init();
  try{let processed=0;while(job.cursor<job.ids.length){
   if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status=job.stopped?'stopped':'paused';break;}
   const id=job.ids[job.cursor],item=index.get(id);if(item){const version=Number(item.modifiedAt)||0;
-   try{const found=await discover({...item});if(found.source){if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status='paused';break;}
+   try{const found=await discover({...item},job.providers);if(found.source){if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status='paused';break;}
     const differences=diff(item,found).filter(d=>job.fields?.includes(d.field)!==false&&(job.method!=='missing'||d.selected));
     if(differences.length){if(job.method==='refresh')differences.forEach(d=>d.selected=true);job.reviews.push({itemId:id,version,found,differences});}else job.skipped++;
    }else job.skipped++;}catch(e){job.errors.push({id,reason:String(e.message||e)});}}
   job.cursor++;processed++;await persist();
   if(job.reviews.length>=250){job.status='waiting-review';break;}
-  if(processed>=job.part&&job.cursor<job.ids.length){job.status=job.stopAfterPart?'stopped':'waiting-part';job.stopped=!!job.stopAfterPart;break;}
+  if(job.runMode!=='one'&&processed>=job.part&&job.cursor<job.ids.length){job.status=job.stopAfterPart?'stopped':'waiting-part';job.stopped=!!job.stopAfterPart;break;}
  }
  if(job.cursor>=job.ids.length)job.status=job.reviews.length?'waiting-review':'complete';
  await persist();
  }catch(e){job.status='paused';job.errors.push({id:'job',reason:String(e.message||e)});await persist();throw e;}
- finally{M.running=false;window.MediaFlowV428Hub?.paint();}
+ finally{
+   M.running=false;window.MediaFlowV428Hub?.paint();
+   // The scheduler frees its slot after the worker resolves. In automatic
+   // Part-by-Part mode enqueue the next segment behind its shared cooldown.
+   if(job.status==='waiting-part'&&job.continuation==='automatic'&&!job.stopAfterPart){
+    setTimeout(()=>{
+     if(M.job===job&&job.account===account()&&!M.running&&job.status==='waiting-part')
+      App.mf428MetadataControl?.('resume');
+    },750);
+   }
+  }
 }
 function review(){
  if(M.account&&M.account!==account()){showToast('Account changed. Reopen Metadata Recovery.');return;}
