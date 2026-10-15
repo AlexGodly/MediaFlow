@@ -61,6 +61,7 @@ assert(engine.schema.anilist&&!engine.schema.anilist.requiresSetup);
 assert(engine.schema.tenrai&&!engine.schema.tenrai.requiresSetup);
 assert(engine.schema.kitsu&&!engine.schema.kitsu.requiresSetup);
 assert(engine.schema.openlibrary.capabilities.includes('comics'));
+assert(engine.schema.mangadex.blockedByCors&&engine.schema.mangadex.requiresSetup,'Browser CORS blockers are not shown as working public sources');
 const mapped=engine.mapAniList(media,'anime');
 assert.equal(mapped.source,'AniList');
 assert.equal(mapped.synopsis,'Official story');
