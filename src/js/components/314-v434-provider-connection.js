@@ -92,7 +92,7 @@ async function mf434TestProvider(provider){
   if(area)area.textContent=MF434_LABELS[provider]+" responded successfully · "+MF434.tests[provider].found+" matching records. "+(MF434_COVER.has(provider)?"Enable it in the provider preferences for Cover Recovery.":"ID-only source; no unlicensed artwork.");
   showToast(MF434_LABELS[provider]+" API connection tested successfully.");
  }catch(e){if(area)area.textContent=MF434_LABELS[provider]+": "+String(e.message||e);showToast("Provider test failed: "+String(e.message||e));}
- finally{MF434.busy=false;mf434RefreshPanel(false);}
+ finally{MF434.busy=false;mf434RefreshPanel(true);}
 }
 function mf434Panel(){
  const statuses=MF434.status?.providers||[];
@@ -112,12 +112,25 @@ function mf434Panel(){
 function mf434RefreshPanel(replaceAll=true){
  const panel=document.querySelector('[data-mf-setting-id="cover-api-gateway"]');
  if(!panel)return;
+ const testTitle=panel.querySelector("#mf434-test-title");
+ if(testTitle)MF434.lastTestTitle=testTitle.value;
+ const oldMessage=panel.querySelector("#mf434-test-results")?.textContent||"";
+ // The legacy Settings Center mounts sections once; refresh just its source
+ // rows when a provider becomes verified, without losing the current tab.
+ const oldSources=document.querySelector(".mf430-settings-provider-list");
+ if(oldSources){
+  const temp=document.createElement("div");
+  temp.innerHTML=mf425SettingsMarkup();
+  const next=temp.querySelector(".mf430-settings-provider-list");
+  if(next)oldSources.replaceWith(next);
+ }
  if(!replaceAll)return;
- const input=panel.querySelector("#mf434-test-title");
- if(input)MF434.lastTestTitle=input.value;
  const replacement=document.createElement("div");
  replacement.innerHTML=mf434Panel();
- panel.replaceWith(replacement.firstElementChild);
+ const fresh=replacement.firstElementChild;
+ const status=fresh?.querySelector("#mf434-test-results");
+ if(status)status.textContent=oldMessage;
+ if(fresh)panel.replaceWith(fresh);
 }
 const mf434OldSettings=mf425SettingsMarkup;
 mf425SettingsMarkup=function(){
