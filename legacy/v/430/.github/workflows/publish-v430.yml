@@ -1,0 +1,56 @@
+name: Publish MediaFlow v430 Beta Archive
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Confirm matching version and archived source
+        id: match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "430" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git cat-file -e HEAD:legacy/v/430/VERSION
+          test "$(git show HEAD:legacy/v/430/VERSION | tr -d '\r\n')" = 430
+          git cat-file -e HEAD:legacy/v/430/assets/js/mediaflow-v430.bundle.js
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - name: Package full v430 archived source without unrelated legacy versions
+        if: steps.match.outputs.release == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v430_Modular.zip HEAD:legacy/v/430
+          sha256sum MediaFlow_v430_Modular.zip > MediaFlow_v430_Modular.sha256
+          test -s MediaFlow_v430_Modular.zip
+      - name: Publish immutable numeric tag 430 and Beta release
+        if: steps.match.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view 430 >/dev/null 2>&1; then
+            echo "Numeric release 430 already exists; refusing to overwrite."
+            exit 0
+          fi
+          gh release create 430 MediaFlow_v430_Modular.zip MediaFlow_v430_Modular.sha256 \
+            --target "$GITHUB_SHA" --title "v430 Beta" --prerelease \
+            --notes-file docs/CHANGELOG_v430.md

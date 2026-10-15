@@ -1,0 +1,70 @@
+name: v430 Recovery, Settings and Navigation Quality Gates
+on:
+  push:
+    branches: [feature/v430-recovery-settings-dashboard-nav-polish]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v430-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and exercise full v430 feature regression gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 430
+          for f in src/js/components/{263-v365-settings-center,309-v424-advanced-cover-recovery,310-v425-cover-recovery-integration,311-v427-recovery-ux-stability,306-v421-adaptive-navigation-filter}.js src/js/pages/dashboard/130-missing-covers-queue.js; do
+            node --check "$f"
+          done
+          python scripts/build.py
+          node scripts/test-v424-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v427-cover-universal-id.cjs
+          node scripts/test-v427-on-this-day.cjs
+          node scripts/check-settings-style.cjs
+          node scripts/test-v430-recovery-polish.cjs
+          python scripts/check.py
+          node --check assets/js/mediaflow-v430.bundle.js
+          test -s assets/css/240-v430-recovery-dashboard-navigation.css
+          grep -q 'mediaflow-pwa-v430-shell-v1' sw.js
+          grep -q 'mediaflow-v430.bundle.js' index.html
+      - name: Commit reproducible v430 site assets to development branch
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html version.json manifest.json sw.js assets/js/mediaflow-v430.bundle.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v430): compiled personal edition and PWA [skip ci]'
+            git push origin HEAD:feature/v430-recovery-settings-dashboard-nav-polish
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v430-verified-site
+          path: |
+            index.html
+            sw.js
+            version.json
+            assets/js/mediaflow-v430.bundle.js
