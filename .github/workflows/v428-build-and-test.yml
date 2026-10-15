@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - feature/v428-universal-recovery
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -40,6 +42,7 @@ jobs:
           grep -q 'mf428MetadataOpen' assets/js/mediaflow-v428.bundle.js
           grep -q 'registerFresh' assets/js/mediaflow-v428.bundle.js
       - name: Commit generated bundle and cache to development branch only
+        if: github.event_name == 'push'
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
