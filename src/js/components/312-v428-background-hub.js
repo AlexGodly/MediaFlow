@@ -11,7 +11,7 @@ const x=(s)=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const account=()=>String((typeof AUTH_USER!=='undefined'&&AUTH_USER&&AUTH_USER.id)||'local');
 const key=()=> 'mf428-background:'+account(),leaseKey=()=> 'mf428-worker:'+account();
 const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right'};
-const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0};
+const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{}};
 function prefs(){const s=(typeof S!=='undefined'&&S.settings&&S.settings.v428Background)||{};return {...defaults,...s};}
 function persistPrefs(p){S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v428 widget preference',e));}catch(e){console.warn(e);}paint();}
 function load(){if(HUB.loadedFor===account())return;HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};try{const data=JSON.parse(localStorage.getItem(key())||'{}');if(Array.isArray(data.queue))HUB.queue=data.queue.filter(q=>KINDS.includes(q.kind)).slice(0,20).map(q=>({kind:q.kind,at:q.at||Date.now(),params:q.params||{}}));HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};}catch(e){console.warn('v428 queue restoration',e);}}
@@ -36,8 +36,9 @@ async function execute(job){
   return nativeCoverRun();
  }
  if(job.kind==='fresh'){
+  if(typeof HUB.freshRunner==='function')return HUB.freshRunner(job.params);
   if(!nativeFresh)throw new Error('Existing Fresh Episodes engine is unavailable');
-  return nativeFresh({force:true});
+  return nativeFresh(job.params||{force:true});
  }
  if(job.kind==='metadata'){
   if(typeof HUB.metadataRunner!=='function')throw new Error('Metadata Fixer has not initialized');
@@ -47,20 +48,21 @@ async function execute(job){
 async function pump(){load();if(HUB.working||HUB.active||!HUB.queue.length||Date.now()<HUB.cooldownUntil)return;
  if(!acquire())return;
  const next=HUB.queue.shift();HUB.active={kind:next.kind,params:next.params,started:Date.now(),leaseLost:false};HUB.working=true;save();paint();
- try{await execute(next);if(HUB.active.leaseLost)throw new Error('Worker ownership changed');note(next.kind,'complete','Finished');}
- catch(e){console.warn('v428 '+next.kind,e);note(next.kind,'failed',String(e.message||e));}
- finally{const hadWork=HUB.active!==null;HUB.active=null;HUB.working=false;release();if(hadWork)HUB.cooldownUntil=Date.now()+Math.max(30,Math.min(600,Number(prefs().cooldownSeconds)||60))*1000;save();paint();}
+ try{const value=await execute(next);if(HUB.active.leaseLost)throw new Error('Worker ownership changed');note(next.kind,'complete','Finished');HUB.waiters[next.kind]?.resolve(value);}
+ catch(e){console.warn('v428 '+next.kind,e);note(next.kind,'failed',String(e.message||e));HUB.waiters[next.kind]?.reject(e);}
+ finally{delete HUB.waiters[next.kind];const hadWork=HUB.active!==null;HUB.active=null;HUB.working=false;release();if(hadWork)HUB.cooldownUntil=Date.now()+Math.max(30,Math.min(600,Number(prefs().cooldownSeconds)||60))*1000;save();paint();}
 }
 if(nativeCoverRun)mf424Run=function(){if(MF424.running)return;enqueue('cover',{});};
-if(nativeFresh)v377RunJikan=function(options){enqueue('fresh',options||{});return Promise.resolve({queued:true});};
+if(nativeFresh)v377RunJikan=function(options){if(HUB.waiters.fresh)return HUB.waiters.fresh.promise;let resolve,reject;const promise=new Promise((ok,no)=>{resolve=ok;reject=no;});HUB.waiters.fresh={promise,resolve,reject};if(!enqueue('fresh',options||{})){delete HUB.waiters.fresh;resolve({queued:true});}return promise;};
 function start(kind){
  if(kind==='cover'){if(typeof App.mf425OpenConfig==='function')App.mf425OpenConfig('settings');else showToast('Cover Recovery unavailable');return;}
  if(kind==='metadata'){if(typeof App.mf428MetadataOpen==='function')App.mf428MetadataOpen('settings');else showToast('Metadata Fixer unavailable');return;}
- if(kind==='fresh'){enqueue('fresh',{});return;}
+ if(kind==='fresh'){if(typeof App.mf428FreshOpen==='function')App.mf428FreshOpen();else enqueue('fresh',{});return;}
 }
 function control(kind,cmd){
  if(kind==='cover'&&MF424.job){if(cmd==='pause')App.mf424Pause();if(cmd==='stop')App.mf424StopTitle();if(cmd==='resume')App.mf424Resume();if(cmd==='review')App.mf424Review();return;}
  if(kind==='metadata'&&typeof App.mf428MetadataControl==='function'){App.mf428MetadataControl(cmd);return;}
+ if(kind==='fresh'&&typeof App.mf428FreshControl==='function'){if(cmd==='resume')App.mf428FreshResume();else App.mf428FreshControl(cmd);return;}
  if(cmd==='cancel')cancel(kind);
 }
 function phase(kind){
@@ -71,12 +73,14 @@ function phase(kind){
  if(HUB.queue.some(q=>q.kind===kind))return 'queued';
  if(kind==='cover'&&MF424.job?.pending)return 'review';
  if(kind==='cover'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
- if(kind==='metadata'&&window.MediaFlowV428Metadata&&window.MediaFlowV428Metadata.status()==='paused')return 'paused';
+ if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(m==='waiting-review')return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
+ if(kind==='fresh'&&window.MediaFlowV428Fresh){const f=window.MediaFlowV428Fresh.status();if(['paused','stopped'].includes(f))return 'paused';}
  return HUB.last[kind]?.status||'idle';
 }
 function progress(kind){
  if(kind==='cover'&&MF424.job){const j=MF424.job;return {at:j.cursor||0,total:j.ids?.length||0};}
  if(kind==='metadata'&&window.MediaFlowV428Metadata)return window.MediaFlowV428Metadata.progress();
+ if(kind==='fresh'&&window.MediaFlowV428Fresh)return window.MediaFlowV428Fresh.progress();
  return {at:0,total:0};
 }
 function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math.round(p.at/p.total*100):0;
@@ -87,7 +91,7 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  '<div class="mf428-process-actions">'+
  (state==='idle'||state==='complete'||state==='failed'?'<button type="button" onclick="App.mf428Start(\''+kind+'\')">Start</button>':'')+
  (state==='queued'?'<button type="button" onclick="App.mf428Move(\''+kind+'\',-1)" aria-label="Move earlier">↑</button><button type="button" onclick="App.mf428Move(\''+kind+'\',1)" aria-label="Move later">↓</button><button type="button" onclick="App.mf428Cancel(\''+kind+'\')">Remove</button>':'')+
- (state==='running'&&kind!=='fresh'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop safely</button>':'')+
+ (state==='running'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'pause\')">Pause</button><button type="button" onclick="App.mf428Control(\''+kind+'\',\'stop\')">Stop safely</button>':'')+
  (state==='paused'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'resume\')">Resume</button>':'')+
  (state==='review'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'review\')">Review</button>':'')+
  '</div></article>';
@@ -107,7 +111,7 @@ if(typeof v405FloatingSettingsHtml==='function'){
  const previous=v405FloatingSettingsHtml;v405FloatingSettingsHtml=function(){return previous.apply(this,arguments)+settingsHtml();};
 }
 Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
-window.MediaFlowV428Hub={enqueue,paint,phase,progress,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil})};
+window.MediaFlowV428Hub={enqueue,paint,phase,progress,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},registerFresh:(fn)=>{HUB.freshRunner=fn;pump();},runLegacyFresh:(options)=>nativeFresh?nativeFresh(options||{force:true}):Promise.resolve(null),status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil})};
 function init(){load();if(!HUB.ticker)HUB.ticker=setInterval(()=>{if(HUB.loadedFor!==account())load();renew();pump();if(!HUB.renderQueued){HUB.renderQueued=true;paint();HUB.renderQueued=false;}},1500);paint();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 window.addEventListener('storage',e=>{if(e.key===leaseKey()&&HUB.active&&!leaseHeld()){HUB.active.leaseLost=true;if(HUB.active.kind==='cover'&&MF424.job)MF424.job.pauseRequested=true;}});
