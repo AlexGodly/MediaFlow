@@ -149,7 +149,7 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
     '<header class="mf425-instant-head"><div><small>COVER SEARCH</small><h2>'+mf427Icon('image',23)+' Cover matches for '+mf427Escape(current.title)+'</h2><p>Library title: <strong>'+mf427Escape(current.title)+'</strong> · Verify matched titles and external IDs before selecting.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Close</button></header>'+
     '<div class="mf427-provider-picker"><label for="mf427-provider-select">Cover source</label><select id="mf427-provider-select"><option value="">All enabled providers</option>'+allowed.map(p=>'<option value="'+mf427Escape(p)+'" '+(allowed.length===1?'selected':'')+'>'+mf427Escape(mf424Provider(p)?.name||p)+'</option>').join('')+'</select><button type="button" class="btn btn-ghost" onclick="App.mf427RetryProvider()">Search source</button></div>'+ 
     '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+ 
-    '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf427Icon('sliders')+' Advanced Recovery</button></div></section>';
+    '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
   document.body.appendChild(root);mf427CleanAdvancedIcons(root);
   const found=[],seen=new Set(),outcomes=[];
   const ordered=allowed.filter(p=>mf424HasID(current,p)).concat(allowed.filter(p=>!mf424HasID(current,p)));
