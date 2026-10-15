@@ -31,7 +31,7 @@ async function db(){return new Promise((done,fail)=>{if(!indexedDB){fail(Error('
 async function store(op,value,owner=account()){const d=await db();return new Promise((done,fail)=>{const tx=d.transaction('records',op==='get'?'readonly':'readwrite');const req=op==='get'?tx.objectStore('records').get('job:'+owner):tx.objectStore('records').put(value,'job:'+owner);req.onerror=()=>fail(req.error);req.onsuccess=()=>done(req.result);tx.oncomplete=()=>d.close();});}
 async function persist(){if(M.job)await store('put',M.job,M.job.account);window.MediaFlowV428Hub?.paint();}
 function kind(item){const cat=String(item.categoryId||'').toLowerCase();const label=(S.categories||[]).find(c=>String(c.id)===cat)?.name||cat;
- const v=String(label).toLowerCase();return /manga|manhwa|manhua|comic/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/book|novel/.test(v)?'books':'other';}
+ const v=String(label).toLowerCase();return /manga|manhwa|manhua/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/book|novel/.test(v)?'books':'other';}
 async function request(provider,url){const row=M.rate[provider]||(M.rate[provider]={next:0,cooldown:0});
  const wait=Math.max(0,row.next-Date.now(),row.cooldown-Date.now());if(wait)await sleep(wait);
  row.next=Date.now()+(provider==='jikan'?2500:1300);
@@ -252,8 +252,16 @@ function enhanceSettings(){if(S.view!=='settings')return;const anchor=document.q
  const el=document.createElement('div');el.className='mf366-subgroup mf428-settings-group';el.innerHTML='<h3 class="mf366-subgroup-heading">Metadata Recovery</h3><div class="mf366-subgroup-content"><section class="mf425-settings-card"><div class="mf425-settings-lead"><strong>Fix Metadata</strong><p>Recover incomplete title information with verified public providers. Review changes before saving.</p></div><div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf428MetadataOpen(\'settings\')">Configure & Start Metadata Recovery</button><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataReview()">Review Pending</button><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataUndo()">Undo Last Metadata Change</button></div></section></div>';
  anchor.insertAdjacentElement('afterend',el);}
 if(typeof MediaFlowRuntime!=='undefined'&&MediaFlowRuntime.registerPageEnhancer)MediaFlowRuntime.registerPageEnhancer('settings',enhanceSettings);
-function enhanceDetails(){const root=document.querySelector('#modal-root');if(!root||!S.modal?.data?.id)return;const action=root.querySelector('[onclick*="v181QuickEditDetail"][onclick*="coverUrl"]');if(action&&!root.querySelector('.mf428-details-action')){const b=document.createElement('button');b.type='button';b.className='btn btn-sm mf428-details-action';b.textContent='Fix Metadata';b.addEventListener('click',()=>App.mf428MetadataOpen('details',String(S.modal.data.id)));action.insertAdjacentElement('afterend',b);}}
-if(document.body){const watch=new MutationObserver(ms=>{if(ms.some(x=>x.target instanceof Element&&(x.target.closest('#modal-root')||x.target.id==='modal-root')))queueMicrotask(enhanceDetails);});watch.observe(document.body,{childList:true,subtree:true});queueMicrotask(enhanceDetails);}
+// Native Title Details markup is rendered separately from #modal-root.
+if(typeof v181TitleDetailsHtml==='function'){
+ const previousDetails=v181TitleDetailsHtml;
+ v181TitleDetailsHtml=function(item){
+  const html=String(previousDetails.apply(this,arguments)||'');
+  if(!item?.id||html.includes('mf428-details-action'))return html;
+  const button='<button type="button" class="btn btn-ghost mf428-details-action" data-title-id="'+esc(item.id)+'" onclick="App.mf428MetadataOpen(\'details\',this.dataset.titleId)">'+(typeof mf425Icon==='function'?mf425Icon('database'):'')+' Fix Metadata</button>';
+  return html.replace('<div class="v181-detail-actions">','<div class="v181-detail-actions">'+button);
+ };
+}
 if(typeof App.v181QuickEditDetail==='function'){const old=App.v181QuickEditDetail;App.v181QuickEditDetail=function(id,key){const result=old.apply(this,arguments);if(key==='coverUrl'){const el=document.querySelector('#v181-quick-detail-overlay .mf425-editor-tools');if(el&&!el.querySelector('.mf428-edit-action'))el.insertAdjacentHTML('beforeend','<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'details\',\''+esc(id)+'\')">Fix Metadata</button>');}return result;};}
 Object.assign(App,{mf428MetadataOpen:open,mf428MetadataClose:close,mf428MetadataStart:start,mf428MetadataControl:control,mf428MetadataReview:review,mf428MetadataCloseReview:closeReview,mf428MetadataSkip:skip,mf428MetadataApply:apply,mf428MetadataUndo:undo});
 window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',schema,review,open};
