@@ -17,7 +17,7 @@ const checks=[
 async function probe(x){
  const controller=new AbortController(),clock=setTimeout(()=>controller.abort(),12000);
  try{
-  const res=await fetch(x.url,{method:x.method||'GET',body:x.body||undefined,headers:{Origin:origin,Accept:'application/json',...(x.body?{'Content-Type':'application/json'}:{})},signal:controller.signal});
+  const res=await fetch(x.url,{method:x.method||'GET',body:x.body||undefined,headers:{Origin:origin,Accept:x.name==='Kitsu'?'application/vnd.api+json':'application/json',...(x.body?{'Content-Type':'application/json'}:{})},signal:controller.signal});
   const acao=res.headers.get('access-control-allow-origin')||'';
   const browserCors=acao==='*'||acao===origin;
   let parsed=false;
