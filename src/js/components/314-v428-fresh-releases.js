@@ -51,39 +51,145 @@ function aired(date,precise){if(!date)return false;let t=NaN;
  return Number.isFinite(t)&&t<=Date.now();
 }
 function known(title,raw){return normalize(title)===normalize(raw);}
+
+function availableEvidence(item,units,source,extra={}){
+ const progress=Math.max(0,Number(item.progress)||0);
+ return {status:units>progress?'fresh':'none',available:units,unwatched:Math.max(0,units-progress),source,...extra};
+}
+function freshButIncomplete(item,highest,source,unit,extra={}){
+ if(!Number.isSafeInteger(highest)||highest<=0)return {status:'unknown',source,unit,reason:'No reliable numeric release evidence'};
+ const progress=Math.max(0,Number(item.progress)||0);
+ // A partial source cannot prove the user is caught up, only that a higher
+ // chapter/episode number has already been released.
+ return {status:highest>progress?'fresh':'unknown',available:highest,unwatched:Math.max(0,highest-progress),source,unit,partial:true,...extra,
+ reason:highest>progress?'Verified released numbered item; incomplete feed does not establish a full total':'Incomplete feed; cannot prove no new releases'};
+}
 async function tvmaze(item){
  const ids=item.externalIds||{},id=String(ids.tvmaze||''),imdb=String(ids.imdb||'');
  let show=null;
  if(/^\d+$/.test(id))show=await request('tvmaze','https://api.tvmaze.com/shows/'+encodeURIComponent(id));
  else if(imdb)show=await request('tvmaze','https://api.tvmaze.com/lookup/shows?imdb='+encodeURIComponent(imdb));
- else{const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(item.title||''));const match=(list||[]).map(x=>x.show).filter(s=>known(s?.name,item.title));if(match.length===1)show=match[0];}
- if(!show||!show.id||!known(item.title,show.name)&&!id&&!imdb)return {status:'unknown',reason:'TVmaze title identity unverified'};
- const episodes=await request('tvmaze','https://api.tvmaze.com/shows/'+show.id+'/episodes');
- if(!Array.isArray(episodes))return {status:'unknown',reason:'No complete episode list'};
- const released=episodes.filter(e=>aired(e.airstamp||e.airdate,!!e.airstamp));
- return {status:'verified',available:released.length,source:'TVmaze',recordId:String(show.id),url:show.url||'',unit:'episodes',releasedAt:released.at(-1)?.airstamp||released.at(-1)?.airdate||''};
+ else{
+  const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(item.title||''));
+  const match=(list||[]).map(x=>x.show).filter(s=>known(s?.name,item.title));
+  if(match.length===1)show=match[0];
+ }
+ if(!show?.id||!known(item.title,show.name))return {status:'unknown',reason:'TVmaze title identity unverified'};
+ const episodes=await request('tvmaze','https://api.tvmaze.com/shows/'+encodeURIComponent(show.id)+'/episodes?specials=1');
+ if(!Array.isArray(episodes))return {status:'unknown',reason:'No episode list'};
+ const normal=new Map(),specials=new Map(),unknownDates=[];
+ for(const ep of episodes){
+  const isSpecial=ep.number==null||Number(ep.number)<=0||ep.type==='significant_special'||ep.type==='insignificant_special';
+  const stamp=ep.airstamp||ep.airdate;
+  if(!stamp){unknownDates.push(ep.id);continue;}
+  if(!aired(stamp,!!ep.airstamp))continue;
+  const key=isSpecial?'special:'+String(ep.id||ep.season+':'+ep.name):String(ep.season)+':'+String(ep.number);
+  (isSpecial?specials:normal).set(key,ep);
+ }
+ const released=[...normal.values()];
+ const result=availableEvidence(item,normal.size,'TVmaze',{
+  recordId:String(show.id),url:show.url||'',unit:'episodes',
+  extras:{specialsReleased:specials.size,unknownDates:unknownDates.length},
+  releasedAt:released.map(e=>e.airstamp||e.airdate).sort().at(-1)||''
+ });
+ if(result.status==='none'&&unknownDates.length){
+  result.status='unknown';result.reason='Some episodes have no known airdate; cannot confirm caught up';
+ }
+ return result;
 }
 async function episodate(item){
  const ids=item.externalIds||{},id=ids.episodate||'';
  let target=id;
- if(!target){const hits=await request('episodate','https://www.episodate.com/api/search?q='+encodeURIComponent(item.title||'')+'&page=1');
-  const exact=(hits?.tv_shows||[]).filter(x=>known(x.name,item.title));if(exact.length!==1)return {status:'unknown',reason:'EpisoDate title ambiguous'};target=exact[0].id;}
+ if(!target){
+  const hits=await request('episodate','https://www.episodate.com/api/search?q='+encodeURIComponent(item.title||'')+'&page=1');
+  const exact=(hits?.tv_shows||[]).filter(x=>known(x.name,item.title));
+  if(exact.length!==1)return {status:'unknown',reason:'EpisoDate title ambiguous'};
+  target=exact[0].id;
+ }
  const resp=await request('episodate','https://www.episodate.com/api/show-details?q='+encodeURIComponent(target));
- const tv=resp?.tvShow;if(!tv||!known(item.title,tv.name)&&!id)return {status:'unknown',reason:'EpisoDate identity mismatch'};
+ const tv=resp?.tvShow;if(!tv||!known(item.title,tv.name))return {status:'unknown',reason:'EpisoDate identity mismatch'};
  if(!Array.isArray(tv.episodes))return {status:'unknown',reason:'Episode list unavailable'};
- const unique=new Map();for(const e of tv.episodes)if(aired(e.air_date,false)&&e.season!=null&&e.episode!=null)unique.set(String(e.season)+':'+String(e.episode),e);
- return {status:'verified',available:unique.size,source:'EpisoDate',unit:'episodes',url:tv.url||'https://www.episodate.com',recordId:String(tv.id||target)};
+ const normal=new Set(),unknownDates=[];
+ for(const ep of tv.episodes){
+  if(ep.season==null||ep.episode==null){continue;}
+  if(!ep.air_date){unknownDates.push(ep.season+':'+ep.episode);continue;}
+  if(aired(ep.air_date,false))normal.add(String(ep.season)+':'+String(ep.episode));
+ }
+ const result=availableEvidence(item,normal.size,'EpisoDate',{unit:'episodes',url:tv.url||'https://www.episodate.com',recordId:String(tv.id||target),extras:{unknownDates:unknownDates.length}});
+ if(result.status==='none'&&unknownDates.length){result.status='unknown';result.reason='Episode dates unavailable';}
+ return result;
 }
 async function mangadex(item){
- const id=String(item.externalIds?.mangadex||'');if(!/^[0-9a-f-]{32,36}$/i.test(id))return {status:'unknown',reason:'Verified MangaDex ID required'};
- const resp=await request('mangadex','https://api.mangadex.org/manga/'+encodeURIComponent(id)+'/feed?limit=100&translatedLanguage%5B%5D=en&order%5Bchapter%5D=desc');
+ const id=String(item.externalIds?.mangadex||'');
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+  return {status:'unknown',reason:'Verified MangaDex title UUID required'};
+ // The feed is paginated and can include duplicate chapters across
+ // scanlation groups, languages and re-uploads. Treat its number as evidence
+ // of a released higher chapter, not a full chapter count or zero.
+ const resp=await request('mangadex','https://api.mangadex.org/manga/'+encodeURIComponent(id)+'/feed?limit=100&translatedLanguage%5B%5D=en&order%5BpublishAt%5D=desc');
  if(!Array.isArray(resp?.data))return {status:'unknown',reason:'MangaDex chapter feed unavailable'};
- const seen=new Set();let highest=0,latest='';
- for(const e of resp.data){const ch=String(e.attributes?.chapter||'').trim(),n=Number(ch);
-  if(!ch||!Number.isFinite(n)||n<=0||!aired(e.attributes?.publishAt||e.attributes?.readableAt,true))continue;
-  seen.add(ch);highest=Math.max(highest,n);latest=e.attributes?.publishAt||latest;}
- if(!highest)return {status:'unknown',reason:'No numbered English chapter evidence in sampled feed'};
- return {status:'verified',available:highest,source:'MangaDex',unit:'translated chapters',url:'https://mangadex.org/title/'+id,recordId:id,partial:true,reason:'English translation feed; numeric chapter numbers can have gaps',releasedAt:latest};
+ const candidates=new Map();
+ for(const entry of resp.data){
+  const value=String(entry.attributes?.chapter||'').trim();
+  const chapter=Number(value);
+  if(!value||!Number.isSafeInteger(chapter)||chapter<=0)continue;
+  const date=entry.attributes?.publishAt||entry.attributes?.readableAt;
+  if(!aired(date,true))continue;
+  const existing=candidates.get(chapter);
+  if(!existing||Date.parse(existing.date)<Date.parse(date))candidates.set(chapter,{date,id:entry.id});
+ }
+ const highest=Math.max(0,...candidates.keys());
+ return freshButIncomplete(item,highest,'MangaDex','English-translated chapters',{
+  url:'https://mangadex.org/title/'+id,recordId:id,observedCount:candidates.size,
+  releasedAt:[...candidates.values()].map(x=>x.date).sort().at(-1)||'',
+  evidenceScope:'Last 100 matching feed entries, English; excludes future updates'
+ });
+}
+function validFeedUrl(item){
+ const raw=item.externalIds?.rss||item.externalIds?.feed||item.rssFeedUrl||item.feedUrl;
+ if(typeof raw!=='string'||raw.length>2000)return '';
+ try{
+  const url=new URL(raw);
+  if(url.protocol!=='https:'||url.username||url.password||!url.hostname.includes('.'))return '';
+  if(/^(localhost|.*\.local|.*\.internal)$/i.test(url.hostname))return '';
+  if(/^(?:127|10|0|169\.254|192\.168)\./.test(url.hostname))return '';
+  return url.href;
+ }catch(_){return '';}
+}
+function feedItems(raw,type){
+ if(typeof DOMParser!=='function')return {error:'XML parser unavailable'};
+ const doc=new DOMParser().parseFromString(raw,'application/xml');
+ if(doc.querySelector('parsererror'))return {error:'Invalid feed XML'};
+ const rss=[...doc.getElementsByTagName('item')],atom=[...doc.getElementsByTagName('entry')];
+ const nodes=rss.length?rss:atom,items=[],seen=new Set();
+ const child=(node,name)=>[...node.children].find(x=>x.localName===name)?.textContent?.trim()||'';
+ for(const item of nodes.slice(0,400)){
+  const guid=child(item,'guid')||child(item,'id')||child(item,'link')||child(item,'title');
+  const date=child(item,'pubDate')||child(item,'published')||child(item,'updated');
+  if(!guid||!date||!aired(date,true)||seen.has(guid))continue;
+  if(type==='podcasts'&&!([...item.children].some(x=>x.localName==='enclosure')))continue;
+  seen.add(guid);
+  const text=child(item,'title');
+  const explicit=[...item.children].find(x=>x.localName==='episode'&&/itunes/i.test(x.prefix||''))?.textContent;
+  const titleNumber=/(?:episode|ep\.?|chapter|ch\.?|part)\s*#?\s*(\d{1,6})\b/i.exec(text);
+  const num=Number(explicit||titleNumber?.[1]);
+  items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null});
+ }
+ return {items,total:nodes.length};
+}
+async function feed(item){
+ const url=validFeedUrl(item);
+ if(!url)return {status:'unknown',reason:'No existing HTTPS RSS/Atom feed URL for this title (future setup remains hidden)'};
+ const kind=media(item),raw=await request('feed',url,'xml');
+ if(typeof raw!=='string'||raw.length>2e6)return {status:'unknown',reason:'Feed not available or too large'};
+ const parsed=feedItems(raw,kind);
+ if(parsed.error)return {status:'unknown',reason:parsed.error};
+ const numbered=parsed.items.filter(x=>x.number!=null),highest=Math.max(0,...numbered.map(x=>x.number));
+ const latest=parsed.items.map(x=>x.date).sort().at(-1)||'';
+ return freshButIncomplete(item,highest,'RSS / Atom',
+  kind==='podcasts'?'podcast episodes':kind==='webnovels'?'web novel chapters':'web series episodes',
+  {url,recordId:url,observedCount:parsed.items.length,releasedAt:latest,
+   evidenceScope:'Existing per-title feed; released unique GUIDs with explicit unit numbers'});
 }
 async function one(item,mode,selected){const type=media(item),supported=Object.entries(sourceKinds).filter(([_,types])=>types.includes(type)).map(([name])=>name);
  if(!supported.length)return {status:'unknown',reason:'No verified public release adapter for '+type,unit:type};
