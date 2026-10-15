@@ -18,15 +18,22 @@ function writeSlot(kind,job){
  catch(e){console.warn('v428 individual queue slot',kind,e);return false;}
  return true;
 }
-const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right'};
-const HUB={queue:[],active:null,cooldownUntil:0,last:{},expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:'',pumping:false};
+const defaults={visibility:'auto',compact:false,cooldownSeconds:60,position:'right',notifications:true};
+const HUB={queue:[],active:null,cooldownUntil:0,last:{},notices:[],expanded:false,loadedFor:'',owner:String(Date.now())+'-'+Math.random().toString(36).slice(2),ticker:0,working:false,metadataRunner:null,freshRunner:null,renderQueued:false,leaseTimer:0,waiters:{},lastMarkup:'',pumping:false};
 function prefs(){const s=(typeof S!=='undefined'&&S.settings&&S.settings.v428Background)||{};return {...defaults,...s};}
-function persistPrefs(p){S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};try{Promise.resolve(typeof persistSettings==='function'?persistSettings():saveState()).catch(e=>console.warn('v428 widget preference',e));}catch(e){console.warn(e);}paint();}
+function persistPrefs(p){
+ S.settings=S.settings||{};S.settings.v428Background={...prefs(),...p};
+ try{
+  const result=typeof persistSettings==='function'?persistSettings():saveState();
+  Promise.resolve(result).catch(e=>{console.warn('v428 widget preference',e);if(typeof showSaveError==='function')showSaveError();});
+ }catch(e){console.warn(e);if(typeof showSaveError==='function')showSaveError();}
+ paint();
+}
 function load(){if(HUB.loadedFor===account())return;
  if(HUB.active){HUB.active.leaseLost=true;HUB.active.accountChanged=true;if(HUB.active.kind==='cover'&&typeof MF424!=='undefined'&&MF424.job)MF424.job.pauseRequested=true;return;}
- HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};
+ HUB.loadedFor=account();HUB.queue=[];HUB.active=null;HUB.cooldownUntil=0;HUB.last={};HUB.notices=[];
  try{const data=JSON.parse(localStorage.getItem(key())||'{}');
-  HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};
+  HUB.cooldownUntil=Math.max(0,Number(data.cooldownUntil)||0);HUB.last=data.last||{};HUB.notices=Array.isArray(data.notices)?data.notices.filter(n=>KINDS.includes(n.kind)).slice(-18):[];
   // Migrate earlier v428 branch snapshots exactly once. Production v427 never had these keys.
   if(Array.isArray(data.queue)){
    for(const row of data.queue.filter(r=>KINDS.includes(r?.kind))){
@@ -40,7 +47,7 @@ function load(){if(HUB.loadedFor===account())return;
 function save(){
  try{const current=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
   HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(current.cooldownUntil)||0);
-  localStorage.setItem(key(HUB.loadedFor),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last}));
+  localStorage.setItem(key(HUB.loadedFor),JSON.stringify({cooldownUntil:HUB.cooldownUntil,last:HUB.last,notices:HUB.notices.slice(-18)}));
  }catch(e){console.warn('v428 queue state persistence',e);}
 }
 function syncQueue(){
@@ -53,7 +60,7 @@ function syncQueue(){
   HUB.queue=found.sort((a,b)=>a.at-b.at||KINDS.indexOf(a.kind)-KINDS.indexOf(b.kind));
   const state=JSON.parse(localStorage.getItem(key(HUB.loadedFor))||'{}');
   HUB.cooldownUntil=Math.max(HUB.cooldownUntil,Number(state.cooldownUntil)||0);
-  if(state.last&&typeof state.last==='object')HUB.last=state.last;
+  if(state.last&&typeof state.last==='object')HUB.last=state.last;if(Array.isArray(state.notices))HUB.notices=state.notices.filter(n=>KINDS.includes(n.kind)).slice(-18);
  }catch(e){console.warn('v428 queue sync',e);}
 }
 function leaseHeld(){try{const v=JSON.parse(localStorage.getItem(leaseKey(HUB.loadedFor))||'null');return !!(v&&v.owner===HUB.owner&&v.until>Date.now());}catch(_){return false;}}
@@ -62,7 +69,31 @@ function foreignLease(){return !!foreignLeaseInfo();}
 function acquire(){try{const k=leaseKey(),old=JSON.parse(localStorage.getItem(k)||'null');if(old&&old.until>Date.now()&&old.owner!==HUB.owner)return false;localStorage.setItem(k,JSON.stringify({owner:HUB.owner,kind:HUB.queue[0]?.kind||null,until:Date.now()+LOCK_MS}));return leaseHeld();}catch(_){return false;}}
 function renew(){if(!HUB.active)return;try{if(!leaseHeld()){HUB.active.leaseLost=true;if(MF424&&MF424.job&&HUB.active.kind==='cover')MF424.job.pauseRequested=true;return;}localStorage.setItem(leaseKey(),JSON.stringify({owner:HUB.owner,kind:HUB.active.kind,until:Date.now()+LOCK_MS}));}catch(_){}}
 function release(){try{if(leaseHeld())localStorage.removeItem(leaseKey());}catch(_){}}
-function note(kind,status,message){HUB.last[kind]={status,message:String(message||''),at:Date.now()};save();paint();}
+function notificationText(kind,status,message){
+ if(status==='complete')return LABELS[kind]+' finished.';
+ if(status==='review')return LABELS[kind]+' has results waiting for review.';
+ if(status==='failed')return LABELS[kind]+' needs attention: '+String(message||'Unexpected error').slice(0,160);
+ return '';
+}
+function note(kind,status,message){
+ const now=Date.now(),text=notificationText(kind,status,message);
+ HUB.last[kind]={status,message:String(message||''),at:now};
+ if(text){
+  HUB.notices.push({kind,status,text,at:now,read:false});
+  if(HUB.notices.length>18)HUB.notices.splice(0,HUB.notices.length-18);
+  if(prefs().notifications&&typeof showToast==='function'&&HUB.loadedFor===account())showToast(text);
+ }
+ save();paint();
+}
+function noticeCount(){return HUB.notices.reduce((n,x)=>n+(x.read?0:1),0);}
+function markNoticesRead(){HUB.notices.forEach(n=>n.read=true);save();paint();}
+function clearNotices(){HUB.notices=[];save();paint();}
+function noticeRows(){
+ const notices=HUB.notices.slice(-5).reverse();
+ return '<div class="mf428-notices" role="region" aria-label="Recent background activity"><div class="mf428-notices-title"><strong>Recent activity</strong><button type="button" onclick="App.mf428ClearNotices()">Clear</button></div>'+
+ (notices.length?notices.map(n=>'<div class="mf428-notice" data-state="'+x(n.status)+'"><span>'+icon(n.kind)+'</span><small>'+x(n.text)+'</small></div>').join(''):'<small class="mf428-empty-notices">No recent alerts.</small>')+'</div>';
+}
+
 function enqueue(kind,params){load();syncQueue();if(!KINDS.includes(kind)||HUB.loadedFor!==account())return false;
  if(HUB.active&&HUB.active.kind===kind){showToast(LABELS[kind]+' is already running.');return false;}
  if(HUB.queue.some(q=>q.kind===kind)){showToast(LABELS[kind]+' is already queued.');return false;}
