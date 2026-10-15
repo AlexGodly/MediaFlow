@@ -168,5 +168,6 @@
   "components/311-v427-recovery-ux-stability.js",
   "components/312-v428-background-hub.js",
   "components/313-v428-metadata-fixer.js",
-  "components/314-v428-fresh-releases.js"
+  "components/314-v428-fresh-releases.js",
+  "components/315-v429-recovery-release-center.js"
 ]
