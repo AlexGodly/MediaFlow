@@ -68,6 +68,8 @@ async function discover(item){
  }
  if(t==='books'&&ids.isbn){
   const d=await request('openlibrary','https://openlibrary.org/isbn/'+encodeURIComponent(ids.isbn)+'.json');
+  if(d&&!norm(d.title||''))return {reason:'Open Library ISBN record did not supply a title'};
+  if(d&&norm(d.title)!==norm(title))return {reason:'Open Library ISBN record title differs; verify the ISBN before recovery'};
   if(d)return {title:d.title||'',synopsis:typeof d.description==='string'?d.description:d.description?.value||'',genres:(d.subjects||[]).filter(x=>typeof x==='string').slice(0,20),year:Number(String(d.publish_date||'').match(/\d{4}/)?.[0])||0,total:0,source:'Open Library',url:'https://openlibrary.org'+String(d.key||''),recordId:d.key};
  }
  return {reason:'No compatible configured public provider or verified ID for this category'};
@@ -183,11 +185,16 @@ async function worker(params={}){await init();
  }catch(e){job.status='paused';job.errors.push({id:'job',reason:String(e.message||e)});await persist();throw e;}
  finally{M.running=false;window.MediaFlowV428Hub?.paint();if(job.reviews.length)showToast(job.reviews.length+' metadata titles ready for review.');}
 }
-function review(){if(!M.job?.reviews?.length){showToast('No metadata changes waiting for review.');return;}M.reviews=M.job.reviews;renderReview();}
+function review(){
+ if(M.reviews.length){renderReview();return;}
+ if(!M.job?.reviews?.length){showToast('No metadata changes waiting for review.');return;}
+ M.reviews=M.job.reviews;renderReview();
+}
 function renderReview(){document.getElementById('mf428-meta-review')?.remove();const current=M.reviews[0];if(!current)return;
  const root=document.createElement('div');root.id='mf428-meta-review';root.className='mf428-metadata-overlay';
  const rows=current.differences.map((d,i)=>'<label class="mf428-diff"><input type="checkbox" data-index="'+i+'" '+(d.selected?'checked':'')+'><span><b>'+esc(d.field)+'</b><small>Current: '+esc(Array.isArray(d.old)?d.old.join(', '):d.old==null?'Missing':d.old).slice(0,240)+'</small><small>Found: '+esc(Array.isArray(d.found)?d.found.join(', '):d.found).slice(0,500)+'</small></span></label>').join('');
- root.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428MetadataCloseReview()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true"><header><div><small>METADATA · '+esc(current.found.source)+'</small><h2>'+esc(current.item?.title||lookup(current.itemId)?.title||'Title changed')+'</h2><p>Review before applying changes. '+M.reviews.length+' title(s) pending.</p></div><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataCloseReview()">Later</button></header><div class="mf428-diff-list">'+(rows||'<p>No safely editable metadata fields found.</p>')+'</div><footer><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataSkip()">Skip</button><button type="button" class="btn btn-primary" onclick="App.mf428MetadataApply()">Apply Selected</button></footer></section>';
+ const recordLink=/^https:\/\//i.test(String(current.found.url||''))?'<a class="mf428-metadata-source" href="'+esc(current.found.url)+'" target="_blank" rel="noopener noreferrer">View '+esc(current.found.source)+' record</a>':'';
+ root.innerHTML='<div class="mf428-meta-shade" onclick="App.mf428MetadataCloseReview()"></div><section class="mf428-meta-dialog" role="dialog" aria-modal="true"><header><div><small>METADATA · '+esc(current.found.source)+'</small><h2>'+esc(current.item?.title||lookup(current.itemId)?.title||'Title changed')+'</h2><p>Matched source title: '+esc(current.found.title||'Unknown')+'. Compare every field before saving. '+M.reviews.length+' title(s) pending.</p>'+recordLink+'</div><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataCloseReview()">Later</button></header><div class="mf428-diff-list">'+(rows||'<p>No safely editable metadata fields found.</p>')+'</div><footer><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataSkip()">Skip</button><button type="button" class="btn btn-primary" onclick="App.mf428MetadataApply()">Apply Selected</button></footer></section>';
  document.body.appendChild(root);
 }
 function closeReview(){document.getElementById('mf428-meta-review')?.remove();}
