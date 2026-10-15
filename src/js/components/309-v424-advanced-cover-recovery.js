@@ -337,7 +337,7 @@ function mf424QueueReview(item,candidates){MF424.job.reviews.push({id:String(ite
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
-async function mf424Apply(item,candidate,expected,{manual=false}={}){
+async function mf424Apply(item,candidate,expected,{manual=false,linkId=true}={}){
   if(mf424Account()!==MF424.account)throw new Error('Account changed; recovery suspended');
   if(!mf424Missing(item))return false;
   if(Number(item.modifiedAt||0)!==Number(expected||0))return false;
@@ -347,7 +347,7 @@ async function mf424Apply(item,candidate,expected,{manual=false}={}){
   // A selected cover can safely link a record ID, but existing IDs are sacred.
   // Auto jobs link only a verified direct ID; explicit user selection may link
   // a title-search record after the user has reviewed the provider's title.
-  if(manual||candidate.idMatch&&candidate.confidence>=.95)mf424LinkSelectedCoverId(item,candidate,{manual});
+  if(linkId&&(manual||candidate.idMatch&&candidate.confidence>=.95))mf424LinkSelectedCoverId(item,candidate,{manual});
   item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
@@ -510,10 +510,18 @@ function mf424ReviewIcon(name){const shapes={
   alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m3 17 6-6 4 4 3-3 5 5"/>'
 };return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.image)+'</svg>';}
+function mf424CoverIdControl(item,candidate,index,scope='mf424'){
+  const link=mf424LinkableCoverId(item,candidate);
+  if(!link)return '<small class="mf424-cover-id-note">No usable external record ID supplied by this cover source.</small>';
+  const name=mf424Escape(link.key==='mal'?'MAL':link.key.toUpperCase());
+  if(link.conflict)return '<small class="mf424-cover-id-conflict">Existing '+name+' ID '+mf424Escape(link.existing)+' is protected. This cover uses '+mf424Escape(link.value)+'; the ID will not be replaced.</small>';
+  if(link.existing===link.value)return '<small class="mf424-cover-id-note">'+name+' ID '+mf424Escape(link.value)+' already linked.</small>';
+  return '<label class="mf424-cover-id-control"><input type="checkbox" data-'+mf424Escape(scope)+'-cover-link-id="'+Number(index)+'" checked> Save '+name+' external ID <strong>'+mf424Escape(link.value)+'</strong> with this cover</label>';
+}
 function mf424Review(){if(!MF424.job?.reviews.length)return;const x=MF424.job.reviews[0],item=mf424Lookup(x.id);
   const old=document.getElementById('mf424-review');if(old)old.remove();const root=document.createElement('div');root.id='mf424-review';root.className='mf424-modal mf425-themed mf427-manual-review';
   root.innerHTML='<div class="mf424-shade" onclick="App.mf424CloseReview()"></div><section class="mf424-dialog" role="dialog" aria-modal="true"><div class="mf424-heading"><div><small>MANUAL REVIEW · '+MF424.job.pending+' PENDING</small><h2>'+mf424Escape(x.title)+'</h2><p>'+mf424Escape(item?String(getCategory(item.categoryId)?.name||''):'Title no longer exists')+'</p></div><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('close')+' Close</button></div>'+ 
-    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">'+mf424ReviewIcon('check')+' Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">'+mf424ReviewIcon('alert')+' Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('skip')+' Later</button></div></section>';
+    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+mf424CoverIdControl(item,c,i,'mf424')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">'+mf424ReviewIcon('check')+' Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">'+mf424ReviewIcon('alert')+' Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('skip')+' Later</button></div></section>';
   document.body.appendChild(root);
 }
 function mf424CloseReview(){document.getElementById('mf424-review')?.remove();}
@@ -523,7 +531,8 @@ async function mf424Confirm(i){if(!MF424.job?.reviews.length)return;const x=MF42
   if(!candidate||!item||!mf424Missing(item)||Number(item.modifiedAt||0)!==x.expectedModified){
     showToast('This title changed after review was queued. Its cover was not overwritten.');return;
   }
-  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true})){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
+  const linkId=document.querySelector('#mf424-review [data-mf424-cover-link-id="'+Number(i)+'"]')?.checked===true;
+  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true,linkId})){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
     MF424.job.reviews.shift();MF424.job.pending--;await mf424ReviewSave();}else showToast('Unable to validate this cover safely.');
 }
 async function mf424ReviewSave(){if(MF424.job.cursor>=MF424.job.ids.length&&!MF424.job.pending)mf424State('complete');
