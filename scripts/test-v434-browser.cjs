@@ -119,7 +119,7 @@ async function pageReady(cdp,label){
    const gateway=await cdp.evaluate("(()=>({version:window.MediaFlowV434?.version,ready:window.MediaFlowV434?.configured()}))()");
    assert.equal(gateway.version,434,'v434 gateway UI loaded');
    assert.equal(gateway.ready,false,'Do not activate providers before authentication and verification');
-   assert(foundation.count>=38,'Expected provider definitions on desktop and mobile');
+   assert(foundation.count>=37,'Expected remaining provider definitions, excluding Podcast Index');
    assert(foundation.pending,'Public staged book provider visible in registry');
    const dock=await cdp.evaluate("(()=>{const el=document.querySelector('.mf421-dock-progress');return el?{type:el.tagName,arrow:!!el.querySelector('.v225-btn-icon'),tabindex:el.getAttribute('tabindex')}:null})()");
    if(dock){assert.notEqual(dock.type,'BUTTON','Dock progression must never become a generic button');assert(!dock.arrow,'First-paint circle arrow must never appear');assert.equal(dock.tabindex,'0');}
