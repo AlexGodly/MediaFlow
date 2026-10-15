@@ -12,7 +12,7 @@ const MF424_PROVIDER_META = [
   {id:'tvmaze',name:'TVmaze',types:['tv'],limit:50,gap:1200,credentials:false,level:'existing'},
   {id:'mangadex',name:'MangaDex',types:['manga'],limit:20,gap:3500,credentials:false,level:'experimental'},
   {id:'openlibrary',name:'Open Library',types:['book','comic','reading'],limit:20,gap:3500,credentials:false,level:'existing'},
-  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:15,gap:4500,credentials:false,level:'experimental'},
+  {id:'googlebooks',name:'Google Books',types:['book','comic','reading'],limit:0,gap:4500,credentials:true,level:'setup'},
   {id:'simkl',name:'SIMKL',types:['anime','anime-movie','tv','movie'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'malofficial',name:'MyAnimeList Official',types:['anime','anime-movie','manga'],limit:0,gap:0,credentials:true,level:'restricted'},
   {id:'tmdb',name:'TMDB',types:['movie','tv'],limit:0,gap:0,credentials:true,level:'setup'},
@@ -34,8 +34,8 @@ const MF424_PROVIDER_META = [
   {id:'crossref',name:'Crossref',types:['book'],limit:0,gap:0,credentials:false,level:'bibliographic'}
 ];
 const MF424_DEFAULT = {mode:'parts',partSize:100,continuation:'automatic',selection:'hybrid',protection:'safe',autoResume:true,
-  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks'],
-  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary','googlebooks']};
+  priorities:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary'],
+  enabled:['tenrai','jikan','anilist','kitsu','tvmaze','mangadex','openlibrary']};
 const MF424 = {db:null,job:null,running:false,runner:null,leaseTimer:0,leaseToken:'',timer:0,overlay:false,expanded:false,
   history:[],rate:{},cache:new Map(),account:'',ready:false,status:'idle',toastAt:0};
 function mf424Account(){return String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');}
