@@ -501,6 +501,12 @@ async function mf424Init(){try{await mf424DB();MF424.account=mf424Account();MF42
   if(interrupted){MF424.job.status='paused';MF424.job.pauseRequested=false;}
   MF424.ready=true;mf424Paint();if(MF424.job&&mf424Defaults().autoResume&&!MF424.job.pauseRequested&&!['stopped','complete','waiting-review','waiting-part'].includes(MF424.job.status))mf424Resume();
 }catch(e){console.warn('MediaFlow v424 persistence unavailable:',e);mf424Paint();}}
+// Public extension point: registering a future provider with a real adapter
+// adds it automatically to Cover Recovery and Find Cover source options.
+window.MediaFlowCoverProviders=Object.freeze({
+ register:mf424RegisterCoverProvider,
+ list:()=>mf424CoverProviderChoices({categoryId:''}).map(({id,name,types,limit,credentials,level})=>({id,name,types,limit,credentials,level}))
+});
 Object.assign(App,{mf424Start,mf424OpenConfig,mf424MoveProvider,mf424CloseModal,mf424Toggle,mf424Pause,mf424Resume,mf424StopTitle,mf424StopPart,
   mf424Review,mf424CloseReview,mf424DiscardReview,mf424Confirm,mf424Export,mf424ExportCSV,mf424RetryUnresolved});
 // Preserve the existing Settings button and Dashboard manual-cover behavior.
