@@ -96,7 +96,7 @@ async function previewDraft(item){try{const data=await discover(item);if(!data.s
 async function worker(){await init();const job=M.job;if(!job||job.account!==account())return;
  job.status='running';M.running=true;await persist();
  try{let processed=0;while(job.cursor<job.ids.length){
-  if(job.paused||job.stopped||job.account!==account()){job.status=job.stopped?'stopped':'paused';break;}
+  if(job.paused||job.stopped||job.account!==account()||!window.MediaFlowV428Hub?.ownsLease()){job.status=job.stopped?'stopped':'paused';break;}
   const id=job.ids[job.cursor],item=lookup(id);if(item){const version=Number(item.modifiedAt)||0;
    try{const found=await discover({...item});if(found.source){const differences=diff(item,found).filter(d=>job.method==='review'||d.selected);
     if(differences.length){job.reviews.push({itemId:id,version,found,differences});}else job.skipped++;
