@@ -1,14 +1,15 @@
 {
-  "name": "mediaflow-v427",
+  "name": "mediaflow-v428",
   "private": true,
-  "version": "4.2.7",
+  "version": "4.2.8",
   "type": "module",
   "scripts": {
     "build:v265": "vite build --config vite.v261.config.ts",
     "test:v369": "node tests/test-v369-itemized-contract.cjs",
     "test:v370": "node tests/test-v369-itemized-contract.cjs",
     "test:v371": "node tests/test-v369-itemized-contract.cjs",
-    "test:v372": "node tests/test-v369-itemized-contract.cjs"
+    "test:v372": "node tests/test-v369-itemized-contract.cjs",
+    "test:v428": "node scripts/test-v428-recovery.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
