@@ -39,7 +39,7 @@ async function discover(item){
  if(t==='anime'||t==='manga'){
   const isManga=t==='manga',prefix=isManga?'manga':'anime',mal=ids.mal||item.malId;
   if(mal&&/^\d+$/.test(String(mal))){const data=await request('jikan','https://api.jikan.moe/v4/'+prefix+'/'+encodeURIComponent(mal)+'/full');
-    if(data?.data){const d=mapJikan(data.data,t);if(norm(d.title)===norm(title)||Number(mal)===Number(d.recordId))return d;return {reason:'MAL record title does not match; review manually'};}}
+    if(data?.data){const d=mapJikan(data.data,t);if(norm(d.title)===norm(title)||[data.data.title_english,data.data.title_japanese,...(data.data.title_synonyms||[])].some(t=>norm(t)===norm(title)))return d;return {reason:'MAL record title does not match; review manually'};}}
   const search=await request('jikan','https://api.jikan.moe/v4/'+prefix+'?q='+encodeURIComponent(title)+'&limit=5');
   const exact=(search?.data||[]).filter(v=>[v.title,v.title_english,v.title_japanese,...(v.title_synonyms||[])].some(n=>norm(n)===norm(title)));
   if(exact.length===1)return mapJikan(exact[0],t);
@@ -64,12 +64,10 @@ function diff(item,result){if(!result||!result.source)return [];
   const equal=JSON.stringify(old??null)===JSON.stringify(found);
   if(equal)continue;
   const oldMissing=old==null||old===''||Array.isArray(old)&&!old.length||(f==='total'&&Number(old)===0);
-  entries.push({field:f,old,found,selected:oldMissing});}
+  entries.push({field:f,old,found:typeof old==='string'&&Array.isArray(found)?found.join(', '):found,selected:oldMissing});}
  return entries;
 }
-async function init(){if(M.ready)return;M.ready=true;M.account=account();
- try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}
- window.MediaFlowV428Hub?.paint();}
+async function init(){if(M.initPromise)return M.initPromise;M.initPromise=(async()=>{M.account=account();try{const old=await store('get');if(old?.account===account()){M.job=old;if(['running','ready','cooldown'].includes(old.status)){M.job.status='paused';await persist();}}}catch(e){console.warn('Metadata recovery storage unavailable',e);}M.ready=true;window.MediaFlowV428Hub?.paint();})();return M.initPromise;}
 function draftItem(entry,id){const saved=lookup(id||S.modal?.data?.id);if(saved)return {...saved};
  const d=S.modal?.data||{};return {...d,id:'',title:document.getElementById('l-title')?.value||d.title||'',categoryId:document.getElementById('l-category')?.value||d.categoryId||'',externalIds:{...(d.externalIds||{})}};}
 function close(){document.getElementById('mf428-metadata-modal')?.remove();}
@@ -120,7 +118,7 @@ function renderReview(){document.getElementById('mf428-meta-review')?.remove();c
  document.body.appendChild(root);
 }
 function closeReview(){document.getElementById('mf428-meta-review')?.remove();}
-async function skip(){const current=M.reviews.shift();if(M.job?.reviews?.[0]===current){M.job.reviews.shift();await persist();}closeReview();if(M.reviews.length)renderReview();}
+async function skip(){const same=M.job&&M.reviews===M.job.reviews;M.reviews.shift();if(same){if(!M.job.reviews.length&&M.job.cursor>=M.job.ids.length)M.job.status='complete';await persist();}closeReview();if(M.reviews.length)renderReview();}
 async function apply(){
  const current=M.reviews[0],checked=[...document.querySelectorAll('#mf428-meta-review [data-index]:checked')].map(x=>Number(x.dataset.index));
  if(!current||!checked.length){showToast('Select at least one field, or skip this result.');return;}
@@ -154,6 +152,8 @@ function enhanceSettings(){if(S.view!=='settings')return;const anchor=document.q
  const el=document.createElement('div');el.className='mf366-subgroup mf428-settings-group';el.innerHTML='<h3 class="mf366-subgroup-heading">Metadata Recovery</h3><div class="mf366-subgroup-content"><section class="mf425-settings-card"><div class="mf425-settings-lead"><strong>Fix Metadata</strong><p>Recover incomplete title information with verified public providers. Review changes before saving.</p></div><div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf428MetadataOpen(\'settings\')">Configure & Start Metadata Recovery</button><button type="button" class="btn btn-ghost" onclick="App.mf428MetadataReview()">Review Pending</button></div></section></div>';
  anchor.insertAdjacentElement('afterend',el);}
 if(typeof MediaFlowRuntime!=='undefined'&&MediaFlowRuntime.registerPageEnhancer)MediaFlowRuntime.registerPageEnhancer('settings',enhanceSettings);
+function enhanceDetails(){const root=document.querySelector('#modal-root');if(!root||!S.modal?.data?.id)return;const action=root.querySelector('[onclick*="v181QuickEditDetail"][onclick*="coverUrl"]');if(action&&!root.querySelector('.mf428-details-action')){const b=document.createElement('button');b.type='button';b.className='btn btn-sm mf428-details-action';b.textContent='Fix Metadata';b.addEventListener('click',()=>App.mf428MetadataOpen('details',String(S.modal.data.id)));action.insertAdjacentElement('afterend',b);}}
+if(document.body){const watch=new MutationObserver(ms=>{if(ms.some(x=>x.target instanceof Element&&(x.target.closest('#modal-root')||x.target.id==='modal-root')))queueMicrotask(enhanceDetails);});watch.observe(document.body,{childList:true,subtree:true});queueMicrotask(enhanceDetails);}
 if(typeof App.v181QuickEditDetail==='function'){const old=App.v181QuickEditDetail;App.v181QuickEditDetail=function(id,key){const result=old.apply(this,arguments);if(key==='coverUrl'){const el=document.querySelector('#v181-quick-detail-overlay .mf425-editor-tools');if(el&&!el.querySelector('.mf428-edit-action'))el.insertAdjacentHTML('beforeend','<button type="button" class="btn btn-ghost mf428-edit-action" onclick="App.mf428MetadataOpen(\'details\',\''+esc(id)+'\')">Fix Metadata</button>');}return result;};}
 Object.assign(App,{mf428MetadataOpen:open,mf428MetadataClose:close,mf428MetadataStart:start,mf428MetadataControl:control,mf428MetadataReview:review,mf428MetadataCloseReview:closeReview,mf428MetadataSkip:skip,mf428MetadataApply:apply});
 window.MediaFlowV428Metadata={progress:()=>M.job?{at:M.job.cursor||0,total:M.job.ids?.length||0}:{at:0,total:0},status:()=>M.job?.status||'idle',schema,review,open};
