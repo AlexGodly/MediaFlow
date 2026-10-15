@@ -324,10 +324,9 @@ async function mf424Candidates(item){
         if(!candidate||dedupe.has(candidate.url)||(!manual&&candidate.confidence<.65))continue;
         dedupe.add(candidate.url);
         if(!await mf424Image(candidate.url,candidate.provider))continue;
-        found.push(candidate);
-        if(!manual&&candidate.idMatch&&candidate.confidence>=.95&&mf424Defaults().selection!=='manual')return [candidate];
-        if(found.length>=(manual?16:4))return found;
-        if(!manual&&mf424Defaults().selection==='smart'&&candidate.idMatch&&candidate.confidence>=.95)return found;
+        // Keep collecting choice candidates rather than stopping after the
+        // first confident ID match. Continue to the next registered provider.
+        if(found.length<24)found.push(candidate);
       }
     }catch(error){if(error.paused)break;mf424Note('provider-error',provider+': '+String(error.message||error),item.id);}
   }
