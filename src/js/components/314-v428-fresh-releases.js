@@ -104,7 +104,7 @@ async function worker(params={}){await init();if(!params.universal)return window
    catch(e){j.animeDone=true;j.legacyError=String(e.message||e);console.warn('Seasonal Smart Engine could not verify every record',e);}
    await save();
   }
-  while(j.cursor<j.ids.length){if(j.paused||j.stopped||account()!==j.account){j.status=j.stopped?'stopped':'paused';break;}
+  while(j.cursor<j.ids.length){if(j.paused||j.stopped||account()!==j.account||!window.MediaFlowV428Hub?.ownsLease()){j.status=j.stopped?'stopped':'paused';break;}
    const id=j.ids[j.cursor],item=(S.library||[]).find(i=>String(i?.id)===id);
    if(item){const type=media(item);if(type==='anime'){const state=typeof v401EpisodeOutcome==='function'?v401EpisodeOutcome(item):'unknown';if(state==='fresh')j.fresh++;else if(state==='none')j.none++;else j.unknown++;if(j.results.length<5000)j.results.push({id,title:item.title,status:state==='fresh'?'fresh':state==='none'?'none':'unknown',reason:j.legacyError||'Original seasonal verification result',source:'Alex Godly Smart Engine',unit:'episodes'});}
     else{const r=await one(item,j.mode,j.provider);j[r.status==='fresh'?'fresh':r.status==='none'?'none':'unknown']++;if((r.status==='fresh'||r.status==='unknown')&&j.results.length<5000)j.results.push({id,title:item.title,...r});}
