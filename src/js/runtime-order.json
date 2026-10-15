@@ -158,5 +158,6 @@
   "components/301-v408-performance-stability-ui.js",
   "components/302-v417-library-icons-fallback.js",
   "components/303-v418-collections-views-cover-parity.js",
-  "components/304-v419-recommendations-cover-logging-sidebar.js"
+  "components/304-v419-recommendations-cover-logging-sidebar.js",
+  "components/305-v420-covers-dashboard-sidebar-fixes.js"
 ]

@@ -1,3 +1,11 @@
+## MediaFlow v420 — Missing Cover Repair & Responsive UI
+
+- Fixed actual missing-cover rendering (centered category icons that resize with the poster) inside Collections and Normal/Dynamic Library Covers and Covers + Titles.
+- Repaired Logging Browse Library membership dropdown alignment.
+- Prevented desktop sidebar progression widgets from being clipped when the window is short.
+- Redesigned Dashboard task, time and streak statistic cards, maintaining original calculation logic.
+- Added source-backed browser checks for visibility, centering, dynamic cover scaling, dropdown geometry, and scrolling.
+
 ## MediaFlow v419 — Collections 2.0 & Missing Cover Parity
 
 - Collections detail: redesigned responsive List, Compact and Cards with configured category/status icons, progress counts and bars, and functional Details/Edit/Remove actions.

@@ -199,36 +199,36 @@ function renderDashboard(){
 
     </div>
 
-    <div class="today-strip">
-
-      <div class="stat-box">
-
-        <div class="num">${totals.tasks} / ${st.tasksPerDay}</div>
-
-        <div class="lbl">tasks complete</div>
-
-        <div class="progress-track"><div class="progress-fill" style="width:${tasksPct}%"></div></div>
-
-      </div>
-
-      <div class="stat-box">
-
-        <div class="num">${fmtMinutes(totals.minutes)} / ${fmtMinutes(st.dailyMinutes)}</div>
-
-        <div class="lbl">time invested</div>
-
-        <div class="progress-track"><div class="progress-fill" style="width:${minutesPct}%"></div></div>
-
-      </div>
-
-      <div class="stat-box">
-
-        <div class="num">${computeDayStreak()}</div>
-
-        <div class="lbl">day streak</div>
-
-      </div>
-
+    <div class="today-strip mf420-activity-cards" aria-label="Daily activity overview">
+      <section class="stat-box mf420-activity-card" aria-label="Tasks completed">
+        <div class="mf420-stat-heading">
+          <span class="mf420-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m7 12 3 3 6-7M7 18h10"/></svg></span>
+          <span class="mf420-stat-percent">${tasksPct}%</span>
+        </div>
+        <div class="mf420-stat-numbers"><strong>${totals.tasks.toLocaleString()}</strong><span>/ ${Number(st.tasksPerDay||0).toLocaleString()} tasks</span></div>
+        <div class="mf420-stat-label">Tasks completed</div>
+        <div class="mf420-stat-detail">${Math.max(0,Number(st.tasksPerDay||0)-totals.tasks).toLocaleString()} tasks remaining today</div>
+        <div class="mf420-stat-track" role="progressbar" aria-label="Tasks completed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${tasksPct}"><span style="width:${tasksPct}%"></span></div>
+      </section>
+      <section class="stat-box mf420-activity-card" aria-label="Time invested">
+        <div class="mf420-stat-heading">
+          <span class="mf420-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></svg></span>
+          <span class="mf420-stat-percent">${minutesPct}%</span>
+        </div>
+        <div class="mf420-stat-numbers"><strong>${fmtMinutes(totals.minutes)}</strong><span>/ ${fmtMinutes(st.dailyMinutes)} target</span></div>
+        <div class="mf420-stat-label">Time invested</div>
+        <div class="mf420-stat-detail">${fmtMinutes(Math.max(0,(Number(st.dailyMinutes)||0)-totals.minutes))} remaining today</div>
+        <div class="mf420-stat-track" role="progressbar" aria-label="Daily time invested" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${minutesPct}"><span style="width:${minutesPct}%"></span></div>
+      </section>
+      <section class="stat-box mf420-activity-card mf420-streak-card" aria-label="Day streak">
+        <div class="mf420-stat-heading">
+          <span class="mf420-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-3-8-8 0-4 4-8 5-11 .5 3 4 4 4 8 2-1 3-3 3-5 7 7 7 16-4 16Z"/></svg></span>
+          <span class="mf420-stat-percent">Consistency</span>
+        </div>
+        <div class="mf420-stat-numbers"><strong>${computeDayStreak().toLocaleString()}</strong><span>days</span></div>
+        <div class="mf420-stat-label">Day streak</div>
+        <div class="mf420-stat-detail">${computeDayStreak()>0?'Keep your momentum going':'Complete your first activity to build a streak'}</div>
+      </section>
     </div>
 
     ${heroHtml}
