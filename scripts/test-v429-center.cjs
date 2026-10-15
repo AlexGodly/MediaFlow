@@ -32,7 +32,8 @@ assert(css.includes('prefers-reduced-motion'));
 assert(!cover.includes('Other researched providers (not available without credentials'),'Setup-only provider names must not leak into UI');
 const imported=['year','mediaFormat','durationMinutes','releaseDate','seasonLabel','ageRating','communityScore','mediaSource','demographic','studios','producers','genres','themes','synopsis'];
 for(const field of imported)assert(meta.includes("'"+field+"'"),'Missing MediaServices field: '+field);
-assert(fresh.includes('globalScope')&&fresh.includes('cachedAnimeOnly'),'Scoped anime must not trigger global refresh');
+assert(fresh.includes('runLegacyFresh({ids:selectedAnime,force:true})'),'Scoped anime requests must pass exact selected IDs into original engine');
+assert(!fresh.includes('globalScope'),'Global anime scan fallback must not bypass selected scope');
 for(const kind of ['anime','tv','manga','comics','books','movies','webnovels','podcasts','webseries'])
  assert(fresh.includes('smart:'+kind),'Missing media-specific engine mode '+kind);
 assert(fresh.includes('smart:')&&fresh.includes("providerMode"),'Provider policy shared with specialized engines');
