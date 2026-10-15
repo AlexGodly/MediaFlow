@@ -33,18 +33,28 @@ async function persist(){if(M.job)await store('put',M.job,M.job.account);window.
 function kind(item){const cat=String(item.categoryId||'').toLowerCase();const label=(S.categories||[]).find(c=>String(c.id)===cat)?.name||cat;
  const v=String(label).toLowerCase();return /manga|manhwa|manhua/.test(v)?'manga':/anime/.test(v)?'anime':/series|television|tv/.test(v)?'tv':/book|novel/.test(v)?'books':'other';}
 async function request(provider,url){const row=M.rate[provider]||(M.rate[provider]={next:0,cooldown:0});
- const wait=Math.max(0,row.next-Date.now(),row.cooldown-Date.now());if(wait)await sleep(wait);
- row.next=Date.now()+(provider==='jikan'?2500:1300);
  for(let attempt=0;attempt<3;attempt++){
+  const gap=provider==='jikan'?2500:1300;
+  const wait=Math.max(0,row.next-Date.now(),row.cooldown-Date.now());if(wait)await sleep(wait);
+  row.next=Date.now()+gap;
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),14000);
-  try{const r=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
+  try{
+   const r=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
    if(r.ok)return r.json();
-   if(r.status===429||r.status===503){const raw=Number(r.headers.get('Retry-After'));row.cooldown=Date.now()+(Number.isFinite(raw)&&raw>0?Math.min(300000,raw*1000):Math.min(300000,30000*(attempt+1)));await sleep(Math.max(0,row.cooldown-Date.now()));continue;}
    if(r.status===404)return null;
+   if(r.status===429||r.status===503||r.status>=500){
+    const raw=String(r.headers.get('Retry-After')||'');
+    const sec=Number(raw),absolute=Date.parse(raw);
+    const retry=Number.isFinite(sec)&&sec>0?sec*1000:Number.isFinite(absolute)?Math.max(0,absolute-Date.now()):30000*(attempt+1);
+    row.cooldown=Date.now()+Math.max(1500,Math.min(300000,retry));continue;
+   }
    throw Error(provider+' HTTP '+r.status);
+  }catch(e){
+   if(attempt>=2||!(e?.name==='AbortError'||e instanceof TypeError||/network|failed to fetch/i.test(String(e?.message||''))))throw e;
+   row.cooldown=Date.now()+1500*(attempt+1);
   }finally{clearTimeout(timeout);}
  }
- throw Error(provider+' could not recover after rate limiting');
+ throw Error(provider+' could not recover after retries');
 }
 function cleanHtml(value){
  // DOMParser's inert HTML document avoids mounting untrusted HTML in MediaFlow.
