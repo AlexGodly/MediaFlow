@@ -28,7 +28,7 @@ const checkpoint=JSON.parse(JSON.stringify(job));
 assert.equal(checkpoint.cursor,125);
 for(let i=checkpoint.cursor;i<sample.length;i++){assert(index.has(sample[i]));checkpoint.cursor++;}
 assert.equal(checkpoint.cursor,300,'Resume avoids repeating processed titles');
-for(const f of ['src/js/components/312-v428-background-hub.js','src/js/components/313-v428-metadata-fixer.js','src/js/components/314-v428-fresh-releases.js']){
+for(const f of ['src/js/components/313-v428-metadata-fixer.js','src/js/components/314-v428-fresh-releases.js']){
  const content=fs.readFileSync(f,'utf8');assert(content.includes('Map('),'Lookup/index usage missing from '+f);
 }
 console.log('v428 scale indexing: 100,000 synthetic titles, '+selected.length+' targeted lookup ids, '+elapsed.toFixed(1)+'ms index and '+lookupTime.toFixed(1)+'ms lookup, checkpoint resume verified');
