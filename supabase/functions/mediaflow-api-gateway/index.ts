@@ -133,7 +133,7 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
  if(p==="metron"){
   const d=await read(p,"https://metron.cloud/api/series/?name="+encodeURIComponent(title),{"Authorization":"Bearer "+secret});
   for(const r of list(d).slice(0,8))
-   add({id:r.id,name:r.name||r.title,year:r.year_began,url:"",link:"https://metron.cloud/series/"+r.id+"/",
+   add({id:r.id,name:r.name||r.title,year:r.year_began,image:"",link:"https://metron.cloud/series/"+r.id+"/",
     key:"metron_series",other:{gcd_series:r.gcd_id,comicvine_volume:r.cv_id}});
  }
  if(p==="trakt"){
