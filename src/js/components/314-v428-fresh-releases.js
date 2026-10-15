@@ -191,18 +191,46 @@ async function feed(item){
   {url,recordId:url,observedCount:parsed.items.length,releasedAt:latest,
    evidenceScope:'Existing per-title feed; released unique GUIDs with explicit unit numbers'});
 }
-async function one(item,mode,selected){const type=media(item),supported=Object.entries(sourceKinds).filter(([_,types])=>types.includes(type)).map(([name])=>name);
- if(!supported.length)return {status:'unknown',reason:'No verified public release adapter for '+type,unit:type};
- const providers=mode==='individual'?[selected].filter(p=>supported.includes(p)):type==='tv'?['tvmaze','episodate']:type==='manga'?['mangadex']:['tvmaze'];
- if(!providers.length)return {status:'unknown',reason:'Provider does not support '+type,unit:type};
- const evidence=[];for(const p of providers){
-  try{const row=await ({tvmaze,episodate,mangadex}[p])(item);evidence.push({...row,provider:p});if(mode==='automatic'&&row.status==='verified')break;}
-  catch(e){evidence.push({status:'unknown',provider:p,reason:String(e.message||e)});}
+const adapters={tvmaze,episodate,mangadex,feed};
+function verifiedEvidence(item,evidence,mode='automatic2'){
+ const verified=evidence.filter(e=>['fresh','none','verified'].includes(e.status)&&Number.isSafeInteger(Number(e.available))&&Number(e.available)>=0);
+ const failures=evidence.filter(e=>e.status==='unknown');
+ const positives=verified.filter(e=>Number(e.available)>Math.max(0,Number(item.progress)||0));
+ if(positives.length){
+  const best=positives.reduce((a,b)=>a.available>=b.available?a:b);
+  return {...best,status:'fresh',unwatched:Math.max(0,best.available-(Number(item.progress)||0)),evidence,disagreement:new Set(verified.map(x=>x.available)).size>1};
  }
- const verified=evidence.filter(x=>x.status==='verified'&&Number.isFinite(x.available));
- if(!verified.length)return {status:'unknown',reason:evidence.map(x=>x.provider+': '+x.reason).join(' | '),evidence};
+ if(!verified.length)return {status:'unknown',unit:types[media(item)]||'releases',reason:evidence.map(x=>x.provider+': '+(x.reason||x.status)).join(' | '),evidence};
+ // A positive from any verifiable source is enough to mark Fresh. For a
+ // negative conclusion, every attempted applicable provider must have
+ // completed positively and no partial/unknown source may remain.
+ if(failures.length||verified.some(e=>e.partial===true)){
+  return {status:'unknown',unit:types[media(item)]||'releases',reason:'Cannot confirm caught up: sources failed or only partial evidence exists',evidence};
+ }
  const best=verified.reduce((a,b)=>a.available>=b.available?a:b);
- const watched=Number(item.progress)||0;return {status:best.available>watched?'fresh':'none',available:best.available,unwatched:Math.max(0,best.available-watched),source:best.source,unit:best.unit,url:best.url||'',releasedAt:best.releasedAt||'',evidence,partial:best.partial||false};
+ return {...best,status:'none',unwatched:0,evidence,disagreement:new Set(verified.map(x=>x.available)).size>1};
+}
+async function one(item,mode,selected){
+ const type=media(item),supported=Object.entries(sourceKinds).filter(([_,types])=>types.includes(type)).map(([name])=>name);
+ // An RSS adapter requires an already-existing title feed. No API setup
+ // controls are surfaced in the MediaFlow UI for unconfigured providers.
+ const eligible=supported.filter(p=>p!=='feed'||validFeedUrl(item));
+ if(!eligible.length)return {status:'unknown',unit:types[type],reason:'No configured and verified release evidence source for '+type,evidence:[]};
+ const providers=mode==='individual'
+  ?[selected].filter(p=>eligible.includes(p))
+  :type==='tv'?['tvmaze','episodate'].filter(p=>eligible.includes(p))
+  :eligible;
+ if(!providers.length)return {status:'unknown',unit:types[type],reason:'Chosen provider is not available for '+type,evidence:[]};
+ const evidence=[];
+ for(const p of providers){
+  try{
+   const row=await adapters[p](item);
+   evidence.push({...row,provider:p});
+   if(mode==='automatic'&&row.status==='fresh')break;
+   if(mode==='automatic'&&row.status==='none'&&!row.partial)break;
+  }catch(e){evidence.push({status:'unknown',provider:p,reason:String(e.message||e).slice(0,220)});}
+ }
+ return verifiedEvidence(item,evidence,mode);
 }
 function report(){const j=F.job;if(!j){showToast('No Fresh Releases results yet.');return;}
  document.getElementById('mf428-fresh-report')?.remove();const root=document.createElement('div');root.id='mf428-fresh-report';root.className='mf428-metadata-overlay';
