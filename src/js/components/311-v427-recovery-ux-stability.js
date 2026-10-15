@@ -158,7 +158,7 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
     '<div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><p class="mf425-loading">Checking permitted cover providers safely…</p></div>'+ 
     '<div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
   document.body.appendChild(root);mf427CleanAdvancedIcons(root);
-  const found=[],seen=new Set(),outcomes=[];
+  const found=[],seen=new Set(),outcomes=[];let exhausted=false;
   const ordered=allowed.filter(p=>mf424HasID(current,p)).concat(allowed.filter(p=>!mf424HasID(current,p)));
   try{
     for(const provider of ordered){
@@ -179,10 +179,27 @@ async function mf427OpenSearch(entry='editor',item=null,providers=null){
       const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
       // Continue checking all eligible sources even after the results view is full.
     }
+    exhausted=true;
   }finally{
     if(serial===MF427.requestSerial){
       MF425.quick={candidates:found};MF425.quickBusy=false;
       const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,current)+mf427ProviderSummary(outcomes);
+      // Opt-in: auto-apply only one uniquely ID-verified image across ALL checked
+      // providers. A title-only match, provider error, conflicting artwork,
+      // cancellation, or changed Dashboard title ALWAYS falls back to review.
+      if(exhausted&&entry==='dashboard'&&S.settings?.v430MissingCoversAutoSave&&found.length===1){
+        const selected=found[0],live=v192CurrentMissingCoverItem();
+        const stillSame=live&&String(live.id)===String(current.id);
+        if(stillSame&&selected.idMatch&&Number(selected.confidence)>=.95){
+          const input=document.getElementById('v192-cover-url-input');
+          if(input){input.value=selected.url;
+            try{
+              await Promise.resolve(App.v192SaveMissingCover());
+              App.mf425CloseInstant();
+            }catch(error){console.error('Verified cover auto-save failed',error);showToast('Could not automatically save this cover. Review it manually.');}
+          }
+        }
+      }
     }
   }
 }
