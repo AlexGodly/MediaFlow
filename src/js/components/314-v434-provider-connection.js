@@ -84,6 +84,10 @@ async function mf434TestProvider(provider){
  const area=document.getElementById("mf434-test-results");if(area)area.textContent="Checking "+provider+"…";
  try{
   const reply=await mf434Call("search",{provider,title,externalIds:{}});
+  // OMDb reports some failures inside HTTP 200 JSON. A healthy provider test
+  // must confirm at least one exact-title record, not merely a 200 response.
+  if(provider==="omdb"&&!(reply.results?.length>0))
+    throw Error("OMDb responded, but no matching title was found. Try The Matrix or Breaking Bad.");
   MF434.tests[provider]={checked:Date.now(),found:reply.results?.length||0};
   S.settings=S.settings||{};
   S.settings.v434TestedProviders=[...new Set([...mf434SavedTests(),provider])];
@@ -91,7 +95,14 @@ async function mf434TestProvider(provider){
   mf434EnableAdapters();
   if(area)area.textContent=MF434_LABELS[provider]+" responded successfully · "+MF434.tests[provider].found+" matching records. "+(MF434_COVER.has(provider)?"Enable it in the provider preferences for Cover Recovery.":"ID-only source; no unlicensed artwork.");
   showToast(MF434_LABELS[provider]+" API connection tested successfully.");
- }catch(e){if(area)area.textContent=MF434_LABELS[provider]+": "+String(e.message||e);showToast("Provider test failed: "+String(e.message||e));}
+ }catch(e){
+  if(provider==="omdb"&&mf434SavedTests().includes("omdb")){
+   S.settings.v434TestedProviders=mf434SavedTests().filter(p=>p!=="omdb");
+   await saveState();mf434EnableAdapters();
+  }
+  if(area)area.textContent=MF434_LABELS[provider]+": "+String(e.message||e);
+  showToast("Provider test failed: "+String(e.message||e));
+ }
  finally{MF434.busy=false;mf434RefreshPanel(true);}
 }
 function mf434Panel(){
