@@ -376,7 +376,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --quiet playwright
+          python -m pip install --quiet playwright beautifulsoup4
           python -m playwright install --with-deps chromium
           python scripts/test-v423-navigation-donation.py
           python scripts/test-v423-cover-regression.py
