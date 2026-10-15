@@ -9,7 +9,8 @@
     "test:v370": "node tests/test-v369-itemized-contract.cjs",
     "test:v371": "node tests/test-v369-itemized-contract.cjs",
     "test:v372": "node tests/test-v369-itemized-contract.cjs",
-    "test:v428": "node scripts/test-v428-recovery.cjs"
+    "test:v428": "node scripts/test-v428-recovery.cjs && node scripts/test-v428-metadata.cjs && node scripts/test-v428-fresh.cjs && node scripts/test-v428-scheduler.cjs && node scripts/test-v428-widget.cjs && node scripts/test-v428-multitab.cjs && node scripts/test-v428-scale.cjs",
+    "test:v428:browser": "node scripts/test-v428-browser.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
