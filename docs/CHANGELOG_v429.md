@@ -22,3 +22,15 @@
 
 ## Safety
 No production Supabase changes. Do not modify MediaFlow Plus or MediaFlowApp. Do not merge this preview until the remaining v429 requirements have been validated. Always preserve existing personal title records, progress, ratings, seasons, History, Collections and user data.
+
+## Reliability and public-provider improvements in this development round
+- Center now preserves the **original native Cover Recovery and Metadata Recovery form DOM** (not copied HTML) when switching tabs or minimizing. Unsaved scope, provider priorities and fields are restored unless the user explicitly opens a new scoped recovery request.
+- The old `App.mf424OpenConfig` shortcut routes into the Covers tab, in addition to the existing `App.mf425OpenConfig`, Library, Settings and Title Details shortcuts. Automatic visibility does not hide a Center the user has already opened to configure work.
+- The existing v377 seasonal anime checker already accepts an explicit `ids` argument. Universal/selected/category Fresh Episodes jobs now pass **only the selected anime title IDs** to the original engine, retaining v401/`automatic2` evidence logic while preventing unrelated seasonal refreshes. An unavailable scan returns Unknown rather than silently promoting old results.
+- Added **AniList** as a no-key anime/manga metadata source using official GraphQL records and strict title/ID verification. Source mapping can fill already-supported rich fields including synopsis, genres, themes, studios, release date, format, duration, official total (when safe), media source and external community score. Existing personal ratings remain untouched.
+- Added **MangaDex** title-UUID metadata lookups (synopsis, official taxonomy, demographics and year) and **Open Library** exact ISBN/Work/Edition-ID lookups for books and comics. Incomplete feeds never imply official chapter counts.
+- All imported v178 rich metadata fields remain selectable; unsupported creator credits, aliases, publishing hierarchy and unknown custom imported fields are **still not silently fabricated**.
+- New browser regressions cover real form-value persistence across tab changes/minimization and the original Cover Recovery settings entry point. Offline source tests verify AniList/MangaDex/Open Library identity evidence and manual/progress protection.
+- No production Supabase writes, schema changes, Provider secrets, paid services, or deployment in this development round.
+
+**Further release blockers:** wider verified provider coverage across the three features, complete import field mapping beyond the current persisted schema, authenticated browser/provider integration and production-like 100k-title UI/sync testing. `v429` remains a **draft development update**, not a published GitHub Release.
