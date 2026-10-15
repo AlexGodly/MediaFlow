@@ -76,7 +76,7 @@ jobs:
           git add --sparse -f legacy/v/434
           if ! git diff --cached --quiet; then
             git commit -m 'build(v434): verified site and full legacy archive [skip ci]'
-            git push origin HEAD:feature/v434-provider-registry-id-foundation
+            git push origin HEAD:feature/v434-gateway-provider-validation
           fi
       - uses: actions/upload-artifact@v4
         with:
