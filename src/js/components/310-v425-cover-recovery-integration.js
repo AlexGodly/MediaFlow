@@ -94,8 +94,8 @@ renderLibrary=function(){let h=String(mf425OldLibrary.apply(this,arguments)||'')
 // Dashboard's existing validated paste/save UI stays untouched.
 const mf425OldMissing=v192MissingCoversHtml;
 v192MissingCoversHtml=function(){let h=String(mf425OldMissing.apply(this,arguments)||'');if(!h.includes('v192-cover-url-input'))return h;
- const btn='<div class="mf425-dashboard-cover-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button></div>';
- return h.replace('<div class="v123-rating-actions v192-cover-actions">',btn+'<div class="v123-rating-actions v192-cover-actions">');};
+ const btn='<button type="button" class="btn btn-ghost mf430-find-cover" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button>';
+ return h.replace('<div class="v123-rating-actions v192-cover-actions">','<div class="v123-rating-actions v192-cover-actions">'+btn);};
 
 // Preserve the established fast cover picker and improve its entire contrast layer.
 const mf425OldPicker=coverPickerModalHtml;
