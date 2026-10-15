@@ -32,7 +32,7 @@ const fake={
  mf425ScopeChange:()=>{},
  mf425Counts:(scope)=>({eligible:scope.ids?.filter(x=>x!=='2').length||0}),
  mf425Icon:()=>'<svg></svg>',mf425Esc:x=>String(x),
- mf397Markup:()=>'<div class="mf397-fan"></div>\n      <button type="button" id="mf397-fab"></button>',
+ mf397Markup:()=>'<div class="mf397-fan">\n      </div>\n      <button type="button" id="mf397-fab"></button>',
  mf397Action:()=>{},mf397SetMenu:()=>{},showToast:()=>{},
  App:{mf425OpenConfig:entry=>{fake.lastEntry=entry}},
  document:{getElementById:()=>null,querySelectorAll:()=>[],querySelector:()=>null}
