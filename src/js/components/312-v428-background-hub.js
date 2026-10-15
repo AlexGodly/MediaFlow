@@ -266,16 +266,45 @@ function paint(){if(!document.body)return;load();const v=prefs().visibility,exis
   HUB.lastMarkup=markup;
  }
 }
-function settingsHtml(){const selected=prefs().visibility,pos=prefs().position;
- return '<div class="mf428-widget-settings"><strong>Background Processes Widget</strong><p>Monitor Cover Recovery, Metadata Recovery and Fresh Releases, or start them from an always-visible launcher.</p>'+
-  '<label for="mf428-visibility">Widget visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+[['hidden','Hidden'],['auto','Automatic — show for background work'],['always','Always Show — launcher and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select>'+
-  '<label for="mf428-position">Widget position</label><select id="mf428-position" onchange="App.mf428SetPosition(this.value)"><option value="right" '+(pos!=='left'?'selected':'')+'>Bottom right</option><option value="left" '+(pos==='left'?'selected':'')+'>Bottom left</option></select>'+
-  '<p class="hint">Expand or collapse the widget with its heading. Hiding the widget never stops processing. Browser-closed work resumes from saved checkpoints when supported.</p></div>';
+function settingsHtml(){
+ const set=prefs(),selected=set.visibility,pos=set.position;
+ return '<div class="mf428-widget-settings" data-mf428-setting="widget">'+
+  '<div class="mf405-group-kicker">BACKGROUND OPERATIONS</div>'+
+  '<div class="mf428-widget-intro"><strong>Background Processes</strong><p>Track and launch Cover Recovery, Metadata Recovery and Fresh Releases from one MediaFlow-themed widget.</p></div>'+
+  '<label for="mf428-visibility">Visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+
+  [['hidden','Hidden'],['auto','Automatic — when work needs attention'],['always','Always Show — quick launch and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select>'+
+  '<div class="mf428-widget-options">'+
+  '<label for="mf428-position">Position</label><select id="mf428-position" onchange="App.mf428SetPosition(this.value)"><option value="right" '+(pos!=='left'?'selected':'')+'>Bottom right</option><option value="left" '+(pos==='left'?'selected':'')+'>Bottom left</option></select>'+
+  '<label for="mf428-size">Size</label><select id="mf428-size" onchange="App.mf428SetSize(this.value)"><option value="comfortable" '+(!set.compact?'selected':'')+'>Comfortable</option><option value="compact" '+(set.compact?'selected':'')+'>Compact</option></select>'+
+  '</div>'+
+  '<label class="mf428-widget-check"><input type="checkbox" id="mf428-notify" '+(set.notifications?'checked':'')+' onchange="App.mf428SetNotifications(this.checked)"><span>Process notifications <small>Completion, errors and pending manual reviews</small></span></label>'+
+  '<p class="hint">Your preferences follow the current account settings. Hiding the widget never stops a task. Browser-closed processing resumes from saved checkpoints.</p></div>';
 }
 if(typeof v405FloatingSettingsHtml==='function'){
- const previous=v405FloatingSettingsHtml;v405FloatingSettingsHtml=function(){return previous.apply(this,arguments)+settingsHtml();};
+ const previous=v405FloatingSettingsHtml;
+ v405FloatingSettingsHtml=function(){
+  const base=String(previous.apply(this,arguments)||'');
+  const closing=base.lastIndexOf('</div>');
+  if(closing<0)return base+settingsHtml();
+  return base.slice(0,closing)+'<div class="mf405-floating-divider"></div>'+settingsHtml()+base.slice(closing);
+ };
 }
-Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428SetPosition:p=>{if(['left','right'].includes(p))persistPrefs({position:p});},mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
+// The existing Settings Center owns this appearance/floating-controls group.
+// Register explicit settings so search and section navigation find these values.
+if(typeof v366RegisterSetting==='function'){
+ for(const [id,label,keywords] of [
+  ['widget','Background Processes Widget',['floating','background','recovery','fresh','widget']],
+  ['visibility','Background Processes Visibility',['floating','hide','always show','automatic']],
+  ['position','Background Processes Position',['left','right','widget']],
+  ['size','Background Processes Size',['compact','comfortable','floating']],
+  ['notify','Background Process Notifications',['alerts','notifications','review','complete']]
+ ]){
+  v366RegisterSetting({id:'v428-background-'+id,section:'v221-settings-floating-controls',
+   selector:id==='widget'?'.mf428-widget-settings':id==='visibility'?'#mf428-visibility':id==='position'?'#mf428-position':id==='size'?'#mf428-size':'#mf428-notify',
+   label,subgroup:'Background Operations',keywords});
+ }
+}
+Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;if(HUB.expanded&&noticeCount())markNoticesRead();else paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428SetPosition:p=>{if(['left','right'].includes(p))persistPrefs({position:p});},mf428SetSize:s=>{if(['compact','comfortable'].includes(s))persistPrefs({compact:s==='compact'});},mf428ToggleSize:()=>persistPrefs({compact:!prefs().compact}),mf428SetNotifications:enabled=>persistPrefs({notifications:!!enabled}),mf428ClearNotices:clearNotices,mf428ReadNotices:markNoticesRead,mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
 window.MediaFlowV428Hub={enqueue,paint,phase,progress,ownsLease:leaseHeld,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},registerFresh:(fn)=>{HUB.freshRunner=fn;pump();},runLegacyFresh:(options)=>nativeFresh?nativeFresh(options||{force:true}):Promise.resolve(null),status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil,otherTab:foreignLease()})};
 function init(){load();if(!HUB.ticker)HUB.ticker=setInterval(()=>{if(HUB.loadedFor!==account())load();renew();pump();if(!HUB.renderQueued){HUB.renderQueued=true;paint();HUB.renderQueued=false;}},1500);paint();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
