@@ -213,6 +213,7 @@ async function discover(item,allowed){
     :/^\d+$/.test(tvdb)?'https://api.tvmaze.com/lookup/shows?thetvdb='+encodeURIComponent(tvdb):'';
    let d=path?await request('tvmaze',path):null;
    if(!d){
+    if(path)return {reason:'Supplied TVmaze/IMDb/TheTVDB identifier was not found; no title-only fallback is allowed'};
     const list=await request('tvmaze','https://api.tvmaze.com/search/shows?q='+encodeURIComponent(title));
     const exact=(list||[]).map(x=>x.show).filter(x=>norm(x?.name)===norm(title));
     if(exact.length!==1)return {reason:'No unique TVmaze match'};
