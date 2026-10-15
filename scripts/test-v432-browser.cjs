@@ -81,12 +81,13 @@ async function pageReady(cdp,label){
  const proc=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu',
   '--disable-background-networking','--no-first-run','--disable-extensions',
   '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
-  '--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:'ignore'});
+  '--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});
+ let chromeErrors='';proc.stderr.on('data',chunk=>{chromeErrors+=String(chunk).slice(-3000);});
  let cdp=null;
  try{
   const active=path.join(profile,'DevToolsActivePort');
   for(let i=0;i<150&&!fs.existsSync(active);i++)await sleep(150);
-  assert(fs.existsSync(active),'Chromium debugging endpoint unavailable');
+  assert(fs.existsSync(active),'Chromium debugging endpoint unavailable: '+JSON.stringify({chrome,exit:proc.exitCode,stderr:chromeErrors.slice(-4000),profile}));
   const port=Number(fs.readFileSync(active,'utf8').split('\n')[0]);
   cdp=await connect(port);
   await cdp.send('Page.enable');await cdp.send('Runtime.enable');
