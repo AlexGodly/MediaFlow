@@ -254,13 +254,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function mf425SettingsMarkup(){const prefs=mf424Defaults(),xp=S.settings?.leveling?.coverChangeXP??DEFAULT_SETTINGS.leveling.coverChangeXP;
  const option=(v,label,current)=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+label+'</option>';
  return '<section class="mf425-settings-card" aria-label="Cover Recovery Settings"><div class="mf425-settings-lead">'+mf425Icon('images',21)+'<div><strong>Recovery preferences</strong><p>Default processing, providers, background recovery and XP rewards.</p></div></div>'+ 
- '<div class="mf425-settings-grid"><label>Recovery mode<select onchange="App.mf425SavePref(\'mode\',this.value)">'+option('parts','Part-by-Part',prefs.mode)+option('one','One-Go',prefs.mode)+'</select></label>'+ 
- '<label>Titles per part<input type="number" min="1" max="10000" value="'+Number(prefs.partSize||100)+'" onchange="App.mf425SavePref(\'partSize\',this.value)"></label>'+ 
- '<label>Continuation<select onchange="App.mf425SavePref(\'continuation\',this.value)">'+option('automatic','Automatic',prefs.continuation)+option('manual','Manual',prefs.continuation)+'</select></label>'+ 
- '<label>Cover selection<select onchange="App.mf425SavePref(\'selection\',this.value)">'+option('hybrid','Hybrid',prefs.selection)+option('smart','Smart Automatic',prefs.selection)+option('priority','Provider Priority',prefs.selection)+option('manual','Manual Selection',prefs.selection)+'</select></label>'+ 
- '<label>Rate-limit protection<select onchange="App.mf425SavePref(\'protection\',this.value)">'+option('safe','Safe',prefs.protection)+option('balanced','Balanced',prefs.protection)+option('custom','Custom',prefs.protection)+'</select></label>'+ 
- '<label>Cover XP per changed URL<input type="number" min="0" max="100000" value="'+Number(xp)+'" onchange="App.mf425SaveCoverXP(this.value)"></label></div>'+ 
- '<label class="mf425-settings-check"><input type="checkbox" '+(prefs.autoResume?'checked':'')+' onchange="App.mf425SavePref(\'autoResume\',this.checked)"> Resume background recovery when MediaFlow reopens</label>'+ 
+ '<div class="mf425-settings-grid"><label data-mf-setting-id="cover-mode">Recovery mode<select onchange="App.mf425SavePref(\'mode\',this.value)">'+option('parts','Part-by-Part',prefs.mode)+option('one','One-Go',prefs.mode)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-part-size">Titles per part<input type="number" min="1" max="10000" value="'+Number(prefs.partSize||100)+'" onchange="App.mf425SavePref(\'partSize\',this.value)"></label>'+ 
+ '<label data-mf-setting-id="cover-continuation">Continuation<select onchange="App.mf425SavePref(\'continuation\',this.value)">'+option('automatic','Automatic',prefs.continuation)+option('manual','Manual',prefs.continuation)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-selection">Cover selection<select onchange="App.mf425SavePref(\'selection\',this.value)">'+option('hybrid','Hybrid',prefs.selection)+option('smart','Smart Automatic',prefs.selection)+option('priority','Provider Priority',prefs.selection)+option('manual','Manual Selection',prefs.selection)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-protection">Rate-limit protection<select onchange="App.mf425SavePref(\'protection\',this.value)">'+option('safe','Safe',prefs.protection)+option('balanced','Balanced',prefs.protection)+option('custom','Custom',prefs.protection)+'</select></label>'+ 
+ '<label data-mf-setting-id="cover-xp">Cover XP per changed URL<input type="number" min="0" max="100000" value="'+Number(xp)+'" onchange="App.mf425SaveCoverXP(this.value)"></label></div>'+ 
+ '<label class="mf425-settings-check" data-mf-setting-id="cover-auto-resume"><input type="checkbox" '+(prefs.autoResume?'checked':'')+' onchange="App.mf425SavePref(\'autoResume\',this.checked)"> Resume background recovery when MediaFlow reopens</label>'+ 
  '<p class="mf425-settings-note">A saved cover change earns XP whether manual or automatic. Previews, retries, unchanged URLs and cloud sync do not award XP again. Provider limits remain enforced.</p>'+ 
  '<div class="mf425-settings-actions"><button type="button" class="btn btn-primary" onclick="App.mf425OpenConfig(\'settings\')">'+mf425Icon('settings')+' Configure & Start Recovery</button></div></section>';}
 function mf425SettingsEnhance(){
@@ -271,6 +271,19 @@ function mf425SettingsEnhance(){
  // Library Integrity / Library Maintenance (header, caret, Pin, search).
  // Never inject a custom accordion or a separate Cover Recovery subgroup.
  if(document.querySelector('.mf365-section[data-mf365-section="v221-settings-cover-recovery"]'))return;
+ const reg=window.MediaFlowSettingsRegistry;
+ if(reg?.registerSetting){
+   for(const [id,label,keywords] of [
+     ['cover-mode','Recovery mode','batch processing'],
+     ['cover-part-size','Titles per part','batch size'],
+     ['cover-continuation','Continuation','automatic manual'],
+     ['cover-selection','Cover selection','hybrid priority manual'],
+     ['cover-protection','Rate-limit protection','providers cooldown'],
+     ['cover-xp','Cover XP per changed URL','leveling rewards'],
+     ['cover-auto-resume','Resume background recovery','reopen resume'],
+     ['cover-confirm','Confirm before applying a selected cover','review confirmation']
+   ])reg.registerSetting({id,section:'v221-settings-cover-recovery',selector:'[data-mf-setting-id="'+id+'"]',label,keywords:[keywords]});
+ }
  const body=document.createElement('div');body.className='mf425-settings-content';
  body.innerHTML=mf425SettingsMarkup();
  center.mountSection({
