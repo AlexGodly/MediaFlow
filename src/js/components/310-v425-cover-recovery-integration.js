@@ -123,17 +123,26 @@ async function mf425Instant(entry){if(MF425.quickBusy)return;MF425.quickBusy=tru
  const item=MF425.draft;if(!item.title){MF425.quickBusy=false;showToast('Enter the title before searching for artwork.');return;}
  document.getElementById('mf425-instant-modal')?.remove();
  const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal';
- root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf425Icon('settings')+' Advanced Recovery</button></div></section>';
+ const availableProviders=mf424Order(item),activeProvider=MF425.providerPick||'';
+ root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div class="mf425-instant-provider-picker" style="display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0"><label style="flex:1;min-width:180px">Search source<select id="mf425-source-choice" class="mf425-source-choice"><option value="">All enabled providers</option>'+availableProviders.map(p=>'<option value="'+mf425Esc(p)+'" '+(activeProvider===p?'selected':'')+'>'+mf425Esc(mf424Provider(p)?.name||p)+'</option>').join('')+'</select></label><button type="button" class="btn btn-ghost" onclick="App.mf425RetryProvider()">Search selected source</button></div><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf425Icon('settings')+' Advanced Recovery</button></div></section>';
  document.body.append(root);
- const found=[],seen=new Set(),ordered=mf424Order(item);const byId=ordered.filter(p=>mf424HasID(item,p)),rest=ordered.filter(p=>!mf424HasID(item,p));
+ const found=[],seen=new Set(),ordered=availableProviders.filter(p=>!activeProvider||p===activeProvider),outcomes=[];const byId=ordered.filter(p=>mf424HasID(item,p)),rest=ordered.filter(p=>!mf424HasID(item,p));
  try{for(const provider of byId.concat(rest)){
   if(!root.isConnected)break;
-  try{for(const c of await mf424Discover(item,provider)){if(!c||c.confidence<.55||seen.has(c.url))continue;seen.add(c.url);if(await mf424Image(c.url,c.provider)){found.push(c);MF425.quick={candidates:found};}}}
-  catch(e){console.warn('v425 quick cover provider',provider,e);}
-  const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item);
+  let count=0,matched=0,failed='';
+  try{const candidates=await mf424Discover(item,provider);matched=candidates.length;
+   for(const c of candidates){if(!c||c.confidence<.55||seen.has(c.url))continue;seen.add(c.url);if(await mf424Image(c.url,c.provider)){found.push(c);count++;MF425.quick={candidates:found};}}}
+  catch(e){failed=String(e?.message||e).slice(0,120);console.warn('v425 quick cover provider',provider,e);}
+  outcomes.push({name:mf424Provider(provider)?.name||provider,count,matched,failed});
+  const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item)+mf425ProviderStatuses(outcomes);
   if(found.length>=16)break;
- }}finally{const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item);MF425.quickBusy=false;}
+ }}finally{const display=root.querySelector('#mf425-instant-results');if(display)display.innerHTML=mf425CandidatesHtml(found,item)+mf425ProviderStatuses(outcomes);MF425.quickBusy=false;}
 }
+function mf425ProviderStatuses(rows){return '<details open><summary>Provider results ('+rows.length+' checked)</summary><div class="mf424-note" role="status">'+rows.map(x=>'<div><strong>'+mf425Esc(x.name)+'</strong>: '+(x.failed?'Unavailable — '+mf425Esc(x.failed):x.count?x.count+' verified image'+(x.count===1?'':'s'):x.matched?'Records found but artwork could not be validated':'No matching record for this title')+'</div>').join('')+'</div></details>';}
+function mf425RetryProvider(){if(MF425.quickBusy){showToast('Cover search is still checking its current sources.');return;}
+ const chosen=document.getElementById('mf425-source-choice')?.value||'';
+ if(chosen&&!mf424Order(MF425.draft||{}).includes(chosen)){showToast('This provider is not available for the selected media type.');return;}
+ MF425.providerPick=chosen;return mf425Instant(MF425.quickEntry||'editor');}
 function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf425-no-results">No validated candidates yet. You can try Advanced Recovery or paste a cover URL.</div>';
  return '<div class="mf425-found-count">'+found.length+' verified-loading image candidates · choose the correct title and edition</div><div class="mf425-candidate-grid">'+found.map((c,i)=>{
  const id=mf425IdText(item,c.provider,c);return '<article class="mf425-candidate"><img src="'+mf425Esc(c.url)+'" alt="'+mf425Esc(c.title||item.title)+' poster" loading="lazy"><div class="mf425-candidate-copy"><strong>'+mf425Esc(c.title||'Untitled provider record')+'</strong><small>Library: '+mf425Esc(item.title)+'</small><span class="mf425-source">'+mf425Icon('database')+' '+mf425Esc(c.provider)+'</span><small>'+mf425Esc(id)+'</small><small>'+mf425Esc(c.reason||'Title match')+'</small>'+(c.recordUrl?'<a href="'+mf425Esc(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">'+mf425Icon('external')+' Provider record</a>':'')+'<button class="btn btn-primary" onclick="App.mf425ChooseInstant('+i+')">'+mf425Icon('check')+' Use this cover</button></div></article>';
@@ -155,8 +164,8 @@ function mf425ChooseInstant(index){const candidate=MF425.quick?.candidates?.[Num
  mf425CloseInstant();}
 function mf425CloseInstant(){document.getElementById('mf425-instant-modal')?.remove();MF425.quick=null;MF425.quickBusy=false;}
 function mf425InstantAdvanced(){const entry=MF425.quickEntry||'editor',id=MF425.draft?.id==='draft'?'':MF425.draft?.id||'';mf425CloseInstant();mf425OpenConfig(entry,id);}
-App.mf425Instant=function(entry){MF425.quick=null;MF425.quickEntry=entry;return mf425Instant(entry);};
-Object.assign(App,{mf425ChooseInstant,mf425CloseInstant,mf425InstantAdvanced});
+App.mf425Instant=function(entry){MF425.quick=null;MF425.quickEntry=entry;MF425.providerPick='';return mf425Instant(entry);};
+Object.assign(App,{mf425ChooseInstant,mf425CloseInstant,mf425InstantAdvanced,mf425RetryProvider});
 
 // The existing Title Details quick Cover URL editor gets the same two actions.
 const mf425OldOpenQuick=App.v181QuickEditDetail;
