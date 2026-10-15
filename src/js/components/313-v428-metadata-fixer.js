@@ -88,7 +88,7 @@ async function start(entry,id){await init();const item=id?lookup(id):entry==='ed
  const part=Math.max(1,Math.min(1000,Number(document.getElementById('mf428-meta-part')?.value)||100));
  const method=document.getElementById('mf428-meta-method')?.value||'missing';
  if(item&&!item.id){close();
-  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:item}))showToast('Metadata lookup queued for this unsaved draft.');
+  if(window.MediaFlowV428Hub?.enqueue('metadata',{draftPreview:item,account:account()}))showToast('Metadata lookup queued for this unsaved draft.');
   else showToast('A Metadata Recovery is already active or queued. Save the draft before running bulk recovery.');
   return;
  }
@@ -98,9 +98,9 @@ async function start(entry,id){await init();const item=id?lookup(id):entry==='ed
  M.job={account:account(),ids,cursor:0,part,method,status:'queued',reviews:[],completed:0,skipped:0,errors:[],created:Date.now(),paused:false,stopped:false};
  await persist();close();if(!window.MediaFlowV428Hub?.enqueue('metadata',{}))showToast('Metadata Recovery is already queued.');
 }
-async function previewDraft(item){try{const data=await discover(item);if(!data.source){showToast(data.reason||'No source record');return;}M.reviews=[{draft:true,itemId:'',item,found:data,differences:diff(item,data),version:0}];renderReview();}catch(e){showToast('Metadata lookup failed: '+String(e.message||e));}}
+async function previewDraft(item,owner=account()){try{const data=await discover(item);if(owner!==account())throw Error('Account changed during unsaved draft search');if(!data.source){showToast(data.reason||'No source record');return;}M.reviews=[{draft:true,itemId:'',item,owner,found:data,differences:diff(item,data),version:0}];renderReview();}catch(e){showToast('Metadata lookup failed: '+String(e.message||e));}}
 async function worker(params={}){await init();
- if(params.draftPreview){if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview);return;}
+ if(params.draftPreview){if(params.account!==account())throw Error('Unsaved title account changed');if(!window.MediaFlowV428Hub?.ownsLease())throw Error('Metadata scheduler lease unavailable');await previewDraft(params.draftPreview,params.account);return;}
  const job=M.job;if(!job||job.account!==account())return;
  job.status='running';M.running=true;await persist();
  try{let processed=0;while(job.cursor<job.ids.length){
@@ -134,7 +134,7 @@ async function apply(){
  if(!current.draft&&(!item||Number(item.modifiedAt||0)!==Number(current.version))){showToast('Title changed since lookup. Recheck metadata before applying.');return;}
  if(!current.draft&&account()!==M.job?.account){showToast('Account changed. No metadata saved.');return;}
  const selected=checked.map(i=>current.differences[i]).filter(Boolean);
- if(current.draft){let applied=0;for(const d of selected){
+ if(current.draft){if(current.owner!==account()){showToast('Account changed. Draft metadata was not applied.');return;}let applied=0;for(const d of selected){
    const aliases={description:['l-description','l-synopsis'],total:['l-total'],year:['l-year'],genres:['l-genres']};
    const el=(aliases[d.field]||[]).map(id=>document.getElementById(id)).find(Boolean);
    if(el){el.value=Array.isArray(d.found)?d.found.join(', '):String(d.found);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));applied++;}}
