@@ -105,9 +105,52 @@ async function mf424Image(url,provider=''){
 });}
 function mf424RetryAfter(h){const s=h?.get('Retry-After');if(!s)return 0;const n=Number(s);return Number.isFinite(n)?Math.max(0,n*1000):Math.max(0,Date.parse(s)-Date.now())||0;}
 const mf424Delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+// This registry is shared by bulk recovery and the instant Find Cover picker.
+// Future provider modules must register both metadata AND a functioning adapter;
+// a label without a handler must never be advertised as a working API.
+const MF424_EXTRA_COVER_ADAPTERS=new Map();
+function mf424RegisterCoverProvider(def,adapter){
+  const id=String(def?.id||'').trim();
+  if(!/^[a-z][a-z0-9-]{1,39}$/.test(id)||typeof adapter!=='function'||mf424Provider(id))
+    throw new Error('A new cover provider needs a unique ID and a working adapter');
+  if(!Array.isArray(def.types)||!def.types.length||!def.types.every(t=>typeof t==='string'))
+    throw new Error('A cover provider must declare supported media types');
+  MF424_PROVIDER_META.push({...def,id,name:String(def.name||id),credentials:Boolean(def.credentials),
+    limit:Math.max(0,Number(def.limit)||0),gap:Math.max(0,Number(def.gap)||0)});
+  MF424_EXTRA_COVER_ADAPTERS.set(id,adapter);
+  return id;
+}
 function mf424Provider(id){return MF424_PROVIDER_META.find(x=>x.id===id);}
-function mf424Order(item){const kind=v158ItemKind(item);const c=mf424Defaults();const seq=c.priorities.concat(c.enabled).filter((p,i,a)=>a.indexOf(p)===i);
-  const valid=seq.filter(p=>c.enabled.includes(p)&&mf424Provider(p)?.limit&&mf424Provider(p).types.includes(kind));
+function mf424Kind(item){
+  const original=v158ItemKind(item);
+  if(!['video','other','reading'].includes(original))return original;
+  const ids=item?.externalIds||{},cat=getCategory(item?.categoryId);
+  const name=String(item?.categoryId||'')+' '+String(cat?.name||'');
+  if(/anime/i.test(name)||ids.mal||ids.anilist||ids.kitsu)return /movie|film/i.test(name)?'anime-movie':'anime';
+  if(/manga|manhua|manhwa/i.test(name)||ids.mangadex)return 'manga';
+  if(/comic/i.test(name))return 'comic';
+  if(/book|novel|literature/i.test(name)||ids.isbn)return 'book';
+  if(/tv|television|series|episode/i.test(name)||ids.tvmaze||ids.imdb)return 'tv';
+  if(/movie|film/i.test(name))return 'movie';
+  return original;
+}
+function mf424ProviderSupports(item,provider){
+  const def=mf424Provider(provider),kind=mf424Kind(item);
+  if(!def||!def.limit)return false;
+  // Custom/imported media categories may be too broad to identify. Display
+  // and permit real providers rather than producing an empty selector.
+  if(['other','video'].includes(kind))return true;
+  return def.types.includes(kind);
+}
+function mf424CoverProviderChoices(item){
+  const settings=mf424Defaults(),order=settings.priorities.concat(MF424_PROVIDER_META.map(x=>x.id));
+  return MF424_PROVIDER_META.slice().sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id)).map(def=>({
+    ...def,usable:!!def.limit,compatible:mf424ProviderSupports(item,def.id),
+    enabled:settings.enabled.includes(def.id)
+  }));
+}
+function mf424Order(item){const c=mf424Defaults(),choices=mf424CoverProviderChoices(item);
+  const valid=choices.filter(p=>p.usable&&p.compatible&&p.enabled).map(p=>p.id);
   if(c.selection!=='smart')return valid;
   return valid.sort((a,b)=>Number(mf424HasID(item,b))-Number(mf424HasID(item,a)));
 }
@@ -151,7 +194,8 @@ function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
   return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId:String(entry?.mal_id??entry?.id??entry?.idMal??'')};}
 async function mf424Discover(item,provider){
-  const title=String(cleanTitle(item.title||'')).trim();const kind=v158ItemKind(item);
+  if(MF424_EXTRA_COVER_ADAPTERS.has(provider))return MF424_EXTRA_COVER_ADAPTERS.get(provider)(item,{request:mf424Request,validate:mf424AsCandidate,cover:mf424Cover,match:mf424Match});
+  const title=String(cleanTitle(item.title||'')).trim();const kind=mf424Kind(item);
   if(provider==='tenrai'||provider==='jikan'){
     const type=kind==='manga'?'manga':'anime', id=mf424Id(item,'mal');
     const base=provider==='tenrai'?'https://api.tenrai.org/v1/':'https://api.jikan.moe/v4/';
@@ -405,10 +449,17 @@ async function mf424Resume(){if(!MF424.job||MF424.running)return;MF424.job.stopR
   mf424State('ready');await mf424SaveJob();mf424Run();}
 async function mf424StopTitle(){if(!MF424.job)return;MF424.job.stopRequested=true;await mf424SaveJob();mf424Paint();}
 async function mf424StopPart(){if(!MF424.job)return;MF424.job.stopAfterPart=true;await mf424SaveJob();mf424Paint();}
+function mf424ReviewIcon(name){const shapes={
+  close:'<path d="M5 5l14 14M19 5L5 19"/>',
+  check:'<path d="m5 12 4 4 10-10"/><circle cx="12" cy="12" r="9"/>',
+  skip:'<path d="M6 5v14m4-14 9 7-9 7Z"/>',
+  alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m3 17 6-6 4 4 3-3 5 5"/>'
+};return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.image)+'</svg>';}
 function mf424Review(){if(!MF424.job?.reviews.length)return;const x=MF424.job.reviews[0],item=mf424Lookup(x.id);
-  const old=document.getElementById('mf424-review');if(old)old.remove();const root=document.createElement('div');root.id='mf424-review';root.className='mf424-modal';
-  root.innerHTML='<div class="mf424-shade" onclick="App.mf424CloseReview()"></div><section class="mf424-dialog" role="dialog" aria-modal="true"><div class="mf424-heading"><div><small>MANUAL REVIEW · '+MF424.job.pending+' PENDING</small><h2>'+mf424Escape(x.title)+'</h2><p>'+mf424Escape(item?String(getCategory(item.categoryId)?.name||''):'Title no longer exists')+'</p></div><button class="btn btn-ghost" onclick="App.mf424CloseReview()">Close</button></div>'+ 
-    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">Later</button></div></section>';
+  const old=document.getElementById('mf424-review');if(old)old.remove();const root=document.createElement('div');root.id='mf424-review';root.className='mf424-modal mf425-themed mf427-manual-review';
+  root.innerHTML='<div class="mf424-shade" onclick="App.mf424CloseReview()"></div><section class="mf424-dialog" role="dialog" aria-modal="true"><div class="mf424-heading"><div><small>MANUAL REVIEW · '+MF424.job.pending+' PENDING</small><h2>'+mf424Escape(x.title)+'</h2><p>'+mf424Escape(item?String(getCategory(item.categoryId)?.name||''):'Title no longer exists')+'</p></div><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('close')+' Close</button></div>'+ 
+    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">'+mf424ReviewIcon('check')+' Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">'+mf424ReviewIcon('alert')+' Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('skip')+' Later</button></div></section>';
   document.body.appendChild(root);
 }
 function mf424CloseReview(){document.getElementById('mf424-review')?.remove();}
