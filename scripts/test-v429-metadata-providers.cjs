@@ -34,6 +34,7 @@ const mock={
     first_publish_date:'2001',subjects:['Literature','Fiction']
    }),headers:{get(){return null;}}};
   if(url.startsWith('https://api.jikan.moe/v4/'))return {ok:false,status:403,headers:{get(){return null;}}};
+  if(url.includes('thetvdb=999'))return {ok:false,status:404,headers:{get(){return null;}}};
   if(url.startsWith('https://api.tvmaze.com/lookup/shows?thetvdb='))return {ok:true,json:async()=>({
    id:920,name:'Example TV',summary:'<b>Official</b> TV description',runtime:44,
    genres:['Drama'],premiered:'2023-02-10',type:'Scripted',rating:{average:8.4},url:'https://www.tvmaze.com/shows/920/example-tv'
@@ -74,6 +75,8 @@ assert(!mapped.producers,'Missing official producers should not be fabricated');
  assert.equal(tv.recordId,920);
  assert.equal(tv.communityScore,8.4);
  assert.equal(tv.total,0,'TVmaze must not overwrite personal episodic totals');
+ const unknownTV=await engine.lookupEvidence({title:'Example TV',categoryId:'tv',externalIds:{thetvdb:'999'}},['tvmaze']);
+ assert(!unknownTV.source&&/identifier was not found/.test(unknownTV.reason),'Unverifiable external ID cannot fall back to same-name result');
  const changes=engine.previewFields({title:'Example Anime',synopsis:'',total:12,progress:6,richMetadataManual:{genres:true}},found);
  assert(changes.some(x=>x.field==='synopsis'));
  assert(!changes.some(x=>x.field==='genres'),'Manually edited genre remains protected');
