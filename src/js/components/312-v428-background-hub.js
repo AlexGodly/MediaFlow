@@ -159,6 +159,8 @@ async function runNext(){
  }
 }
 function actualOutcome(kind){
+ if(kind==='metadata'&&window.MediaFlowV428Metadata?.pending?.()>0)return 'review';
+ if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job?.pending>0)return 'review';
  const raw=kind==='cover'?(typeof MF424!=='undefined'?MF424.job?.status:null):kind==='metadata'?window.MediaFlowV428Metadata?.status():window.MediaFlowV428Fresh?.status();
  if(raw==='waiting-review')return 'review';
  if(['paused','stopped','waiting-part','other-tab'].includes(raw))return 'paused';
@@ -201,7 +203,7 @@ function phase(kind){
  if(HUB.queue.some(q=>q.kind===kind))return 'queued';
  if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job?.pending)return 'review';
  if(kind==='cover'&&typeof MF424!=='undefined'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
- if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(window.MediaFlowV428Metadata.pending?.()>0&&(m==='waiting-review'||m==='complete'))return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
+ if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(window.MediaFlowV428Metadata.pending?.()>0)return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
  if(kind==='fresh'&&window.MediaFlowV428Fresh){const f=window.MediaFlowV428Fresh.status();if(['paused','stopped'].includes(f))return 'paused';}
  if(foreignLeaseInfo()?.kind===kind&&!HUB.active)return 'other-tab';
  return HUB.last[kind]?.status||'idle';
