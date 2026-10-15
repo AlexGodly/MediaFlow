@@ -31,7 +31,18 @@ function enqueue(kind,params){load();syncQueue();if(!KINDS.includes(kind)||HUB.l
  if(HUB.queue.some(q=>q.kind===kind)){showToast(LABELS[kind]+' is already queued.');return false;}
  HUB.queue.push({kind,at:Date.now(),params:params||{}});save();paint();pump();return true;
 }
-function cancel(kind){syncQueue();const n=HUB.queue.length;HUB.queue=HUB.queue.filter(q=>q.kind!==kind);if(n!==HUB.queue.length){save();paint();}}
+function cancel(kind){
+ syncQueue();const n=HUB.queue.length;
+ HUB.queue=HUB.queue.filter(q=>q.kind!==kind);
+ if(n===HUB.queue.length)return;
+ if(kind==='cover'&&typeof MF424!=='undefined'&&MF424.job){
+  MF424.job.pauseRequested=true;MF424.job.status='paused';
+  if(typeof mf424SaveJob==='function')Promise.resolve(mf424SaveJob()).catch(e=>console.warn('v428 cover checkpoint',e));
+ }
+ if(kind==='metadata')App.mf428MetadataControl?.('cancel');
+ if(kind==='fresh')App.mf428FreshControl?.('cancel');
+ save();paint();
+}
 function move(kind,by){syncQueue();const i=HUB.queue.findIndex(q=>q.kind===kind),j=i+by;if(i<0||j<0||j>=HUB.queue.length)return;const a=HUB.queue.splice(i,1)[0];HUB.queue.splice(j,0,a);save();paint();}
 const nativeCoverRun=typeof mf424Run==='function'?mf424Run:null;
 const nativeFresh=typeof v377RunJikan==='function'?v377RunJikan:null;
@@ -114,6 +125,7 @@ function phase(kind){
  if(kind==='cover'&&['paused','stopped','waiting-part','other-tab'].includes(MF424.job?.status))return 'paused';
  if(kind==='metadata'&&window.MediaFlowV428Metadata){const m=window.MediaFlowV428Metadata.status();if(m==='waiting-review')return 'review';if(['paused','waiting-part','stopped'].includes(m))return 'paused';}
  if(kind==='fresh'&&window.MediaFlowV428Fresh){const f=window.MediaFlowV428Fresh.status();if(['paused','stopped'].includes(f))return 'paused';}
+ if(foreignLease()&&!HUB.active)return 'other-tab';
  return HUB.last[kind]?.status||'idle';
 }
 function progress(kind){
@@ -124,7 +136,7 @@ function progress(kind){
 }
 function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math.round(p.at/p.total*100):0;
  const order=HUB.queue.findIndex(q=>q.kind===kind);
- const detail=state==='queued'?'Queue position '+(order+1):state==='running'?(p.total?p.at.toLocaleString()+' / '+p.total.toLocaleString():'Checking providers'):state==='review'?'Manual review pending':state==='paused'?'Progress saved':state==='cooldown'?'Respecting API limits':HUB.last[kind]?.message||'Ready to start';
+ const detail=state==='queued'?'Queue position '+(order+1):state==='running'?(p.total?p.at.toLocaleString()+' / '+p.total.toLocaleString():'Checking providers'):state==='review'?'Manual review pending':state==='paused'?'Progress saved':state==='other-tab'?'Another tab is processing':state==='cooldown'?'Respecting API limits':HUB.last[kind]?.message||'Ready to start';
  return '<article class="mf428-process" data-kind="'+kind+'"><div class="mf428-process-head"><span class="mf428-process-icon">'+icon(kind)+'</span><span class="mf428-process-copy"><strong>'+LABELS[kind]+'</strong><small>'+x(detail)+'</small></span><span class="mf428-state" data-state="'+state+'">'+x(state)+'</span></div>'+
  (p.total&&['running','paused','queued','review','cooldown'].includes(state)?'<div class="mf428-bar" role="progressbar" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+percent+'%"></i></div>':'')+
  '<div class="mf428-process-actions">'+
@@ -135,23 +147,37 @@ function row(kind){const state=phase(kind),p=progress(kind),percent=p.total?Math
  (state==='review'?'<button type="button" onclick="App.mf428Control(\''+kind+'\',\'review\')">Review</button>':'')+
  '</div></article>';
 }
-function paint(){if(!document.body)return;load();const v=prefs().visibility,exists=HUB.active||HUB.queue.length||Date.now()<HUB.cooldownUntil||KINDS.some(k=>['paused','review','running'].includes(phase(k)));
+function paint(){if(!document.body)return;load();const v=prefs().visibility,exists=HUB.active||HUB.queue.length||foreignLease()||Date.now()<HUB.cooldownUntil||KINDS.some(k=>['paused','review','running'].includes(phase(k)));
  let el=document.getElementById('mf428-hub');if(v==='hidden'||(v==='auto'&&!exists)){el?.remove();HUB.lastMarkup='';return;}
  if(!el){el=document.createElement('aside');el.id='mf428-hub';el.setAttribute('aria-label','Background Processes');document.body.appendChild(el);HUB.lastMarkup='';}
  const cooldown=Math.max(0,Math.ceil((HUB.cooldownUntil-Date.now())/1000));
  el.className='mf428-hub'+(HUB.expanded?' mf428-open':'');
+ el.dataset.position=prefs().position==='left'?'left':'right';
  const markup='<button type="button" class="mf428-pill" onclick="App.mf428Toggle()" aria-expanded="'+HUB.expanded+'"><span class="mf428-pulse" aria-hidden="true"></span><span><strong>Background Processes</strong><small>'+(HUB.active?LABELS[HUB.active.kind]+' running':HUB.queue.length?HUB.queue.length+' queued':cooldown?'Cooldown · '+cooldown+'s':'All systems idle')+'</small></span><span aria-hidden="true">'+(HUB.expanded?'▾':'▴')+'</span></button>'+
  (HUB.expanded?'<section class="mf428-panel" aria-label="Process controls"><div class="mf428-panel-title"><strong>Recovery & Release Center</strong><small>Only one process runs at a time</small></div>'+KINDS.map(row).join('')+'<div class="mf428-footer"><span>◈ '+(cooldown?'Shared cooldown: '+cooldown+'s':'Smart rate-limit scheduling')+'</span><button type="button" onclick="App.mf428SetVisibility(\'hidden\')">Hide widget</button></div></section>':'');
- if(HUB.lastMarkup!==markup){const panel=el.querySelector('.mf428-panel'),scroll=panel?.scrollTop||0;el.innerHTML=markup;const next=el.querySelector('.mf428-panel');if(next)next.scrollTop=scroll;HUB.lastMarkup=markup;}
+ if(HUB.lastMarkup!==markup){
+  const panel=el.querySelector('.mf428-panel'),scroll=panel?.scrollTop||0;
+  const selected=el.contains(document.activeElement)?document.activeElement:null;
+  const selectKey=selected?.getAttribute('onclick')||null;
+  const wasPill=selected?.classList?.contains('mf428-pill');
+  el.innerHTML=markup;
+  const next=el.querySelector('.mf428-panel');if(next)next.scrollTop=scroll;
+  const target=wasPill?el.querySelector('.mf428-pill'):selectKey?[...el.querySelectorAll('button')].find(b=>b.getAttribute('onclick')===selectKey):null;
+  target?.focus({preventScroll:true});
+  HUB.lastMarkup=markup;
+ }
 }
-function settingsHtml(){const selected=prefs().visibility;
- return '<div class="mf428-widget-settings"><strong>Background Processes Widget</strong><p>Monitor Cover Recovery, Metadata Recovery and Fresh Releases, or start them from an always-visible launcher.</p><label for="mf428-visibility">Widget visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+[['hidden','Hidden'],['auto','Automatic — show for background work'],['always','Always Show — launcher and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select><p class="hint">Hiding does not stop tasks. Browser-closed work resumes from saved checkpoints when supported.</p></div>';
+function settingsHtml(){const selected=prefs().visibility,pos=prefs().position;
+ return '<div class="mf428-widget-settings"><strong>Background Processes Widget</strong><p>Monitor Cover Recovery, Metadata Recovery and Fresh Releases, or start them from an always-visible launcher.</p>'+
+  '<label for="mf428-visibility">Widget visibility</label><select id="mf428-visibility" onchange="App.mf428SetVisibility(this.value)">'+[['hidden','Hidden'],['auto','Automatic — show for background work'],['always','Always Show — launcher and progress']].map(a=>'<option value="'+a[0]+'" '+(selected===a[0]?'selected':'')+'>'+a[1]+'</option>').join('')+'</select>'+
+  '<label for="mf428-position">Widget position</label><select id="mf428-position" onchange="App.mf428SetPosition(this.value)"><option value="right" '+(pos!=='left'?'selected':'')+'>Bottom right</option><option value="left" '+(pos==='left'?'selected':'')+'>Bottom left</option></select>'+
+  '<p class="hint">Expand or collapse the widget with its heading. Hiding the widget never stops processing. Browser-closed work resumes from saved checkpoints when supported.</p></div>';
 }
 if(typeof v405FloatingSettingsHtml==='function'){
  const previous=v405FloatingSettingsHtml;v405FloatingSettingsHtml=function(){return previous.apply(this,arguments)+settingsHtml();};
 }
-Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
-window.MediaFlowV428Hub={enqueue,paint,phase,progress,ownsLease:leaseHeld,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},registerFresh:(fn)=>{HUB.freshRunner=fn;pump();},runLegacyFresh:(options)=>nativeFresh?nativeFresh(options||{force:true}):Promise.resolve(null),status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil})};
+Object.assign(App,{mf428Start:start,mf428Toggle:()=>{HUB.expanded=!HUB.expanded;paint();},mf428SetVisibility:v=>{if(['hidden','auto','always'].includes(v))persistPrefs({visibility:v});},mf428SetPosition:p=>{if(['left','right'].includes(p))persistPrefs({position:p});},mf428Move:move,mf428Cancel:cancel,mf428Control:control,mf428Queue:enqueue});
+window.MediaFlowV428Hub={enqueue,paint,phase,progress,ownsLease:leaseHeld,registerMetadata:(fn)=>{HUB.metadataRunner=fn;pump();},registerFresh:(fn)=>{HUB.freshRunner=fn;pump();},runLegacyFresh:(options)=>nativeFresh?nativeFresh(options||{force:true}):Promise.resolve(null),status:()=>({active:HUB.active?.kind||null,queued:HUB.queue.map(x=>x.kind),cooldownUntil:HUB.cooldownUntil,otherTab:foreignLease()})};
 function init(){load();if(!HUB.ticker)HUB.ticker=setInterval(()=>{if(HUB.loadedFor!==account())load();renew();pump();if(!HUB.renderQueued){HUB.renderQueued=true;paint();HUB.renderQueued=false;}},1500);paint();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 window.addEventListener('storage',e=>{
