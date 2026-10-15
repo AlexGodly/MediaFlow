@@ -94,18 +94,18 @@ renderLibrary=function(){let h=String(mf425OldLibrary.apply(this,arguments)||'')
 // Dashboard's existing validated paste/save UI stays untouched.
 const mf425OldMissing=v192MissingCoversHtml;
 v192MissingCoversHtml=function(){let h=String(mf425OldMissing.apply(this,arguments)||'');if(!h.includes('v192-cover-url-input'))return h;
- const btn='<div class="mf425-dashboard-cover-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button><button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'dashboard\',String(v192CurrentMissingCoverItem()?.id||\'\'))">'+mf425Icon('settings')+' Advanced Recovery</button></div>';
+ const btn='<div class="mf425-dashboard-cover-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'dashboard\')">'+mf425Icon('search')+' Find cover automatically</button></div>';
  return h.replace('<div class="v123-rating-actions v192-cover-actions">',btn+'<div class="v123-rating-actions v192-cover-actions">');};
 
 // Preserve the established fast cover picker and improve its entire contrast layer.
 const mf425OldPicker=coverPickerModalHtml;
 coverPickerModalHtml=function(data){const h=String(mf425OldPicker.apply(this,arguments)||'');return '<div class="mf425-legacy-picker"><p class="mf425-picker-explain">'+mf425Icon('shield')+' Compare the matched title, source and media type before choosing. The selected cover URL is not saved until you confirm the title.</p>'+h+'</div>';};
 
-// Add both actions to Add/Edit Title without removing Find Cover Automatically.
+// Keep Find Cover Automatically in Add/Edit Title; advanced jobs remain available in Library and Settings.
 const mf425OldEditor=libraryModalHtml;
 libraryModalHtml=function(data){let h=String(mf425OldEditor.apply(this,arguments)||'');if(!h||h.includes('mf425-editor-tools'))return h;
  const extra=h.includes('Find cover automatically')?'':'<button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'editor\')">'+mf425Icon('search')+' Find cover automatically</button>';
- const controls='<div class="mf425-editor-tools">'+extra+'<button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'editor\',String(S.modal?.data?.id||\'\'))">'+mf425Icon('settings')+' Advanced Recovery</button></div>';
+ const controls=extra?'<div class="mf425-editor-tools">'+extra+'</div>':'';
  const marker='</div>';const coverLabel=/(<label[^>]*>\s*(?:Cover art|Cover URL|Cover image)\s*<\/label>)/i;
  if(coverLabel.test(h))h=h.replace(coverLabel,'$1'+controls);
  else h=h.replace(/(<div class="modal-title">[^<]*<\/div>)/,'$1'+controls);
@@ -124,7 +124,7 @@ async function mf425Instant(entry){if(MF425.quickBusy)return;MF425.quickBusy=tru
  document.getElementById('mf425-instant-modal')?.remove();
  const root=document.createElement('div');root.id='mf425-instant-modal';root.className='mf424-modal mf425-themed mf425-instant-modal';
  const availableProviders=mf424Order(item),activeProvider=MF425.providerPick||'';
- root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div class="mf425-instant-provider-picker" style="display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0"><label style="flex:1;min-width:180px">Search source<select id="mf425-source-choice" class="mf425-source-choice"><option value="">All enabled providers</option>'+availableProviders.map(p=>'<option value="'+mf425Esc(p)+'" '+(activeProvider===p?'selected':'')+'>'+mf425Esc(mf424Provider(p)?.name||p)+'</option>').join('')+'</select></label><button type="button" class="btn btn-ghost" onclick="App.mf425RetryProvider()">Search selected source</button></div><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button><button type="button" class="btn btn-primary" onclick="App.mf425InstantAdvanced()">'+mf425Icon('settings')+' Advanced Recovery</button></div></section>';
+ root.innerHTML='<div class="mf424-shade" onclick="App.mf425CloseInstant()"></div><section class="mf424-dialog" role="dialog" aria-modal="true" aria-label="Instant cover search"><header class="mf425-instant-head"><div><small>INSTANT COVER SEARCH</small><h2>'+mf425Icon('search')+' Cover matches for '+mf425Esc(item.title)+'</h2><p>Library title: <strong>'+mf425Esc(item.title)+'</strong> · IDs checked first · no automatic replacements</p></div><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">'+mf425Icon('x')+' Close</button></header><div class="mf425-instant-provider-picker" style="display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0"><label style="flex:1;min-width:180px">Search source<select id="mf425-source-choice" class="mf425-source-choice"><option value="">All enabled providers</option>'+availableProviders.map(p=>'<option value="'+mf425Esc(p)+'" '+(activeProvider===p?'selected':'')+'>'+mf425Esc(mf424Provider(p)?.name||p)+'</option>').join('')+'</select></label><button type="button" class="btn btn-ghost" onclick="App.mf425RetryProvider()">Search selected source</button></div><div id="mf425-instant-results" class="mf425-instant-results" role="status" aria-live="polite"><div class="mf425-loading">'+mf425Icon('database')+' Checking enabled cover providers safely…</div></div><div class="mf424-actions"><button type="button" class="btn btn-ghost" onclick="App.mf425CloseInstant()">Cancel</button></div></section>';
  document.body.append(root);
  const found=[],seen=new Set(),ordered=availableProviders.filter(p=>!activeProvider||p===activeProvider),outcomes=[];const byId=ordered.filter(p=>mf424HasID(item,p)),rest=ordered.filter(p=>!mf424HasID(item,p));
  try{for(const provider of byId.concat(rest)){
@@ -143,7 +143,7 @@ function mf425RetryProvider(){if(MF425.quickBusy){showToast('Cover search is sti
  const chosen=document.getElementById('mf425-source-choice')?.value||'';
  if(chosen&&!mf424Order(MF425.draft||{}).includes(chosen)){showToast('This provider is not available for the selected media type.');return;}
  MF425.providerPick=chosen;return mf425Instant(MF425.quickEntry||'editor');}
-function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf425-no-results">No validated candidates yet. You can try Advanced Recovery or paste a cover URL.</div>';
+function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf425-no-results">No validated candidates yet. Try a different enabled provider or paste a cover URL.</div>';
  return '<div class="mf425-found-count">'+found.length+' verified-loading image candidates · choose the correct title and edition</div><div class="mf425-candidate-grid">'+found.map((c,i)=>{
  const id=mf425IdText(item,c.provider,c);return '<article class="mf425-candidate"><img src="'+mf425Esc(c.url)+'" alt="'+mf425Esc(c.title||item.title)+' poster" loading="lazy"><div class="mf425-candidate-copy"><strong>'+mf425Esc(c.title||'Untitled provider record')+'</strong><small>Library: '+mf425Esc(item.title)+'</small><span class="mf425-source">'+mf425Icon('database')+' '+mf425Esc(c.provider)+'</span><small>'+mf425Esc(id)+'</small><small>'+mf425Esc(c.reason||'Title match')+'</small>'+(c.recordUrl?'<a href="'+mf425Esc(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">'+mf425Icon('external')+' Provider record</a>':'')+'<button class="btn btn-primary" onclick="App.mf425ChooseInstant('+i+')">'+mf425Icon('check')+' Use this cover</button></div></article>';
  }).join('')+'</div>';}
@@ -167,12 +167,12 @@ function mf425InstantAdvanced(){const entry=MF425.quickEntry||'editor',id=MF425.
 App.mf425Instant=function(entry){MF425.quick=null;MF425.quickEntry=entry;MF425.providerPick='';return mf425Instant(entry);};
 Object.assign(App,{mf425ChooseInstant,mf425CloseInstant,mf425InstantAdvanced,mf425RetryProvider});
 
-// The existing Title Details quick Cover URL editor gets the same two actions.
+// The Title Details Quick Cover URL editor only offers Find Cover Automatically.
 const mf425OldOpenQuick=App.v181QuickEditDetail;
 App.v181QuickEditDetail=function(id,key){const result=mf425OldOpenQuick.apply(this,arguments);if(key!=='coverUrl')return result;
  const field=document.querySelector('#v181-quick-detail-overlay .field');if(!field)return result;
  MF425.oneId=String(id);
- field.insertAdjacentHTML('afterend','<div class="mf425-editor-tools"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'details\')">'+mf425Icon('search')+' Find cover automatically</button><button type="button" class="btn btn-ghost" onclick="App.mf425OpenConfig(\'details\',String(MF425.oneId))">'+mf425Icon('settings')+' Advanced Recovery</button></div>');
+ field.insertAdjacentHTML('afterend','<div class="mf425-editor-tools"><button type="button" class="btn btn-ghost" onclick="App.mf425Instant(\'details\')">'+mf425Icon('search')+' Find cover automatically</button></div>');
  return result;};
 const mf425OldSaveQuick=App.v181SaveQuickDetail;
 App.v181SaveQuickDetail=function(id,key){if(key!=='coverUrl')return mf425OldSaveQuick.apply(this,arguments);
