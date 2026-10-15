@@ -1,8 +1,8 @@
-# MediaFlow v428 — Universal Media Intelligence (development candidate)
+# MediaFlow v428 Beta — Universal Media Intelligence & Recovery
 
-**Status:** in active development on `feature/v428-universal-recovery`. This is **not** a published release, not a Stable designation and not a claim of full v428 scope completion. As of this branch, the production site remains on v427.
+**Release class: Beta.** The numeric `428` tag, source archive, modular ZIP and GitHub Pages deployment are produced only after the v428 release workflow passes its build, contract, synthetic scale, Chromium browser-boot and previous-version regression gates. Beta is not a claim of full provider or cross-device compatibility.
 
-## Implemented in source on the development branch
+## Included in v428 Beta
 
 - Theme-aware floating Background Processes panel with Hidden, Automatic and Always Show visibility; direct launch controls and distinct Cover Recovery / Metadata Recovery / Fresh Releases rows.
 - Browser-local account-scoped serialized work queue, 60-second inter-feature cooldown, queue ordering and cancellation, cross-tab coordination, progress and pause controls. Browser closure pauses work; jobs use checkpoints. Cross-device locks are **not implemented**.
@@ -19,14 +19,14 @@
 - Existing v427/v425/v424 regression tests and `python scripts/check.py`.
 - GitHub Actions development workflow on branch/PR; generated JS and PWA assets are subject to successful build and branch-artifact commit.
 
-## Remaining work before a v428 release
+## Known limitations and subsequent hardening
 
 1. Full UI/browser validation across all dynamic themes, desktop/mobile/tablet and extreme narrow screens.
 2. Verify real provider CORS, access terms, API stability, attribution and rate limits; expand legitimate release/metadata adapters category by category.
 3. Complete cover/save/XP reconciliation under a single controller, refine all-process notifications and backend-optional multi-device coordination.
 4. Verify 50,000–100,000 title performance and suspend/resume, partial failure, cross-tab/account-switch correctness in real browsers.
 5. Complete release-history, per-provider evidence diagnostics and hardening of automatic retry / cooldown behavior.
-6. Add complete `legacy/v/428` archive, reviewed versioned release ZIP, numeric `428` tag and live GitHub Pages deployment **only once release testing is complete**.
+6. The release workflow is designed to create `legacy/v/428`, the versioned modular ZIP plus SHA-256 checksum, numeric tag `428`, and GitHub Pages deployment. Verify each published artifact and the live site after the workflow completes.
 
 ## Safety
 
@@ -91,4 +91,14 @@
 - **Safe stop controls:** Cover Recovery and Metadata Recovery provide Pause, Stop After Current Title and Finish Current Part & Stop when running, preserving checkpoints; other processes keep their supported safe-stop controls.
 - **Testing:** Added `scripts/test-v428-widget.cjs` to the isolated development build's required checks. Existing v424/v425/v427 checks and all Phase 2–4 regressions remain active.
 
-**Scope limitations:** Server-run jobs after browser closure and cross-device global API locks are not enabled; this is browser-checkpointed work. Real-provider live API validation, full browser/phone/tablet visual inspection and 100k title load benchmarking remain release blockers. PR #3 stays draft; do not merge or deploy before final release verification.
+**Scope limitations:** Server-run jobs after browser closure and cross-device global API locks are not enabled; this is browser-checkpointed work. Some live-provider CORS and API rate-limit behaviors cannot be fully verified by offline tests. The synthetic 100k-title benchmark exercises indexed access and checkpoints, not every production UI and database flow.
+
+## Phase 6 — Release and verification
+
+- Full development CI and release workflow run syntax, original v424/v425/v427 regressions and new v428 recovery, metadata, Fresh Releases, scheduler, multitab, and theme-aware floating-widget contracts.
+- `scripts/test-v428-scale.cjs` indexes 100,000 synthetic records and exercises indexed category selection and checkpoint resume without modifying production data. This **does not** simulate 100,000 remote API calls or a fully loaded live account.
+- `scripts/test-v428-browser.cjs` boots the actual assembled app-shell locally in headless Chromium at desktop and narrow mobile viewport sizes, checks v428 runtime initialization and visible HTML, and saves QA screenshots. External DNS is blocked to avoid writing to or relying on production Supabase.
+- `.github/workflows/publish-v428.yml` rebuilds and reruns those checks; archives the whole v428 project in `legacy/v/428`; publishes GitHub Release `428` titled `v428 Beta` with `MediaFlow_v428_Modular.zip` and its SHA-256 checksum; deploys Pages and verifies the live v428 version and bundle URL.
+- No user-library migration and no new Supabase schema, Edge Functions, or secret-bearing provider integrations are part of v428 Beta.
+
+**Beta disclaimer:** Provider coverage remains category-specific. Unsupported or unverifiable publication outcomes are Unknown, not zero. Existing user progress, ratings, order, and season records must not be silently changed by provider reads. Browser closure pauses frontend processing; persistent checkpoints support resuming after reopening.
