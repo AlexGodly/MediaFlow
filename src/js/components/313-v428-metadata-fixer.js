@@ -204,7 +204,7 @@ async function worker(params={}){await init();
  if(job.cursor>=job.ids.length)job.status=job.reviews.length?'waiting-review':'complete';
  await persist();
  }catch(e){job.status='paused';job.errors.push({id:'job',reason:String(e.message||e)});await persist();throw e;}
- finally{M.running=false;window.MediaFlowV428Hub?.paint();if(job.reviews.length)showToast(job.reviews.length+' metadata titles ready for review.');}
+ finally{M.running=false;window.MediaFlowV428Hub?.paint();}
 }
 function review(){
  if(M.account&&M.account!==account()){showToast('Account changed. Reopen Metadata Recovery.');return;}
