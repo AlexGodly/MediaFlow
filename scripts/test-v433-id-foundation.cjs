@@ -2,7 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const read=path=>fs.readFileSync(path,'utf8');
-assert(['433','434'].includes(read('VERSION').trim());
+assert(['433','434'].includes(read('VERSION').trim()));
 const src=read('src/js/components/313-v433-provider-registry-foundation.js');
 const legacy=read('src/js/components/309-v424-advanced-cover-recovery.js');
 const edit=read('src/js/components/273-v377-ids-editor-jikan-recovery.js');
