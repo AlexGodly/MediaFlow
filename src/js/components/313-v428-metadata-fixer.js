@@ -39,7 +39,7 @@ async function request(provider,url){const row=M.rate[provider]||(M.rate[provide
   row.next=Date.now()+gap;
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),14000);
   try{
-   const r=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
+   const r=await fetch(url,{signal:controller.signal,headers:{Accept:provider==='kitsu'?'application/vnd.api+json':'application/json'}});
    if(r.ok)return r.json();
    if(r.status===404)return null;
    if(r.status===429||r.status===503||r.status>=500){
