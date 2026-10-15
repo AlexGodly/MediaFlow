@@ -27,7 +27,7 @@ const catCount=vm.runInContext('mf425Counts({mode:"categoryStatus",pairs:{anime:
 // New options must mount through the same v365 Settings Center registry,
 // not create a separate fake accordion or duplicate category heading.
 const sectionStart=source.indexOf('function mf425SettingsEnhance(){');
-const sectionEnd=source.indexOf("\\nMediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance)",sectionStart);
+const sectionEnd=source.indexOf("\nMediaFlowRuntime.registerPageEnhancer('settings',mf425SettingsEnhance)",sectionStart);
 assert(sectionStart>=0&&sectionEnd>sectionStart,'Settings enhancer exists');
 const sectionFn=source.slice(sectionStart,sectionEnd);
 const settingsBody='<section class="mf425-settings-card">Existing recovery controls</section><label data-mf-setting-id="cover-confirm">Confirmation setting</label>';
