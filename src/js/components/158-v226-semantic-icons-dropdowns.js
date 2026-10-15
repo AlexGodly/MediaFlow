@@ -54,6 +54,8 @@ Object.assign(V225_BUTTON_ICONS,{
 
 const v226ButtonIconNameBase=v225ButtonIconName;
 v225ButtonIconName=function(el){
+  // v427: explicit mf425/mf427 svg already describes the action, never inject a second icon.
+  if(el?.querySelector?.(':scope > svg.mf425-icon, :scope > svg.mf427-icon, :scope > .mf425-icon, :scope > .mf427-icon'))return null;
   const t=v225CleanActionText(el);
   const title=String(el?.getAttribute?.('title')||'').trim().toLowerCase();
   const aria=String(el?.getAttribute?.('aria-label')||'').trim().toLowerCase();

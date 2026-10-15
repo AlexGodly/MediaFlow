@@ -325,14 +325,14 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
   finally{MF424.running=false;mf424Release();mf424Paint();}
 }
 async function mf424Start(){if(MF424.running)return;const settings=mf424ReadForm();
-  if(!MF424.ready){alert('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}
+  if(!MF424.ready){showToast('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}
   const missing=[];const lib=S.library||[];
   for(let i=0;i<lib.length;i+=1000){
     for(const item of lib.slice(i,i+1000))if(mf424Missing(item)&&(typeof mf425ScopeAllows!=='function'||mf425ScopeAllows(item)))missing.push(String(item.id));
     if(i%10000===0)await mf424Delay(0);
   }
   if(!missing.length){showToast('Every Library title already has a cover URL.');return;}
-  if(MF424.job&&!['complete','stopped'].includes(MF424.job.status)&&!confirm('Replace your existing recovery job? Pending confirmations will be lost.'))return;
+  if(MF424.job&&!['complete','stopped'].includes(MF424.job.status)&&!await mf427ConfirmJobReplace())return;
   MF424.job={id:'mf424-'+Date.now(),account:mf424Account(),created:Date.now(),updated:Date.now(),ended:0,
     ids:missing,cursor:0,scope:(typeof MF425!=='undefined'&&MF425.active?MF425.active:null),mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,
     status:'ready',fixed:0,unresolved:0,skipped:0,failed:0,pending:0,processed:0,dirty:0,
@@ -423,8 +423,8 @@ async function mf424RetryUnresolved(){if(!MF424.job||MF424.running)return;
   const old=MF424.job;const ids=[...new Set([...(old.unresolvedIds||[]),...old.results.filter(x=>x.type==='unresolved'||x.type==='provider-error'||x.type==='error').map(x=>x.id).filter(Boolean)])]
     .filter(id=>mf424Missing(mf424Item(id)));
   if(!ids.length){showToast('No unresolved missing-cover titles to retry.');return;}
-  if(old.pending&&!confirm('Pending confirmations will remain only in the exported previous report. Continue?'))return;
-  if(!confirm('Retry '+ids.length+' unresolved titles as a new recovery job?'))return;
+  if(old.pending&&!await mf427ConfirmRetryPending())return;
+  if(!await mf427ConfirmRetry(ids.length))return;
   await mf424Storage('put','history:'+mf424Account()+':'+old.id,{...old,ids:undefined});
   MF424.job={...old,id:'mf424-'+Date.now(),ids,cursor:0,created:Date.now(),ended:0,status:'ready',fixed:0,unresolved:0,skipped:0,failed:0,pending:0,processed:0,dirty:0,
     requestCount:0,cooldownEvents:0,rate:{},unresolvedIds:[],results:[],reviews:[],stopRequested:false,pauseRequested:false,stopAfterPart:false};
