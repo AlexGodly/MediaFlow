@@ -214,33 +214,82 @@ function mf427FillEditor(url){
   if(!input)return false;
   input.value=url;input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));return true;
 }
-async function mf427SaveExisting(item,url,provider){
+function mf427SelectedLinkId(index){
+  return document.querySelector('#mf425-instant-modal [data-mf425-cover-link-id="'+Number(index)+'"]')?.checked===true;
+}
+function mf427FillDraftExternalId(candidate){
+  const live=MF425.draft||{},link=mf424LinkableCoverId(live,candidate);
+  if(!link||link.conflict||link.existing===link.value)return false;
+  const root=document.querySelector('#modal-root [data-v377-ids-editor]');
+  const grid=root?.querySelector('.mf377-ids-grid');
+  if(!grid)return false;
+  let input=[...grid.querySelectorAll('[data-v377-id]')].find(el=>el.dataset.v377Id===link.key);
+  if(!input){
+    const row=document.createElement('label');row.className='field';row.dataset.v377IdRow=link.key;
+    row.innerHTML='<span class="field-label">'+mf427Escape(link.key.toUpperCase())+'</span><span class="mf377-id-control"><input type="text" data-v377-id="'+mf427Escape(link.key)+'" autocomplete="off"></span>';
+    grid.appendChild(row);input=row.querySelector('input');
+  }
+  if(input&&(!input.value||input.value.trim()===link.value)){
+    input.value=link.value;input.dispatchEvent(new Event('input',{bubbles:true}));
+    return true;
+  }
+  return false;
+}
+async function mf427SaveExisting(item,url,candidate,linkId=false){
   if(!item||!url)return false;
-  const before=String(item.coverUrl||'');if(before===url){showToast('This title already uses that cover.');return true;}
+  const provider=candidate?.provider||'unknown',before=String(item.coverUrl||'');
+  const link=linkId?mf424LinkableCoverId(item,candidate):null;
+  const shouldLink=!!(link&&!link.conflict&&link.existing!==link.value);
+  if(before===url&&!shouldLink){showToast('This cover and its provider ID are already saved.');return true;}
   if(MF427.busySave)return false;
   MF427.busySave=true;
-  const old={coverUrl:item.coverUrl,coverSource:item.coverSource,modifiedAt:item.modifiedAt,richMetadataManual:item.richMetadataManual?{...item.richMetadataManual}:null};
+  const old={coverUrl:item.coverUrl,coverSource:item.coverSource,modifiedAt:item.modifiedAt,
+    externalIds:{...(item.externalIds||{})},v377ManualExternalIds:{...(item.v377ManualExternalIds||{})},
+    richMetadataManual:item.richMetadataManual?{...item.richMetadataManual}:null};
   try{
     if(mf424Account()!==String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local'))throw new Error('Account changed');
-    item.coverUrl=url;item.coverSource='manual:instant:'+provider;item.modifiedAt=Date.now();
-    if(typeof V178_EDITABLE_RICH_FIELDS!=='undefined'&&V178_EDITABLE_RICH_FIELDS.includes('coverUrl')){
-      item.richMetadataManual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});item.richMetadataManual.coverUrl=true;
+    if(before!==url){
+      item.coverUrl=url;item.coverSource='manual:instant:'+provider;
+      if(typeof V178_EDITABLE_RICH_FIELDS!=='undefined'&&V178_EDITABLE_RICH_FIELDS.includes('coverUrl')){
+        item.richMetadataManual=typeof v178ManualMap==='function'?v178ManualMap(item):(item.richMetadataManual||{});
+        item.richMetadataManual.coverUrl=true;
+      }
     }
-    const earned=mf425Credit(item,before,url,'instant:'+provider);
+    const linked=shouldLink&&mf424LinkSelectedCoverId(item,candidate,{manual:true});
+    item.modifiedAt=Date.now();
+    const earned=before!==url?mf425Credit(item,before,url,'instant:'+provider):0;
     if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();
     await saveState();
     mf427FillEditor(url);
-    showToast('Cover saved'+(earned?' · +'+earned.toLocaleString()+' XP':'')+' ✓');
+    showToast('Cover saved'+(linked?' · '+link.key.toUpperCase()+' ID linked':'')+(earned?' · +'+earned.toLocaleString()+' XP':'')+' ✓');
     return true;
   }catch(e){
-    item.coverUrl=old.coverUrl;item.coverSource=old.coverSource;item.modifiedAt=old.modifiedAt;item.richMetadataManual=old.richMetadataManual;
+    item.coverUrl=old.coverUrl;item.coverSource=old.coverSource;item.modifiedAt=old.modifiedAt;
+    item.externalIds=old.externalIds;item.v377ManualExternalIds=old.v377ManualExternalIds;
+    item.richMetadataManual=old.richMetadataManual;
     console.error('Instant cover save failed',e);showToast('Cover could not be saved. Please try again.');return false;
   }finally{MF427.busySave=false;}
+}
+async function mf427LinkAfterExternalSave(item,candidate,url,linkId){
+  if(!linkId||!item||String(item.coverUrl||'')!==String(url))return false;
+  const link=mf424LinkableCoverId(item,candidate);
+  if(!link||link.conflict||link.existing===link.value)return false;
+  const oldIds={...(item.externalIds||{})},oldOverrides={...(item.v377ManualExternalIds||{})},oldModified=item.modifiedAt;
+  if(!mf424LinkSelectedCoverId(item,candidate,{manual:true}))return false;
+  item.modifiedAt=Date.now();
+  try{await saveState();showToast(link.key.toUpperCase()+' external ID linked');return true;}
+  catch(e){
+    item.externalIds=oldIds;item.v377ManualExternalIds=oldOverrides;item.modifiedAt=oldModified;
+    console.error('Cover provider ID sync failed',e);
+    showToast('Cover saved, but provider ID could not be linked. Try again.');
+    return false;
+  }
 }
 App.mf425ChooseInstant=async function(index){
   const candidate=MF425.quick?.candidates?.[Number(index)];
   if(!candidate){showToast('Cover result no longer available. Retry search.');return;}
   const entry=MF425.quickEntry||'editor',url=candidate.url;
+  const linkId=mf427SelectedLinkId(index);
   const item=MF425.draft||mf427CurrentDraft(entry);
   const title=item?.title||candidate.title;
   if(mf427PrefConfirm()){
@@ -254,8 +303,9 @@ App.mf425ChooseInstant=async function(index){
     if(!input){showToast('Missing Covers panel changed. Reopen the title.');return;}
     const before=v192CurrentMissingCoverItem()?.id;
     if(before&&String(before)!==String(item.id)){showToast('The queue changed. Please reopen cover search.');return;}
-    input.value=url;
-    try{App.v192SaveMissingCover();App.mf425CloseInstant();}catch(e){console.error(e);showToast('Unable to save the selected cover.');}
+    const live=mf424Lookup(String(item.id||''));input.value=url;
+    try{await Promise.resolve(App.v192SaveMissingCover());await mf427LinkAfterExternalSave(live,candidate,url,linkId);App.mf425CloseInstant();}
+    catch(e){console.error(e);showToast('Unable to save the selected cover.');}
     return;
   }
   if(entry==='details'){
@@ -264,18 +314,21 @@ App.mf425ChooseInstant=async function(index){
     const live=mf424Lookup(String(item.id||''));
     if(!live){showToast('The Library title has changed.');return;}
     field.value=url;field.dispatchEvent(new Event('input',{bubbles:true}));
-    App.v181SaveQuickDetail(live.id,'coverUrl');App.mf425CloseInstant();
+    await Promise.resolve(App.v181SaveQuickDetail(live.id,'coverUrl'));
+    await mf427LinkAfterExternalSave(live,candidate,url,linkId);
+    App.mf425CloseInstant();
     return;
   }
   if(item?.id&&item.id!=='draft'){
     const live=mf424Lookup(String(item.id));
     if(!live){showToast('Could not locate this Library title.');return;}
-    if(await mf427SaveExisting(live,url,candidate.provider))App.mf425CloseInstant();
+    if(await mf427SaveExisting(live,url,candidate,linkId))App.mf425CloseInstant();
     return;
   }
   // Unsaved Add Title is intentionally a draft: never create cloud data early.
   if(!mf427FillEditor(url)){showToast('Cover URL field could not be found in the Add Title draft.');return;}
-  showToast('Cover added to the draft. Save the new title when ready.');
+  const linked=linkId&&mf427FillDraftExternalId(candidate);
+  showToast(linked?'Cover and provider ID added to the draft. Save the title when ready.':'Cover added to the draft. Save the title when ready.');
   App.mf425CloseInstant();
 };
 App.mf425InstantAdvanced=function(){
