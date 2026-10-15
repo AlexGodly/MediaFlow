@@ -136,11 +136,9 @@ function mf424Kind(item){
 }
 function mf424ProviderSupports(item,provider){
   const def=mf424Provider(provider),kind=mf424Kind(item);
-  if(!def||!def.limit)return false;
-  // Custom/imported media categories may be too broad to identify. Display
-  // and permit real providers rather than producing an empty selector.
-  if(['other','video'].includes(kind))return true;
-  return def.types.includes(kind);
+  // Categories are user-defined, not authoritative media classifications.
+  // The provider reports whether its API can serve the requested work.
+  return Boolean(def&&def.limit);
 }
 function mf424CoverProviderChoices(item){
   const settings=mf424Defaults(),order=settings.priorities.concat(MF424_PROVIDER_META.map(x=>x.id));
@@ -150,7 +148,7 @@ function mf424CoverProviderChoices(item){
   }));
 }
 function mf424Order(item){const c=mf424Defaults(),choices=mf424CoverProviderChoices(item);
-  const valid=choices.filter(p=>p.usable&&p.compatible&&p.enabled).map(p=>p.id);
+  const valid=choices.filter(p=>p.usable&&p.enabled).map(p=>p.id);
   if(c.selection!=='smart')return valid;
   return valid.sort((a,b)=>Number(mf424HasID(item,b))-Number(mf424HasID(item,a)));
 }
@@ -192,10 +190,27 @@ async function mf424Request(provider,url,options={}){
 }
 function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
-  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId:String(entry?.mal_id??entry?.id??entry?.idMal??'')};}
-async function mf424Discover(item,provider){
-  if(MF424_EXTRA_COVER_ADAPTERS.has(provider))return MF424_EXTRA_COVER_ADAPTERS.get(provider)(item,{request:mf424Request,validate:mf424AsCandidate,cover:mf424Cover,match:mf424Match});
-  const title=String(cleanTitle(item.title||'')).trim();const kind=mf424Kind(item);
+  const externalIdKey=({tenrai:'mal',jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',mangadex:'mangadex',openlibrary:'openlibrary',googlebooks:'googlebooks'})[provider]||'';
+  const recordId=String((provider==='openlibrary'?entry?.key:null)??entry?.mal_id??entry?.id??entry?.idMal??'').trim();
+  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId,externalIdKey,externalIdValue:recordId};
+}
+function mf424LinkableCoverId(item,candidate){
+  const key=String(candidate?.externalIdKey||'').trim(),value=String(candidate?.externalIdValue||candidate?.recordId||'').trim();
+  if(!/^[a-z][a-z0-9_]{0,32}$/.test(key)||!value||value.length>120||!(/^[\w.:-]+$/.test(value)||key==='openlibrary'&&/^\/works\/OL\d+W$/.test(value)))return null;
+  const existing=String(item?.externalIds?.[key]??'').trim();
+  if(existing&&existing!==value)return {key,value,existing,conflict:true};
+  return {key,value,existing,conflict:false};
+}
+function mf424LinkSelectedCoverId(item,candidate,{manual=false}={}){
+  const link=mf424LinkableCoverId(item,candidate);
+  if(!link||link.conflict||link.existing===link.value)return false;
+  // Respect an intentional manual clearing of IDs during automatic recovery.
+  if(!manual&&Object.prototype.hasOwnProperty.call(item?.v377ManualExternalIds||{},link.key))return false;
+  item.externalIds={...(item.externalIds||{}),[link.key]:link.value};
+  return true;
+}
+async function mf424DiscoverKind(item,provider,kind){
+  const title=String(cleanTitle(item.title||'')).trim();
   if(provider==='tenrai'||provider==='jikan'){
     const type=kind==='manga'?'manga':'anime', id=mf424Id(item,'mal');
     const base=provider==='tenrai'?'https://api.tenrai.org/v1/':'https://api.jikan.moe/v4/';
