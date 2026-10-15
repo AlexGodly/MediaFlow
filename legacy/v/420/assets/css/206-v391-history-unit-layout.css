@@ -1,0 +1,107 @@
+/* MediaFlow v391: History itemized-unit presentation repair.
+ * Previous History cards were flex rows with the full-width title button and
+ * the itemized <details> as competing siblings. At the narrow 3-column size,
+ * unit grid columns and timestamp text were forced into almost no space.
+ * Keep every real timestamp and unit duration visible; never truncate data.
+ */
+.v269-history-page .mf269-day-grid {
+  align-items: start;
+}
+.v269-history-page .mf269-history-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+}
+.v269-history-page .mf269-history-card > .mf269-card-main {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-height: 96px;
+  padding-right: 42px;
+}
+.v269-history-page .mf269-history-card > .mf269-card-menu {
+  right: 7px;
+  top: 9px;
+  transform: none;
+}
+.v269-history-page .mf269-history-card > .v369-history-units {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 10px 10px 12px;
+  margin: 0;
+  border-top: 1px solid var(--border);
+}
+.v269-history-page .v369-history-units > summary {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  font-size: 11px;
+}
+.v269-history-page .v369-history-unit-list {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  margin-top: 9px;
+}
+.v269-history-page .v369-history-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) max-content;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 4px;
+  padding: 9px;
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: 10px;
+  line-height: 1.45;
+  background: color-mix(in srgb, var(--panel-raised) 65%, var(--panel));
+}
+.v269-history-page .v369-history-unit > b,
+.v269-history-page .v369-history-unit > span,
+.v269-history-page .v369-history-unit > strong {
+  min-width: 0;
+  max-width: 100%;
+  display: block;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.v269-history-page .v369-history-unit > strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+}
+/* A 3-column History grid can make individual cards narrower than a phone.
+ * Give date/time a full row instead of letting it collide with the unit label.
+ */
+@container (max-width: 470px) {
+  .v269-history-page .v369-history-unit {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+  .v269-history-page .v369-history-unit > span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .v269-history-page .v369-history-unit > strong {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+.v269-history-page .mf269-history-card {
+  container-type: inline-size;
+}
+@media (max-width: 680px) {
+  .v269-history-page .mf269-history-card > .mf269-card-main {
+    min-height: 86px;
+  }
+}
