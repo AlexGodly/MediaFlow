@@ -1,0 +1,184 @@
+name: Publish MediaFlow v428 Beta — Universal Media Intelligence (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v428.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mediaflow-v428-release
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout latest personal MediaFlow main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate release baseline, full source, and no previous v428 publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 428
+          test -s assets/js/mediaflow-v428.bundle.js
+          test -s assets/css/239-v428-background-recovery.css
+          test -d legacy/v/427
+          test ! -e legacy/v/428
+          ! git show-ref --verify --quiet refs/tags/428
+          for f in 312-v428-background-hub 313-v428-metadata-fixer 314-v428-fresh-releases; do
+            test -s "src/js/components/$f.js"
+          done
+          test -s docs/CHANGELOG_v428.md
+          test -s src/js/providers/v428-provider-registry.json
+          test -s scripts/test-v428-scale.cjs
+
+      - name: Build PWA, check all recovery contracts, 100k synthetic index and release integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/build.py
+          node scripts/test-v428-recovery.cjs
+          node scripts/test-v428-metadata.cjs
+          node scripts/test-v428-fresh.cjs
+          node scripts/test-v428-scheduler.cjs
+          node scripts/test-v428-widget.cjs
+          node scripts/test-v428-multitab.cjs
+          node scripts/test-v428-scale.cjs
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v424-recovery.cjs
+          python scripts/check.py
+          node --check assets/js/mediaflow-v428.bundle.js
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('.')
+          index=(root/'index.html').read_text()
+          worker=(root/'sw.js').read_text()
+          order=json.loads((root/'src/js/runtime-order.json').read_text())
+          registry=json.loads((root/'src/js/providers/v428-provider-registry.json').read_text())
+          for module in ['312-v428-background-hub.js','313-v428-metadata-fixer.js','314-v428-fresh-releases.js']:
+              assert 'components/'+module in order,module
+          assert 'assets/js/mediaflow-v428.bundle.js' in index
+          assert 'assets/css/239-v428-background-recovery.css' in index
+          assert 'mediaflow-pwa-v428-shell-v1' in worker
+          assert './assets/css/239-v428-background-recovery.css' in worker
+          assert registry['version']==428
+          assert all(not p['enabled'] and not p['publicUi'] for p in registry['providers'])
+          assert (root/'version.json').read_text().find('"appVersion": 428')>=0
+          print('v428 release integrity, cache and credential secrecy checks passed')
+          PY
+
+      - name: Archive complete independently recoverable v428 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -- . ':!legacy' ':!beta'
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build MediaFlow v428 Beta bundle, manifest and PWA cache'
+          fi
+          mkdir -p "$RUNNER_TEMP/mediaflow-v428-source"
+          rsync -a --exclude='/legacy/' --exclude='/beta/' --exclude='/.git/' ./ "$RUNNER_TEMP/mediaflow-v428-source/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v428-source/VERSION")" = 428
+          test -s "$RUNNER_TEMP/mediaflow-v428-source/assets/js/mediaflow-v428.bundle.js"
+          mkdir -p legacy/v/428
+          rsync -a "$RUNNER_TEMP/mediaflow-v428-source/" legacy/v/428/
+          test -s legacy/v/428/src/js/components/314-v428-fresh-releases.js
+          test -s legacy/v/428/assets/js/mediaflow-v428.bundle.js
+          git add legacy/v/428
+          git commit -m 'Archive the complete MediaFlow v428 release in legacy/v/428'
+          git tag 428
+          git push origin HEAD:main refs/tags/428
+          echo "Archived and tagged v428 at $(git rev-parse HEAD)"
+
+      - name: Create audited full Modular ZIP and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import os,hashlib,json
+          src=Path(os.environ['RUNNER_TEMP'])/'mediaflow-v428-source'
+          dest=Path(os.environ['RUNNER_TEMP'])/'MediaFlow_v428_Modular.zip'
+          with ZipFile(dest,'w',ZIP_DEFLATED,compresslevel=6) as zipfile:
+              for p in sorted(src.rglob('*')):
+                  if not p.is_file():continue
+                  rel=p.relative_to(src)
+                  if rel.parts[0] in {'legacy','beta','.git','.github','node_modules'}:continue
+                  zipfile.write(p,rel.as_posix())
+          with ZipFile(dest,'r') as archive:
+              assert archive.testzip() is None
+              names=set(archive.namelist())
+              for required in ['VERSION','index.html','sw.js','version.json',
+                  'assets/js/mediaflow-v428.bundle.js','assets/css/239-v428-background-recovery.css',
+                  'src/js/components/312-v428-background-hub.js',
+                  'src/js/components/313-v428-metadata-fixer.js',
+                  'src/js/components/314-v428-fresh-releases.js']:
+                  assert required in names,required
+              assert archive.read('VERSION').decode().strip()=='428'
+          digest=hashlib.sha256(dest.read_bytes()).hexdigest()
+          checksum=dest.parent/'MediaFlow_v428_Modular.sha256'
+          checksum.write_text(digest+'  '+dest.name+'\n')
+          print('v428 modular ZIP validated:',dest.stat().st_size,'bytes SHA256',digest)
+          PY
+
+      - name: Publish numeric v428 Beta GitHub Release with complete changelog
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create 428 \
+            "$RUNNER_TEMP/MediaFlow_v428_Modular.zip" \
+            "$RUNNER_TEMP/MediaFlow_v428_Modular.sha256" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v428 Beta' \
+            --notes-file docs/CHANGELOG_v428.md \
+            --prerelease
+          gh release view 428 --repo "$GITHUB_REPOSITORY" --json tagName,name,url,assets
+
+      - name: Prepare live Pages site without historical source archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mediaflow-v428-site"
+          rsync -a \
+            --exclude='/legacy/' --exclude='/beta/' \
+            --exclude='/.git/' --exclude='/.github/' \
+            ./ "$RUNNER_TEMP/mediaflow-v428-site/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v428-site/VERSION")" = 428
+          test -s "$RUNNER_TEMP/mediaflow-v428-site/assets/js/mediaflow-v428.bundle.js"
+          test ! -e "$RUNNER_TEMP/mediaflow-v428-site/legacy"
+          test ! -e "$RUNNER_TEMP/mediaflow-v428-site/beta"
+
+      - uses: actions/configure-pages@v5
+      - name: Upload v428 GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mediaflow-v428-site
+      - name: Deploy v428 Beta to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
