@@ -33,7 +33,7 @@ jobs:
           test "$(cat VERSION)" = "432"
           python scripts/build.py
           node --check assets/js/mediaflow-v432.bundle.js
-          node --check src/js/components/312-v432-dashboard-auto-save-navigation.js
+          node --check src/js/components/312-v431-dashboard-auto-save-navigation.js
           node --check scripts/test-v431-cover-autosave.cjs
           node --check scripts/test-v432-avatar-icon.cjs
       - name: Verify cover validation, navigation and existing recovery features
