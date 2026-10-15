@@ -173,9 +173,11 @@ function feedItems(raw,type){
   seen.add(guid);
   const text=child(item,'title');
   const explicit=[...item.children].find(x=>x.localName==='episode'&&/itunes/i.test(x.prefix||''))?.textContent;
+  const rawSeason=[...item.children].find(x=>x.localName==='season'&&/itunes/i.test(x.prefix||''))?.textContent;
+  const season=rawSeason&&Number.isSafeInteger(Number(rawSeason))?Number(rawSeason):null;
   const titleNumber=/(?:episode|ep\.?|chapter|ch\.?|part|issue)\s*#?\s*(\d{1,6})\b/i.exec(text);
   const num=Number(explicit||titleNumber?.[1]);
-  items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null});
+  items.push({id:guid,date,title:text,number:Number.isSafeInteger(num)&&num>0?num:null,season});
  }
  return {items,total:nodes.length};
 }
@@ -188,6 +190,9 @@ async function feed(item){
  if(parsed.error)return {status:'unknown',reason:parsed.error};
  const numbered=parsed.items.filter(x=>x.number!=null),highest=Math.max(0,...numbered.map(x=>x.number));
  const latest=parsed.items.map(x=>x.date).sort().at(-1)||'';
+ if(parsed.items.some(x=>x.season!==null&&x.season>0))
+  return {status:'unknown',source:'RSS / Atom',url,unit:types[kind],observedCount:parsed.items.length,releasedAt:latest,partial:true,
+   reason:'Season-numbered episodes in a partial feed cannot be compared safely against aggregate Library progress'};
  return freshButIncomplete(item,highest,'RSS / Atom',
   kind==='podcasts'?'podcast episodes':kind==='webnovels'?'web novel chapters':kind==='comics'?'comic issues':'web series episodes',
   {url,recordId:url,observedCount:parsed.items.length,releasedAt:latest,
