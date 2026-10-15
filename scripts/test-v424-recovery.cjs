@@ -72,13 +72,13 @@ async function main(){
   await assert.rejects(run('mf424Request("jikan","https://api.jikan.moe/v4/anime/1")'),/temporarily unreachable/);
   await run('delete MF424.rate.jikan');
   // Direct MAL ID path must never use a search endpoint.
-  let captured='';context.fetch=async(url)=>{captured=String(url);return {ok:true,json:async()=>({data:{mal_id:123,title:'Test',images:{jpg:{large_image_url:'https://example.org/test.jpg'}}}}),headers:new Map()}};
+  let captured=[];context.fetch=async(url)=>{captured.push(String(url));return {ok:true,json:async()=>({data:{mal_id:123,title:'Test',images:{jpg:{large_image_url:'https://example.org/test.jpg'}}}}),headers:new Map()}};
   const direct=await run('mf424Discover({title:"Test",type:"anime",externalIds:{mal:"123"}},"jikan")');
-  assert.equal(direct.length,1);assert.ok(direct[0].idMatch);assert.ok(captured.includes('/anime/123'));
+  assert.equal(direct.length,1);assert.ok(direct[0].idMatch);assert.ok(captured.some(x=>x.includes('/anime/123')));
   // Kitsu serves JSON:API; sending regular Accept: application/json may cause HTTP 406.
   context.fetch=async(url,opts={})=>{
     assert.equal(opts.headers.Accept,'application/vnd.api+json');
-    assert.ok(String(url).includes('kitsu.io/api/edge/anime/15'));
+    assert.ok(String(url).includes('kitsu.io/api/edge/anime/15')||String(url).includes('kitsu.io/api/edge/manga/15'));
     return {ok:true,json:async()=>({data:{id:'15',attributes:{
       canonicalTitle:'Example Anime',titles:{en:'Example Anime'},startDate:'2022-04-01',
       posterImage:{original:'https://example.org/kitsu.jpg'}

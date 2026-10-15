@@ -136,11 +136,9 @@ function mf424Kind(item){
 }
 function mf424ProviderSupports(item,provider){
   const def=mf424Provider(provider),kind=mf424Kind(item);
-  if(!def||!def.limit)return false;
-  // Custom/imported media categories may be too broad to identify. Display
-  // and permit real providers rather than producing an empty selector.
-  if(['other','video'].includes(kind))return true;
-  return def.types.includes(kind);
+  // Categories are user-defined, not authoritative media classifications.
+  // The provider reports whether its API can serve the requested work.
+  return Boolean(def&&def.limit);
 }
 function mf424CoverProviderChoices(item){
   const settings=mf424Defaults(),order=settings.priorities.concat(MF424_PROVIDER_META.map(x=>x.id));
@@ -150,7 +148,7 @@ function mf424CoverProviderChoices(item){
   }));
 }
 function mf424Order(item){const c=mf424Defaults(),choices=mf424CoverProviderChoices(item);
-  const valid=choices.filter(p=>p.usable&&p.compatible&&p.enabled).map(p=>p.id);
+  const valid=choices.filter(p=>p.usable&&p.enabled).map(p=>p.id);
   if(c.selection!=='smart')return valid;
   return valid.sort((a,b)=>Number(mf424HasID(item,b))-Number(mf424HasID(item,a)));
 }
@@ -192,10 +190,28 @@ async function mf424Request(provider,url,options={}){
 }
 function mf424Id(item,name){return String(item.externalIds?.[name]??'').trim();}
 function mf424AsCandidate(entry,url,provider,idMatch,link,reason,confidence){url=mf424Cover(url);if(!url)return null;
-  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId:String(entry?.mal_id??entry?.id??entry?.idMal??'')};}
-async function mf424Discover(item,provider){
-  if(MF424_EXTRA_COVER_ADAPTERS.has(provider))return MF424_EXTRA_COVER_ADAPTERS.get(provider)(item,{request:mf424Request,validate:mf424AsCandidate,cover:mf424Cover,match:mf424Match});
-  const title=String(cleanTitle(item.title||'')).trim();const kind=mf424Kind(item);
+  const externalIdKey=({tenrai:'mal',jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',mangadex:'mangadex',openlibrary:'openlibrary',googlebooks:'googlebooks'})[provider]||'';
+  const recordId=String((provider==='openlibrary'?entry?.key:null)??entry?.mal_id??entry?.id??entry?.idMal??'').trim().replace(provider==='openlibrary'?/^\/works\//:/^\u0000/,'');
+  return {url,provider,recordUrl:link||'',title:mf424Titles(entry)[0]||'',confidence:confidence??(idMatch?1:.7),reason:reason||'',idMatch:Boolean(idMatch),recordId,externalIdKey,externalIdValue:recordId};
+}
+function mf424LinkableCoverId(item,candidate){
+  const key=String(candidate?.externalIdKey||'').trim(),value=String(candidate?.externalIdValue||candidate?.recordId||'').trim();
+  if(!/^[a-z][a-z0-9_]{0,32}$/.test(key)||!value||value.length>120||!(/^[\w.:-]+$/.test(value)||key==='openlibrary'&&/^\/works\/OL\d+W$/.test(value)))return null;
+  const existing=String(item?.externalIds?.[key]??'').trim();
+  if(existing&&existing!==value)return {key,value,existing,conflict:true};
+  return {key,value,existing,conflict:false};
+}
+function mf424LinkSelectedCoverId(item,candidate,{manual=false}={}){
+  const link=mf424LinkableCoverId(item,candidate);
+  if(!link||link.conflict||link.existing===link.value)return false;
+  // Respect an intentional manual clearing of IDs during automatic recovery.
+  if(!manual&&Object.prototype.hasOwnProperty.call(item?.v377ManualExternalIds||{},link.key))return false;
+  item.externalIds={...(item.externalIds||{}),[link.key]:link.value};
+  if(manual)item.v377ManualExternalIds={...(item.v377ManualExternalIds||{}),[link.key]:link.value};
+  return true;
+}
+async function mf424DiscoverKind(item,provider,kind){
+  const title=String(cleanTitle(item.title||'')).trim();
   if(provider==='tenrai'||provider==='jikan'){
     const type=kind==='manga'?'manga':'anime', id=mf424Id(item,'mal');
     const base=provider==='tenrai'?'https://api.tenrai.org/v1/':'https://api.jikan.moe/v4/';
@@ -256,7 +272,7 @@ async function mf424Discover(item,provider){
     }
     const data=await mf424Request(provider,'https://openlibrary.org/search.json?title='+encodeURIComponent(title)+'&limit=8&fields=key,title,first_publish_year,cover_i');
     return (data?.docs||[]).filter(x=>x.cover_i).map(x=>{const m=mf424Match(item,{title:x.title,year:x.first_publish_year},false);
-      return mf424AsCandidate({title:x.title},'https://covers.openlibrary.org/b/id/'+x.cover_i+'-L.jpg?default=false',provider,false,'https://openlibrary.org'+x.key,m.reason,m.confidence);
+      return mf424AsCandidate({title:x.title,key:x.key},'https://covers.openlibrary.org/b/id/'+x.cover_i+'-L.jpg?default=false',provider,false,'https://openlibrary.org'+x.key,m.reason,m.confidence);
     }).filter(Boolean);
   }
   if(provider==='googlebooks'){
@@ -269,17 +285,50 @@ async function mf424Discover(item,provider){
   }
   return [];
 }
-async function mf424Candidates(item){const found=[],dedupe=new Set();const ordered=mf424Order(item);
+// Search each provider's own supported catalogues, not MediaFlow category names.
+// A provider may return no matching record, but it is never blocked by the
+// user's chosen category. Existing IDs get first chance; name search follows
+// if the saved ID is missing, stale, or identifies a differently named work.
+async function mf424Discover(item,provider){
+  if(MF424_EXTRA_COVER_ADAPTERS.has(provider))
+    return MF424_EXTRA_COVER_ADAPTERS.get(provider)(item,{request:mf424Request,validate:mf424AsCandidate,cover:mf424Cover,match:mf424Match});
+  const kinds=['tenrai','jikan','anilist','kitsu'].includes(provider)
+    ?(mf424Kind(item)==='manga'?['manga','anime']:['anime','manga'])
+    :[mf424Kind(item)];
+  const all=[],seen=new Set(),issues=[];
+  const append=rows=>{for(const c of rows||[]){if(!c?.url||seen.has(c.url))continue;seen.add(c.url);all.push(c);}};
+  for(const kind of kinds){
+    let direct=[];
+    try{direct=await mf424DiscoverKind(item,provider,kind);append(direct);}
+    catch(error){issues.push(error);}
+    if(mf424HasID(item,provider)&&!direct.some(c=>c.idMatch&&c.confidence>=.95)){
+      const ids={...(item.externalIds||{})};
+      if(provider==='tenrai'||provider==='jikan')delete ids.mal;
+      if(provider==='anilist'){delete ids.anilist;delete ids.mal;}
+      if(provider==='kitsu')delete ids.kitsu;
+      if(provider==='tvmaze'){delete ids.tvmaze;delete ids.imdb;}
+      if(provider==='openlibrary')delete ids.isbn;
+      try{append(await mf424DiscoverKind({...item,externalIds:ids},provider,kind));}
+      catch(error){issues.push(error);}
+    }
+  }
+  if(!all.length&&issues.length)throw issues[0];
+  return all;
+}
+async function mf424Candidates(item){
+  const found=[],dedupe=new Set(),ordered=mf424Order(item),manual=mf424Defaults().selection==='manual';
   const idFirst=ordered.filter(p=>mf424HasID(item,p)),search=ordered.filter(p=>!mf424HasID(item,p));
-  for(const p of idFirst.concat(search)){
-    try{for(const candidate of await mf424Discover(item,p)){
-      if(!candidate||candidate.confidence<.65||dedupe.has(candidate.url))continue;
-      dedupe.add(candidate.url);if(!await mf424Image(candidate.url,candidate.provider))continue;
-      found.push(candidate);
-      if(candidate.idMatch&&candidate.confidence>=.95&&mf424Defaults().selection!=='manual')return [candidate];
-      if(found.length>=4)return found;
-      if(mf424Defaults().selection==='smart'&&candidate.confidence>=.95)return found;
-    }}catch(e){if(e.paused)break;mf424Note('provider-error',p+': '+String(e.message||e),item.id);}
+  for(const provider of idFirst.concat(search)){
+    try{
+      for(const candidate of await mf424Discover(item,provider)){
+        if(!candidate||dedupe.has(candidate.url)||(!manual&&candidate.confidence<.65))continue;
+        dedupe.add(candidate.url);
+        if(!await mf424Image(candidate.url,candidate.provider))continue;
+        // Keep collecting choice candidates rather than stopping after the
+        // first confident ID match. Continue to the next registered provider.
+        if(found.length<24)found.push(candidate);
+      }
+    }catch(error){if(error.paused)break;mf424Note('provider-error',provider+': '+String(error.message||error),item.id);}
   }
   return found;
 }
@@ -287,13 +336,17 @@ function mf424QueueReview(item,candidates){MF424.job.reviews.push({id:String(ite
   expectedModified:Number(item.modifiedAt)||0,added:Date.now(),candidates});
   MF424.job.pending++;mf424Note('review','Manual confirmation required',item.id);
 }
-async function mf424Apply(item,candidate,expected){
+async function mf424Apply(item,candidate,expected,{manual=false,linkId=true}={}){
   if(mf424Account()!==MF424.account)throw new Error('Account changed; recovery suspended');
   if(!mf424Missing(item))return false;
   if(Number(item.modifiedAt||0)!==Number(expected||0))return false;
   if(!await mf424Image(candidate.url,candidate.provider))return false;
   if(!mf424Missing(item)||Number(item.modifiedAt||0)!==Number(expected||0))return false;
   item.coverUrl=candidate.url;item.coverSource='auto:'+candidate.provider+':'+(candidate.idMatch?'external-id':'verified');
+  // A selected cover can safely link a record ID, but existing IDs are sacred.
+  // Auto jobs link only a verified direct ID; explicit user selection may link
+  // a title-search record after the user has reviewed the provider's title.
+  if(linkId&&(manual||candidate.idMatch&&candidate.confidence>=.95))mf424LinkSelectedCoverId(item,candidate,{manual});
   item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
@@ -329,10 +382,12 @@ async function mf424Process(item){if(!mf424Missing(item)){MF424.job.skipped++;re
   if(!candidates.length){MF424.job.unresolved++;mf424Note('unresolved','No verified cover found',item.id);return;}
   const mode=mf424Defaults().selection;
   const best=candidates.sort((a,b)=>b.confidence-a.confidence)[0];
-  if(mode==='manual'||mode==='hybrid'&&best.confidence<.95){
+  // With user-defined categories, a title-only match cannot establish media
+  // identity. Queue it for the owner's choice rather than overwriting artwork.
+  // Automatic application requires a verified saved provider ID AND title.
+  if(mode==='manual'||!best.idMatch||best.confidence<.95){
     mf424QueueReview(item,candidates);return;
   }
-  if(best.confidence<.95){mf424QueueReview(item,candidates);return;}
   if(await mf424Apply(item,best,expected)){MF424.job.fixed++;mf424Note('recovered',best.provider,item.id);}
   else{MF424.job.unresolved++;mf424Note('conflict','Title changed; skipped outdated cover candidate',item.id);}
 }
@@ -456,10 +511,18 @@ function mf424ReviewIcon(name){const shapes={
   alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m3 17 6-6 4 4 3-3 5 5"/>'
 };return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.image)+'</svg>';}
+function mf424CoverIdControl(item,candidate,index,scope='mf424'){
+  const link=mf424LinkableCoverId(item,candidate);
+  if(!link)return '<small class="mf424-cover-id-note">No usable external record ID supplied by this cover source.</small>';
+  const name=mf424Escape(link.key==='mal'?'MAL':link.key.toUpperCase());
+  if(link.conflict)return '<small class="mf424-cover-id-conflict">Existing '+name+' ID '+mf424Escape(link.existing)+' is protected. This cover uses '+mf424Escape(link.value)+'; the ID will not be replaced.</small>';
+  if(link.existing===link.value)return '<small class="mf424-cover-id-note">'+name+' ID '+mf424Escape(link.value)+' already linked.</small>';
+  return '<label class="mf424-cover-id-control"><input type="checkbox" data-'+mf424Escape(scope)+'-cover-link-id="'+Number(index)+'" checked> Save '+name+' external ID <strong>'+mf424Escape(link.value)+'</strong> with this cover</label>';
+}
 function mf424Review(){if(!MF424.job?.reviews.length)return;const x=MF424.job.reviews[0],item=mf424Lookup(x.id);
   const old=document.getElementById('mf424-review');if(old)old.remove();const root=document.createElement('div');root.id='mf424-review';root.className='mf424-modal mf425-themed mf427-manual-review';
   root.innerHTML='<div class="mf424-shade" onclick="App.mf424CloseReview()"></div><section class="mf424-dialog" role="dialog" aria-modal="true"><div class="mf424-heading"><div><small>MANUAL REVIEW · '+MF424.job.pending+' PENDING</small><h2>'+mf424Escape(x.title)+'</h2><p>'+mf424Escape(item?String(getCategory(item.categoryId)?.name||''):'Title no longer exists')+'</p></div><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('close')+' Close</button></div>'+ 
-    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">'+mf424ReviewIcon('check')+' Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">'+mf424ReviewIcon('alert')+' Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('skip')+' Later</button></div></section>';
+    '<div class="mf424-review-candidates">'+x.candidates.map((c,i)=>'<article><img loading="lazy" src="'+mf424Escape(c.url)+'" alt="Cover candidate"><div><b>'+mf424Escape(c.title||c.provider)+'</b><small>'+mf424Escape(c.provider)+' · '+Math.round(c.confidence*100)+'% match</small><p>'+mf424Escape(c.reason)+'</p>'+(c.recordUrl?'<a href="'+mf424Escape(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">Source record</a>':'')+mf424CoverIdControl(item,c,i,'mf424')+'<button class="btn btn-primary" onclick="App.mf424Confirm('+i+')">'+mf424ReviewIcon('check')+' Use cover</button></div></article>').join('')+'</div><div class="mf424-actions"><button class="btn btn-ghost" onclick="App.mf424DiscardReview()">'+mf424ReviewIcon('alert')+' Mark unresolved</button><button class="btn btn-ghost" onclick="App.mf424CloseReview()">'+mf424ReviewIcon('skip')+' Later</button></div></section>';
   document.body.appendChild(root);
 }
 function mf424CloseReview(){document.getElementById('mf424-review')?.remove();}
@@ -469,7 +532,8 @@ async function mf424Confirm(i){if(!MF424.job?.reviews.length)return;const x=MF42
   if(!candidate||!item||!mf424Missing(item)||Number(item.modifiedAt||0)!==x.expectedModified){
     showToast('This title changed after review was queued. Its cover was not overwritten.');return;
   }
-  if(await mf424Apply(item,candidate,x.expectedModified)){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
+  const linkId=document.querySelector('#mf424-review [data-mf424-cover-link-id="'+Number(i)+'"]')?.checked===true;
+  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true,linkId})){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
     MF424.job.reviews.shift();MF424.job.pending--;await mf424ReviewSave();}else showToast('Unable to validate this cover safely.');
 }
 async function mf424ReviewSave(){if(MF424.job.cursor>=MF424.job.ids.length&&!MF424.job.pending)mf424State('complete');

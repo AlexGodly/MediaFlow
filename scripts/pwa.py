@@ -68,7 +68,7 @@ if missing:
 assets_js='\n'.join(f'  {json.dumps(x)},' for x in assets).rstrip(',')
 # The v427 cover-search hotfix keeps app version 427 while replacing cached JS.
 # Bump the cache namespace so installed PWAs fetch the corrected interface.
-cache=f'mediaflow-pwa-v{VERSION}-shell-v6' if VERSION == 427 else f'mediaflow-pwa-v{VERSION}-shell-v1'
+cache=f'mediaflow-pwa-v{VERSION}-shell-v7' if VERSION == 427 else f'mediaflow-pwa-v{VERSION}-shell-v1'
 
 # v247+ intentionally does not use cache.addAll(APP_SHELL). A single transient
 # 404 used to reject the whole install event. Each asset is now cached

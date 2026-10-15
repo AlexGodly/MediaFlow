@@ -137,3 +137,19 @@ html body #mf424-review.mf427-manual-review .mf424-dialog{
  #mf424-review.mf427-manual-review .mf424-actions .btn{min-width:0;white-space:normal}
  #mf424-review.mf427-manual-review .mf424-review-candidates img{width:76px}
 }
+
+/* ID linking is opt-in per selected cover, never a silent metadata rewrite. */
+.mf424-cover-id-control{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  margin:9px 0 10px;padding:9px 11px;min-height:40px;
+  border:1px solid var(--border-soft);background:var(--panel);color:var(--text);
+  border-radius:10px;font-size:12px;line-height:1.55;font-weight:550}
+.mf424-cover-id-control input[type="checkbox"]{width:17px;height:17px;accent-color:var(--flow);
+  flex:none;margin:0;cursor:pointer}
+.mf424-cover-id-control strong{color:var(--flow);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.mf424-cover-id-note,.mf424-cover-id-conflict{display:block;margin:6px 0 9px;
+  font-size:12px;line-height:1.45;color:var(--text-dim)}
+.mf424-cover-id-conflict{color:var(--text)!important;border-inline-start:3px solid var(--flow);
+  padding:6px 10px;background:var(--panel);border-radius:5px}
+.mf425-candidate .mf424-cover-id-control{width:100%}
+#mf424-review .mf424-cover-id-control{max-width:100%}
+.mf424-cover-id-control:focus-within{outline:2px solid var(--flow);outline-offset:2px}
