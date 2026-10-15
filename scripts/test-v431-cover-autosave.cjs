@@ -24,7 +24,7 @@ const fake={
  mf430SetMissingAutoSave:enabled=>{states.settings.v430MissingCoversAutoSave=enabled;},
  v46ApplyState:()=>{},
  render:()=>{},
- App:{},showToast:s=>toasts.push(s),console,
+ window:{},App:{},showToast:s=>toasts.push(s),console,
  setTimeout,clearTimeout,queueMicrotask,Promise,
 };
 fake.App.v192SaveMissingCover=()=>{
