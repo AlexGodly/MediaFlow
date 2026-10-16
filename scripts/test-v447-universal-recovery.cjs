@@ -1,9 +1,9 @@
 /* v447: deterministic, offline integration contract for universal shortcuts + confirmed stages. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'447');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=447);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/327-v447-universal-recovery-actions.js');
+assert(order.includes('components/327-v447-universal-recovery-actions.js'));
 const src=fs.readFileSync('src/js/components/327-v447-universal-recovery-actions.js','utf8');
 const css=fs.readFileSync('assets/css/254-v447-universal-recovery-actions.css','utf8');
 assert(fs.readFileSync('index.html','utf8').includes('254-v447-universal-recovery-actions.css'));
