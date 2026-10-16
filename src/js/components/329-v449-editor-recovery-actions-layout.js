@@ -11,9 +11,7 @@ function mf449DraftButtons(){
    'title="Save this title first to enable recovery" aria-label="'+mf424Escape(label)+' — save title first">'+
    mf425Icon(icon,16)+' '+label+'</button>').join('')+'</div>';
 }
-const mf449PreviousEditor=libraryModalHtml;
-libraryModalHtml=function(item){
- const raw=String(mf449PreviousEditor.apply(this,arguments)||'');
+function mf449TransformEditor(raw,item){
  // v239/v240 editor wrappers are stable; modify the returned markup only.
  // No DOM edits to the active form while the user is typing.
  try{
@@ -62,15 +60,20 @@ libraryModalHtml=function(item){
   console.warn('v449 recovery toolbar relocation failed, preserving editor markup',error);
   return raw;
  }
+}
+const mf449PreviousEditor=libraryModalHtml;
+libraryModalHtml=function(item){
+ return mf449TransformEditor(String(mf449PreviousEditor.apply(this,arguments)||''),item);
 };
-const mf449PreviousLibrary=renderLibrary;
-renderLibrary=function(){
- const raw=String(mf449PreviousLibrary.apply(this,arguments)||'');
+function mf449CleanLibraryMarkup(raw){
+ raw=String(raw||'');
  // v425's original one-off button duplicates v447's Cover Recovery action.
  // Keep v447's Cover / Metadata / Recover Both controls intact in both
  // Normal and Dynamic Library toolbars, regardless of layout or selection.
  let html=raw.replace(/<button\b(?=[^>]*\bmf425-tools-button\b)[^>]*>[\s\S]*?<\/button>/g,'');
  html=html.replace(/<div class="mf425-library-tools">\s*<\/div>/g,'');
  return html;
-};
-window.MediaFlowV449=Object.freeze({version:449,draft:mf449DraftButtons,editor:()=>libraryModalHtml,libraryMarkup:()=>renderLibrary()});
+}
+const mf449PreviousLibrary=renderLibrary;
+renderLibrary=function(){return mf449CleanLibraryMarkup(mf449PreviousLibrary.apply(this,arguments));};
+window.MediaFlowV449=Object.freeze({version:449,draft:mf449DraftButtons,transform:mf449TransformEditor,cleanLibrary:mf449CleanLibraryMarkup});
