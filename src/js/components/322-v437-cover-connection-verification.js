@@ -7,7 +7,7 @@ mf425SettingsMarkup=function(){
  const rows=MF437_COVER_CATALOG.map(([id,name])=>{
   const active=Boolean(mf424Provider(id)?.limit);
   return '<div class="mf437-provider"><strong>'+mf437Escape(name)+'</strong>'+
-   (active?'<button type="button" class="btn btn-ghost" onclick="App.mf437TestCover(\\''+mf437Escape(id)+'\\')">Test Cover</button>':
+   (active?`<button type="button" class="btn btn-ghost" onclick="App.mf437TestCover(\'${mf437Escape(id)}\')">Test Cover</button>`:
     '<small>Provider unavailable or awaiting access review</small>')+
    '<small id="mf437-cover-result-'+mf437Escape(id)+'">'+mf437Escape(MF437_COVER_TESTS[id]||'')+'</small></div>';
  }).join('');
