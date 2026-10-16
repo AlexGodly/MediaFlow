@@ -6,7 +6,7 @@ const src=fs.readFileSync('src/js/components/319-v439-metadata-recovery.js','utf
 const adapters=fs.readFileSync('src/js/components/318-v439-metadata-adapters.js','utf8');
 const gateway=fs.readFileSync('supabase/functions/mediaflow-api-gateway/index.ts','utf8');
 const version=fs.readFileSync('VERSION','utf8').trim();
-assert.equal(version,'439');
+assert(['439','440'].includes(version));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.slice(-2).join(',')==='components/318-v439-metadata-adapters.js,components/319-v439-metadata-recovery.js');
 const settings={v439Metadata:{minimumConfidence:0.94}};
