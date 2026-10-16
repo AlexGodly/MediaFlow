@@ -12,6 +12,7 @@ animeschedule:{env:"ANIMESCHEDULE_APP_TOKEN",mode:"cover",cap:50,perUser:15},
 malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:70,perUser:20},
 metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:45,perUser:15},
 trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
+simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
 watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:15,perUser:4},
 episodate:{env:"",mode:"cover",cap:80,perUser:20},
 gutendex:{env:"",mode:"cover",cap:80,perUser:20},
@@ -163,6 +164,16 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
    add({id:n.ids?.trakt,name:n.title,year:n.year,link:"https://trakt.tv/"+(r.type==="show"?"shows/":"movies/")+n.ids?.slug,key:"trakt",
      other:{imdb:n.ids?.imdb,...(r.type==="show"?{tmdb_tv:n.ids?.tmdb}:{tmdb:n.ids?.tmdb}),tvdb_series:n.ids?.tvdb}});}
  }
+ if(p==="simkl"){
+  for(const kind of ["movie","tv","anime"]){
+   const d=await read(p,"https://api.simkl.com/search/"+kind+"?q="+encodeURIComponent(title)+"&extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
+   for(const row of (Array.isArray(d)?d:list(d)).slice(0,6)){const simklId=row.ids?.simkl||row.ids?.simkl_id;
+    if(!simklId)continue;
+    add({id:simklId,name:row.title,year:row.year,key:"simkl",link:"https://simkl.com/"+(kind==="movie"?"movies":kind)+"/"+simklId,
+      other:{imdb:row.ids?.imdb,mal:row.ids?.mal,tmdb:row.ids?.tmdb,anidb:row.ids?.anidb}});
+   }
+  }
+ }
  if(p==="watchmode"){
   const q=new URL("https://api.watchmode.com/v1/search/");
   q.searchParams.set("search_field",/^tt\d{7,12}$/i.test(ids.imdb||"")?"imdb_id":"name");
@@ -253,6 +264,17 @@ async function metadata(p:Provider,title:string,ids:IdMap,year:number){
    ratings:{mal:metaRating(d.mean,10,d.num_scoring_users)},
    sourceUrl:"https://myanimelist.net/"+media+"/"+d.id},ids,title)].filter(Boolean);
  }
+ if(p==="simkl"){
+  const source=best.recordUrl||"";const kind=source.includes("/movies/")?"movies":source.includes("/anime/")?"anime":"tv";
+  const d=await read(p,"https://api.simkl.com/"+kind+"/"+encodeURIComponent(id)+"?extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
+  const rt=d.ratings||{},simklScore=rt.simkl?.rating??rt.simkl?.score??d.rating;
+  return [metaRow(p,{title:d.title||best.title,ids:{simkl:String(d.ids?.simkl||d.ids?.simkl_id||id),
+    ...(d.ids?.imdb?{imdb:d.ids.imdb}:{}),...(d.ids?.mal?{mal:d.ids.mal}:{})},
+    fields:{synopsis:d.overview||d.description,year:d.year,status:d.status,genres:d.genres,
+      episodeCount:d.total_episodes,durationMinutes:d.runtime,mediaFormat:d.anime_type||d.type},
+    ratings:{simkl:metaRating(simklScore,10,rt.simkl?.votes),imdb:metaRating(rt.imdb?.rating,10,rt.imdb?.votes),mal:metaRating(rt.mal?.rating,10,rt.mal?.votes)},
+    sourceUrl:source},ids,title)].filter(Boolean);
+ }
  if(p==="trakt"){
   const kind=String(best.recordUrl||"").includes("/shows/")?"shows":"movies";
   const headers={"trakt-api-key":secret,"trakt-api-version":"2"};
@@ -305,7 +327,7 @@ Deno.serve(async(req:Request)=>{
  catch(_){return reply(400,{error:"Invalid JSON request"});}
  if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","episodate","gutendex"].includes(id)}))});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
