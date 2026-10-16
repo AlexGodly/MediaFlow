@@ -144,6 +144,7 @@ async function mf454QuickFinish(q){
  if(q.finishPromise)return q.finishPromise;
  q.finishPromise=(async()=>{
   try{
+   if(q.preparePromise)await q.preparePromise.catch(()=>{});
    if(q.scanPromise)await q.scanPromise.catch(()=>{});
    if(q.priority&&MF451.journal){
     const restored=await mf451Restore({force:true});
@@ -259,7 +260,8 @@ mf453OpenQuick=async function(kind,id){
    // Both is intentional even for cover-only or metadata-only quick views:
    // the v451 journal must checkpoint BOTH preexisting processes before any
    // provider call. Otherwise old processes can race with our quick scan.
-   if(!await mf451Prepare('both',id))
+   q.preparePromise=mf451Prepare('both',id);
+   if(!await q.preparePromise)
     throw Error('Could not safely pause existing recovery. Check Background Processes.');
    q.priority=true;
   }
