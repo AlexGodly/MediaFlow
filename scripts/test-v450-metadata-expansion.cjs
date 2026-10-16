@@ -1,14 +1,15 @@
 /* MediaFlow v450 deterministic metadata, rating provenance and safety contract. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert(['450','451','452','453','454','455'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['450','451','452','453','454','455','456'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.includes('components/330-v450-universal-metadata-expansion.js'));
 assert(order.includes('components/331-v451-recovery-stop-priority.js'));
 assert(order.includes('components/332-v452-recovery-control-polish.js'));
 assert(order.includes('components/334-v453-quick-title-recovery.js'));
 assert(order.includes('components/336-v454-quick-title-hardening.js'));
-assert.equal(order.at(-1),'components/338-v455-recovery-handoff-visibility.js');
+assert(order.includes('components/338-v455-recovery-handoff-visibility.js'));
+assert.equal(order.at(-1),'components/340-v456-recovery-start-status.js');
 const src=fs.readFileSync('src/js/components/330-v450-universal-metadata-expansion.js','utf8');
 const styles=fs.readFileSync('assets/css/257-v450-universal-metadata-expansion.css','utf8');
 const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');

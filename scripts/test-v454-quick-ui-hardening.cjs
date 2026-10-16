@@ -1,10 +1,11 @@
 /* MediaFlow v454 — modal, recovery alternatives and scroll-stable presets. */
 'use strict';
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
-assert(['454','455'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['454','455','456'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.includes('components/335-v454-preset-layout.js')&&order.includes('components/336-v454-quick-title-hardening.js'));
-assert.equal(order.at(-1),'components/338-v455-recovery-handoff-visibility.js');
+assert(order.includes('components/338-v455-recovery-handoff-visibility.js'));
+assert.equal(order.at(-1),'components/340-v456-recovery-start-status.js');
 const preset=fs.readFileSync('src/js/components/335-v454-preset-layout.js','utf8'),
  quick=fs.readFileSync('src/js/components/336-v454-quick-title-hardening.js','utf8'),
  css=fs.readFileSync('assets/css/261-v454-quick-presets-hardening.css','utf8');

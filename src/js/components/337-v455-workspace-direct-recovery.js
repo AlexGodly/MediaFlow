@@ -251,12 +251,13 @@ function mf455CoverJob(ids,providers,mode,options){
 async function mf455Launch(kind){
  if(MF455.launching)return;
  kind=['cover','metadata','both'].includes(kind)?kind:'cover';
+ mf456LaunchStage('validating','Checking selected titles and available providers…',kind);
  const ids=(kind==='both'?mf447ScopeSnapshot():mf446ScopeIds(kind)).map(String);
  const valid=new Set((S.library||[]).map(item=>String(item?.id||'')));
  const chosen=[...new Set(ids.filter(id=>valid.has(id)))];
- if(!chosen.length){showToast('Choose saved Library titles before starting recovery.');return;}
- if(!AUTH_USER){showToast('Sign in before recovering.');return;}
- if((kind==='cover'||kind==='both')&&!MF424.ready){showToast('Cover Recovery is initializing.');return;}
+ if(!chosen.length){mf456LaunchStage('error','No titles in scope. Choose All, Library, a category, or check Library titles.',kind);showToast('Choose saved Library titles before starting recovery.');return;}
+ if(!AUTH_USER){mf456LaunchStage('error','Sign in to start recovery.',kind);showToast('Sign in before recovering.');return;}
+ if((kind==='cover'||kind==='both')&&!MF424.ready){mf456LaunchStage('error','Cover storage is still initializing; retry after readiness.',kind);showToast('Cover Recovery is initializing.');return;}
  MF455.launching=true;
  try{
   const coverIds=kind==='metadata'?[]:mf455JobProviders('cover');
@@ -265,11 +266,16 @@ async function mf455Launch(kind){
   const bounded=kind==='cover'?chosen:chosen.slice(0,allowed);
   const prefs=mf455Settings(kind);
   const cover=kind==='metadata'?null:mf455CoverJob(bounded,coverIds,kind,prefs);
-  if(kind==='cover'&&!cover){showToast('Selected titles already have covers. Use a title’s Quick Cover Recovery to replace existing artwork.');return;}
+  if(kind==='cover'&&!cover){mf456LaunchStage('error','No missing covers in scope. To replace existing artwork, open Quick Cover Recovery for the title.',kind);showToast('Selected titles already have covers. Use a title’s Quick Cover Recovery to replace existing artwork.');return;}
+  mf456LaunchStage('confirming','Review the new recovery queue and confirm to start.',kind);
   if(!await mf444Confirm('Start '+(kind==='both'?'Cover + Metadata':kind==='cover'?'Cover':'Metadata')+' Recovery?',
     bounded.length+' titles in scope. This replaces any previous unfinished queue after its current title is safely checkpointed. Completed Library changes remain saved.',
-    'Replace Queue & Start',false,bounded.length,kind==='cover'?'cover':'metadata'))return;
+    'Replace Queue & Start',false,bounded.length,kind==='cover'?'cover':'metadata')){
+   mf456LaunchStage('cancelled','Recovery launch cancelled; existing queues unchanged.',kind);return;
+  }
+  mf456LaunchStage('stopping','Stopping previous jobs at safe checkpoints before replacement…',kind);
   await mf455ReplaceQueuedJobs();
+  mf456LaunchStage('queue','Creating a durable new job and provider snapshot…',kind);
   // Jobs own immutable source selection and settings snapshots, so later
   // changes in Settings never mutate a running job’s API list.
   if(cover){
@@ -286,12 +292,16 @@ async function mf455Launch(kind){
    mf439SaveJob();
   }
   mf445Close();
+  mf456LaunchStage('starting','Queue saved. Waiting for provider lease and first title…',kind);
   MF455.afterStart=Date.now();mf441Paint();
   if(cover)void mf424Run(); // Existing lease safety, cooldown and progress.
   else if(kind==='metadata')void mf439RunBatch();
   else if(kind==='both')void mf447ContinueCombined();
-  showToast('New '+kind+' recovery queue started: '+bounded.length+' selected title(s). Check Background Processes.');
+  mf456LaunchStage('queued','New queue saved for '+bounded.length+' title(s). Waiting for first engine checkpoint.',kind);
+  mf456WatchRecovery(kind);
+  showToast('New '+kind+' recovery queue created: '+bounded.length+' title(s). Check Background Processes.');
  }catch(err){console.warn('v455 unified recovery start failed',err);
+  mf456LaunchStage('error','Recovery not started: '+String(err?.message||err).slice(0,170),kind);
   showToast('Recovery not started: '+String(err?.message||err).slice(0,170));}
  finally{MF455.launching=false;}
 }

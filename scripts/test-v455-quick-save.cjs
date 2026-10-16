@@ -10,7 +10,8 @@ const env={
  App:{mf447Open:()=>{}},MF453Quick:{},MF424:{running:false},MF439:{working:false},MF442:{process:''},
  S:{library:rows,settings:{},categories:[{id:'anime',name:'Anime'}]},
  mf439Item:id=>rows.find(x=>x.id===id),mf439Account:()=> 'account',mf424Image:async()=>true,
- mf444Confirm:async()=>true,mf439DescribeValue:(k,x)=>String(x||''),mf439Apply:(item,p)=>{
+ mf444Confirm:async()=>true,mf456QuickProgress:()=>{},mf456NotifyRecoverySaved:()=>{},
+ mf456RefreshEditor:()=>{},mf456CandidateLink:()=>({canLink:true,key:'anilist',id:'1036'}),mf439DescribeValue:(k,x)=>String(x||''),mf439Apply:(item,p)=>{
   if(mergeFailed)throw Error('provider merge failed');
   item.synopsis='New verified synopsis';return {changed:1};},
  mf425Icon:()=>'<svg></svg>',mf453Esc:String,mf453Category:()=>({name:'Anime'}),
@@ -34,6 +35,8 @@ function prepare(kind,coverUrl,meta){
  prepare('cover','https://example.org/cover-v455.jpg',null);
  await env.App.mf453ApplyQuick();
  assert.equal(rows[0].coverUrl,'https://example.org/cover-v455.jpg');
+ assert.equal(rows[0].externalIds.anilist,'1036','Selected provider ID must be saved on title');
+ assert.equal(committed?.[0]?.externalIds?.anilist,'1036','Selected ID must persist with cover URL');
  assert.equal(committed?.[0]?.coverUrl,'https://example.org/cover-v455.jpg','Committed Library must store updated URL');
  assert.equal(vm.runInContext('MF453Quick.current',env),null,'Dialog should close only after confirmed write');
  rows[0].coverUrl='https://example.org/cover-v455.jpg';
