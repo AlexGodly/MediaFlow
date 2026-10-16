@@ -135,10 +135,38 @@ async function mf437CoverLibretro(item){
  });
 }
 
+
+async function mf437CoverDeezer(item){
+ if(typeof mf434Call!=='function'||!AUTH_USER)return [];
+ try{
+  if(!MF434?.status)MF434.status=await mf434Call('status');
+  if(!MF434.status?.providers?.some(row=>row.id==='deezer'&&row.testable))return [];
+  const response=await mf434Call('search',{provider:'deezer',title:String(item.title||'').slice(0,110),externalIds:item.externalIds||{}});
+  return (response.results||[]).slice(0,8).map(row=>{
+   if(!row?.url||!row?.recordId)return null;
+   const c=mf437CoverCandidate(item,row.url,'deezer',row.recordUrl,row.recordId,row.title);
+   if(!c)return null;
+   const confirmed=String(item.externalIds?.deezer||'')===String(row.recordId);
+   const match=mf424Match(item,{title:row.title},confirmed);
+   return {...c,confidence:match.confidence,idMatch:confirmed};
+  }).filter(Boolean);
+ }catch(e){console.warn('Deezer public cover lookup unavailable:',String(e.message||e));return [];}
+}
+async function mf437CoverPCGamingWiki(item,{request}){
+ // The public MediaWiki API remains accessible without the authenticated Cargo API.
+ // A wiki thumbnail is NOT guaranteed to be official box art, so keep manual-review confidence.
+ const raw=await request('pcgamingwiki','https://www.pcgamingwiki.com/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(item.title)+'&gsrlimit=4&prop=pageimages&pithumbsize=600&format=json&origin=*');
+ return Object.values(raw?.query?.pages||{}).filter(x=>x.thumbnail?.source).slice(0,4).map(row=>{
+  const c=mf437CoverCandidate(item,String(row.thumbnail.source).replace(/^http:/,'https:'),
+   'pcgamingwiki','https://www.pcgamingwiki.com/wiki/'+encodeURIComponent(row.title),row.pageid,row.title);
+  return c?{...c,confidence:.56,idMatch:false,reason:'PCGamingWiki thumbnail — manual review required'}:null;
+ }).filter(Boolean);
+}
 for(const [id,name] of MF437_COVER_CATALOG){
  const adapter={steamstore:mf437CoverSteam,vndb:mf437CoverVNDB,itunes:mf437CoverITunes,
   coverartarchive:mf437CoverArchive,theaudiodb:mf437CoverAudioDB,ifdb:mf437CoverIFDB,
-  wikidata:mf437CoverWikidata,'wikimedia-commons':mf437CoverCommons,libretro:mf437CoverLibretro}[id]||null;
+  wikidata:mf437CoverWikidata,'wikimedia-commons':mf437CoverCommons,libretro:mf437CoverLibretro,
+  deezer:mf437CoverDeezer,pcgamingwiki:mf437CoverPCGamingWiki}[id]||null;
  mf437CoverRegister(id,name,adapter);
 }
 // Keep options visible but never represent a registered name as a verified connection.
