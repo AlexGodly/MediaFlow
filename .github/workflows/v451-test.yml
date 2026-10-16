@@ -34,7 +34,8 @@ jobs:
           test "$(cat VERSION)" = "451"
           python scripts/build.py
           node --check assets/js/mediaflow-v451.bundle.js
-          node --check src/js/components/330-v451-universal-recovery-stop-priority-scheduler.js
+          node --check src/js/components/330-v450-universal-metadata-expansion.js
+          node --check src/js/components/331-v451-recovery-stop-priority.js
           node --check scripts/test-v451-recovery-stop-priority.cjs
           node --check scripts/test-v450-metadata-expansion.cjs
           node --check scripts/test-v451-browser.cjs
