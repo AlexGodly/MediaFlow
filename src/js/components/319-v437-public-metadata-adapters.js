@@ -20,7 +20,7 @@ const MF437_ADDITIONAL_PUBLIC=[
  {id:'steamstore',name:'Steam Storefront',group:'Video Games / Visual Novels'}
 ];
 const MF437_DEEZER=MF437_PROVIDERS.find(p=>p.id==='deezer');
-if(MF437_DEEZER)Object.assign(MF437_DEEZER,{gateway:true,live:true,public:true,group:'Music / Albums — gateway'});
+if(MF437_DEEZER)Object.assign(MF437_DEEZER,{gateway:true,live:false,public:false,group:'Music / Albums — access approval pending'});
 for(const p of MF437_ADDITIONAL_PUBLIC){
  const existing=MF437_PROVIDERS.find(x=>x.id===p.id);
  if(existing)Object.assign(existing,p,{live:true,public:true});
