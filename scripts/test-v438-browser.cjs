@@ -119,8 +119,8 @@ async function pageReady(cdp,label){
    const v436=await cdp.evaluate("(()=>({version:window.MediaFlowV436?.version,hasSelection:typeof window.MediaFlowV436?.selectedIds==='function'}))()");
    assert.equal(v436.version,436,'v436 runtime extension loaded');
    assert.equal(v436.hasSelection,true,'Selection recovery helper exists');
-   const schema=await cdp.evaluate("(()=>({version:window.MediaFlowV438?.version,schema:window.MediaFlowV438?.schemaVersion,hasMusic:window.MediaFlowV438?.mediaTypes?.some(x=>x[0]==='music'),hasVisualNovel:window.MediaFlowV438?.mediaTypes?.some(x=>x[0]==='visual_novel')}))()");
-   assert.deepEqual(schema,{version:437,schema:1,hasMusic:true,hasVisualNovel:true},'v438 runtime metadata foundation available');
+   const schema=await cdp.evaluate("(()=>({version:window.MediaFlowV437?.version,schema:window.MediaFlowV437?.schemaVersion,hasMusic:window.MediaFlowV437?.mediaTypes?.some(x=>x[0]==='music'),hasVisualNovel:window.MediaFlowV437?.mediaTypes?.some(x=>x[0]==='visual_novel')}))()");
+   assert.deepEqual(schema,{version:437,schema:1,hasMusic:true,hasVisualNovel:true},'v437 metadata foundation remains loaded');
    const gateway=await cdp.evaluate("(()=>({version:window.MediaFlowV434?.version,ready:window.MediaFlowV434?.configured()}))()");
    assert.equal(gateway.version,434,'Existing v434 gateway UI remains loaded');
    assert.equal(gateway.ready,false,'Do not activate providers before authentication and verification');
