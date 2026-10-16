@@ -348,6 +348,9 @@ async function mf424Apply(item,candidate,expected,{manual=false,linkId=true}={})
   if(!mf424Missing(item))return false;
   if(Number(item.modifiedAt||0)!==Number(expected||0))return false;
   if(!await mf424Image(candidate.url,candidate.provider))return false;
+  // A slow image probe may outlive this tab's lease or account session.
+  if(mf424Account()!==MF424.account||(MF424.running&&!mf424OwnLease())||
+     (MF424.running&&typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover')))return false;
   if(!mf424Missing(item)||Number(item.modifiedAt||0)!==Number(expected||0))return false;
   item.coverUrl=candidate.url;item.coverSource='auto:'+candidate.provider+':'+(candidate.idMatch?'external-id':'verified');
   // A selected cover can safely link a record ID, but existing IDs are sacred.
@@ -359,6 +362,7 @@ async function mf424Apply(item,candidate,expected,{manual=false,linkId=true}={})
 }
 async function mf424Flush(){if(!MF424.job?.dirty)return;
   if(mf424Account()!==MF424.account)throw new Error('Account changed before saving');
+  if(MF424.running&&typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover'))throw new Error('Recovery process lock changed; cover save suspended');
   if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();
   await saveState();MF424.job.dirty=0;MF424.byId=null;mf424BuildIndex();
 }
@@ -371,7 +375,7 @@ async function mf424WaitForLibrary(){
   throw new Error('Account Library is not fully loaded; recovery paused rather than skipping titles');
 }
 function mf424LeaseKey(){return 'mf-v424-owner-'+mf424Account();}
-function mf424OwnLease(){try{const row=JSON.parse(localStorage.getItem(mf424LeaseKey())||'null');return row?.token===MF424.leaseToken;}catch(_){return false;}}
+function mf424OwnLease(){try{const row=JSON.parse(localStorage.getItem(mf424LeaseKey())||'null');return Boolean(MF424.leaseToken&&row?.token===MF424.leaseToken&&Number(row.expiry)>Date.now());}catch(_){return false;}}
 function mf424Lease(){const key=mf424LeaseKey();try{
   const current=JSON.parse(localStorage.getItem(key)||'null');if(current&&current.expiry>Date.now()&&current.token!==MF424.leaseToken)return false;
   if(!MF424.leaseToken)MF424.leaseToken=String(Date.now())+'-'+Math.random();
@@ -413,9 +417,13 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
         const id=job.ids[job.cursor],item=mf424Lookup(id);
         try{if(item)await mf424Process(item);else job.skipped++;}
         catch(e){if(!e.paused){job.failed++;mf424Note('error',String(e.message||e),id);}}
+        // Never commit a checkpoint for a title processed after lease loss.
+        if(!mf424OwnLease()||(typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover'))){job.pauseRequested=true;break;}
         if(job.pauseRequested||job.stopRequested)break;
+        await mf424Flush(); // confirm actual Library save BEFORE moving the cursor
+        if(!mf424OwnLease()||(typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover'))){job.pauseRequested=true;break;}
         job.cursor++;job.processed++;
-        await mf424Flush();await mf424SaveJob(); // committed results before checkpoint advancement
+        await mf424SaveJob(); // committed results before checkpoint advancement
         mf424Paint();await mf424Delay(0);
       }
       if(job.cursor>=partEnd&&job.mode==='parts'&&job.cursor<job.ids.length){

@@ -1,0 +1,21 @@
+/* v435 OMDb hotfix: source and client checks without provider credentials. */
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const read=path=>fs.readFileSync(path,'utf8');
+assert(['435','436','437','438','439','440','441','442'].includes(read('VERSION').trim()));
+const g=read('supabase/functions/mediaflow-api-gateway/index.ts');
+const ui=read('src/js/components/314-v434-provider-connection.js');
+assert(g.includes('OMDb API key rejected. Check email activation'),'Activation vs missing titles distinguished');
+assert(g.includes('OMDb API daily request limit reached'),'Daily credits distinguished');
+assert(g.includes('OMDb returned a provider-side error'),'Unknown API failures distinguished');
+assert(g.includes('if(!r.ok)throw Error(p+" returned HTTP "+r.status)'),"HTTP errors not silently discarded");
+assert(g.includes('q.searchParams.delete("s");q.searchParams.set("t",title)'),"Known OMDb broad search limitations have a direct-title fallback");
+assert(g.includes('if(!known&&!rows.length)'),"Fallback bounded to searches without an exact title");
+assert(g.includes('return reply(502,{error:msg.startsWith("OMDb ")?msg:'),"Safe OMDb error detail forwarded to UI");
+assert(ui.includes('if(provider==="omdb"&&!(reply.results?.length>0))'),'OMDb test must find actual title');
+assert(ui.includes('if(provider==="omdb"&&mf434SavedTests().includes("omdb"))'),'OMDb is disabled on verification failure');
+assert(!ui.includes('OMDB_API_KEY'),'Never include backend secrets in frontend');
+assert(g.includes('getUser(jwt)'),'Authentication remains enforced');
+assert(g.includes('mediaflow_gateway_claim'),'Quota persists');
+assert(g.includes('p==="tmdb"')&&g.includes('p==="metron"'),'Other provider adapters retained');
+console.log('PASS v435 OMDb key/activation errors, quota diagnostics, exact-title fallback, failed-test disable, security');
