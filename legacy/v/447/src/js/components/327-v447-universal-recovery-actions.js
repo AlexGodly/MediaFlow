@@ -221,6 +221,16 @@ mf441Show=function(prefs,state){
  if(combo&&combo.stage!=='completed')return true;
  return mf447OriginalShowWidget.apply(this,arguments);
 };
+const mf447OriginalCoverPaint=mf424Paint;
+mf424Paint=function(){
+ const result=mf447OriginalCoverPaint.apply(this,arguments);
+ const combo=mf447Combo();
+ if(combo?.stage==='cover'&&MF424.job?.id===combo.coverId&&
+    MF424.job.status==='complete'&&!MF424.running){
+  queueMicrotask(mf447CheckCombo);
+ }
+ return result;
+};
 const mf447OriginalRunCover=mf424Run;
 mf424Run=async function(){
  const result=await mf447OriginalRunCover.apply(this,arguments);
