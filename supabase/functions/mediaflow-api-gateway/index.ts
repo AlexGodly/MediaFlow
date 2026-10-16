@@ -12,6 +12,8 @@ animeschedule:{env:"ANIMESCHEDULE_APP_TOKEN",mode:"cover",cap:50,perUser:15},
 malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:70,perUser:20},
 metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:45,perUser:15},
 trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
+simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
+deezer:{env:"",mode:"review",cap:0,perUser:0},
 watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:15,perUser:4},
 episodate:{env:"",mode:"cover",cap:80,perUser:20},
 gutendex:{env:"",mode:"cover",cap:80,perUser:20},
@@ -21,7 +23,7 @@ type Provider=keyof typeof RULES;
 type IdMap=Record<string,string>;
 const KEY=(k:string)=>String(Deno.env.get(k)||"").trim();
 const IMAGES=["image.tmdb.org","assets.fanart.tv","fanart.tv","m.media-amazon.com",
-"images-na.ssl-images-amazon.com","cdn.myanimelist.net","myanimelist.net",
+"images-na.ssl-images-amazon.com","cdn-images.dzcdn.net","cdn.myanimelist.net","myanimelist.net",
 "img.animeschedule.net","static.episodate.com","www.episodate.com",
 "episodate.com","www.gutenberg.org","gutenberg.org"];
 const mem=new Map<string,{until:number,results:unknown[]}>();
@@ -163,6 +165,23 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
    add({id:n.ids?.trakt,name:n.title,year:n.year,link:"https://trakt.tv/"+(r.type==="show"?"shows/":"movies/")+n.ids?.slug,key:"trakt",
      other:{imdb:n.ids?.imdb,...(r.type==="show"?{tmdb_tv:n.ids?.tmdb}:{tmdb:n.ids?.tmdb}),tvdb_series:n.ids?.tvdb}});}
  }
+ if(p==="deezer"){
+  const d=await read(p,"https://api.deezer.com/search/album?q="+encodeURIComponent(title));
+  for(const row of list(d).slice(0,9)){if(!row?.id||!row?.title)continue;
+   add({id:row.id,name:row.title,image:row.cover_xl||row.cover_big,
+    link:row.link||"https://www.deezer.com/album/"+row.id,key:"deezer"});
+  }
+ }
+ if(p==="simkl"){
+  for(const kind of ["movie","tv","anime"]){
+   const d=await read(p,"https://api.simkl.com/search/"+kind+"?q="+encodeURIComponent(title)+"&extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
+   for(const row of (Array.isArray(d)?d:list(d)).slice(0,6)){const simklId=row.ids?.simkl||row.ids?.simkl_id;
+    if(!simklId)continue;
+    add({id:simklId,name:row.title,year:row.year,key:"simkl",link:"https://simkl.com/"+(kind==="movie"?"movies":kind)+"/"+simklId,
+      other:{imdb:row.ids?.imdb,mal:row.ids?.mal,tmdb:row.ids?.tmdb,anidb:row.ids?.anidb}});
+   }
+  }
+ }
  if(p==="watchmode"){
   const q=new URL("https://api.watchmode.com/v1/search/");
   q.searchParams.set("search_field",/^tt\d{7,12}$/i.test(ids.imdb||"")?"imdb_id":"name");
@@ -174,6 +193,157 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
  }
  return rows.slice(0,24);
 }
+
+// v437 — explicit metadata contract. Never return secrets or unchecked remote URLs.
+// A successful lookup must refer to a real record, not merely a healthy HTTP response.
+function metaValue(v:unknown,max=6000){return text(v,max).replace(/<[^>]+>/g," ").trim();}
+function metaNames(v:any){return Array.isArray(v)?v.map((x:any)=>metaValue(x?.name??x?.node?.name??x,120)).filter(Boolean).slice(0,40):[];}
+function metaRating(v:unknown,scale:number,votes?:unknown){
+ if(v==null||v==="")return null;const n=Number(v);
+ if(!Number.isFinite(n)||n<0||n>scale)return null;
+ return {value:n,scale,votes:votes!=null&&Number.isFinite(Number(votes))?Number(votes):null};
+}
+function metaRow(p:Provider,r:any,ids:IdMap,title:string){
+ if(!r||typeof r!=="object")return null;
+ const name=metaValue(r.title||r.name,220);
+ if(!name)return null;
+ const recordIds=Object.fromEntries(Object.entries(r.ids||{}).filter(([k,v])=>/^[a-z][a-z0-9_]{0,32}$/.test(k)&&/^[\w.:-]{1,120}$/.test(String(v||""))));
+ const idMatch=Object.entries(recordIds).some(([k,v])=>Boolean(ids[k])&&String(ids[k])===String(v));
+ const accepted=idMatch||norm(name)===norm(title);
+ if(!accepted)return null;
+ const safeFields:any={};
+ const allowed=new Set(["synopsis","releaseDate","year","genres","themes","studios","producers","durationMinutes","mediaFormat","ageRating","originalTitle","episodeCount","chapterCount","volumeCount","authors","artists","platforms","publishers","developers","language","network","officialSite","status","cast","directors","countries","budget","revenue","popularity"]);
+ for(const [k,v] of Object.entries(r.fields||{})){if(!allowed.has(k)||v==null)continue;
+  if(Array.isArray(v))safeFields[k]=v.slice(0,40).map(x=>metaValue(x,130)).filter(Boolean);
+  else if(typeof v==="number"&&Number.isFinite(v))safeFields[k]=v;
+  else if(typeof v==="string")safeFields[k]=metaValue(v,k==="synopsis"?6000:220);
+ }
+ const safeRatings:any={};
+ for(const [k,v] of Object.entries(r.ratings||{})){
+  if(!/^[a-z][a-z0-9_]{1,32}$/.test(k)||!v||typeof v!=="object")continue;
+  const rt=v as any;const rating=metaRating(rt.value,Number(rt.scale),rt.votes);
+  if(rating)safeRatings[k]=rating;
+ }
+ return {provider:p,title:name,fields:safeFields,ratings:safeRatings,ids:recordIds,
+ sourceUrl:safeUrl(r.sourceUrl)||"",verified:true,matchedBy:idMatch?"id":"title"};
+}
+async function metadata(p:Provider,title:string,ids:IdMap,year:number){
+ const secret=RULES[p].env?KEY(RULES[p].env):"";
+ if(RULES[p].env&&!secret)throw Error("Provider not configured");
+ const candidates=await discover(p,title,ids,year);
+ const best=candidates.filter((x:any)=>x.idMatch||norm(x.title)===norm(title))
+   .sort((a:any,b:any)=>Number(b.idMatch)-Number(a.idMatch)||b.confidence-a.confidence)[0];
+ if(!best)return [];
+ const id=best.recordId;
+ if(p==="omdb"){
+  const url=new URL("https://www.omdbapi.com/");
+  url.searchParams.set("apikey",secret);url.searchParams.set("i",id);url.searchParams.set("plot","full");
+  const d=await read(p,url.href);
+  if(!d?.imdbID||String(d.Response).toLowerCase()==="false")return [];
+  const ratings:any={imdb:metaRating(d.imdbRating,10,d.imdbVotes),metacritic:metaRating(d.Metascore,100)};
+  const rt=(d.Ratings||[]).find((r:any)=>/Rotten Tomatoes/i.test(r.Source||""));
+  if(rt){const value=Number(String(rt.Value||"").replace("%",""));ratings.rottenTomatoes=metaRating(value,100);}
+  return [metaRow(p,{title:d.Title,ids:{imdb:d.imdbID},
+    fields:{synopsis:d.Plot,year:yr(d.Year),genres:String(d.Genre||"").split(",").map(x=>x.trim()),directors:String(d.Director||"").split(",").map(x=>x.trim()),
+      cast:String(d.Actors||"").split(",").map(x=>x.trim()),language:d.Language,ageRating:d.Rated,durationMinutes:parseInt(d.Runtime,10),releaseDate:d.Released,mediaFormat:d.Type},
+    ratings,sourceUrl:"https://www.imdb.com/title/"+d.imdbID+"/"},ids,title)].filter(Boolean);
+ }
+ if(p==="tmdb"){
+  const key=best.externalIdKey==="tmdb_tv"?"tv":"movie",details=await read(p,
+   "https://api.themoviedb.org/3/"+key+"/"+encodeURIComponent(id),{"Authorization":"Bearer "+secret});
+  const release=details.release_date||details.first_air_date;
+  return [metaRow(p,{title:details.title||details.name,ids:{[best.externalIdKey]:String(id)},
+   fields:{synopsis:details.overview,releaseDate:release,year:yr(release),genres:metaNames(details.genres),
+     language:details.original_language,originalTitle:details.original_title||details.original_name,
+     producers:metaNames(details.production_companies),durationMinutes:details.runtime||details.episode_run_time?.[0],
+     status:details.status,episodeCount:details.number_of_episodes,budget:details.budget,revenue:details.revenue,popularity:details.popularity},
+   ratings:{tmdb:metaRating(details.vote_average,10,details.vote_count)},
+   sourceUrl:"https://www.themoviedb.org/"+key+"/"+id},ids,title)].filter(Boolean);
+ }
+ if(p==="malofficial"){
+  const media=/manga/i.test(best.recordUrl||"")?"manga":"anime";
+  const fields=media==="anime"?"alternative_titles,synopsis,mean,num_scoring_users,genres,media_type,status,start_date,end_date,num_episodes,average_episode_duration,studios":"alternative_titles,synopsis,mean,num_scoring_users,genres,media_type,status,start_date,end_date,num_chapters,num_volumes,authors";
+  const d=await read(p,"https://api.myanimelist.net/v2/"+media+"/"+encodeURIComponent(id)+"?fields="+encodeURIComponent(fields),{"X-MAL-CLIENT-ID":secret});
+  return [metaRow(p,{title:d.title,ids:{mal:String(d.id)},fields:{synopsis:d.synopsis,originalTitle:d.alternative_titles?.ja,
+   releaseDate:d.start_date,year:yr(d.start_date),genres:metaNames(d.genres),mediaFormat:d.media_type,
+   status:d.status,studios:metaNames(d.studios),authors:(d.authors||[]).map((x:any)=>[x.node?.first_name,x.node?.last_name].filter(Boolean).join(" ")),
+   episodeCount:d.num_episodes||null,chapterCount:d.num_chapters||null,volumeCount:d.num_volumes||null,
+   durationMinutes:d.average_episode_duration?Math.round(d.average_episode_duration/60):null},
+   ratings:{mal:metaRating(d.mean,10,d.num_scoring_users)},
+   sourceUrl:"https://myanimelist.net/"+media+"/"+d.id},ids,title)].filter(Boolean);
+ }
+ if(p==="deezer"){
+  const d=await read(p,"https://api.deezer.com/album/"+encodeURIComponent(id));
+  return [metaRow(p,{title:d.title||best.title,ids:{deezer:String(d.id||id)},
+    fields:{genres:metaNames(d.genres?.data),trackCount:d.nb_tracks,artists:d.artist?.name?[d.artist.name]:[],
+      releaseDate:d.release_date,durationMinutes:typeof d.duration==="number"?Math.round(d.duration/60):null,
+      publishers:d.label?[d.label]:[],mediaFormat:"Album"},sourceUrl:d.link||best.recordUrl},ids,title)].filter(Boolean);
+ }
+
+ if(p==="metron"){
+  const d=await read(p,"https://metron.cloud/api/series/"+encodeURIComponent(id)+"/",{"Authorization":"Bearer "+secret});
+  return [metaRow(p,{title:d.name||best.title,ids:{metron_series:String(d.id||id),...(d.cv_id?{comicvine_volume:String(d.cv_id)}:{}),
+   ...(d.gcd_id?{gcd_series:String(d.gcd_id)}:{})},
+   fields:{synopsis:d.desc||"",year:d.year_began,genres:metaNames(d.genres),status:d.status,
+     language:d.language,mediaFormat:d.series_type?.name||"Comic",publishers:metaNames(d.publisher?[d.publisher]:[])},
+   sourceUrl:d.resource_url||best.recordUrl},ids,title)].filter(Boolean);
+ }
+ if(p==="watchmode"){
+  const d=await read(p,"https://api.watchmode.com/v1/title/"+encodeURIComponent(id)+"/details/",{"X-API-Key":secret});
+  return [metaRow(p,{title:d.title||best.title,ids:{watchmode:String(d.id||id),...(d.imdb_id?{imdb:d.imdb_id}:{})},
+   fields:{synopsis:d.plot_overview,year:d.year,originalTitle:d.original_title,
+    durationMinutes:d.runtime_minutes,releaseDate:d.release_date,mediaFormat:d.type,
+    genres:d.genre_names||d.genres,cast:d.cast,language:d.language},
+   ratings:{imdb:metaRating(d.user_rating,10,d.user_rating_votes)},
+   sourceUrl:best.recordUrl||""},ids,title)].filter(Boolean);
+ }
+ if(p==="animeschedule"){
+  const d=await read(p,"https://animeschedule.net/api/v3/anime/"+encodeURIComponent(id),{"Authorization":"Bearer "+secret});
+  return [metaRow(p,{title:d.title||best.title,ids:{animeschedule:String(d.id||id)},
+   fields:{synopsis:d.description||d.synopsis,year:d.year,releaseDate:d.premier,
+    episodeCount:d.episodes,mediaFormat:d.type||"Anime",status:d.status,genres:d.genres,
+    durationMinutes:d.episodeDuration},
+   sourceUrl:"https://animeschedule.net/anime/"+String(d.route||id)},ids,title)].filter(Boolean);
+ }
+ if(p==="simkl"){
+  const source=best.recordUrl||"";const kind=source.includes("/movies/")?"movies":source.includes("/anime/")?"anime":"tv";
+  const d=await read(p,"https://api.simkl.com/"+kind+"/"+encodeURIComponent(id)+"?extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
+  const rt=d.ratings||{},simklScore=rt.simkl?.rating??rt.simkl?.score??d.rating;
+  return [metaRow(p,{title:d.title||best.title,ids:{simkl:String(d.ids?.simkl||d.ids?.simkl_id||id),
+    ...(d.ids?.imdb?{imdb:d.ids.imdb}:{}),...(d.ids?.mal?{mal:d.ids.mal}:{})},
+    fields:{synopsis:d.overview||d.description,year:d.year,status:d.status,genres:d.genres,
+      episodeCount:d.total_episodes,durationMinutes:d.runtime,mediaFormat:d.anime_type||d.type},
+    ratings:{simkl:metaRating(simklScore,10,rt.simkl?.votes),imdb:metaRating(rt.imdb?.rating,10,rt.imdb?.votes),mal:metaRating(rt.mal?.rating,10,rt.mal?.votes)},
+    sourceUrl:source},ids,title)].filter(Boolean);
+ }
+ if(p==="trakt"){
+  const kind=String(best.recordUrl||"").includes("/shows/")?"shows":"movies";
+  const headers={"trakt-api-key":secret,"trakt-api-version":"2"};
+  const [detail,rating]=await Promise.all([
+   read(p,"https://api.trakt.tv/"+kind+"/"+encodeURIComponent(id)+"?extended=full",headers),
+   read(p,"https://api.trakt.tv/"+kind+"/"+encodeURIComponent(id)+"/ratings",headers)]);
+  return [metaRow(p,{title:detail.title||best.title,ids:{trakt:String(detail.ids?.trakt||id),...(detail.ids?.imdb?{imdb:detail.ids.imdb}:{})},
+   fields:{synopsis:detail.overview,year:detail.year,genres:detail.genres,language:detail.language,
+      durationMinutes:detail.runtime,network:detail.network,status:detail.status},
+   ratings:{trakt:metaRating(rating.rating,10,rating.votes)},sourceUrl:best.recordUrl},ids,title)].filter(Boolean);
+ }
+ if(p==="episodate"){
+  const d=await read(p,"https://www.episodate.com/api/show-details?q="+encodeURIComponent(id));
+  const r=d?.tvShow||d?.tv_show||{};
+  return [metaRow(p,{title:r.name||best.title,ids:{episodate:String(r.id||id)},
+    fields:{synopsis:r.description,releaseDate:r.start_date,year:yr(r.start_date),
+     episodeCount:Array.isArray(r.episodes)?r.episodes.length:null,genres:r.genres||[],
+     status:r.status,network:r.network,language:r.language},sourceUrl:best.recordUrl},ids,title)].filter(Boolean);
+ }
+ if(p==="gutendex"){
+  const d=await read(p,"https://gutendex.com/books/"+encodeURIComponent(id));
+  return [metaRow(p,{title:d.title,ids:{gutendex:String(d.id)},fields:{synopsis:(d.summaries||[])[0],
+     authors:(d.authors||[]).map((x:any)=>x.name),genres:d.subjects,language:d.languages?.[0],mediaFormat:"Book"},
+    sourceUrl:"https://www.gutenberg.org/ebooks/"+id},ids,title)].filter(Boolean);
+ }
+ return [];
+}
+
 function cors(origin:string){const h:Record<string,string>={"Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin"};
  if(origin===ORIGIN)Object.assign(h,{"Access-Control-Allow-Origin":ORIGIN,
   "Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"});
@@ -196,10 +366,10 @@ Deno.serve(async(req:Request)=>{
  let data:any;
  try{data=await req.json();if(!data||typeof data!=="object"||Array.isArray(data))throw Error();}
  catch(_){return reply(400,{error:"Invalid JSON request"});}
- if(data.action==="status")return reply(200,{version:434,ready:true,
+ if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review"}))});
- if(data.action!=="search")return reply(400,{error:"Invalid action"});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:r.mode!=="review"&&["tmdb","omdb","malofficial","trakt","simkl","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
+ if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
  const rule=RULES[p];
@@ -214,7 +384,7 @@ Deno.serve(async(req:Request)=>{
    if(/^[a-z][a-z0-9_]{0,32}$/.test(k)&&/^[\w.:-]{1,120}$/.test(value))ids[k]=value;
   }
  const year=yr(data.year),account=verified.data.user.id;
- const cacheKey=account+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
+ const cacheKey=account+":"+data.action+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
  const cached=mem.get(cacheKey);
  if(cached&&cached.until>Date.now())return reply(200,{provider:p,results:cached.results,cached:true});
  const throttle=account+":"+p;
@@ -226,7 +396,7 @@ Deno.serve(async(req:Request)=>{
    {p_user:account,p_provider:p,p_global_max:rule.cap,p_user_max:rule.perUser});
   if(claim.error)return reply(503,{error:"Gateway quota database is unavailable"});
   if(claim.data!==true)return reply(429,{error:"Safe daily provider quota reached"});
-  const results=await discover(p,title,ids,year);
+  const results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year);
   if(mem.size>300)mem.delete(mem.keys().next().value as string);
   mem.set(cacheKey,{until:Date.now()+1200000,results});
   return reply(200,{provider:p,results,cached:false});
