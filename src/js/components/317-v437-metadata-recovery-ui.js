@@ -70,6 +70,7 @@ function mf437Selections(){return [...document.querySelectorAll('#mf437-modal in
 async function mf437Start(){
  const root=document.getElementById('mf437-modal');if(!root)return;
  const scope=root.querySelector('#mf437-scope')?.value||'all',providers=mf437Selections();
+ await mf437Restore();
  const config={scope,id:MF437_UI.oneId,category:root.querySelector('#mf437-category')?.value,mode:root.querySelector('#mf437-mode')?.value,
   partSize:Number(root.querySelector('#mf437-part-size')?.value)||100,continuation:root.querySelector('#mf437-continuation')?.value||'automatic',providers};
  const buttons=[...root.querySelectorAll('footer button')];buttons.forEach(b=>b.disabled=true);
@@ -98,6 +99,7 @@ async function mf437Control(action){
  const job=MF437.job;if(!job||job.account!==mf424Account())return;
  if(action==='pause'){MF437.pause=true;job.status=MF437.running?'pausing':'paused';}
  if(action==='stop'){MF437.stop='stop';job.status=MF437.running?'stopping':'stopped';}
+ if(action==='part'){MF437.stop='part';job.status=MF437.running?'stopping-after-part':'stopped';}
  if(action==='resume'){
   if(MF437.running)return;MF437.pause=false;MF437.stop='';void mf437Process();
  }
@@ -115,7 +117,7 @@ function mf437Paint(){
  '<div class="mf437-track" role="progressbar" aria-label="Metadata progress" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pct+'%"></span></div>'+
  '<p>Updated '+job.updated+' · Skipped '+job.skipped+' · Provider errors '+job.errors+'</p>'+
  (job.lastError?'<p title="'+mf437Escape(job.lastError)+'">'+mf437Escape(job.lastError)+'</p>':'')+
- '<div class="mf437-job-controls">'+(active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'pause\')">Pause</button><button class="btn btn-ghost" onclick="App.mf437Control(\'stop\')">Stop after current title</button>':'')+
+ '<div class="mf437-job-controls">'+(active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'pause\')">Pause</button><button class="btn btn-ghost" onclick="App.mf437Control(\'stop\')">Stop after current title</button><button class="btn btn-ghost" onclick="App.mf437Control(\'part\')">Stop after current part</button>':'')+
  (canResume?'<button class="btn btn-primary" onclick="App.mf437Control(\'resume\')">Resume</button>':'')+
  (!active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'dismiss\')">Dismiss</button>':'')+'</div></aside>';
  if(old)old.outerHTML=html;else document.body.insertAdjacentHTML('beforeend',html);
@@ -136,6 +138,7 @@ function mf437SettingsMarkup(){
 }
 function mf437SettingsEnhance(){
  if(S.view!=='settings'||!window.MediaFlowSettingsCenter?.mountSection)return;
+ if(AUTH_USER&&!MF437.job)void mf437Restore().then(mf437Paint);
  if(document.querySelector('[data-mf365-section="v437-metadata-recovery"]'))return;
  const body=document.createElement('div');body.innerHTML=mf437SettingsMarkup();
  MediaFlowSettingsCenter.mountSection({id:'v437-metadata-recovery',title:'METADATA RECOVERY',category:'library',subgroup:'Library maintenance',
@@ -167,7 +170,8 @@ libraryModalHtml=function(data){const html=String(mf437OldEditor.apply(this,argu
  return html.includes(anchor)?html.replace(anchor,block+anchor):html;
 };
 const mf437OldLibrary=renderLibrary;
-renderLibrary=function(){const html=String(mf437OldLibrary.apply(this,arguments)||'');
+renderLibrary=function(){if(AUTH_USER&&!MF437.job)void mf437Restore().then(mf437Paint);
+ const html=String(mf437OldLibrary.apply(this,arguments)||'');
  const button='<button type="button" class="btn btn-sm mf425-tools-button mf437-library-button" onclick="App.mf437Open(\'library\')">'+mf437Icon('database')+' Fix Metadata</button>';
  if(html.includes('mf437-library-button'))return html;
  if(html.includes('mf425-tools-button'))return html.replace(/(<button\b[^>]*mf425-tools-button[^>]*>[\s\S]*?<\/button>)/,'$1'+button);
