@@ -36,7 +36,7 @@ const c={console,window:{},document:doc,S,MF445,MF425,MF436,App,
  Map,Set,Array,Object,Number,JSON,Math,Promise,String,
  DEFAULT_SETTINGS:{},MF424:{running:false},MF439:{working:false},
  saveState:async()=>counts.saves++,showToast:()=>{},mf425Icon:(name)=>'<svg data-name="'+name+'"></svg>',
- mf445Esc:escape,mf445Providers:mode=>mode==='cover'?
+ mf445Esc:escape,mf445SourceHtml:()=>'',mf445Categories:()=>'',mf445Providers:mode=>mode==='cover'?
   [{id:'jikan',name:'Jikan',enabled:S.settings.v424Covers.enabled.includes('jikan'),available:true},
    {id:'tmdb',name:'TMDB',enabled:false,available:false,detail:'Setup needed'}]:
   [{id:'jikan',name:'Jikan',enabled:S.settings.v439Metadata.enabled.includes('jikan'),available:true}],
