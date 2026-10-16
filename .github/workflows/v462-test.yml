@@ -42,14 +42,23 @@ jobs:
         run: |
           set -euo pipefail
           cp src/js/runtime-order.json "$RUNNER_TEMP/runtime-v462.json"
+          cp index.html "$RUNNER_TEMP/index-v462.html"
+          cp version.json "$RUNNER_TEMP/version-v462.json"
           node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/346-v462-background-widget-first-paint.js')throw Error('Missing v462 at runtime tail');fs.writeFileSync(p,JSON.stringify(a,null,2))"
+          # Run the v461 contract against its historical header and version metadata,
+          # then restore all current-version files before any v462 checks/publishing.
+          sed -i 's/mediaflow-v462.bundle.js/mediaflow-v461.bundle.js/' index.html
+          node -e "const fs=require('fs'),p='version.json',v=JSON.parse(fs.readFileSync(p));v.appVersion=461;v.version=461;v.build=461;fs.writeFileSync(p,JSON.stringify(v,null,2)+'\\n')"
           echo 461 > VERSION
           node scripts/test-v461-shortcut-layout.cjs
           node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/345-v461-background-shortcut-layout.js')throw Error('Missing v461 at runtime tail');fs.writeFileSync(p,JSON.stringify(a,null,2))"
           echo 460 > VERSION
           node scripts/test-v460-floating-shortcuts.cjs
           cp "$RUNNER_TEMP/runtime-v462.json" src/js/runtime-order.json
+          cp "$RUNNER_TEMP/index-v462.html" index.html
+          cp "$RUNNER_TEMP/version-v462.json" version.json
           echo 462 > VERSION
+          node scripts/test-v462-widget-boot.cjs
           python scripts/check.py
       - name: Chromium desktop and 360px mobile recovery regression
         run: node scripts/test-v462-browser.cjs
