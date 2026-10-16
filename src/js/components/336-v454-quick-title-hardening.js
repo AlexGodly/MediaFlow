@@ -38,7 +38,7 @@ function mf454QuickView(example=null){
  '<small>'+q.covers.length+' available'+(q.coverLoading?' · searching':'')+'</small></div>'+
  (q.coverLoading&&q.covers.length===0?'<p class="mf454-wait">Searching actual artwork providers…</p>':'')+
  (q.covers.length?'<div class="mf454-cover-gallery" role="group" aria-label="Choose artwork">'+
-  q.covers.map((c,i)=>'<button type="button" class="mf454-cover-option '+(q.coverIndex===i?'selected':'')+
+  q.covers.map((c,i)=>'<button type="button" data-v225-iconified="1" class="mf454-cover-option '+(q.coverIndex===i?'selected':'')+
    '" aria-pressed="'+(q.coverIndex===i)+'" onclick="App.mf453PickCover('+i+')">'+
    '<span class="mf454-cover-image"><img src="'+mf453Esc(c.url)+'" loading="lazy" decoding="async" alt="'+
    mf453Esc(c.title||'Cover candidate')+'"></span>'+
