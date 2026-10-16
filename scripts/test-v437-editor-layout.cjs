@@ -11,6 +11,7 @@ assert(js.includes('Universal Metadata & External Ratings'),'human-friendly head
 assert(!js.includes('v437 · optional · protected'),'requested subtitle removed');
 assert(js.includes("const imported=editor.querySelector(':scope > .v178-rich-editor')"),'target actual imported metadata section');
 assert(js.includes('editor.insertBefore(section,imported)'),'metadata is inserted before imported metadata');
+assert(js.includes('mountEditor:mf437MountEditorSection'),'browser uses real placement function');
 assert(css.includes('grid-column:1/-1!important;order:39!important'),'full 12-column grid positioning before imported metadata order 40');
 assert(css.includes('.v240-library-editor .mf437-lock input[type="checkbox"]'),'legacy form checkbox size reset');
 assert(css.includes('height:16px!important'),'checkbox native sizing restored');
