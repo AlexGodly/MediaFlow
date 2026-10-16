@@ -1,9 +1,9 @@
 /* MediaFlow v458: safe early cover commits + protected bulk metadata selection. */
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'458');
+assert(['458','459'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/342-v458-recovery-dialog-quick-actions.js');
+assert(order.includes('components/342-v458-recovery-dialog-quick-actions.js'));
 const html=fs.readFileSync('index.html','utf8');
 assert(html.includes('264-v458-recovery-confirmation-quick-actions.css'));
 const css=fs.readFileSync('assets/css/264-v458-recovery-confirmation-quick-actions.css','utf8');
