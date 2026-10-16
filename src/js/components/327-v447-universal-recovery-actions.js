@@ -34,7 +34,9 @@ function mf447ReadCombo(){
   if(!raw||raw.schema!==1||raw.account!==mf439Account()||
      !['cover','ready-metadata','metadata','completed'].includes(raw.stage)||
      !Array.isArray(raw.ids)||raw.ids.length>250)return null;
-  const ids=mf447AllowedIds(raw.ids);
+  // Widget paints must not scan the entire Library (100k titles possible).
+  // Resolve membership against the current account only at stage transitions.
+  const ids=[...new Set(raw.ids.filter(id=>['string','number'].includes(typeof id)).map(String).filter(Boolean))];
   if(ids.length!==raw.ids.length)return null;
   return {...raw,ids};
  }catch(_){return null;}
@@ -264,7 +266,7 @@ function mf447ComboControls(){
    combo.stage==='cover'?'Cover stage · '+String(job?.status||'waiting'):
    'Metadata stage · '+String(job?.status||'running'))+'</small></span>'+
   (ready?'<button type="button" onclick="App.mf447ContinueCombined()">'+mf425Icon('database',15)+' Continue Metadata</button>':'')+
-  ((done||combo.stage==='cover'&&job?.status==='stopped'||combo.stage==='metadata'&&job?.status==='paused')?'<button type="button" onclick="App.mf447ClearCombo()">'+mf425Icon('x',15)+' '+(done?'Dismiss':'Clear Handoff')+'</button>':'')+
+  ((done||combo.stage==='cover'&&(!job||job.id!==combo.coverId||job.status==='stopped')||combo.stage==='metadata'&&job?.status==='paused')?'<button type="button" onclick="App.mf447ClearCombo()">'+mf425Icon('x',15)+' '+(done?'Dismiss':'Clear Handoff')+'</button>':'')+
   '</div>';
 }
 const mf447OriginalWidget=mf441WidgetHtml;
