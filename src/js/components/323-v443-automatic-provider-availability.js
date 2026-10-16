@@ -87,6 +87,13 @@ mf434RefreshGateway=async function(){
  mf443RepaintProviderSettings();
 };
 App.mf434RefreshGateway=mf434RefreshGateway;
+// Resumed background cover jobs must have the same gateway readiness as manual jobs.
+const mf443CoverRunBase=mf424Run;
+mf424Run=async function(...args){
+ if(!MF424.job||MF424.running)return;
+ await mf443EnsureGateway();
+ return mf443CoverRunBase.apply(this,args);
+};
 const mf443CoverConfigBase=App.mf425OpenConfig;
 App.mf425OpenConfig=async function(...args){
  await mf443EnsureGateway();
