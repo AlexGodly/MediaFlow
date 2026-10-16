@@ -46,18 +46,20 @@ function mf447WriteCombo(combo){
  }catch(err){console.warn('Combined recovery checkpoint unavailable',err);showToast('Combined handoff could not be saved. Use independent recovery actions.');}
 }
 function mf447Combo(){return mf447ReadCombo();}
-function mf447ClearCombo(){
- if(MF447.handoff){showToast('Finish the active confirmation first.');return;}
+async function mf447ClearCombo(){
+ if(MF447.handoff||MF424.running||MF439.working){showToast('Pause the active recovery first.');return;}
  const combo=mf447Combo();
- if(combo&&['cover','metadata'].includes(combo.stage)){
-  showToast('A recovery stage is active. Pause or finish it before clearing the combined shortcut.');return;
- }
+ if(combo&&combo.stage!=='completed'&&
+    !await mf444Confirm('Clear combined recovery shortcut?',
+    'Remove the combined-stage handoff. Existing cover and metadata checkpoints and recovered Library fields remain unchanged.',
+    'Clear Handoff',true,combo.ids.length,'cover'))return;
  mf447WriteCombo(null);mf441Paint();
 }
 function mf447Open(kind='cover',options={}){
  if(!['cover','metadata','both'].includes(kind))kind='cover';
  MF447.active=kind;
- const ids=options?.ids?mf447AllowedIds(options.ids):null;
+ const ids=Array.isArray(options?.ids)?mf447AllowedIds(options.ids):null;
+ if(ids&&!ids.length){showToast('This collection or queue has no saved Library titles to recover.');return;}
  MF447.contextIds=ids?.length?ids:null;
  MF447.contextLabel=ids?.length?String(options.label||'Selected titles'):'';
  if(ids?.length){
@@ -203,6 +205,13 @@ function mf447CheckCombo(){
   }
  }
 }
+const mf447OriginalShowWidget=mf441Show;
+mf441Show=function(prefs,state){
+ if(prefs.visibility==='hidden')return false;
+ const combo=mf447Combo();
+ if(combo&&combo.stage!=='completed')return true;
+ return mf447OriginalShowWidget.apply(this,arguments);
+};
 const mf447OriginalRunCover=mf424Run;
 mf424Run=async function(){
  const result=await mf447OriginalRunCover.apply(this,arguments);
@@ -248,7 +257,7 @@ function mf447ComboControls(){
    combo.stage==='cover'?'Cover stage · '+String(job?.status||'waiting'):
    'Metadata stage · '+String(job?.status||'running'))+'</small></span>'+
   (ready?'<button type="button" onclick="App.mf447ContinueCombined()">'+mf425Icon('database',15)+' Continue Metadata</button>':'')+
-  (done?'<button type="button" onclick="App.mf447ClearCombo()">'+mf425Icon('check',15)+' Dismiss</button>':'')+
+  ((done||combo.stage==='cover'&&job?.status==='stopped'||combo.stage==='metadata'&&job?.status==='paused')?'<button type="button" onclick="App.mf447ClearCombo()">'+mf425Icon('x',15)+' '+(done?'Dismiss':'Clear Handoff')+'</button>':'')+
   '</div>';
 }
 const mf447OriginalWidget=mf441WidgetHtml;
@@ -280,7 +289,10 @@ v181TitleDetailsHtml=function(item){
  const id=mf447Escape(JSON.stringify(String(item.id)));
  const buttons='<button class="btn btn-sm btn-ghost" type="button" onclick="App.mf447Open(\'cover\',{id:'+id+'})">'+mf425Icon('images',16)+' Fix Cover</button>'+
   '<button class="btn btn-sm btn-ghost" type="button" onclick="App.mf447Open(\'metadata\',{id:'+id+'})">'+mf425Icon('database',16)+' Fix Metadata</button>';
- return html.replace(/(<div class="v181-detail-actions"[^>]*>)/,'$1'+buttons);
+ // The original v439 Fix Metadata action remains; avoid a duplicate button.
+ return html.includes('data-mf439-details-action="1"')?
+  html.replace(/(<div class="v181-detail-actions"[^>]*>)/,'$1'+buttons.replace(/<button class="btn btn-sm btn-ghost" type="button" onclick="App\.mf447Open\('metadata',[\s\S]*?<\/button>/,'') ):
+  html.replace(/(<div class="v181-detail-actions"[^>]*>)/,'$1'+buttons);
 };
 const mf447PreviousEditor=libraryModalHtml;
 libraryModalHtml=function(item){
@@ -351,7 +363,7 @@ mf441WorkspaceHtml=function(){
   return '<label><input type="checkbox" '+(mf447Prefs()[key]?'checked ':'')+
    'onchange="App.mf447SaveShortcut(\''+key+'\',this.checked)">'+mf447Escape(titles[key])+'</label>';
  }).join('');
- const section='<fieldset class="mf447-settings-shortcuts"><legend>'+mf425Icon('mouse',16)+' Recovery Actions & Shortcuts</legend>'+
+ const section='<fieldset class="mf447-settings-shortcuts"><legend>'+mf425Icon('layers',16)+' Recovery Actions & Shortcuts</legend>'+
   '<p>Enable or hide shortcut groups without changing the recovery engines, provider preferences or saved jobs.</p>'+
   '<div>'+inputs+'</div><button type="button" class="btn btn-ghost" onclick="App.mf447Open(\'both\')">'+
   mf425Icon('layers',16)+' Open Combined Recovery</button></fieldset>';
