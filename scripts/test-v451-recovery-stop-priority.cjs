@@ -1,7 +1,7 @@
 /* MediaFlow v451: durable checkpoints, hard stop and priority recovery. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert(['451','452','453','454','455','456','457'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['451','452','453','454','455','456','457','458'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const runtime=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(runtime.includes('components/331-v451-recovery-stop-priority.js'));
 assert(runtime.includes('components/332-v452-recovery-control-polish.js'));
