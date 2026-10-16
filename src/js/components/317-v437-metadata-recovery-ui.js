@@ -19,6 +19,25 @@ function mf437ProvidersMarkup(settingsOnly=false){
  '<small class="mf437-test-status" id="mf437-test-'+mf437Escape(p.id)+'">'+mf437Escape(tested||'')+'</small></div>';
  }).join('')+'</div>';
 }
+function mf437FieldsMarkup(pref){
+ const names=[...MF437_FIELD_NAMES,...MF437_EXTRA_FIELD_NAMES,'externalRatings','externalIds'];
+ const selected=Array.isArray(pref.fields)?new Set(pref.fields):null;
+ const labels={synopsis:'Synopsis / description',releaseDate:'Release / publication date',year:'Release year',
+   genres:'Genres',themes:'Themes',studios:'Studios',producers:'Producers',durationMinutes:'Duration',
+   mediaFormat:'Media format',ageRating:'Content rating',externalRatings:'External provider ratings',
+   externalIds:'External provider IDs',originalTitle:'Original title',alternativeTitles:'Alternative titles',
+   episodeCount:'Episodes',seasonCount:'Seasons',chapterCount:'Chapters',volumeCount:'Volumes',
+   issueCount:'Comic issues',pageCount:'Pages',trackCount:'Tracks',visualNovelLength:'Visual novel length'};
+ return '<details class="mf437-metadata-fields"><summary><strong>SELECT METADATA FIELDS</strong> · Choose what to recover</summary>'+
+ '<div class="mf437-fields-toolbar"><button type="button" class="btn btn-ghost" onclick="App.mf437ToggleFields(true)">Select all</button>'+
+ '<button type="button" class="btn btn-ghost" onclick="App.mf437ToggleFields(false)">Clear all</button></div>'+
+ '<div class="mf437-field-options">'+names.map(name=>'<label><input type="checkbox" data-mf437-field-opt value="'+mf437Escape(name)+'" '+
+ (!selected||selected.has(name)?'checked':'')+'> '+mf437Escape(labels[name]||name.replace(/[A-Z]/g,c=>' '+c).replace(/^./,c=>c.toUpperCase()))+'</label>').join('')+
+ '</div></details>';
+}
+function mf437ToggleFields(checked){
+ for(const input of document.querySelectorAll('#mf437-modal input[data-mf437-field-opt]'))input.checked=Boolean(checked);
+}
 function mf437PopupMarkup(entry='settings',id=''){
  const prefs=mf437Prefs(),selection=typeof mf436SelectedLibraryIds==='function'?mf436SelectedLibraryIds():[];
  const single=entry==='single'&&id;
@@ -38,7 +57,7 @@ function mf437PopupMarkup(entry='settings',id=''){
  '<label>Titles per part<input id="mf437-part-size" type="number" min="1" max="1000" value="'+Math.max(1,Math.min(1000,Number(prefs.partSize)||100))+'"></label></div>'+
  '<label>Provider coordination<select id="mf437-engine">'+mf437Options([['smart',"Alex Godly's Smart Metadata Recovery Engine"],['priority','Provider Priority']],prefs.engine||'smart')+'</select></label>'+
  '<label>After each part<select id="mf437-continuation">'+mf437Options([['automatic','Continue automatically'],['manual','Wait for confirmation']],prefs.continuation||'automatic')+'</select></label>'+
- '<p class="mf437-sub">'+mf437Icon('check')+' Personal ratings, playback progress, History, XP, manual metadata and conflicting IDs are protected. Existing fields are never overwritten automatically.</p></section>'+
+ '<p class="mf437-sub">'+mf437Icon('check')+' Personal ratings, playback progress, History, XP, manual metadata and conflicting IDs are protected. Existing fields are never overwritten automatically.</p>'+mf437FieldsMarkup(prefs)+'</section>'+
  '<section><h3>'+mf437Icon('database')+' 3. METADATA PROVIDERS & VERIFIED CONNECTIONS</h3><p class="mf437-sub">'+available+' implemented public adapters. Additional public and configured Supabase sources stay visible but inactive until their metadata adapters and permissions are verified.</p>'+
  '<label>Verification test title<input id="mf437-test-title" placeholder="Naruto / Breaking Bad / Pride and Prejudice" value="Naruto" maxlength="120"></label>'+
  mf437ProvidersMarkup()+'</section>'+
@@ -50,7 +69,7 @@ function mf437Styles(){
  style.textContent=
  '.mf437-dialog{position:fixed;inset:0;z-index:110000;display:grid;place-items:center;background:rgba(0,0,0,.65);padding:12px}.mf437-panel{width:min(850px,100%);max-height:min(90vh,960px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border,rgba(180,180,180,.3));border-radius:var(--radius-lg,18px);background:var(--card-bg,var(--surface,var(--bg,#141923)));color:var(--text,var(--fg,#fff));box-shadow:0 25px 90px rgba(0,0,0,.4)}'+
  '.mf437-header,.mf437-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px}.mf437-header>div{display:flex;align-items:center;gap:12px}.mf437-header small{font-size:.68rem;letter-spacing:.11em;font-weight:700;opacity:.65}.mf437-header h2{font-size:1.2rem;margin:0;text-transform:uppercase;letter-spacing:.045em}.mf437-scroll{overflow:auto;min-height:0;padding:0 20px 12px}.mf437-scroll section{padding:14px 0;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent)}.mf437-scroll h3{font-size:.86rem;letter-spacing:.045em;display:flex;align-items:center;gap:8px;margin:0 0 12px}.mf437-scroll label{display:block;margin:9px 0;font-size:.81rem;font-weight:700}.mf437-scroll input:not([type=checkbox]),.mf437-scroll select{width:100%;min-width:0;display:block;margin-top:5px;padding:10px;border-radius:9px;background:var(--input-bg,var(--surface-2,transparent));color:inherit;border:1px solid color-mix(in srgb,currentColor 28%,transparent)}'+
- '.mf437-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}.mf437-sub{font-size:.78rem;line-height:1.6;opacity:.75}.mf437-providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.mf437-provider{min-width:0;border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:11px;padding:10px;display:flex;align-items:center;flex-wrap:wrap;gap:8px}.mf437-provider label{display:flex;flex:1;min-width:140px;align-items:center;gap:8px;margin:0}.mf437-provider label input{flex-shrink:0}.mf437-provider strong{display:block;font-size:.79rem}.mf437-provider small{display:block;font-size:.7rem;font-weight:400;opacity:.7}.mf437-provider button{font-size:.7rem}.mf437-pending{font-size:.68rem;opacity:.65}.mf437-test-status{width:100%}.mf437-footer{border-top:1px solid color-mix(in srgb,currentColor 18%,transparent)}'+
+ '.mf437-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}.mf437-sub{font-size:.78rem;line-height:1.6;opacity:.75}.mf437-providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.mf437-provider{min-width:0;border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:11px;padding:10px;display:flex;align-items:center;flex-wrap:wrap;gap:8px}.mf437-metadata-fields{margin-top:14px;border:1px solid color-mix(in srgb,currentColor 20%,transparent);padding:10px;border-radius:10px}.mf437-metadata-fields summary{font-size:.79rem;cursor:pointer}.mf437-fields-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.mf437-field-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.mf437-field-options label{display:flex;gap:7px;align-items:center;font-weight:400;margin:0;padding:5px 2px}.mf437-field-options input{flex-shrink:0}@media(max-width:600px){.mf437-field-options{grid-template-columns:1fr}}.mf437-provider label{display:flex;flex:1;min-width:140px;align-items:center;gap:8px;margin:0}.mf437-provider label input{flex-shrink:0}.mf437-provider strong{display:block;font-size:.79rem}.mf437-provider small{display:block;font-size:.7rem;font-weight:400;opacity:.7}.mf437-provider button{font-size:.7rem}.mf437-pending{font-size:.68rem;opacity:.65}.mf437-test-status{width:100%}.mf437-footer{border-top:1px solid color-mix(in srgb,currentColor 18%,transparent)}'+
  '.mf437-job-indicator{position:fixed;bottom:105px;right:16px;width:min(335px,calc(100vw - 32px));z-index:85000;border:1px solid color-mix(in srgb,currentColor 30%,transparent);border-radius:15px;background:var(--card-bg,var(--surface,var(--bg,#141923)));color:var(--text,var(--fg,#fff));box-shadow:0 15px 45px rgba(0,0,0,.3);padding:14px}.mf437-job-indicator header{display:flex;justify-content:space-between;gap:10px;align-items:center}.mf437-job-indicator strong{font-size:.84rem}.mf437-job-indicator p{font-size:.74rem;opacity:.78}.mf437-track{height:8px;border-radius:8px;background:color-mix(in srgb,currentColor 18%,transparent);overflow:hidden}.mf437-track span{display:block;height:100%;background:currentColor}.mf437-job-controls{display:flex;gap:7px;flex-wrap:wrap}.mf437-job-controls button{font-size:.72rem}.mf437-settings-card{font-size:.84rem}.mf437-settings-card .mf437-providers{grid-template-columns:repeat(2,minmax(0,1fr))}.mf437-settings-card h3{font-size:.8rem}.mf437-settings-card .mf437-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.mf437-rating-grid{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.mf437-rating{display:inline-flex;gap:5px;align-items:center;padding:6px 9px;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:8px;font-size:.77rem}.mf437-rating b{font-variant-numeric:tabular-nums}'+
  '@media(max-width:640px){.mf437-dialog{padding:0;align-items:end}.mf437-panel{max-height:96dvh;border-radius:17px 17px 0 0}.mf437-providers,.mf437-grid,.mf437-settings-card .mf437-providers{grid-template-columns:1fr}.mf437-header,.mf437-footer{padding:12px 14px}.mf437-scroll{padding:0 14px 12px}.mf437-job-indicator{bottom:120px;right:8px}}';
  document.head.appendChild(style);
@@ -78,11 +97,13 @@ async function mf437Start(){
  const scope=root.querySelector('#mf437-scope')?.value||'all',providers=mf437Selections();
  await mf437Restore();
  const config={scope,id:MF437_UI.oneId,category:root.querySelector('#mf437-category')?.value,mode:root.querySelector('#mf437-mode')?.value,engine:root.querySelector('#mf437-engine')?.value||'smart',
-  partSize:Number(root.querySelector('#mf437-part-size')?.value)||100,continuation:root.querySelector('#mf437-continuation')?.value||'automatic',providers};
+  partSize:Number(root.querySelector('#mf437-part-size')?.value)||100,continuation:root.querySelector('#mf437-continuation')?.value||'automatic',providers,
+  fields:[...root.querySelectorAll('[data-mf437-field-opt]:checked')].map(el=>el.value)};
  const buttons=[...root.querySelectorAll('footer button')];buttons.forEach(b=>b.disabled=true);
  try{
+  if(!config.fields.length)throw Error('Select at least one metadata field to recover.');
   if(providers.some(id=>!mf437GatewayAllowed(id)))throw Error('A configured provider requires a successful metadata-specific connection test first.');
-  S.settings=S.settings||{};S.settings.v437Metadata={...mf437Prefs(),mode:config.mode,partSize:config.partSize,continuation:config.continuation,engine:config.engine,providers};
+  S.settings=S.settings||{};S.settings.v437Metadata={...mf437Prefs(),mode:config.mode,partSize:config.partSize,continuation:config.continuation,engine:config.engine,providers,fields:config.fields};
   await saveState();await mf437StartJob(config);mf437Close();mf437Paint();
  }catch(e){showToast('Metadata Recovery: '+String(e.message||e));}
  finally{buttons.forEach(b=>b.disabled=false);}
@@ -273,4 +294,4 @@ function mf437SaveProvidersFromSettings(){
  const providers=[...root.querySelectorAll('input[data-mf437-enabled]:checked')].map(x=>x.value);
  mf437SavePref('providers',providers);
 }
-Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset,mf437SaveProvidersFromSettings,mf437Review,mf437ApplyReview,mf437SkipReview,mf437Undo});
+Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437ToggleFields,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset,mf437SaveProvidersFromSettings,mf437Review,mf437ApplyReview,mf437SkipReview,mf437Undo});
