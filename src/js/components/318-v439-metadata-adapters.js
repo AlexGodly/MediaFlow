@@ -87,18 +87,23 @@ async function mf439LookupPublic(provider,item,signal){
  const pull=(obj)=>{if(obj&&obj.title&&obj.recordId)rows.push(obj);};
  if(provider==='jikan'){
   const mal=String(ids.mal||'').match(/^\d{1,12}$/)?.[0];
-  const url=mal?'https://api.jikan.moe/v4/anime/'+mal:mf439Url('https://api.jikan.moe/v4/anime',{q:title,limit:6,sfw:true});
-  const d=await mf439Fetch(provider,url,null,signal);
-  const values=Array.isArray(d.data)?d.data:[d.data];
-  for(const v of values.slice(0,6))if(v?.mal_id){
+  for(const kind of ['anime','manga']){
+   if(signal?.aborted)break;
+   const url=mal?'https://api.jikan.moe/v4/'+kind+'/'+mal:mf439Url('https://api.jikan.moe/v4/'+kind,{q:title,limit:5,sfw:true});
+   let d;try{d=await mf439Fetch(provider,url,null,signal);}catch(e){if(mal)continue;throw e;}
+   const values=Array.isArray(d.data)?d.data:[d.data];
+   for(const v of values.slice(0,5))if(v?.mal_id){
    const type=String(v.type||'').toLowerCase();
    const synopsis=mf439Plain(v.synopsis);
    pull(mf439Entry(provider,v.mal_id,v.title,{year:mf439Year(v.aired?.from||v.published?.from),
     aliases:mf439StringList([v.title_english,v.title_japanese,...(v.title_synonyms||[])]),
     externalIds:{mal:String(v.mal_id)},legacy:{synopsis,genres:mf439StringList(v.genres?.map(z=>z.name)),
-     studios:mf439StringList(v.studios?.map(z=>z.name)),year:mf439Year(v.aired?.from),mediaFormat:v.type||''},
-    fields:{originalTitle:v.title_japanese||'',animeSeason:v.season?String(v.season):'',episodeCount:v.episodes||null},
+     studios:mf439StringList(v.studios?.map(z=>z.name)),year:mf439Year(v.aired?.from||v.published?.from),mediaFormat:v.type||''},
+    fields:{originalTitle:v.title_japanese||'',animeSeason:v.season?String(v.season):'',episodeCount:v.episodes||null,
+      chapterCount:v.chapters||null,volumeCount:v.volumes||null,
+      mangaAuthors:mf439StringList(v.authors?.map(z=>z.name))},
     ratings:{mal:mf439Score(v.score,10,v.scored_by)}}));
+   }
   }
  }
  if(provider==='anilist'){
@@ -153,8 +158,14 @@ async function mf439LookupPublic(provider,item,signal){
    const work=String(v.key||match?.[0]||'').match(/OL\d+W/i)?.[0];if(!work)continue;
    const names=mf439StringList(v.author_name);
    let desc=typeof v.description==='object'?v.description?.value:v.description;
-   // Only fetch full work description when exact work ID was supplied.
-   if(match&&!desc)desc=v.description?.value||'';
+   // Open Library search normally excludes synopsis. Fetch only the first
+   // two exact-title works, never a whole search page of descriptions.
+   if(!desc&&work&&rows.length<2&&mf439Norm(v.title)===mf439Norm(title)){
+    try{
+     const detail=await mf439Fetch(provider,'https://openlibrary.org/works/'+work+'.json',null,signal);
+     desc=typeof detail?.description==='object'?detail.description.value:detail?.description;
+    }catch(_){}
+   }
    pull(mf439Entry(provider,work,v.title,{year:Number(v.first_publish_year)||0,
     externalIds:{openlibrary_work:work},
     legacy:{synopsis:mf439Plain(desc),year:Number(v.first_publish_year)||0,
