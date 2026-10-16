@@ -1,12 +1,11 @@
-## MediaFlow v441 — Recovery Workspace & Background Processes
+## MediaFlow v442 — Recovery Integration & Performance Hardening
 
 MediaFlow by Alex Godly, personal web/PWA edition.
 
-- Unified **Recovery Workspace** in Settings links existing Cover Recovery, Metadata Recovery and API Providers & Testing.
-- Theme-aware **Background Processes** floating widget shows both recovery engines with live progress, safe pause/resume and persistent Hidden/Automatic/Always visibility preferences.
-- Floating quick actions now include **New Metadata Recovery** (fifth shortcut), automatically respecting checkbox-selected Library titles. Opening it never sends requests until the user chooses a preview or explicitly confirms a batch.
-- Metadata Recovery previews gain field-status totals and filters; settings show the selected Library scope.
-- Existing v439 metadata field protections and v440 cover providers/validation remain intact. Nothing overwrites personal ratings, progress, protected values or saved artwork.
-- Responsive desktop/mobile UI, reduced-motion support, safe area and 100k-title-friendly progress updates.
+This completes the v437–v442 recovery architecture roadmap. Both Cover Recovery and Metadata Recovery now share a safer account-scoped local-browser process guard that prevents two tabs in the same browser profile from applying the two recovery jobs simultaneously. The lock is **not cross-device**. Slow lookups verify ownership before saving, and durable batch checkpoints advance only after the Library save completes. Interrupted saves retain the current title for safe retry.
 
-Read the [v441 changelog](docs/CHANGELOG_v441.md). Each full version is archived under `legacy/v/<version>/` outside the GitHub Pages site.
+Metadata title lookup now uses a selected-title index for better performance on 100K libraries. A title edited during recovery is skipped rather than overwritten; manually protected values, personal scores, progress and existing covers are preserved. Recovery Workspace → **Recovery Integrity & Diagnostics** displays checkpoint state, lock status, warnings and sanitized JSON export.
+
+The existing v441 Background Processes widget and v440 artwork sources remain available. No Supabase migration or new API keys are needed.
+
+See [v442 release notes](docs/CHANGELOG_v442.md). Full sources archive under `legacy/v/<version>`, outside the deployed Pages site.
