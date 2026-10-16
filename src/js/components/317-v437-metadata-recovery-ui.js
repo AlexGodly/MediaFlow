@@ -24,7 +24,7 @@ function mf437PopupMarkup(entry='settings',id=''){
  const scope=single?'single':selection.length?'selected':'all';
  const cats=(S.categories||[]).filter(x=>x.id).map(c=>[String(c.id),c.name]);
  const available=MF437_PROVIDERS.filter(x=>x.live).length;
- const modeOptions=[['missing','Fill missing metadata (safe)'],['refresh','Refresh ratings and missing fields (existing metadata protected)']];
+ const modeOptions=[['missing','Fill missing metadata (safe)'],['review','Review existing metadata changes before saving']];
  return '<div class="mf437-dialog" id="mf437-modal" role="dialog" aria-modal="true" aria-label="Metadata Recovery configuration">'+
  '<div class="mf437-panel"><header class="mf437-header"><div>'+mf437Icon('database',23)+'<div><small>RECOVERY WORKSPACE</small><h2>Metadata Recovery</h2></div></div><button class="btn btn-ghost" onclick="App.mf437Close()" aria-label="Close metadata recovery">'+mf437Icon('x')+'</button></header>'+
  '<div class="mf437-scroll">'+
@@ -125,7 +125,9 @@ function mf437Paint(){
  '<p>Updated '+job.updated+' · Skipped '+job.skipped+' · Provider errors '+job.errors+'</p>'+
  (job.lastError?'<p title="'+mf437Escape(job.lastError)+'">'+mf437Escape(job.lastError)+'</p>':'')+
  '<div class="mf437-job-controls">'+(active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'pause\')">Pause</button><button class="btn btn-ghost" onclick="App.mf437Control(\'stop\')">Stop after current title</button><button class="btn btn-ghost" onclick="App.mf437Control(\'part\')">Stop after current part</button>':'')+
- (canResume?'<button class="btn btn-primary" onclick="App.mf437Control(\'resume\')">Resume</button>':'')+
+ ((job.status==='waiting-review')?'<button class="btn btn-primary" onclick="App.mf437Review()">Review '+(job.previews?.length||0)+' Changes</button>':'')+
+ (canResume&&job.status!=='waiting-review'?'<button class="btn btn-primary" onclick="App.mf437Control(\'resume\')">Resume</button>':'')+
+ (!active&&job.events?.some(x=>!x.undone)?'<button class="btn btn-ghost" onclick="App.mf437Undo()">Undo Eligible Changes</button>':'')+
  (!active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'dismiss\')">Dismiss</button>':'')+'</div></aside>';
  if(old)old.outerHTML=html;else document.body.insertAdjacentHTML('beforeend',html);
 }
@@ -137,7 +139,7 @@ function mf437SettingsMarkup(){
  const pref=mf437Prefs();
  return '<div class="mf437-settings-card" data-mf-setting-id="metadata-recovery">'+
  '<p>Metadata Recovery has independent settings and verified metadata retrieval. Public and configured API credentials are never copied into the browser.</p>'+
- '<div class="mf425-settings-grid"><label>Default recovery mode<select onchange="App.mf437SavePref(\'mode\',this.value)">'+mf437Options([['missing','Fill missing fields'],['refresh','Review updates (never overwrite existing values automatically)']],pref.mode)+'</select></label>'+
+ '<div class="mf425-settings-grid"><label>Default recovery mode<select onchange="App.mf437SavePref(\'mode\',this.value)">'+mf437Options([['missing','Fill missing fields'],['review','Review all proposed changes before saving']],pref.mode)+'</select></label>'+
  '<label>Titles per part<input type="number" min="1" max="1000" value="'+pref.partSize+'" onchange="App.mf437SavePref(\'partSize\',Math.max(1,Math.min(1000,Number(this.value)||100)))"></label></div>'+
  '<label class="mf425-settings-check"><input type="checkbox" '+(pref.ratingRefresh?'checked':'')+' onchange="App.mf437SavePref(\'ratingRefresh\',this.checked)"> Refresh previously retrieved external ratings</label>'+
  '<p class="mf437-sub">Your personal rating is never changed. Unverified or restricted providers remain disabled until a real metadata adapter has been tested.</p>'+
@@ -201,6 +203,42 @@ mf397Action=function(action){
 MediaFlowRuntime.registerPageEnhancer('settings',mf437SettingsEnhance);
 function mf437Boot(){mf437Styles();void mf437Restore().then(mf437Paint);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mf437Boot,{once:true});else mf437Boot();
+function mf437Review(){
+ const job=MF437.job;if(!job||job.status!=='waiting-review')return;
+ const proposals=job.previews||[];document.getElementById('mf437-review')?.remove();
+ const rows=proposals.map((proposal,index)=>{
+ const item=mf437Find(proposal.titleId);
+ const changes=Object.entries(proposal.after||{}).map(([field,value])=>{
+ const old=proposal.before?.[field],describe=v=>v===undefined||v===null?'Missing':typeof v==='object'?JSON.stringify(v).slice(0,170):String(v).slice(0,170);
+ const safe=!item?.richMetadataManual?.[field];
+ return '<label class="mf437-review-row"><input type="checkbox" data-review-index="'+index+'" data-review-field="'+mf437Escape(field)+'" '+(safe?'checked':' disabled')+'><strong>'+mf437Escape(field)+'</strong><small>'+mf437Escape(describe(old))+' → '+mf437Escape(describe(value))+'</small></label>';
+ }).join('');
+ return '<section><h3>'+mf437Escape(item?.title||'Deleted title')+' · '+mf437Escape(proposal.provider)+'</h3>'+changes+'</section>';
+ }).join('');
+ const html='<div class="mf437-dialog" id="mf437-review" role="dialog" aria-modal="true" aria-label="Review metadata changes"><div class="mf437-panel">'+
+ '<header class="mf437-header"><h2>REVIEW METADATA CHANGES</h2></header><div class="mf437-scroll">'+rows+
+ '</div><footer class="mf437-footer"><button class="btn btn-ghost" onclick="App.mf437SkipReview()">Skip Changes</button>'+
+ '<button class="btn btn-primary" onclick="App.mf437ApplyReview()">Apply Selected</button></footer></div></div>';
+ document.body.insertAdjacentHTML('beforeend',html);
+}
+async function mf437ApplyReview(){
+ const root=document.getElementById('mf437-review');if(!root)return;
+ const selected={};
+ for(const c of root.querySelectorAll('input[data-review-index]:checked')){
+  const n=c.dataset.reviewIndex;selected[n]=selected[n]||[];selected[n].push(c.dataset.reviewField);
+ }
+ try{const count=await mf437ApplyReviews(selected);root.remove();showToast('Applied '+count+' verified metadata changes.');await mf437Control('resume');}
+ catch(e){showToast('Review could not be applied: '+String(e.message||e));}
+}
+async function mf437SkipReview(){
+ const job=MF437.job;if(!job||job.status!=='waiting-review')return;
+ job.previews=[];job.status='paused';await mf437SaveJob();
+ document.getElementById('mf437-review')?.remove();void mf437Process();
+}
+async function mf437Undo(){
+ try{const result=await mf437UndoRecent();showToast('Restored '+result.events+' eligible change(s) for '+result.titles+' title(s).');}
+ catch(e){showToast('Undo unavailable: '+String(e.message||e));}
+}
 const mf437OriginalDetails=v181TitleDetailsHtml;
 v181TitleDetailsHtml=function(item){
  let html=String(mf437OriginalDetails.apply(this,arguments)||'');
@@ -216,4 +254,4 @@ function mf437SaveProvidersFromSettings(){
  const providers=[...root.querySelectorAll('input[data-mf437-enabled]:checked')].map(x=>x.value);
  mf437SavePref('providers',providers);
 }
-Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset,mf437SaveProvidersFromSettings});
+Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset,mf437SaveProvidersFromSettings,mf437Review,mf437ApplyReview,mf437SkipReview,mf437Undo});
