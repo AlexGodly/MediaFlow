@@ -69326,7 +69326,7 @@ function mf437EditorRatings(item){
 function mf437EditorHtml(item){
  const env=mf437Normalized(item?.universalMetadata);
  return '<section class="mf437-editor" data-mf437-editor>'+
-  '<details><summary><strong>Universal metadata & external ratings</strong><small>v437 · optional · protected</small></summary>'+
+  '<details><summary><span class="mf437-section-icon" aria-hidden="true">'+mf425Icon('database',18)+'</span><strong>Universal Metadata & External Ratings</strong></summary>'+
   '<p class="hint">Your personal rating and progress are separate. A media type improves organization but never restricts provider searches. Existing title data is untouched until you save changes.</p>'+
   '<label class="field"><span class="field-label">Media type (optional)</span><select id="mf437-type" onchange="App.mf437MediaTypeChanged(this.value)">'+
   MF437_MEDIA_TYPES.map(([id,label])=>'<option value="'+escapeHtml(id)+'" '+(env.mediaType===id?'selected':'')+'>'+escapeHtml(label)+'</option>').join('')+'</select></label>'+
@@ -69341,15 +69341,26 @@ function mf437MediaTypeChanged(type){
   group.hidden=group.dataset.mf437Group!=='shared'&&group.dataset.mf437Group!==type;
  });
 }
+function mf437MountEditorSection(editor,item){
+ if(!editor)return null;
+ const fragment=document.createElement('div');
+ fragment.innerHTML=mf437EditorHtml(item||{});
+ const section=fragment.firstElementChild;
+ if(!section)return null;
+ // This same mount operation is exercised in browser smoke without logging in.
+ // v240 uses a 12-column CSS grid; position directly before Imported Metadata.
+ const imported=editor.querySelector(':scope > .v178-rich-editor');
+ if(imported)editor.insertBefore(section,imported);
+ else editor.appendChild(section);
+ return section;
+}
 const mf437LibraryEditorBase=libraryModalHtml;
 libraryModalHtml=function(item){
  const html=mf437LibraryEditorBase.apply(this,arguments);
  try{
   const host=document.createElement('div');host.innerHTML=html;
   const editor=host.querySelector('.v240-library-editor,.v238-library-editor');
-  if(!editor)return html;
-  const fragment=document.createElement('div');fragment.innerHTML=mf437EditorHtml(item||{});
-  editor.appendChild(fragment.firstElementChild);
+  if(!mf437MountEditorSection(editor,item))return html;
   return host.innerHTML;
  }catch(e){console.warn('v437 editor composition failed',e);return html;}
 };
@@ -69500,7 +69511,7 @@ window.MediaFlowV437=Object.freeze({
  version:437,schemaVersion:MF437_SCHEMA_VERSION,mediaTypes:MF437_MEDIA_TYPES,
  fieldGroups:MF437_FIELDS,ratingSources:MF437_RATING_SOURCES,
  normalize:mf437Normalized,merge:mf437MergeEnvelope,
- applyVerifiedProvider:mf437ApplyVerifiedProvider
+ applyVerifiedProvider:mf437ApplyVerifiedProvider,mountEditor:mf437MountEditorSection
 });
 Object.assign(App,{mf437MediaTypeChanged});
 
