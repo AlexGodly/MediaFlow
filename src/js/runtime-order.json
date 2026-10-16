@@ -190,5 +190,7 @@
   "components/333-v453-recovery-presets.js",
   "components/334-v453-quick-title-recovery.js",
   "components/335-v454-preset-layout.js",
-  "components/336-v454-quick-title-hardening.js"
+  "components/336-v454-quick-title-hardening.js",
+  "components/337-v455-workspace-direct-recovery.js",
+  "components/338-v455-recovery-handoff-visibility.js"
 ]
