@@ -15,13 +15,15 @@ const MF437_COVER_CATALOG=[
  ['deezer','Deezer','Music artwork · access review'],
  ['ifdb','IFDB','Interactive fiction artwork · adapter review']
 ];
+const MF437_COVER_NEEDS_PERMISSION=new Set(['gametdb','deezer']); // Artwork-use terms require explicit authorization.
 function mf437CoverRegister(id,name,adapter){
+ const permitted=Boolean(adapter)&&!MF437_COVER_NEEDS_PERMISSION.has(id);
  const current=mf424Provider(id);
- if(current){if(current.limit&&MF424_EXTRA_COVER_ADAPTERS.has(id))return;current.limit=adapter?20:0;current.gap=adapter?2500:0;current.level=adapter?'Public metadata and cover endpoint':'Pending technical or permission verification';}
- else if(adapter)mf424RegisterCoverProvider({id,name,types:['other'],limit:20,gap:2500,credentials:false,level:'Public artwork'},adapter);
+ if(current){if(current.limit&&MF424_EXTRA_COVER_ADAPTERS.has(id))return;current.limit=permitted?20:0;current.gap=permitted?2500:0;current.level=permitted?'Public metadata and cover endpoint':'Pending technical or permission verification';}
+ else if(adapter)mf424RegisterCoverProvider({id,name,types:['other'],limit:permitted?20:0,gap:permitted?2500:0,credentials:false,level:permitted?'Public artwork':'Permission required'},adapter);
  else MF424_PROVIDER_META.push({id,name,types:['other'],limit:0,gap:0,credentials:false,level:'Pending verification'});
  if(adapter&&!MF424_EXTRA_COVER_ADAPTERS.has(id))MF424_EXTRA_COVER_ADAPTERS.set(id,adapter);
- if(adapter){
+ if(permitted){
   if(!MF424_DEFAULT.enabled.includes(id))MF424_DEFAULT.enabled.push(id);
   if(!MF424_DEFAULT.priorities.includes(id))MF424_DEFAULT.priorities.push(id);
  }
