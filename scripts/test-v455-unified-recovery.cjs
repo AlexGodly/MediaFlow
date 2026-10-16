@@ -49,6 +49,7 @@ const env={
  mf451PauseActive:async()=>true,mf451Read:()=>null,mf424SaveJob:async()=>{saves.push('cover');},
  mf424Run:async()=>{logs.push('cover-run')},mf439RunBatch:async()=>{logs.push('metadata-run');},
  mf439SaveJob:()=>{saves.push('metadata')},
+ mf455MetadataOptions:(kind,ids,providers)=>({schema:1,account:'user',ids,cursor:0,status:'running',completed:0,changed:0,errors:[],startedAt:Date.now(),v455Providers:providers,mode:'parts',partSize:25}),
  mf444Confirm:async()=>true,mf445Close:()=>{logs.push('closed')},
  mf441Paint:()=>{},mf447WriteCombo:x=>{env.combined=x},
  mf447ContinueCombined:async()=>{logs.push('both-next')},
