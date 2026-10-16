@@ -50,7 +50,7 @@ vm.createContext(env);vm.runInContext(source,env,{filename:'v452.js'});
   assert(html.includes('data-v225-iconified="1"'));
   assert(!html.includes('v225-btn-icon'));
  }
- assert(coverTools.includes('mf446ProviderAll(&quot;cover&quot;,true)')===false,'Inline argument stays JavaScript, not escaped JSON string');
+ assert(coverTools.includes('mf446ProviderAll(&quot;cover&quot;,true)')===true,'HTML-escaped quote characters keep inline JavaScript attributes executable');
  env.mf446ProviderAll('cover',true);
  assert.deepEqual(Array.from(env.S.settings.v424Covers.enabled),['jikan','kitsu']);
  env.mf446ProviderAll('metadata',true);
