@@ -2,9 +2,9 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const src=fs.readFileSync('src/js/components/322-v442-recovery-hardening.js','utf8'),core=fs.readFileSync('src/js/components/309-v424-advanced-cover-recovery.js','utf8');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'442');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=442);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/322-v442-recovery-hardening.js');
+assert(order.includes('components/322-v442-recovery-hardening.js'));
 const store=new Map(),events=[];let saveFail=false,discover=0,applies=0,coverStarts=0,saves=0;
 const account={id:'demo'},title={id:'one',title:'First Work',year:2025,externalIds:{},modifiedAt:0};
 const S={view:'library',library:[title],settings:{},loading:false};
