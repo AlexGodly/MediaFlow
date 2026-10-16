@@ -3,7 +3,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const source=fs.readFileSync('src/js/components/316-v437-universal-metadata-ratings.js','utf8');
 const runtime=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert(['437','438','439','440','441','442','443','444','445','446','447','448','449','450','451','452','453','454','455','456','457'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['437','438','439','440','441','442','443','444','445','446','447','448','449','450','451','452','453','454','455','456','457','458'].includes(fs.readFileSync('VERSION','utf8').trim()));
 assert(runtime.includes('components/316-v437-universal-metadata-ratings.js'));
 const escapeHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const sandbox={
