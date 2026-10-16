@@ -13,7 +13,7 @@ malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:70,perUser:20},
 metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:45,perUser:15},
 trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
 simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
-deezer:{env:"",mode:"cover",cap:45,perUser:15},
+deezer:{env:"",mode:"review",cap:0,perUser:0},
 watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:15,perUser:4},
 episodate:{env:"",mode:"cover",cap:80,perUser:20},
 gutendex:{env:"",mode:"cover",cap:80,perUser:20},
@@ -368,7 +368,7 @@ Deno.serve(async(req:Request)=>{
  catch(_){return reply(400,{error:"Invalid JSON request"});}
  if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:r.mode!=="review"&&["tmdb","omdb","malofficial","trakt","simkl","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
