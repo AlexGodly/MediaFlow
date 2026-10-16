@@ -165,13 +165,15 @@ async function mf424Request(provider,url,options={}){
   if(hit&&hit.until>Date.now())return hit.data;
   let attempt=0;
   while(attempt<3){
+    if(MF424.job?.hardStop)throw Object.assign(new Error('Recovery stopped by user'),{paused:true});
     let now=Date.now();state.at=state.at.filter(t=>now-t<60000);
     const wait=Math.max(0,state.next-now,state.cooldown-now,state.at.length>=limit?state.at[0]+60000-now:0);
-    if(wait){mf424State('cooldown');await mf424Delay(Math.min(60000,wait));continue;}
+    if(wait){mf424State('cooldown');await mf424Delay(Math.min(3000,wait));continue;}
     attempt++;
     state.at.push(Date.now());state.next=Date.now()+gap;state.count++;
     if(MF424.job)MF424.job.requestCount++;
-    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),14500);
+    const controller=new AbortController();MF424.activeControllers??=new Set();MF424.activeControllers.add(controller);
+    const timer=setTimeout(()=>controller.abort(),14500);
     try{
       const res=await fetch(url,{method:options.body?'POST':'GET',body:options.body||undefined,signal:controller.signal,headers:{'Accept':provider==='kitsu'?'application/vnd.api+json':'application/json',...(options.body?{'Content-Type':'application/json'}:{})}});
       if(res.ok){const data=await res.json();
@@ -182,8 +184,8 @@ async function mf424Request(provider,url,options={}){
         mf424Note('cooldown',provider+' '+res.status+' — cooling down');if(MF424.job)MF424.job.cooldownEvents++;await mf424SaveJob();continue;}
       if(res.status>=500){state.fails++;await mf424Delay(1200*(attempt+1));continue;}
       throw Object.assign(new Error(provider+' HTTP '+res.status),{permanent:true});
-    }catch(e){if(e.permanent)throw e;state.fails++;if(attempt>=3){state.unavailableUntil=Date.now()+90000;throw e;}await mf424Delay(900*(attempt+1)+Math.random()*550);}
-    finally{clearTimeout(timer);}
+    }catch(e){if(e.permanent||MF424.job?.hardStop)throw e;state.fails++;if(attempt>=3){state.unavailableUntil=Date.now()+90000;throw e;}await mf424Delay(900*(attempt+1)+Math.random()*550);}
+    finally{clearTimeout(timer);MF424.activeControllers?.delete(controller);}
   }
   if(state.fails>=6)state.cooldown=Date.now()+5*60000;
   throw new Error(provider+' temporarily unavailable');
