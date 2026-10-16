@@ -145,6 +145,16 @@ function mf437SettingsEnhance(){
  if(section&&cover)cover.after(section);
 }
 function mf437Reset(){mf437SavePref('providers',MF437_DEFAULTS.providers.slice());S.settings.v437Metadata={...MF437_DEFAULTS,providers:MF437_DEFAULTS.providers.slice()};saveState().then(()=>render());}
+function mf437ExtrasMarkup(item){
+ const fields=Object.entries(item?.mediaMetadata||{}).filter(([,v])=>v!==null&&v!==undefined&&v!==''&&(!Array.isArray(v)||v.length));
+ if(!fields.length)return '';
+ const labels={originalTitle:'Original title',episodeCount:'Episodes',chapterCount:'Chapters',volumeCount:'Volumes',
+ pageCount:'Pages',trackCount:'Tracks',authors:'Authors',artists:'Artists',platforms:'Platforms',publishers:'Publishers',
+ developers:'Developers',language:'Language',network:'Network',isbn:'ISBN',originalLanguage:'Original language',
+ officialSite:'Official website',visualNovelLength:'Visual novel length'};
+ return '<div class="v181-detail-section-label" style="margin-top:14px;">More media metadata</div><div class="v181-detail-grid">'+
+ fields.map(([key,val])=>v181ReadonlyDetail(labels[key]||key,Array.isArray(val)?val.join(', '):val)).join('')+'</div>';
+}
 function mf437RatingsMarkup(item){
  const ratings=Object.entries(item?.externalRatings||{}).filter(([,r])=>r&&Number.isFinite(r.value)&&Number.isFinite(r.scale));
  if(!ratings.length)return '';
@@ -185,7 +195,7 @@ v181TitleDetailsHtml=function(item){
  const editButton='<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf437Open(\'single\',\''+mf437Escape(String(item?.id||''))+'\')">'+mf437Icon('database')+' Fix Metadata</button>';
  html=html.replace('<div class="v181-detail-actions" style="margin:0;">','<div class="v181-detail-actions" style="margin:0;">'+editButton);
  const anchor='<div class="v181-detail-section-label" style="margin-top:14px;">Dates & source</div>';
- if(html.includes(anchor))html=html.replace(anchor,mf437RatingsMarkup(item)+anchor);
+ if(html.includes(anchor))html=html.replace(anchor,mf437RatingsMarkup(item)+mf437ExtrasMarkup(item)+anchor);
  return html;
 };
 function mf437SaveProvidersFromSettings(){
