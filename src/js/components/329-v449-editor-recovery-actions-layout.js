@@ -73,4 +73,4 @@ renderLibrary=function(){
  html=html.replace(/<div class="mf425-library-tools">\s*<\/div>/g,'');
  return html;
 };
-window.MediaFlowV449=Object.freeze({version:449,draft:mf449DraftButtons,editor:()=>libraryModalHtml});
+window.MediaFlowV449=Object.freeze({version:449,draft:mf449DraftButtons,editor:()=>libraryModalHtml,libraryMarkup:()=>renderLibrary()});
