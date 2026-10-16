@@ -174,9 +174,12 @@ async function mf437Process(){
  const job=MF437.job;
  if(!job||MF437.running)return;
  if(typeof navigator==='undefined'||!navigator.locks?.request){job.status='paused';job.lastError='Browser global process locking unavailable; recovery not started.';await mf437SaveJob();return;}
- return navigator.locks.request('mediaflow-metadata-recovery:'+mf424Account(),{mode:'exclusive',ifAvailable:true},async lock=>{
-  if(!lock){job.status='paused';job.lastError='Another tab or window already owns the Metadata Recovery lock.';await mf437SaveJob();return;}
-  return mf437ProcessLocked();
+ return navigator.locks.request('mediaflow-recovery-global:'+mf424Account(),{mode:'exclusive',ifAvailable:true},async globalLock=>{
+  if(!globalLock){job.status='paused';job.lastError='Another recovery job is active on this account in another tab.';await mf437SaveJob();return;}
+  return navigator.locks.request('mediaflow-metadata-recovery:'+mf424Account(),{mode:'exclusive',ifAvailable:true},async lock=>{
+   if(!lock){job.status='paused';job.lastError='Another metadata job owns the processing lock.';await mf437SaveJob();return;}
+   return mf437ProcessLocked();
+  });
  });
 }
 async function mf437ProcessLocked(){
