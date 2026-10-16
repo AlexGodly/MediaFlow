@@ -177,5 +177,6 @@
   "components/320-v440-universal-cover-adapters.js",
   "components/321-v441-recovery-workspace.js",
   "components/322-v442-recovery-hardening.js",
-  "components/323-v443-automatic-provider-availability.js"
+  "components/323-v443-automatic-provider-availability.js",
+  "components/324-v444-recovery-ui-corrections.js"
 ]
