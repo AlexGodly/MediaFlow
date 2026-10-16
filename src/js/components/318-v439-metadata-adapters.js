@@ -15,7 +15,7 @@ const MF439_PUBLIC={
  vndb:{name:'VNDB',minGap:1800},
  musicbrainz:{name:'MusicBrainz',minGap:1500}
 };
-const MF439_GATEWAY=['tmdb','omdb','malofficial'];
+const MF439_GATEWAY=['tmdb','omdb','malofficial','trakt','simkl','watchmode','animeschedule','metron','episodate','gutendex'];
 const MF439_NET={last:new Map(),cache:new Map(),fail:new Map()};
 const mf439Plain=(v,max=6000)=>String(v??'').replace(/<[^>]*>/g,' ').replace(/&(?:amp|lt|gt|quot|#39);/g,m=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'"}[m]||m)).replace(/\r/g,'').trim().slice(0,max);
 const mf439StringList=(xs,n=35)=>[...new Set((Array.isArray(xs)?xs:[]).map(x=>mf439Plain(x,160)).filter(Boolean))].slice(0,n);
@@ -222,16 +222,59 @@ async function mf439LookupPublic(provider,item,signal){
  }
  return rows.filter(x=>x.title&&x.recordId).slice(0,10);
 }
+/* Existing live v437 gateway already returns metadata in a restricted
+ * {verified,ids,fields,ratings:{value,scale}} shape. Normalize it to the v439
+ * metadata contract WITHOUT replacing or weakening the deployed gateway. */
+function mf439TranslateGateway(provider,record,item){
+ if(record?.provider!==provider||record?.verified!==true||!record?.title)return null;
+ const ids=record.ids&&typeof record.ids==='object'&&!Array.isArray(record.ids)?record.ids:{};
+ const keys={tmdb:['tmdb','tmdb_tv'],omdb:['imdb'],malofficial:['mal'],trakt:['trakt'],
+  simkl:['simkl'],watchmode:['watchmode'],animeschedule:['animeschedule'],
+  metron:['metron_series'],episodate:['episodate'],gutendex:['gutendex']};
+ const primary=(keys[provider]||[]).map(k=>ids[k]).find(Boolean);
+ if(primary==null)return null;
+ const raw=record.fields&&typeof record.fields==='object'?record.fields:{};
+ const legacy={},fields={},ratings={};
+ const legacyKeys=['synopsis','releaseDate','year','genres','themes','studios','producers',
+  'durationMinutes','mediaFormat','ageRating'];
+ for(const key of legacyKeys)if(raw[key]!==undefined)legacy[key]=raw[key];
+ const universalKeys=['originalTitle','episodeCount','chapterCount','volumeCount','authors',
+  'platforms','directors','cast','countries','budget'];
+ for(const key of universalKeys)if(raw[key]!==undefined)fields[key]=raw[key];
+ if(raw.language)fields.originalLanguage=raw.language;
+ if(raw.network)fields.networks=Array.isArray(raw.network)?raw.network:[raw.network];
+ if(raw.officialSite)fields.officialWebsite=raw.officialSite;
+ if(raw.status)fields.releaseStatus=raw.status;
+ if(raw.revenue)fields.boxOffice=String(raw.revenue);
+ if(raw.publishers) {
+  const type=item?.universalMetadata?.mediaType||'unspecified';
+  if(type==='book')fields.bookPublishers=raw.publishers;
+  if(type==='game')fields.gamePublishers=raw.publishers;
+  if(type==='music')fields.recordLabels=raw.publishers;
+ }
+ if(raw.artists) {
+  const type=item?.universalMetadata?.mediaType||'unspecified';
+  if(type==='music')fields.albumArtists=raw.artists;
+  if(type==='manga')fields.mangaArtists=raw.artists;
+ }
+ for(const [key,score] of Object.entries(record.ratings||{})){
+  const source=key==='rottenTomatoes'?'rottentomatoes_critics':key;
+  if(score?.value!=null&&Number.isFinite(Number(score.scale)))
+   ratings[source]={score:Number(score.value),scale:Number(score.scale),votes:score.votes??null};
+ }
+ const aliases=Array.isArray(raw.alternateTitles)?raw.alternateTitles:[];
+ return mf439Entry(provider,primary,record.title,{
+  year:mf439Year(raw.year||raw.releaseDate),aliases:mf439StringList(aliases),
+  externalIds:ids,fields,legacy,ratings});
+}
 async function mf439LookupGateway(provider,item){
  if(!MF439_GATEWAY.includes(provider))return [];
  const status=mf434ProviderStatus(provider);
  if(!status?.configured||!status?.testable||!mf434SavedTests().includes(provider))return [];
  const title=mf439TitleVariants(item)[0];
  const reply=await mf434Call('metadata',{provider,title,externalIds:item.externalIds||{},year:item.year||''});
- return (Array.isArray(reply?.results)?reply.results:[]).filter(x=>x?.provider===provider&&x?.title&&x?.recordId)
-  .slice(0,8).map(x=>mf439Entry(provider,x.recordId,x.title,{
-   year:mf439Year(x.year),aliases:mf439StringList(x.aliases),externalIds:x.externalIds||{},
-   fields:x.fields||{},legacy:x.legacy||{},ratings:x.ratings||{}}));
+ return (Array.isArray(reply?.results)?reply.results:[])
+  .slice(0,8).map(row=>mf439TranslateGateway(provider,row,item)).filter(Boolean);
 }
 window.MediaFlowMetadataAdapters=Object.freeze({
  publicNames:Object.keys(MF439_PUBLIC),gatewayNames:MF439_GATEWAY.slice(),
