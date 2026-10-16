@@ -41,7 +41,7 @@ assert.equal(new Set(meta.map(p=>p.id)).size,meta.length);
 assert.equal(meta.find(x=>x.id==='googlebooks').credentials,false,'Google Books uses keyless public API');
 assert.equal(active.size,7,'Every advertised new source has an actual registered adapter');
 assert(ctx.MF424_DEFAULT.enabled.includes('ifdb'),'fresh installs include IFDB');
-assert.deepEqual(defaultPrefs.enabled.slice(0,2),['jikan','openlibrary'],'original defaults unchanged in order');
+assert.equal(defaultPrefs.enabled.slice(0,2).join(','),'jikan,openlibrary','original defaults unchanged in order');
 assert(probes.steam&&probes.ifdb&&probes.vndb&&probes.googlebooks,'standalone API tests registered');
 assert.equal(ctx.mf438Catalog().find(p=>p.id==='googlebooks').coverAdapter,true);
 assert.equal(ctx.mf438Catalog().find(p=>p.id==='steam').coverAdapter,true);
