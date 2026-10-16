@@ -33,7 +33,7 @@ jobs:
           set -euo pipefail
           test "$(cat VERSION)" = "457"
           python scripts/build.py
-          node --check assets/js/mediaflow-v456.bundle.js
+          node --check assets/js/mediaflow-v457.bundle.js
           node --check src/js/components/330-v450-universal-metadata-expansion.js
           node --check src/js/components/331-v451-recovery-stop-priority.js
           node --check src/js/components/332-v452-recovery-control-polish.js
@@ -103,14 +103,14 @@ jobs:
           set -euo pipefail
           mkdir -p legacy/v/457
           rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/457/
-          test "$(cat legacy/v/457/VERSION)" = 456
-          test -s legacy/v/457/assets/js/mediaflow-v456.bundle.js
+          test "$(cat legacy/v/457/VERSION)" = 457
+          test -s legacy/v/457/assets/js/mediaflow-v457.bundle.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v456.bundle.js
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v457.bundle.js
           git add --sparse -f legacy/v/457
           if ! git diff --cached --quiet; then
-            git commit -m 'build(v456): verified site and full legacy archive [skip ci]'
+            git commit -m 'build(v457): verified site and full legacy archive [skip ci]'
             git push origin HEAD:feature/v457-recovery-launch-editor-scroll-fixes
           fi
       - uses: actions/upload-artifact@v4
