@@ -6,6 +6,7 @@ const vm=require('node:vm');
 const core=fs.readFileSync('src/js/components/316-v437-metadata-recovery-core.js','utf8');
 const ui=fs.readFileSync('src/js/components/317-v437-metadata-recovery-ui.js','utf8');
 const cover=fs.readFileSync('src/js/components/318-v437-expanded-cover-providers.js','utf8');
+const adapters=fs.readFileSync('src/js/components/319-v437-public-metadata-adapters.js','utf8');
 const ctx={
  console,Date,Promise,Map,Set,JSON,Number,String,Object,Math,
  window:{},S:{library:[{id:'a',title:'Naruto',categoryId:'anime',rating:9.5,progress:12,richMetadataManual:{synopsis:true},synopsis:'Written by me',externalIds:{mal:'20'}}],categories:[{id:'anime',name:'Anime'}],settings:{}},
@@ -28,6 +29,7 @@ const ctx={
  };
 vm.createContext(ctx);
 vm.runInContext(core,ctx);
+vm.runInContext(adapters,ctx);
 let test=vm.runInContext('mf437Merge(S.library[0], {verified:true,provider:"jikan",fields:{synopsis:"overwrite",genres:["Action"],year:2002},ratings:{mal:{value:8.9,scale:10,updatedAt:1}},ids:{mal:"999",anilist:"23"},sourceUrl:"https://example.org"});',ctx);
 assert.equal(test.changed>0,true);
 assert.equal(ctx.S.library[0].synopsis,'Written by me');
