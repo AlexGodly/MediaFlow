@@ -41,7 +41,7 @@ mf424Defaults=function(){
 const mf455OldRunMetadata=mf439RunBatch;
 mf439RunBatch=async function(){
  const job=MF439.job;
- if(job?.v455Providers&&job.v455Selection==='manual'&&job.status==='waiting-review'){
+ if(job?.v455Providers&&job.v455Selection==='manual'&&job.manualReviewId){
   showToast('Review or skip the pending metadata title before resuming this job.');return;
  }
  return mf455OldRunMetadata.apply(this,arguments);
@@ -108,5 +108,55 @@ mf441WidgetHtml=function(){
  const html=String(mf455OldWidget.apply(this,arguments)||'');
  return html.replace('class="mf441-widget ', 'class="mf441-widget mf455-readable-widget ');
 };
+
+function mf455ReviewPendingMetadata(){
+ const job=MF439.job||mf439ReadJob();
+ if(!job?.manualReviewId||MF439.working)return;
+ return App.mf453OpenQuick('metadata',String(job.manualReviewId));
+}
+async function mf455FinishManualTitle(action='skip',id=''){
+ const job=MF439.job;
+ if(!job?.manualReviewId||MF439.working)return false;
+ if(id&&String(job.manualReviewId)!==String(id))return false;
+ if(action==='skip'&&!await mf444Confirm('Skip this metadata title?',
+  'Skip the pending manual review and continue from the next saved title. Already saved metadata will not change.',
+  'Skip Title',false,1,'metadata'))return false;
+ const current=String(job.ids[job.cursor]||'');
+ if(current!==String(job.manualReviewId))return false;
+ job.manualReviewId='';
+ job.cursor++;job.completed=job.cursor;job.status=job.cursor>=job.ids.length?'completed':'paused';
+ mf439SaveJob();mf439PaintJob();mf441Paint();
+ showToast(job.status==='completed'?'Metadata manual recovery complete.':'Manual review checkpoint saved. Resume for the next title.');
+ return true;
+}
+const mf455OldQuickApply=App.mf453ApplyQuick;
+App.mf453ApplyQuick=async function(){
+ const quick=window.MediaFlowV454?.active?.(),id=quick?.id;
+ const title=quick&&mf439Item(id);
+ const before=title&&JSON.stringify(title);
+ const result=await mf455OldQuickApply.apply(this,arguments);
+ if(id&&MF439.job?.manualReviewId===String(id)&&!window.MediaFlowV454?.active?.()&&
+  title&&JSON.stringify(title)!==before)await mf455FinishManualTitle('saved',id);
+ return result;
+};
+const mf455OldMetadataRowReview=mf441MetadataRow;
+mf441MetadataRow=function(state){
+ let html=String(mf455OldMetadataRowReview.apply(this,arguments)||'');
+ const job=state.metadata;
+ if(job?.manualReviewId){
+  const controls='<div class="mf455-manual-review"><strong>'+
+   mf425Icon('search',15)+' Manual metadata selection</strong>'+
+   '<small>Title '+(Number(job.cursor)+1)+' / '+job.ids.length+
+   ' needs confirmation before progressing.</small>'+
+   '<button type="button" data-v225-iconified="1" onclick="App.mf455ReviewPendingMetadata()">'+
+   mf425Icon('database',15)+' Review title</button>'+
+   '<button type="button" data-v225-iconified="1" onclick="App.mf455FinishManualTitle(&#39;skip&#39;)">'+
+   mf425Icon('x',15)+' Skip title</button></div>';
+  return html.replace('</article>',controls+'</article>');
+ }
+ return html;
+};
+App.mf455ReviewPendingMetadata=mf455ReviewPendingMetadata;
+App.mf455FinishManualTitle=mf455FinishManualTitle;
 window.MediaFlowV455Stages=Object.freeze({version:455,metadata:mf455MetadataOptions,
  progress:mf455ProcessStatus,continue:mf447ContinueCombined,settings:()=>mf441WorkspaceHtml()});
