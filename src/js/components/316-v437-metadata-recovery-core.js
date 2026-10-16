@@ -117,10 +117,12 @@ async function mf437Discover(item,provider){
  }
  return null;
 }
-function mf437Merge(item,record,mode='missing'){
+function mf437Merge(item,record,mode='missing',allowedFields=null){
+ const permitted=Array.isArray(allowedFields)?new Set(allowedFields):null;
  if(!record?.verified)return {changed:0,reason:'Unverified match'};
  const before={},after={},manual=item.richMetadataManual||{},fields=record.fields||{};
  for(const name of MF437_FIELD_NAMES){
+  if(permitted&&!permitted.has(name))continue;
   if(!Object.prototype.hasOwnProperty.call(fields,name)||manual[name])continue;
   let value=fields[name];if(value===null||value===undefined||value==='')continue;
   if(Array.isArray(value)){value=[...new Set(value.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);if(!value.length)continue;}
@@ -134,6 +136,7 @@ function mf437Merge(item,record,mode='missing'){
  }
  const detail={...(item.mediaMetadata||{})};
  for(const name of MF437_EXTRA_FIELD_NAMES){
+  if(permitted&&!permitted.has(name))continue;
   let value=fields[name];if(value===undefined||value===null||value===''||item.richMetadataManual?.[name])continue;
   if(Array.isArray(value)){value=[...new Set(value.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);if(!value.length)continue;}
   if(typeof value==='string')value=value.slice(0,300);
@@ -143,14 +146,14 @@ function mf437Merge(item,record,mode='missing'){
  }
  if(JSON.stringify(detail)!==JSON.stringify(item.mediaMetadata||{})){before.mediaMetadata=item.mediaMetadata;after.mediaMetadata=detail;}
  const ratings={...(item.externalRatings||{})};
- for(const [id,score] of Object.entries(record.ratings||{})){
+ for(const [id,score] of Object.entries(permitted&&!permitted.has('externalRatings')?{}:record.ratings||{})){
   if(!score||!Number.isFinite(score.value)||!Number.isFinite(score.scale))continue;
   if(ratings[id]&&!mf437Prefs().ratingRefresh)continue;
   ratings[id]={...score,provider:score.provider||record.provider};
  }
  if(JSON.stringify(ratings)!==JSON.stringify(item.externalRatings||{})){before.externalRatings=item.externalRatings;after.externalRatings=ratings;}
  const newIds={...(item.externalIds||{})};
- for(const [key,value] of Object.entries(record.ids||{})){
+ for(const [key,value] of Object.entries(permitted&&!permitted.has('externalIds')?{}:record.ids||{})){
   if(!/^[a-z][a-z0-9_]{0,32}$/.test(key)||!value||String(value).length>120)continue;
   if(item.v377ManualExternalIds&&Object.prototype.hasOwnProperty.call(item.v377ManualExternalIds,key))continue;
   if(newIds[key])continue;
@@ -210,7 +213,7 @@ async function mf437ProcessLocked(){
    if(failedForTitle){job.failedIds=job.failedIds||[];if(!job.failedIds.includes(id))job.failedIds.push(id);}
    if(records.length&&!skipCurrent){
     const selection=mf437Consolidate(item,records,job.engine||'smart');
-    const changed=mf437Merge(item,selection,job.mode);
+    const changed=mf437Merge(item,selection,job.mode,job.fields);
     updated+=changed.changed;
     if(changed.preview){job.previews=job.previews||[];job.previews.push({titleId:id,provider:selection.provider,before:changed.preview.before,after:changed.preview.after,at:Date.now()});}
     if(changed.changed){job.events.push({titleId:id,provider:selection.provider,at:Date.now(),before:changed.before,after:changed.after,fields:Object.keys(changed.after)});if(job.events.length>2000)job.events.shift();}
@@ -320,7 +323,7 @@ async function mf437StartJob(config){
  if(!AUTH_USER)throw Error('Sign in before recovering metadata.');
  const ids=[...new Set(mf437SelectedIds(config.scope,config.category,config.id))];
  if(!ids.length)throw Error('No Library titles in this recovery scope.');
- MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',engine:config.engine||'smart',
+ MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',engine:config.engine||'smart',fields:Array.isArray(config.fields)?config.fields.slice():null,
   providers:(config.providers||[]).filter(id=>MF437_PROVIDERS.some(p=>p.id===id&&p.live)),
   partSize:Math.max(1,Math.min(1000,Number(config.partSize)||100)),continuation:config.continuation||'automatic',
   updated:0,skipped:0,errors:0,failedIds:[],lastError:'',createdAt:Date.now(),events:[],previews:[]};
