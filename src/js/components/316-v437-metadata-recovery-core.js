@@ -15,7 +15,7 @@ const MF437_PROVIDERS=[
  ...['Tenrai','Shikimori','MangaDex','MangaUpdates','IFDB','MusicBrainz','Open Opus','BookBrainz','Inventaire','Wikidata','Wikimedia Commons','Crossref','OpenAlex','Library of Congress','BnF','German National Library','Fribb','manami-project','Royal Road RSS','Steam Storefront','SteamSpy','CheapShark','PCGamingWiki','Libretro Thumbnails','GameTDB','Cover Art Archive','TheAudioDB','Deezer','Grand Comics Database','Anime News Network'].map(name=>({id:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,group:'Additional sources',public:true,live:false})),
  ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured',public:false,gateway:true,live:['malofficial','tmdb','omdb','trakt','episodate','gutendex'].includes(id)}))
 ];
-const MF437_DEFAULTS={mode:'missing',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb','gutendex','librivox'],ratingRefresh:false};
+const MF437_DEFAULTS={mode:'missing',engine:'smart',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb','gutendex','librivox'],ratingRefresh:false};
 const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{}};
 function mf437Prefs(){const saved=S.settings?.v437Metadata||{};return {...MF437_DEFAULTS,...saved,providers:Array.isArray(saved.providers)?saved.providers.slice():MF437_DEFAULTS.providers.slice()};}
 function mf437Escape(t){return typeof mf424Escape==='function'?mf424Escape(t):String(t??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
@@ -146,7 +146,7 @@ function mf437Merge(item,record,mode='missing'){
  for(const [id,score] of Object.entries(record.ratings||{})){
   if(!score||!Number.isFinite(score.value)||!Number.isFinite(score.scale))continue;
   if(ratings[id]&&!mf437Prefs().ratingRefresh)continue;
-  ratings[id]={...score,provider:record.provider};
+  ratings[id]={...score,provider:score.provider||record.provider};
  }
  if(JSON.stringify(ratings)!==JSON.stringify(item.externalRatings||{})){before.externalRatings=item.externalRatings;after.externalRatings=ratings;}
  const newIds={...(item.externalIds||{})};
@@ -161,7 +161,7 @@ function mf437Merge(item,record,mode='missing'){
  const changes=Object.keys(after);if(!changes.length)return {changed:0,reason:'Nothing missing'};
  if(mode==='review')return {changed:0,preview:{before,after},provider:record.provider};
  Object.assign(item,after);item.modifiedAt=Date.now();
- item.metadataRecoverySources={...(item.metadataRecoverySources||{}),...Object.fromEntries(changes.map(x=>[x,{provider:record.provider,at:Date.now(),url:record.sourceUrl||''}]))};
+ item.metadataRecoverySources={...(item.metadataRecoverySources||{}),...Object.fromEntries(changes.map(x=>[x,{provider:record.fieldProviders?.[x]||record.provider,at:Date.now(),url:record.sourceUrl||''}]))};
  return {changed:changes.length,before,after,provider:record.provider};
 }
 async function mf437SaveJob(){if(!MF437.job)return;MF437.job.updatedAt=Date.now();await mf424Storage('put','metadata:'+mf424Account(),MF437.job);}
@@ -190,19 +190,24 @@ async function mf437ProcessLocked(){
    if(typeof MF424!=='undefined'&&MF424.running){job.status='paused';job.lastError='Cover Recovery is active. Resume metadata after it finishes.';break;}
    const id=job.ids[job.cursor],item=index.get(id);
    if(!item){job.skipped++;job.cursor++;await mf437SaveJob();continue;}
-   let updated=0,attempted=0;
+   let updated=0,attempted=0;const records=[];
    for(const provider of job.providers){
     if((MF437.cooldowns[provider]||0)>Date.now())continue;
     if(!MF437_PROVIDERS.some(p=>p.id===provider&&p.live)||!mf437Suitable(provider,item))continue;
     attempted++;
     try{
      const record=await mf437Discover(item,provider);
-     if(record){const changed=mf437Merge(item,record,job.mode);updated+=changed.changed;
-      if(changed.preview){job.previews=job.previews||[];job.previews.push({titleId:id,provider,before:changed.preview.before,after:changed.preview.after,at:Date.now()});}
-      if(changed.changed){job.events.push({titleId:id,provider,at:Date.now(),before:changed.before,after:changed.after,fields:Object.keys(changed.after)});if(job.events.length>2000)job.events.shift();}}
+     if(record?.verified)records.push(record);
     }catch(e){job.errors++;job.lastError=provider+': '+String(e.message||e).slice(0,120);
      if(/cooldown|HTTP 429|HTTP 503/i.test(job.lastError))MF437.cooldowns[provider]=Date.now()+90000;}
     await new Promise(resolve=>setTimeout(resolve,1150));
+   }
+   if(records.length){
+    const selection=mf437Consolidate(item,records,job.engine||'smart');
+    const changed=mf437Merge(item,selection,job.mode);
+    updated+=changed.changed;
+    if(changed.preview){job.previews=job.previews||[];job.previews.push({titleId:id,provider:selection.provider,before:changed.preview.before,after:changed.preview.after,at:Date.now()});}
+    if(changed.changed){job.events.push({titleId:id,provider:selection.provider,at:Date.now(),before:changed.before,after:changed.after,fields:Object.keys(changed.after)});if(job.events.length>2000)job.events.shift();}
    }
    if(updated){job.updated++;persistLibrary();await saveState();}
    else job.skipped++;
@@ -214,6 +219,44 @@ async function mf437ProcessLocked(){
   if(job.cursor>=job.ids.length)job.status='complete';
  }catch(e){job.status='paused';job.lastError=String(e.message||e).slice(0,200);}
  finally{MF437.running=false;await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();}
+}
+
+
+function mf437Consolidate(item,records,engine='smart'){
+ const fields={},fieldProviders={},ratings={},ids={},chosen=new Map();
+ const priority=new Map(records.map((r,i)=>[r.provider,i]));
+ const allFields=[...MF437_FIELD_NAMES,...MF437_EXTRA_FIELD_NAMES];
+ for(const field of allFields){
+  const candidates=records.filter(r=>r.fields?.[field]!==undefined&&r.fields?.[field]!==null&&r.fields?.[field]!==''&&
+   (!Array.isArray(r.fields[field])||r.fields[field].length));
+  if(!candidates.length)continue;
+  const ranked=candidates.map(r=>{
+   const value=r.fields[field],key=JSON.stringify(value).toLowerCase();
+   const consensus=candidates.filter(x=>JSON.stringify(x.fields[field]).toLowerCase()===key).length;
+   const sourceYear=Number(r.fields?.year||String(r.fields?.releaseDate||'').slice(0,4));
+   const itemYear=Number(item.year||'');
+   const yearAgreement=sourceYear>1900&&itemYear>1900&&Math.abs(sourceYear-itemYear)<=1;
+   const score=(r.matchedBy==='id'?1:.75)+(yearAgreement?.09:0)+(engine==='smart'?Math.min(.12,(consensus-1)*.06):0);
+   return {r,value,score,rank:priority.get(r.provider)||0};
+  }).sort((a,b)=>engine==='priority'?a.rank-b.rank:b.score-a.score||a.rank-b.rank);
+  const best=ranked[0];fields[field]=best.value;fieldProviders[field]=best.r.provider;
+ }
+ for(const r of records){
+  for(const [name,score] of Object.entries(r.ratings||{})){
+   if(!score)continue;
+   const rank=r.matchedBy==='id'?2:1;
+   if(!chosen.has(name)||rank>chosen.get(name)){ratings[name]={...score,provider:r.provider};chosen.set(name,rank);}
+  }
+  if(r.externalIdVerified){
+   for(const [key,value] of Object.entries(r.ids||{})){
+    if(!ids[key]&&value)ids[key]=value;
+   }
+  }
+ }
+ return {provider:engine==='priority'?'provider-priority':'smart-metadata-engine',
+  verified:true,matchedBy:'coordinated',externalIdVerified:true,fields,fieldProviders,ratings,ids,
+  sourceUrl:records.find(r=>r.matchedBy==='id')?.sourceUrl||records[0]?.sourceUrl||'',
+  contributingProviders:records.map(r=>r.provider)};
 }
 
 function mf437ChangesSafeToApply(item,before,after,selected){
@@ -271,7 +314,7 @@ async function mf437StartJob(config){
  if(!AUTH_USER)throw Error('Sign in before recovering metadata.');
  const ids=[...new Set(mf437SelectedIds(config.scope,config.category,config.id))];
  if(!ids.length)throw Error('No Library titles in this recovery scope.');
- MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',
+ MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',engine:config.engine||'smart',
   providers:(config.providers||[]).filter(id=>MF437_PROVIDERS.some(p=>p.id===id&&p.live)),
   partSize:Math.max(1,Math.min(1000,Number(config.partSize)||100)),continuation:config.continuation||'automatic',
   updated:0,skipped:0,errors:0,lastError:'',createdAt:Date.now(),events:[],previews:[]};
