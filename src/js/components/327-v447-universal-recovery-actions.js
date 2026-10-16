@@ -75,6 +75,13 @@ function mf447Open(kind='cover',options={}){
  mf445Open(kind==='both'?'cover':kind,{entry:options?.entry||'shortcut',id:options?.id||''});
  if(kind==='both')mf445Panel('both');
 }
+const mf447OriginalClose=mf445Close;
+mf445Close=function(){
+ const result=mf447OriginalClose.apply(this,arguments);
+ MF447.contextIds=null;MF447.contextLabel='';MF447.active='cover';
+ return result;
+};
+App.mf445Close=mf445Close;
 const mf447PreviousScopeIds=mf446ScopeIds;
 mf446ScopeIds=function(mode){
  if(MF447.contextIds&&mf446State(mode).mode==='selected'&&
