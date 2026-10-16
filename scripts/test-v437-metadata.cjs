@@ -30,7 +30,7 @@ const ctx={
 vm.createContext(ctx);
 vm.runInContext(core,ctx);
 vm.runInContext(adapters,ctx);
-let test=vm.runInContext('mf437Merge(S.library[0], {verified:true,provider:"jikan",fields:{synopsis:"overwrite",genres:["Action"],year:2002},ratings:{mal:{value:8.9,scale:10,updatedAt:1}},ids:{mal:"999",anilist:"23"},sourceUrl:"https://example.org"});',ctx);
+let test=vm.runInContext('mf437Merge(S.library[0], {verified:true,externalIdVerified:true,provider:"jikan",fields:{synopsis:"overwrite",genres:["Action"],year:2002},ratings:{mal:{value:8.9,scale:10,updatedAt:1}},ids:{mal:"999",anilist:"23"},sourceUrl:"https://example.org"});',ctx);
 assert.equal(test.changed>0,true);
 assert.equal(ctx.S.library[0].synopsis,'Written by me');
 assert.equal(ctx.S.library[0].rating,9.5);
