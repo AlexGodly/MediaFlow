@@ -29,6 +29,7 @@ function mf437Suitable(provider,item){const k=mf437Kind(item),ids=item?.external
  default:return false;
 }}
 const MF437_FIELD_NAMES=['synopsis','releaseDate','year','genres','themes','studios','producers','durationMinutes','mediaFormat','ageRating'];
+const MF437_EXTRA_FIELD_NAMES=['originalTitle','episodeCount','chapterCount','volumeCount','pageCount','trackCount','authors','artists','platforms','publishers','developers','language','network','isbn','originalLanguage','officialSite','visualNovelLength'];
 function mf437Rating(value,scale,votes,url){
  if(value===null||value===undefined||value==='')return null;
  const n=Number(value);if(!Number.isFinite(n)||n<0||n>scale)return null;
@@ -57,43 +58,43 @@ async function mf437Discover(item,provider){
   const type=/manga|manhwa|manhua|novel/.test(kind)?'manga':'anime',id=String(ids.mal||'');
   const data=await mf437Fetch('https://api.jikan.moe/v4/'+type+( /^\d+$/.test(id)?'/'+id:'?q='+q+'&limit=5'));
   const row= /^\d+$/.test(id)?data?.data:(data?.data||[])[0];if(!row)return null;
-  return mf437Entry(item,provider,row.title,{synopsis:row.synopsis||'',year:row.year||row.published?.from?.slice(0,4)||row.aired?.from?.slice(0,4),genres:(row.genres||[]).map(x=>x.name),themes:(row.themes||[]).map(x=>x.name),studios:(row.studios||[]).map(x=>x.name),mediaFormat:row.type||'',durationMinutes:Number.parseInt(row.duration)||null}, {mal:mf437Rating(row.score,10,row.scored_by,row.url)},{mal:String(row.mal_id)},row.url,[row.title_english,row.title_japanese,...(row.title_synonyms||[])]);
+  return mf437Entry(item,provider,row.title,{synopsis:row.synopsis||'',year:row.year||row.published?.from?.slice(0,4)||row.aired?.from?.slice(0,4),genres:(row.genres||[]).map(x=>x.name),themes:(row.themes||[]).map(x=>x.name),studios:(row.studios||[]).map(x=>x.name),mediaFormat:row.type||'',durationMinutes:Number.parseInt(row.duration)||null,episodeCount:row.episodes,chapterCount:row.chapters,volumeCount:row.volumes,authors:(row.authors||[]).map(x=>x.name),originalTitle:row.title_japanese||''}, {mal:mf437Rating(row.score,10,row.scored_by,row.url)},{mal:String(row.mal_id)},row.url,[row.title_english,row.title_japanese,...(row.title_synonyms||[])]);
  }
  if(provider==='anilist'){
   const type=/manga|novel|manhwa|manhua/.test(kind)?'MANGA':'ANIME';
-  const query='query($search:String,$id:Int,$type:MediaType){Page(perPage:5){media(search:$search,id:$id,type:$type){id idMal title{romaji english native} synonyms description(asHtml:false) genres tags{name} startDate{year month day} duration format averageScore meanScore popularity siteUrl studios{nodes{name}}}}}';
+  const query='query($search:String,$id:Int,$type:MediaType){Page(perPage:5){media(search:$search,id:$id,type:$type){id idMal title{romaji english native} synonyms description(asHtml:false) genres tags{name} startDate{year month day} duration format episodes chapters volumes averageScore meanScore popularity siteUrl studios{nodes{name}}}}}';
   const id=Number(ids.anilist)||null,raw=await mf437Fetch('https://graphql.anilist.co',{query,variables:{search:id?null:title,id,type}});
   const row=raw?.data?.Page?.media?.[0];if(!row)return null;
-  return mf437Entry(item,provider,row.title?.romaji||row.title?.english,{synopsis:row.description||'',year:row.startDate?.year,genres:row.genres||[],themes:(row.tags||[]).map(x=>x.name),studios:(row.studios?.nodes||[]).map(x=>x.name),durationMinutes:row.duration,mediaFormat:row.format},{anilist:mf437Rating(row.averageScore,100,null,row.siteUrl)},{anilist:String(row.id),...(row.idMal?{mal:String(row.idMal)}:{})},row.siteUrl,[row.title?.english,row.title?.native,...(row.synonyms||[])]);
+  return mf437Entry(item,provider,row.title?.romaji||row.title?.english,{synopsis:row.description||'',year:row.startDate?.year,genres:row.genres||[],themes:(row.tags||[]).map(x=>x.name),studios:(row.studios?.nodes||[]).map(x=>x.name),durationMinutes:row.duration,mediaFormat:row.format,episodeCount:row.episodes,chapterCount:row.chapters,volumeCount:row.volumes,originalTitle:row.title?.native},{anilist:mf437Rating(row.averageScore,100,null,row.siteUrl)},{anilist:String(row.id),...(row.idMal?{mal:String(row.idMal)}:{})},row.siteUrl,[row.title?.english,row.title?.native,...(row.synonyms||[])]);
  }
  if(provider==='kitsu'){
   const type=/manga|manhwa|manhua|novel/.test(kind)?'manga':'anime',id=String(ids.kitsu||'');
   const data=await mf437Fetch('https://kitsu.io/api/edge/'+type+(id?'/'+encodeURIComponent(id):'?filter%5Btext%5D='+q+'&page%5Blimit%5D=5'));
   const row=id?data?.data:data?.data?.[0];if(!row)return null;const a=row.attributes||{};
-  return mf437Entry(item,provider,a.canonicalTitle,{synopsis:a.synopsis||a.description||'',releaseDate:a.startDate||'',genres:[],mediaFormat:a.subtype||'',durationMinutes:a.episodeLength},{kitsu:mf437Rating(a.averageRating,100,null,'https://kitsu.io/'+type+'/'+row.id)},{kitsu:String(row.id)},'https://kitsu.io/'+type+'/'+row.id,Object.values(a.titles||{}));
+  return mf437Entry(item,provider,a.canonicalTitle,{synopsis:a.synopsis||a.description||'',releaseDate:a.startDate||'',genres:[],mediaFormat:a.subtype||'',durationMinutes:a.episodeLength,episodeCount:a.episodeCount,chapterCount:a.chapterCount,volumeCount:a.volumeCount,originalTitle:a.titles?.ja_jp},{kitsu:mf437Rating(a.averageRating,100,null,'https://kitsu.io/'+type+'/'+row.id)},{kitsu:String(row.id)},'https://kitsu.io/'+type+'/'+row.id,Object.values(a.titles||{}));
  }
  if(provider==='tvmaze'){
   const id=String(ids.tvmaze||'');const raw=await mf437Fetch(id?'https://api.tvmaze.com/shows/'+encodeURIComponent(id):'https://api.tvmaze.com/search/shows?q='+q);
   const row=id?raw:raw?.[0]?.show;if(!row)return null;
-  return mf437Entry(item,provider,row.name,{synopsis:row.summary||'',releaseDate:row.premiered||'',year:String(row.premiered||'').slice(0,4),genres:row.genres||[],mediaFormat:row.type||'',durationMinutes:row.runtime||row.averageRuntime||null},{tvmaze:mf437Rating(row.rating?.average,10,null,row.url)},{tvmaze:String(row.id)},row.url);
+  return mf437Entry(item,provider,row.name,{synopsis:row.summary||'',releaseDate:row.premiered||'',year:String(row.premiered||'').slice(0,4),genres:row.genres||[],mediaFormat:row.type||'',durationMinutes:row.runtime||row.averageRuntime||null,language:row.language||'',network:row.network?.name||'',officialSite:row.officialSite||''},{tvmaze:mf437Rating(row.rating?.average,10,null,row.url)},{tvmaze:String(row.id)},row.url);
  }
  if(provider==='openlibrary'){
   const raw=await mf437Fetch('https://openlibrary.org/search.json?title='+q+'&limit=5&fields=key,title,author_name,first_publish_year,subject,isbn');
   const row=raw?.docs?.[0];if(!row)return null;
-  return mf437Entry(item,provider,row.title,{year:row.first_publish_year,genres:(row.subject||[]).slice(0,25),producers:(row.author_name||[]).slice(0,20),mediaFormat:'Book'},{},{openlibrary:String(row.key||'').replace('/works/','')},'https://openlibrary.org'+row.key);
+  return mf437Entry(item,provider,row.title,{year:row.first_publish_year,genres:(row.subject||[]).slice(0,25),producers:(row.author_name||[]).slice(0,20),authors:(row.author_name||[]).slice(0,20),isbn:(row.isbn||[])[0]||'',mediaFormat:'Book'},{},{openlibrary:String(row.key||'').replace('/works/','')},'https://openlibrary.org'+row.key);
  }
  if(provider==='vndb'){
   const id=String(ids.vndb||'');const filters=id?['id','=',id]:['search','=',title];
-  const raw=await mf437Fetch('https://api.vndb.org/kana/vn',{filters,fields:'id,title,alttitle,description,released,rating,votecount,image.url',results:5});
+  const raw=await mf437Fetch('https://api.vndb.org/kana/vn',{filters,fields:'id,title,alttitle,description,released,rating,votecount,length_minutes,image.url',results:5});
   const row=raw?.results?.[0];if(!row)return null;
-  return mf437Entry(item,provider,row.title,{synopsis:row.description||'',releaseDate:row.released||'',mediaFormat:'Visual Novel'},{vndb:mf437Rating(row.rating,100,row.votecount,'https://vndb.org/'+row.id)},{vndb:row.id},'https://vndb.org/'+row.id,[row.alttitle]);
+  return mf437Entry(item,provider,row.title,{synopsis:row.description||'',releaseDate:row.released||'',mediaFormat:'Visual Novel',originalTitle:row.alttitle||'',visualNovelLength:row.length_minutes},{vndb:mf437Rating(row.rating,100,row.votecount,'https://vndb.org/'+row.id)},{vndb:row.id},'https://vndb.org/'+row.id,[row.alttitle]);
  }
  if(provider==='itunes'){
   const media=/music|album|soundtrack|track|song/.test(kind)?'music':/book|novel/.test(kind)?'ebook':/movie|film/.test(kind)?'movie':'all';
   const raw=await mf437Fetch('https://itunes.apple.com/search?term='+q+'&limit=6&media='+media);
   const row=raw?.results?.find(x=>mf437Name(x.collectionName||x.trackName)===mf437Name(title))||raw?.results?.[0];
   if(!row)return null;
-  return mf437Entry(item,provider,row.collectionName||row.trackName,{synopsis:row.longDescription||row.description||'',releaseDate:String(row.releaseDate||'').slice(0,10),genres:row.primaryGenreName?[row.primaryGenreName]:[],producers:row.artistName?[row.artistName]:[],durationMinutes:row.trackTimeMillis?Math.round(row.trackTimeMillis/60000):null},{},{itunes:String(row.collectionId||row.trackId||'')},row.collectionViewUrl||row.trackViewUrl);
+  return mf437Entry(item,provider,row.collectionName||row.trackName,{synopsis:row.longDescription||row.description||'',releaseDate:String(row.releaseDate||'').slice(0,10),genres:row.primaryGenreName?[row.primaryGenreName]:[],producers:row.artistName?[row.artistName]:[],durationMinutes:row.trackTimeMillis?Math.round(row.trackTimeMillis/60000):null,artists:row.artistName?[row.artistName]:[],trackCount:row.trackCount,publishers:row.publisherName?[row.publisherName]:[]},{},{itunes:String(row.collectionId||row.trackId||'')},row.collectionViewUrl||row.trackViewUrl);
  }
  return null;
 }
@@ -112,6 +113,16 @@ function mf437Merge(item,record,mode='missing'){
   if(JSON.stringify(old)===JSON.stringify(value))continue;
   before[name]=old;after[name]=value;
  }
+ const detail={...(item.mediaMetadata||{})};
+ for(const name of MF437_EXTRA_FIELD_NAMES){
+  let value=fields[name];if(value===undefined||value===null||value===''||item.richMetadataManual?.[name])continue;
+  if(Array.isArray(value)){value=[...new Set(value.map(x=>String(x||'').trim()).filter(Boolean))].slice(0,40);if(!value.length)continue;}
+  if(typeof value==='string')value=value.slice(0,300);
+  if(typeof value==='number'&&(!Number.isFinite(value)||value<=0))continue;
+  if(detail[name]!==undefined&&detail[name]!==null&&detail[name]!=='')continue;
+  detail[name]=value;
+ }
+ if(JSON.stringify(detail)!==JSON.stringify(item.mediaMetadata||{})){before.mediaMetadata=item.mediaMetadata;after.mediaMetadata=detail;}
  const ratings={...(item.externalRatings||{})};
  for(const [id,score] of Object.entries(record.ratings||{})){
   if(!score||!Number.isFinite(score.value)||!Number.isFinite(score.scale))continue;
