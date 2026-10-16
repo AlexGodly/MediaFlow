@@ -14,7 +14,7 @@ const MF437_PROVIDERS=[
  ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured (metadata adapter pending)',public:false,live:false}))
 ];
 const MF437_DEFAULTS={mode:'missing',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb'],ratingRefresh:false};
-const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1};
+const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{}};
 function mf437Prefs(){const saved=S.settings?.v437Metadata||{};return {...MF437_DEFAULTS,...saved,providers:Array.isArray(saved.providers)?saved.providers.slice():MF437_DEFAULTS.providers.slice()};}
 function mf437Escape(t){return typeof mf424Escape==='function'?mf424Escape(t):String(t??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
 function mf437Name(t){return String(t||'').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();}
@@ -36,9 +36,11 @@ function mf437Rating(value,scale,votes,url){
  return {value:n,scale,votes:Number.isSafeInteger(Number(votes))&&Number(votes)>=0?Number(votes):null,url:/^https:\/\//.test(String(url||''))?String(url):'',updatedAt:Date.now()};
 }
 async function mf437Fetch(url,body){
+ const host=new URL(url).hostname;
+ if((MF437.cooldowns[host]||0)>Date.now())throw Error('Provider cooldown in effect');
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000);
  try{const res=await fetch(url,{method:body?'POST':'GET',body:body?JSON.stringify(body):undefined,headers:body?{'Content-Type':'application/json','Accept':'application/json'}:{'Accept':'application/json'},signal:ctl.signal});
-  if(!res.ok)throw Error('Provider HTTP '+res.status);
+  if(!res.ok){if(res.status===429||res.status===503)MF437.cooldowns[host]=Date.now()+(res.status===429?90000:30000);throw Error('Provider HTTP '+res.status);}
   return await res.json();
  }finally{clearTimeout(timer);}
 }
@@ -151,32 +153,43 @@ async function mf437Restore(){if(!AUTH_USER||MF437.running)return;try{
  }catch(e){console.warn('Metadata recovery checkpoint unavailable:',e);}
 }
 async function mf437Process(){
+ const job=MF437.job;
+ if(!job||MF437.running)return;
+ if(typeof navigator==='undefined'||!navigator.locks?.request){job.status='paused';job.lastError='Browser global process locking unavailable; recovery not started.';await mf437SaveJob();return;}
+ return navigator.locks.request('mediaflow-metadata-recovery:'+mf424Account(),{mode:'exclusive',ifAvailable:true},async lock=>{
+  if(!lock){job.status='paused';job.lastError='Another tab or window already owns the Metadata Recovery lock.';await mf437SaveJob();return;}
+  return mf437ProcessLocked();
+ });
+}
+async function mf437ProcessLocked(){
  const job=MF437.job;if(!job||MF437.running||job.account!==mf424Account())return;
  MF437.running=true;MF437.pause=false;MF437.stop='';job.status='running';await mf437SaveJob();
  try{
   const index=new Map((S.library||[]).map(x=>[String(x.id),x]));
   while(job.cursor<job.ids.length){
    if(job.account!==mf424Account()){job.status='paused';break;}
-   if(MF437.pause||MF437.stop){job.status=MF437.stop?'stopped':'paused';break;}
+   if(MF437.pause||MF437.stop==='stop'){job.status=MF437.stop?'stopped':'paused';break;}
+   if(typeof MF424!=='undefined'&&MF424.running){job.status='paused';job.lastError='Cover Recovery is active. Resume metadata after it finishes.';break;}
    const id=job.ids[job.cursor],item=index.get(id);
    if(!item){job.skipped++;job.cursor++;await mf437SaveJob();continue;}
    let updated=0,attempted=0;
    for(const provider of job.providers){
-    if(MF437.pause||MF437.stop)break;
+    if((MF437.cooldowns[provider]||0)>Date.now())continue;
     if(!MF437_PROVIDERS.some(p=>p.id===provider&&p.live)||!mf437Suitable(provider,item))continue;
     attempted++;
     try{
      const record=await mf437Discover(item,provider);
      if(record){const changed=mf437Merge(item,record,job.mode);updated+=changed.changed;
       if(changed.changed){job.events.push({titleId:id,provider,at:Date.now(),before:changed.before,fields:Object.keys(changed.after)});if(job.events.length>200)job.events.shift();}}
-    }catch(e){job.errors++;job.lastError=provider+': '+String(e.message||e).slice(0,120);}
+    }catch(e){job.errors++;job.lastError=provider+': '+String(e.message||e).slice(0,120);
+     if(/cooldown|HTTP 429|HTTP 503/i.test(job.lastError))MF437.cooldowns[provider]=Date.now()+90000;}
     await new Promise(resolve=>setTimeout(resolve,1150));
    }
    if(updated){job.updated++;persistLibrary();await saveState();}
    else job.skipped++;
    job.cursor++;
    await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();
-   if(job.cursor<job.ids.length&&job.cursor%job.partSize===0){if(job.continuation==='manual'){job.status='waiting-part';break;}}
+   if(job.cursor<job.ids.length&&job.cursor%job.partSize===0){if(MF437.stop==='part'){job.status='stopped';break;}if(job.continuation==='manual'){job.status='waiting-part';break;}}
   }
   if(job.cursor>=job.ids.length)job.status='complete';
  }catch(e){job.status='paused';job.lastError=String(e.message||e).slice(0,200);}
