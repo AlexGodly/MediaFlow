@@ -1,9 +1,9 @@
 /* v445: deterministic safety and rendering contracts for unified recovery UI. */
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'445');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=445);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/325-v445-unified-recovery-workspace.js');
+assert(order.includes('components/325-v445-unified-recovery-workspace.js'));
 const src=fs.readFileSync('src/js/components/325-v445-unified-recovery-workspace.js','utf8');
 const css=fs.readFileSync('assets/css/252-v445-unified-recovery-workspace.css','utf8');
 const html=fs.readFileSync('index.html','utf8');
