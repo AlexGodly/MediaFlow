@@ -14,7 +14,8 @@ function mf448Prefs(){
  const int=(n,floor,ceil,def)=>Number.isFinite(Number(n))?Math.max(floor,Math.min(ceil,Math.floor(Number(n)))):def;
  return {...MF448_DEFAULT,...data,coverPolicy:cp,metadataPolicy:mp,
   coverConfidence:int(data.coverConfidence,95,99,98),
-  metadataConfidence:int(data.metadataConfidence,94,99,94),
+  metadataConfidence:int(data.metadataConfidence,94,99,
+   Math.round(Math.max(.94,Math.min(.99,Number(S.settings?.v439Metadata?.minimumConfidence)||.94))*100)),
   collectReviews:data.collectReviews!==false,
   dashboardAutoSave:!!S.settings?.v430MissingCoversAutoSave};
 }
@@ -87,8 +88,10 @@ mf439Proposals=function(item,results){
 const mf448OriginalMetaPreferences=mf439Preferences;
 mf439Preferences=function(){
  const prefs=mf448OriginalMetaPreferences.apply(this,arguments),policy=mf448PolicyMetadata();
- return {...prefs,minimumConfidence:Math.max(Number(prefs.minimumConfidence)||.94,
-  policy.metadataConfidence/100)};
+ const configured=S.settings?.v448SmartRecovery?.metadataConfidence;
+ const explicit=configured!==null&&configured!==undefined&&Number.isFinite(Number(configured));
+ return {...prefs,minimumConfidence:explicit||MF439.job?.mf448Options?.metadataConfidence!=null?
+  policy.metadataConfidence/100:Math.max(.94,Number(prefs.minimumConfidence)||.94)};
 };
 const mf448OriginalMetaApply=mf439Apply;
 mf439Apply=function(item,preview,mode='review'){
