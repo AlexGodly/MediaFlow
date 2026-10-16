@@ -25,6 +25,7 @@ const btn=name=>({isConnected:true,focus(){state.focus++},addEventListener(event
 const approve=btn('approve'),close=btn('close'),cancel=btn('cancel');
 const originalFocus=btn('opener');
 const document={
+ getElementById:()=>null,
  activeElement:originalFocus,
  body:{appendChild(el){state.appended=el;}},
  createElement(){return {
