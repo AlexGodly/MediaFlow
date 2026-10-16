@@ -448,7 +448,7 @@ Object.assign(App,{mf439Open,mf439Close,mf439Save,mf439Toggle,mf439Choose,
  mf439SaveSettings,mf439OpenSelected,mf439ConfirmBatch,mf439Pause,mf439Resume,mf439Discard});
 MediaFlowRuntime.registerPageEnhancer('settings',mf439SettingsEnhance);
 window.MediaFlowV439=Object.freeze({
- version:439,match:mf439Evidence,plan:mf439Proposals,apply:mf439Apply,
+ version:439,renderSettings:mf439SettingsHtml,renderPreview:mf439PreviewHtml,match:mf439Evidence,plan:mf439Proposals,apply:mf439Apply,
  getProviders:mf439Available,discover:mf439Discover,
  preview:()=>MF439.preview,job:()=>MF439.job||mf439ReadJob()
 });
