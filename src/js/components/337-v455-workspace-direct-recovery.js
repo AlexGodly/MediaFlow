@@ -200,6 +200,8 @@ function mf455ReadyForNewJob(){
  return !owner||owner.token===MF442.owner;
 }
 async function mf455ReplaceQueuedJobs(){
+ if(typeof MF451!=='undefined'&&(MF451.journal||mf451Read()))
+  throw Error('Finish the priority title before replacing its suspended queue.');
  if(!mf455ReadyForNewJob())throw Error('Another tab owns a recovery process.');
  if(MF424.running||MF439.working||MF442.process){
   if(!await mf451PauseActive())throw Error('The old process could not safely stop.');
@@ -208,9 +210,7 @@ async function mf455ReplaceQueuedJobs(){
  if(MF424.job){MF424.job.stopRequested=true;MF424.job.pauseRequested=true;await mf424SaveJob();}
  if(MF439.job){MF439.job.stopRequested=true;MF439.cancel=true;mf439SaveJob();}
  if(typeof mf447WriteCombo==='function')mf447WriteCombo(null);
- if(typeof MF451!=='undefined'&&MF451.journal){
-  throw Error('Finish the priority title before replacing its suspended queue.');
- }
+
 }
 function mf455JobProviders(kind){
  const selected=mf455Enabled(kind);
@@ -278,13 +278,11 @@ async function mf455Launch(kind){
   }else if(kind!=='metadata')MF424.job=null;
   if(kind==='both'){
    mf447WriteCombo({schema:1,account:mf439Account(),ids:bounded,
-    created:Date.now(),stage:cover?'cover':'ready-metadata',coverId:cover?.id||null});
+    created:Date.now(),stage:cover?'cover':'ready-metadata',coverId:cover?.id||null,
+    v455Direct:true,v455MetaProviders:metaIds});
   }
   if(kind==='metadata'){
-   MF439.job={schema:1,account:mf439Account(),ids:bounded,cursor:0,
-    changed:0,completed:0,errors:[],startedAt:Date.now(),status:'running',
-    v455Providers:metaIds,mode:prefs.mode,partSize:prefs.partSize,
-    continuation:prefs.continuation,stopRequested:false};
+   MF439.job=mf455MetadataOptions('metadata',bounded,metaIds);
    mf439SaveJob();
   }
   mf445Close();
