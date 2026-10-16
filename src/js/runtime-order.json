@@ -194,5 +194,6 @@
   "components/337-v455-workspace-direct-recovery.js",
   "components/338-v455-recovery-handoff-visibility.js",
   "components/339-v456-quick-cover-candidates.js",
-  "components/340-v456-recovery-start-status.js"
+  "components/340-v456-recovery-start-status.js",
+  "components/341-v457-recovery-interaction-fixes.js"
 ]
