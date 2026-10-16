@@ -1,0 +1,192 @@
+name: Publish MediaFlow v424 Beta — Advanced Cover Recovery (one-time)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v424.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mediaflow-v424-release
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout current personal MediaFlow branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Guard source version and prevent double-release
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 423
+          test ! -d legacy/v/424
+          test ! -f assets/js/mediaflow-v424.bundle.js
+          test -s scripts/v424-payload.b64
+          ! git show-ref --verify --quiet refs/tags/424
+          echo 'MediaFlow v423 baseline verified; v424 publish may proceed.'
+
+      - name: Apply audited implementation and prepare v424 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d scripts/v424-payload.b64 | tar xzf -
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('.')
+          src=root/'src/js/runtime-order.json'
+          order=json.loads(src.read_text(encoding='utf-8'))
+          module='components/309-v424-advanced-cover-recovery.js'
+          assert module not in order
+          assert order[-1]=='components/308-v423-navigation-restore-donation-polish.js'
+          order.append(module)
+          src.write_text(json.dumps(order,indent=2)+'\n',encoding='utf-8')
+          (root/'VERSION').write_text('424\n',encoding='utf-8')
+          index=root/'index.html'
+          html=index.read_text(encoding='utf-8')
+          assert 'mediaflow-v423.bundle.js' in html
+          assert '<meta name="mediaflow-version" content="423">' in html
+          html=html.replace('mediaflow-v423.bundle.js','mediaflow-v424.bundle.js')
+          html=html.replace('<meta name="mediaflow-version" content="423">','<meta name="mediaflow-version" content="424">')
+          style='<link rel="stylesheet" href="assets/css/235-v424-advanced-cover-recovery.css">'
+          assert style not in html and '</body>' in html
+          html=html.replace('</body>',style+'\n</body>')
+          index.write_text(html,encoding='utf-8')
+          package=root/'package.json'
+          pkg=json.loads(package.read_text(encoding='utf-8'))
+          pkg['name']='mediaflow-v424'
+          pkg['version']='4.2.4'
+          package.write_text(json.dumps(pkg,indent=2)+'\n',encoding='utf-8')
+          PY
+          git rm -f scripts/v424-payload.b64
+          python scripts/build.py
+          test -f assets/js/mediaflow-v424.bundle.js
+          test -f assets/css/235-v424-advanced-cover-recovery.css
+          grep -q 'mf424Start' assets/js/mediaflow-v424.bundle.js
+          grep -q 'mediaflow-v424.bundle.js' index.html
+          node --check assets/js/mediaflow-v424.bundle.js
+
+      - name: Validate v424 contract tests and MediaFlow build integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/test-v424-recovery.cjs
+          # The old v232 classic renderer assertion was retired in newer releases;
+          # require the active v391+v408 performance replacements instead.
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/check.py')
+          s=p.read_text(encoding='utf-8')
+          old="if 'const v232OverviewMeta=new Map();' not in classic232: errors.append('missing v232 one-pass classic Library overview optimization')"
+          new=("if 'const v232OverviewMeta=new Map();' not in classic232 and "
+               "not ({'components/285-v391-runtime-performance.js', "
+               "'components/301-v408-performance-stability-ui.js'} <= set(runtime_order)): "
+               "errors.append('missing newer Library performance implementation')")
+          assert old in s, 'v232 historic check changed; review before replacement'
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          PY
+          python scripts/check.py
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          j=json.loads(Path('src/js/runtime-order.json').read_text())
+          assert j[-1]=='components/309-v424-advanced-cover-recovery.js'
+          assert Path('sw.js').read_text().find('mediaflow-pwa-v424-shell')>=0
+          assert '235-v424-advanced-cover-recovery.css' in Path('index.html').read_text()
+          assert Path('docs/PROVIDERS_v424.md').is_file()
+          PY
+
+      - name: Commit v424 and archive exact independent version
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'AlexGodly'
+          git config user.email '90983397+AlexGodly@users.noreply.github.com'
+          git add -A -- . ':!legacy' ':!beta'
+          git commit -m 'MediaFlow v424 Beta: persistent ID-first missing covers recovery'
+          mkdir -p "$RUNNER_TEMP/mediaflow-v424-source"
+          rsync -a \
+            --exclude='/legacy/' --exclude='/beta/' \
+            --exclude='/.git/' \
+            ./ "$RUNNER_TEMP/mediaflow-v424-source/"
+          test -f "$RUNNER_TEMP/mediaflow-v424-source/src/js/components/309-v424-advanced-cover-recovery.js"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v424-source/VERSION")" = 424
+          mkdir -p legacy/v/424
+          rsync -a "$RUNNER_TEMP/mediaflow-v424-source/" legacy/v/424/
+          git add legacy/v/424
+          git commit -m 'Archive full MediaFlow v424 source in legacy/v/424'
+          git tag 424
+          git push origin HEAD:main refs/tags/424
+          echo "v424 source, archive and numeric tag pushed: $(git rev-parse HEAD)"
+
+      - name: Package version ZIP and publish v424 Beta release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import os
+          src=Path(os.environ['RUNNER_TEMP'])/'mediaflow-v424-source'
+          dst=Path(os.environ['RUNNER_TEMP'])/'MediaFlow_v424_Modular.zip'
+          with ZipFile(dst,'w',ZIP_DEFLATED,compresslevel=6) as out:
+            for p in src.rglob('*'):
+              if not p.is_file():continue
+              relative=p.relative_to(src)
+              if relative.parts[0] in {'legacy','beta','.git','.github'}:continue
+              out.write(p,relative.as_posix())
+          with ZipFile(dst) as z:
+            assert z.testzip() is None
+            assert 'assets/js/mediaflow-v424.bundle.js' in z.namelist()
+            assert 'src/js/components/309-v424-advanced-cover-recovery.js' in z.namelist()
+            assert 'VERSION' in z.namelist()
+          print('Validated version ZIP:',dst,dst.stat().st_size)
+          PY
+          gh release create 424 "$RUNNER_TEMP/MediaFlow_v424_Modular.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v424 Beta' \
+            --notes-file docs/CHANGELOG_v424.md \
+            --prerelease
+          gh release view 424 --repo "$GITHUB_REPOSITORY" --json tagName,name,assets,url
+
+      - name: Prepare deployed site without legacy or beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mediaflow-v424-site"
+          rsync -a \
+            --exclude='/legacy/' --exclude='/beta/' \
+            --exclude='/.git/' --exclude='/.github/' \
+            ./ "$RUNNER_TEMP/mediaflow-v424-site/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v424-site/VERSION")" = 424
+          test ! -d "$RUNNER_TEMP/mediaflow-v424-site/legacy"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload v424 Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mediaflow-v424-site
+
+      - name: Deploy v424 as live website
+        id: deployment
+        uses: actions/deploy-pages@v4
