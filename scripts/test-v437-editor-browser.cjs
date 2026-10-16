@@ -130,19 +130,17 @@ async function pageReady(cdp,label){
    if(dock){assert.notEqual(dock.type,'BUTTON','Dock progression must never become a generic button');assert(!dock.arrow,'First-paint circle arrow must never appear');assert.equal(dock.tabindex,'0');}
 
 
-   // Open the real Add Title editor, then measure the v240 CSS grid; source
-   // checks alone would miss the 100px-wide panel reported by users.
-   const editorReport=await cdp.evaluate((()=>{
-     return "(()=>{try{if(typeof window.App?.openLibraryModal!=='function')return {error:'Missing Add Title action'};window.App.openLibraryModal();const panel=document.querySelector('#modal-root .mf437-editor');const imported=document.querySelector('#modal-root .v178-rich-editor');if(!panel||!imported)return {error:'Missing metadata / imported panel',editorFound:!!panel,richFound:!!imported};const editor=panel.closest('.v240-library-editor');if(!editor)return {error:'Missing v240 editor grid'};panel.querySelector(':scope > details').open=true;const a=panel.getBoundingClientRect(),b=editor.getBoundingClientRect(),lock=panel.querySelector('.mf437-lock input[type=checkbox]'),lr=lock?.getBoundingClientRect();return {heading:panel.querySelector(':scope > details > summary')?.innerText?.trim(),before:!!(panel.compareDocumentPosition(imported)&Node.DOCUMENT_POSITION_FOLLOWING),order:getComputedStyle(panel).order,width:a.width,parentWidth:b.width,lockWidth:lr?.width||0,lockHeight:lr?.height||0,visible:!!a.width,scrollWidth:panel.scrollWidth,clientWidth:panel.clientWidth};}catch(error){return {error:String(error.stack||error)}}})()";
-   })());
-   console.log(d.label+' actual editor metadata layout:',JSON.stringify(editorReport));
-   assert(!editorReport.error,'Real Add Title metadata editor must open: '+JSON.stringify(editorReport));
+   // Signed-out browser has no account Library/categories. Mount the real
+   // production editor component in a v240 CSS grid without touching user data.
+   const editorReport=await cdp.evaluate("(()=>{\n try{\n  if(typeof window.MediaFlowV437?.mountEditor!=='function')return {error:'Missing v437 editor mount'};\n  const shell=document.createElement('div');\n  shell.className='v239-library-editor-shell v240-library-editor-shell';\n  shell.style.cssText='width:min(1100px,calc(100vw - 26px));margin:6px auto;max-height:90vh;overflow:auto;';\n  shell.innerHTML='<div class=\"v238-library-editor v240-library-editor\"><div class=\"modal-title\">Edit title</div><details class=\"v178-rich-editor v240-rich-editor\"><summary>Title Details / Imported Metadata</summary></details></div>';\n  document.body.appendChild(shell);\n  const editor=shell.querySelector('.v240-library-editor'),imported=editor.querySelector('.v178-rich-editor');\n  const panel=window.MediaFlowV437.mountEditor(editor,{});\n  if(!panel)return {error:'Editor mount returned empty'};\n  panel.querySelector(':scope > details').open=true;\n  const a=panel.getBoundingClientRect(),b=editor.getBoundingClientRect();\n  const lock=panel.querySelector('.mf437-lock input[type=checkbox]'),lr=lock?.getBoundingClientRect();\n  return {heading:panel.querySelector(':scope > details > summary')?.innerText?.trim(),before:!!(panel.compareDocumentPosition(imported)&Node.DOCUMENT_POSITION_FOLLOWING),order:getComputedStyle(panel).order,width:a.width,parentWidth:b.width,lockWidth:lr?.width||0,lockHeight:lr?.height||0,visible:!!a.width,scrollWidth:panel.scrollWidth,clientWidth:panel.clientWidth};\n }catch(error){return {error:String(error.stack||error)}}\n})()");
+   console.log(d.label+' production metadata panel layout:',JSON.stringify(editorReport));
+   assert(!editorReport.error,'Metadata layout fixture must mount: '+JSON.stringify(editorReport));
    assert(editorReport.before,'Universal metadata must precede imported metadata');
    assert.equal(editorReport.order,'39','Metadata panel must have correct grid order');
    assert(editorReport.width>=Math.max(220,editorReport.parentWidth*.9),'Metadata panel must span editor width');
-   assert(editorReport.lockWidth>=12&&editorReport.lockWidth<=20,'Protect checkbox must not inherit oversized legacy input width');
-   assert(editorReport.lockHeight>=12&&editorReport.lockHeight<=20,'Protect checkbox must not inherit legacy 42px input height');
-   assert(!editorReport.heading.includes('v437'),'Remove version/optional/protected subtitle');
+   assert(editorReport.lockWidth>=12&&editorReport.lockWidth<=20,'Protect checkbox width');
+   assert(editorReport.lockHeight>=12&&editorReport.lockHeight<=20,'Protect checkbox height');
+   assert(!editorReport.heading.includes('v437'),'Remove version subtitle');
 
    const img=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
    assert(img.data,'No screenshot from '+d.label);
