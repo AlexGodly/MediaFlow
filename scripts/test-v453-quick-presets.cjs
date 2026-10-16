@@ -1,7 +1,7 @@
 /* MediaFlow v453 — actionable presets and quick recovery contracts. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert(['453','454'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['453','454','455'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.includes('components/333-v453-recovery-presets.js')&&order.includes('components/334-v453-quick-title-recovery.js'));
 assert(order.includes('components/336-v454-quick-title-hardening.js'));
