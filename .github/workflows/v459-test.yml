@@ -109,7 +109,7 @@ jobs:
           set -euo pipefail
           mkdir -p legacy/v/459
           rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/459/
-          test "$(cat legacy/v/459/VERSION)" = 458
+          test "$(cat legacy/v/459/VERSION)" = 459
           test -s legacy/v/459/assets/js/mediaflow-v459.bundle.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
