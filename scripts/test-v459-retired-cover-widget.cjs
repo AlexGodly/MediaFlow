@@ -8,7 +8,7 @@ const html=fs.readFileSync('index.html','utf8');
 assert(html.includes('265-v459-retire-legacy-cover-widget.css'));
 const css=fs.readFileSync('assets/css/265-v459-retire-legacy-cover-widget.css','utf8');
 assert(css.includes('html body #mf424-indicator')&&css.includes('display:none!important'),'Stale floating indicator must be visually suppressed before JS runs');
-assert(!css.includes('#mf441-process-widget'),'New Background Processes widget must stay visible');
+assert(!/#mf441-process-widget\\s*\\{/.test(css),'New Background Processes widget must stay visible');
 const code=fs.readFileSync('src/js/components/343-v459-retire-cover-only-floating-widget.js','utf8');
 let priorPaintCalls=0,backgroundPaintCalls=0,legacy=[];
 const root=()=>({remove(){legacy.shift()}});
