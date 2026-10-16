@@ -74,21 +74,24 @@ async function pageReady(cdp,label){
  }
 }
 (async()=>{
- const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mf443-browser-')),screens=path.join(root,'artifacts','v455-browser-smoke');
+ let profile=fs.mkdtempSync(path.join(os.tmpdir(),'mf443-browser-'));const screens=path.join(root,'artifacts','v455-browser-smoke');
  fs.mkdirSync(screens,{recursive:true});
  const server=await startServer();
  const chrome=binary();
- const proc=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu',
+ const spawnChrome=()=>spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu',
   '--disable-background-networking','--no-first-run','--disable-extensions',
   '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
   '--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});
- let chromeErrors='';proc.stderr.on('data',chunk=>{chromeErrors+=String(chunk).slice(-3000);});
+ let chromeErrors='';let proc=spawnChrome();proc.stderr.on('data',chunk=>{chromeErrors+=String(chunk).slice(-3000);});
  let cdp=null;
  try{
   const active=path.join(profile,'DevToolsActivePort');
-  for(let i=0;i<150&&!fs.existsSync(active);i++)await sleep(150);
-  assert(fs.existsSync(active),'Chromium debugging endpoint unavailable: '+JSON.stringify({chrome,exit:proc.exitCode,stderr:chromeErrors.slice(-4000),profile}));
-  const port=Number(fs.readFileSync(active,'utf8').split('\n')[0]);
+  for(let attempt=0;attempt<3&&!fs.existsSync(path.join(profile,'DevToolsActivePort'));attempt++){
+   if(attempt){proc.kill('SIGKILL');profile=fs.mkdtempSync(path.join(os.tmpdir(),'mf455-browser-retry-'));chromeErrors='';proc=spawnChrome();proc.stderr.on('data',chunk=>{chromeErrors+=String(chunk).slice(-3000);});}
+   for(let i=0;i<150&&!fs.existsSync(path.join(profile,'DevToolsActivePort'));i++)await sleep(150);
+  }
+  assert(fs.existsSync(path.join(profile,'DevToolsActivePort')),'Chromium debugging endpoint unavailable after retries: '+JSON.stringify({chrome,exit:proc.exitCode,stderr:chromeErrors.slice(-4000),profile}));
+  const port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);
   cdp=await connect(port);
   await cdp.send('Page.enable');await cdp.send('Runtime.enable');
   for(const d of [{label:'desktop',width:1440,height:900,mobile:false},{label:'mobile',width:360,height:780,mobile:true}]){
