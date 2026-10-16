@@ -1,29 +1,41 @@
-# MediaFlow v437 — Recovery Systems Expansion (development draft)
+# MediaFlow v437 — Recovery Systems Expansion (development candidate)
 
-**Status:** Work in progress on \`feature/v437-recovery-metadata-foundation\`. **Do not call this a published Beta or merge into the live website until all gates pass.**
+**Status: Draft PR #19, not released, not merged, live website remains v436.**
 
-## Implemented in this development branch
+## Recovery & UI
 
-- New independent Metadata Recovery state, conservative per-field merges, separate \`externalRatings\`, manual-edit protection and preservation of the personal rating.
-- Metadata recovery scopes: All Library, checked/selected titles, by category, and a single saved title.
-- New Metadata Recovery configuration dialog, Settings Center section immediately following Cover Recovery, independent metadata provider verification, floating quick action and Library / Add/Edit / Title Details actions.
-- IndexedDB job checkpoints, per-part processing, pause/resume, stop-after-title, stop-after-part and cross-tab Web Locks guard. A browser lacking a global process lock fails closed rather than running unsafe bulk writes.
-- Original source-specific ratings and scales, persisted per title. Existing \`rating\` and \`communityScore\` are not reinterpreted.
-- Media-specific metadata stored additively under \`mediaMetadata\`; currently populated for supported fields including episodes, chapters, volumes, authors, artists, languages, ISBNs and visual novel lengths.
-- Public metadata adapters currently implemented: **Jikan, AniList, Kitsu, TVmaze, Open Library, Apple iTunes Search, VNDB, Gutendex, LibriVox**.
-- Credential-free cover adapters currently implemented: **VNDB, Apple iTunes Search, Cover Art Archive (known release MBID), TheAudioDB (known artist + album), Steam Storefront CDN (known Steam app ID)**. They continue to use the existing Cover Recovery candidate review and image validation.
-- All 12 newly requested cover providers cataloged; restricted/untested sources remain disabled.
-- New headless contracts, syntax checks and existing recovery regressions in dedicated v437 GitHub Actions workflow.
+- Metadata Recovery workspace with all/selected/category/single-title scope, grouped field selection, missing-only and explicitly approved review modes, Smart Metadata Recovery coordination, custom provider selections, independent metadata API tests and durable verification results.
+- New METADATA RECOVERY native Settings section below Cover Recovery, floating quick action, Library Fix Metadata, Title Details Fix Metadata, Add/Edit Fix Metadata, per-job progress and recovery controls.
+- Queue and checkpoint controls: pause, resume, skip current title, stop after current title or part, cancel remaining, retry failed titles, review selected field changes, eligible undo and history.
+- Combined account-scoped Web Lock prevents Metadata and Cover Recovery running at the same time across tabs in supported browsers; v424 retains its original lease mechanism. Metadata fails closed when browser locks are unavailable.
+- Metadata writes preserve personal rating, progress, user history, XP, manually protected fields, and existing conflicting provider IDs. Provider IDs require strong evidence; differing existing fields need explicit approval.
+- Existing MediaFlow title editor extended with universal/media-specific optional details, grouped by creators/production, counts, games, music, books, interactive fiction. Canonical title undo snapshot updated for these edits.
 
-## Not yet finished / release blockers
+## Ratings
 
-- Implement and test the remaining public metadata adapters from the approved inventory, subject to each provider's usage policy and actual endpoint availability.
-- Extend the existing authenticated Supabase gateway with properly authorized *metadata* responses and independent metadata verification for configured sources, including MyAnimeList Official, TMDB, OMDb, Trakt and eligible others. A working cover or ID test is not equivalent to a verified metadata adapter.
-- Implement missing permitted cover adapters (GameTDB, PCGamingWiki, Wikidata/Commons, Deezer, IFDB, Libretro and any remaining ones). Do not falsely activate blocked or restricted APIs.
-- Add broad media-specific field editing, import/export audits, independent provider IDs and complete schema migration coverage.
-- Add conflict preview/approval, per-field recovery history/undo, advanced recovery cancellation and cross-recovery deduplication.
-- Browser test on phone/tablet/desktop including live public-provider CORS and API-policy checks; offline/reconnect, cross-tab, 100k synthetic title and Supabase sync checks.
-- Verify data protection for existing Library, History, personal ratings, cover URLs, Collections, XP and Personal Order.
-- Create the real \`legacy/v/437\` archive, merged tested bundle, numeric \`437\` release tag, full ZIP and GitHub Pages deployment **only after** the above is complete.
+Independent externalRatings field with source, scale, vote count, verification time. Adapters support ratings from MAL/Jikan, AniList, Kitsu, TVmaze, VNDB, IFDB, MusicBrainz, and configured gateway metadata responses from OMDb (IMDb, Rotten Tomatoes if supplied, Metacritic), TMDB, Trakt, MAL Official and applicable SIMKL responses. Missing scores are never silently treated as zero. No third-party rating overwrites personal MediaFlow rating.
 
-No new user-supplied API credentials. Podcast Index excluded. Never overwrite personal ratings/progress, existing manual metadata, or conflicting external IDs automatically.
+## Provider code included
+
+- Direct public metadata adapter implementations: Jikan, AniList, Kitsu, TVmaze, Open Library, iTunes, VNDB, Gutendex, LibriVox, Open Opus, Tenrai, BookBrainz, Inventaire, Library of Congress, MangaUpdates, IFDB, MusicBrainz, TheAudioDB, Wikidata, Crossref, OpenAlex, MangaDex, Shikimori, SteamSpy, Steam Storefront.
+- Existing Supabase gateway extended with a strictly authenticated `metadata` action for TMDB, OMDb, MAL Official, Trakt, SIMKL, Watchmode, AnimeSchedule, Metron, EpisoDate and Gutendex, with independent metadata authorization and rate quotas.
+- Twelve additional Cover Recovery sources have code paths / registry entries: Steam Storefront, Libretro Thumbnails, GameTDB, Wikidata, Wikimedia Commons, PCGamingWiki, VNDB, Cover Art Archive, TheAudioDB, Apple iTunes Search, Deezer, IFDB.
+- GameTDB and Deezer remain disabled pending applicable site/API authorization. Other registry-only or credential-restricted sources remain disabled until legitimate access and functional verification. **Adapter code does not mean a provider endpoint is already verified live.**
+
+## Verification performed
+
+- Node syntax and deterministic metadata/protection contracts, field selection, review/undo and final-title review regression.
+- Deno static gateway check; existing Cover Recovery regression tests.
+- Synthetic 100k-title Library safety run.
+- Headless Chromium app-shell smoke at desktop 1440px, tablet 768px and mobile 360px. These tests do **not** prove end-to-end authenticated recovery or every provider's real-world availability.
+- Source compatibility review against existing MediaFlow core persistence/undo, existing provider gateway and Cover Recovery architecture.
+
+## Release blockers
+
+1. Confirm external API functionality, CORS, attribution, quotas and image rights per provider in a real browser, including restricted/approval services; disable sources that fail.
+2. Validate configured Supabase API secrets and metadata endpoints with authenticated test records. The v437 gateway remains in the PR **and is not deployed to the live function**.
+3. Audit export/import/backup/sync recovery of `mediaMetadata`, `externalRatings`, provenance and new IDs across all supported formats and providers.
+4. Complete working acceptance tests for full popup, selected-title scopes, provider tests, settings persistence, review/undo and background reconnect/resume (including multiple tabs).
+5. Verify themes and cross-device styling against user's existing Cover Recovery interface, run final regression, compile site assets, and only then merge/deploy/archive/tag/release v437 with full ZIP.
+
+This plan requires **no additional user-supplied keys**. Podcast Index excluded. Restricted providers are visible but fail closed. Do not misrepresent unverified sources as working.
