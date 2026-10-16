@@ -3,7 +3,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const src=fs.readFileSync('src/js/components/321-v441-recovery-workspace.js','utf8');
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert(['441','442'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['441','442','443'].includes(fs.readFileSync('VERSION','utf8').trim()));
 assert(order.includes('components/321-v441-recovery-workspace.js'));
 assert.equal(order.indexOf('components/321-v441-recovery-workspace.js')+1,order.indexOf('components/322-v442-recovery-hardening.js'));
 const calls={network:0,selected:0,coverOpen:0,batch:0,preview:0,save:0,actions:[],paint:0};

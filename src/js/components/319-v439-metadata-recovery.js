@@ -321,10 +321,11 @@ function mf439SettingsHtml(){
   '<div class="mf439-settings-head">'+mf425Icon('database',22)+'<div><strong>Metadata Recovery</strong><p>Fill missing fields from verified providers without overwriting existing metadata.</p></div></div>'+
   '<p>Each provider contributes only the fields it actually returns. Conflicts and uncertain matches are reviewed rather than guessed. Custom Library categories never restrict available sources.</p>'+
   '<fieldset><legend>Metadata providers</legend><div class="mf439-provider-list">'+mf439Available().map(id=>{
-   const gateway=MF439_GATEWAY.includes(id),active=gateway?mf434ProviderStatus(id)?.configured&&mf434SavedTests().includes(id):true;
+   const gateway=MF439_GATEWAY.includes(id),status=gateway?mf434ProviderStatus(id):null;
+   const ready=!gateway||Boolean(status?.configured&&status?.testable);
    return '<label><input type="checkbox" value="'+mf439Esc(id)+'" data-mf439-provider '+(prefs.enabled.includes(id)?'checked':'')+
-    (gateway&&!active?' disabled':'')+' onchange="App.mf439SaveSettings()"><span><strong>'+mf439Esc(id)+'</strong><small>'+
-    (gateway?active?'Existing verified Supabase gateway':'Requires configured and tested gateway':'Public · best effort; browser CORS/quotas apply')+
+    ' onchange="App.mf439SaveSettings()"><span><strong>'+mf439Esc(id)+'</strong><small>'+
+    (gateway?(ready?'Configured gateway · ready without testing':status&&!status.testable?'Integration unavailable / under review':status&&!status.configured?'Credential missing · setup needed':'Gateway status pending · automatically checked at recovery'):'Public · ready without testing; browser CORS/quotas apply')+
     '</small></span></label>';
   }).join('')+'</div></fieldset>'+
   '<label>Maximum titles per manual batch (up to 250)<input id="mf439-max-batch" type="number" min="1" max="250" step="1" value="'+prefs.maxBatch+'" onchange="App.mf439SaveSettings()"></label>'+

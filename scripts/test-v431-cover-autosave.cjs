@@ -4,7 +4,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('src/js/components/312-v431-dashboard-auto-save-navigation.js','utf8');
-assert(['431','432','433','434','435','436','437','438','439','440','441','442'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['431','432','433','434','435','436','437','438','439','440','441','442','443'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const css=fs.readFileSync('assets/css/241-v431-cover-auto-navigation.css','utf8');
 assert(css.includes('> :not(.mf422-level-badge):not(.mf422-streak-badge)'));
 assert(css.includes('.mf421-dock-progress :is(.v225-btn-icon,svg,i,'));

@@ -6,7 +6,7 @@ const js=fs.readFileSync('src/js/components/316-v437-universal-metadata-ratings.
 const css=fs.readFileSync('assets/css/246-v437-universal-metadata.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const pwa=fs.readFileSync('scripts/pwa.py','utf8');
-assert(['437','438','439','440','441','442'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['437','438','439','440','441','442','443'].includes(fs.readFileSync('VERSION','utf8').trim()));
 assert(js.includes('Universal Metadata & External Ratings'),'human-friendly header');
 assert(!js.includes('v437 · optional · protected'),'requested subtitle removed');
 assert(js.includes("const imported=editor.querySelector(':scope > .v178-rich-editor')"),'target actual imported metadata section');

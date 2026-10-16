@@ -176,5 +176,6 @@
   "components/319-v439-metadata-recovery.js",
   "components/320-v440-universal-cover-adapters.js",
   "components/321-v441-recovery-workspace.js",
-  "components/322-v442-recovery-hardening.js"
+  "components/322-v442-recovery-hardening.js",
+  "components/323-v443-automatic-provider-availability.js"
 ]

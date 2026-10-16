@@ -2,7 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const read=path=>fs.readFileSync(path,'utf8');
-assert(['433','434','435','436','437','438','439','440','441','442'].includes(read('VERSION').trim()));
+assert(['433','434','435','436','437','438','439','440','441','442','443'].includes(read('VERSION').trim()));
 const src=read('src/js/components/313-v433-provider-registry-foundation.js');
 const legacy=read('src/js/components/309-v424-advanced-cover-recovery.js');
 const edit=read('src/js/components/273-v377-ids-editor-jikan-recovery.js');
@@ -16,8 +16,8 @@ assert(picker.includes("mf433CandidateLinks(item,candidate).some"),'Find Cover d
 assert(edit.includes("['royalroad_rss']"),'Royal Road RSS URL validation');
 assert(edit.includes('mf433FilterExternalIds(this.value)'),'Searchable IDs editor');
 assert(gateway.includes('getUser(jwt)'),"Gateway requires authenticated user");
-assert(['434','435','436','437','438','439','440','441','442'].includes(read('VERSION').trim())?gateway.includes('mediaflow_gateway_claim'):gateway.includes('staged for v434'),'Gateway fails closed until authenticated/quota checked');
-assert(['434','435','436','437','438','439','440','441','442'].includes(read('VERSION').trim())?gateway.includes('TMDB_API_TOKEN'):!gateway.includes('TMDB_API_TOKEN'),'Gateway provider activation is version gated');
+assert(['434','435','436','437','438','439','440','441','442','443'].includes(read('VERSION').trim())?gateway.includes('mediaflow_gateway_claim'):gateway.includes('staged for v434'),'Gateway fails closed until authenticated/quota checked');
+assert(['434','435','436','437','438','439','440','441','442','443'].includes(read('VERSION').trim())?gateway.includes('TMDB_API_TOKEN'):!gateway.includes('TMDB_API_TOKEN'),'Gateway provider activation is version gated');
 const keys=Array.from(edit.matchAll(/\['([a-z0-9_]+)','[^']+','[^']+'\]/g),r=>r[1]);
 const fake={
  V377_ID_PROVIDERS:keys.map(k=>[k,k,'']),MF424_PROVIDER_META:[

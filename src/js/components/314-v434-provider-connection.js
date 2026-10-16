@@ -1,4 +1,4 @@
-/* MediaFlow v434 — opt-in live provider testing and External ID source lookup.
+/* MediaFlow v434 gateway adapter; v443 makes testing optional for configured connections.
  * A successful gateway response only validates access; it does not establish a
  * match to a Library title. The user selects any unconfirmed results manually. */
 const MF434={status:null,loading:false,tests:{},lookup:[],lookupProvider:"",cache:new Map(),busy:false};
@@ -29,11 +29,10 @@ async function mf434Call(action,payload={}){
  }finally{clearTimeout(timer);}
 }
 function mf434EnableAdapters(){
- const verified=new Set(mf434SavedTests());
  for(const p of MF424_PROVIDER_META){
   const status=mf434ProviderStatus(p.id);
   if(!MF434_COVER.has(p.id))continue;
-  const enabled=Boolean(status?.configured&&status?.testable&&verified.has(p.id));
+  const enabled=Boolean(status?.configured&&status?.testable);
   p.limit=enabled?(p.id==="tmdb"?8:6):0;
   p.gap=enabled?Math.max(10000,Number(p.gap)||10000):0;
   if(enabled)MF424_EXTRA_COVER_ADAPTERS.set(p.id,(item)=>mf434Find(item,p.id));
@@ -61,8 +60,9 @@ function mf434Payload(item,provider){
 }
 async function mf434Find(item,provider){
  if(!MF434_COVER.has(provider))return [];
+ if(typeof mf443EnsureGateway==='function')await mf443EnsureGateway();
  const status=mf434ProviderStatus(provider);
- if(!status?.configured||!mf434SavedTests().includes(provider))return [];
+ if(!status?.configured||!status?.testable)return [];
  const key=String(AUTH_USER?.id||"")+":"+provider+":"+item.title+":"+JSON.stringify(item.externalIds||{});
  const hit=MF434.cache.get(key);
  if(hit&&hit.until>Date.now())return hit.rows;
@@ -93,13 +93,9 @@ async function mf434TestProvider(provider){
   S.settings.v434TestedProviders=[...new Set([...mf434SavedTests(),provider])];
   await saveState();
   mf434EnableAdapters();
-  if(area)area.textContent=MF434_LABELS[provider]+" responded successfully · "+MF434.tests[provider].found+" matching records. "+(MF434_COVER.has(provider)?"Enable it in the provider preferences for Cover Recovery.":"ID-only source; no unlicensed artwork.");
+  if(area)area.textContent=MF434_LABELS[provider]+" responded successfully · "+MF434.tests[provider].found+" matching records. "+(MF434_COVER.has(provider)?"Cover Recovery can use this connection without testing.":"ID-only source; no unlicensed artwork.");
   showToast(MF434_LABELS[provider]+" API connection tested successfully.");
  }catch(e){
-  if(provider==="omdb"&&mf434SavedTests().includes("omdb")){
-   S.settings.v434TestedProviders=mf434SavedTests().filter(p=>p!=="omdb");
-   await saveState();mf434EnableAdapters();
-  }
   if(area)area.textContent=MF434_LABELS[provider]+": "+String(e.message||e);
   showToast("Provider test failed: "+String(e.message||e));
  }
@@ -108,10 +104,10 @@ async function mf434TestProvider(provider){
 function mf434Panel(){
  const statuses=MF434.status?.providers||[];
  const label=p=>mf434Esc(MF434_LABELS[p.id]||p.id);
- const statusText=p=>!p.testable?"API access or licensing review":!p.configured?"Credential missing":mf434SavedTests().includes(p.id)?"Connection tested":"Ready for manual test";
+ const statusText=p=>!p.testable?"API access or licensing review":!p.configured?"Credential missing":mf434SavedTests().includes(p.id)?"Ready · last diagnostic passed":"Ready · optional test";
  return '<div class="mf434-connection" data-mf-setting-id="cover-api-gateway">'+
  '<header><strong>Verified API connections</strong><span>Personal MediaFlow · v434</span></header>'+
- '<p>New APIs are opt-in. Use a real title to test each provider, then enable approved cover sources. No credential is displayed or stored in the browser.</p>'+
+ '<p>Configured providers work without testing first. Test API is optional diagnostics. Credentials remain in Supabase.</p>'+
  '<div class="mf434-test-toolbar"><label>Test title <input id="mf434-test-title" type="text" placeholder="Breaking Bad / Naruto / Frankenstein" maxlength="110" value="'+mf434Esc(MF434.lastTestTitle||"")+'"></label>'+
  '<button class="btn btn-ghost" type="button" onclick="App.mf434RefreshGateway()">Check connections</button></div>'+
  '<div class="mf434-status-grid">'+(statuses.length?statuses.map(p=>'<div class="mf434-provider" data-provider="'+mf434Esc(p.id)+'"><div><strong>'+label(p)+'</strong><small>'+mf434Esc(statusText(p))+'</small></div>'+

@@ -3,7 +3,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const read=path=>fs.readFileSync(path,'utf8');
-assert(['432','433','434','435','436','437','438','439','440','441','442'].includes(read('VERSION').trim()));
+assert(['432','433','434','435','436','437','438','439','440','441','442','443'].includes(read('VERSION').trim()));
 const old=read('src/js/components/157-v225-global-button-icons.js');
 const semantic=read('src/js/components/158-v226-semantic-icons-dropdowns.js');
 const avatar=read('src/js/components/308-v423-navigation-restore-donation-polish.js');

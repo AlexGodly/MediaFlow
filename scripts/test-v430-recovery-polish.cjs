@@ -11,7 +11,7 @@ const nav=src('src/js/components/306-v421-adaptive-navigation-filter.js');
 const css=src('assets/css/240-v430-recovery-dashboard-navigation.css');
 const html=src('index.html');
 const eq=(s,part,msg)=>assert(s.includes(part),msg);
-assert(['430','431','432','433','434','435','436','437','438','439','440','441','442'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['430','431','432','433','434','435','436','437','438','439','440','441','442','443'].includes(fs.readFileSync('VERSION','utf8').trim()));
 eq(html,'assets/css/240-v430-recovery-dashboard-navigation.css','New stylesheet is included');
 eq(settings,'if(node&&node.nodeType===1)body.appendChild(node)','Native section must attach DETACHED nodes');
 assert(!settings.includes('if(node&&node.parentNode)body.appendChild(node)'),'Detached nodes must not be ignored');

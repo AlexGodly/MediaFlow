@@ -80,18 +80,19 @@ function mf438Catalog(){
   entry.gateway=Boolean(status);
   entry.configured=Boolean(status?.configured);
   entry.testable=Boolean(status?.testable&&status?.configured);
-  entry.verified=Boolean(entry.testable&&mf434SavedTests().includes(entry.id));
+  entry.verified=Boolean(entry.testable&&mf434SavedTests().includes(entry.id)); // diagnostic history only
   entry.publicProbe=Boolean(MF438_PUBLIC_PROBES[entry.id]);
   entry.probeResult=MF438_UI.tests.get(entry.id)||null;
   entry.coverEnabled=entry.coverAdapter&&mf424Defaults().enabled.includes(entry.id);
-  // Metadata is a declared potential capability, not a live recovery adapter.
-  entry.metadataActive=false;
+  // A catalog entry is NOT evidence of a live adapter.
+  entry.metadataActive=(typeof MF439_PUBLIC!=='undefined'&&Boolean(MF439_PUBLIC[entry.id]))||
+    (typeof MF439_GATEWAY!=='undefined'&&MF439_GATEWAY.includes(entry.id)&&Boolean(status?.configured&&status?.testable));
   entry.releaseActive=false;
   entry.ratingActive=false;
   entry.testKind=entry.gateway?(entry.testable?'gateway':'none'):(entry.publicProbe?'public':'none');
-  entry.state=entry.verified?'tested':entry.probeResult?.ok===true?'tested':
-   entry.probeResult?.ok===false?'failed':entry.coverEnabled?'cover':
-   entry.gateway&&entry.configured?'configured':'pending';
+  entry.state=entry.coverEnabled?'cover':entry.metadataActive?'configured':
+   entry.gateway&&entry.configured&&entry.testable?'configured':
+   entry.probeResult?.ok===true?'tested':entry.probeResult?.ok===false?'failed':'pending';
  }
  return [...entries.values()].sort((a,b)=>a.name.localeCompare(b.name));
 }
@@ -102,22 +103,23 @@ function mf438Filtered(list){
   if(MF438_UI.media!=='all'&&p.mediaTypes.length&&!p.mediaTypes.includes(MF438_UI.media))return false;
   if(MF438_UI.media!=='all'&&!p.mediaTypes.length)return false;
   if(MF438_UI.access==='testable'&&p.testKind==='none')return false;
-  if(MF438_UI.access==='active'&&!(p.coverEnabled||p.verified))return false;
-  if(MF438_UI.access==='pending'&&(p.coverEnabled||p.verified))return false;
+  if(MF438_UI.access==='active'&&!(p.coverEnabled||p.metadataActive||p.gateway&&p.configured&&p.testable))return false;
+  if(MF438_UI.access==='pending'&&(p.coverEnabled||p.metadataActive||p.gateway&&p.configured&&p.testable))return false;
   if(!query)return true;
   const hay=[p.id,p.name,p.access,p.source,...p.capabilities,...p.mediaTypes].join(' ').toLowerCase();
   return hay.includes(query);
  });
 }
 function mf438StateLabel(p){
- if(p.probeResult?.ok===false)return 'Latest API test failed';
- if(p.verified)return 'Gateway connection tested';
+ if(p.coverEnabled)return 'Cover Recovery ready · no test required';
+ if(p.metadataActive)return 'Metadata Recovery ready · no test required';
+ if(p.gateway&&p.configured&&p.testable)return 'Configured gateway · no test required';
+ if(p.probeResult?.ok===false)return 'Optional API diagnostic failed';
+ if(p.verified)return 'Last diagnostic passed';
  if(p.probeResult?.ok===true)return 'Public API responded';
- if(p.coverEnabled)return 'Available in Cover Recovery';
- if(p.gateway&&p.configured&&p.testable)return 'Gateway configured · test required';
  if(p.gateway&&!p.configured)return 'Gateway credential not configured';
  if(p.gateway&&!p.testable)return 'Gateway integration not approved';
- if(p.publicProbe)return 'Public · manual test available';
+ if(p.publicProbe)return 'Public · optional diagnostic available';
  return 'Catalog only · no tested request adapter';
 }
 function mf438EntryHtml(p){
@@ -156,7 +158,7 @@ function mf438ControlsHtml(){
   '<div class="mf438-results-line" aria-live="polite" id="mf438-results-count"></div>'+
   '<div class="mf438-grid" id="mf438-provider-grid"></div>'+
   '<div id="mf438-test-message" role="status" aria-live="polite"></div>'+
-  '<p class="mf438-note">No API keys appear here. Existing Cover Recovery provider order and enable choices remain in Cover Recovery. Testing one API does not automatically enable bulk recovery or grant usage rights. Provider coverage is never restricted by your custom categories.</p>'+
+  '<p class="mf438-note">No API keys appear here. Existing Cover Recovery provider order and enable choices remain in Cover Recovery. Testing is optional and does not unlock providers. Only real adapters with proper access can recover data. Provider coverage is never restricted by your custom categories.</p>'+
   '<div class="mf438-gateway" data-mf-setting-id="api-gateway-panel">'+mf434Panel()+'</div>'+
   '</section>';
 }
