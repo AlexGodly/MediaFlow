@@ -163,7 +163,20 @@ function mf441StartBatch(){
 }
 function mf441Settings(section='v221-settings-recovery-workspace'){
  mf441CloseStart();
- if(S.view!=='settings'){showToast('Open Settings, then Recovery Workspace to configure recovery.');return;}
+ if(S.view!=='settings'){
+  if(typeof App.setView!=='function'){showToast('Open Settings → Recovery Workspace.');return;}
+  App.setView('settings');
+  // Settings Center's page enhancer registers sections after page render.
+  // Wait until it exists instead of opening a stale section on the prior page.
+  const tryOpen=(attempt=0)=>{
+   if(S.view==='settings'&&document.querySelector('.mf365-section[data-mf365-section="'+section+'"]')){
+    App.v365OpenSection?.(section);return;
+   }
+   if(attempt<8)setTimeout(()=>tryOpen(attempt+1),80);
+   else showToast('In Settings, open Recovery Workspace.');
+  };
+  tryOpen();return;
+ }
  App.v365OpenSection?.(section);
 }
 function mf441RefreshSettingsStatus(state=mf441State()){
