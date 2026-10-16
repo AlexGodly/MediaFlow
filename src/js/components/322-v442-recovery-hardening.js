@@ -135,7 +135,7 @@ mf424Run=async function(){
   showToast('Another recovery is using this account. Resume Cover Recovery after it finishes.');
   return;
  }
- if(mf442MetadataLockIsActive()&&!MF439.working){
+ if(mf442MetadataLockIsActive()){
   mf442ReleaseProcess('cover');
   MF424.job.pauseRequested=true;mf424State('paused');await mf424SaveJob();
   showToast('Metadata Recovery is active in another tab. Resume covers when it finishes.');return;
