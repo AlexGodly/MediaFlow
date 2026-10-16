@@ -8,7 +8,7 @@ const saved=[],library=[
  {id:'b',title:'Other',categoryId:'game',synopsis:'Owner writing',rating:8,richMetadataManual:{synopsis:true}}
 ];
 const ctx={console,window:{},S:{library,categories:[],settings:{}},AUTH_USER:{id:'a-user'},Date,Math,Map,Set,Promise,
- mf424Account:()=> 'a-user',mf424Storage:async(a,k,v)=>{if(a==='put')saved.push(v);return null;},
+ mf424Account:()=> 'a-user',mf424Storage:async(a,k,v)=>{if(a==='put')saved.push(v);return null;},setTimeout:fn=>{fn();return 1;},
  saveState:async()=>{},persistLibrary:()=>{},mf437Paint:()=>{},v176SafeText:s=>String(s)};
 vm.createContext(ctx);vm.runInContext(source,ctx);
 const proposal=vm.runInContext('mf437Merge',ctx)(library[0],{provider:'omdb',verified:true,fields:{synopsis:'Revised'},
@@ -29,5 +29,10 @@ vm.runInContext('MF437.job.previews.push({titleId:"a",provider:"omdb",before:{sy
   ids:{},ratings:{},sourceUrl:''},'review');
  assert.equal(disallowed.changed,0);
  assert.equal(library[1].synopsis,'Owner writing','Manual metadata cannot be proposed for replacement');
+ vm.runInContext('MF437.job={version:437,account:"a-user",ids:["a"],cursor:0,status:"queued",updated:0,skipped:0,errors:0,partSize:100,mode:"review",providers:["itunes"],engine:"smart",events:[],previews:[],failedIds:[]};mf437Discover=async ()=>({provider:"itunes",title:"Example",verified:true,matchedBy:"title",externalIdVerified:false,fields:{synopsis:"Final title review"},ratings:{},ids:{},sourceUrl:""})',ctx);
+ await vm.runInContext('mf437ProcessLocked()',ctx);
+ assert.equal(vm.runInContext('MF437.job.status',ctx),'waiting-review','Final-title review must not be silently completed');
+ assert.equal(library[0].synopsis,'Original','Review must never commit automatically');
+ assert.equal(vm.runInContext('MF437.job.previews.length',ctx),1);
  console.log('v437 recovery review and eligible undo contracts passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
