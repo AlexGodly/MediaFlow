@@ -1,11 +1,11 @@
-## MediaFlow v423 — Navigation Reliability & Support Redesign
+## MediaFlow v437 — Universal Metadata & External Ratings
 
-This is the v423 personal web/PWA edition of MediaFlow by Alex Godly.
+This is the v437 personal web/PWA edition of MediaFlow by Alex Godly.
 
-- Fixed the desktop navigation style restoring incorrectly on first load and after account hydration. Saved selections persist by account with normal Settings export/import support.
-- Removed the redundant glowing top/bottom navigation logos and unwanted circle-arrow icons in navigation controls.
-- Top/bottom Profile now shows the saved Account image URL when available, with a safe fallback.
-- Replaced the Explore Other Apps and Alex Godly Apps buttons with Ko-fi donation links and redesigned About's Support MediaFlow section.
-- Added focused UI regression tests for the new behavior and retained the previous Library/Collections fallback-cover verification.
+- Versioned per-title metadata for anime, manga, movies, TV, books, comics, games, visual novels, music/albums and interactive fiction.
+- Independent external ratings with original scales, timestamps and source attribution; personal ratings and progress remain completely separate.
+- Optional media-type hints, manual field protection, conflict-aware cloud merges, portable backups and expanded external identifiers.
+- Add/Edit Title and Title Details display metadata in responsive, theme-aware sections.
+- v437 is phase 1: automatic Metadata Recovery and expanded Cover Recovery follow in later releases.
 
-See [v423 release notes](docs/CHANGELOG_v423.md). Previous complete versions remain archived under `legacy/v/<version>/` in the GitHub repository (excluded from GitHub Pages deployment). The `beta` folder is also excluded from the deployed website. The app's existing cloud and personal data remain untouched.
+See [v437 release notes](docs/CHANGELOG_v437.md). Historical snapshots live in `legacy/v/<version>/` (excluded from the deployed website), and `beta` is also excluded from deployment. No live Supabase table migration is required.
