@@ -192,6 +192,9 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
    if(!item){mf442Failure(job,'Library title unavailable; no changes applied',id);
     job.cursor++;job.completed=job.cursor;mf439SaveJob();mf439PaintJob();
     if(typeof mf452StopBoundary==='function'&&mf452StopBoundary(job))break;continue;}
+   if(job.v455Selection==='manual'){
+    job.manualReviewId=id;job.status='paused';mf439SaveJob();mf439PaintJob();break;
+   }
    const before=mf442TitleSignature(item);
    const {preview,failures}=await mf439Discover(item,mf439Preferences().enabled,()=>{},null);
    if(MF439.cancel||MF439.job!==job||MF439.account!==mf439Account()||
@@ -225,6 +228,8 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
    job.cursor++;job.completed=job.cursor;
    mf439SaveJob();mf439PaintJob();
    if(typeof mf452StopBoundary==='function'&&mf452StopBoundary(job))break;
+   if(job.mode==='parts'&&job.continuation==='manual'&&job.cursor<job.ids.length&&
+      job.cursor%Math.max(1,Number(job.partSize)||25)===0){job.status='paused';break;}
   }
   job.status=job.stopRequested?'stopped':job.cursor>=job.ids.length?'completed':'paused';
  }catch(e){
