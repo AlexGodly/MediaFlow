@@ -8,7 +8,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: mediaflow-v440-${{ github.ref }}
+  group: mediaflow-v441-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build v440 from source
+      - name: Build v441 from source
         run: |
           test "$(cat VERSION)" = "441"
           python scripts/build.py
