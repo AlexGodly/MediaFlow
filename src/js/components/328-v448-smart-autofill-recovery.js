@@ -161,9 +161,9 @@ function mf448ConfigHtml(kind='both'){
  const p=mf448Prefs(),isCover=kind==='cover'||kind==='both',isMeta=kind==='metadata'||kind==='both';
  const select=(key,rows,val)=>'<select data-mf448-key="'+key+'" onchange="App.mf448Set(\''+key+'\',this.value)">'+
   rows.map(([id,label])=>'<option value="'+id+'" '+(id===val?'selected':'')+'>'+mf424Escape(label)+'</option>').join('')+'</select>';
- const number=(key,val,low,high)=>'<input type="number" inputmode="numeric" min="'+low+'" max="'+high+'" step="1" value="'+val+
+ const number=(key,val,low,high)=>'<input type="number" data-mf448-key="'+key+'" inputmode="numeric" min="'+low+'" max="'+high+'" step="1" value="'+val+
   '" onchange="App.mf448Set(\''+key+'\',Math.max('+low+',Math.min('+high+',Number(this.value)||'+low+')))">';
- const check=(key,on,title)=>'<label class="mf448-checkbox"><input type="checkbox" '+(on?'checked ':'')+
+ const check=(key,on,title)=>'<label class="mf448-checkbox"><input type="checkbox" data-mf448-key="'+key+'" '+(on?'checked ':'')+
   'onchange="App.mf448Set(\''+key+'\',this.checked)">'+title+'</label>';
  return '<section class="mf448-settings" data-mf-setting-id="smart-recovery" aria-label="Smart Auto-Fill Recovery">'+
   '<header><span>'+mf425Icon('shield',19)+'</span><div><strong>Smart Auto-Fill & Automatic Recovery</strong>'+
