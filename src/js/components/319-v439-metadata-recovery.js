@@ -447,6 +447,18 @@ v181TitleDetailsHtml=function(item){
 Object.assign(App,{mf439Open,mf439Close,mf439Save,mf439Toggle,mf439Choose,
  mf439SaveSettings,mf439OpenSelected,mf439ConfirmBatch,mf439Pause,mf439Resume,mf439Discard});
 MediaFlowRuntime.registerPageEnhancer('settings',mf439SettingsEnhance);
+const mf439BackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+ const backup=mf439BackupBase.apply(this,arguments);
+ if(backup){
+  backup.mediaFlowVersion=439;backup.backupVersion=439;
+  const manifest=backup.backupManifest||(backup.backupManifest={});
+  manifest.includes={...(manifest.includes||{}),metadataRecoveryProvenance:true,metadataRecoveryHistory:true};
+  manifest.v439={schemaVersion:1,metadataRecoveredFieldsProtected:true,
+    explicitBatchCheckpointsStoredLocally:true,synopsisUsesExistingField:true};
+ }
+ return backup;
+};
 window.MediaFlowV439=Object.freeze({
  version:439,renderSettings:mf439SettingsHtml,renderPreview:mf439PreviewHtml,match:mf439Evidence,plan:mf439Proposals,apply:mf439Apply,
  getProviders:mf439Available,discover:mf439Discover,
