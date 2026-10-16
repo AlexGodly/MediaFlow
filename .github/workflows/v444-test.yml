@@ -61,7 +61,7 @@ jobs:
           node --check scripts/test-v441-recovery-workspace.cjs
           node --check src/js/components/322-v442-recovery-hardening.js
           node --check scripts/test-v442-recovery-hardening.cjs
-          node --check src/js/components/323-v444-recovery-ui-corrections.js
+          node --check src/js/components/323-v443-automatic-provider-availability.js
           node --check scripts/test-v443-provider-availability.cjs
       - uses: denoland/setup-deno@v2
         with:
