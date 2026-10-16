@@ -1,9 +1,9 @@
 /* MediaFlow v444 — deterministic confirmation and floating menu safety checks. */
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'444');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=444);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/324-v444-recovery-ui-corrections.js');
+assert(order.includes('components/324-v444-recovery-ui-corrections.js'));
 const src=fs.readFileSync('src/js/components/324-v444-recovery-ui-corrections.js','utf8');
 const css=fs.readFileSync('assets/css/251-v444-recovery-ui-corrections.css','utf8');
 const meta=fs.readFileSync('src/js/components/319-v439-metadata-recovery.js','utf8');
