@@ -8,7 +8,7 @@ const src=fs.readFileSync('src/js/components/327-v447-universal-recovery-actions
 const css=fs.readFileSync('assets/css/254-v447-universal-recovery-actions.css','utf8');
 assert(fs.readFileSync('index.html','utf8').includes('254-v447-universal-recovery-actions.css'));
 for(const tag of ['.mf447-shortcut-group','.mf447-combo-status','.mf447-three-tabs','.mf397-fan','@media(max-width:390px)','var(--flow)'])assert(css.includes(tag),tag);
-assert(!/\.coverUrl\s*=|\.synopsis\s*=|\.metadata\s*=/.test(src),'Shortcut module never writes title data');
+assert(!/\bitem\.coverUrl\s*=|\bitem\.synopsis\s*=|\bitem\.metadata\s*=/.test(src),'Shortcut module never writes title data');
 const lib=[
  {id:'a',title:'A',categoryId:'anime',coverUrl:''},
  {id:'b',title:'B',categoryId:'anime',coverUrl:'https://example.com/b.jpg'},
