@@ -1,12 +1,13 @@
-## MediaFlow v438 — Unified API Providers & Testing
+## MediaFlow v439 — Metadata Recovery Engine
 
-This is the v438 personal web/PWA edition of MediaFlow by Alex Godly.
+This is the v439 personal web/PWA edition of MediaFlow by Alex Godly.
 
-- **API Providers & Testing** is now its own Settings Center category. Existing authenticated Supabase gateway tests were moved out of Cover Recovery with credentials and prior approved connections preserved.
-- The shared provider directory covers movies, TV, anime, manga, books, comics, video games, visual novels, music/albums and interactive fiction, with honest implemented-vs-planned states.
-- Public connectivity tests are manual, rate-conscious and read-only. Catalog entries never automatically activate new recovery adapters.
-- Cover Recovery retains its own enabled sources, provider priority, safeguards and preferences.
-- v437's universal title metadata, external ratings, field protection, cloud state and backup compatibility are preserved.
-- Automatic Metadata Recovery comes in v439; v438 does not auto-populate title fields or change personal scores.
+- Recover missing title metadata field-by-field from implemented, public or configured providers.
+- Fix Metadata in Add/Edit Title and Title Details, plus a dedicated Metadata Recovery Settings section.
+- Recover synopsis into the **existing** imported synopsis field, combine verified title metadata, keep separate external ratings and original scales.
+- Exact-title/year/ID confidence checks, visual source comparison, conflict review, and strict preservation of existing and protected fields.
+- Safe, explicitly selected batches with checkpoints, pause and resume; Cover Recovery and fresh releases are unchanged.
+- Use existing authenticated Supabase API gateway for TMDB, OMDb and MAL Official; reuse credentials already configured in MediaFlow.
+- v439 implements actual metadata adapters for a subset of v438's 60 cataloged providers. Others remain pending until safe working adapters are added.
 
-See [v438 release notes](docs/CHANGELOG_v438.md). Each full version archive lives under `legacy/v/<version>/` and is excluded from GitHub Pages deployment.
+See [v439 release notes](docs/CHANGELOG_v439.md). Each full project snapshot is archived under `legacy/v/<version>/`, outside the deployed Pages site.
