@@ -48,7 +48,7 @@ jobs:
           # Run the v461 contract against its historical header and version metadata,
           # then restore all current-version files before any v462 checks/publishing.
           sed -i 's/mediaflow-v462.bundle.js/mediaflow-v461.bundle.js/' index.html
-          node -e "const fs=require('fs'),p='version.json',v=JSON.parse(fs.readFileSync(p));v.appVersion=461;v.version=461;v.build=461;fs.writeFileSync(p,JSON.stringify(v,null,2)+'\\n')"
+          node -e "const fs=require('fs'),p='version.json',v=JSON.parse(fs.readFileSync(p));v.appVersion=461;v.version=461;v.build=461;fs.writeFileSync(p,JSON.stringify(v,null,2))"
           echo 461 > VERSION
           node scripts/test-v461-shortcut-layout.cjs
           node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/345-v461-background-shortcut-layout.js')throw Error('Missing v461 at runtime tail');fs.writeFileSync(p,JSON.stringify(a,null,2))"
