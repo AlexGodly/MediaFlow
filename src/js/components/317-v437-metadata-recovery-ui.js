@@ -6,12 +6,15 @@ function mf437Options(list,selected){return list.map(x=>'<option value="'+mf437E
 function mf437ProvidersMarkup(settingsOnly=false){
  const pref=mf437Prefs();
  return '<div class="mf437-providers">'+MF437_PROVIDERS.map(p=>{
- const selected=p.live&&pref.providers.includes(p.id);
+ const stat=p.gateway?(typeof mf434ProviderStatus==='function'?mf434ProviderStatus(p.id):null):null;
+ const available=p.live&&(!p.gateway||(stat?.configured&&stat?.metadataSupported));
+ const verified=!p.gateway||mf437SavedMetadataTests().includes(p.id);
+ const selected=available&&verified&&pref.providers.includes(p.id);
  const tested=MF437_UI.tests[p.id];
  return '<div class="mf437-provider" data-mf437-provider="'+mf437Escape(p.id)+'"><label>'+
- '<input type="checkbox" value="'+mf437Escape(p.id)+'" data-mf437-enabled '+(selected?'checked':'')+(p.live?'':' disabled')+(settingsOnly?' onchange="App.mf437SaveProvidersFromSettings()"':'')+'>'+
- '<span><strong>'+mf437Escape(p.name)+'</strong><small>'+mf437Escape(p.group)+' · '+(p.live?'Public metadata adapter':'Integration pending verification')+'</small></span></label>'+
- (p.live?'<button class="btn btn-ghost" type="button" onclick="App.mf437Test(\''+mf437Escape(p.id)+'\')">Test Metadata</button>':'<span class="mf437-pending">Not active</span>')+
+ '<input type="checkbox" value="'+mf437Escape(p.id)+'" data-mf437-enabled '+(selected?'checked':'')+(available&&verified?'':' disabled')+(settingsOnly?' onchange="App.mf437SaveProvidersFromSettings()"':'')+'>'+
+ '<span><strong>'+mf437Escape(p.name)+'</strong><small>'+mf437Escape(p.group)+' · '+(p.gateway?(stat?.metadataSupported?(stat?.configured?'Supabase credential configured':'Credential missing'):'Metadata adapter unavailable'):(p.live?'Public metadata adapter':'Integration pending verification'))+'</small></span></label>'+
+ (available?'<button class="btn btn-ghost" type="button" onclick="App.mf437Test(\''+mf437Escape(p.id)+'\')">Test Metadata</button>':'<span class="mf437-pending">Not active</span>')+
  '<small class="mf437-test-status" id="mf437-test-'+mf437Escape(p.id)+'">'+mf437Escape(tested||'')+'</small></div>';
  }).join('')+'</div>';
 }
@@ -53,6 +56,7 @@ function mf437Styles(){
 function mf437Open(entry='settings',id=''){
  if(!AUTH_USER){showToast('Sign in before using Metadata Recovery.');return;}
  mf437Styles();
+ if(typeof mf434RefreshGateway==='function'&&!MF434?.loading&&MF434?.status==null)void mf434RefreshGateway().then(()=>{if(document.getElementById('mf437-modal')){const list=document.querySelector('#mf437-modal .mf437-providers');if(list)list.outerHTML=mf437ProvidersMarkup();}});
  MF437_UI.source=entry;MF437_UI.oneId=String(id||'');
  document.getElementById('mf437-modal')?.remove();
  document.body.insertAdjacentHTML('beforeend',mf437PopupMarkup(entry,id));
@@ -75,6 +79,7 @@ async function mf437Start(){
   partSize:Number(root.querySelector('#mf437-part-size')?.value)||100,continuation:root.querySelector('#mf437-continuation')?.value||'automatic',providers};
  const buttons=[...root.querySelectorAll('footer button')];buttons.forEach(b=>b.disabled=true);
  try{
+  if(providers.some(id=>!mf437GatewayAllowed(id)))throw Error('A configured provider requires a successful metadata-specific connection test first.');
   S.settings=S.settings||{};S.settings.v437Metadata={...mf437Prefs(),mode:config.mode,partSize:config.partSize,continuation:config.continuation,providers};
   await saveState();await mf437StartJob(config);mf437Close();mf437Paint();
  }catch(e){showToast('Metadata Recovery: '+String(e.message||e));}
@@ -82,6 +87,7 @@ async function mf437Start(){
 }
 async function mf437Test(id){
  const provider=MF437_PROVIDERS.find(p=>p.id===id);if(!provider?.live)return;
+ if(provider.gateway&&(!mf434ProviderStatus(id)?.configured||!mf434ProviderStatus(id)?.metadataSupported))return;
  const root=document.getElementById('mf437-modal')||document.querySelector('[data-mf-setting-id="metadata-recovery"]');
  const title=String(root?.querySelector('#mf437-test-title')?.value||'').trim();const node=root?.querySelector('#mf437-test-'+id);
  if(title.length<2){showToast('Enter a real test title first.');return;}
@@ -89,10 +95,11 @@ async function mf437Test(id){
  const samples={jikan:'anime',anilist:'anime',kitsu:'anime',tvmaze:'tv',openlibrary:'book',itunes:'movie',vndb:'visual novel'};
  if(node)node.textContent='Checking metadata…';
  try{
-  const data=await mf437Discover({title,mediaFormat:samples[id],externalIds:{}},id);
+  const data=await mf437Discover({title,mediaFormat:samples[id]||({omdb:'Movie',tmdb:'Movie',malofficial:'Anime',trakt:'TV'}[id]||'Movie'),externalIds:{}},id);
   if(!data||!(Object.keys(data.fields||{}).some(k=>Boolean(data.fields[k]))||Object.values(data.ratings||{}).some(Boolean)))throw Error('No matching metadata; try a title from this provider');
   const info='Verified · '+new Date().toLocaleDateString();
   MF437_UI.tests[id]=info;if(node)node.textContent=info;
+  if(provider.gateway){S.settings=S.settings||{};S.settings.v437VerifiedMetadataProviders=[...new Set([...mf437SavedMetadataTests(),id])];await saveState();}
  }catch(e){if(node)node.textContent='Not verified · '+String(e.message||e).slice(0,85);}
 }
 async function mf437Control(action){
@@ -139,6 +146,7 @@ function mf437SettingsMarkup(){
 function mf437SettingsEnhance(){
  if(S.view!=='settings'||!window.MediaFlowSettingsCenter?.mountSection)return;
  if(AUTH_USER&&!MF437.job)void mf437Restore().then(mf437Paint);
+ if(typeof mf434RefreshGateway==='function'&&MF434?.status==null&&!MF434?.loading)void mf434RefreshGateway();
  if(document.querySelector('[data-mf365-section="v437-metadata-recovery"]'))return;
  const body=document.createElement('div');body.innerHTML=mf437SettingsMarkup();
  MediaFlowSettingsCenter.mountSection({id:'v437-metadata-recovery',title:'METADATA RECOVERY',category:'library',subgroup:'Library maintenance',
