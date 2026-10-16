@@ -24,7 +24,7 @@ const records=[
  {id:'malofficial',limit:0}
 ];
 const defaults={enabled:['tenrai'],priorities:['tenrai']};
-let statusCalls=0,saves=0,coverAdapterRefreshes=0,coverOpens=0,searches=0;
+let statusCalls=0,saves=0,coverAdapterRefreshes=0,coverOpens=0,searches=0,coverRuns=0;
 let remote={providers:[
  {id:'tmdb',configured:true,testable:true},
  {id:'omdb',configured:false,testable:true},
@@ -38,7 +38,8 @@ const App={
 };
 const runtime={registerPageEnhancer:()=>{}};
 const ctx={console,Date,Math,Array,Object,Map,Set,JSON,Promise,String,Number,
- S,AUTH_USER,App,MediaFlowRuntime:runtime,MF424_DEFAULT:defaults,
+ S,AUTH_USER,App,MediaFlowRuntime:runtime,MF424_DEFAULT:defaults,MF424:{job:{},running:false},
+ mf424Run:async()=>{coverRuns++;},
  MF424_PROVIDER_META:records,MF434:{status:null},MF434_COVER:new Set(['tmdb','omdb','malofficial']),
  supabase:{},window:{},document:{querySelector:()=>null,createElement:()=>({innerHTML:'',querySelector:()=>null})},
  mf434EnableAdapters:()=>{coverAdapterRefreshes++;},
@@ -56,6 +57,8 @@ vm.runInContext(fs.readFileSync('src/js/components/323-v443-automatic-provider-a
  assert.deepEqual([...defaults.enabled],['tenrai','tmdb','malofficial']);
  assert.deepEqual([...S.settings.v424Covers.enabled],['tenrai','tmdb','malofficial']);
  assert.equal(saves,1);
+ await ctx.mf424Run();
+ assert.equal(coverRuns,1,'background cover recovery waits for gateway status');
  const repeat=await ctx.mf443EnsureGateway();
  assert.equal(repeat,first);
  assert.equal(statusCalls,1,'gateway status is cached; recovery does not need manual checking');
