@@ -306,6 +306,6 @@ document.addEventListener('keydown',event=>{
 Object.assign(App,{mf441OpenMetadata,mf441OpenCover,mf441CloseStart,mf441StartPreview,
  mf441StartBatch,mf441Settings,mf441Toggle,mf441Hide,mf441SaveSetting,mf441FilterPreview});
 window.MediaFlowV441=Object.freeze({version:441,settings:mf441WorkspaceHtml,
- widget:mf441WidgetHtml,state:mf441State,paint:mf441Paint,openMetadata:mf441OpenMetadata,
+ widget:mf441WidgetHtml,state:mf441State,paint:mf441Paint,quickMarkup:()=>mf397Markup(),openMetadata:mf441OpenMetadata,
  providers:()=>({cover:MF424_PROVIDER_META.filter(p=>p.limit).length,
   metadata:mf439Available().length})});
