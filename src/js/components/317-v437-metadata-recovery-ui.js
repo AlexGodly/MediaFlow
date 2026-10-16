@@ -35,6 +35,7 @@ function mf437PopupMarkup(entry='settings',id=''){
  '<section><h3>'+mf437Icon('settings')+' 2. PROCESSING & DATA PROTECTION</h3><div class="mf437-grid">'+
  '<label>Recovery mode<select id="mf437-mode">'+mf437Options(modeOptions,prefs.mode)+'</select></label>'+
  '<label>Titles per part<input id="mf437-part-size" type="number" min="1" max="1000" value="'+Math.max(1,Math.min(1000,Number(prefs.partSize)||100))+'"></label></div>'+
+ '<label>Provider coordination<select id="mf437-engine">'+mf437Options([['smart',"Alex Godly's Smart Metadata Recovery Engine"],['priority','Provider Priority']],prefs.engine||'smart')+'</select></label>'+
  '<label>After each part<select id="mf437-continuation">'+mf437Options([['automatic','Continue automatically'],['manual','Wait for confirmation']],prefs.continuation||'automatic')+'</select></label>'+
  '<p class="mf437-sub">'+mf437Icon('check')+' Personal ratings, playback progress, History, XP, manual metadata and conflicting IDs are protected. Existing fields are never overwritten automatically.</p></section>'+
  '<section><h3>'+mf437Icon('database')+' 3. METADATA PROVIDERS & VERIFIED CONNECTIONS</h3><p class="mf437-sub">'+available+' implemented public adapters. Additional public and configured Supabase sources stay visible but inactive until their metadata adapters and permissions are verified.</p>'+
@@ -75,12 +76,12 @@ async function mf437Start(){
  const root=document.getElementById('mf437-modal');if(!root)return;
  const scope=root.querySelector('#mf437-scope')?.value||'all',providers=mf437Selections();
  await mf437Restore();
- const config={scope,id:MF437_UI.oneId,category:root.querySelector('#mf437-category')?.value,mode:root.querySelector('#mf437-mode')?.value,
+ const config={scope,id:MF437_UI.oneId,category:root.querySelector('#mf437-category')?.value,mode:root.querySelector('#mf437-mode')?.value,engine:root.querySelector('#mf437-engine')?.value||'smart',
   partSize:Number(root.querySelector('#mf437-part-size')?.value)||100,continuation:root.querySelector('#mf437-continuation')?.value||'automatic',providers};
  const buttons=[...root.querySelectorAll('footer button')];buttons.forEach(b=>b.disabled=true);
  try{
   if(providers.some(id=>!mf437GatewayAllowed(id)))throw Error('A configured provider requires a successful metadata-specific connection test first.');
-  S.settings=S.settings||{};S.settings.v437Metadata={...mf437Prefs(),mode:config.mode,partSize:config.partSize,continuation:config.continuation,providers};
+  S.settings=S.settings||{};S.settings.v437Metadata={...mf437Prefs(),mode:config.mode,partSize:config.partSize,continuation:config.continuation,engine:config.engine,providers};
   await saveState();await mf437StartJob(config);mf437Close();mf437Paint();
  }catch(e){showToast('Metadata Recovery: '+String(e.message||e));}
  finally{buttons.forEach(b=>b.disabled=false);}
@@ -141,6 +142,7 @@ function mf437SettingsMarkup(){
  '<p>Metadata Recovery has independent settings and verified metadata retrieval. Public and configured API credentials are never copied into the browser.</p>'+
  '<div class="mf425-settings-grid"><label>Default recovery mode<select onchange="App.mf437SavePref(\'mode\',this.value)">'+mf437Options([['missing','Fill missing fields'],['review','Review all proposed changes before saving']],pref.mode)+'</select></label>'+
  '<label>Titles per part<input type="number" min="1" max="1000" value="'+pref.partSize+'" onchange="App.mf437SavePref(\'partSize\',Math.max(1,Math.min(1000,Number(this.value)||100)))"></label></div>'+
+ '<label>Default provider coordination<select onchange="App.mf437SavePref(\'engine\',this.value)">'+mf437Options([['smart',"Alex Godly's Smart Metadata Recovery Engine"],['priority','Provider Priority']],pref.engine||'smart')+'</select></label>'+
  '<label class="mf425-settings-check"><input type="checkbox" '+(pref.ratingRefresh?'checked':'')+' onchange="App.mf437SavePref(\'ratingRefresh\',this.checked)"> Refresh previously retrieved external ratings</label>'+
  '<p class="mf437-sub">Your personal rating is never changed. Unverified or restricted providers remain disabled until a real metadata adapter has been tested.</p>'+
  '<h3>'+mf437Icon('database')+' VERIFIED METADATA API CONNECTIONS</h3><p class="mf437-sub">Test each public metadata endpoint independently. A cover-only connection does not verify metadata support. Restricted and unimplemented adapters remain disabled.</p><label>Verification test title<input id="mf437-test-title" type="text" maxlength="120" value="Naruto" placeholder="Enter a title supported by the chosen provider"></label>'+mf437ProvidersMarkup(true)+'<div class="mf437-actions"><button class="btn btn-primary" onclick="App.mf437Open()">Configure & Start Metadata Recovery</button><button class="btn btn-ghost" onclick="App.mf437Reset()">Restore Metadata Recovery defaults</button></div></div>';
