@@ -148,7 +148,7 @@ function mf425CandidatesHtml(found,item){if(!found.length)return '<div class="mf
  const id=mf425IdText(item,c.provider,c);return '<article class="mf425-candidate"><img src="'+mf425Esc(c.url)+'" alt="'+mf425Esc(c.title||item.title)+' poster" loading="lazy"><div class="mf425-candidate-copy"><strong>'+mf425Esc(c.title||'Untitled provider record')+'</strong><small>Library: '+mf425Esc(item.title)+'</small><span class="mf425-source">'+mf425Icon('database')+' '+mf425Esc(c.provider)+'</span><small>'+mf425Esc(id)+'</small><small>'+mf425Esc(c.reason||'Title match')+'</small>'+(c.recordUrl?'<a href="'+mf425Esc(c.recordUrl)+'" target="_blank" rel="noopener noreferrer">'+mf425Icon('external')+' Provider record</a>':'')+mf424CoverIdControl(item,c,i,'mf425')+'<button class="btn btn-primary" onclick="App.mf425ChooseInstant('+i+')">'+mf425Icon('check')+' Use this cover</button></div></article>';
  }).join('')+'</div>';}
 // Only validated, visible candidates are selectable, in precisely the displayed order.
-function mf425ChooseInstant(index){const candidate=MF425.quick?.candidates?.[Number(index)];if(!candidate){showToast('This cover result is no longer available. Retry the search.');return;}
+async function mf425ChooseInstant(index){const candidate=MF425.quick?.candidates?.[Number(index)];if(!candidate){showToast('This cover result is no longer available. Retry the search.');return;}
  const entry=MF425.quickEntry||MF425.quickSource||'editor';const url=candidate.url;
  if(entry==='dashboard'){
   const input=document.getElementById('v192-cover-url-input');if(input){input.value=url;App.v235ValidateMissingCover?.(url);showToast('Cover selected. Confirm Save cover & Next to earn XP.');}
@@ -158,7 +158,7 @@ function mf425ChooseInstant(index){const candidate=MF425.quick?.candidates?.[Num
   const all=[...document.querySelectorAll('#modal-root input')];const input=all.find(x=>/cover|image/i.test(x.id+' '+x.placeholder)&&x.type!=='file');
   if(input){input.value=url;input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));showToast('Cover selected. Save the title to apply it and earn XP.');}
   else if(MF425.draft?.id&&MF425.draft.id!=='draft'){
-    const item=mf424Lookup(MF425.draft.id);if(item&&(!item.coverUrl||confirm('Replace this title’s existing cover?'))){const previous=String(item.coverUrl||'');item.coverUrl=url;item.coverSource='manual:instant:'+candidate.provider;item.modifiedAt=Date.now();mf425Credit(item,previous,url,'instant');saveState();render();}
+    const item=mf424Lookup(MF425.draft.id);if(item&&(!item.coverUrl||await mf444Confirm('Replace existing cover?', 'You can replace this title’s current artwork with the selected validated cover. Other title data remains unchanged.', 'Use Cover', false, 1, 'cover'))){const previous=String(item.coverUrl||'');item.coverUrl=url;item.coverSource='manual:instant:'+candidate.provider;item.modifiedAt=Date.now();mf425Credit(item,previous,url,'instant');saveState();render();}
   }
  }
  mf425CloseInstant();}
