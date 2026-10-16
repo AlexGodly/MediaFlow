@@ -13,6 +13,7 @@ malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:70,perUser:20},
 metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:45,perUser:15},
 trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
 simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
+deezer:{env:"",mode:"cover",cap:45,perUser:15},
 watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:15,perUser:4},
 episodate:{env:"",mode:"cover",cap:80,perUser:20},
 gutendex:{env:"",mode:"cover",cap:80,perUser:20},
@@ -22,7 +23,7 @@ type Provider=keyof typeof RULES;
 type IdMap=Record<string,string>;
 const KEY=(k:string)=>String(Deno.env.get(k)||"").trim();
 const IMAGES=["image.tmdb.org","assets.fanart.tv","fanart.tv","m.media-amazon.com",
-"images-na.ssl-images-amazon.com","cdn.myanimelist.net","myanimelist.net",
+"images-na.ssl-images-amazon.com","cdn-images.dzcdn.net","cdn.myanimelist.net","myanimelist.net",
 "img.animeschedule.net","static.episodate.com","www.episodate.com",
 "episodate.com","www.gutenberg.org","gutenberg.org"];
 const mem=new Map<string,{until:number,results:unknown[]}>();
@@ -164,6 +165,13 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
    add({id:n.ids?.trakt,name:n.title,year:n.year,link:"https://trakt.tv/"+(r.type==="show"?"shows/":"movies/")+n.ids?.slug,key:"trakt",
      other:{imdb:n.ids?.imdb,...(r.type==="show"?{tmdb_tv:n.ids?.tmdb}:{tmdb:n.ids?.tmdb}),tvdb_series:n.ids?.tvdb}});}
  }
+ if(p==="deezer"){
+  const d=await read(p,"https://api.deezer.com/search/album?q="+encodeURIComponent(title));
+  for(const row of list(d).slice(0,9)){if(!row?.id||!row?.title)continue;
+   add({id:row.id,name:row.title,image:row.cover_xl||row.cover_big,
+    link:row.link||"https://www.deezer.com/album/"+row.id,key:"deezer"});
+  }
+ }
  if(p==="simkl"){
   for(const kind of ["movie","tv","anime"]){
    const d=await read(p,"https://api.simkl.com/search/"+kind+"?q="+encodeURIComponent(title)+"&extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
@@ -264,6 +272,13 @@ async function metadata(p:Provider,title:string,ids:IdMap,year:number){
    ratings:{mal:metaRating(d.mean,10,d.num_scoring_users)},
    sourceUrl:"https://myanimelist.net/"+media+"/"+d.id},ids,title)].filter(Boolean);
  }
+ if(p==="deezer"){
+  const d=await read(p,"https://api.deezer.com/album/"+encodeURIComponent(id));
+  return [metaRow(p,{title:d.title||best.title,ids:{deezer:String(d.id||id)},
+    fields:{genres:metaNames(d.genres?.data),trackCount:d.nb_tracks,artists:d.artist?.name?[d.artist.name]:[],
+      releaseDate:d.release_date,durationMinutes:typeof d.duration==="number"?Math.round(d.duration/60):null,
+      publishers:d.label?[d.label]:[],mediaFormat:"Album"},sourceUrl:d.link||best.recordUrl},ids,title)].filter(Boolean);
+ }
  if(p==="simkl"){
   const source=best.recordUrl||"";const kind=source.includes("/movies/")?"movies":source.includes("/anime/")?"anime":"tv";
   const d=await read(p,"https://api.simkl.com/"+kind+"/"+encodeURIComponent(id)+"?extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
@@ -327,7 +342,7 @@ Deno.serve(async(req:Request)=>{
  catch(_){return reply(400,{error:"Invalid JSON request"});}
  if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","episodate","gutendex"].includes(id)}))});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
