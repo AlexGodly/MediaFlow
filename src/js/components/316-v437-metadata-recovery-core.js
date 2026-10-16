@@ -236,7 +236,7 @@ function mf437Consolidate(item,records,engine='smart'){
    const sourceYear=Number(r.fields?.year||String(r.fields?.releaseDate||'').slice(0,4));
    const itemYear=Number(item.year||'');
    const yearAgreement=sourceYear>1900&&itemYear>1900&&Math.abs(sourceYear-itemYear)<=1;
-   const score=(r.matchedBy==='id'?1:.75)+(yearAgreement?.09:0)+(engine==='smart'?Math.min(.12,(consensus-1)*.06):0);
+   const score=(r.matchedBy==='id'?1:.75)+(yearAgreement?0.09:0)+(engine==='smart'?Math.min(.12,(consensus-1)*.06):0);
    return {r,value,score,rank:priority.get(r.provider)||0};
   }).sort((a,b)=>engine==='priority'?a.rank-b.rank:b.score-a.score||a.rank-b.rank);
   const best=ranked[0];fields[field]=best.value;fieldProviders[field]=best.r.provider;
