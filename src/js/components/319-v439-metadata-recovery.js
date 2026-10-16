@@ -216,7 +216,7 @@ function mf439Apply(item,preview,mode='review'){
   }
  }
  if(count){
-  if(fields||ratings)item.universalMetadata=env;
+  item.universalMetadata=env;
   item.modifiedAt=Math.max(Number(item.modifiedAt)||0,timestamp);
   item.v439RecoveryHistory=(Array.isArray(item.v439RecoveryHistory)?item.v439RecoveryHistory:[]).slice(-24);
   item.v439RecoveryHistory.push({at:timestamp,legacy,fields,ratings,
