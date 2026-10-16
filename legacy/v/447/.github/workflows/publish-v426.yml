@@ -1,0 +1,227 @@
+name: Publish MediaFlow v426 Beta — Navigation Icon Hotfix (one-time)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v426.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mediaflow-v426-release
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout personal MediaFlow main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify exact v425 baseline and unused v426 tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 425
+          test ! -e legacy/v/426
+          test ! -e assets/js/mediaflow-v426.bundle.js
+          ! git show-ref --verify --quiet refs/tags/426
+          test -f src/js/components/157-v225-global-button-icons.js
+          test -f src/js/components/158-v226-semantic-icons-dropdowns.js
+          echo "Validated MediaFlow v425 source, v426 tag available."
+
+      - name: Eliminate circle-chevron injection in v225 and v226 sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          def edit(path,old,new):
+              p=Path(path);s=p.read_text(encoding='utf-8')
+              assert s.count(old)==1, (path,'expected exactly one occurrence',s.count(old))
+              p.write_text(s.replace(old,new),encoding='utf-8')
+          edit('src/js/components/157-v225-global-button-icons.js',
+               'function v225ButtonIconName(el){\n  const explicit=',
+               "function v225ButtonIconName(el){\n  // v426: the Level/Streak badge owns its content, never attach a generic action glyph.\n  if(el?.matches?.('.mf421-dock-progress'))return null;\n  const explicit=")
+          edit('src/js/components/157-v225-global-button-icons.js',
+               'function v225IconEligible(el){\n  if(!el||el.nodeType!==1)return false;',
+               "function v225IconEligible(el){\n  if(!el||el.nodeType!==1)return false;\n  // Prevent the global icon system injecting its default circled arrow.\n  if(el.matches?.('.mf421-dock-progress'))return false;")
+          edit('src/js/components/158-v226-semantic-icons-dropdowns.js',
+               "  if(!el||el.nodeType!==1||!el.matches?.('button,a.btn,label.btn,summary.btn,.v221-settings-nav-item'))return;\n  const name=v225ButtonIconName(el);",
+               "  if(!el||el.nodeType!==1||!el.matches?.('button,a.btn,label.btn,summary.btn,.v221-settings-nav-item'))return;\n  // v426: remove legacy v225 arrows even when v226 refreshes an old button.\n  if(el.matches?.('.mf421-dock-progress')){\n    el.querySelectorAll(':scope > .v225-btn-icon').forEach(icon=>icon.remove());\n    el.classList.remove('v225-icon-button');\n    delete el.dataset.v226SemanticIcon;\n    el.dataset.v225Iconified='1';\n    return;\n  }\n  const name=v225ButtonIconName(el);")
+          css=Path('assets/css/237-v426-navigation-icon-hotfix.css')
+          css.write_text("""/* v426: ignore previously cached v225 generic-action badges.
+             All Level/Streak content and the adjacent profile remain clickable. */
+          .mf421-dock-progress > .v225-btn-icon,
+          .mf421-dock-progress .v225-btn-icon { display: none !important; }
+          .mf421-dock-progress::before,
+          .mf421-dock-progress::after { content: none !important; display: none !important; }
+          """,encoding='utf-8')
+          Path('VERSION').write_text('426\n',encoding='utf-8')
+          htmlpath=Path('index.html');h=htmlpath.read_text(encoding='utf-8')
+          assert 'assets/js/mediaflow-v425.bundle.js' in h
+          assert '<meta name="mediaflow-version" content="425">' in h
+          h=h.replace('assets/js/mediaflow-v425.bundle.js','assets/js/mediaflow-v426.bundle.js',1)
+          h=h.replace('<meta name="mediaflow-version" content="425">','<meta name="mediaflow-version" content="426">',1)
+          cssref='<link rel="stylesheet" href="assets/css/237-v426-navigation-icon-hotfix.css">'
+          assert cssref not in h and '</body>' in h
+          h=h.replace('</body>',cssref+'\n</body>')
+          htmlpath.write_text(h,encoding='utf-8')
+          pkg=Path('package.json');p=json.loads(pkg.read_text(encoding='utf-8'))
+          p['name']='mediaflow-v426';p['version']='4.2.6'
+          pkg.write_text(json.dumps(p,indent=2)+'\n',encoding='utf-8')
+          Path('docs/CHANGELOG_v426.md').write_text("""# MediaFlow v426 Beta — Navigation Icon Hotfix
+
+          ## Fixed permanently
+          - Removed the unwanted circled-right-arrow icon overlapping the Level/Streak badge and avatar in desktop Top and Bottom Navigation.
+          - Corrected the **actual injection source** in the v225 global button-icon system. It no longer considers the progression badge eligible for generic action icons.
+          - Corrected the v226 semantic icon refresh system so it cleans up any previously inserted legacy icon instead of adding it back after a render.
+          - Added a narrowly scoped CSS safeguard for legacy icon markup under existing browser caches.
+          - Preserved the Level/Streak popup action, current XP/streak badges, Account button and saved profile picture.
+          - Rebuilt the production JS bundle and PWA cache, so a fresh v426 load picks up the source-level fix.
+
+          ## Validation
+          - Runtime contract tests for v225 eligibility, v225 icon-name resolution and v226 refresh cleanup.
+          - Prior v424 and v425 recovery regression tests and complete MediaFlow repository checks.
+          - No database, Supabase, MediaFlow Plus or MediaFlowApp changes.
+
+          This is a focused v426 Beta hotfix; the other proposed recovery-engine features remain future work, not silently claimed as implemented.
+
+          ## Release
+          - Numeric tag: 426
+          - Full project snapshot: legacy/v/426
+          - Modular ZIP: MediaFlow_v426_Modular.zip
+          """.replace('\n          ','\n'),encoding='utf-8')
+          PY
+          python scripts/build.py
+          node --check assets/js/mediaflow-v426.bundle.js
+          grep -q "v426: the Level/Streak badge owns its content" assets/js/mediaflow-v426.bundle.js
+          test -f assets/css/237-v426-navigation-icon-hotfix.css
+
+      - name: Prove the generic action icon can never reappear in the progression badge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const a=fs.readFileSync('src/js/components/157-v225-global-button-icons.js','utf8');
+          const b=fs.readFileSync('src/js/components/158-v226-semantic-icons-dropdowns.js','utf8');
+          const extract=(source,name)=>{const start=source.indexOf('function '+name+'(');assert(start>=0,name+' missing');const tail=source.slice(start);const m=tail.match(/^function \w+\([^]*?\n\}/);assert(m,name+' body not found');return m[0]};
+          const scope={
+            v225CleanActionText:()=> 'Level 201',
+            V225_BUTTON_ICONS:{action:'circle-chevron',save:'save'},
+            NodeFilter:{SHOW_TEXT:4},
+          };
+          vm.createContext(scope);
+          vm.runInContext(extract(a,'v225ButtonIconName')+'\n'+extract(a,'v225IconEligible')+'\n'+extract(b,'v226RefreshSemanticButtonIcon'),scope);
+          const classes=new Set(['mf421-dock-progress','v225-icon-button']);
+          let removed=0;
+          const el={nodeType:1,dataset:{v225Iconified:'1',v226SemanticIcon:'action'},classList:{contains:k=>classes.has(k),remove:k=>classes.delete(k)},matches:q=>q.includes('.mf421-dock-progress')||q.includes('button'),querySelectorAll:()=>[{remove:()=>removed++}],insertAdjacentHTML:()=>assert.fail('never reinject circular-arrow into Level/Streak')};
+          assert.equal(scope.v225IconEligible(el),false);
+          assert.equal(scope.v225ButtonIconName(el),null);
+          scope.v226RefreshSemanticButtonIcon(el);
+          assert.equal(removed,1);
+          assert.equal(el.dataset.v226SemanticIcon,undefined);
+          assert.equal(classes.has('v225-icon-button'),false);
+          assert.equal(el.dataset.v225Iconified,'1');
+          console.log('PASS: v225 skips Level/Streak; v226 strips legacy generic icon and does not reinject it.');
+          JS
+          if test -f scripts/test-v425-recovery.cjs; then node scripts/test-v425-recovery.cjs; fi
+          if test -f scripts/test-v424-recovery.cjs; then node scripts/test-v424-recovery.cjs; fi
+          python scripts/check.py
+          grep -q 'mediaflow-pwa-v426-shell' sw.js
+          test "$(cat VERSION)" = 426
+          test -f docs/CHANGELOG_v426.md
+
+      - name: Commit tested v426 and preserve full project in legacy/v/426
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'AlexGodly'
+          git config user.email '90983397+AlexGodly@users.noreply.github.com'
+          git add -A -- . ':!legacy' ':!beta'
+          git commit -m 'MediaFlow v426 Beta: permanently prevent global icon injection beside profile'
+          mkdir -p "$RUNNER_TEMP/mediaflow-v426-source"
+          rsync -a --exclude='/legacy/' --exclude='/beta/' --exclude='/.git/' ./ "$RUNNER_TEMP/mediaflow-v426-source/"
+          test -f "$RUNNER_TEMP/mediaflow-v426-source/src/js/components/310-v425-cover-recovery-integration.js"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v426-source/VERSION")" = 426
+          mkdir -p legacy/v/426
+          rsync -a "$RUNNER_TEMP/mediaflow-v426-source/" legacy/v/426/
+          git add legacy/v/426
+          git commit -m 'Archive complete MediaFlow v426 at legacy/v/426'
+          git tag 426
+          git push origin HEAD:main refs/tags/426
+          echo "v426 committed with snapshot, tag 426: $(git rev-parse HEAD)"
+
+      - name: Package complete modular ZIP and publish v426 Beta release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import os
+          src=Path(os.environ['RUNNER_TEMP'])/'mediaflow-v426-source'
+          dst=Path(os.environ['RUNNER_TEMP'])/'MediaFlow_v426_Modular.zip'
+          with ZipFile(dst,'w',ZIP_DEFLATED,compresslevel=6) as archive:
+            for p in src.rglob('*'):
+              if not p.is_file():continue
+              relative=p.relative_to(src)
+              if relative.parts[0] in {'legacy','beta','.git','.github'}:continue
+              archive.write(p,relative.as_posix())
+          with ZipFile(dst) as archive:
+            assert archive.testzip() is None
+            assert 'assets/js/mediaflow-v426.bundle.js' in archive.namelist()
+            assert 'src/js/components/310-v425-cover-recovery-integration.js' in archive.namelist()
+            assert 'VERSION' in archive.namelist()
+          print('Validated ZIP',dst,'size',dst.stat().st_size)
+          PY
+          gh release create 426 "$RUNNER_TEMP/MediaFlow_v426_Modular.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v426 Beta' \
+            --notes-file docs/CHANGELOG_v426.md \
+            --prerelease
+          gh release view 426 --repo "$GITHUB_REPOSITORY" --json tagName,name,url,assets
+
+      - name: Prepare live GitHub Pages artifact without legacy or beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mediaflow-v426-site"
+          rsync -a \
+            --exclude='/legacy/' \
+            --exclude='/beta/' \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            ./ "$RUNNER_TEMP/mediaflow-v426-site/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v426-site/VERSION")" = 426
+          test -f "$RUNNER_TEMP/mediaflow-v426-site/assets/js/mediaflow-v426.bundle.js"
+          test ! -e "$RUNNER_TEMP/mediaflow-v426-site/legacy"
+          test ! -e "$RUNNER_TEMP/mediaflow-v426-site/beta"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mediaflow-v426-site
+
+      - name: Deploy v426 to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,9 +1,9 @@
 /* v446 regression: provider preferences, category/status scopes, engine handoffs. */
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'446');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=446);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/326-v446-recovery-scope-controls.js');
+assert(order.includes('components/326-v446-recovery-scope-controls.js'));
 const src=fs.readFileSync('src/js/components/326-v446-recovery-scope-controls.js','utf8');
 const css=fs.readFileSync('assets/css/253-v446-recovery-scopes.css','utf8');
 const html=fs.readFileSync('index.html','utf8');
