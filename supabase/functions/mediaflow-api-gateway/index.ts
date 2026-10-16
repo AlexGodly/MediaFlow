@@ -279,6 +279,24 @@ async function metadata(p:Provider,title:string,ids:IdMap,year:number){
       releaseDate:d.release_date,durationMinutes:typeof d.duration==="number"?Math.round(d.duration/60):null,
       publishers:d.label?[d.label]:[],mediaFormat:"Album"},sourceUrl:d.link||best.recordUrl},ids,title)].filter(Boolean);
  }
+
+ if(p==="watchmode"){
+  const d=await read(p,"https://api.watchmode.com/v1/title/"+encodeURIComponent(id)+"/details/",{"X-API-Key":secret});
+  return [metaRow(p,{title:d.title||best.title,ids:{watchmode:String(d.id||id),...(d.imdb_id?{imdb:d.imdb_id}:{})},
+   fields:{synopsis:d.plot_overview,year:d.year,originalTitle:d.original_title,
+    durationMinutes:d.runtime_minutes,releaseDate:d.release_date,mediaFormat:d.type,
+    genres:d.genre_names||d.genres,cast:d.cast,language:d.language},
+   ratings:{imdb:metaRating(d.user_rating,10,d.user_rating_votes)},
+   sourceUrl:best.recordUrl||""},ids,title)].filter(Boolean);
+ }
+ if(p==="animeschedule"){
+  const d=await read(p,"https://animeschedule.net/api/v3/anime/"+encodeURIComponent(id),{"Authorization":"Bearer "+secret});
+  return [metaRow(p,{title:d.title||best.title,ids:{animeschedule:String(d.id||id)},
+   fields:{synopsis:d.description||d.synopsis,year:d.year,releaseDate:d.premier,
+    episodeCount:d.episodes,mediaFormat:d.type||"Anime",status:d.status,genres:d.genres,
+    durationMinutes:d.episodeDuration},
+   sourceUrl:"https://animeschedule.net/anime/"+String(d.route||id)},ids,title)].filter(Boolean);
+ }
  if(p==="simkl"){
   const source=best.recordUrl||"";const kind=source.includes("/movies/")?"movies":source.includes("/anime/")?"anime":"tv";
   const d=await read(p,"https://api.simkl.com/"+kind+"/"+encodeURIComponent(id)+"?extended=full&client_id="+encodeURIComponent(secret)+"&app-name=MediaFlow&app-version=437",{"simkl-api-key":secret});
@@ -342,7 +360,7 @@ Deno.serve(async(req:Request)=>{
  catch(_){return reply(400,{error:"Invalid JSON request"});}
  if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","episodate","gutendex"].includes(id)}))});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","watchmode","animeschedule","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
