@@ -1,4 +1,4 @@
-name: MediaFlow v443 Recovery Integration & Performance Quality Gate
+name: MediaFlow v443 Automatic Provider Availability Quality Gate
 on:
   push:
     branches: [feature/v443-automatic-provider-availability]
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build v442 from source
+      - name: Build v443 from source
         run: |
           test "$(cat VERSION)" = "443"
           python scripts/build.py
@@ -46,7 +46,7 @@ jobs:
           node --check scripts/test-v437-browser.cjs
           node --check src/js/components/317-v438-unified-provider-management.js
           node --check scripts/test-v438-provider-registry.cjs
-          node --check scripts/test-v442-browser.cjs
+          node --check scripts/test-v443-browser.cjs
           node --check src/js/components/318-v439-metadata-adapters.js
           node --check src/js/components/319-v439-metadata-recovery.js
           node --check scripts/test-v439-metadata-engine.cjs
@@ -98,14 +98,14 @@ jobs:
           set -euo pipefail
           mkdir -p legacy/v/443
           rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/443/
-          test "$(cat legacy/v/443/VERSION)" = 442
+          test "$(cat legacy/v/443/VERSION)" = 443
           test -s legacy/v/443/assets/js/mediaflow-v443.bundle.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v443.bundle.js
           git add --sparse -f legacy/v/443
           if ! git diff --cached --quiet; then
-            git commit -m 'build(v442): verified site and full legacy archive [skip ci]'
+            git commit -m 'build(v443): verified site and full legacy archive [skip ci]'
             git push origin HEAD:feature/v443-automatic-provider-availability
           fi
       - uses: actions/upload-artifact@v4
