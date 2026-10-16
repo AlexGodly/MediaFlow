@@ -1,7 +1,7 @@
 /* MediaFlow v455: direct recovery job creation and safe cover persistence. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'455');
+assert(['455','456'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert.deepEqual(order.slice(-2),['components/337-v455-workspace-direct-recovery.js','components/338-v455-recovery-handoff-visibility.js']);
 const direct=fs.readFileSync('src/js/components/337-v455-workspace-direct-recovery.js','utf8');
@@ -49,6 +49,7 @@ const env={
  mf451PauseActive:async()=>true,mf451Read:()=>null,mf424SaveJob:async()=>{saves.push('cover');},
  mf424Run:async()=>{logs.push('cover-run')},mf439RunBatch:async()=>{logs.push('metadata-run');},
  mf439SaveJob:()=>{saves.push('metadata')},
+ mf456LaunchStage:()=>{},mf456WatchRecovery:()=>{},
  mf455MetadataOptions:(kind,ids,providers)=>({schema:1,account:'user',ids,cursor:0,status:'running',completed:0,changed:0,errors:[],startedAt:Date.now(),v455Providers:providers,mode:'parts',partSize:25}),
  mf444Confirm:async()=>true,mf445Close:()=>{logs.push('closed')},
  mf441Paint:()=>{},mf447WriteCombo:x=>{env.combined=x},

@@ -192,5 +192,7 @@
   "components/335-v454-preset-layout.js",
   "components/336-v454-quick-title-hardening.js",
   "components/337-v455-workspace-direct-recovery.js",
-  "components/338-v455-recovery-handoff-visibility.js"
+  "components/338-v455-recovery-handoff-visibility.js",
+  "components/339-v456-quick-cover-candidates.js",
+  "components/340-v456-recovery-start-status.js"
 ]
