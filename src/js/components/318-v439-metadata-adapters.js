@@ -269,8 +269,9 @@ function mf439TranslateGateway(provider,record,item){
 }
 async function mf439LookupGateway(provider,item){
  if(!MF439_GATEWAY.includes(provider))return [];
+ if(typeof mf443EnsureGateway==='function')await mf443EnsureGateway();
  const status=mf434ProviderStatus(provider);
- if(!status?.configured||!status?.testable||!mf434SavedTests().includes(provider))return [];
+ if(!status?.configured||!status?.testable)return [];
  const title=mf439TitleVariants(item)[0];
  const reply=await mf434Call('metadata',{provider,title,externalIds:item.externalIds||{},year:item.year||''});
  return (Array.isArray(reply?.results)?reply.results:[])
