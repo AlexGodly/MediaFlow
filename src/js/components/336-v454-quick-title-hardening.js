@@ -137,7 +137,7 @@ mf453ApplyQuick=async function(){
 };
 App.mf453ApplyQuick=mf453ApplyQuick;
 function mf454QuickKeyboard(event){
- if(event.key!=='Escape'||!mf453QuickRoot())return;
+ if(event.key!=='Escape'||!mf453QuickRoot()||document.getElementById('mf444-confirm'))return;
  event.preventDefault();event.stopImmediatePropagation();
  void mf453CloseQuick();
 }
