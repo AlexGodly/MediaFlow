@@ -185,5 +185,6 @@
   "components/328-v448-smart-autofill-recovery.js",
   "components/329-v449-editor-recovery-actions-layout.js",
   "components/330-v450-universal-metadata-expansion.js",
-  "components/331-v451-recovery-stop-priority.js"
+  "components/331-v451-recovery-stop-priority.js",
+  "components/332-v452-recovery-control-polish.js"
 ]
