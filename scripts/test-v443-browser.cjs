@@ -166,15 +166,18 @@ async function pageReady(cdp,label){
    assert(recovery.providerControls&&recovery.settingsControls,'shared settings and provider links available');
    assert(recovery.width>=Math.min(300,d.width*.75),'widget readable in desktop and narrow mobile');
    assert(!recovery.overflow,'no viewport horizontal overflow');
-   const health=await cdp.evaluate("(()=>{\n try{\n  const api=window.MediaFlowV443;\n  if(!api)return {error:'v443 Recovery Integrity API missing'};\n  const root=document.createElement('section');\n  root.className='mf441-settings';\n  root.style.cssText='width:min(930px,calc(100vw - 25px));margin:12px auto;';\n  root.innerHTML=api.renderHealth();\n  document.body.append(root);\n  const panel=root.querySelector('.mf443-health');\n  const rect=panel?.getBoundingClientRect(),health=api.health();\n  const info={version:api.version,scope:health.scope,\n    hasHealth:!!panel,hasRefresh:!!root.querySelector('[onclick=\"App.mf443RefreshHealth()\"]'),\n    hasExport:!!root.querySelector('[onclick=\"App.mf443ExportHealth()\"]'),\n    gridItems:panel?.querySelectorAll('.mf443-health-grid>div').length||0,\n    width:rect?.width||0,screen:innerWidth,overflow:panel?panel.scrollWidth>panel.clientWidth+4:true,\n    leakIds:panel?.textContent.includes('apikey')||false,\n    originalWidget:!!window.MediaFlowV441};\n  root.remove();return info;\n }catch(e){return {error:String(e.stack||e)};}\n})()");
-   console.log(d.label+' v443 recovery health:',JSON.stringify(health));
-   assert(!health.error,'v443 Recovery Integrity must render: '+JSON.stringify(health));
-   assert.equal(health.version,443);
+   const health=await cdp.evaluate("(()=>{\n try{\n  const api=window.MediaFlowV442;\n  if(!api)return {error:'v442 Recovery Integrity API missing'};\n  const root=document.createElement('section');\n  root.className='mf441-settings';\n  root.style.cssText='width:min(930px,calc(100vw - 25px));margin:12px auto;';\n  root.innerHTML=api.renderHealth();\n  document.body.append(root);\n  const panel=root.querySelector('.mf442-health');\n  const rect=panel?.getBoundingClientRect(),health=api.health();\n  const info={version:api.version,scope:health.scope,\n    hasHealth:!!panel,hasRefresh:!!root.querySelector('[onclick=\"App.mf442RefreshHealth()\"]'),\n    hasExport:!!root.querySelector('[onclick=\"App.mf442ExportHealth()\"]'),\n    gridItems:panel?.querySelectorAll('.mf442-health-grid>div').length||0,\n    width:rect?.width||0,screen:innerWidth,overflow:panel?panel.scrollWidth>panel.clientWidth+4:true,\n    leakIds:panel?.textContent.includes('apikey')||false,\n    originalWidget:!!window.MediaFlowV441};\n  root.remove();return info;\n }catch(e){return {error:String(e.stack||e)};}\n})()");
+   console.log(d.label+' v442 recovery health:',JSON.stringify(health));
+   assert(!health.error,'v442 Recovery Integrity must render: '+JSON.stringify(health));
+   assert.equal(health.version,442);
    assert(health.hasHealth&&health.hasRefresh&&health.hasExport&&health.gridItems===4,
      'recovery diagnostics and actions present');
    assert(health.originalWidget,'v441 recovery interface remains intact');
    assert(health.width>=Math.min(300,d.width*.8),'health UI readable on mobile and desktop');
    assert(!health.overflow&&!health.leakIds,'safe non-overflow diagnostics');
+   const providerReadiness=await cdp.evaluate("(()=>{const api=window.MediaFlowV443;return api?{version:api.version,state:api.state(),hasReadySources:typeof api.readyCoverProviders==='function'}:null})()");
+   assert(providerReadiness&&providerReadiness.version===443,'v443 provider readiness API must boot on both viewport sizes');
+   assert(providerReadiness.hasReadySources,'v443 exposes real gateway readiness contract');
    const dock=await cdp.evaluate("(()=>{const el=document.querySelector('.mf421-dock-progress');return el?{type:el.tagName,arrow:!!el.querySelector('.v225-btn-icon'),tabindex:el.getAttribute('tabindex')}:null})()");
    if(dock){assert.notEqual(dock.type,'BUTTON','Dock progression must never become a generic button');assert(!dock.arrow,'First-paint circle arrow must never appear');assert.equal(dock.tabindex,'0');}
 
