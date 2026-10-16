@@ -1,0 +1,57 @@
+name: MediaFlow v437 Recovery Foundation Quality Gate
+on:
+  push:
+    branches: [feature/v437-recovery-metadata-foundation]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check new modules and metadata safety contracts
+        run: |
+          test "$(cat VERSION)" = "437"
+          node --check src/js/components/316-v437-metadata-recovery-core.js
+          node --check src/js/components/317-v437-metadata-recovery-ui.js
+          node --check src/js/components/318-v437-expanded-cover-providers.js
+          node scripts/test-v437-metadata.cjs
+      - name: Rebuild v437 bundle and check JavaScript syntax
+        run: |
+          python scripts/build.py
+          node --check assets/js/mediaflow-v437.bundle.js
+      - name: Existing recovery and provider regressions
+        run: |
+          node scripts/test-v436-shortcuts.cjs
+          node scripts/test-v435-omdb.cjs
+          node scripts/test-v434-gateway.cjs
+          node scripts/test-v433-id-foundation.cjs
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v424-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/check-settings-style.cjs
+          python scripts/check.py
+      - name: Upload preview bundle for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v437-recovery-foundation
+          path: |
+            VERSION
+            assets/js/mediaflow-v437.bundle.js
+            index.html
+            version.json
