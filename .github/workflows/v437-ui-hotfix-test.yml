@@ -87,7 +87,7 @@ jobs:
           git add --sparse -f legacy/v/437.1
           if ! git diff --cached --quiet; then
             git commit -m 'build(v437): verified editor hotfix and full archive [skip ci]'
-            git push origin HEAD:feature/v437-universal-metadata-ratings
+            git push origin HEAD:fix/v437-metadata-editor-layout
           fi
       - uses: actions/upload-artifact@v4
         with:
