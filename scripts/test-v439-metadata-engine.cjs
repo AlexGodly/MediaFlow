@@ -39,7 +39,7 @@ const env={
  MF424_PROVIDER_META:[],mf424Provider:()=>null,
  document:{getElementById:()=>null,querySelector:()=>null,createElement:()=>({})},
  localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
- persistLibrary:()=>{persist++;},saveState:async()=>{},render:()=>{},
+ persistLibrary:()=>{persist++;},saveState:async()=>{},render:()=>{},v148BuildFullBackup:()=>({backupManifest:{}}),
  v53InvalidateLibraryCache:()=>{},showToast:()=>{},confirm:()=>true,
  fetch:()=>{network++;throw Error('No background fetch on module evaluation');}
 };
