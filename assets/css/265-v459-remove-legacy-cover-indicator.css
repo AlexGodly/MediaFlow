@@ -1,0 +1,3 @@
+/* MediaFlow v459 — defensive first-paint guard for retired cover-only HUD.
+ * Modern background recovery lives in #mf441-process-widget. */
+#mf424-indicator{display:none!important;visibility:hidden!important;pointer-events:none!important}
