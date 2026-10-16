@@ -10,10 +10,12 @@ const MF437_PROVIDERS=[
  {id:'openlibrary',name:'Open Library',group:'Books',public:true,live:true},
  {id:'itunes',name:'Apple iTunes',group:'Movies / Music / Books',public:true,live:true},
  {id:'vndb',name:'VNDB',group:'Visual Novels',public:true,live:true},
- ...['Tenrai','Shikimori','MangaDex','MangaUpdates','IFDB','MusicBrainz','Open Opus','LibriVox','BookBrainz','Inventaire','Gutendex','Wikidata','Wikimedia Commons','Crossref','OpenAlex','Library of Congress','BnF','German National Library','Fribb','manami-project','Royal Road RSS','Steam Storefront','SteamSpy','CheapShark','PCGamingWiki','Libretro Thumbnails','GameTDB','Cover Art Archive','TheAudioDB','Deezer','Grand Comics Database','Anime News Network'].map(name=>({id:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,group:'Additional sources',public:true,live:false})),
+ {id:'gutendex',name:'Gutendex',group:'Books / Project Gutenberg',public:true,live:true},
+ {id:'librivox',name:'LibriVox',group:'Audiobooks',public:true,live:true},
+ ...['Tenrai','Shikimori','MangaDex','MangaUpdates','IFDB','MusicBrainz','Open Opus','BookBrainz','Inventaire','Wikidata','Wikimedia Commons','Crossref','OpenAlex','Library of Congress','BnF','German National Library','Fribb','manami-project','Royal Road RSS','Steam Storefront','SteamSpy','CheapShark','PCGamingWiki','Libretro Thumbnails','GameTDB','Cover Art Archive','TheAudioDB','Deezer','Grand Comics Database','Anime News Network'].map(name=>({id:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,group:'Additional sources',public:true,live:false})),
  ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured (metadata adapter pending)',public:false,live:false}))
 ];
-const MF437_DEFAULTS={mode:'missing',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb'],ratingRefresh:false};
+const MF437_DEFAULTS={mode:'missing',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb','gutendex','librivox'],ratingRefresh:false};
 const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{}};
 function mf437Prefs(){const saved=S.settings?.v437Metadata||{};return {...MF437_DEFAULTS,...saved,providers:Array.isArray(saved.providers)?saved.providers.slice():MF437_DEFAULTS.providers.slice()};}
 function mf437Escape(t){return typeof mf424Escape==='function'?mf424Escape(t):String(t??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
@@ -23,7 +25,8 @@ function mf437Kind(item){const cat=(S.categories||[]).find(c=>String(c.id)===Str
 function mf437Suitable(provider,item){const k=mf437Kind(item),ids=item?.externalIds||{};switch(provider){
  case 'jikan':case 'anilist':case 'kitsu':return /anime|manga|manhwa|manhua|light novel/.test(k)||Boolean(ids.mal||ids.anilist||ids.kitsu);
  case 'tvmaze':return /tv|series|television|show/.test(k)||Boolean(ids.tvmaze);
- case 'openlibrary':return /book|novel|comic|reading|literature/.test(k)||Boolean(ids.isbn||ids.openlibrary);
+ case 'openlibrary':case 'gutendex':return /book|novel|comic|reading|literature/.test(k)||Boolean(ids.isbn||ids.openlibrary||ids.gutendex);
+ case 'librivox':return /audiobook|audio book|spoken word/.test(k)||Boolean(ids.librivox);
  case 'vndb':return /visual novel/.test(k)||Boolean(ids.vndb);
  case 'itunes':return true;
  default:return false;
@@ -84,6 +87,19 @@ async function mf437Discover(item,provider){
   const raw=await mf437Fetch('https://openlibrary.org/search.json?title='+q+'&limit=5&fields=key,title,author_name,first_publish_year,subject,isbn');
   const row=raw?.docs?.[0];if(!row)return null;
   return mf437Entry(item,provider,row.title,{year:row.first_publish_year,genres:(row.subject||[]).slice(0,25),producers:(row.author_name||[]).slice(0,20),authors:(row.author_name||[]).slice(0,20),isbn:(row.isbn||[])[0]||'',mediaFormat:'Book'},{},{openlibrary:String(row.key||'').replace('/works/','')},'https://openlibrary.org'+row.key);
+ }
+ if(provider==='gutendex'){
+  const id=String(ids.gutendex||'').trim();
+  const data=await mf437Fetch('https://gutendex.com/books'+(/^\d+$/.test(id)?'/'+id:'?search='+q));
+  const row=/^\d+$/.test(id)?data:data?.results?.[0];if(!row)return null;
+  return mf437Entry(item,provider,row.title,{synopsis:(row.summaries||[])[0]||'',genres:(row.subjects||[]).slice(0,35),authors:(row.authors||[]).map(a=>a.name),language:(row.languages||[])[0]||'',mediaFormat:'Book'}, {},{gutendex:String(row.id)},'https://www.gutenberg.org/ebooks/'+row.id);
+ }
+ if(provider==='librivox'){
+  const id=String(ids.librivox||'').trim();
+  const data=await mf437Fetch('https://librivox.org/api/feed/audiobooks/?'+(/^\d+$/.test(id)?'id='+encodeURIComponent(id):'title='+q)+'&format=json&limit=5');
+  const row=(data?.books||data?.audiobooks||[])[0];if(!row)return null;
+  const authors=(row.authors||[]).map(a=>[a.first_name,a.last_name].filter(Boolean).join(' ').trim()).filter(Boolean);
+  return mf437Entry(item,provider,row.title,{synopsis:row.description||'',authors,language:row.language||'',mediaFormat:'Audiobook',durationMinutes:Number(row.totaltime)||null}, {},{librivox:String(row.id)},row.url_librivox||row.url_iarchive||'');
  }
  if(provider==='vndb'){
   const id=String(ids.vndb||'');const filters=id?['id','=',id]:['search','=',title];
