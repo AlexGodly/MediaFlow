@@ -81,7 +81,7 @@ function mf446SourceHtml(mode){
    return '<div class="mf445-provider mf446-provider" data-mf446-provider="'+mf445Esc(id)+'" data-status="'+(disabled?'unavailable':p.enabled?'enabled':'disabled')+'">'+
     '<label class="mf446-provider-check"><input type="checkbox" data-mf446-toggle="'+mf445Esc(id)+'" '+
     (p.enabled&&p.available?'checked ':'')+(disabled?'disabled ':'')+
-    'onchange="App.mf446ToggleProvider('+mf424Escape(JSON.stringify(mode))+','+mf424Escape(JSON.stringify(id))+',this.checked)">'+
+    'onchange="App.mf446ToggleProvider('+mf445Esc(JSON.stringify(mode))+','+mf445Esc(JSON.stringify(id))+',this.checked)">'+
     '<span class="mf445-provider-info"><strong>'+mf445Esc(p.name)+'</strong><small>'+mf445Esc(p.detail)+'</small></span></label>'+
     '<span class="mf445-provider-status">'+(disabled?'Unavailable':p.enabled?'Enabled':'Disabled')+'</span>'+
     (disabled?'<button class="mf445-provider-setup" type="button" onclick="App.mf445Settings(\'v221-settings-api-providers\')" aria-label="Set up '+mf445Esc(p.name)+'">'+mf425Icon('settings',15)+'</button>':'')+
