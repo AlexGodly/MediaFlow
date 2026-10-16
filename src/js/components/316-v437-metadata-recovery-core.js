@@ -16,7 +16,7 @@ const MF437_PROVIDERS=[
  ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured',public:false,gateway:true,live:['malofficial','tmdb','omdb','trakt','episodate','gutendex'].includes(id)}))
 ];
 const MF437_DEFAULTS={mode:'missing',engine:'smart',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb','gutendex','librivox'],ratingRefresh:false};
-const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{}};
+const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{},skipRequested:false};
 function mf437Prefs(){const saved=S.settings?.v437Metadata||{};return {...MF437_DEFAULTS,...saved,providers:Array.isArray(saved.providers)?saved.providers.slice():MF437_DEFAULTS.providers.slice()};}
 function mf437Escape(t){return typeof mf424Escape==='function'?mf424Escape(t):String(t??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));}
 function mf437Name(t){return String(t||'').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();}
@@ -186,23 +186,26 @@ async function mf437ProcessLocked(){
   const index=new Map((S.library||[]).map(x=>[String(x.id),x]));
   while(job.cursor<job.ids.length){
    if(job.account!==mf424Account()){job.status='paused';break;}
-   if(MF437.pause||MF437.stop==='stop'){job.status=MF437.stop?'stopped':'paused';break;}
+   if(MF437.pause||MF437.stop==='stop'||MF437.stop==='cancel'){job.status=MF437.stop==='cancel'?'cancelled':MF437.stop?'stopped':'paused';break;}
    if(typeof MF424!=='undefined'&&MF424.running){job.status='paused';job.lastError='Cover Recovery is active. Resume metadata after it finishes.';break;}
    const id=job.ids[job.cursor],item=index.get(id);
    if(!item){job.skipped++;job.cursor++;await mf437SaveJob();continue;}
-   let updated=0,attempted=0;const records=[];
+   let updated=0,attempted=0;const records=[];let failedForTitle=false;
    for(const provider of job.providers){
+    if(MF437.skipRequested)break;
     if((MF437.cooldowns[provider]||0)>Date.now())continue;
     if(!MF437_PROVIDERS.some(p=>p.id===provider&&p.live)||!mf437Suitable(provider,item))continue;
     attempted++;
     try{
      const record=await mf437Discover(item,provider);
      if(record?.verified)records.push(record);
-    }catch(e){job.errors++;job.lastError=provider+': '+String(e.message||e).slice(0,120);
+    }catch(e){job.errors++;failedForTitle=true;job.lastError=provider+': '+String(e.message||e).slice(0,120);
      if(/cooldown|HTTP 429|HTTP 503/i.test(job.lastError))MF437.cooldowns[provider]=Date.now()+90000;}
     await new Promise(resolve=>setTimeout(resolve,1150));
    }
-   if(records.length){
+   const skipCurrent=MF437.skipRequested;MF437.skipRequested=false;
+   if(failedForTitle){job.failedIds=job.failedIds||[];if(!job.failedIds.includes(id))job.failedIds.push(id);}
+   if(records.length&&!skipCurrent){
     const selection=mf437Consolidate(item,records,job.engine||'smart');
     const changed=mf437Merge(item,selection,job.mode);
     updated+=changed.changed;
@@ -317,7 +320,7 @@ async function mf437StartJob(config){
  MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',engine:config.engine||'smart',
   providers:(config.providers||[]).filter(id=>MF437_PROVIDERS.some(p=>p.id===id&&p.live)),
   partSize:Math.max(1,Math.min(1000,Number(config.partSize)||100)),continuation:config.continuation||'automatic',
-  updated:0,skipped:0,errors:0,lastError:'',createdAt:Date.now(),events:[],previews:[]};
+  updated:0,skipped:0,errors:0,failedIds:[],lastError:'',createdAt:Date.now(),events:[],previews:[]};
  if(!MF437.job.providers.length)throw Error('Choose at least one working metadata provider.');
  await mf437SaveJob();void mf437Process();
 }
