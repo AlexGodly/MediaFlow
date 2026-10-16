@@ -3,7 +3,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('src/js/components/317-v438-unified-provider-management.js','utf8');
 const version=fs.readFileSync('VERSION','utf8').trim();
-assert(['438','439','440','441','442','443','444','445','446','447','448','449','450','451','452','453','454','455','456','457'].includes(version));
+assert(['438','439','440','441','442','443','444','445','446','447','448','449','450','451','452','453','454','455','456','457','458'].includes(version));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.includes('components/317-v438-unified-provider-management.js'));
 const cats=[{id:'library',name:'Library'},{id:'uncategorized',name:'Uncategorized'}];

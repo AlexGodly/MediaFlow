@@ -150,7 +150,7 @@ async function mf453CloseQuick(){
  }
 }
 async function mf453ApplyQuick(){
- const q=MF453Quick.current;if(!q||q.applying||q.coverLoading||q.metaLoading)return;
+ const q=MF453Quick.current;if(!q||(typeof mf458CanConfirmQuick==='function'? !mf458CanConfirmQuick(q): (q.applying||q.coverLoading||q.metaLoading)))return;
  const item=mf439Item(q.id),cover=q.covers[q.coverIndex],preview=q.metadata?.preview;
  if(!item||MF453Quick.account!==mf439Account()){showToast('Title or account changed. Reopen preview.');return;}
  if(!cover&&!preview?.proposals?.some(p=>p.selected)){showToast('Choose a cover or eligible missing metadata first.');return;}
@@ -162,6 +162,9 @@ async function mf453ApplyQuick(){
    !await mf444Confirm('Replace this title’s existing cover?',
     'Apply the selected verified cover? Your old cover will be kept if you cancel.',
     'Replace Cover',false,1,'cover')){q.applying=false;mf453PaintQuick();return;}
+  // Stop unnecessary artwork discovery after confirmation: saving a selected
+  // verified cover does not require waiting for slow unrelated providers.
+  if(q.coverLoading&&q.controller&&!q.controller.signal.aborted)q.controller.abort();
   // Persist the cover independently; a metadata mapping failure must never
   // roll back an artwork replacement the user explicitly confirmed.
   let coverCount=0,metadataCount=0,metadataError='';

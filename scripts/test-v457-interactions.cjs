@@ -2,9 +2,9 @@
 'use strict';
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const s=fs.readFileSync('src/js/components/341-v457-recovery-interaction-fixes.js','utf8');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'457');
+assert(['457','458'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/341-v457-recovery-interaction-fixes.js');
+assert(order.includes('components/341-v457-recovery-interaction-fixes.js'));
 const listeners={};let closes=0,quickCloses=0;
 const state={type:'library',data:{id:'media-1'}};
 const env={

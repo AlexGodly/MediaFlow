@@ -1,7 +1,7 @@
 /* MediaFlow v452: provider selection, semantic icons and safe stop boundaries. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert(['452','453','454','455','456','457'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['452','453','454','455','456','457','458'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const runtime=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(runtime.includes('components/332-v452-recovery-control-polish.js'));
 assert(runtime.includes('components/334-v453-quick-title-recovery.js'));

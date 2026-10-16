@@ -19,7 +19,8 @@ function mf454QuickView(example=null){
  if(!q||q.closed)return '';
  const item=mf439Item(q.id),cover=q.kind!=='metadata',metadata=q.kind!=='cover';
  const panel=q.metadata?.preview;
- const busy=mf454QuickLoading(q)||q.coverLoading||q.metaLoading||q.applying;
+ const busy=typeof mf458CanConfirmQuick==='function' ? !mf458CanConfirmQuick(q) :
+  (mf454QuickLoading(q)||q.coverLoading||q.metaLoading||q.applying);
  const selected=q.coverIndex>=0||Boolean(panel?.proposals?.some(p=>p.selected&&!p.protected&&!p.hasOriginal&&!p.same));
  const intro='<div class="mf454-intro"><div class="mf454-intro-title"><strong>'+
  mf453Esc(item?.title||'Saved title')+'</strong><span class="mf454-mode-badge">'+
@@ -122,7 +123,7 @@ function mf454QuickValidateCover(item,source){
 const mf454OriginalApply=mf453ApplyQuick;
 mf453ApplyQuick=async function(){
  const q=MF453Quick.current;
- if(!q||q.closed||q.applying||q.coverLoading||q.metaLoading)return;
+ if(!q||(typeof mf458CanConfirmQuick==='function'? !mf458CanConfirmQuick(q) : (q.closed||q.applying||q.coverLoading||q.metaLoading)))return;
  const chosen=q.covers?.[q.coverIndex],item=mf439Item(q.id);
  if(chosen&&!mf454QuickValidateCover(item,chosen)){
   showToast('The selected artwork did not meet minimum validation. Choose another verified-loading image.');return;
@@ -136,7 +137,7 @@ mf453ApplyQuick=async function(){
 };
 App.mf453ApplyQuick=mf453ApplyQuick;
 function mf454QuickKeyboard(event){
- if(event.key!=='Escape'||!mf453QuickRoot())return;
+ if(event.key!=='Escape'||!mf453QuickRoot()||document.getElementById('mf444-confirm'))return;
  event.preventDefault();event.stopImmediatePropagation();
  void mf453CloseQuick();
 }
