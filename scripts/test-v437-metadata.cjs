@@ -51,10 +51,11 @@ assert.ok(vm.runInContext('mf437PopupMarkup("settings")',ctx).includes('METADATA
 assert.ok(vm.runInContext('mf397Markup()',ctx).includes('New Metadata Recovery'));
 vm.runInContext(cover,ctx);
 assert.ok(vm.runInContext('MF437_COVER_CATALOG.length',ctx)>=12);
-assert.equal(vm.runInContext('mf424Provider("gametdb").limit>0',ctx),true);
+assert.equal(vm.runInContext('mf424Provider("gametdb").limit',ctx),0);
 assert.equal(vm.runInContext('mf424Provider("vndb").limit',ctx)>0,true);
 assert.equal(vm.runInContext('mf424Provider("coverartarchive").limit',ctx)>0,true);
 assert.equal(vm.runInContext('MF424_EXTRA_COVER_ADAPTERS.has("deezer")',ctx),true);
+assert.equal(vm.runInContext('mf424Provider("deezer").limit',ctx),0);
 assert.equal(vm.runInContext('MF424_EXTRA_COVER_ADAPTERS.has("pcgamingwiki")',ctx),true);
-assert.equal(vm.runInContext('mf424Provider("gametdb").limit>0',ctx),true);
+assert.equal(vm.runInContext('mf424Provider("gametdb").limit',ctx),0);
 console.log('v437 metadata, personal-rating safety, scope, UI, and cover provider contracts passed');
