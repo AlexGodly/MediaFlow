@@ -127,7 +127,7 @@ function mf437Merge(item,record,mode='missing'){
   if(name==='year'||name==='durationMinutes'){value=Number(value);if(!Number.isFinite(value)||value<=0)continue;}
   if(typeof value==='string')value=value.slice(0,name==='synopsis'?6000:180);
   const old=item[name];const empty=old===null||old===undefined||old===''||(Array.isArray(old)&&old.length===0);
-  if(!empty&&mode!=='refresh')continue; // default no existing overrides, even in full recovery
+  if(!empty&&mode!=='review')continue; // Never replace existing values without review
   if(JSON.stringify(old)===JSON.stringify(value))continue;
   before[name]=old;after[name]=value;
  }
@@ -158,6 +158,7 @@ function mf437Merge(item,record,mode='missing'){
  }
  if(JSON.stringify(newIds)!==JSON.stringify(item.externalIds||{})){before.externalIds=item.externalIds;after.externalIds=newIds;}
  const changes=Object.keys(after);if(!changes.length)return {changed:0,reason:'Nothing missing'};
+ if(mode==='review')return {changed:0,preview:{before,after},provider:record.provider};
  Object.assign(item,after);item.modifiedAt=Date.now();
  item.metadataRecoverySources={...(item.metadataRecoverySources||{}),...Object.fromEntries(changes.map(x=>[x,{provider:record.provider,at:Date.now(),url:record.sourceUrl||''}]))};
  return {changed:changes.length,before,after,provider:record.provider};
@@ -196,7 +197,8 @@ async function mf437ProcessLocked(){
     try{
      const record=await mf437Discover(item,provider);
      if(record){const changed=mf437Merge(item,record,job.mode);updated+=changed.changed;
-      if(changed.changed){job.events.push({titleId:id,provider,at:Date.now(),before:changed.before,fields:Object.keys(changed.after)});if(job.events.length>200)job.events.shift();}}
+      if(changed.preview){job.previews=job.previews||[];job.previews.push({titleId:id,provider,before:changed.preview.before,after:changed.preview.after,at:Date.now()});}
+      if(changed.changed){job.events.push({titleId:id,provider,at:Date.now(),before:changed.before,after:changed.after,fields:Object.keys(changed.after)});if(job.events.length>2000)job.events.shift();}}
     }catch(e){job.errors++;job.lastError=provider+': '+String(e.message||e).slice(0,120);
      if(/cooldown|HTTP 429|HTTP 503/i.test(job.lastError))MF437.cooldowns[provider]=Date.now()+90000;}
     await new Promise(resolve=>setTimeout(resolve,1150));
@@ -204,6 +206,7 @@ async function mf437ProcessLocked(){
    if(updated){job.updated++;persistLibrary();await saveState();}
    else job.skipped++;
    job.cursor++;
+   if(job.mode==='review'&&job.previews?.length){job.status='waiting-review';await mf437SaveJob();break;}
    await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();
    if(job.cursor<job.ids.length&&job.cursor%job.partSize===0){if(MF437.stop==='part'){job.status='stopped';break;}if(job.continuation==='manual'){job.status='waiting-part';break;}}
   }
@@ -211,6 +214,51 @@ async function mf437ProcessLocked(){
  }catch(e){job.status='paused';job.lastError=String(e.message||e).slice(0,200);}
  finally{MF437.running=false;await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();}
 }
+
+function mf437ChangesSafeToApply(item,before,after,selected){
+ if(!item||!before||!after)return false;
+ for(const name of selected){
+  if(['rating','progress','total','coverUrl','xp','history'].includes(name))return false;
+  if(item.richMetadataManual?.[name])return false;
+  if(JSON.stringify(item[name])!==JSON.stringify(before[name]))return false;
+ }
+ return true;
+}
+async function mf437ApplyReviews(decisions){
+ const job=MF437.job;if(!job||job.account!==mf424Account()||MF437.running||job.status!=='waiting-review')throw Error('No paused metadata review is available.');
+ const picks=decisions||{},events=[],changedIds=new Set();
+ for(const [index,proposal] of (job.previews||[]).entries()){
+  const item=mf437Find(proposal.titleId);if(!item)continue;
+  const keys=Object.keys(proposal.after||{}).filter(key=>Array.isArray(picks[index])?picks[index].includes(key):false);
+  if(!keys.length||!mf437ChangesSafeToApply(item,proposal.before,proposal.after,keys))continue;
+  const before={},after={};
+  for(const key of keys){before[key]=item[key];after[key]=proposal.after[key];if(after[key]===undefined)delete item[key];else item[key]=after[key];}
+  item.modifiedAt=Date.now();changedIds.add(String(item.id));
+  events.push({titleId:String(item.id),provider:proposal.provider,at:Date.now(),before,after,fields:keys});
+ }
+ if(events.length){
+  job.events=(job.events||[]).concat(events).slice(-2000);
+  job.updated+=changedIds.size;persistLibrary();await saveState();
+ }
+ job.previews=[];job.status='paused';await mf437SaveJob();mf437Paint();
+ return events.length;
+}
+async function mf437UndoRecent(){
+ const job=MF437.job;if(!job||job.account!==mf424Account()||MF437.running)throw Error('Pause recovery before undoing changes.');
+ let count=0;
+ const history=job.events||[],affected=new Set();
+ for(const event of history.slice().reverse()){
+  if(event.undone)continue;
+  const item=mf437Find(event.titleId);if(!item){event.undone=true;continue;}
+  const keys=event.fields||Object.keys(event.after||{});
+  if(!mf437ChangesSafeToApply(item,event.after,event.before,keys))continue;
+  for(const key of keys){const original=event.before?.[key];if(original===undefined)delete item[key];else item[key]=original;}
+  item.modifiedAt=Date.now();event.undone=true;count++;affected.add(String(item.id));
+ }
+ if(count){persistLibrary();await saveState();}
+ await mf437SaveJob();mf437Paint();return {events:count,titles:affected.size};
+}
+
 function mf437SelectedIds(mode,category,id){
  if(mode==='single')return id?[String(id)]:[];
  if(mode==='selected')return typeof mf436SelectedLibraryIds==='function'?mf436SelectedLibraryIds():[];
@@ -225,7 +273,7 @@ async function mf437StartJob(config){
  MF437.job={version:437,account:mf424Account(),ids,cursor:0,status:'queued',mode:config.mode||'missing',
   providers:(config.providers||[]).filter(id=>MF437_PROVIDERS.some(p=>p.id===id&&p.live)),
   partSize:Math.max(1,Math.min(1000,Number(config.partSize)||100)),continuation:config.continuation||'automatic',
-  updated:0,skipped:0,errors:0,lastError:'',createdAt:Date.now(),events:[]};
+  updated:0,skipped:0,errors:0,lastError:'',createdAt:Date.now(),events:[],previews:[]};
  if(!MF437.job.providers.length)throw Error('Choose at least one working metadata provider.');
  await mf437SaveJob();void mf437Process();
 }
