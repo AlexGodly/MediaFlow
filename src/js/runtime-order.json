@@ -182,5 +182,6 @@
   "components/325-v445-unified-recovery-workspace.js",
   "components/326-v446-recovery-scope-controls.js",
   "components/327-v447-universal-recovery-actions.js",
-  "components/328-v448-smart-autofill-recovery.js"
+  "components/328-v448-smart-autofill-recovery.js",
+  "components/329-v449-editor-recovery-actions-layout.js"
 ]
