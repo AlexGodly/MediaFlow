@@ -2,6 +2,7 @@
  * Enabled sources have real parsing code. A source catalog entry alone is not an adapter.
  * Permission failures, blocked CORS, and invalid matches fail closed without changing Library data. */
 const MF437_ADDITIONAL_PUBLIC=[
+ {id:'openopus',name:'Open Opus',group:'Classical Music'},
  {id:'tenrai',name:'Tenrai',group:'Anime / Manga'},
  {id:'bookbrainz',name:'BookBrainz',group:'Books / Bibliography'},
  {id:'inventaire',name:'Inventaire',group:'Books / Bibliography'},
@@ -60,6 +61,20 @@ function mf437PublicMatch(item,provider,row,fields,ratings,ids,url,aliases){
 async function mf437ExtraDiscover(item,p){
  const title=String(item.title||'').trim(),q=encodeURIComponent(title),ids=item.externalIds||{},k=mf437Kind(item);
 
+
+ if(p==='openopus'){
+  const composer=String(item.mediaMetadata?.composers?.[0]||item.mediaMetadata?.artists?.[0]||'').trim();
+  if(!composer)return null;
+  const result=await mf437Fetch('https://api.openopus.org/composer/list/search/'+encodeURIComponent(composer)+'.json');
+  const found=(result.composers||[]).find(x=>mf437Name(x.complete_name||x.name)===mf437Name(composer))||(result.composers||[])[0];
+  if(!found)return null;
+  const works=await mf437Fetch('https://api.openopus.org/work/list/composer/'+encodeURIComponent(found.id)+'/genre/all.json');
+  const row=(works.works||[]).find(x=>mf437Name(x.title)===mf437Name(title));
+  if(!row)return null;
+  return mf437PublicMatch(item,p,row,{composers:[found.complete_name||found.name],genres:row.genre?[row.genre]:[],
+    mediaFormat:'Classical Music Work'}, {},{openopus:String(row.id)},
+   'https://openopus.org/works/'+String(row.id));
+ }
  if(p==='tenrai'){
   const type=/manga|manhwa|manhua|novel/.test(k)?'manga':'anime',id=String(ids.mal||'');
   const raw=await mf437Fetch('https://api.tenrai.org/v1/'+type+( /^\d+$/.test(id)?'/'+id:'?q='+q+'&limit=5'));
