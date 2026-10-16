@@ -207,7 +207,7 @@ function mf440Activate(){
  // workspaces with custom quotas or preferences.
  MF424_DEFAULT.enabled=[...new Set([...MF424_DEFAULT.enabled,...MF440_SOURCES.map(x=>x.id)])];
  MF424_DEFAULT.priorities=[...new Set([...MF424_DEFAULT.priorities,...MF440_SOURCES.map(x=>x.id)])];
- for(const p of MF440_SOURCES)if(p.id!=='googlebooks'){
+ for(const p of MF440_SOURCES){
   // Cover adapters are real; update the shared v438 capability directory
   // without changing registered-only metadata or ratings statuses.
   const entry=MF438_EXTRA_CATALOG.find(x=>x[0]===p.id);
@@ -216,6 +216,21 @@ function mf440Activate(){
  return MF440_ACTIVE.size;
 }
 mf440Activate();
+// Manual API testing stays in the independent v438 Settings directory;
+// all probes are fixed read-only endpoints and never activate anything else.
+Object.assign(MF438_PUBLIC_PROBES,{
+ steam:{url:'https://store.steampowered.com/api/storesearch/?term=portal&l=english&cc=us',
+  valid:d=>Array.isArray(d?.items)},
+ vndb:{url:'https://api.vndb.org/kana/vn',method:'POST',
+  body:JSON.stringify({filters:['id','=','v17'],fields:'title,image.url',results:1}),
+  valid:d=>Array.isArray(d?.results)},
+ ifdb:{url:'https://ifdb.org/search?json&game&searchfor=Zork',
+  valid:d=>Array.isArray(d?.games)},
+ 'gutendex-public':{url:'https://gutendex.com/books?search=frankenstein',
+  valid:d=>Array.isArray(d?.results)},
+ googlebooks:{url:'https://www.googleapis.com/books/v1/volumes?q=intitle%3AFrankenstein&maxResults=1',
+  valid:d=>Array.isArray(d?.items)||Number(d?.totalItems)===0}
+});
 const mf440PriorHasId=mf424HasID;
 mf424HasID=function(item,provider){
  if(MF440_ACTIVE.has(provider))return Boolean(mf440Id(item,provider));
