@@ -197,5 +197,6 @@
   "components/340-v456-recovery-start-status.js",
   "components/341-v457-recovery-interaction-fixes.js",
   "components/342-v458-recovery-dialog-quick-actions.js",
-  "components/343-v459-retire-cover-only-floating-widget.js"
+  "components/343-v459-retire-cover-only-floating-widget.js",
+  "components/344-v460-quick-recovery-widget-toggle.js"
 ]
