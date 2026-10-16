@@ -161,7 +161,7 @@ async function pageReady(cdp,label){
    console.log(d.label+' v441 recovery workspace:',JSON.stringify(recovery));
    assert(!recovery.error,'v441 recovery workspace mounts: '+JSON.stringify(recovery));
    assert.equal(recovery.version,441);
-   assert.equal(recovery.actions,5,'five floating actions including metadata');
+   assert(recovery.actions>=6,'original actions plus Cover, Metadata and Combined Recovery shortcuts');
    assert(recovery.both&&recovery.progress===2,'both background recovery engines displayed with progress');
    assert(recovery.providerControls&&recovery.settingsControls,'shared settings and provider links available');
    assert(recovery.width>=Math.min(300,d.width*.75),'widget readable in desktop and narrow mobile');
