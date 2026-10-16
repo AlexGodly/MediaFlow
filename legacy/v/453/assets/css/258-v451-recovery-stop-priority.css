@@ -1,0 +1,40 @@
+/* MediaFlow v451 — full stop, priority resume; all accents follow dynamic themes. */
+.mf441-widget .mf451-stop,.mf451-workspace-controls .mf451-stop{
+ color:var(--text);border-color:color-mix(in srgb,var(--text) 23%,var(--border-soft));
+ background:color-mix(in srgb,var(--text) 6%,var(--panel-raised));
+}
+.mf441-widget .mf451-stop:hover,.mf451-workspace-controls .mf451-stop:hover{
+ border-color:var(--flow);background:color-mix(in srgb,var(--flow) 12%,var(--panel-raised));
+}
+.mf441-widget .mf451-resume,.mf451-workspace-controls .mf451-resume{
+ color:var(--flow);border-color:color-mix(in srgb,var(--flow) 24%,var(--border-soft));
+}
+.mf441-widget .mf451-discard,.mf451-workspace-controls .mf451-discard{
+ color:var(--text-dim);border-color:var(--border-soft);
+}
+.mf441-widget .mf451-discard:hover,.mf451-workspace-controls .mf451-discard:hover{color:var(--text)}
+.mf451-workspace-controls{
+ border:1px solid var(--border-soft);background:var(--panel-raised);
+ border-radius:14px;padding:14px;margin-top:16px;display:grid;gap:10px;
+ box-sizing:border-box;min-width:0;color:var(--text);
+}
+.mf451-workspace-controls>strong{display:flex;align-items:center;gap:9px;font-size:13px;line-height:1.45}
+.mf451-workspace-controls>p{margin:0;color:var(--text-dim);font-size:12px;line-height:1.6}
+.mf451-workspace-controls>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.mf451-workspace-controls>div>button{min-width:0;white-space:normal;min-height:38px;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.mf451-workspace-controls>small{font-size:11px;color:var(--text-dim);overflow-wrap:anywhere}
+.mf441-widget .mf441-process-actions,.mf441-widget .mf441-widget-foot{display:flex;flex-wrap:wrap;align-items:center;gap:7px;min-width:0}
+.mf441-widget .mf451-stop,.mf441-widget .mf451-resume,.mf441-widget .mf451-discard{
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;
+ min-width:0;min-height:34px;white-space:normal;overflow-wrap:anywhere;
+}
+@media(max-width:680px){
+ .mf451-workspace-controls{padding:12px}
+ .mf451-workspace-controls>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .mf451-workspace-controls>div>button{width:100%;padding:9px}
+}
+@media(max-width:380px){
+ .mf451-workspace-controls>div{grid-template-columns:1fr}
+ .mf441-widget .mf451-stop,.mf441-widget .mf451-resume,.mf441-widget .mf451-discard{min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){.mf451-workspace-controls button,.mf441-widget .mf451-stop{transition:none}}
