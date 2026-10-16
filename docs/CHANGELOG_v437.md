@@ -1,6 +1,6 @@
 # MediaFlow v437 — Recovery Systems Expansion (development candidate)
 
-**Status: Draft PR #19, not released, not merged, live website remains v436.**
+**Status: Draft PR #19, not released, not merged, live website remains v436.** The secure Supabase metadata gateway is deployed as v3 (backward compatible with v436 search).
 
 ## Recovery & UI
 
@@ -33,7 +33,7 @@ Independent externalRatings field with source, scale, vote count, verification t
 ## Release blockers
 
 1. Confirm external API functionality, CORS, attribution, quotas and image rights per provider in a real browser, including restricted/approval services; disable sources that fail.
-2. Validate configured Supabase API secrets and metadata endpoints with authenticated test records. The v437 gateway remains in the PR **and is not deployed to the live function**.
+2. **Deployed:** personal Supabase `mediaflow-api-gateway` v3 is ACTIVE with JWT verification and was checked byte-for-byte against this PR's gateway source. Authenticated live metadata responses and configured secret/provider permission checks still require end-to-end testing; deployment alone does not verify every source.
 3. Audit export/import/backup/sync recovery of `mediaMetadata`, `externalRatings`, provenance and new IDs across all supported formats and providers.
 4. Complete working acceptance tests for full popup, selected-title scopes, provider tests, settings persistence, review/undo and background reconnect/resume (including multiple tabs).
 5. Verify themes and cross-device styling against user's existing Cover Recovery interface, run final regression, compile site assets, and only then merge/deploy/archive/tag/release v437 with full ZIP.
