@@ -30,6 +30,7 @@ function mf437Suitable(provider,item){const k=mf437Kind(item),ids=item?.external
 }}
 const MF437_FIELD_NAMES=['synopsis','releaseDate','year','genres','themes','studios','producers','durationMinutes','mediaFormat','ageRating'];
 function mf437Rating(value,scale,votes,url){
+ if(value===null||value===undefined||value==='')return null;
  const n=Number(value);if(!Number.isFinite(n)||n<0||n>scale)return null;
  return {value:n,scale,votes:Number.isSafeInteger(Number(votes))&&Number(votes)>=0?Number(votes):null,url:/^https:\/\//.test(String(url||''))?String(url):'',updatedAt:Date.now()};
 }
