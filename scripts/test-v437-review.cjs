@@ -34,5 +34,12 @@ vm.runInContext('MF437.job.previews.push({titleId:"a",provider:"omdb",before:{sy
  assert.equal(vm.runInContext('MF437.job.status',ctx),'waiting-review','Final-title review must not be silently completed');
  assert.equal(library[0].synopsis,'Original','Review must never commit automatically');
  assert.equal(vm.runInContext('MF437.job.previews.length',ctx),1);
+ const onlyRatings=vm.runInContext('mf437Merge',ctx)(library[0],{verified:true,provider:'omdb',
+  fields:{synopsis:'Should not write',genres:['Science Fiction']},
+  ratings:{imdb:{value:8.4,scale:10}},ids:{imdb:'tt0123456'},externalIdVerified:true},'missing',['externalRatings']);
+ assert.equal(library[0].synopsis,'Original','Field selection cannot write deselected synopsis');
+ assert.equal(library[0].genres,undefined,'Field selection cannot write deselected genres');
+ assert.equal(library[0].externalIds,undefined,'Field selection cannot write deselected IDs');
+ assert(onlyRatings.changed>=0);
  console.log('v437 recovery review and eligible undo contracts passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
