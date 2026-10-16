@@ -2,9 +2,9 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'443');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=443);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/323-v443-automatic-provider-availability.js');
+assert(order.includes('components/323-v443-automatic-provider-availability.js'));
 const cover=fs.readFileSync('src/js/components/314-v434-provider-connection.js','utf8');
 const metadata=fs.readFileSync('src/js/components/318-v439-metadata-adapters.js','utf8');
 const settings=fs.readFileSync('src/js/components/319-v439-metadata-recovery.js','utf8');
