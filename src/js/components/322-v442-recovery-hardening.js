@@ -75,7 +75,7 @@ function mf442NormalizeJob(job){
  if(!ids.length)return null;
  const cursor=Math.max(0,Math.min(ids.length,Math.floor(Number(job.cursor)||0)));
  const errors=Array.isArray(job.errors)?job.errors.slice(-50):[];
- const status=['running','paused','completed'].includes(job.status)?job.status:'paused';
+ const status=['running','paused','completed','stopped'].includes(job.status)?job.status:'paused';
  return {...job,ids,cursor,errors,status,
   completed:cursor,changed:Math.max(0,Math.floor(Number(job.changed)||0))};
 }
@@ -224,7 +224,7 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
    job.cursor++;job.completed=job.cursor;
    mf439SaveJob();mf439PaintJob();
   }
-  job.status=job.cursor>=job.ids.length?'completed':'paused';
+  job.status=job.stopRequested?'stopped':job.cursor>=job.ids.length?'completed':'paused';
  }catch(e){
   job.status='paused';mf442Failure(job,'Saved checkpoint preserved: '+String(e?.message||e));
  }finally{

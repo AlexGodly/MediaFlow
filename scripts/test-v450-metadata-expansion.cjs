@@ -1,9 +1,10 @@
 /* MediaFlow v450 deterministic metadata, rating provenance and safety contract. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'450');
+assert(['450','451'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/330-v450-universal-metadata-expansion.js');
+assert(order.includes('components/330-v450-universal-metadata-expansion.js'));
+assert.equal(order.at(-1),'components/331-v451-recovery-stop-priority.js');
 const src=fs.readFileSync('src/js/components/330-v450-universal-metadata-expansion.js','utf8');
 const styles=fs.readFileSync('assets/css/257-v450-universal-metadata-expansion.css','utf8');
 const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
