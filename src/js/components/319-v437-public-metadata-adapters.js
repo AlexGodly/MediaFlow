@@ -2,6 +2,11 @@
  * Enabled sources have real parsing code. A source catalog entry alone is not an adapter.
  * Permission failures, blocked CORS, and invalid matches fail closed without changing Library data. */
 const MF437_ADDITIONAL_PUBLIC=[
+ {id:'tenrai',name:'Tenrai',group:'Anime / Manga'},
+ {id:'bookbrainz',name:'BookBrainz',group:'Books / Bibliography'},
+ {id:'inventaire',name:'Inventaire',group:'Books / Bibliography'},
+ {id:'loc',name:'Library of Congress',group:'Books / Bibliography'},
+ {id:'mangaupdates',name:'MangaUpdates',group:'Manga / Novels'},
  {id:'ifdb',name:'IFDB',group:'Interactive Fiction'},
  {id:'musicbrainz',name:'MusicBrainz',group:'Music / Albums'},
  {id:'theaudiodb',name:'TheAudioDB',group:'Music / Albums'},
@@ -54,6 +59,53 @@ function mf437PublicMatch(item,provider,row,fields,ratings,ids,url,aliases){
 }
 async function mf437ExtraDiscover(item,p){
  const title=String(item.title||'').trim(),q=encodeURIComponent(title),ids=item.externalIds||{},k=mf437Kind(item);
+
+ if(p==='tenrai'){
+  const type=/manga|manhwa|manhua|novel/.test(k)?'manga':'anime',id=String(ids.mal||'');
+  const raw=await mf437Fetch('https://api.tenrai.org/v1/'+type+( /^\d+$/.test(id)?'/'+id:'?q='+q+'&limit=5'));
+  const row=/^\d+$/.test(id)?raw.data:raw.data?.[0];if(!row)return null;
+  return mf437PublicMatch(item,p,row,{synopsis:row.synopsis||'',year:row.year,
+    genres:(row.genres||[]).map(x=>x.name),studios:(row.studios||[]).map(x=>x.name),
+    episodeCount:row.episodes,chapterCount:row.chapters,volumeCount:row.volumes,
+    mediaFormat:row.type||'',originalTitle:row.title_japanese||''},
+   {mal:mf437Rating(row.score,10,row.scored_by,row.url)}, {mal:String(row.mal_id)},row.url,[row.title_english,row.title_japanese,...(row.title_synonyms||[])]);
+ }
+ if(p==='inventaire'){
+  const isbn=String(ids.isbn||ids.isbn13||ids.isbn10||'').replace(/[-\s]/g,'');
+  if(!/^(?:\d{13}|\d{9}[\dXx])$/.test(isbn))return null;
+  const raw=await mf437Fetch('https://inventaire.io/api/entities/by-uris?uris='+encodeURIComponent('isbn:'+isbn));
+  const row=raw.entities?.['isbn:'+isbn];if(!row)return null;
+  return mf437PublicMatch(item,p,{title:row.labels?.en||row.label||title},{synopsis:row.descriptions?.en||'',
+    isbn,mediaFormat:'Book'}, {},{isbn},'https://inventaire.io/entity/isbn:'+isbn);
+ }
+ if(p==='bookbrainz'){
+  const bbid=String(ids.bookbrainz||'');
+  if(!/^[0-9a-f-]{36}$/i.test(bbid))return null;
+  const row=await mf437Fetch('https://api.bookbrainz.org/1/work/'+encodeURIComponent(bbid));
+  return mf437PublicMatch(item,p,{title:row.name||row.title}, {synopsis:row.disambiguation||'',
+    mediaFormat:'Book',releaseDate:row.date||''},{},{bookbrainz:bbid},'https://bookbrainz.org/work/'+bbid);
+ }
+ if(p==='loc'){
+  const raw=await mf437Fetch('https://www.loc.gov/books/?fo=json&q='+q+'&c=5&at=results');
+  const row=raw.results?.[0];if(!row)return null;
+  const full=String(row.title||'').replace(/\s*\/\s*$/, '').trim();
+  return mf437PublicMatch(item,p,{title:full},{synopsis:(row.description||[]).join(' '),
+    authors:row.contributor||[],year:Number(String(row.date||'').slice(0,4)),
+    publishers:row.publisher||[],language:row.language?.[0]||'',mediaFormat:'Book'},
+    {},{loc:String(row.item_id||row.id||'').split('/').filter(Boolean).at(-1)},String(row.id||'').replace(/^http:/,'https:'));
+ }
+ if(p==='mangaupdates'){
+  const id=String(ids.mangaupdates||'');
+  // MangaUpdates v1 is a JSON API; browser CORS and access policy must be validated.
+  const raw=id&&/^\d+$/.test(id)?await mf437Fetch('https://api.mangaupdates.com/v1/series/'+id):
+   await mf437Fetch('https://api.mangaupdates.com/v1/series/search',{search:title,perpage:5});
+  const row=id?raw:(raw.results?.[0]?.record||raw.results?.[0]);if(!row)return null;
+  const record=row.record||row,seriesId=String(record.series_id||record.id||id||'');
+  return mf437PublicMatch(item,p,{title:record.title}, {synopsis:record.description||'',
+    genres:(record.genres||[]).map(x=>x.genre||x.name||x),authors:(record.authors||[]).map(x=>x.name||x),
+    artists:(record.artists||[]).map(x=>x.name||x),status:record.status||'',mediaFormat:record.type||'Manga'},
+   {},{mangaupdates:seriesId},'https://www.mangaupdates.com/series/'+seriesId);
+ }
  if(p==='ifdb'){
   const raw=await mf437Fetch('https://ifdb.org/search?json&game&searchfor='+q);
   const row=(raw.games||[]).find(r=>mf437Name(r.title)===mf437Name(title))||(raw.games||[])[0];
