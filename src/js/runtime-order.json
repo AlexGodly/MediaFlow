@@ -169,5 +169,8 @@
   "components/312-v431-dashboard-auto-save-navigation.js",
   "components/313-v433-provider-registry-foundation.js",
   "components/314-v434-provider-connection.js",
-  "components/315-v436-selected-recovery-shortcut.js"
+  "components/315-v436-selected-recovery-shortcut.js",
+  "components/316-v437-metadata-recovery-core.js",
+  "components/317-v437-metadata-recovery-ui.js",
+  "components/318-v437-expanded-cover-providers.js"
 ]
