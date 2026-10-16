@@ -87,7 +87,7 @@ assert.deepEqual([...S.settings.v439Metadata.enabled],['jikan'],'Cover choice do
 c.mf446ToggleProvider('cover','jikan',true);
 assert.deepEqual([...S.settings.v424Covers.enabled],['jikan']);
 c.mf446ToggleProvider('cover','tmdb',true);
-assert.deepEqual(S.settings.v424Covers.enabled,['jikan'],'unconfigured API cannot be enabled');
+assert.deepEqual([...S.settings.v424Covers.enabled],['jikan'],'unconfigured API cannot be enabled');
 assert(api.sourceHtml('cover').includes('data-mf446-toggle="jikan"'));
 const row=api.coverRow({});
 assert(row.includes('New Recovery')&&!row.includes(' Setup'));
