@@ -239,7 +239,7 @@ function mf455CoverJob(ids,providers,mode,options){
  if(!targets.length)return null;
  const partSize=options.partMode==='automatic'?Math.max(1,Math.min(1000,Math.ceil(targets.length/10))):
   Math.max(1,options.partSize);
- return {id:'mf455-'+Date.now(),account:mf424Account(),created:Date.now(),updated:Date.now(),ended:0,
+ return {id:'mf455-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),account:mf424Account(),created:Date.now(),updated:Date.now(),ended:0,
   ids:targets,cursor:0,scope:{mode:'selected',ids:targets},mode:options.mode==='one'?'one':'parts',
   partSize,continuation:options.continuation,status:'ready',fixed:0,unresolved:0,skipped:0,
   failed:0,pending:0,processed:0,dirty:0,requestCount:0,cooldownEvents:0,rate:{},
