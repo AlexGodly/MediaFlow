@@ -174,5 +174,6 @@
   "components/317-v437-metadata-recovery-ui.js",
   "components/318-v437-expanded-cover-providers.js",
   "components/319-v437-public-metadata-adapters.js",
-  "components/320-v437-universal-metadata-editor.js"
+  "components/320-v437-universal-metadata-editor.js",
+  "components/321-v437-media-provider-identifiers.js"
 ]
