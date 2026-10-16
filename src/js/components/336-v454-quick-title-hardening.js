@@ -264,6 +264,10 @@ mf453OpenQuick=async function(kind,id){
    if(!await q.preparePromise)
     throw Error('Could not safely pause existing recovery. Check Background Processes.');
    q.priority=true;
+   // The old combined engine may already report completed. Do not let its
+   // regular scheduler restart older jobs while this quick preview is open.
+   const checkpoint=MF451.journal||mf451Read();
+   if(checkpoint){checkpoint.autoResume=false;checkpoint.state='quick-preview';mf451Store(checkpoint);}
   }
   if(!mf454QuickLive(q))return;
   q.stage='connecting';mf453PaintQuick();
