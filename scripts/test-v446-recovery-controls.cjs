@@ -94,6 +94,7 @@ assert(row.includes('New Recovery')&&!row.includes(' Setup'));
 const foot=api.widget({},{});
 assert(foot.indexOf(' Setup</button>')<foot.indexOf('Recovery Settings'));
 (async()=>{
+ c.MF445.mode='metadata';
  internal.draft.metadata={mode:'categoryStatus',categories:['anime','books'],pairs:{anime:['completed'],books:['dropped']}};
  const m=api.scopeIds('metadata');
  assert.deepEqual([...m],['b','d']);
