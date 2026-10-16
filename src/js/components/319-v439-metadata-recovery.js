@@ -194,22 +194,23 @@ function mf439Apply(item,preview,mode='review'){
   if(prop.hasOriginal)continue;
   const current=mf439FieldValue(item,prop.token);
   if(mf439Has(current?.score??current))continue;
+  let applied=false;
   if(prop.token.startsWith('legacy.')){
    const key=prop.token.slice(7);
    if(!MF439_LEGACY_FIELDS[key])continue;
    item[key]=JSON.parse(JSON.stringify(choice.value));
    legacy++;
-   count++;
+   count++;applied=true;
   }else if(prop.token.startsWith('field.')){
    if(mf437SetField(env,prop.token.slice(6),choice.value,{source:src.provider,verified:true,updatedAt:timestamp})){
-    fields++;count++;
+    fields++;count++;applied=true;
    }
   }else if(prop.token.startsWith('rating.')){
    if(mf437SetRating(env,prop.token.slice(7),choice.value,{source:src.provider,verified:true,updatedAt:timestamp})){
-    ratings++;count++;
+    ratings++;count++;applied=true;
    }
   }
-  if(count) {
+  if(applied) {
    env.provenance[prop.token]={source:src.provider,verified:true,
     recordId:src.recordId,evidence:src.evidence,updatedAt:timestamp};
   }
@@ -264,7 +265,7 @@ function mf439Dialog(title,body){
   '<button type="button" class="btn btn-ghost" onclick="App.mf439Close()">'+mf425Icon('x')+' Close</button></header>'+
   '<div class="mf439-dialog-body" id="mf439-dialog-body">'+body+'</div></section>';
 }
-function mf439Close(){document.getElementById('mf439-recovery-modal')?.remove();}
+function mf439Close(){MF439.controller?.abort();document.getElementById('mf439-recovery-modal')?.remove();}
 async function mf439Open(id){
  const item=mf439Item(id);
  if(!item){showToast('Select an existing Library title for Metadata Recovery.');return;}
