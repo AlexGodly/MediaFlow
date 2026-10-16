@@ -31,6 +31,13 @@ jobs:
           node --check src/js/components/317-v437-metadata-recovery-ui.js
           node --check src/js/components/318-v437-expanded-cover-providers.js
           node scripts/test-v437-metadata.cjs
+          node --check src/js/components/319-v437-public-metadata-adapters.js
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Validate v437 Supabase Gateway
+        run: |
+          deno check --node-modules-dir=auto supabase/functions/mediaflow-api-gateway/index.ts
       - name: Rebuild v437 bundle and check JavaScript syntax
         run: |
           python scripts/build.py
