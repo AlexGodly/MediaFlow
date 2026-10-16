@@ -19,9 +19,7 @@ function mf441State(){
  const metadataActive=!!metadata&&!['completed'].includes(metadata.status);
  const coverPct=cover?.ids?.length?Math.min(100,Math.max(0,Math.floor((cover.cursor||0)/cover.ids.length*100))):0;
  const metaPct=metadata?.ids?.length?Math.min(100,Math.max(0,Math.floor((metadata.cursor||0)/metadata.ids.length*100))):0;
- const selected=typeof mf436SelectedLibraryIds==='function'?mf436SelectedLibraryIds():[];
  return {cover,metadata,coverActive,metadataActive,coverPct,metaPct,
-  selectedCount:selected.length,
   activeCount:Number(coverActive)+Number(metadataActive)};
 }
 function mf441Show(prefs,state){
@@ -125,7 +123,7 @@ function mf441OpenCover(){
 }
 function mf441OpenMetadata(){
  // No metadata provider call is issued by opening this setup surface.
- const selected=mf441State().selectedCount;
+ const selected=typeof mf436SelectedLibraryIds==='function'?mf436SelectedLibraryIds().length:0;
  const existing=document.getElementById('mf441-start-dialog');existing?.remove();
  const root=document.createElement('div');root.id='mf441-start-dialog';root.className='mf424-modal mf441-start-overlay mf425-themed';
  root.innerHTML='<div class="mf424-shade" data-mf441-close="1"></div>'+
