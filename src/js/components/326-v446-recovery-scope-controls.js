@@ -138,7 +138,7 @@ function mf446CategoryRows(mode){
   '<div class="mf445-category-grid mf446-category-grid">'+cats.map(c=>{
    const id=String(c.id),isOn=scope.categories.includes(id),statuses=scope.pairs[id]||[];
    return '<div class="mf446-category"><label class="mf446-category-top">'+
-    '<input type="checkbox" '+(isOn?'checked ':'')+'data-mf446-category="'+mf445Esc(id)+'" onchange="App.mf446ToggleCategory('+JSON.stringify(id)+',this.checked)">'+
+    '<input type="checkbox" '+(isOn?'checked ':'')+'data-mf446-category="'+mf445Esc(id)+'" onchange="App.mf446ToggleCategory('+mf445Esc(JSON.stringify(id))+',this.checked)">'+
     '<span class="mf445-category-art">'+mf445CategoryIcon(c)+'</span>'+
     '<span class="mf445-category-label"><strong>'+mf445Esc(c.name||id)+'</strong><small>'+Number(count.get(id)||0).toLocaleString()+' titles</small></span></label>'+
     (isOn&&statusMode?'<details class="mf446-statuses" open><summary>Statuses ('+statuses.length+' / '+MF446_STATUS.length+')</summary>'+
