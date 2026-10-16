@@ -162,11 +162,34 @@ async function mf437CoverPCGamingWiki(item,{request}){
   return c?{...c,confidence:.56,idMatch:false,reason:'PCGamingWiki thumbnail — manual review required'}:null;
  }).filter(Boolean);
 }
+
+async function mf437CoverGameTDB(item){
+ const id=String(item.externalIds?.gametdb||'').trim().toUpperCase();
+ if(!/^[A-Z0-9]{4,12}$/.test(id))return [];
+ const platforms=(item.mediaMetadata?.platforms||[]).map(x=>String(x).toLowerCase());
+ const map={'nintendo wii':'wii',wii:'wii','nintendo switch':'switch',switch:'switch',
+   'playstation 2':'ps2',ps2:'ps2','playstation 3':'ps3',ps3:'ps3','nintendo ds':'ds',ds:'ds',
+   'nintendo 3ds':'3ds','3ds':'3ds','wii u':'wiiu',wiiu:'wiiu'};
+ const consoleName=platforms.map(x=>map[x]).find(Boolean);
+ if(!consoleName)return [];
+ const prefix='https://art.gametdb.com/'+consoleName+'/cover/US/'+encodeURIComponent(id);
+ const urls=[prefix+'.png',prefix+'.jpg'];
+ for(const url of urls){
+  const loaded=await new Promise(resolve=>{const image=new Image(),timer=setTimeout(()=>resolve(false),4000);
+   image.onload=()=>{clearTimeout(timer);resolve(image.naturalWidth>90&&image.naturalHeight>90);};
+   image.onerror=()=>{clearTimeout(timer);resolve(false);};image.src=url;});
+  if(loaded){
+   const c=mf437CoverCandidate(item,url,'gametdb','https://www.gametdb.com/',id,item.title);
+   return c?[{...c,confidence:.87,idMatch:true,reason:'GameTDB console artwork found for saved game serial; confirm edition'}]:[];
+  }
+ }
+ return [];
+}
 for(const [id,name] of MF437_COVER_CATALOG){
  const adapter={steamstore:mf437CoverSteam,vndb:mf437CoverVNDB,itunes:mf437CoverITunes,
   coverartarchive:mf437CoverArchive,theaudiodb:mf437CoverAudioDB,ifdb:mf437CoverIFDB,
   wikidata:mf437CoverWikidata,'wikimedia-commons':mf437CoverCommons,libretro:mf437CoverLibretro,
-  deezer:mf437CoverDeezer,pcgamingwiki:mf437CoverPCGamingWiki}[id]||null;
+  deezer:mf437CoverDeezer,pcgamingwiki:mf437CoverPCGamingWiki,gametdb:mf437CoverGameTDB}[id]||null;
  mf437CoverRegister(id,name,adapter);
 }
 // Keep options visible but never represent a registered name as a verified connection.
