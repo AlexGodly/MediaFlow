@@ -91,7 +91,7 @@ async function pageReady(cdp,label){
   const port=Number(fs.readFileSync(active,'utf8').split('\n')[0]);
   cdp=await connect(port);
   await cdp.send('Page.enable');await cdp.send('Runtime.enable');
-  for(const d of [{label:'desktop',width:1440,height:900,mobile:false},{label:'mobile',width:360,height:780,mobile:true}]){
+  for(const d of [{label:'desktop',width:1440,height:900,mobile:false},{label:'tablet',width:768,height:1024,mobile:true},{label:'mobile',width:360,height:780,mobile:true}]){
    await cdp.send('Emulation.setDeviceMetricsOverride',{width:d.width,height:d.height,deviceScaleFactor:1,mobile:d.mobile});
    await cdp.send('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/?v437-smoke='+d.label});
    await pageReady(cdp,d.label);
