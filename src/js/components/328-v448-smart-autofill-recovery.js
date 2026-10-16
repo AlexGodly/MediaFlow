@@ -138,7 +138,15 @@ mf424Process=async function(item){
 };
 const mf448OriginalInstantCandidates=mf425CandidatesHtml;
 mf425CandidatesHtml=function(candidates,item){
- const raw=mf448OriginalInstantCandidates.apply(this,arguments);
+ let raw=mf448OriginalInstantCandidates.apply(this,arguments);
+ let card=0;
+ raw=raw.replace(/(<article class="mf425-candidate"[^>]*>)/g,match=>{
+  const candidate=candidates[card++];if(!candidate)return match;
+  const verified=candidate.idMatch===true&&Number(candidate.confidence)>=.95;
+  const pct=Math.round(Math.max(0,Math.min(1,Number(candidate.confidence)||0))*100);
+  return match+'<span class="mf448-candidate-confidence '+(verified?'verified':'review')+'">'+
+   mf425Icon(verified?'shield':'search',13)+' '+pct+'% · '+(verified?'Direct ID match':'Manual review')+'</span>';
+ });
  const policy=mf448Prefs();
  // Candidate cards remain interactive. Evidence is explanatory only: a
  // title-only match never becomes auto-verified from this badge.
@@ -203,7 +211,8 @@ mf439SettingsHtml=function(){
 };
 function mf448OpenReviews(){
  document.getElementById('mf448-review-dialog')?.remove();
- const rows=mf448ReadReviews().slice().reverse().filter(x=>(S.library||[]).some(item=>String(item?.id)===x.id));
+ const catalog=new Map((S.library||[]).filter(item=>item?.id!=null).map(item=>[String(item.id),item]));
+ const rows=mf448ReadReviews().slice().reverse().filter(x=>catalog.has(x.id));
  const root=document.createElement('div');root.id='mf448-review-dialog';root.className='mf424-modal mf425-themed mf448-review-overlay';
  root.innerHTML='<div class="mf424-shade" data-mf448-close></div>'+
   '<section class="mf424-dialog mf448-dialog" role="dialog" aria-modal="true" aria-label="Metadata candidates requiring manual review">'+
@@ -211,7 +220,7 @@ function mf448OpenReviews(){
   '<p>Low-confidence, conflicting or manual-review candidates. Nothing in this list is automatically written.</p></div>'+
   '<button type="button" class="btn btn-ghost" data-mf448-close>'+mf425Icon('x',17)+' Close</button></header>'+
   '<div class="mf448-review-list">'+(rows.length?rows.map(x=>{
-   const item=(S.library||[]).find(t=>String(t?.id)===x.id);
+   const item=catalog.get(x.id);
    return '<div class="mf448-review-row"><span><strong>'+mf424Escape(item?.title||x.id)+'</strong>'+
     '<small>'+mf424Escape(x.reason.replace(/-/g,' '))+' · '+Number(x.fields)+' fields · '+new Date(x.at).toLocaleString()+'</small></span>'+
     '<button type="button" class="btn btn-sm" onclick="App.mf448PreviewReview('+mf424Escape(JSON.stringify(x.id))+')">'+
