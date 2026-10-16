@@ -263,6 +263,21 @@ function mf438SettingsHtml(){
   '<p class="mf438-footnote">Media types guide recommendation order only. All sources remain searchable regardless of custom Library category. Provider capability tags describe possible data, not automatically enabled APIs. Disabled providers do not change your existing Cover Recovery choices.</p>'+
  '</div>';
 }
+// Retitle the existing authenticated v434 panel for its new shared home.
+// It still delegates testing and credential checks to the original backend.
+const mf438LegacyGatewayPanel=mf434Panel;
+mf434Panel=function(){
+ return mf438LegacyGatewayPanel.apply(this,arguments)
+  .replace('Personal MediaFlow · v434','Shared API services')
+  .replace('New APIs are opt-in. Use a real title to test each provider, then enable approved cover sources.',
+   'Configured APIs require a manual, verified title test. A successful connection does not automatically enable metadata or cover writes.');
+};
+const mf438LegacyGatewayRefresh=mf434RefreshPanel;
+mf434RefreshPanel=function(){
+ const result=mf438LegacyGatewayRefresh.apply(this,arguments);
+ mf438PaintCatalog();
+ return result;
+};
 // Remove the old v434 gateway panel only from COVER RECOVERY; keep the
 // source-provider order/enable fieldset and its existing persistence untouched.
 const mf438CoverSettingsBase=mf425SettingsMarkup;
@@ -292,6 +307,20 @@ function mf438SettingsEnhance(){
 }
 // The v434 panel refresh now lives in the dedicated shared Settings section.
 MediaFlowRuntime.registerPageEnhancer('settings',mf438SettingsEnhance);
+// Existing backups already transfer S.settings; preserve the old backup schema
+// while stamping the true application version in full account exports.
+const mf438BackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+ const payload=mf438BackupBase.apply(this,arguments);
+ if(payload){
+  payload.mediaFlowVersion=438;payload.backupVersion=438;
+  const manifest=payload.backupManifest||(payload.backupManifest={});
+  manifest.includes={...(manifest.includes||{}),v438UnifiedProviderPreferences:true};
+  manifest.v438={sharedProviderRegistry:true,configuredKeysRemainServerSide:true,
+   apiTestingManual:true,settingsPath:'settings.v438Providers'};
+ }
+ return payload;
+};
 Object.assign(App,{mf438SetFilter,mf438SetEnabled,mf438TestPublic});
 window.MediaFlowV438=Object.freeze({
  version:MF438_VERSION,capabilities:MF438_CAPS.slice(),
