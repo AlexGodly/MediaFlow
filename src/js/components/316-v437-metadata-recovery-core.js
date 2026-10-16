@@ -13,7 +13,7 @@ const MF437_PROVIDERS=[
  {id:'gutendex',name:'Gutendex',group:'Books / Project Gutenberg',public:true,live:true},
  {id:'librivox',name:'LibriVox',group:'Audiobooks',public:true,live:true},
  ...['Tenrai','Shikimori','MangaDex','MangaUpdates','IFDB','MusicBrainz','Open Opus','BookBrainz','Inventaire','Wikidata','Wikimedia Commons','Crossref','OpenAlex','Library of Congress','BnF','German National Library','Fribb','manami-project','Royal Road RSS','Steam Storefront','SteamSpy','CheapShark','PCGamingWiki','Libretro Thumbnails','GameTDB','Cover Art Archive','TheAudioDB','Deezer','Grand Comics Database','Anime News Network'].map(name=>({id:name.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name,group:'Additional sources',public:true,live:false})),
- ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured (metadata adapter pending)',public:false,live:false}))
+ ...['malofficial','tmdb','omdb','trakt','simkl','metron','animeschedule','watchmode','fanart','hardcover','thetvdb','comicvine','anidb','marvel','googlebooks'].map(id=>({id,name:({malofficial:'MyAnimeList Official',tmdb:'TMDB',omdb:'OMDb',trakt:'Trakt',simkl:'SIMKL',metron:'Metron',animeschedule:'AnimeSchedule',watchmode:'Watchmode',fanart:'Fanart.tv',hardcover:'Hardcover',thetvdb:'TheTVDB',comicvine:'Comic Vine',anidb:'AniDB',marvel:'Marvel API',googlebooks:'Google Books'})[id],group:'Supabase-configured',public:false,gateway:true,live:['malofficial','tmdb','omdb','trakt','episodate','gutendex'].includes(id)}))
 ];
 const MF437_DEFAULTS={mode:'missing',scope:'selected',partSize:100,autoResume:false,providers:['jikan','anilist','kitsu','tvmaze','openlibrary','itunes','vndb','gutendex','librivox'],ratingRefresh:false};
 const MF437={job:null,running:false,busy:false,requested:'',pause:false,stop:'',results:[],ready:false,lastError:'',modalOpen:false,metadataVersion:1,cooldowns:{}};
@@ -50,7 +50,7 @@ async function mf437Fetch(url,body){
 function mf437Entry(item,provider,title,fields,ratings,ids,sourceUrl,aliases=[]){
  const existing=mf437Name(item?.title),candidates=[title,...aliases].map(mf437Name).filter(Boolean);
  const matched=candidates.some(name=>name===existing||name.length>4&&existing.length>4&&(name.includes(existing)||existing.includes(name)));
- const idField=({jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',openlibrary:'openlibrary',vndb:'vndb'})[provider];
+ const idField=({jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',openlibrary:'openlibrary',vndb:'vndb',omdb:'imdb',malofficial:'mal',trakt:'trakt',tmdb:'tmdb',episodate:'episodate',gutendex:'gutendex'})[provider];
  const idConfirmed=Boolean(idField&&item.externalIds?.[idField]&&String(item.externalIds[idField])===String(ids?.[idField]));
  if(!matched&&!idConfirmed)return null;
  const sourceYear=Number(fields?.year||String(fields?.releaseDate||'').slice(0,4)),localYear=Number(item.year||'');
