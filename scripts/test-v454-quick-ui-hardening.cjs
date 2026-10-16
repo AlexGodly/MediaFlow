@@ -1,9 +1,10 @@
 /* MediaFlow v454 — modal, recovery alternatives and scroll-stable presets. */
 'use strict';
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'454');
+assert(['454','455'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.deepEqual(order.slice(-2),['components/335-v454-preset-layout.js','components/336-v454-quick-title-hardening.js']);
+assert(order.includes('components/335-v454-preset-layout.js')&&order.includes('components/336-v454-quick-title-hardening.js'));
+assert.equal(order.at(-1),'components/338-v455-recovery-handoff-visibility.js');
 const preset=fs.readFileSync('src/js/components/335-v454-preset-layout.js','utf8'),
  quick=fs.readFileSync('src/js/components/336-v454-quick-title-hardening.js','utf8'),
  css=fs.readFileSync('assets/css/261-v454-quick-presets-hardening.css','utf8');
@@ -16,9 +17,9 @@ assert(quick.includes('mf454QuickRemoveDom')&&quick.includes('querySelectorAll('
 assert(quick.includes('await Promise.allSettled(tasks)'),'Quick Cover and Metadata search in parallel, not serially');
 assert(quick.includes('q.covers.length>=24'),'Multiple cover alternatives retained');
 assert(quick.includes('p.options.map'),'Alternate verified metadata choices exposed');
-assert(quick.includes("Number(candidate?.confidence)<.25"),'Display reviewable low-confidence candidates rather than only perfect matches');
+assert(quick.includes("!url.startsWith('https://')||found.has(url)"),'Display reviewable loadable cover alternatives');
 assert(quick.includes('mf424Image(url,candidate.provider)'),'Artwork must still load before selection');
-assert(quick.includes("if(chosen&&Number(chosen.confidence)<.65)"),'Low confidence requires explicit review');
+assert(quick.includes("if(chosen&&(Number(chosen.confidence)<.65||chosen.idMatch!==true)"),'Missing verified ID requires explicit review');
 assert(preset.includes('mf454FindProviders')&&preset.includes('mf454FindCategories'));
 assert(preset.includes('mf454CopyPreset')&&preset.includes('mf453SavePreset'));
 assert(!preset.includes("mf453PaintPresets();\n};\nmf453PresetBulk"),'Bulk checkbox action must not rebuild entire panel');
@@ -85,7 +86,7 @@ const fixture={id:'1',kind:'both',serial:1,stage:'ready',closed:false,
 env.MF453Quick.current=fixture;env.MF453Quick.serial=1;
 const view=env.window.MediaFlowV454.html();
 assert(view.includes('Season 2 variant')&&view.includes('Option A')&&view.includes('Option B'));
-assert(view.includes('Review match carefully')&&view.includes('2 source alternatives'));
+assert(view.includes('Unverified match')&&view.includes('2 source alternatives'));
 assert(view.includes('Current cover')===false||view.includes('Existing cover'));
 assert(view.includes('Search all ready providers')&&view.includes('Confirm selected changes'));
 assert.equal(env.S.library[0].coverUrl,'https://example.com/existing.jpg','Only previewed, never mutated');

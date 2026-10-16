@@ -10,8 +10,8 @@ function mf454QuickRemoveDom(){
 }
 function mf454QuickBadge(candidate){
  const confidence=Number(candidate.confidence)||0;
- const exact=candidate.idMatch===true||confidence>=.9;
- return exact?'Verified match':confidence>=.65?'Likely match':'Review match carefully';
+ const exact=candidate.idMatch===true&&confidence>=.9;
+ return exact?'Verified external-ID match':confidence>=.65?'Title match · review':'Unverified match · review carefully';
 }
 function mf454QuickLoading(q){return q.stage==='pausing'||q.stage==='connecting';}
 function mf454QuickView(example=null){
@@ -38,7 +38,7 @@ function mf454QuickView(example=null){
  '<small>'+q.covers.length+' available'+(q.coverLoading?' · searching':'')+'</small></div>'+
  (q.coverLoading&&q.covers.length===0?'<p class="mf454-wait">Searching actual artwork providers…</p>':'')+
  (q.covers.length?'<div class="mf454-cover-gallery" role="group" aria-label="Choose artwork">'+
-  q.covers.map((c,i)=>'<button type="button" class="mf454-cover-option '+(q.coverIndex===i?'selected':'')+
+  q.covers.map((c,i)=>'<button type="button" data-v225-iconified="1" class="mf454-cover-option '+(q.coverIndex===i?'selected':'')+
    '" aria-pressed="'+(q.coverIndex===i)+'" onclick="App.mf453PickCover('+i+')">'+
    '<span class="mf454-cover-image"><img src="'+mf453Esc(c.url)+'" loading="lazy" decoding="async" alt="'+
    mf453Esc(c.title||'Cover candidate')+'"></span>'+
@@ -117,7 +117,7 @@ function mf454QuickValidateCover(item,source){
  // mf444Confirm step still handles replacement. Less-certain title matches
  // receive a separate review warning first.
  return !!source&&/^https:\/\//i.test(String(source.url||''))&&
- Number(source.confidence)>=.25;
+ Number(source.confidence)>=0;
 }
 const mf454OriginalApply=mf453ApplyQuick;
 mf453ApplyQuick=async function(){
@@ -127,7 +127,7 @@ mf453ApplyQuick=async function(){
  if(chosen&&!mf454QuickValidateCover(item,chosen)){
   showToast('The selected artwork did not meet minimum validation. Choose another verified-loading image.');return;
  }
- if(chosen&&Number(chosen.confidence)<.65){
+ if(chosen&&(Number(chosen.confidence)<.65||chosen.idMatch!==true)){
   if(!await mf444Confirm('Review lower-confidence cover match?',
    'This artwork loaded successfully, but the provider title match is uncertain. Make sure it belongs to the correct title and edition before applying.',
    'Use Reviewed Cover',false,1,'cover'))return;
@@ -183,7 +183,7 @@ async function mf454FetchQuick(session){
      for(const candidate of rows||[]){
       if(!mf454QuickLive(q)||q.controller.signal.aborted)break;
       const url=String(candidate?.url||'');
-      if(!url.startsWith('https://')||found.has(url)||Number(candidate?.confidence)<.25)continue;
+      if(!url.startsWith('https://')||found.has(url))continue;
       found.add(url);
       if(await mf424Image(url,candidate.provider)){
        if(!mf454QuickLive(q))break;
