@@ -190,7 +190,8 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
    if(MF442.indexLibrary!==S.library)mf442IndexSelected(job.ids);
    const item=MF442.index.get(id);
    if(!item){mf442Failure(job,'Library title unavailable; no changes applied',id);
-    job.cursor++;job.completed=job.cursor;mf439SaveJob();mf439PaintJob();continue;}
+    job.cursor++;job.completed=job.cursor;mf439SaveJob();mf439PaintJob();
+    if(typeof mf452StopBoundary==='function'&&mf452StopBoundary(job))break;continue;}
    const before=mf442TitleSignature(item);
    const {preview,failures}=await mf439Discover(item,mf439Preferences().enabled,()=>{},null);
    if(MF439.cancel||MF439.job!==job||MF439.account!==mf439Account()||
@@ -223,6 +224,7 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
    }
    job.cursor++;job.completed=job.cursor;
    mf439SaveJob();mf439PaintJob();
+   if(typeof mf452StopBoundary==='function'&&mf452StopBoundary(job))break;
   }
   job.status=job.stopRequested?'stopped':job.cursor>=job.ids.length?'completed':'paused';
  }catch(e){
