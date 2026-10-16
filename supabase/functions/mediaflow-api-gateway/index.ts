@@ -280,6 +280,14 @@ async function metadata(p:Provider,title:string,ids:IdMap,year:number){
       publishers:d.label?[d.label]:[],mediaFormat:"Album"},sourceUrl:d.link||best.recordUrl},ids,title)].filter(Boolean);
  }
 
+ if(p==="metron"){
+  const d=await read(p,"https://metron.cloud/api/series/"+encodeURIComponent(id)+"/",{"Authorization":"Bearer "+secret});
+  return [metaRow(p,{title:d.name||best.title,ids:{metron_series:String(d.id||id),...(d.cv_id?{comicvine_volume:String(d.cv_id)}:{}),
+   ...(d.gcd_id?{gcd_series:String(d.gcd_id)}:{})},
+   fields:{synopsis:d.desc||"",year:d.year_began,genres:metaNames(d.genres),status:d.status,
+     language:d.language,mediaFormat:d.series_type?.name||"Comic",publishers:metaNames(d.publisher?[d.publisher]:[])},
+   sourceUrl:d.resource_url||best.recordUrl},ids,title)].filter(Boolean);
+ }
  if(p==="watchmode"){
   const d=await read(p,"https://api.watchmode.com/v1/title/"+encodeURIComponent(id)+"/details/",{"X-API-Key":secret});
   return [metaRow(p,{title:d.title||best.title,ids:{watchmode:String(d.id||id),...(d.imdb_id?{imdb:d.imdb_id}:{})},
@@ -360,7 +368,7 @@ Deno.serve(async(req:Request)=>{
  catch(_){return reply(400,{error:"Invalid JSON request"});}
  if(data.action==="status")return reply(200,{version:437,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
-   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","watchmode","animeschedule","episodate","gutendex"].includes(id)}))});
+   mode:r.mode,testable:r.mode!=="review",metadataSupported:["tmdb","omdb","malofficial","trakt","simkl","deezer","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
