@@ -18,7 +18,7 @@ function mf452Icon(type,size=16){
 }
 function mf452Button(action,label,icon,cls='',title=''){
  return '<button type="button" data-v225-iconified="1" class="mf452-control '+cls+
-  '" onclick="'+action+'"'+(title?' title="'+mf424Escape(title)+'"':'')+
+  '" onclick="'+mf424Escape(action)+'"'+(title?' title="'+mf424Escape(title)+'"':'')+
   '>'+mf452Icon(icon,15)+' <span>'+mf424Escape(label)+'</span></button>';
 }
 function mf452ProviderToolbar(mode){
