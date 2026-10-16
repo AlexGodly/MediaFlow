@@ -35,7 +35,8 @@
 #mf397-fan .mf397-fan-action small{font-size:10.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
 #mf397-fan .mf397-fan-action em{display:none}
 #mf397-fan .mf397-fan-action:focus-visible{outline:2px solid var(--flow);outline-offset:-2px}
-@media(max-width:720px){#mf397-fan.mf397-fan{left:0;right:auto;width:min(310px,calc(100vw - 24px));bottom:calc(100% + 12px)}}
+#mf397-fan.mf397-fan.mf444-align-right{left:0!important;right:auto!important}
+@media(max-width:720px){#mf397-fan.mf397-fan{width:min(310px,calc(100vw - 24px));bottom:calc(100% + 12px)}}
 @media(max-width:390px){#mf397-fan.mf397-fan{transform:none!important;width:min(305px,calc(100vw - 24px))}#mf397-fan .mf397-fan-action{min-height:62px;height:62px;padding:9px 11px}#mf397-fan .mf397-fan-action strong{font-size:12px}}
 @media(max-height:560px){#mf397-fan.mf397-fan{max-height:calc(100dvh - 125px - env(safe-area-inset-bottom,0px))}#mf397-fan .mf397-fan-action{height:56px;min-height:56px}#mf397-fan .mf397-action-symbol{height:36px;width:36px;flex-basis:36px}}
 @media(max-width:450px){.mf444-dialog{border-radius:18px}.mf444-head,.mf444-body{padding:16px}.mf444-actions{padding:14px 16px 16px}.mf444-heading h2{font-size:16px}}
