@@ -172,5 +172,6 @@
   "components/315-v436-selected-recovery-shortcut.js",
   "components/316-v437-metadata-recovery-core.js",
   "components/317-v437-metadata-recovery-ui.js",
-  "components/318-v437-expanded-cover-providers.js"
+  "components/318-v437-expanded-cover-providers.js",
+  "components/319-v437-public-metadata-adapters.js"
 ]
