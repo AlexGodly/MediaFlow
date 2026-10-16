@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const read=p=>fs.readFileSync(p,'utf8');
-assert(['434','435','436','437','438','439'].includes(read('VERSION').trim()));
+assert(['434','435','436','437','438','439','440'].includes(read('VERSION').trim()));
 const code=read('src/js/components/314-v434-provider-connection.js');
 const gateway=read('supabase/functions/mediaflow-api-gateway/index.ts');
 const prior=read('src/js/components/313-v433-provider-registry-foundation.js');
