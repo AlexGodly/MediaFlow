@@ -222,7 +222,7 @@ async function mf437ProcessLocked(){
    await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();
    if(job.cursor<job.ids.length&&job.cursor%job.partSize===0){if(MF437.stop==='part'){job.status='stopped';break;}if(job.continuation==='manual'){job.status='waiting-part';break;}}
   }
-  if(job.cursor>=job.ids.length)job.status='complete';
+  if(job.cursor>=job.ids.length&&job.status==='running')job.status='complete';
  }catch(e){job.status='paused';job.lastError=String(e.message||e).slice(0,200);}
  finally{MF437.running=false;await mf437SaveJob();if(typeof mf437Paint==='function')mf437Paint();}
 }
@@ -316,7 +316,7 @@ function mf437SelectedIds(mode,category,id){
  return (S.library||[]).filter(x=>x?.id!=null).map(x=>String(x.id));
 }
 async function mf437StartJob(config){
- if(MF437.running||MF437.job&&['running','paused','waiting-part'].includes(MF437.job.status))throw Error('Finish or cancel the previous metadata job first.');
+ if(MF437.running||MF437.job&&['running','pausing','stopping','stopping-after-part','paused','waiting-part','waiting-review'].includes(MF437.job.status))throw Error('Finish or cancel the previous metadata job first.');
  if(!AUTH_USER)throw Error('Sign in before recovering metadata.');
  const ids=[...new Set(mf437SelectedIds(config.scope,config.category,config.id))];
  if(!ids.length)throw Error('No Library titles in this recovery scope.');
