@@ -22,6 +22,7 @@ function mf446State(mode){
  if(!MF446.draft[mode]){
   const stored=S.settings?.v446RecoveryScopes?.[mode];
   MF446.draft[mode]=mf446CleanScope(stored);
+  if(!stored&&mode==='cover')MF446.draft[mode].mode=typeof mf436SelectedLibraryIds==='function'&&mf436SelectedLibraryIds().length?'selected':'all';
  }
  return MF446.draft[mode];
 }
@@ -124,7 +125,7 @@ function mf446ProviderAll(mode,on){
 function mf446CategoryRows(mode){
  const scope=mf446State(mode);
  const statusMode=scope.mode==='categoryStatus';
- const valid=scope.mode==='category'||statusMode;
+ const valid=!(mode==='cover'?MF445.oneId:MF445.metadataId)&&(scope.mode==='category'||statusMode);
  const cats=(S.categories||[]).filter(c=>c?.id!=null);
  const count=new Map();
  for(const item of S.library||[])if(item?.categoryId!=null){
@@ -207,7 +208,8 @@ function mf446UpdateSummary(){
  const actionButtons=root.querySelectorAll('.mf445-actions .btn-primary');
  for(const button of actionButtons){
   const action=button.getAttribute('onclick')||'';
-  button.disabled=!ready||(action.includes('preview')?ids.length!==1:!ids.length);
+  button.disabled=!ready||(action.includes('preview')?ids.length!==1:
+   action.includes('batch')&&!!MF445.metadataId?true:!ids.length);
  }
  if(mode==='metadata'){
   const note=root.querySelector('.mf446-scope .mf446-count');
@@ -284,6 +286,7 @@ async function mf446Start(action){
   mf445Close();return mf445OriginalMetadataOpen(ids[0]);
  }
  if(action==='batch'){
+  if(MF445.metadataId){showToast('Use Preview for a single saved title.');return;}
   if(MF446.pendingBatchIds){showToast('A metadata recovery confirmation is already open.');return;}
   // Keep the selected IDs through both confirmations in v442/v439. v439 reads
   // the candidate snapshot only after any unfinished-queue confirmation.
