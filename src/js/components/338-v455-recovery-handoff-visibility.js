@@ -17,6 +17,21 @@ mf441WorkspaceHtml=function(){
  mf425Icon('sliders',15)+' Open provider selection</button></div></details>').join('')+'</section>';
  return html+settings;
 };
+
+const mf455OriginalCoverSettings=mf425SettingsMarkup;
+mf425SettingsMarkup=function(){
+ const html=String(mf455OriginalCoverSettings.apply(this,arguments)||'');
+ return html.replace('<div class="mf425-settings-actions">',
+  '<details class="mf455-native-processing"><summary>Advanced Cover Processing & Matching</summary>'+
+  mf455ProcessingHtml('cover')+'</details><div class="mf425-settings-actions">');
+};
+const mf455OriginalMetaSettings=mf439SettingsHtml;
+mf439SettingsHtml=function(){
+ const html=String(mf455OriginalMetaSettings.apply(this,arguments)||'');
+ return html.replace('<div class="mf439-settings-actions">',
+  '<details class="mf455-native-processing"><summary>Advanced Metadata Processing & Matching</summary>'+
+  mf455ProcessingHtml('metadata')+'</details><div class="mf439-settings-actions">');
+};
 const mf455OrigCoverPrefs=mf424Defaults;
 mf424Defaults=function(){
  const x=mf455OrigCoverPrefs.apply(this,arguments),j=MF424.job;
