@@ -2,6 +2,8 @@
  * Gateway status is resolved on demand, with a bounded per-account cache.
  * This module does not add fictitious adapters, cloud secrets or data writes. */
 const MF443_VERSION=443;
+const MF443_BASE_COVER_ENABLED=MF424_DEFAULT.enabled.slice();
+const MF443_BASE_COVER_PRIORITIES=MF424_DEFAULT.priorities.slice();
 const MF443={account:'',checkedAt:0,pending:null,lastError:'',migrated:false};
 function mf443Account(){return String(AUTH_USER?.id||'');}
 function mf443ReadyCoverProviders(){
@@ -15,12 +17,12 @@ function mf443MaybeEnableDefaultCovers(){
  // Default recovery previously excluded gateway adapters even when configured.
  // Migrate ONLY unchanged default selections; never overwrite custom provider choices.
  const previous=S.settings?.v424Covers;
- const baseline=MF424_DEFAULT.enabled.slice();
+ const baseline=MF443_BASE_COVER_ENABLED;
  const unchanged=previous&&Array.isArray(previous.enabled)&&
   previous.enabled.length===baseline.length&&
   baseline.every(id=>previous.enabled.includes(id));
  MF424_DEFAULT.enabled=[...new Set([...baseline,...configured])];
- MF424_DEFAULT.priorities=[...new Set([...MF424_DEFAULT.priorities,...configured])];
+ MF424_DEFAULT.priorities=[...new Set([...MF443_BASE_COVER_PRIORITIES,...configured])];
  if(unchanged){
   S.settings.v424Covers={...previous,
    enabled:[...new Set([...previous.enabled,...configured])],
@@ -52,6 +54,8 @@ async function mf443EnsureGateway(force=false){
  if(!account||!supabase)return null;
  if(MF443.account!==account){
   MF443.account=account;MF443.checkedAt=0;MF443.lastError='';
+  MF424_DEFAULT.enabled=MF443_BASE_COVER_ENABLED.slice();
+  MF424_DEFAULT.priorities=MF443_BASE_COVER_PRIORITIES.slice();
   MF434.status=null;mf434EnableAdapters();
  }
  if(!force&&MF443.checkedAt&&Date.now()-MF443.checkedAt<5*60*1000)
