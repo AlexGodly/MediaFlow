@@ -82,7 +82,7 @@ assert.equal(c.mf441Show({visibility:'hidden'},{}),false,'Explicitly hidden widg
 (async()=>{
  c.App.mf447Open('both',{ids:['a','b','bad'],label:'Test collection'});
  assert.deepEqual([...api.scope()],['a','b'],'Untrusted/stale IDs are removed from collection context');
- assert(call.original.at(-1).mode==='cover'&&call.panel.at(-1)==='both');
+ assert(call.original.at(-1).mode==='cover'&&call.panel.at(-1)==='cover'&&vm.runInContext('MF447.active',c)==='both');
  await c.App.mf447StartCombined();
  assert.equal(call.coverStart,1);
  assert.deepEqual([...MF425.selected],['a','b'],'Cover stage uses immutable selected IDs, not the whole Library');
