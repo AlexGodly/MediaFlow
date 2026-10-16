@@ -75,7 +75,7 @@ jobs:
           # Historical regression contracts predate v460 and validate their
           # v459 snapshot. Supply their expected VERSION only for that pass;
           # restore v460 before all current-version checks and publishing.
-          printf '459\\n' > VERSION
+          echo 459 > VERSION
           node scripts/test-v455-unified-recovery.cjs
           node scripts/test-v455-quick-save.cjs
           node scripts/test-v456-quick-choices.cjs
@@ -106,7 +106,7 @@ jobs:
           node scripts/test-v425-recovery.cjs
           node scripts/test-v427-cover-universal-id.cjs
           node scripts/check-settings-style.cjs
-          printf '460\\n' > VERSION
+          echo 460 > VERSION
           python scripts/check.py
       - name: Desktop and 360px mobile Chromium browser smoke
         run: node scripts/test-v460-browser.cjs
