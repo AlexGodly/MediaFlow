@@ -12,7 +12,7 @@ assert(css.includes('.mf454-category-art img')&&css.includes('max-width:24px!imp
 assert(css.includes('.mf454-cover-gallery')&&css.includes('minmax(min(145px,100%),1fr)'),'Cover cards must have readable widths');
 assert(quick.includes("mf451Prepare('both',id)"),'Quick cover/metadata/both must pause both existing recovery engines');
 assert(quick.includes('q.preparePromise')&&quick.includes('if(q.scanPromise)await'),'Close during pause must restore after safe boundaries');
-assert(quick.includes('document.querySelectorAll(\\'[id="mf453-title-quick"]\\')'),'Remove orphaned duplicate popups');
+assert(quick.includes('mf454QuickRemoveDom')&&quick.includes('querySelectorAll('),'Remove orphaned duplicate popups');
 assert(quick.includes('await Promise.allSettled(tasks)'),'Quick Cover and Metadata search in parallel, not serially');
 assert(quick.includes('q.covers.length>=24'),'Multiple cover alternatives retained');
 assert(quick.includes('p.options.map'),'Alternate verified metadata choices exposed');
