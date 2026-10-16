@@ -13,7 +13,7 @@ function mf444Confirm(title,detail,action='Continue',destructive=false,count=0,k
   root.className='mf444-overlay mf425-themed';
   const esc=value=>mf424Escape(String(value??''));
   const number=Number.isSafeInteger(Number(count))&&Number(count)>0?Number(count):0;
-  const graphic=destructive?'alert':kind==='cover'?'images':'database';
+  const graphic=destructive?'shield':kind==='cover'?'images':'database';
   const kindName=kind==='cover'?'COVER RECOVERY':'METADATA RECOVERY';
   root.innerHTML='<div class="mf444-backdrop" aria-hidden="true"></div>'+
    '<section class="mf444-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mf444-title" aria-describedby="mf444-description" tabindex="-1">'+
@@ -22,9 +22,9 @@ function mf444Confirm(title,detail,action='Continue',destructive=false,count=0,k
    '<button class="mf444-close" type="button" data-mf444-dismiss aria-label="Close confirmation">'+mf425Icon('x',20)+'</button></header>'+
    '<div class="mf444-body"><p id="mf444-description">'+esc(detail)+'</p>'+
    (number?'<div class="mf444-count"><strong>'+number.toLocaleString()+'</strong><span>Selected title'+(number===1?'':'s')+'</span></div>':'')+
-   '<div class="mf444-info"><span>'+mf425Icon('shieldCheck',19)+'</span><p><strong>Existing Library data stays protected.</strong><small>Recovery safeguards, confirmed changes and saved progress remain in place.</small></p></div>'+
+   '<div class="mf444-info"><span>'+mf425Icon('shield',19)+'</span><p><strong>Existing Library data stays protected.</strong><small>Recovery safeguards, confirmed changes and saved progress remain in place.</small></p></div>'+
    '</div><footer class="mf444-actions"><button class="btn btn-ghost" type="button" data-mf444-dismiss>Cancel</button>'+
-   '<button class="btn '+(destructive?'btn-danger':'btn-primary')+'" type="button" data-mf444-approve>'+mf425Icon(destructive?'alert':'check',17)+esc(action)+'</button></footer>'+
+   '<button class="btn '+(destructive?'btn-danger':'btn-primary')+'" type="button" data-mf444-approve>'+mf425Icon(destructive?'shield':'check',17)+esc(action)+'</button></footer>'+
    '</section>';
   const dialog=root.querySelector('.mf444-dialog');
   const dismiss=approved=>{
