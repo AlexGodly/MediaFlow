@@ -97,7 +97,8 @@ function mf439Propose(item,rows,{manualApproval=[]}={}){
 function mf439PlanChosen(plan,selected={},manualApproval=[]){
  const approvals=new Set(manualApproval),choices=[];
  for(const prop of plan.proposals||[]){
-  const selectedIndex=Number(selected[prop.token]??prop.initial);
+  if(!Object.prototype.hasOwnProperty.call(selected,prop.token))continue;
+  const selectedIndex=Number(selected[prop.token]);
   const opt=prop.options[selectedIndex];
   if(!opt||prop.protected)continue;
   const approved=opt.identityVerified||approvals.has(opt.provider+':'+opt.recordId);
@@ -310,9 +311,11 @@ async function mf439Advance(save=false){
  if(!data||!job||job.status!=='review')return;
  const item=(S.library||[]).find(x=>String(x?.id)===data.plan.itemId);
  if(save&&item){
+  if(!mf439Lease()){showToast('Another tab is running Metadata Recovery');return;}
   const choice={};for(const id of MF439.selected)choice[id]=MF439.picked[id]??data.plan.proposals.find(p=>p.token===id)?.initial??0;
   const saved=await mf439Commit(item,data.plan,choice,[...MF439.confirm]);
   if(saved.changed)job.done++;else{job.skipped++;showToast(saved.reason||'Nothing eligible to save');}
+  mf439Unlock();
  }else job.skipped++;
  job.cursor++;MF439.preview=null;job.status='paused';mf439Checkpoint();
  mf439Paint();
