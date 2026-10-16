@@ -1,0 +1,40 @@
+/* v448 Smart Auto-Fill: dynamic theme, dense provider and manual evidence tools */
+.mf448-settings{display:grid;gap:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);padding:14px;min-width:0}
+.mf448-settings>header{display:flex;align-items:center;gap:10px}
+.mf448-settings>header>span{display:grid;place-items:center;border-radius:10px;padding:10px;background:var(--panel-raised);color:var(--flow);flex:none}
+.mf448-settings>header>div{display:grid;gap:4px;min-width:0}
+.mf448-settings>header strong{font-size:12px;color:var(--text);font-weight:850}
+.mf448-settings>header small{font-size:10px;color:var(--text-dim);line-height:1.4}
+.mf448-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(255px,100%),1fr));gap:10px}
+.mf448-policy{display:grid;gap:12px;min-width:0;border:1px solid var(--border-soft);background:var(--panel-raised);padding:12px;border-radius:11px}
+.mf448-policy>strong{display:flex;align-items:center;gap:8px;font-size:12px}
+.mf448-policy>label:not(.mf448-checkbox){display:grid;gap:6px;font-size:11px;font-weight:740;color:var(--text)}
+.mf448-policy select,.mf448-policy input[type=number]{min-width:0;width:100%;font:inherit;font-size:11px;color:var(--text);background:var(--panel);border:1px solid var(--border-soft);border-radius:9px;min-height:40px;padding:8px 10px}
+.mf448-policy>.mf448-checkbox{display:flex;align-items:start;gap:9px;font-size:11px;line-height:1.5;color:var(--text);cursor:pointer}
+.mf448-checkbox>input{width:17px;height:17px;flex:none;margin-top:2px;accent-color:var(--flow)}
+.mf448-policy>small{font-size:10px;color:var(--text-dim);line-height:1.55}
+.mf448-tools{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.mf448-tools button{display:flex;align-items:center;gap:8px;font-size:11px}
+.mf448-tools small{color:var(--text-dim);font-size:10px}
+.mf448-evidence-caption{display:inline-block;margin-left:8px;color:var(--text-dim);font-weight:600;font-size:10px}
+.mf448-instant-policy{display:flex;align-items:center;gap:8px;margin:12px 0;padding:9px 10px;border:1px solid var(--border-soft);border-radius:9px;font-size:11px;color:var(--text-dim)}
+.mf448-instant-policy svg{color:var(--flow);flex:none}
+.mf448-candidate-confidence{display:inline-flex;align-items:center;gap:5px;margin:5px 0;padding:3px 7px;font-weight:750;font-size:10px;border-radius:8px;border:1px solid var(--border-soft);background:var(--panel-raised)}
+.mf448-candidate-confidence.verified{color:var(--flow)}
+.mf448-review-overlay{z-index:100110!important}
+.mf448-dialog{width:min(730px,calc(100vw - 24px));max-width:730px;max-height:90dvh;overflow:auto;color:var(--text);background:var(--panel);border:1px solid var(--border-soft);border-radius:15px}
+.mf448-dialog>header{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:17px 18px;border-bottom:1px solid var(--border-soft)}
+.mf448-dialog>header h2{margin:4px 0;font-size:16px;display:flex;align-items:center;gap:7px}
+.mf448-dialog>header small{color:var(--flow);font-size:10px;letter-spacing:.13em;font-weight:850}
+.mf448-dialog>header p{margin:5px 0 0;color:var(--text-dim);font-size:11px;line-height:1.5}
+.mf448-review-list{padding:15px;overflow:auto;display:grid;gap:8px;max-height:60dvh}
+.mf448-review-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px;border-radius:10px;background:var(--panel-raised);border:1px solid var(--border-soft)}
+.mf448-review-row>span{display:grid;gap:4px;min-width:0;overflow-wrap:anywhere}
+.mf448-review-row strong{font-size:11px}
+.mf448-review-row small{font-size:10px;color:var(--text-dim)}
+.mf448-review-row button{display:inline-flex;align-items:center;gap:5px;flex:none}
+.mf448-empty{font-size:12px;color:var(--text-dim);margin:0}
+.mf448-review-footer{padding:12px 17px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end}
+.mf448-settings input:focus-visible,.mf448-settings select:focus-visible,.mf448-review-overlay button:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+@media(max-width:590px){.mf448-settings{padding:10px}.mf448-grid{grid-template-columns:1fr}.mf448-review-row{align-items:flex-start;flex-wrap:wrap}.mf448-review-row button{margin-left:auto}.mf448-dialog>header{padding:12px}}
+@media(max-width:370px){.mf448-tools button{width:100%;justify-content:center}.mf448-policy{padding:10px}.mf448-dialog>header h2{font-size:14px}}
