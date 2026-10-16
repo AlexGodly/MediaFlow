@@ -49,13 +49,14 @@ async function mf437Fetch(url,body){
 }
 function mf437Entry(item,provider,title,fields,ratings,ids,sourceUrl,aliases=[]){
  const existing=mf437Name(item?.title),candidates=[title,...aliases].map(mf437Name).filter(Boolean);
- const matched=candidates.some(name=>name===existing||name.length>4&&existing.length>4&&(name.includes(existing)||existing.includes(name)));
- const idField=({jikan:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',openlibrary:'openlibrary',vndb:'vndb',omdb:'imdb',malofficial:'mal',trakt:'trakt',tmdb:'tmdb',episodate:'episodate',gutendex:'gutendex'})[provider];
+ const matched=candidates.some(name=>name===existing); // Fuzzy name containment requires explicit review, never auto-save
+ const idField=({tenrai:'mal',jikan:'mal',malofficial:'mal',anilist:'anilist',kitsu:'kitsu',tvmaze:'tvmaze',openlibrary:'openlibrary',vndb:'vndb',omdb:'imdb',trakt:'trakt',tmdb:'tmdb',simkl:'simkl',deezer:'deezer',episodate:'episodate',gutendex:'gutendex',librivox:'librivox',ifdb:'ifdb',musicbrainz:'musicbrainz_release_group',theaudiodb:'theaudiodb',mangadex:'mangadex',mangaupdates:'mangaupdates',shikimori:'shikimori',steamspy:'steam',steamstore:'steam',openalex:'openalex',wikidata:'wikidata',crossref:'crossref',inventaire:'isbn',bookbrainz:'bookbrainz',loc:'loc'})[provider];
  const idConfirmed=Boolean(idField&&item.externalIds?.[idField]&&String(item.externalIds[idField])===String(ids?.[idField]));
  if(!matched&&!idConfirmed)return null;
  const sourceYear=Number(fields?.year||String(fields?.releaseDate||'').slice(0,4)),localYear=Number(item.year||'');
  if(!idConfirmed&&sourceYear>1900&&localYear>1900&&Math.abs(sourceYear-localYear)>1)return null;
- return {provider,title,fields,ratings,ids,sourceUrl,matchedBy:idConfirmed?'id':'title',verified:idConfirmed||matched};
+ return {provider,title,fields,ratings,ids,sourceUrl,matchedBy:idConfirmed?'id':'title',verified:idConfirmed||matched,
+  externalIdVerified:idConfirmed||Boolean(matched&&sourceYear>1900&&localYear>1900&&Math.abs(sourceYear-localYear)<=1)};
 }
 async function mf437Discover(item,provider){
  const title=String(item.title||'').trim(),q=encodeURIComponent(title),ids=item.externalIds||{},kind=mf437Kind(item);
@@ -153,7 +154,7 @@ function mf437Merge(item,record,mode='missing'){
   if(!/^[a-z][a-z0-9_]{0,32}$/.test(key)||!value||String(value).length>120)continue;
   if(item.v377ManualExternalIds&&Object.prototype.hasOwnProperty.call(item.v377ManualExternalIds,key))continue;
   if(newIds[key])continue;
-  if(!record.verified)continue;
+  if(!record.externalIdVerified)continue; // Never persist a new provider ID from ambiguous title-only matching.
   newIds[key]=String(value);
  }
  if(JSON.stringify(newIds)!==JSON.stringify(item.externalIds||{})){before.externalIds=item.externalIds;after.externalIds=newIds;}
