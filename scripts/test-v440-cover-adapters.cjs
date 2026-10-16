@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const code=fs.readFileSync('src/js/components/320-v440-universal-cover-adapters.js','utf8');
-assert(['439','440','441','442','443','444','445','446','447','448','449'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['439','440','441','442','443','444','445','446','447','448','449','450'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const meta=[{id:'googlebooks',name:'Google Books',types:['book'],limit:0,gap:4500,credentials:true}];
 const active=new Map(),defaultPrefs={enabled:['jikan','openlibrary'],priorities:['jikan','openlibrary']};
 const catalog=[['steam','Steam','game','cover','public'],['itunes','iTunes','music','cover','public'],
