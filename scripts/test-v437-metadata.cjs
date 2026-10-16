@@ -21,6 +21,7 @@ const ctx={
  createElement(){return {style:{},set textContent(v){this.value=v;}}},head:{appendChild(){}}},
  MediaFlowRuntime:{registerPageEnhancer(){}},libraryModalHtml:()=>'<div class="modal-actions" style="justify-content:space-between;">',
  renderLibrary:()=>'<button class="mf425-tools-button">Covers</button>',
+ v181TitleDetailsHtml:()=>'<div class="v181-detail-actions" style="margin:0;"><div class="v181-detail-section-label" style="margin-top:14px;">Dates & source</div>',
  mf397Markup:()=> '      </div>\n      <button type="button" id="mf397-fab"',
  mf397Action:()=>{},mf425Icon:()=>'<svg></svg>',
  showToast:()=>{},mf397SetMenu:()=>{},
@@ -37,6 +38,8 @@ assert.equal(ctx.S.library[0].externalIds.anilist,'23');
 assert.equal(ctx.S.library[0].externalRatings.mal.value,8.9);
 assert.equal(ctx.S.library[0].externalRatings.mal.scale,10);
 assert.equal(ctx.S.library[0].genres[0],'Action');
+assert.equal(vm.runInContext('mf437Merge(S.library[0], {verified:true,provider:"jikan",fields:{episodeCount:220,originalTitle:"ナルト"},ratings:{},ids:{},sourceUrl:"https://example.org"}).changed',ctx)>0,true);
+assert.equal(ctx.S.library[0].mediaMetadata.episodeCount,220);
 assert.equal(vm.runInContext('mf437SelectedIds("selected")',ctx).length,2); // call reads source selections, dedupe happens at job creation
 assert.equal(vm.runInContext('mf437Rating(null,10)',ctx),null,'Missing rating must never become zero');
 assert.equal(vm.runInContext('MF437_PROVIDERS.filter(x=>x.live).length',ctx),7);
