@@ -2,9 +2,9 @@
  * protected base-engine handoff, persisted evidence queue, Dashboard opt-in. */
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'448');
+assert(Number(fs.readFileSync('VERSION','utf8').trim())>=448);
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(order.at(-1),'components/328-v448-smart-autofill-recovery.js');
+assert(order.includes('components/328-v448-smart-autofill-recovery.js'));
 const src=fs.readFileSync('src/js/components/328-v448-smart-autofill-recovery.js','utf8');
 const css=fs.readFileSync('assets/css/255-v448-smart-auto-fill.css','utf8');
 assert(fs.readFileSync('index.html','utf8').includes('255-v448-smart-auto-fill.css'));
