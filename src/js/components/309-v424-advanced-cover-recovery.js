@@ -426,6 +426,7 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
         if(!mf424OwnLease()||(typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover'))){job.pauseRequested=true;break;}
         job.cursor++;job.processed++;
         await mf424SaveJob(); // committed results before checkpoint advancement
+        if(job.stopAfterTitle){job.stopAfterTitle=false;job.stopRequested=true;await mf424SaveJob();break;}
         mf424Paint();await mf424Delay(0);
       }
       if(job.cursor>=partEnd&&job.mode==='parts'&&job.cursor<job.ids.length){
