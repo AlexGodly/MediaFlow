@@ -177,7 +177,10 @@ async function mf453ApplyQuick(){
    // Link only the actual provider record ID, and never overwrite an existing
    // external ID. The chosen card previews this exact key/value first.
    const link=mf456CandidateLink(item,cover);
-   if(link.canLink)mf424LinkSelectedCoverId(item,cover,{manual:true});
+   if(link.canLink){
+    item.externalIds={...(item.externalIds||{}),[link.key]:link.id};
+    item.v377ManualExternalIds={...(item.v377ManualExternalIds||{}),[link.key]:link.id};
+   }
    item.modifiedAt=Date.now();
    mf456QuickProgress(q,'Saving selected cover URL and safe provider ID…');
    try{
