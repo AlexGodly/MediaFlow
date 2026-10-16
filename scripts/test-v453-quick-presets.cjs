@@ -1,9 +1,10 @@
 /* MediaFlow v453 — actionable presets and quick recovery contracts. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'453');
+assert(['453','454'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.deepEqual(order.slice(-2),['components/333-v453-recovery-presets.js','components/334-v453-quick-title-recovery.js']);
+assert(order.includes('components/333-v453-recovery-presets.js')&&order.includes('components/334-v453-quick-title-recovery.js'));
+assert.equal(order.at(-1),'components/336-v454-quick-title-hardening.js');
 const presetsSrc=fs.readFileSync('src/js/components/333-v453-recovery-presets.js','utf8');
 const quickSrc=fs.readFileSync('src/js/components/334-v453-quick-title-recovery.js','utf8');
 const oldSelect=fs.readFileSync('src/js/components/332-v452-recovery-control-polish.js','utf8');
