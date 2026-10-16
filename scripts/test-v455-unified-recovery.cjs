@@ -3,7 +3,8 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 assert(['455','456'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.deepEqual(order.slice(-2),['components/337-v455-workspace-direct-recovery.js','components/338-v455-recovery-handoff-visibility.js']);
+assert(order.includes('components/337-v455-workspace-direct-recovery.js')&&order.includes('components/338-v455-recovery-handoff-visibility.js'));
+assert.equal(order.at(-1),'components/340-v456-recovery-start-status.js');
 const direct=fs.readFileSync('src/js/components/337-v455-workspace-direct-recovery.js','utf8');
 const handoff=fs.readFileSync('src/js/components/338-v455-recovery-handoff-visibility.js','utf8');
 const quick=fs.readFileSync('src/js/components/334-v453-quick-title-recovery.js','utf8');
