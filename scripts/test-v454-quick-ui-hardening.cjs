@@ -19,7 +19,7 @@ assert(quick.includes('q.covers.length>=24'),'Multiple cover alternatives retain
 assert(quick.includes('p.options.map'),'Alternate verified metadata choices exposed');
 assert(quick.includes("!url.startsWith('https://')||found.has(url)"),'Display reviewable loadable cover alternatives');
 assert(quick.includes('mf424Image(url,candidate.provider)'),'Artwork must still load before selection');
-assert(quick.includes("if(chosen&&Number(chosen.confidence)<.65)"),'Low confidence requires explicit review');
+assert(quick.includes("if(chosen&&(Number(chosen.confidence)<.65||chosen.idMatch!==true)"),'Missing verified ID requires explicit review');
 assert(preset.includes('mf454FindProviders')&&preset.includes('mf454FindCategories'));
 assert(preset.includes('mf454CopyPreset')&&preset.includes('mf453SavePreset'));
 assert(!preset.includes("mf453PaintPresets();\n};\nmf453PresetBulk"),'Bulk checkbox action must not rebuild entire panel');
