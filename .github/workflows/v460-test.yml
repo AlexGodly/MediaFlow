@@ -76,7 +76,7 @@ jobs:
           # v459 snapshot. Supply their expected VERSION only for that pass;
           # restore v460 before all current-version checks and publishing.
           cp src/js/runtime-order.json "$RUNNER_TEMP/runtime-order-v460.json"
-          node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/344-v460-quick-recovery-widget-toggle.js')throw Error('Unexpected v460 runtime baseline');fs.writeFileSync(p,JSON.stringify(a,null,2)+'\\n')"
+          node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/344-v460-quick-recovery-widget-toggle.js')throw Error('Unexpected v460 runtime baseline');fs.writeFileSync(p,JSON.stringify(a,null,2))"
           echo 459 > VERSION
           node scripts/test-v455-unified-recovery.cjs
           node scripts/test-v455-quick-save.cjs
