@@ -55,4 +55,17 @@ function mf444Confirm(title,detail,action='Continue',destructive=false,count=0,k
 mf427Confirm=function(title,detail,action='Continue',destructive=false){
  return mf444Confirm(title,detail,action,destructive,0,'cover');
 };
+// Decide which side has room each time the FAB opens. When task progress is
+// visible on a narrow screen the + button moves left; otherwise it sits right.
+const mf444PreviousSetMenu=mf397SetMenu;
+mf397SetMenu=function(open){
+ const result=mf444PreviousSetMenu.apply(this,arguments);
+ const menu=document.getElementById('mf397-fan'),fab=document.getElementById('mf397-fab');
+ if(open&&menu&&fab){
+  const rect=fab.getBoundingClientRect(),viewport=window.innerWidth||document.documentElement.clientWidth;
+  const width=Math.min(310,Math.max(1,viewport-24));
+  menu.classList.toggle('mf444-align-right',rect.right-width<12&&rect.left+width<viewport-12);
+ }
+ return result;
+};
 window.MediaFlowV444=Object.freeze({version:444,confirm:mf444Confirm,open:()=>!!MF444.current});
