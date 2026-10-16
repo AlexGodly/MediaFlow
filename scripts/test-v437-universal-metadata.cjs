@@ -3,7 +3,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const source=fs.readFileSync('src/js/components/316-v437-universal-metadata-ratings.js','utf8');
 const runtime=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'437');
+assert(['437','438'].includes(fs.readFileSync('VERSION','utf8').trim()));
 assert(runtime.includes('components/316-v437-universal-metadata-ratings.js'));
 const escapeHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const sandbox={
@@ -72,6 +72,6 @@ assert.equal(cloud.universalMetadata.fields.gameDevelopers[0],'Studio');
 const backup=sandbox.v148BuildFullBackup();
 assert.equal(backup.backupManifest.includes.legacy,true);
 assert.equal(backup.backupManifest.v437.schemaVersion,1);
-assert.equal(backup.backupVersion,437);
+assert.equal(backup.backupVersion,437); // v437 unit runs standalone; v438 layer is tested separately
 assert(!source.includes('item.rating='),'provider never writes personal rating');
 console.log('v437 metadata tests passed: schema, IDs, rated sources, provenance, locks, merge, backup and isolation.');
