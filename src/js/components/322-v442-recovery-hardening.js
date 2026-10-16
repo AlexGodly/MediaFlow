@@ -112,14 +112,14 @@ mf439ReadJob=function(){
  return mf442NormalizeJob(original);
 };
 const mf442OriginalMetadataConfirm=mf439ConfirmBatch;
-mf439ConfirmBatch=function(){
+mf439ConfirmBatch=async function(){
  if(MF439.working)return mf442OriginalMetadataConfirm.apply(this,arguments);
  if(mf442CoverLockIsActive()||mf442ProcessLease()?.kind==='cover'){
   showToast('Cover Recovery is active. Pause it before starting Metadata Recovery.');return;
  }
  const previous=mf442NormalizeJob(MF439.job||mf439ReadJob());
  if(previous&&previous.cursor<previous.ids.length&&previous.status!=='completed'){
-  if(!confirm('A paused Metadata Recovery checkpoint already exists. Start a new selection and replace the unfinished queue? Previously saved fields will remain.'))return;
+  if(!await mf444Confirm('Replace unfinished recovery?', 'A saved metadata queue is unfinished. Replacing it discards pending work, but previously recovered fields remain saved.', 'Replace Queue', true, previous.ids.length-previous.cursor, 'metadata'))return;
  }
  return mf442OriginalMetadataConfirm.apply(this,arguments);
 };
