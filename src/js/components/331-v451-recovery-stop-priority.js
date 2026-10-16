@@ -130,7 +130,7 @@ async function mf451Restore({force=false}={}){
    mf447WriteCombo(j.combinedBackup?.stage!=='completed'?j.combinedBackup:null);
   }
   mf451Store(null);
-  const shouldResume=force?false:j.autoResume;
+  const shouldResume=force?true:j.autoResume;
   if(shouldResume&&j.coverWasRunning&&MF424.job&&
      MF424.job.cursor<MF424.job.ids.length){
    MF424.job.pauseRequested=false;
@@ -293,7 +293,9 @@ const mf451BaseMetadataRow=mf441MetadataRow;
 mf441MetadataRow=function(s){
  const html=mf451BaseMetadataRow.apply(this,arguments);
  const j=s.metadata;
- if(!j||['completed','stopped'].includes(j.status))return html;
+ if(!j)return html;
+ if(j.status==='stopped')return html.replace('</div></article>','<button type="button" class="mf451-resume" onclick="App.mf439Resume()">'+mf425Icon('play',15)+' Resume</button></div></article>').replace('No active job','Stopped safely · pending titles preserved');
+ if(j.status==='completed')return html;
  return html.replace('</div></article>','<button type="button" class="mf451-stop" onclick="App.mf451Stop(&#39;metadata&#39;)">'+mf425Icon('square',15)+' Stop</button></div></article>');
 };
 const mf451BaseWidget=mf441WidgetHtml;
@@ -321,7 +323,8 @@ mf441WorkspaceHtml=function(){
   (j?'<small>Priority title: '+mf424Escape(mf451SavedId(j.id)?mf439Item(j.id)?.title||'Saved title':'Unavailable title')+
   ' · '+mf424Escape(j.kind)+' · interrupted checkpoints preserved</small>':'')+
   '</section>';
- return html.replace('</section>',controls+'</section>');
+ const last=html.lastIndexOf('</section>');
+ return last<0?html:html.slice(0,last)+controls+html.slice(last);
 };
 async function mf451ResumeInterrupted(){
  const j=MF451.journal||mf451Read();
@@ -329,8 +332,14 @@ async function mf451ResumeInterrupted(){
  if(MF424.running||MF439.working||MF442.process){
   showToast('Finish or stop the current priority process before resuming older jobs.');return;
  }
- // Explicit resume never silently restarts a manually stopped process;
- // users choose Resume again from the original row when ready.
+ if(!mf451Ready(j)){
+  if(!await mf444Confirm('End priority recovery and resume interrupted jobs?',
+   'The priority run has not finished yet. Its already saved title changes will remain, but unprocessed priority items will be cancelled to restore the older queue.',
+   'Resume Older Jobs',true,0,j.kind==='metadata'?'metadata':'cover'))return;
+  if(j.kind==='cover'||j.kind==='both')await mf451Stop('cover',{confirm:false});
+  if(j.kind==='metadata')MF439.controller?.abort();
+  if(!await mf451Drain()){showToast('Waiting for the current provider request to exit safely. Try Resume Interrupted again.');return;}
+ }
  return mf451Restore({force:true});
 }
 Object.assign(App,{mf451Stop,mf451ClearAll,mf451ResumeInterrupted});
