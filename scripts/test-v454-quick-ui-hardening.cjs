@@ -86,7 +86,7 @@ const fixture={id:'1',kind:'both',serial:1,stage:'ready',closed:false,
 env.MF453Quick.current=fixture;env.MF453Quick.serial=1;
 const view=env.window.MediaFlowV454.html();
 assert(view.includes('Season 2 variant')&&view.includes('Option A')&&view.includes('Option B'));
-assert(view.includes('Review match carefully')&&view.includes('2 source alternatives'));
+assert(view.includes('Unverified match')&&view.includes('2 source alternatives'));
 assert(view.includes('Current cover')===false||view.includes('Existing cover'));
 assert(view.includes('Search all ready providers')&&view.includes('Confirm selected changes'));
 assert.equal(env.S.library[0].coverUrl,'https://example.com/existing.jpg','Only previewed, never mutated');
