@@ -9,7 +9,7 @@ function mf437ProvidersMarkup(settingsOnly=false){
  const selected=p.live&&pref.providers.includes(p.id);
  const tested=MF437_UI.tests[p.id];
  return '<div class="mf437-provider" data-mf437-provider="'+mf437Escape(p.id)+'"><label>'+
- '<input type="checkbox" value="'+mf437Escape(p.id)+'" data-mf437-enabled '+(selected?'checked':'')+(p.live?'':' disabled')+'>'+
+ '<input type="checkbox" value="'+mf437Escape(p.id)+'" data-mf437-enabled '+(selected?'checked':'')+(p.live?'':' disabled')+(settingsOnly?' onchange="App.mf437SaveProvidersFromSettings()"':'')+'>'+
  '<span><strong>'+mf437Escape(p.name)+'</strong><small>'+mf437Escape(p.group)+' · '+(p.live?'Public metadata adapter':'Integration pending verification')+'</small></span></label>'+
  (p.live?'<button class="btn btn-ghost" type="button" onclick="App.mf437Test(\''+mf437Escape(p.id)+'\')">Test Metadata</button>':'<span class="mf437-pending">Not active</span>')+
  '<small class="mf437-test-status" id="mf437-test-'+mf437Escape(p.id)+'">'+mf437Escape(tested||'')+'</small></div>';
@@ -21,13 +21,13 @@ function mf437PopupMarkup(entry='settings',id=''){
  const scope=single?'single':selection.length?'selected':'all';
  const cats=(S.categories||[]).filter(x=>x.id).map(c=>[String(c.id),c.name]);
  const available=MF437_PROVIDERS.filter(x=>x.live).length;
- const modeOptions=[['missing','Fill missing metadata (safe)'],['refresh','Review existing fields (manual values protected)']];
+ const modeOptions=[['missing','Fill missing metadata (safe)'],['refresh','Refresh ratings and missing fields (existing metadata protected)']];
  return '<div class="mf437-dialog" id="mf437-modal" role="dialog" aria-modal="true" aria-label="Metadata Recovery configuration">'+
  '<div class="mf437-panel"><header class="mf437-header"><div>'+mf437Icon('database',23)+'<div><small>RECOVERY WORKSPACE</small><h2>Metadata Recovery</h2></div></div><button class="btn btn-ghost" onclick="App.mf437Close()" aria-label="Close metadata recovery">'+mf437Icon('x')+'</button></header>'+
  '<div class="mf437-scroll">'+
  '<section><h3>'+mf437Icon('layers')+' 1. RECOVERY SCOPE</h3><label>Choose titles<select id="mf437-scope" '+(single?'disabled':'')+' onchange="App.mf437ScopeChange()">'+mf437Options([['all','All Library'],['selected','Selected Titles ('+selection.length+')'],['category','By Category'],['single','This Title']],scope)+'</select></label>'+
  (single?'<p>Selected title: '+mf437Escape(mf437Find(id)?.title||'Unknown')+'</p>':'')+
- '<label id="mf437-category-row">Category<select id="mf437-category">'+mf437Options(cats,cats[0]?.[0])+'</select></label>'+
+ '<label id="mf437-category-row">Category<select id="mf437-category" onchange="App.mf437ScopeChange()">'+mf437Options(cats,cats[0]?.[0])+'</select></label>'+
  '<p class="mf437-sub" id="mf437-count"></p></section>'+
  '<section><h3>'+mf437Icon('settings')+' 2. PROCESSING & DATA PROTECTION</h3><div class="mf437-grid">'+
  '<label>Recovery mode<select id="mf437-mode">'+mf437Options(modeOptions,prefs.mode)+'</select></label>'+
@@ -81,7 +81,8 @@ async function mf437Start(){
 }
 async function mf437Test(id){
  const provider=MF437_PROVIDERS.find(p=>p.id===id);if(!provider?.live)return;
- const title=String(document.getElementById('mf437-test-title')?.value||'').trim();const node=document.getElementById('mf437-test-'+id);
+ const root=document.getElementById('mf437-modal')||document.querySelector('[data-mf-setting-id="metadata-recovery"]');
+ const title=String(root?.querySelector('#mf437-test-title')?.value||'').trim();const node=root?.querySelector('#mf437-test-'+id);
  if(title.length<2){showToast('Enter a real test title first.');return;}
  // Testing verifies returned metadata. API availability alone is not a successful match.
  const samples={jikan:'anime',anilist:'anime',kitsu:'anime',tvmaze:'tv',openlibrary:'book',itunes:'movie',vndb:'visual novel'};
@@ -131,7 +132,7 @@ function mf437SettingsMarkup(){
  '<label>Titles per part<input type="number" min="1" max="1000" value="'+pref.partSize+'" onchange="App.mf437SavePref(\'partSize\',Math.max(1,Math.min(1000,Number(this.value)||100)))"></label></div>'+
  '<label class="mf425-settings-check"><input type="checkbox" '+(pref.ratingRefresh?'checked':'')+' onchange="App.mf437SavePref(\'ratingRefresh\',this.checked)"> Refresh previously retrieved external ratings</label>'+
  '<p class="mf437-sub">Your personal rating is never changed. Unverified or restricted providers remain disabled until a real metadata adapter has been tested.</p>'+
- '<div class="mf437-actions"><button class="btn btn-primary" onclick="App.mf437Open()">Configure & Start Metadata Recovery</button><button class="btn btn-ghost" onclick="App.mf437Reset()">Restore Metadata Recovery defaults</button></div></div>';
+ '<h3>'+mf437Icon('database')+' VERIFIED METADATA API CONNECTIONS</h3><p class="mf437-sub">Test each public metadata endpoint independently. A cover-only connection does not verify metadata support. Restricted and unimplemented adapters remain disabled.</p><label>Verification test title<input id="mf437-test-title" type="text" maxlength="120" value="Naruto" placeholder="Enter a title supported by the chosen provider"></label>'+mf437ProvidersMarkup(true)+'<div class="mf437-actions"><button class="btn btn-primary" onclick="App.mf437Open()">Configure & Start Metadata Recovery</button><button class="btn btn-ghost" onclick="App.mf437Reset()">Restore Metadata Recovery defaults</button></div></div>';
 }
 function mf437SettingsEnhance(){
  if(S.view!=='settings'||!window.MediaFlowSettingsCenter?.mountSection)return;
@@ -178,4 +179,19 @@ mf397Action=function(action){
 MediaFlowRuntime.registerPageEnhancer('settings',mf437SettingsEnhance);
 function mf437Boot(){mf437Styles();void mf437Restore().then(mf437Paint);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mf437Boot,{once:true});else mf437Boot();
-Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset});
+const mf437OriginalDetails=v181TitleDetailsHtml;
+v181TitleDetailsHtml=function(item){
+ let html=String(mf437OriginalDetails.apply(this,arguments)||'');
+ const editButton='<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf437Open(\'single\',\''+mf437Escape(String(item?.id||''))+'\')">'+mf437Icon('database')+' Fix Metadata</button>';
+ html=html.replace('<div class="v181-detail-actions" style="margin:0;">','<div class="v181-detail-actions" style="margin:0;">'+editButton);
+ const anchor='<div class="v181-detail-section-label" style="margin-top:14px;">Dates & source</div>';
+ if(html.includes(anchor))html=html.replace(anchor,mf437RatingsMarkup(item)+anchor);
+ return html;
+};
+function mf437SaveProvidersFromSettings(){
+ const root=document.querySelector('[data-mf-setting-id="metadata-recovery"]');
+ if(!root)return;
+ const providers=[...root.querySelectorAll('input[data-mf437-enabled]:checked')].map(x=>x.value);
+ mf437SavePref('providers',providers);
+}
+Object.assign(App,{mf437Open,mf437Close,mf437OpenEditor,mf437ScopeChange,mf437Start,mf437Test,mf437Control,mf437SavePref,mf437Reset,mf437SaveProvidersFromSettings});
