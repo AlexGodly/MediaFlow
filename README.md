@@ -1,9 +1,12 @@
-## MediaFlow v440 — Universal Cover Recovery Expansion
+## MediaFlow v441 — Recovery Workspace & Background Processes
 
-MediaFlow personal web/PWA edition.
+MediaFlow by Alex Godly, personal web/PWA edition.
 
-Seven new working public Cover Recovery adapters: Steam, Apple iTunes, MusicBrainz/Cover Art Archive, VNDB, IFDB interactive fiction, Gutendex and Google Books. Providers feed the existing bulk cover recovery and Find Cover picker, with safe image checks, source provenance, ID protection, custom-category independence, and manual review for uncertain matches.
+- Unified **Recovery Workspace** in Settings links existing Cover Recovery, Metadata Recovery and API Providers & Testing.
+- Theme-aware **Background Processes** floating widget shows both recovery engines with live progress, safe pause/resume and persistent Hidden/Automatic/Always visibility preferences.
+- Floating quick actions now include **New Metadata Recovery** (fifth shortcut), automatically respecting checkbox-selected Library titles. Opening it never sends requests until the user chooses a preview or explicitly confirms a batch.
+- Metadata Recovery previews gain field-status totals and filters; settings show the selected Library scope.
+- Existing v439 metadata field protections and v440 cover providers/validation remain intact. Nothing overwrites personal ratings, progress, protected values or saved artwork.
+- Responsive desktop/mobile UI, reduced-motion support, safe area and 100k-title-friendly progress updates.
 
-Cover Recovery Settings and the shared **API Providers & Testing** Settings category include the new sources without resetting existing users' configured priorities. v439 automatic Metadata Recovery and the live Supabase gateway are preserved, with no new API secrets required.
-
-See [v440 release notes](docs/CHANGELOG_v440.md). Each complete release archive is stored at `legacy/v/<number>` and excluded from the production GitHub Pages site.
+Read the [v441 changelog](docs/CHANGELOG_v441.md). Each full version is archived under `legacy/v/<version>/` outside the GitHub Pages site.
