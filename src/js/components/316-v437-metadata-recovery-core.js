@@ -32,7 +32,7 @@ function mf437Suitable(provider,item){const k=mf437Kind(item),ids=item?.external
  default:return false;
 }}
 const MF437_FIELD_NAMES=['synopsis','releaseDate','year','genres','themes','studios','producers','durationMinutes','mediaFormat','ageRating'];
-const MF437_EXTRA_FIELD_NAMES=['originalTitle','episodeCount','chapterCount','volumeCount','pageCount','trackCount','authors','artists','platforms','publishers','developers','language','network','isbn','originalLanguage','officialSite','visualNovelLength'];
+const MF437_EXTRA_FIELD_NAMES=['originalTitle','alternativeTitles','episodeCount','seasonCount','chapterCount','volumeCount','issueCount','pageCount','trackCount','authors','artists','directors','cast','narrators','composers','seiyuu','labels','platforms','gameModes','gameEngine','visualNovelEngine','publishers','developers','language','originalLanguage','countries','network','isbn','isrc','ifid','releaseGroup','franchise','series','edition','serialization','readingPlatform','estimatedPlaytime','officialSite','visualNovelLength','status','budget','revenue','popularity'];
 function mf437Rating(value,scale,votes,url){
  if(value===null||value===undefined||value==='')return null;
  const n=Number(value);if(!Number.isFinite(n)||n<0||n>scale)return null;
