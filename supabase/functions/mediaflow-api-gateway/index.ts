@@ -262,7 +262,7 @@ async function metadata(p:Provider,title:string,ids:IdMap,year:number){
  }
  if(p==="malofficial"){
   const media=/manga/i.test(best.recordUrl||"")?"manga":"anime";
-  const fields="alternative_titles,synopsis,mean,num_scoring_users,genres,media_type,status,start_date,end_date,num_episodes,num_chapters,num_volumes,average_episode_duration,studios,authors";
+  const fields=media==="anime"?"alternative_titles,synopsis,mean,num_scoring_users,genres,media_type,status,start_date,end_date,num_episodes,average_episode_duration,studios":"alternative_titles,synopsis,mean,num_scoring_users,genres,media_type,status,start_date,end_date,num_chapters,num_volumes,authors";
   const d=await read(p,"https://api.myanimelist.net/v2/"+media+"/"+encodeURIComponent(id)+"?fields="+encodeURIComponent(fields),{"X-MAL-CLIENT-ID":secret});
   return [metaRow(p,{title:d.title,ids:{mal:String(d.id)},fields:{synopsis:d.synopsis,originalTitle:d.alternative_titles?.ja,
    releaseDate:d.start_date,year:yr(d.start_date),genres:metaNames(d.genres),mediaFormat:d.media_type,
