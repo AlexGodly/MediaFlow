@@ -1,0 +1,216 @@
+name: Publish MediaFlow v427 Beta — Unified Cover Recovery UX (one-time)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v427.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mediaflow-v427-release
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout personal MediaFlow main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Check v426 baseline, immutable history and release eligibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 426
+          test -d legacy/v/426
+          test ! -e legacy/v/427
+          test ! -e assets/js/mediaflow-v427.bundle.js
+          test -s scripts/v427-payload.b64
+          ! git show-ref --verify --quiet refs/tags/427
+          test -f src/js/components/310-v425-cover-recovery-integration.js
+          test -f src/js/components/309-v424-advanced-cover-recovery.js
+          echo 'Safe to build personal MediaFlow v427 from exact v426 baseline.'
+
+      - name: Apply v427 source, icon, modal, confirmation and saving changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d scripts/v427-payload.b64 | tar xzf -
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('.')
+          def edit(path,old,new,label):
+              target=root/path
+              text=target.read_text(encoding='utf-8')
+              assert text.count(old)==1,(label,text.count(old))
+              target.write_text(text.replace(old,new),encoding='utf-8')
+          edit('src/js/components/309-v424-advanced-cover-recovery.js',
+               "if(!MF424.ready){alert('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}",
+               "if(!MF424.ready){showToast('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}",
+               'no browser-native recovery ready alert')
+          edit('src/js/components/309-v424-advanced-cover-recovery.js',
+               "!confirm('Replace your existing recovery job? Pending confirmations will be lost.')",
+               "!await mf427ConfirmJobReplace()",
+               'themed job replacement confirmation')
+          edit('src/js/components/309-v424-advanced-cover-recovery.js',
+               "!confirm('Pending confirmations will remain only in the exported previous report. Continue?')",
+               "!await mf427ConfirmRetryPending()",
+               'themed pending review warning')
+          edit('src/js/components/309-v424-advanced-cover-recovery.js',
+               "!confirm('Retry '+ids.length+' unresolved titles as a new recovery job?')",
+               "!await mf427ConfirmRetry(ids.length)",
+               'themed retry confirmation')
+          edit('src/js/components/158-v226-semantic-icons-dropdowns.js',
+               "v225ButtonIconName=function(el){\n  const t=v225CleanActionText(el);",
+               "v225ButtonIconName=function(el){\n  // v427: explicit mf425/mf427 svg already describes the action, never inject a second icon.\n  if(el?.querySelector?.(':scope > svg.mf425-icon, :scope > svg.mf427-icon, :scope > .mf425-icon, :scope > .mf427-icon'))return null;\n  const t=v225CleanActionText(el);",
+               'fix double Advanced Recovery icon at the source')
+          edit('src/js/components/308-v423-navigation-restore-donation-polish.js',
+               '<span>✧ More possibilities</span><span>☁ Hosting &amp; storage</span><span>♡ Ongoing improvements</span>',
+               '<span>More possibilities</span><span>Hosting &amp; storage</span><span>Ongoing improvements</span>',
+               'remove hard-coded unicode icon text from About chips')
+          manifest=root/'src/js/runtime-order.json'
+          order=json.loads(manifest.read_text(encoding='utf-8'))
+          assert order[-1]=='components/310-v425-cover-recovery-integration.js'
+          assert 'components/311-v427-recovery-ux-stability.js' not in order
+          order.append('components/311-v427-recovery-ux-stability.js')
+          manifest.write_text(json.dumps(order,indent=2)+'\n',encoding='utf-8')
+          (root/'VERSION').write_text('427\n',encoding='utf-8')
+          index=root/'index.html'
+          html=index.read_text(encoding='utf-8')
+          assert 'assets/js/mediaflow-v426.bundle.js' in html
+          assert '<meta name="mediaflow-version" content="426">' in html
+          html=html.replace('assets/js/mediaflow-v426.bundle.js','assets/js/mediaflow-v427.bundle.js',1)
+          html=html.replace('<meta name="mediaflow-version" content="426">','<meta name="mediaflow-version" content="427">',1)
+          style='<link rel="stylesheet" href="assets/css/238-v427-recovery-dialog-polish.css">'
+          assert style not in html and '</body>' in html
+          html=html.replace('</body>',style+'\n</body>')
+          index.write_text(html,encoding='utf-8')
+          package=root/'package.json'
+          info=json.loads(package.read_text(encoding='utf-8'))
+          info['name']='mediaflow-v427';info['version']='4.2.7'
+          package.write_text(json.dumps(info,indent=2)+'\n',encoding='utf-8')
+          PY
+          git rm -f scripts/v427-payload.b64
+          python scripts/build.py
+          node --check assets/js/mediaflow-v427.bundle.js
+          test -f assets/css/238-v427-recovery-dialog-polish.css
+          grep -q 'mf427ConfirmJobReplace' assets/js/mediaflow-v427.bundle.js
+          grep -q 'mf427OpenSearch' assets/js/mediaflow-v427.bundle.js
+
+      - name: Run v427 recovery interaction and full-project regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v424-recovery.cjs
+          python scripts/check.py
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          order=json.loads(Path('src/js/runtime-order.json').read_text(encoding='utf-8'))
+          assert order[-1]=='components/311-v427-recovery-ux-stability.js'
+          assert Path('VERSION').read_text().strip()=='427'
+          assert '238-v427-recovery-dialog-polish.css' in Path('index.html').read_text()
+          assert 'mediaflow-pwa-v427-shell' in Path('sw.js').read_text()
+          assert Path('docs/CHANGELOG_v427.md').exists()
+          old=Path('src/js/components/309-v424-advanced-cover-recovery.js').read_text()
+          assert not any(s in old for s in ["confirm('Replace your existing recovery job", "confirm('Pending confirmations", "confirm('Retry '"])
+          assert Path('src/js/components/157-v225-global-button-icons.js').read_text().count('mf421-dock-progress')>=2
+          assert Path('src/js/components/308-v423-navigation-restore-donation-polish.js').read_text().count('☁ Hosting')==0
+          print('v427 release integrity checks passed')
+          PY
+
+      - name: Commit validated v427 and archive the complete independent version
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'AlexGodly'
+          git config user.email '90983397+AlexGodly@users.noreply.github.com'
+          git add -A -- . ':!legacy' ':!beta'
+          git commit -m 'MediaFlow v427 Beta: unified covers, theme dialogs, save on select and icon cleanup'
+          mkdir -p "$RUNNER_TEMP/mediaflow-v427-source"
+          rsync -a --exclude='/legacy/' --exclude='/beta/' --exclude='/.git/' ./ "$RUNNER_TEMP/mediaflow-v427-source/"
+          test -f "$RUNNER_TEMP/mediaflow-v427-source/src/js/components/311-v427-recovery-ux-stability.js"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v427-source/VERSION")" = 427
+          mkdir -p legacy/v/427
+          rsync -a "$RUNNER_TEMP/mediaflow-v427-source/" legacy/v/427/
+          git add legacy/v/427
+          git commit -m 'Archive complete MediaFlow v427 source in legacy/v/427'
+          git tag 427
+          git push origin HEAD:main refs/tags/427
+          echo "v427 source, archive and tag pushed: $(git rev-parse HEAD)"
+
+      - name: Package full Modular ZIP and publish v427 Beta release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import os
+          src=Path(os.environ['RUNNER_TEMP'])/'mediaflow-v427-source'
+          dst=Path(os.environ['RUNNER_TEMP'])/'MediaFlow_v427_Modular.zip'
+          with ZipFile(dst,'w',ZIP_DEFLATED,compresslevel=6) as archive:
+            for p in src.rglob('*'):
+              if not p.is_file():continue
+              rel=p.relative_to(src)
+              if rel.parts[0] in {'legacy','beta','.git','.github'}:continue
+              archive.write(p,rel.as_posix())
+          with ZipFile(dst) as archive:
+            assert archive.testzip() is None
+            assert 'assets/js/mediaflow-v427.bundle.js' in archive.namelist()
+            assert 'src/js/components/311-v427-recovery-ux-stability.js' in archive.namelist()
+            assert 'VERSION' in archive.namelist()
+          print('Validated v427 Modular ZIP:',dst,dst.stat().st_size)
+          PY
+          gh release create 427 "$RUNNER_TEMP/MediaFlow_v427_Modular.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v427 Beta' \
+            --notes-file docs/CHANGELOG_v427.md \
+            --prerelease
+          gh release view 427 --repo "$GITHUB_REPOSITORY" --json tagName,name,url,assets
+
+      - name: Prepare deployed GitHub Pages website without legacy or beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mediaflow-v427-site"
+          rsync -a \
+            --exclude='/legacy/' \
+            --exclude='/beta/' \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            ./ "$RUNNER_TEMP/mediaflow-v427-site/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v427-site/VERSION")" = 427
+          test -f "$RUNNER_TEMP/mediaflow-v427-site/assets/js/mediaflow-v427.bundle.js"
+          test ! -e "$RUNNER_TEMP/mediaflow-v427-site/legacy"
+          test ! -e "$RUNNER_TEMP/mediaflow-v427-site/beta"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mediaflow-v427-site
+
+      - name: Deploy v427 to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
