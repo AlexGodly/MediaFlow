@@ -36,6 +36,7 @@ jobs:
           node --check src/js/components/321-v437-media-provider-identifiers.js
           node --check src/js/components/322-v437-cover-connection-verification.js
           node scripts/test-v437-review.cjs
+          node scripts/test-v437-persistence.cjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
