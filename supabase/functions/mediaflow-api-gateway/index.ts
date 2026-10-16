@@ -245,7 +245,7 @@ async function discoverMetadata(p:Provider,title:string,ids:IdMap,year:number){
    if(rotten?.Value&&/^\d+%$/.test(rotten.Value))ratings.rottentomatoes_critics=score(Number(rotten.Value.slice(0,-1)),100);
    if(/^\d+$/.test(d.Metascore||""))ratings.metacritic=score(Number(d.Metascore),100);
    add(makeMetadata(p,d.imdbID,d.Title,{year:y,externalIds:{imdb:d.imdbID},
-    legacy:{synopsis:clean(d.Plot),genres,year:y,releaseDate:text(d.Released,40),
+    legacy:{synopsis:clean(d.Plot),genres,year:y,releaseDate:/^\d{2} \w{3} \d{4}$/.test(String(d.Released||""))?new Date(String(d.Released)).toISOString().slice(0,10):"",
       durationMinutes:Number(String(d.Runtime||"").match(/\d+/)?.[0])||null,ageRating:clean(d.Rated,80)},
     fields:{directors:clean(d.Director,400).split(",").map((x:string)=>x.trim()).filter(Boolean),
       screenwriters:clean(d.Writer,400).split(",").map((x:string)=>x.trim()).filter(Boolean),
