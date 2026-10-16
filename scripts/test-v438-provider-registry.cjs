@@ -23,6 +23,7 @@ const context={console,Map,Set,Date,JSON,Object,Number,String,Array,Math,Error,U
  ],
  MF424_EXTRA_COVER_ADAPTERS:new Map([['tmdb',()=>[]]]),
  MF434:{status:{providers:[{id:'tmdb',configured:true,testable:true},{id:'omdb',configured:false,testable:true}]},tests:{}},
+ mf434RefreshGateway:async()=>{},v148BuildFullBackup:()=>({backupManifest:{includes:{}}}),
  mf434SavedTests:()=>['tmdb'],mf434Panel:()=>'<div class="mf434-connection" data-mf-setting-id="cover-api-gateway">Legacy connection test</div>',
  mf425SettingsMarkup:()=>'<div class="mf425-settings-card"><fieldset class="mf430-settings-providers">Preferences remain</fieldset><div class="mf434-connection">API panel</div></div>',
  mf424Provider:id=>context.MF424_PROVIDER_META.find(p=>p.id===id),
