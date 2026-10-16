@@ -14,8 +14,8 @@ function mf454QuickBadge(candidate){
  return exact?'Verified match':confidence>=.65?'Likely match':'Review match carefully';
 }
 function mf454QuickLoading(q){return q.stage==='pausing'||q.stage==='connecting';}
-function mf454QuickView(){
- const q=MF453Quick.current;
+function mf454QuickView(example=null){
+ const q=example||MF453Quick.current;
  if(!q||q.closed)return '';
  const item=mf439Item(q.id),cover=q.kind!=='metadata',metadata=q.kind!=='cover';
  const panel=q.metadata?.preview;
