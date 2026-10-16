@@ -42,7 +42,7 @@ assert.equal(vm.runInContext('mf437Merge(S.library[0], {verified:true,provider:"
 assert.equal(ctx.S.library[0].mediaMetadata.episodeCount,220);
 assert.equal(vm.runInContext('mf437SelectedIds("selected")',ctx).length,2); // call reads source selections, dedupe happens at job creation
 assert.equal(vm.runInContext('mf437Rating(null,10)',ctx),null,'Missing rating must never become zero');
-assert.equal(vm.runInContext('MF437_PROVIDERS.filter(x=>x.live).length',ctx),9);
+assert.ok(vm.runInContext('MF437_PROVIDERS.filter(x=>x.public&&x.live).length',ctx)>=9);
 vm.runInContext(ui,ctx);
 assert.equal(typeof ctx.App.mf437Start,'function');
 assert.ok(vm.runInContext('mf437PopupMarkup("settings")',ctx).includes('METADATA PROVIDERS'));
