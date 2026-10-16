@@ -194,10 +194,12 @@ async function mf438Test(id){
    if(String(input?.value||'').trim().length<2){
     throw Error('Enter a title in Configured API Connections below before testing '+p.name+'.');
    }
+   const checkedBefore=Number(MF434.tests[id]?.checked)||0;
    await mf434TestProvider(id);
-   // v434 remains the sole gateway verification authority and persists its
-   // previously approved user-tested provider IDs as before.
-   const ok=mf434SavedTests().includes(id);
+   // A saved verification from an earlier day must NOT count as success of
+   // this new test. Only a fresh v434 response is authoritative.
+   const checkedAfter=Number(MF434.tests[id]?.checked)||0;
+   const ok=checkedAfter>checkedBefore&&checkedAfter>=now&&mf434SavedTests().includes(id);
    MF438_UI.tests.set(id,{at:Date.now(),ok,error:ok?'':'Connection was not verified; see gateway results.'});
    if(!ok)throw Error('Gateway test did not verify this source. Review the result below.');
   }else{
