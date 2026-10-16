@@ -32,6 +32,10 @@ jobs:
           node --check src/js/components/318-v437-expanded-cover-providers.js
           node scripts/test-v437-metadata.cjs
           node --check src/js/components/319-v437-public-metadata-adapters.js
+          node --check src/js/components/320-v437-universal-metadata-editor.js
+          node --check src/js/components/321-v437-media-provider-identifiers.js
+          node --check src/js/components/322-v437-cover-connection-verification.js
+          node scripts/test-v437-review.cjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
