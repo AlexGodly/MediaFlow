@@ -18,6 +18,15 @@ for(const p of MF437_ADDITIONAL_PUBLIC){
  if(existing)Object.assign(existing,p,{live:true,public:true});
  else MF437_PROVIDERS.push({...p,live:true,public:true});
 }
+for(const provider of MF437_ADDITIONAL_PUBLIC){
+ if(!MF437_DEFAULTS.providers.includes(provider.id))MF437_DEFAULTS.providers.push(provider.id);
+}
+const mf437OldSuitable=mf437Suitable;
+mf437Suitable=function(provider,item){
+ if(MF437_ADDITIONAL_PUBLIC.some(p=>p.id===provider))return true;
+ if(MF437_PROVIDERS.some(p=>p.id===provider&&p.gateway))return true;
+ return mf437OldSuitable(provider,item);
+};
 function mf437GatewayAllowed(provider){
  const v=MF437_PROVIDERS.find(p=>p.id===provider);
  if(!v?.gateway)return true;
