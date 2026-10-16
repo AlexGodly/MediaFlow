@@ -300,21 +300,26 @@ function mf437MediaTypeChanged(type){
   group.hidden=group.dataset.mf437Group!=='shared'&&group.dataset.mf437Group!==type;
  });
 }
+function mf437MountEditorSection(editor,item){
+ if(!editor)return null;
+ const fragment=document.createElement('div');
+ fragment.innerHTML=mf437EditorHtml(item||{});
+ const section=fragment.firstElementChild;
+ if(!section)return null;
+ // This same mount operation is exercised in browser smoke without logging in.
+ // v240 uses a 12-column CSS grid; position directly before Imported Metadata.
+ const imported=editor.querySelector(':scope > .v178-rich-editor');
+ if(imported)editor.insertBefore(section,imported);
+ else editor.appendChild(section);
+ return section;
+}
 const mf437LibraryEditorBase=libraryModalHtml;
 libraryModalHtml=function(item){
  const html=mf437LibraryEditorBase.apply(this,arguments);
  try{
   const host=document.createElement('div');host.innerHTML=html;
   const editor=host.querySelector('.v240-library-editor,.v238-library-editor');
-  if(!editor)return html;
-  const fragment=document.createElement('div');fragment.innerHTML=mf437EditorHtml(item||{});
-  const section=fragment.firstElementChild;
-  if(!section)return html;
-  // v240 is a 12-column CSS grid. Anchor this full-width panel directly
-  // before imported metadata; do not append an unpositioned grid cell.
-  const imported=editor.querySelector(':scope > .v178-rich-editor');
-  if(imported)editor.insertBefore(section,imported);
-  else editor.appendChild(section);
+  if(!mf437MountEditorSection(editor,item))return html;
   return host.innerHTML;
  }catch(e){console.warn('v437 editor composition failed',e);return html;}
 };
@@ -465,6 +470,6 @@ window.MediaFlowV437=Object.freeze({
  version:437,schemaVersion:MF437_SCHEMA_VERSION,mediaTypes:MF437_MEDIA_TYPES,
  fieldGroups:MF437_FIELDS,ratingSources:MF437_RATING_SOURCES,
  normalize:mf437Normalized,merge:mf437MergeEnvelope,
- applyVerifiedProvider:mf437ApplyVerifiedProvider
+ applyVerifiedProvider:mf437ApplyVerifiedProvider,mountEditor:mf437MountEditorSection
 });
 Object.assign(App,{mf437MediaTypeChanged});
