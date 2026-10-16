@@ -294,6 +294,7 @@ v148BuildFullBackup=function(){
  return out;
 };
 window.MediaFlowV438=Object.freeze({version:MF438_VERSION,
+ render:mf438ControlsHtml,
  list:()=>mf438Catalog().map(p=>({...p,probeResult:p.probeResult?{...p.probeResult}:null})),
  inspect:()=>({total:mf438Catalog().length,publicTestPaths:Object.keys(MF438_PUBLIC_PROBES).length,
   gatewayTestPaths:mf438Catalog().filter(p=>p.gateway).length,
