@@ -26,8 +26,8 @@ function mf456CoverGallery(q,item){
    '<div class="mf456-cover-content">'+
    '<strong class="mf456-cover-title">'+mf456Escape(c.title||item?.title||'Untitled match')+'</strong>'+
    '<div class="mf456-cover-facts"><span>'+mf425Icon('database',13)+' '+mf456Escape(c.provider||'Unknown provider')+'</span>'+
-   '<span>'+mf425Icon('percent',13)+' '+mf456Escape(match)+' match</span></div>'+
-   '<small class="mf456-cover-trust">'+mf425Icon(c.idMatch?'shield-check':'shield-alert',14)+
+   '<span>'+mf425Icon('check',13)+' '+mf456Escape(match)+' match</span></div>'+
+   '<small class="mf456-cover-trust">'+mf425Icon('shield',14)+
    ' '+mf456Escape(c.idMatch?'Provider external-ID match':'Title candidate — verify edition')+'</small>'+
    '<div class="mf456-cover-record"><span>Provider record ID</span><code>'+mf456Escape(id.id||'Not supplied')+'</code>'+
    '<span>ID saved as</span><code>'+mf456Escape(id.key||'Cover URL only')+'</code></div>'+
