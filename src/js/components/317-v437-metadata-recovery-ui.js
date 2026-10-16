@@ -108,6 +108,13 @@ async function mf437Control(action){
  if(action==='pause'){MF437.pause=true;job.status=MF437.running?'pausing':'paused';}
  if(action==='stop'){MF437.stop='stop';job.status=MF437.running?'stopping':'stopped';}
  if(action==='part'){MF437.stop='part';job.status=MF437.running?'stopping-after-part':'stopped';}
+ if(action==='skip'){if(!MF437.running)return;MF437.skipRequested=true;job.message='Skipping current title after the active provider response';}
+ if(action==='cancel'){MF437.stop='cancel';job.status=MF437.running?'cancelling':'cancelled';}
+ if(action==='retry'){
+  if(MF437.running||!job.failedIds?.length)return;
+  job.ids=job.failedIds.slice();job.cursor=0;job.updated=0;job.skipped=0;job.errors=0;job.failedIds=[];job.status='paused';job.lastError='';job.retriedAt=Date.now();
+  await mf437SaveJob();void mf437Process();return;
+ }
  if(action==='resume'){
   if(MF437.running)return;MF437.pause=false;MF437.stop='';void mf437Process();
  }
@@ -123,11 +130,12 @@ function mf437Paint(){
  '<header><strong>'+mf437Icon('database')+' Metadata Recovery</strong><span>'+mf437Escape(job.status)+'</span></header>'+
  '<p>'+job.cursor.toLocaleString()+' / '+job.ids.length.toLocaleString()+' titles · '+pct+'%</p>'+
  '<div class="mf437-track" role="progressbar" aria-label="Metadata progress" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pct+'%"></span></div>'+
- '<p>Updated '+job.updated+' · Skipped '+job.skipped+' · Provider errors '+job.errors+'</p>'+
+ '<p>Updated '+job.updated+' · Skipped '+job.skipped+' · Failed providers '+job.errors+' · Retry titles '+(job.failedIds?.length||0)+'</p>'+ 
  (job.lastError?'<p title="'+mf437Escape(job.lastError)+'">'+mf437Escape(job.lastError)+'</p>':'')+
- '<div class="mf437-job-controls">'+(active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'pause\')">Pause</button><button class="btn btn-ghost" onclick="App.mf437Control(\'stop\')">Stop after current title</button><button class="btn btn-ghost" onclick="App.mf437Control(\'part\')">Stop after current part</button>':'')+
+ '<div class="mf437-job-controls">'+(active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'pause\')">Pause</button><button class="btn btn-ghost" onclick="App.mf437Control(\'skip\')">Skip title</button><button class="btn btn-ghost" onclick="App.mf437Control(\'stop\')">Stop after current title</button><button class="btn btn-ghost" onclick="App.mf437Control(\'part\')">Stop after current part</button><button class="btn btn-ghost" onclick="App.mf437Control(\'cancel\')">Cancel remaining</button>':'')+
  ((job.status==='waiting-review')?'<button class="btn btn-primary" onclick="App.mf437Review()">Review '+(job.previews?.length||0)+' Changes</button>':'')+
  (canResume&&job.status!=='waiting-review'?'<button class="btn btn-primary" onclick="App.mf437Control(\'resume\')">Resume</button>':'')+
+ (!active&&job.failedIds?.length?'<button class="btn btn-ghost" onclick="App.mf437Control(\'retry\')">Retry Failed Titles</button>':'')+
  (!active&&job.events?.some(x=>!x.undone)?'<button class="btn btn-ghost" onclick="App.mf437Undo()">Undo Eligible Changes</button>':'')+
  (!active?'<button class="btn btn-ghost" onclick="App.mf437Control(\'dismiss\')">Dismiss</button>':'')+'</div></aside>';
  if(old)old.outerHTML=html;else document.body.insertAdjacentHTML('beforeend',html);
