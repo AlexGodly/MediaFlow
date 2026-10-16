@@ -4,7 +4,7 @@
  * Single-title preview and bounded, resumable missing-field batches. */
 const MF439_VERSION=439;
 const MF439_DEFAULT={
- enabled:['jikan','anilist','kitsu','tvmaze','openlibrary','gutendex','itunes','steam','vndb','musicbrainz','tmdb','omdb','malofficial'],
+ enabled:['jikan','anilist','kitsu','tvmaze','openlibrary','gutendex','itunes','steam','vndb','musicbrainz',...MF439_GATEWAY],
  batchSize:25,maxBatch:250,minimumConfidence:0.94,manualReview:true
 };
 const MF439={preview:null,job:null,working:false,cancel:false,pane:'',account:'',results:[],lastError:'',startedAt:0};
