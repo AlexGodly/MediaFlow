@@ -1,9 +1,9 @@
 /* MediaFlow v456 — explicit cover record/selection and progress contracts. */
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-assert(['456','457'].includes(fs.readFileSync('VERSION','utf8').trim()));
+assert(['456','457','458'].includes(fs.readFileSync('VERSION','utf8').trim()));
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
-assert.deepEqual(order.slice(-3,-1),['components/339-v456-quick-cover-candidates.js','components/340-v456-recovery-start-status.js']);
+assert.deepEqual(order.slice(-4,-2),['components/339-v456-quick-cover-candidates.js','components/340-v456-recovery-start-status.js']);
 const quick=fs.readFileSync('src/js/components/339-v456-quick-cover-candidates.js','utf8');
 const launch=fs.readFileSync('src/js/components/340-v456-recovery-start-status.js','utf8');
 const original=fs.readFileSync('src/js/components/334-v453-quick-title-recovery.js','utf8');
