@@ -174,6 +174,117 @@ async function discover(p:Provider,title:string,ids:IdMap,year:number){
  }
  return rows.slice(0,24);
 }
+
+/* v439 Metadata Recovery: read-only, authenticated, source-verified records.
+ * Preserve v434 provider search and quotas; no arbitrary endpoints or writes.
+ * Only enabled/configured services are accepted; metadata payloads contain
+ * no user Library fields and no API keys. */
+const clean=(v:unknown,max=6000)=>text(v,max).replace(/<[^>]*>/g," ").replace(/&(?:amp|lt|gt|quot|#39);/g,m=>({"&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"}[m]||m)).trim();
+const score=(value:unknown,scale:number,votes:unknown=null)=>{
+ const n=Number(value),q=Number(votes);
+ return value!==null&&value!==undefined&&String(value).trim()!==""&&Number.isFinite(n)&&n>=0&&n<=scale?
+ {score:n,scale,votes:Number.isSafeInteger(q)&&q>=0?q:null}:null;
+};
+function makeMetadata(p:Provider,id:unknown,name:unknown,extra:Record<string,unknown>={}){
+ const title=clean(name,220),recordId=text(id,100);
+ if(!title||!recordId)return null;
+ return {provider:p,recordId,title,year:0,aliases:[],externalIds:{},legacy:{},fields:{},ratings:{},...extra};
+}
+async function discoverMetadata(p:Provider,title:string,ids:IdMap,year:number){
+ const rows:any[]=[];
+ const add=(value:unknown)=>{if(value)rows.push(value);};
+ const secret=RULES[p].env?KEY(RULES[p].env):"";
+ if(!secret&&RULES[p].env)throw Error("Provider not configured");
+ if(p==="tmdb"){
+  for(const type of ["movie","tv"]){
+   const existing=/^[1-9]\d*$/.test(ids[type==="movie"?"tmdb":"tmdb_tv"]||"")?
+    ids[type==="movie"?"tmdb":"tmdb_tv"]:"";
+   const endpoint=existing?type+"/"+existing:"search/"+type+"?query="+encodeURIComponent(title)+"&include_adult=false";
+   const result=await read(p,"https://api.themoviedb.org/3/"+endpoint,{"Authorization":"Bearer "+secret});
+   const candidates=(existing?[result]:list(result)).slice(0,7);
+   for(const r of candidates){
+    if(!r?.id)continue;
+    const name=clean(r.title||r.name,220);
+    if(norm(name)!==norm(title)&&String(r.id)!==existing)continue;
+    const key=type==="movie"?"tmdb":"tmdb_tv";
+    const y=yr(r.release_date||r.first_air_date);
+    const date=text(r.release_date||r.first_air_date,10);
+    let detail=r;
+    // Detail is essential for credited creators, genres and runtime, but
+    // only fetch for a verified exact title or an explicit saved provider ID.
+    try{detail=await read(p,"https://api.themoviedb.org/3/"+type+"/"+encodeURIComponent(String(r.id)),
+      {"Authorization":"Bearer "+secret});}catch(_){}
+    const vote=score(detail.vote_average??r.vote_average,10,detail.vote_count??r.vote_count);
+    const genres=(Array.isArray(detail.genres)?detail.genres:[]).map((x:any)=>clean(x.name,120)).filter(Boolean).slice(0,40);
+    add(makeMetadata(p,r.id,name,{
+     year:y,externalIds:{[key]:String(r.id)},
+     legacy:{synopsis:clean(detail.overview||r.overview),genres,year:y,releaseDate:date,
+      durationMinutes:detail.runtime||null,mediaFormat:type==="movie"?"Movie":"TV"},
+     fields:{originalLanguage:clean(detail.original_language||r.original_language,20),
+      originalTitle:clean(detail.original_title||detail.original_name||r.original_title||r.original_name,220),
+      tvCreators:((detail.created_by||[]) as any[]).map(x=>clean(x.name,150)).filter(Boolean),
+      networks:((detail.networks||[]) as any[]).map(x=>clean(x.name,150)).filter(Boolean),
+      releaseStatus:clean(detail.status,120)},
+     ratings:vote?{tmdb:vote}:{}
+    }));
+   }
+  }
+ }
+ if(p==="omdb"){
+  const existing=/^tt\d{7,12}$/i.test(ids.imdb||"")?ids.imdb:"";
+  const url=new URL("https://www.omdbapi.com/");
+  url.searchParams.set("apikey",secret);
+  if(existing)url.searchParams.set("i",existing);
+  else url.searchParams.set("t",title);
+  const d=await read(p,url.href);
+  if(d?.Response==="True"&&d.imdbID&&(norm(d.Title)===norm(title)||d.imdbID===existing)){
+   const y=yr(d.Year),genres=clean(d.Genre,400).split(",").map(x=>x.trim()).filter(Boolean);
+   const ratings:any={},imdb=score(d.imdbRating,10,d.imdbVotes?Number(String(d.imdbVotes).replace(/,/g,"")):null);
+   if(imdb)ratings.imdb=imdb;
+   const rotten=(d.Ratings||[]).find((x:any)=>/Rotten Tomatoes/i.test(x.Source));
+   if(rotten?.Value&&/^\d+%$/.test(rotten.Value))ratings.rottentomatoes_critics=score(Number(rotten.Value.slice(0,-1)),100);
+   if(/^\d+$/.test(d.Metascore||""))ratings.metacritic=score(Number(d.Metascore),100);
+   add(makeMetadata(p,d.imdbID,d.Title,{year:y,externalIds:{imdb:d.imdbID},
+    legacy:{synopsis:clean(d.Plot),genres,year:y,releaseDate:text(d.Released,40),
+      durationMinutes:Number(String(d.Runtime||"").match(/\d+/)?.[0])||null,ageRating:clean(d.Rated,80)},
+    fields:{directors:clean(d.Director,400).split(",").map((x:string)=>x.trim()).filter(Boolean),
+      screenwriters:clean(d.Writer,400).split(",").map((x:string)=>x.trim()).filter(Boolean),
+      cast:clean(d.Actors,600).split(",").map((x:string)=>x.trim()).filter(Boolean)},
+    ratings
+   }));
+  }
+ }
+ if(p==="malofficial"){
+  // Supports anime metadata with existing MAL client ID. No OAuth user token.
+  const existing=/^\d{1,12}$/.test(ids.mal||"")?ids.mal:"";
+  const sources=existing?[{node:{id:Number(existing),title}}]:
+   list(await read(p,"https://api.myanimelist.net/v2/anime?q="+encodeURIComponent(title)+"&limit=6",
+    {"X-MAL-CLIENT-ID":secret}));
+  for(const source of sources.slice(0,6)){
+   const n=source.node||source;
+   if(!n?.id||(norm(n.title)!==norm(title)&&String(n.id)!==existing))continue;
+   try{
+    const details=await read(p,"https://api.myanimelist.net/v2/anime/"+n.id+
+      "?fields=id,title,alternative_titles,start_date,synopsis,mean,num_scoring_users,genres,media_type,num_episodes,studios",
+      {"X-MAL-CLIENT-ID":secret});
+    if(!details?.id)continue;
+    const y=yr(details.start_date);
+    const rating=score(details.mean,10,details.num_scoring_users);
+    add(makeMetadata(p,details.id,details.title,{year:y,
+     aliases:[details.alternative_titles?.en,details.alternative_titles?.ja].filter(Boolean),
+     externalIds:{mal:String(details.id)},
+     legacy:{synopsis:clean(details.synopsis),genres:((details.genres||[]) as any[]).map(x=>clean(x.name,120)).filter(Boolean),
+      studios:((details.studios||[]) as any[]).map(x=>clean(x.name,120)).filter(Boolean),
+      year:y,releaseDate:text(details.start_date,10),mediaFormat:clean(details.media_type,60)},
+     fields:{originalTitle:clean(details.alternative_titles?.ja,200),
+      episodeCount:Number(details.num_episodes)||null},
+     ratings:rating?{mal:rating}:{}
+    }));
+   }catch(_){}
+  }
+ }
+ return rows.slice(0,12);
+}
 function cors(origin:string){const h:Record<string,string>={"Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin"};
  if(origin===ORIGIN)Object.assign(h,{"Access-Control-Allow-Origin":ORIGIN,
   "Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"});
@@ -196,10 +307,12 @@ Deno.serve(async(req:Request)=>{
  let data:any;
  try{data=await req.json();if(!data||typeof data!=="object"||Array.isArray(data))throw Error();}
  catch(_){return reply(400,{error:"Invalid JSON request"});}
- if(data.action==="status")return reply(200,{version:434,ready:true,
+ if(data.action==="status")return reply(200,{version:439,ready:true,metadataProviders:["tmdb","omdb","malofficial"],
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
    mode:r.mode,testable:r.mode!=="review"}))});
- if(data.action!=="search")return reply(400,{error:"Invalid action"});
+ if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
+ if(data.action==="metadata"&&!["tmdb","omdb","malofficial"].includes(text(data.provider,25)))
+  return reply(403,{error:"Metadata adapter not approved for this gateway provider"});
  const p=text(data.provider,25) as Provider;
  if(!Object.prototype.hasOwnProperty.call(RULES,p))return reply(400,{error:"Unknown provider"});
  const rule=RULES[p];
@@ -214,7 +327,7 @@ Deno.serve(async(req:Request)=>{
    if(/^[a-z][a-z0-9_]{0,32}$/.test(k)&&/^[\w.:-]{1,120}$/.test(value))ids[k]=value;
   }
  const year=yr(data.year),account=verified.data.user.id;
- const cacheKey=account+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
+ const cacheKey=account+":"+data.action+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
  const cached=mem.get(cacheKey);
  if(cached&&cached.until>Date.now())return reply(200,{provider:p,results:cached.results,cached:true});
  const throttle=account+":"+p;
@@ -226,7 +339,7 @@ Deno.serve(async(req:Request)=>{
    {p_user:account,p_provider:p,p_global_max:rule.cap,p_user_max:rule.perUser});
   if(claim.error)return reply(503,{error:"Gateway quota database is unavailable"});
   if(claim.data!==true)return reply(429,{error:"Safe daily provider quota reached"});
-  const results=await discover(p,title,ids,year);
+  const results=data.action==="metadata"?await discoverMetadata(p,title,ids,year):await discover(p,title,ids,year);
   if(mem.size>300)mem.delete(mem.keys().next().value as string);
   mem.set(cacheKey,{until:Date.now()+1200000,results});
   return reply(200,{provider:p,results,cached:false});
