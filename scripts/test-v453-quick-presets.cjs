@@ -9,7 +9,7 @@ const quickSrc=fs.readFileSync('src/js/components/334-v453-quick-title-recovery.
 const oldSelect=fs.readFileSync('src/js/components/332-v452-recovery-control-polish.js','utf8');
 const oldCheck=fs.readFileSync('src/js/components/326-v446-recovery-scope-controls.js','utf8');
 assert(oldSelect.includes('mf424Escape(action)'), 'Provider Select All onclick must HTML-escape JSON quotes');
-assert(oldCheck.includes('mf424Escape(JSON.stringify(mode))'), 'Individual checkbox onchange must HTML-escape JSON quotes');
+assert(oldCheck.includes('mf445Esc(JSON.stringify(mode))'), 'Individual checkbox onchange must HTML-escape JSON quotes using the existing v445 helper');
 const writes=[],messages=[];
 const providers={
  cover:[{id:'jikan',name:'Jikan',available:true},{id:'tmdb',name:'TMDB',available:false}],
