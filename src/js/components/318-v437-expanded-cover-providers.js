@@ -83,9 +83,62 @@ async function mf437CoverAudioDB(item,{request}){
   return c?{...c,confidence:m.confidence,idMatch:false}:null;
  }).filter(Boolean);
 }
+
+async function mf437CoverIFDB(item,{request}){
+ const known=String(item.externalIds?.ifdb||'').trim();
+ const rows=known?[{tuid:known,title:item.title,link:'https://ifdb.org/viewgame?id='+encodeURIComponent(known),coverArtLink:'https://ifdb.org/coverart?id='+encodeURIComponent(known)}]:
+  (await request('ifdb','https://ifdb.org/search?json&game&searchfor='+encodeURIComponent(item.title))).games||[];
+ return rows.slice(0,8).filter(x=>x.coverArtLink).map(row=>{
+  const match=mf424Match(item,{title:row.title},Boolean(known&&row.tuid===known));
+  const c=mf437CoverCandidate(item,String(row.coverArtLink).replace(/^http:/,'https:'),'ifdb',row.link,row.tuid,row.title);
+  return c?{...c,confidence:match.confidence,idMatch:Boolean(known&&row.tuid===known)}:null;
+ }).filter(Boolean);
+}
+async function mf437CoverWikidata(item,{request}){
+ const id=String(item.externalIds?.wikidata||'');
+ if(!/^Q[1-9]\d{0,12}$/.test(id))return [];
+ const raw=await request('wikidata','https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+id+'&props=claims%7Clabels&languages=en&format=json&origin=*');
+ const row=raw.entities?.[id],claims=row?.claims?.P18||[];
+ const title=row?.labels?.en?.value||item.title;
+ return claims.slice(0,5).map(x=>{
+  const name=String(x.mainsnak?.datavalue?.value||'').trim();
+  if(!name)return null;
+  const url='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(name);
+  const c=mf437CoverCandidate(item,url,'wikidata','https://www.wikidata.org/wiki/'+id,id,title);
+  return c?{...c,confidence:1,idMatch:true,externalIdKey:'wikidata',externalIdValue:id}:null;
+ }).filter(Boolean);
+}
+async function mf437CoverCommons(item,{request}){
+ const raw=await request('wikimedia-commons','https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(item.title+' cover art')+'&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url&format=json&origin=*');
+ return Object.values(raw.query?.pages||{}).filter(x=>x?.imageinfo?.[0]?.url).slice(0,8).map(row=>{
+  const guessed=String(row.title||'').replace(/^File:/,'').replace(/\.[^.]+$/,'').replace(/[_-]/g,' ');
+  const candidate=mf437CoverCandidate(item,row.imageinfo[0].url,'wikimedia-commons','https://commons.wikimedia.org/wiki/'+encodeURIComponent(row.title||''),String(row.pageid||''),guessed);
+  return candidate?{...candidate,confidence:.58,idMatch:false,reason:'Unverified Commons search result — manually confirm'}:null;
+ }).filter(Boolean);
+}
+async function mf437CoverLibretro(item){
+ const platforms=(item.mediaMetadata?.platforms||[]).map(x=>String(x).toLowerCase());
+ const map={nes:'Nintendo - Nintendo Entertainment System',snes:'Nintendo - Super Nintendo Entertainment System',
+  n64:'Nintendo - Nintendo 64',gba:'Nintendo - Game Boy Advance',gb:'Nintendo - Game Boy',
+  gbc:'Nintendo - Game Boy Color',ps1:'Sony - PlayStation',psp:'Sony - PlayStation Portable',
+  genesis:'Sega - Mega Drive - Genesis',nds:'Nintendo - Nintendo DS'};
+ const known=platforms.map(x=>map[x]).find(Boolean);
+ if(!known)return [];
+ const name=String(item.title||'').replace(/[<>:"\/\\|?*]/g,'').trim();
+ if(!name)return [];
+ const url='https://raw.githubusercontent.com/libretro-thumbnails/'+encodeURIComponent(known)+'/master/Named_Boxarts/'+encodeURIComponent(name+'.png');
+ return new Promise(resolve=>{
+  const image=new Image(),timer=setTimeout(()=>{image.onload=null;image.onerror=null;resolve([]);},6500);
+  image.onload=()=>{clearTimeout(timer);const row=mf437CoverCandidate(item,url,'libretro','https://github.com/libretro-thumbnails/libretro-thumbnails','',item.title);resolve(row?[{...row,confidence:.62,idMatch:false,reason:'Named box art found; confirm exact game edition'}]:[]);};
+  image.onerror=()=>{clearTimeout(timer);resolve([]);};
+  image.src=url;
+ });
+}
+
 for(const [id,name] of MF437_COVER_CATALOG){
  const adapter={steamstore:mf437CoverSteam,vndb:mf437CoverVNDB,itunes:mf437CoverITunes,
-  coverartarchive:mf437CoverArchive,theaudiodb:mf437CoverAudioDB}[id]||null;
+  coverartarchive:mf437CoverArchive,theaudiodb:mf437CoverAudioDB,ifdb:mf437CoverIFDB,
+  wikidata:mf437CoverWikidata,'wikimedia-commons':mf437CoverCommons,libretro:mf437CoverLibretro}[id]||null;
  mf437CoverRegister(id,name,adapter);
 }
 // Keep options visible but never represent a registered name as a verified connection.
