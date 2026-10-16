@@ -211,10 +211,16 @@ mf439RunBatch=async function(){
 };
 const mf451BaseResumeMetadata=mf439Resume;
 mf439Resume=function(){
- if(MF439.job)MF439.job.stopRequested=false;
+ if(!MF439.job)MF439.job=mf439ReadJob();
+ if(MF439.job){MF439.job.stopRequested=false;mf439SaveJob();}
  return mf451BaseResumeMetadata.apply(this,arguments);
 };
 App.mf439Resume=mf439Resume;
+const mf451BaseResumeCover=App.mf424Resume;
+App.mf424Resume=async function(){
+ if(MF424.job){MF424.job.hardStop=false;await mf424SaveJob();}
+ return mf451BaseResumeCover.apply(this,arguments);
+};
 const mf451BaseOpen=App.mf447Open;
 App.mf447Open=function(kind='cover',options={}){
  const id=mf451SavedId(options?.id);
