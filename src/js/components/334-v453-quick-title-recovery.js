@@ -170,7 +170,7 @@ async function mf453ApplyQuick(){
    metadataCount=mf439Apply(item,preview,'review').changed||0;
   }
   if(!coverCount&&!metadataCount){q.applying=false;mf453PaintQuick();showToast('Nothing eligible to save.');return;}
-  try{await saveState();}
+  try{await Promise.resolve(persistLibrary());await saveState();}
   catch(e){Object.assign(item,backup);throw e;}
   try{v53InvalidateLibraryCache();}catch(_){}
   showToast('Saved '+coverCount+' cover and '+metadataCount+' verified missing metadata values.');
