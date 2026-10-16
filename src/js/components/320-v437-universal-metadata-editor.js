@@ -76,7 +76,10 @@ App.saveLibraryModal=function(id){
  }
  if(!changed)return result;
  item.mediaMetadata=next;item.richMetadataManual=flags;item.modifiedAt=Date.now();
- persistLibrary();Promise.resolve(saveState()).catch(e=>console.warn('Universal metadata save:',e));
+ // Update the canonical editor undo snapshot so a single Undo reverts both base and universal fields.
+ const lastUndo=(S.undoStack||[]).at(-1);
+ if(lastUndo&&/^(Edit title|Add title)$/i.test(String(lastUndo.action||''))&&typeof mfCoreSnapshot==='function')lastUndo.after=mfCoreSnapshot();
+ persistLibrary();render();Promise.resolve(saveState()).catch(e=>console.warn('Universal metadata save:',e));
  return result;
 };
 const mf437EditorStyles=document.createElement('style');
