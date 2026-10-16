@@ -186,5 +186,7 @@
   "components/329-v449-editor-recovery-actions-layout.js",
   "components/330-v450-universal-metadata-expansion.js",
   "components/331-v451-recovery-stop-priority.js",
-  "components/332-v452-recovery-control-polish.js"
+  "components/332-v452-recovery-control-polish.js",
+  "components/333-v453-recovery-presets.js",
+  "components/334-v453-quick-title-recovery.js"
 ]
