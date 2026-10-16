@@ -22,7 +22,7 @@ const env={
  AUTH_USER:{id:'user'},S:{library:[{id:'1',title:'One'},{id:'2',title:'Two'}]},
  MF424:{ready:true,job:null,running:false,account:'user',activeControllers:new Set()},
  MF439:{job:null,working:false,cancel:false},MF442:{process:'',owner:'this-tab'},
- MF425:{oneId:''},MF447:{},MF445:{},App:{},
+ MF425:{oneId:''},MF447:{},MF445:{},App:{},window:{},
  mf439Account:()=> 'user',mf424Account:()=> 'user',mf442ProcessLease:()=>null,
  mf424Key:()=> 'cover-main',mf439StateKey:()=> 'metadata-main',
  mf424Storage:async(action,key,val)=>{
