@@ -271,8 +271,28 @@ window.MediaFlowSettingsRegistry?.registerCategory?.({
  hint:'Connections, provider capabilities and testing',
  description:'Manage verified API connections and inspect public and planned provider coverage'
 });
+// A gateway status refresh changes actual activation and connection readiness.
+const mf438GatewayRefreshBase=mf434RefreshGateway;
+mf434RefreshGateway=async function(){
+ const value=await mf438GatewayRefreshBase.apply(this,arguments);
+ mf438Paint();
+ return value;
+};
+Object.assign(App,{mf434RefreshGateway,mf438Filter,mf438Test});
 MediaFlowRuntime.registerPageEnhancer('settings',mf438SettingsEnhance);
-Object.assign(App,{mf438Filter,mf438Test});
+const mf438BackupBase=v148BuildFullBackup;
+v148BuildFullBackup=function(){
+ const out=mf438BackupBase.apply(this,arguments);
+ if(out){
+  out.mediaFlowVersion=MF438_VERSION;
+  out.backupVersion=MF438_VERSION;
+  const manifest=out.backupManifest||(out.backupManifest={});
+  manifest.includes={...(manifest.includes||{}),v438UnifiedProviderRegistry:true};
+  manifest.v438={release:MF438_VERSION,providerTestingCredentialsExcluded:true,
+   existingGatewayVerificationRetained:true,metadataRecoveryEnabled:false};
+ }
+ return out;
+};
 window.MediaFlowV438=Object.freeze({version:MF438_VERSION,
  list:()=>mf438Catalog().map(p=>({...p,probeResult:p.probeResult?{...p.probeResult}:null})),
  inspect:()=>({total:mf438Catalog().length,publicTestPaths:Object.keys(MF438_PUBLIC_PROBES).length,
