@@ -90,7 +90,6 @@ function mf457WireLaunch(){
     actions.prepend(button);
   }
   for(const extra of candidates.slice(1))extra.remove();
-  if(button.dataset.mf457LaunchKind===kind)return;
   // Remove any old inline handler (including preview), and use the real v455
   // safe queue launch, which owns confirmation, checkpoints, and provider calls.
   button.removeAttribute('onclick');
@@ -99,6 +98,8 @@ function mf457WireLaunch(){
   button.dataset.v225Iconified='1';
   button.setAttribute('aria-label','Recover selected titles — '+kind);
   button.innerHTML=mf425Icon('play',17)+' Recover selected titles';
+  if(button.dataset.mf457ClickBound==='1')return;
+  button.dataset.mf457ClickBound='1';
   button.addEventListener('click',()=>{
     MF457.calls++;
     if(MF455.launching){
