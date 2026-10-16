@@ -1,0 +1,78 @@
+name: MediaFlow v462 Background Processes Startup Quality Gate
+on:
+  push:
+    branches: [feature/v462-background-widget-first-paint]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v462-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and contract-check v462
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "462"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v462.bundle.js
+          node --check src/js/components/346-v462-background-widget-first-paint.js
+          node --check scripts/test-v462-widget-boot.cjs
+          node --check scripts/test-v462-browser.cjs
+          node scripts/test-v462-widget-boot.cjs
+      - name: Recheck v461 shortcut layout and v460 show/hide against their source contracts
+        run: |
+          set -euo pipefail
+          cp src/js/runtime-order.json "$RUNNER_TEMP/runtime-v462.json"
+          node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/346-v462-background-widget-first-paint.js')throw Error('Missing v462 at runtime tail');fs.writeFileSync(p,JSON.stringify(a,null,2))"
+          echo 461 > VERSION
+          node scripts/test-v461-shortcut-layout.cjs
+          node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/345-v461-background-shortcut-layout.js')throw Error('Missing v461 at runtime tail');fs.writeFileSync(p,JSON.stringify(a,null,2))"
+          echo 460 > VERSION
+          node scripts/test-v460-floating-shortcuts.cjs
+          cp "$RUNNER_TEMP/runtime-v462.json" src/js/runtime-order.json
+          echo 462 > VERSION
+          python scripts/check.py
+      - name: Chromium desktop and 360px mobile recovery regression
+        run: node scripts/test-v462-browser.cjs
+      - name: Commit verified bundle and full v462 legacy archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/462
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/462/
+          test "$(cat legacy/v/462/VERSION)" = 462
+          test -s legacy/v/462/assets/js/mediaflow-v462.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v462.bundle.js
+          git add --sparse -f legacy/v/462
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v462): verified bundle and complete legacy archive [skip ci]'
+            git push origin HEAD:feature/v462-background-widget-first-paint
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v462-widget-first-paint
+          path: |
+            artifacts/v462-browser-smoke/
+            version.json

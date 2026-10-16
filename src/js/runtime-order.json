@@ -199,5 +199,6 @@
   "components/342-v458-recovery-dialog-quick-actions.js",
   "components/343-v459-retire-cover-only-floating-widget.js",
   "components/344-v460-quick-recovery-widget-toggle.js",
-  "components/345-v461-background-shortcut-layout.js"
+  "components/345-v461-background-shortcut-layout.js",
+  "components/346-v462-background-widget-first-paint.js"
 ]
