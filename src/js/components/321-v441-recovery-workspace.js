@@ -196,9 +196,9 @@ function mf441WorkspaceHtml(){
  '<div class="mf441-settings-status" id="mf441-settings-status" role="status">'+
  'Cover: '+mf441Esc(state.cover?.status||'No saved job')+' · Metadata: '+mf441Esc(state.metadata?.status||'No saved job')+'</div>'+
  '<div class="mf441-settings-links">'+
- '<button type="button" onclick="App.mf441OpenCover()">'+mf425Icon('images',19)+
+ '<button type="button" onclick="App.mf445Open(&#39;cover&#39;)">'+mf425Icon('images',19)+
  '<span><strong>New Cover Recovery</strong><small>Scope, cover providers, rate protection and previews</small></span>'+mf425Icon('chevronRight',16)+'</button>'+
- '<button type="button" onclick="App.mf441OpenMetadata()">'+mf425Icon('database',19)+
+ '<button type="button" onclick="App.mf445Open(&#39;metadata&#39;)">'+mf425Icon('database',19)+
  '<span><strong>New Metadata Recovery</strong><small>Selected titles, field evidence and safe merging</small></span>'+mf425Icon('chevronRight',16)+'</button>'+
  '<button type="button" onclick="App.v365OpenSection(\'v221-settings-cover-recovery\')">'+mf425Icon('settings',19)+
  '<span><strong>Cover Recovery preferences</strong><small>Enabled sources, priority and automation</small></span>'+mf425Icon('chevronRight',16)+'</button>'+
