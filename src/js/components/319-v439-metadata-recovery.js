@@ -363,12 +363,12 @@ function mf439BatchCandidates(){
  const known=new Set(selected.map(String)),max=mf439Preferences().maxBatch;
  return (S.library||[]).filter(x=>x?.id!=null&&known.has(String(x.id))).slice(0,max).map(x=>String(x.id));
 }
-function mf439ConfirmBatch(){
+async function mf439ConfirmBatch(){
  if(MF439.working){showToast('Metadata Recovery already running.');return;}
  const ids=mf439BatchCandidates();
  if(!ids.length){showToast('Check Library titles first. Batches require an explicit selection.');return;}
  if(!mf439Preferences().enabled.length){showToast('Enable at least one metadata provider.');return;}
- if(!confirm('Recover missing metadata for '+ids.length+' selected title(s)? Existing values and protected fields will be preserved. This may take time due to public API rate limits.'))return;
+ if(!await mf444Confirm('Start Metadata Recovery?', 'MediaFlow will search enabled metadata providers and fill only eligible missing fields. Rate limits can extend processing time.', 'Start Recovery', false, ids.length, 'metadata'))return;
  MF439.job={schema:1,account:mf439Account(),ids,cursor:0,changed:0,completed:0,errors:[],startedAt:Date.now(),status:'running'};
  mf439SaveJob();mf439RunBatch();
 }
@@ -407,9 +407,9 @@ function mf439Resume(){
  if(!MF439.job||MF439.job.status==='completed')return;
  MF439.job.status='running';mf439RunBatch();
 }
-function mf439Discard(){
+async function mf439Discard(){
  if(MF439.working){showToast('Pause recovery first.');return;}
- if(!confirm('Clear the saved metadata recovery checkpoint? Previously recovered fields will remain saved.'))return;
+ if(!await mf444Confirm('Clear recovery checkpoint?', 'The unfinished recovery queue will be discarded. Metadata fields already saved to the Library will remain unchanged.', 'Clear Checkpoint', true, 0, 'metadata'))return;
  MF439.job=null;
  try{localStorage.removeItem(mf439StateKey());}catch(_){}
  mf439PaintJob();
