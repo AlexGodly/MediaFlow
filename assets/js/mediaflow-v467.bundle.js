@@ -76539,6 +76539,11 @@ function mf467PatchEditor(item,before){
  const found=root.closest('.v240-library-editor,.v238-library-editor');
  const persisted=found&&String(item.id||'');
  if(!persisted)return;
+ // Do not repaint an unrelated open editor while refreshing Title Details.
+ // The editor may also contain unsaved draft title text; preserve that draft.
+ if(S.modal?.type==='library'&&S.modal.id!=null&&
+  String(S.modal.id)!==String(item.id))return;
+ if(typeof mf456EditorMatches==='function'&&mf456EditorMatches(item)!==found)return;
  // Only update form fields that are still unmodified. In-progress user edits
  // (including ratings or manual locks) must survive the background check.
  const original=before||{},next=item.universalMetadata?.externalRatings||{};
