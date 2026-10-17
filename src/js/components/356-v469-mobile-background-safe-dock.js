@@ -65,7 +65,7 @@ mf441Paint=function(){
 const mf469DockUpdateBase=mf397Update;
 mf397Update=function(){
  const result=mf469DockUpdateBase.apply(this,arguments);
- mf469Schedule();
+ mf469ObserveDock();mf469Schedule();
  return result;
 };
 const mf469DockMenuBase=mf397SetMenu;
