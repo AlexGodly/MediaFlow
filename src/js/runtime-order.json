@@ -201,5 +201,6 @@
   "components/344-v460-quick-recovery-widget-toggle.js",
   "components/345-v461-background-shortcut-layout.js",
   "components/346-v462-background-widget-first-paint.js",
-  "components/347-v463-recommended-title-fresh-left.js"
+  "components/347-v463-recommended-title-fresh-left.js",
+  "components/348-v464-recommendations-external-ratings.js"
 ]
