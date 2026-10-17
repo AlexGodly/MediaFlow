@@ -9,7 +9,7 @@ const MF468_SYSTEMS=['legacy','advanced'];
 const MF468_SOURCES=['smart','automatic','tenrai','anizip','anilist','kitsu','tvmaze','manual'];
 const MF468_SETTINGS_DEFAULT=Object.freeze({
  source:'smart',verification:'balanced',refresh:'manual',
- schedules:true,compare:true,includeUnknown:true,
+ schedules:true,compare:true,includeUnknown:true,freshOnly:false,
  providerOrder:['tenrai','anizip','anilist','tvmaze','kitsu']
 });
 const MF468_AGE=24*60*60*1000;
@@ -76,7 +76,7 @@ function mf468FreshReport(item){
 }
 function mf468Verdict(item,identity,raw,opts=mf468AdvancedPrefs()){
  const replies=(raw?.results||[]).filter(x=>x&&typeof x==='object');
- const signed=!!identity?.verifiedMal||!!identity?.anilistId||!!identity?.kitsuId;
+ const signed=!!identity?.verifiedMal||Array.isArray(identity?.evidence)&&identity.evidence.some(e=>e.status==='verified'&&['anilist','kitsu'].includes(e.source));
  const trustworthy=replies.filter(x=>x.status==='verified'&&Number.isSafeInteger(x.available)&&x.available>=0);
  const count=trustworthy.length?Math.max(...trustworthy.map(x=>x.available)):null;
  const winner=trustworthy.find(x=>x.available===count);
@@ -146,7 +146,7 @@ async function mf468CheckItem(item,force=false){
  const copy={...item,externalIds:{...(item.externalIds||{})},
   v377ManualExternalIds:item.v377ManualExternalIds?{...item.v377ManualExternalIds}:undefined};
  const identity=await v402ResolveIdentity(copy,force);
- if(identity.conflict||!(identity.verifiedMal||identity.anilistId||identity.kitsuId))
+ if(identity.conflict||!(identity.verifiedMal||identity.evidence?.some(e=>e.status==='verified'&&['anilist','kitsu'].includes(e.source))))
   return {status:'unknown',reason:'Unverified or conflicting identity',fingerprint:mf468Fingerprint(item),
    at:Date.now(),providers:[],identity:{conflict:!!identity.conflict}};
  const opts=mf468AdvancedPrefs(),source=opts.source;
@@ -291,6 +291,20 @@ const mf468LegacyOutcome=v401EpisodeOutcome;
 const mf468Legacy402=v402EpisodeOutcomeFor;
 v402EpisodeOutcomeFor=function(item){return mf468Active()?mf468Outcome(item):mf468Legacy402.apply(this,arguments);};
 v401EpisodeOutcome=function(item){return mf468Active()?mf468Outcome(item):mf468LegacyOutcome.apply(this,arguments);};
+const mf468LegacyFilterEnabled=v401FilterEnabled;
+v401FilterEnabled=function(){
+ return mf468Active()?mf468AutoEnabled()&&mf468AdvancedPrefs().freshOnly===true:
+  mf468LegacyFilterEnabled.apply(this,arguments);
+};
+const mf468LegacyEligible=v401Eligible;
+v401Eligible=function(item,cat){
+ if(!mf468Active())return mf468LegacyEligible.apply(this,arguments);
+ if(!item)return false;
+ if(!v401FilterEnabled()||!v401IsSeasonal(cat))return true;
+ if(String(item.categoryId||'')!==String(cat.id||''))return false;
+ const outcome=mf468Outcome(item);
+ return outcome==='fresh'||outcome==='unknown'&&mf468AdvancedPrefs().includeUnknown;
+};
 const mf468LegacyFreshCard=mf463FreshForRecommendedTitle;
 mf463FreshForRecommendedTitle=function(item,cat){
  return mf468Active()?mf468FreshReport(item):mf468LegacyFreshCard.apply(this,arguments);
