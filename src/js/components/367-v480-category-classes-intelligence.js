@@ -230,6 +230,7 @@ function v480SetSetting(key,value){
  showToast(key==='enabled'?(value?'Category Classes enabled':'Category Classes disabled; preferences retained'):'Category Classes setting saved');
 }
 function v480OpenClassEditor(id){
+ if(!S.settings||!Array.isArray(S.categories)){showToast('Wait for your MediaFlow account to finish loading.');return;}
  const existing=v480Prefs().classes.find(c=>c.id===String(id))||null;
  const target=existing||{name:'',icon:'✨',iconUrl:'',color:'#A78BFA',weight:1,enabled:true,categoryIds:[]};
  // categoryModalHtml is the current v258/v144 Category editor, so extraction
@@ -325,7 +326,7 @@ Object.assign(App,{
  v480SetSetting,v480OpenClassEditor,v480CloseClassEditor,v480SaveClass,v480DeleteClass
 });
 MediaFlowRuntime.registerPageEnhancer('settings',v480MountSettings);
-window.MediaFlowV480=Object.freeze({version:480,prefs:v480Prefs,
+window.MediaFlowV480=Object.freeze({version:480,prefs:v480Prefs,preview:v480PanelHtml,openEditor:v480OpenClassEditor,closeEditor:v480CloseClassEditor,
  groups:()=>v480Groups(computeScores([]),v480Prefs()),score:v480ClassScore,
  stats:(id,days)=>{const p=v480Prefs().classes.find(c=>c.id===String(id));return p?v480ClassMinutes(p,days):0;},
  candidates:()=>v480Groups(computeScores([]),v480Prefs()).map(g=>({key:g.key,categories:g.rows.map(r=>r.cat.id)}))
