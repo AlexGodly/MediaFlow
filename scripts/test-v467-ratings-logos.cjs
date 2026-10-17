@@ -45,7 +45,7 @@ const ctx={window:{},document:{querySelector:()=>null,querySelectorAll:()=>[],ad
  mf439ReleaseLease:()=>{lease=false},
  mf442MetadataLeaseOwned:()=>lease,mf442RenewMetadataLease:()=>lease,
  mf466Providers:()=>['jikan'],
- mf439Preferences:()=>({minimumConfidence:.94}),
+ mf439Preferences:()=>({minimumConfidence:.94,enabled:['jikan']}),
  mf439Evidence:(_item,row)=>({confidence:row.confidence??1}),
  mf439Discover:async()=>{providerScans++;return discovered??{results:[],failures:[]}},
  mf466ApplyVerified:(item,rows,opts)=>{
@@ -86,6 +86,7 @@ for(const key of ['anidb','tvmaze','hardcover','backloggd','vndb',
  assert(mark.includes('mf467-source-fallback'),'Must degrade if offline');
 }
 assert(api.button(saved,'editor').includes('Refresh external ratings'));
+assert.deepEqual(Array.from(api.providers(saved)),['jikan'],'Only ready rating-capable sources are checked');
 assert(api.button({},'editor').includes('disabled'));
 assert(api.button({},'editor').includes('Save this title'));
 assert.equal(api.details(saved).includes('ratings'),true);
