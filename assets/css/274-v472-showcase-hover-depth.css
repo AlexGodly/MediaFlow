@@ -90,7 +90,7 @@
   }
 /* Preserve touch swiping and horizontal scrolling; tap feedback is restrained
  * so mobile never triggers a hover-only enlargement or accidental scroll lock. */
-@media(hover:none),(pointer:coarse){
+@media(pointer:coarse){
   .mf274-collections-browser .mf471-showcase-poster:hover:not(:active){
     --mf472-lift:0px;
     --mf472-zoom:1;
