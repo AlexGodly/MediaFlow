@@ -219,5 +219,6 @@
   "components/362-v475-pwa-auth-transition-guard.js",
   "components/363-v476-background-visual-redesign.js",
   "components/364-v477-background-footer-layout.js",
-  "components/365-v478-background-launcher-visibility.js"
+  "components/365-v478-background-launcher-visibility.js",
+  "components/366-v479-external-rating-refresh-icon.js"
 ]
