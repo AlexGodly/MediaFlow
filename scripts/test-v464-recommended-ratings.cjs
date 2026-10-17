@@ -73,6 +73,7 @@ assert.equal(calls.length,0,'Render must never block on network');
  await new Promise(r=>setTimeout(r,540));
  const now=api.current(item);
  assert.equal(now.imdb.score,7.8,'Manual stored ratings may not be overridden by providers');
+ console.log('DIAG v464 live',JSON.stringify({calls,now,storage:[...storage.entries()]}));
  assert.equal(now.mal.score,8.4,'Exact identity-matched provider score appears asynchronously');
  assert(calls.includes('jikan')&&calls.includes('omdb'));
  assert(!calls.includes('tmdb'),'Never request an unconfigured gateway');
