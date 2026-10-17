@@ -6,7 +6,7 @@ function mf470Version(){
   const reported=Number(v161CurrentVersion());
   return Number.isSafeInteger(reported)&&reported>=470?reported:470;
 }
-function mf470Own(value,key){return value!=null&&Object.prototype.hasOwnProperty.call(value,key);}
+function mf470Own(value,key){return value!=null&&Object.prototype.hasOwnProperty.call(value,key)&&value[key]!==undefined;}
 function mf470Copy(value){
   const result=JSON.stringify(value);
   if(result===undefined)throw new Error('MediaFlow backup contains non-portable undefined data');
@@ -82,6 +82,7 @@ v155VerifyCloudState=function(actual,expected){
   const previous=mf470VerifyBase.apply(this,arguments)||{ok:true,missing:[]};
   const missing=new Set(previous.missing||[]);
   for(const field of Object.keys(expected||{})){
+    if(!mf470Own(expected,field))continue; // JSON drops undefined values
     if(!mf470Own(actual,field)||!mf470Parity(actual[field],expected[field]))
       missing.add(field+' cloud readback');
   }
