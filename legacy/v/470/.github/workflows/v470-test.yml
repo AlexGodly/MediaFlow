@@ -36,6 +36,7 @@ jobs:
           node --check src/js/components/357-v470-cloud-transfer-pwa-xp-integrity.js
           node --check assets/js/mediaflow-v470.bundle.js
           node scripts/test-v470-transfer-integrity.cjs
+          node scripts/test-v470-pwa-contract.cjs
           python scripts/check.py
           python - <<'PY'
           import json
@@ -50,6 +51,8 @@ jobs:
           assert json.loads((r/'manifest.json').read_text())['scope']=='./'
           print('v470 release/PWA coherence PASS')
           PY
+      - name: Chromium mobile and desktop regression suite
+        run: node scripts/test-v470-browser.cjs
       - name: Archive verified complete v470 project
         if: github.event_name == 'push'
         shell: bash
