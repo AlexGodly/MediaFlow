@@ -39,7 +39,8 @@ for(const size of [0,1,2,3,4,5,6,8,12,100,150]){
   assert.equal((out.match(/class="mf471-showcase-poster/g)||[]).length,size,'all posters must render including >4');
   assert.match(out,/mf471-showcase-frame/);assert.match(out,/mf418-browser-copy/);
   assert.match(out,/mf418-browser-entry/);assert.match(out,/mf418-dates/);
-  assert.match(out,/mf471-showcase-strip/);
+  if(size)assert.match(out,/mf471-showcase-strip/);
+  else assert.match(out,/mf471-showcase-empty/);
   assert(!out.includes('mf471-showcase-poster')||!out.includes('count-4'),'must not use old four-cover cap');
 }
 const special=c(10);special.coverUrl='https://example.com/featured.jpg';
