@@ -212,5 +212,6 @@
   "components/355-v468-fresh-engines-interface.js",
   "components/356-v469-mobile-background-safe-dock.js",
   "components/357-v470-cloud-transfer-pwa-xp-integrity.js",
-  "components/358-v471-collections-showcase-collage.js"
+  "components/358-v471-collections-showcase-collage.js",
+  "components/359-v472-showcase-hover-depth.js"
 ]
