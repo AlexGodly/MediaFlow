@@ -76424,6 +76424,28 @@ function mf467Mark(key){
 mf450ProviderMark=mf467Mark;
 const MF467={working:false,titleId:'',account:'',provider:'',note:'',success:null,
  abort:null,sequence:0};
+const MF467_RATING_PROVIDERS=new Set([
+ 'jikan','anilist','kitsu','tvmaze','vndb','tmdb','omdb',
+ 'malofficial','trakt','simkl','watchmode'
+]);
+function mf467RatingProviders(item){
+ // Unlike general Metadata Recovery, avoid wasting the four-slot provider
+ // budget on bibliographic adapters that cannot return external scores.
+ const opts=mf439Preferences(),enabled=new Set(opts.enabled);
+ const all=typeof mf453Ready==='function'?mf453Ready('metadata',item):
+  typeof mf466Providers==='function'?mf466Providers(item):opts.enabled;
+ const ids=item?.externalIds||{};
+ const saved=item?.universalMetadata?.provenance||{};
+ const keyMap={jikan:['mal'],malofficial:['mal'],anilist:['anilist'],
+  kitsu:['kitsu'],tvmaze:['tvmaze'],vndb:['vndb'],
+  tmdb:['tmdb','tmdb_tv'],omdb:['imdb'],trakt:['trakt'],
+  simkl:['simkl'],watchmode:['watchmode']};
+ return [...new Set(all)].filter(x=>enabled.has(x)&&MF467_RATING_PROVIDERS.has(x))
+  .map((id,index)=>({id,index,weight:(keyMap[id]||[id]).some(k=>ids[k])?4:
+   Object.entries(saved).some(([token,v])=>token.startsWith('rating.')&&v?.source===id&&v.verified===true)?3:0}))
+  .sort((a,b)=>b.weight-a.weight||a.index-b.index).slice(0,4).map(x=>x.id);
+}
+
 function mf467IsCurrent(item,id,account,signature){
  return Boolean(mf439Account()===account&&mf439Item(id)===item&&
   mf442TitleSignature(item)===signature&&!S.loading);
@@ -76439,8 +76461,8 @@ function mf467Button(item,placement){
  return '<div class="mf467-rating-refresh" data-mf467-title="'+escapeHtml(id)+'" data-mf467-placement="'+
   escapeHtml(placement)+'">'+
   '<button type="button" class="btn btn-sm btn-ghost mf467-rating-refresh-btn" '+
-  (!id||running?'disabled ':'')+'onclick="App.mf467RefreshRatings(&#39;'+
-  escapeHtml(id).replace(/'/g,'&#39;')+'&#39;)">'+mf425Icon('refresh',17)+
+  (!id||running?'disabled ':'')+'onclick="App.mf467RefreshRatings('+escapeHtml(JSON.stringify(id))+')">'+
+  mf425Icon('refresh',17)+
   '<span>'+ (selected?'Refreshing ratings…':'Refresh external ratings')+'</span></button>'+
   '<small class="mf467-rating-hint" role="status" aria-live="polite">'+escapeHtml(hint)+'</small></div>';
 }
@@ -76556,7 +76578,7 @@ async function mf467RefreshRatings(id){
   showToast(reason);return {ok:false,reason};
  }
  if(!navigator.onLine){showToast('Offline. Ratings need provider access.');return {ok:false,reason:'Offline'};}
- const providers=mf466Providers(item);
+ const providers=mf467RatingProviders(item);
  if(!providers.length){
   const reason='No ready rating metadata providers. Enable/configure them in Provider Management.';
   showToast(reason);return {ok:false,reason};
@@ -76619,7 +76641,7 @@ async function mf467RefreshRatings(id){
 }
 App.mf467RefreshRatings=mf467RefreshRatings;
 window.MediaFlowV467=Object.freeze({
- version:MF467_VERSION,logo:mf467Mark,refresh:mf467RefreshRatings,
+ version:MF467_VERSION,logo:mf467Mark,refresh:mf467RefreshRatings,providers:mf467RatingProviders,
  button:mf467Button,details:mf467DetailsRatings,
  active:()=>({working:MF467.working,titleId:MF467.titleId,note:MF467.note})
 });
