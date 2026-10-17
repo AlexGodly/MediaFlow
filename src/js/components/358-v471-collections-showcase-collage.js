@@ -76,7 +76,7 @@ function mf471ScheduleSync(){
 let MF471_RESIZE_OBSERVER=null;
 function mf471Observe(){
   if(typeof ResizeObserver==='undefined')return;
-  if(!MF471_RESIZE_OBSERVER)MF471_RESIZE_OBSERVER=new ResizeObserver(mf471ScheduleSync);
+  if(!MF471_RESIZE_OBSERVER)MF471_RESIZE_OBSERVER=new ResizeObserver(mf471SyncAll);
   // Observe the active gallery widths, not unrelated application surfaces.
   MF471_RESIZE_OBSERVER.disconnect();
   document.querySelectorAll('.mf274-collections-browser .mf471-showcase-strip').forEach(node=>MF471_RESIZE_OBSERVER.observe(node));
