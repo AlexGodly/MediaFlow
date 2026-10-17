@@ -44,7 +44,7 @@ const ctx={
  {cat:cats[1],score:70,reasons:[{t:'Finished neglected',w:8}]},
  {cat:cats[2],score:100,reasons:[{t:'TV balance',w:5}]},
  {cat:cats[3],score:1000,reasons:[]}],
- weightedPick:function(rows){this.calls=(this.calls||0)+1;return rows.slice().sort((a,b)=>b.score-a.score)[0]||null;},
+ weightedPick:function(rows){return rows.slice().sort((a,b)=>b.score-a.score)[0]||null;},
  suggestedAmount:()=>({low:3,high:5,multiplier:1,direction:'normal'})
 };
 ctx.window.MediaFlowSettingsCenter={mountSection:()=>{}};
