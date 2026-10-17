@@ -3,7 +3,7 @@
  * than using a fixed 2.3x expansion. Uses only browser layout and Image data.
  * No writes to Library, Collections, Supabase, Settings, History or XP.
  */
-const MF474_MIN_PEEK=14;
+const MF474_MIN_PEEK=5;
 let MF474_REFRESH_PENDING=false;
 let MF474_OBSERVER=null;
 function mf474Measure(poster){
