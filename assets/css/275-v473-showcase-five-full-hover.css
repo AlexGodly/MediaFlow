@@ -91,9 +91,6 @@
 }
 /* "Open book" hover animation: highlighted cover grows into a fully visible,
  * centered 2:3 portrait. Peers gently compress instead of being clipped. */
-.mf274-collections-browser .mf473-showcase-strip:has(.mf473-showcase-poster:hover) .mf473-showcase-poster{
-  flex-grow:1!important;
-}
 .mf274-collections-browser .mf473-showcase-poster:hover{
   flex-grow:2.3!important;
   z-index:9!important;
