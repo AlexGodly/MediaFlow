@@ -43,6 +43,17 @@ function mf468AdvancedSettingsHtml(){
   '<label>Background checking<select onchange="App.mf468SetAdvanced(&#39;refresh&#39;,this.value)">'+
   options([['manual','Manual checks only'],['adaptive','Adaptive while app is open']],p.refresh)+
   '</select></label></div>'+
+  '<details class="mf468-provider-priority"><summary>Advanced provider priority (used for fallback and tie-breaking)</summary>'+
+  '<div class="mf468-provider-priority-rows">'+p.providerOrder.map((name,index)=>
+   '<div class="mf468-provider-priority-row"><span><b>'+(index+1)+'.</b> '+
+   escapeHtml(V380_NAMES[name]||name)+'</span>'+
+   '<div><button type="button" class="btn btn-sm btn-ghost" aria-label="Move '+
+   escapeHtml(name)+' earlier" '+(index===0?'disabled ':'')+
+   'onclick="App.mf468Reorder(&#39;'+name+'&#39;,-1)">↑</button>'+
+   '<button type="button" class="btn btn-sm btn-ghost" aria-label="Move '+
+   escapeHtml(name)+' later" '+(index===p.providerOrder.length-1?'disabled ':'')+
+   'onclick="App.mf468Reorder(&#39;'+name+'&#39;,1)">↓</button></div></div>').join('')+
+  '</div><small>Legacy provider order is never modified. Smart compares every applicable source; Automatic uses the selected fallback order.</small></details>'+
   switcher('schedules','Show upcoming episodes when a verified schedule is available')+
   switcher('compare','Show provider disagreement and evidence')+
   switcher('includeUnknown','Keep Unknown titles eligible for fresh-only recommendations')+
@@ -185,6 +196,17 @@ App.mf468RefreshAll=async function(){
 App.mf468RefreshOne=async function(id){
  const result=await mf468Scan({ids:[id],force:true,notify:true});
  if(!result.ok)showToast(result.reason||result.error||'Title refresh unavailable');
+};
+App.mf468Reorder=async function(name,delta){
+ if(!mf468Active()||MF468_RUNTIME.working)return;
+ const current=mf468AdvancedPrefs(),old=S.settings.v468AdvancedFresh,
+  list=current.providerOrder.slice(),idx=list.indexOf(String(name)),j=idx+Number(delta);
+ if(idx<0||j<0||j>=list.length)return;
+ [list[idx],list[j]]=[list[j],list[idx]];
+ current.providerOrder=list;S.settings.v468AdvancedFresh=current;
+ try{await persistSettings();}
+ catch(e){S.settings.v468AdvancedFresh=old;showToast('Unable to save provider order.');}
+ render();
 };
 App.mf468Stop=mf468RequestStop;
 async function mf468SetSystem(mode){

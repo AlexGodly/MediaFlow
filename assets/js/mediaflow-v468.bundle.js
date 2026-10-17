@@ -76753,7 +76753,8 @@ function mf468Verdict(item,identity,raw,opts=mf468AdvancedPrefs()){
  const signed=!!identity?.verifiedMal||Array.isArray(identity?.evidence)&&identity.evidence.some(e=>e.status==='verified'&&['anilist','kitsu'].includes(e.source));
  const trustworthy=replies.filter(x=>x.status==='verified'&&Number.isSafeInteger(x.available)&&x.available>=0);
  const count=trustworthy.length?Math.max(...trustworthy.map(x=>x.available)):null;
- const winner=trustworthy.find(x=>x.available===count);
+ const winner=trustworthy.filter(x=>x.available===count).sort((a,b)=>
+  opts.providerOrder.indexOf(a.source)-opts.providerOrder.indexOf(b.source))[0];
  const disagreement=new Set(trustworthy.map(x=>x.available)).size>1;
  const fresh=count!==null&&count>mf468Progress(item);
  // A single dated/finished-season proof can establish "caught up", exactly
@@ -76816,7 +76817,42 @@ async function mf468Schedule(item,identity,entry){
   return {nextEpisode:episode,nextAt:air};
  }catch(_){return null;}
 }
+async function mf468SequentialCheck(item,identity,force,opts){
+ // Ordered fallback is truly sequential; unlike Smart, it can stop once
+ // dependable release evidence is found. Unconfirmed negative results must
+ // continue to another provider rather than pretending to verify zero fresh.
+ const result=[],progress=mf468Progress(item);
+ let proof=null;
+ for(const source of opts.providerOrder){
+  if(!identity?.malId&&!(['anilist','kitsu'].includes(source)))continue;
+  try{
+   const count=!identity.malId&&source==='anilist'&&identity.anilistId?
+    await v402AniListById(identity.anilistId,force):
+    !identity.malId&&source==='kitsu'&&identity.kitsuId?
+    await v402KitsuById(identity.kitsuId,force):
+    identity.malId&&V380_ADAPTERS[source]?
+    await V380_ADAPTERS[source](identity.malId,force):null;
+   if(!Number.isSafeInteger(count)||count<0)throw Error('No usable aired episode count');
+   result.push({source,status:'verified',available:count});
+   if(count>progress)break;
+   if(source==='anilist')proof=await v403VerifyAniListNoFresh(identity,count,force);
+   if(proof?.verified||result.filter(row=>row.status==='verified').length>=2)break;
+  }catch(e){result.push({source,status:'unknown',reason:String(e?.message||e).slice(0,140)});}
+ }
+ return {results:result,v403SingleSourceCertified:!!proof?.verified,
+  v403Proof:proof};
+}
+function mf468MediaSupported(item){
+ const media=String(item?.universalMetadata?.mediaType||item?.mediaType||
+  getCategory(item?.categoryId)?.mediaType||'unspecified').toLowerCase();
+ // Existing v380/v402 adapters are verified for ANIME identity/episodes, not
+ // for TV seasons, manga chapters, books, games or comic issues.
+ return ['anime','unspecified',''].includes(media);
+}
 async function mf468CheckItem(item,force=false){
+ if(!mf468MediaSupported(item))
+  return {status:'unknown',reason:'This media type needs a separate verified release adapter',
+   fingerprint:mf468Fingerprint(item),at:Date.now(),providers:[]};
  const copy={...item,externalIds:{...(item.externalIds||{})},
   v377ManualExternalIds:item.v377ManualExternalIds?{...item.v377ManualExternalIds}:undefined};
  const identity=await v402ResolveIdentity(copy,force);
@@ -76825,9 +76861,11 @@ async function mf468CheckItem(item,force=false){
    at:Date.now(),providers:[],identity:{conflict:!!identity.conflict}};
  const opts=mf468AdvancedPrefs(),source=opts.source;
  let report=null;
- if(source==='smart'||source==='automatic'){
+ if(source==='smart'){
   // v403 augments the v402 verified checker with genuine airing evidence.
   report=await v402CheckAllProviders(copy,identity,force);
+ }else if(source==='automatic'){
+  report=await mf468SequentialCheck(copy,identity,force,opts);
  }else if(source==='manual'){
   return {status:'unknown',reason:'Manual detection',fingerprint:mf468Fingerprint(item),at:Date.now()};
  }else{
@@ -76987,6 +77025,7 @@ window.MediaFlowV468=Object.freeze({version:468,system:mf468System,advanced:mf46
  candidates:mf468Candidates,verdict:mf468Verdict,outcome:mf468Outcome,
  entry:mf468Entry,report:mf468FreshReport,counts:mf468Counts,
  scan:mf468Scan,check:mf468CheckItem,stop:mf468RequestStop,
+ sequential:mf468SequentialCheck,supports:mf468MediaSupported,
  runtime:()=>({working:MF468_RUNTIME.working,stopping:MF468_RUNTIME.stopping,
   checked:MF468_RUNTIME.checked,total:MF468_RUNTIME.total,error:MF468_RUNTIME.error})});
 MediaFlowRuntime.version=MF468_VERSION;
@@ -77035,6 +77074,17 @@ function mf468AdvancedSettingsHtml(){
   '<label>Background checking<select onchange="App.mf468SetAdvanced(&#39;refresh&#39;,this.value)">'+
   options([['manual','Manual checks only'],['adaptive','Adaptive while app is open']],p.refresh)+
   '</select></label></div>'+
+  '<details class="mf468-provider-priority"><summary>Advanced provider priority (used for fallback and tie-breaking)</summary>'+
+  '<div class="mf468-provider-priority-rows">'+p.providerOrder.map((name,index)=>
+   '<div class="mf468-provider-priority-row"><span><b>'+(index+1)+'.</b> '+
+   escapeHtml(V380_NAMES[name]||name)+'</span>'+
+   '<div><button type="button" class="btn btn-sm btn-ghost" aria-label="Move '+
+   escapeHtml(name)+' earlier" '+(index===0?'disabled ':'')+
+   'onclick="App.mf468Reorder(&#39;'+name+'&#39;,-1)">↑</button>'+
+   '<button type="button" class="btn btn-sm btn-ghost" aria-label="Move '+
+   escapeHtml(name)+' later" '+(index===p.providerOrder.length-1?'disabled ':'')+
+   'onclick="App.mf468Reorder(&#39;'+name+'&#39;,1)">↓</button></div></div>').join('')+
+  '</div><small>Legacy provider order is never modified. Smart compares every applicable source; Automatic uses the selected fallback order.</small></details>'+
   switcher('schedules','Show upcoming episodes when a verified schedule is available')+
   switcher('compare','Show provider disagreement and evidence')+
   switcher('includeUnknown','Keep Unknown titles eligible for fresh-only recommendations')+
@@ -77177,6 +77227,17 @@ App.mf468RefreshAll=async function(){
 App.mf468RefreshOne=async function(id){
  const result=await mf468Scan({ids:[id],force:true,notify:true});
  if(!result.ok)showToast(result.reason||result.error||'Title refresh unavailable');
+};
+App.mf468Reorder=async function(name,delta){
+ if(!mf468Active()||MF468_RUNTIME.working)return;
+ const current=mf468AdvancedPrefs(),old=S.settings.v468AdvancedFresh,
+  list=current.providerOrder.slice(),idx=list.indexOf(String(name)),j=idx+Number(delta);
+ if(idx<0||j<0||j>=list.length)return;
+ [list[idx],list[j]]=[list[j],list[idx]];
+ current.providerOrder=list;S.settings.v468AdvancedFresh=current;
+ try{await persistSettings();}
+ catch(e){S.settings.v468AdvancedFresh=old;showToast('Unable to save provider order.');}
+ render();
 };
 App.mf468Stop=mf468RequestStop;
 async function mf468SetSystem(mode){
