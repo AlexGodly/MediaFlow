@@ -14,7 +14,7 @@ assert(v481.includes('mf481FilterSidebar('), 'search retained');
 assert(v481.includes('mf481AssignCategory('), 'assignment action retained');
 assert(css.includes('grid-column:2/-1'), 'narrow sidebar has separate assignment row');
 assert(css.includes('min-width:395px'), 'wide sidebar may keep assignment inline');
-assert(css.includes('text-overflow:ellipsis'),'only very long names may ellipsize');
+assert(css.includes('white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip'),'long class names wrap instead of getting clipped');
 assert(css.includes('.mf482-assignment-menu'), 'popup is independent of sidebar');
 assert(css.includes('position:fixed!important'), 'portal menu does not clip inside sidebar');
 assert(css.includes('.mf482-assign-label'));
