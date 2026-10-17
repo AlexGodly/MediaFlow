@@ -217,5 +217,6 @@
   "components/360-v473-showcase-five-full-hover.js",
   "components/361-v474-showcase-intrinsic-aspect.js",
   "components/362-v475-pwa-auth-transition-guard.js",
-  "components/363-v476-background-visual-redesign.js"
+  "components/363-v476-background-visual-redesign.js",
+  "components/364-v477-background-footer-layout.js"
 ]
