@@ -49,7 +49,7 @@ mf441WidgetHtml=function(prefs,state){
     '</button>'+
     '<div class="mf441-widget-content mf476-widget-content" id="mf441-process-content" '+(expanded?'':'hidden')+'>'+
       '<div class="mf476-content-heading"><span><i class="mf476-live-dot" aria-hidden="true"></i>PROCESS MONITOR</span>'+
-      '<em>'+active+' running</em></div>'+
+      '<em>'+active+' active</em></div>'+
       '<div class="mf476-process-grid">'+coverRow+metaRow+'</div>'+
       '<div class="mf441-widget-foot mf476-widget-foot">'+
        '<button type="button" onclick="App.mf441Settings()">'+mf425Icon('settings',15)+' Recovery Settings</button>'+
