@@ -30,9 +30,7 @@ function mf481SidebarHtml(){
     '<span class="mf481-grip" aria-hidden="true">⋮⋮</span><span class="mf481-category-art">'+mf481IconMarkup(cat)+'</span>'+
     '<div class="mf481-category-info"><b>'+escapeHtml(cat.name)+'</b>'+
     '<small>'+escapeHtml(owner?.name||'Unassigned')+(cat.enabled===false?' · Disabled':'')+'</small></div>'+
-    '<select class="mf481-category-assign" aria-label="Assign '+escapeHtml(cat.name)+' to a class" '+
-    'onchange="App.mf481AssignCategory(this.closest(\'[data-mf481-sidebar-category]\').dataset.mf481SidebarCategory,this.value)" '+
-    'onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()">'+mf481ClassOptions(owner?.id||'')+'</select></div>';
+    mf482AssignmentControl(cat,owner)+'</div>';
   }).join('')+
   '</div><div class="mf481-sidebar-foot">Drag categories onto a class or choose from the Assign dropdown. Disabled categories can be organized but never recommended.</div></aside>';
 }
