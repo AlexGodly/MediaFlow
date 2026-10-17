@@ -56,6 +56,7 @@ const ctx={
  v401EpisodeOutcome:()=> 'none',v402EpisodeOutcomeFor:()=> 'none',
  v401Eligible:()=>false,
  mf463FreshForRecommendedTitle:()=>({count:900,status:'legacy'}),
+ mf419FreshRemaining:()=>({fresh:900,unknown:0}),
  v377RunJikan:async()=>{legacyRuns++;return {legacy:true}},
  saveState:async()=>{saved++},
  render:()=>{rendered++},showToast(){},mf468UpdateDashboard(){},
@@ -108,6 +109,8 @@ assert.equal(api.candidates().length,1,'Checkbox controls advanced categories');
  assert.equal(api.entry(title).available,10);
  assert.equal(api.outcome(title),'fresh');assert.equal(ctx.v401EpisodeOutcome(title),'fresh');
  assert.equal(api.report(title).count,3);
+ assert.equal(ctx.mf419FreshRemaining({id:'s1',seasonal:true}).fresh,3);
+ assert.equal(ctx.mf419FreshRemaining({id:'s1',seasonal:true}).unknown,0);
  assert.equal(ctx.MF439.working,false);assert.equal(ctx.MF442.process,'');
  assert.equal(lease,false);
  settings.v468AdvancedFresh.freshOnly=false;
@@ -122,7 +125,9 @@ assert.equal(api.candidates().length,1,'Checkbox controls advanced categories');
  settings.v468FreshEpisodesSystem='legacy';
  assert.equal(ctx.v401EpisodeOutcome(title),'none');
  assert.equal(ctx.mf463FreshForRecommendedTitle(title).count,900);
+ assert.equal(ctx.mf419FreshRemaining({id:'s1',seasonal:true}).fresh,900);
  assert.equal(settings.v377JikanLedger['title-1'].available,500);
+ assert.equal(ctx.mf419FreshRemaining({id:'s1',seasonal:true}).fresh,900);
  assert.equal(legacyRuns,1);
  const markup=fs.readFileSync('index.html','utf8');
  assert(markup.includes('mediaflow-v468.bundle.js'));

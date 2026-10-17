@@ -343,6 +343,20 @@ v401Eligible=function(item,cat){
  const outcome=mf468Outcome(item);
  return outcome==='fresh'||outcome==='unknown'&&mf468AdvancedPrefs().includeUnknown;
 };
+const mf468LegacyCategoryFresh=mf419FreshRemaining;
+mf419FreshRemaining=function(category){
+ if(!mf468Active())return mf468LegacyCategoryFresh.apply(this,arguments);
+ if(!category?.seasonal||!mf468AutoEnabled())return null;
+ let fresh=0,unknown=0;
+ for(const item of S.library||[]){
+  if(!item||String(item.categoryId)!==String(category.id))continue;
+  const entry=mf468Entry(item),status=mf468Outcome(item);
+  if(status==='unknown')unknown++;
+  else if(status==='fresh')
+   fresh+=Math.max(0,entry.available-mf468Progress(item));
+ }
+ return {fresh,unknown};
+};
 const mf468LegacyFreshCard=mf463FreshForRecommendedTitle;
 mf463FreshForRecommendedTitle=function(item,cat){
  return mf468Active()?mf468FreshReport(item):mf468LegacyFreshCard.apply(this,arguments);
