@@ -30,7 +30,7 @@ const S={categories:cats,sessions,settings,view:'settings'};
 const App={};let writes=0;
 const ctx={
  S,App,DEFAULT_SETTINGS:{},MediaFlowRuntime:{registerPageEnhancer:()=>{},version:479},
- window:{},document:{},Math,Date,
+ window:{},document:{querySelector:()=>null},Math,Date,
  v144SafeIconUrl:v=>/^https?:\/\//.test(v)?v:String(v||'').startsWith('assets/category-icons/')?v:'',
  v144CategoryIconHtml:g=>'<span>'+g.icon+'</span>',
  categoryModalHtml:()=>'',escapeHtml:s=>String(s),showToast:()=>{},uid:()=>String(writes+100),
