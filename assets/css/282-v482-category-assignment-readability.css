@@ -24,7 +24,7 @@
 .mf482-assign-trigger{
  display:flex!important;align-items:center!important;justify-content:space-between!important;
  gap:10px!important;width:100%!important;min-width:0!important;max-width:100%!important;
- height:38px!important;min-height:38px!important;padding:8px 12px!important;margin:0!important;
+ height:auto!important;min-height:38px!important;padding:8px 12px!important;margin:0!important;
  box-sizing:border-box!important;border-radius:10px!important;
  border:1px solid var(--border-soft)!important;
  color:var(--text,var(--fg,currentColor))!important;
@@ -38,7 +38,7 @@
  outline:2px solid var(--flow,var(--accent))!important;outline-offset:2px!important;
 }
 .mf482-assign-label{display:block;flex:1 1 auto;min-width:0;
- white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip;
  color:inherit!important;font:inherit!important;line-height:inherit!important;
 }
 .mf482-assign-chevron{flex:0 0 16px!important;color:currentColor;opacity:.8}
