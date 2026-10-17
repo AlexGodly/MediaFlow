@@ -211,5 +211,6 @@
   "components/354-v468-fresh-engines-core.js",
   "components/355-v468-fresh-engines-interface.js",
   "components/356-v469-mobile-background-safe-dock.js",
-  "components/357-v470-cloud-transfer-pwa-xp-integrity.js"
+  "components/357-v470-cloud-transfer-pwa-xp-integrity.js",
+  "components/358-v471-collections-showcase-collage.js"
 ]
