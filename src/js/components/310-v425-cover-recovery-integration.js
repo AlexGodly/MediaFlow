@@ -12,6 +12,7 @@ const MF425_PATHS={
  database:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/>',
  download:'<path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/>',
  retry:'<path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/>',
+ refresh:'<path d="M20 11a8 8 0 0 0-14.93-4.1L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.93 4.1L21 15"/><path d="M16 15h5v5"/>',
  check:'<path d="m5 12 4 4L19 6"/>',x:'<path d="M5 5 19 19M19 5 5 19"/>',
  gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-5-7-7-8-3-1 3 3 3 8 3Zm0 0c2-5 7-7 8-3 1 3-3 3-8 3Z"/>',
  external:'<path d="M13 4h7v7M20 4l-9 9M20 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h6"/>',
