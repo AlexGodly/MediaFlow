@@ -65,8 +65,10 @@
   transition:filter .18s ease,transform .2s ease!important;
   backface-visibility:hidden;
 }
-@media(hover:hover) and (pointer:fine){
-  /* The hovered artwork rises in front of its neighbors, not the entire row. */
+/* The hovered artwork rises in front of its neighbors, not the entire row.
+ * Chromium's headless/desktop environment may report hover:none despite
+ * receiving mouse input. Apply real :hover semantics, then neutralize them
+ * specifically on touch-only devices below. */
   .mf274-collections-browser .mf471-showcase-poster:hover{
     --mf472-lift:-3px;
     --mf472-zoom:1.075;
@@ -86,11 +88,20 @@
   .mf274-collections-browser .mf471-showcase-strip:has(.mf471-showcase-poster:hover) .mf471-showcase-poster:not(:hover){
     z-index:1;
   }
-}
 /* Preserve touch swiping and horizontal scrolling; tap feedback is restrained
  * so mobile never triggers a hover-only enlargement or accidental scroll lock. */
 @media(hover:none),(pointer:coarse){
+  .mf274-collections-browser .mf471-showcase-poster:hover:not(:active){
+    --mf472-lift:0px;
+    --mf472-zoom:1;
+    z-index:1!important;
+    border-radius:1px!important;
+    box-shadow:2px 1px 7px rgba(0,0,0,.32),-1px 1px 5px rgba(0,0,0,.12)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-poster:hover:not(:active)>img{filter:none!important;}
+  .mf274-collections-browser .mf471-showcase-strip:has(.mf471-showcase-poster:hover) .mf471-showcase-poster:not(:hover)>img{filter:none!important;}
   .mf274-collections-browser .mf471-showcase-poster:active{
+    --mf472-lift:0px;
     --mf472-zoom:1.024;
     z-index:7;
     box-shadow:0 6px 12px rgba(0,0,0,.36)!important;
