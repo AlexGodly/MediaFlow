@@ -1,0 +1,67 @@
+name: MediaFlow v468 Dual Fresh Episodes Engines Quality Gate
+on:
+  push:
+    branches: [feature/v468-dual-fresh-episodes-engines]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v468-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify independently selectable Fresh Episodes systems
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "468"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v468.bundle.js
+          node --check src/js/components/354-v468-fresh-engines-core.js
+          node --check src/js/components/355-v468-fresh-engines-interface.js
+          node --check scripts/test-v468-dual-engines.cjs
+          node --check scripts/test-v468-browser.cjs
+          node scripts/test-v468-dual-engines.cjs
+          python scripts/check.py
+      - name: Chromium desktop / 360px mobile + v462–v467 recovery regressions
+        run: node scripts/test-v468-browser.cjs
+      - name: Commit verified app and complete v468 archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/468
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/468/
+          test "$(cat legacy/v/468/VERSION)" = 468
+          test -s legacy/v/468/assets/js/mediaflow-v468.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v468.bundle.js
+          git add --sparse -f legacy/v/468
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v468): verified app and complete version archive [skip ci]'
+            git push origin HEAD:feature/v468-dual-fresh-episodes-engines
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v468-dual-fresh-episodes
+          path: |
+            artifacts/v468-browser-smoke/
+            version.json
