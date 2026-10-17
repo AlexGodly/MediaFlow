@@ -26,7 +26,7 @@ const x={
  window:{addEventListener:noop},document:{querySelector:()=>null},navigator:{onLine:true},
  setInterval:()=>3,clearInterval:noop,setTimeout:()=>3,clearTimeout:noop,
  structuredClone:value=>JSON.parse(JSON.stringify(value)),
- Date,Math,Number,Object,Array,String,Promise,console,
+ Date,Math,Number,Object,Array,String,Promise,console,AbortController,
  AUTH_USER:{id:'test-account'},AUTH_READY:true,S,App:{},MediaFlowRuntime:{version:465,registerPageRenderer:noop},
  V219_PAGE_RENDERERS:new Map([['settings',()=>'<div class="mf404-recommendations-card"></div>']]),
  MF439:{working:false,account:''},MF424:{running:false},MF442:{process:'',owner:'test-owner'},MF453Quick:{current:null},
