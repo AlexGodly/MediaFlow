@@ -20,7 +20,7 @@ const storage=new Map(),calls=[],settings={
 };
 const ctx={
  window:{},App:{},MediaFlowRuntime:{},AUTH_USER:null,AUTH_READY:false,
- V115_STARTUP_GUARD:true,MF437_RATING_SOURCES:defs,MF437_RATING_MAP:new Map(defs),
+ V115_STARTUP_GUARD:true,MF437_RATING_SOURCES:defs,MF437_RATING_MAP:new Map(defs.map(row=>[row[0],row])),
  MF439_PUBLIC:{jikan:{},anilist:{},kitsu:{}},MF439_GATEWAY:['tmdb','omdb'],
  sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},
  S:{settings,loading:true,view:'dashboard',currentTask:{libraryId:item.id,title:item.title}},
@@ -48,7 +48,7 @@ assert.equal(api.stored(item).rottentomatoes_critics.scale,100);
 assert.equal(api.stored(item).imdb.attribution,'Entered manually');
 assert.equal(api.stored(item).rottentomatoes_critics.attribution,'Verified provider rating');
 let card=api.score({...api.stored(item).imdb});
-console.log('DEBUG rating card:',card);assert(card.includes('IMDb')&&card.includes('7.8')&&card.includes('2,354 votes'));
+assert(card.includes('IMDb')&&card.includes('7.8')&&card.includes('2,354 votes'));
 assert(card.includes('imdb')&&card.includes('Entered manually'));
 const matches=[
  {provider:'jikan',title:item.title,recordId:'42',confidence:1,ratings:{mal:{score:8.4,scale:10,votes:99}}},
