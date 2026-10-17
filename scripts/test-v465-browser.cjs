@@ -12,7 +12,7 @@ const extract=(file,re)=>{const s=fs.readFileSync(path.join(__dirname,file),'utf
  assert(hit,'Missing previous version probe: '+file);return hit[1];};
 const early462=extract('test-v462-browser.cjs',/const probe=`([\s\S]*?)`;/);
 const title463=extract('test-v463-browser.cjs',/const extra=`([\s\S]*?)`;/);
-const rating464=extract('test-v464-browser.cjs',/const probe=`([\s\S]*?)`;/);
+const rating464=extract('test-v464-browser.cjs',/const probe=`(   const rating464=[\s\S]*?)`;/);
 const probe=`   const label465=await cdp.evaluate("(()=>{try{const api=window.MediaFlowV465;if(!api)return {error:'v465 module missing'};const fake={status:'fresh',count:1,available:2,progress:1,source:'Tenrai'};const markup=api.card(fake);const parent=document.createElement('div');parent.className='mf419-category-stats';parent.style.cssText='position:relative;width:min(100%,900px)';parent.innerHTML=markup;document.body.appendChild(parent);const tile=parent.querySelector('.mf463-fresh-stat'),p=parent.getBoundingClientRect(),t=tile.getBoundingClientRect(),label=tile.querySelector('span')?.textContent.trim();const result={version:api.version,label,count:tile.querySelector('strong')?.textContent,details:tile.querySelector('small')?.textContent,inside:t.left>=p.left-1&&t.right<=p.right+1,overflow:document.documentElement.scrollWidth>innerWidth+6};parent.remove();return result}catch(e){return {error:String(e.stack||e)}}})()");
    console.log(d.label+' v465 fresh card:',JSON.stringify(label465));
    assert(!label465.error&&label465.version===465&&label465.label==='Fresh episodes left'&&label465.count==='1'&&label465.details.includes('Tenrai')&&label465.inside&&!label465.overflow,
