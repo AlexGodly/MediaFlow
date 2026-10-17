@@ -76422,6 +76422,27 @@ function mf467Mark(key){
 }
 // Existing v450/v464 rendering calls the function at paint-time.
 mf450ProviderMark=mf467Mark;
+// Existing v437 Save Capture does not include a provider rating URL in the
+// editor's numeric inputs. Keep its hidden URL when score/scale/votes are
+// untouched; otherwise an ordinary Edit Title save could silently rewrite
+// a just-refreshed verified value as a new manual rating.
+const mf467CaptureBase=mf437SaveCapture;
+mf437SaveCapture=function(item,previous,capture){
+ if(!item||!capture?.ratings)return mf467CaptureBase.apply(this,arguments);
+ const existing=item.universalMetadata?.externalRatings||{};
+ const ratings={...capture.ratings};
+ for(const [key,rating] of Object.entries(ratings)){
+  const old=existing[key];
+  if(!old||!rating||!old.url)continue;
+  if(Number(rating.score??NaN)!==Number(old.score??NaN)||
+     Number(rating.scale)!==Number(old.scale)||
+     (rating.votes==null?null:Number(rating.votes))!==
+     (old.votes==null?null:Number(old.votes)))continue;
+  ratings[key]={...rating,url:old.url};
+ }
+ return mf467CaptureBase.call(this,item,previous,{...capture,ratings});
+};
+
 const MF467={working:false,titleId:'',account:'',provider:'',note:'',success:null,
  abort:null,sequence:0};
 const MF467_RATING_PROVIDERS=new Set([

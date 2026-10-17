@@ -31,6 +31,7 @@ const ctx={window:{},document:{querySelector:()=>null,querySelectorAll:()=>[],ad
  MF442:{process:''},MF466:{working:false},MF453Quick:{current:null},
  MF439_LEGACY_FIELDS:{},MF450_MARKS:{anidb:'AniDB'},MF437_RATING_MAP:new Map([['mal',['mal','MAL',10]]]),
  mf450ProviderMark:()=>'<span>old</span>',
+ mf437SaveCapture:(item,previous,capture)=>{ctx.lastCapture=capture;return false;},
  mf425Icon:()=>'<svg></svg>',mf419Icon:()=>'<svg></svg>',
  escapeHtml:t=>String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/'/g,'&#39;'),
  mf439Account:()=>ctx.AUTH_USER.id,
@@ -86,6 +87,13 @@ for(const key of ['anidb','tvmaze','hardcover','backloggd','vndb',
  assert(mark.includes('mf467-source-fallback'),'Must degrade if offline');
 }
 assert(api.button(saved,'editor').includes('Refresh external ratings'));
+// Provider-owned hidden source URLs must survive a later ordinary Edit Title save.
+saved.universalMetadata.externalRatings.mal.url='https://myanimelist.net/anime/90';
+ctx.mf437SaveCapture(saved,{}, {ratings:{mal:{score:7,scale:10,votes:200}}});
+assert.equal(ctx.lastCapture.ratings.mal.url,'https://myanimelist.net/anime/90');
+ctx.mf437SaveCapture(saved,{}, {ratings:{mal:{score:8,scale:10,votes:200}}});
+assert.equal(ctx.lastCapture.ratings.mal.url,undefined,'Edited score is user-managed');
+
 assert.deepEqual(Array.from(api.providers(saved)),['jikan'],'Only ready rating-capable sources are checked');
 assert(api.button({},'editor').includes('disabled'));
 assert(api.button({},'editor').includes('Save this title'));
