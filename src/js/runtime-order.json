@@ -207,5 +207,7 @@
   "components/350-v466-auto-recommended-metadata-refresh.js",
   "components/351-v467-brand-logos-a.js",
   "components/352-v467-brand-logos-b.js",
-  "components/353-v467-rating-refresh-brand-marks.js"
+  "components/353-v467-rating-refresh-brand-marks.js",
+  "components/354-v468-fresh-engines-core.js",
+  "components/355-v468-fresh-engines-interface.js"
 ]
