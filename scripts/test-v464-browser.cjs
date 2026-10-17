@@ -16,5 +16,5 @@ assert(script.includes(needle),'v463 browser layout injection changed');
 script=script.replace(needle,'const extra464='+JSON.stringify(probe)+';\n'+needle);
 const signature="'+JSON.stringify(extra)+'+marker);";
 assert(script.includes(signature),'v463 regression chaining hook changed');
-script=script.replace(signature,"'+JSON.stringify(extra)+'+JSON.stringify(extra464)+'+marker);");
+script=script.replace(signature,"'+JSON.stringify(extra)+'+'+JSON.stringify(extra464)+'+marker);");
 const run=new Module(filename,module);run.filename=filename;run.paths=Module._nodeModulePaths(path.dirname(filename));run._compile(script,filename);
