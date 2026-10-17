@@ -204,5 +204,8 @@
   "components/347-v463-recommended-title-fresh-left.js",
   "components/348-v464-recommendations-external-ratings.js",
   "components/349-v465-recommended-fresh-card-title-seasonal-visibility.js",
-  "components/350-v466-auto-recommended-metadata-refresh.js"
+  "components/350-v466-auto-recommended-metadata-refresh.js",
+  "components/351-v467-brand-logos-a.js",
+  "components/352-v467-brand-logos-b.js",
+  "components/353-v467-rating-refresh-brand-marks.js"
 ]
