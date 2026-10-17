@@ -48,7 +48,7 @@ assert.equal(api.stored(item).rottentomatoes_critics.scale,100);
 assert.equal(api.stored(item).imdb.attribution,'Entered manually');
 assert.equal(api.stored(item).rottentomatoes_critics.attribution,'Verified provider rating');
 let card=api.score({...api.stored(item).imdb});
-assert(card.includes('IMDb')&&card.includes('7.8')&&card.includes('2,354 votes'));
+console.log('DEBUG rating card:',card);assert(card.includes('IMDb')&&card.includes('7.8')&&card.includes('2,354 votes'));
 assert(card.includes('imdb')&&card.includes('Entered manually'));
 const matches=[
  {provider:'jikan',title:item.title,recordId:'42',confidence:1,ratings:{mal:{score:8.4,scale:10,votes:99}}},
