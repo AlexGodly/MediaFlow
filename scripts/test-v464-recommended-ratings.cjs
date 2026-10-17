@@ -38,7 +38,7 @@ const ctx={
  mf395DashboardRecommendationHtml:()=>'<section><div class="mf419-category-stats">category remains</div></section>',
  escapeHtml:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),
  document:{querySelector:()=>null},
- setTimeout,clearTimeout
+ AbortController,setTimeout,clearTimeout
 };
 vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'v464.js'});
 const api=ctx.window.MediaFlowV464;
@@ -73,7 +73,6 @@ assert.equal(calls.length,0,'Render must never block on network');
  await new Promise(r=>setTimeout(r,540));
  const now=api.current(item);
  assert.equal(now.imdb.score,7.8,'Manual stored ratings may not be overridden by providers');
- console.log('DIAG v464 live',JSON.stringify({calls,now,storage:[...storage.entries()]}));
  assert.equal(now.mal.score,8.4,'Exact identity-matched provider score appears asynchronously');
  assert(calls.includes('jikan')&&calls.includes('omdb'));
  assert(!calls.includes('tmdb'),'Never request an unconfigured gateway');
