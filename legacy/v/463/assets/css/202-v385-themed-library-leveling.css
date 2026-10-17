@@ -1,0 +1,53 @@
+/* MediaFlow v385 — full Library workspace reflects the current active theme.
+   Saturated accent for the shell, calmer complementary surfaces for form inputs. */
+.log-form .mf383-logging-library{
+  --mf385-library-edge:color-mix(in srgb,var(--accent) 67%,var(--panel-raised) 33%);
+  border:1px solid color-mix(in srgb,var(--accent) 65%,var(--border-soft));
+  background:linear-gradient(128deg,color-mix(in srgb,var(--accent) 41%,var(--panel) 59%),color-mix(in srgb,var(--accent) 30%,var(--panel-raised) 70%) 53%,color-mix(in srgb,var(--accent) 42%,var(--panel) 58%));
+  box-shadow:0 15px 38px color-mix(in srgb,var(--accent) 22%,transparent),inset 0 1px 0 color-mix(in srgb,var(--text) 14%,transparent);
+}
+.log-form .mf383-logging-library>.mf383-logging-summary{
+  background:linear-gradient(118deg,color-mix(in srgb,var(--accent) 69%,var(--panel) 31%),color-mix(in srgb,var(--accent) 52%,var(--panel-raised) 48%) 65%,color-mix(in srgb,var(--accent) 59%,var(--panel) 41%));
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 38%,var(--border-soft));
+}
+.log-form .mf383-logging-library[open]>.mf383-logging-summary{border-radius:19px 19px 0 0}
+.log-form .mf383-logging-body{
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 31%,var(--panel-raised) 69%),color-mix(in srgb,var(--accent) 18%,var(--panel) 82%) 68%,color-mix(in srgb,var(--accent) 27%,var(--panel-raised) 73%));
+  border-top:1px solid color-mix(in srgb,var(--accent) 40%,var(--border-soft));
+  box-shadow:inset 0 12px 30px color-mix(in srgb,var(--accent) 10%,transparent);
+}
+.log-form .mf383-logging-body .v238-log-library-head{
+  background:color-mix(in srgb,var(--accent) 14%,var(--panel-raised));
+  border:1px solid color-mix(in srgb,var(--accent) 34%,var(--border-soft));
+  padding:14px 17px;border-radius:15px;margin:12px 0;
+}
+/* Tint the workspace layers, never make search inputs unreadable. */
+.log-form .mf383-logging-body :is(.v378-logging-library,.v378-library-picker,.v379-logging-picker,.v238-log-library-results,.v238-log-library-controls){
+  border-color:color-mix(in srgb,var(--accent) 28%,var(--border-soft));
+}
+.log-form .mf383-logging-body :is(input,select,textarea){
+  background:color-mix(in srgb,var(--accent) 6%,var(--panel-raised));
+  border-color:color-mix(in srgb,var(--accent) 25%,var(--border-soft));
+  color:var(--text);
+}
+.log-form .mf383-logging-body :is(input,select,textarea):focus-visible{border-color:var(--accent);outline-offset:2px}
+/* Wordmark and icon share a common headline row. Subtitle belongs beneath
+   that row so it does not pull the logo toward the subtitle's baseline. */
+.mf384-about .mf383-about-brand{
+  display:grid;grid-template-columns:66px minmax(0,1fr);grid-template-rows:auto auto;
+  column-gap:17px;row-gap:4px;align-items:center;
+}
+.mf384-about .mf383-about-brand>div{display:contents}
+.mf384-about .mf384-brand-logo{grid-column:1;grid-row:1;align-self:center;margin:0;width:66px;height:66px}
+.mf384-about .mf383-about-brand h1{grid-column:2;grid-row:1;margin:0;align-self:center;line-height:1.04!important}
+.mf384-about .mf383-brand-version{grid-column:2;grid-row:2;align-self:start}
+.mf385-cloud-state{font-size:10.5px;color:var(--text-mute);margin-top:10px;line-height:1.4}
+.mf385-cloud-state[data-sync-state="saved"]{color:color-mix(in srgb,var(--accent) 50%,var(--text) 50%)}
+.mf385-cloud-state[data-sync-state="failed"]{color:var(--danger,var(--text))}
+@media(max-width:690px){
+ .mf384-about .mf383-about-brand{grid-template-columns:50px minmax(0,1fr);column-gap:11px;row-gap:3px}
+ .mf384-about .mf384-brand-logo{width:50px;height:50px}
+ .mf384-about .mf383-about-brand h1{font-size:clamp(30px,8vw,45px)!important}
+ .log-form .mf383-logging-body .v238-log-library-head{padding:11px 12px;margin:9px 0}
+}
+@media(prefers-reduced-motion:reduce){.log-form .mf383-logging-library,.log-form .mf383-logging-body{transition:none}}
