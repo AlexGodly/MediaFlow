@@ -215,5 +215,6 @@
   "components/358-v471-collections-showcase-collage.js",
   "components/359-v472-showcase-hover-depth.js",
   "components/360-v473-showcase-five-full-hover.js",
-  "components/361-v474-showcase-intrinsic-aspect.js"
+  "components/361-v474-showcase-intrinsic-aspect.js",
+  "components/362-v475-pwa-auth-transition-guard.js"
 ]

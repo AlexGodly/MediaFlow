@@ -1,0 +1,66 @@
+name: MediaFlow v464 External Ratings Recommendation Quality Gate
+on:
+  push:
+    branches: [feature/v464-recommendations-external-ratings]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v464-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify v464 rating provenance and ranking
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "464"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v464.bundle.js
+          node --check src/js/components/348-v464-recommendations-external-ratings.js
+          node --check scripts/test-v464-external-ratings.cjs
+          node --check scripts/test-v464-browser.cjs
+          node scripts/test-v464-external-ratings.cjs
+          python scripts/check.py
+      - name: Chromium desktop + 360px mobile recommended ratings and recovery regression
+        run: node scripts/test-v464-browser.cjs
+      - name: Commit verified site and full v464 source archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/464
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/464/
+          test "$(cat legacy/v/464/VERSION)" = 464
+          test -s legacy/v/464/assets/js/mediaflow-v464.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v464.bundle.js
+          git add --sparse -f legacy/v/464
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v464): verified site and full source archive [skip ci]'
+            git push origin HEAD:feature/v464-recommendations-external-ratings
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v464-recommends-external-ratings
+          path: |
+            artifacts/v464-browser-smoke/
+            version.json
