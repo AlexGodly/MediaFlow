@@ -29,6 +29,12 @@ function mf476ProcessCard(base,type,status){
 }
 const mf476WidgetBase=mf441WidgetHtml;
 mf441WidgetHtml=function(prefs,state){
+  // Extract the *fully decorated* footer from the v441/v451 wrapper chain:
+  // stop-all, discard, resume-interrupted and any future controls must survive
+  // a visual redesign even when their appearance is restyled.
+  const previous=String(mf476WidgetBase.apply(this,arguments)||'');
+  const footerMatch=previous.match(/<div class="mf441-widget-foot[^"]*">[\s\S]*?<\/div>/);
+  const originalFooter=footerMatch?footerMatch[0].replace('class="mf441-widget-foot','class="mf441-widget-foot mf476-widget-foot'):null;
   const expanded=Boolean(prefs.expanded),active=Number(state.activeCount)||0;
   const cover=mf476Progress(state.cover,state.coverPct,'Covers',mf425Icon('images',13));
   const metadata=mf476Progress(state.metadata,state.metaPct,'Metadata',mf425Icon('database',13));
@@ -51,10 +57,7 @@ mf441WidgetHtml=function(prefs,state){
       '<div class="mf476-content-heading"><span><i class="mf476-live-dot" aria-hidden="true"></i>PROCESS MONITOR</span>'+
       '<em>'+active+' active</em></div>'+
       '<div class="mf476-process-grid">'+coverRow+metaRow+'</div>'+
-      '<div class="mf441-widget-foot mf476-widget-foot">'+
-       '<button type="button" onclick="App.mf441Settings()">'+mf425Icon('settings',15)+' Recovery Settings</button>'+
-       '<button type="button" onclick="App.mf441Hide()">'+mf425Icon('x',15)+' Hide widget</button>'+
-      '</div>'+
+      (originalFooter||'<div class="mf441-widget-foot mf476-widget-foot"><button type="button" onclick="App.mf441Settings()">'+mf425Icon('settings',15)+' Recovery Settings</button><button type="button" onclick="App.mf441Hide()">'+mf425Icon('x',15)+' Hide widget</button></div>')+
     '</div></aside>';
 };
 window.MediaFlowV476=Object.freeze({version:MF476_VERSION,
