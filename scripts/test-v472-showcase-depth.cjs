@@ -16,7 +16,7 @@ for(const token of [
 '.mf274-collections-browser .mf471-showcase-entry:hover',
 '.mf274-collections-browser .mf471-showcase-poster::after',
 '--mf472-zoom:1.075','box-shadow:','z-index:12','brightness(.83)',
-'padding:8px 9px 9px','@media(max-width:680px)','@media(hover:none)',
+'padding:8px 9px 9px','@media(max-width:680px)','@media(pointer:coarse)',
 '@media(prefers-reduced-motion:reduce)',':focus-visible'
 ])assert(css.includes(token),'Missing Simkl-inspired behavior: '+token);
 for(const selector of css.matchAll(/\n\s*([^{}]+)\s*\{/g)){
