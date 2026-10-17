@@ -135,6 +135,7 @@ function mf468AdvancedWorkspaceHtml(){
   'onclick="App.mf468RefreshAll()">Check Fresh Episodes</button>'+
   (run.working?'<button type="button" class="btn" onclick="App.mf468Stop()">Stop after current title</button>':'')+
   '</div></div>'+
+  v401FilterControl('checker')+
   '<div class="mf468-overview">'+tile(counts.freshTitles,'Verified fresh titles')+
    tile(counts.freshEpisodes,'Fresh episodes remaining')+tile(counts.caughtUp,'Verified caught up')+
    tile(counts.unknown,'Unknown')+tile(counts.conflicts,'Provider disagreements')+
@@ -213,6 +214,18 @@ async function mf468SetAdvanced(key,value){
  catch(e){S.settings.v468AdvancedFresh=old;showToast('Unable to synchronize Advanced settings.');}
  render();
 }
+const mf468OldFreshToggle=App.v401ToggleFreshRecommendations;
+App.v401ToggleFreshRecommendations=async function(){
+ if(!mf468Active())return mf468OldFreshToggle.apply(this,arguments);
+ if(!mf468AutoEnabled()){showToast('Choose an automatic Advanced source to enable fresh-only recommendations.');return;}
+ const current=mf468AdvancedPrefs();
+ const previous=S.settings.v468AdvancedFresh;
+ current.freshOnly=!current.freshOnly;
+ S.settings.v468AdvancedFresh=current;
+ try{await persistSettings();}
+ catch(e){S.settings.v468AdvancedFresh=previous;showToast('Unable to save the Advanced Fresh Episodes filter.');}
+ render();
+};
 App.mf468SelectSystem=mf468SetSystem;
 App.mf468SetAdvanced=mf468SetAdvanced;
 // Fresh Episodes area: Legacy markup and controls remain untouched in Legacy,

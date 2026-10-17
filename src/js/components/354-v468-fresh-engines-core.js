@@ -236,7 +236,7 @@ async function mf468Scan({ids=null,force=false,notify=false}={}){
     const result=await mf468CheckItem(item,force);
     if(mf439Account()!==account||mf439Item(item.id)!==item||
       oldSignature!==mf442TitleSignature(item)||fingerprint!==mf468Fingerprint(item)||
-      MF468_RUNTIME.stopping||seq!==MF468_RUNTIME.sequence)break;
+      seq!==MF468_RUNTIME.sequence)break;
     // Unverified checks never replace a still-current verified result.
     if(result.status==='unknown'){
      const old=ledger[String(item.id)];
