@@ -4,7 +4,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 assert.equal(fs.readFileSync('VERSION','utf8').trim(),'481');
 const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert.equal(order.at(-1),'components/368-v481-category-class-management.js');
-cp.execFileSync(process.execPath,['scripts/test-v480-category-classes.cjs'],{stdio:'pipe'});
+cp.execFileSync(process.execPath,['scripts/test-v481-scheduler-regression.cjs'],{stdio:'pipe'});
 const source=fs.readFileSync('src/js/components/368-v481-category-class-management.js','utf8');
 const css=fs.readFileSync('assets/css/281-v481-category-class-ui.css','utf8');
 assert(!/reset.*categor|delete.*categor|S\.sessions\s*=|S\.library\s*=/.test(source));
