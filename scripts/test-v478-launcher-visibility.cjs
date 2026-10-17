@@ -8,6 +8,7 @@ assert.equal(order.at(-1),'components/365-v478-background-launcher-visibility.js
 assert.equal(order.at(-2),'components/364-v477-background-footer-layout.js');
 const css=fs.readFileSync('assets/css/279-v478-background-launcher-visibility.css','utf8');
 const source=fs.readFileSync('src/js/components/365-v478-background-launcher-visibility.js','utf8');
+assert(fs.readFileSync('assets/css/277-v476-background-processes-premium.css','utf8').includes('var(--flow)'), 'v478 must inherit MediaFlow theme-driven v476 skin');
 assert(fs.readFileSync('index.html','utf8').includes('279-v478-background-launcher-visibility.css'));
 for(const token of [
  'mf476-widget:not(.mf441-expanded)','max-height:none!important',
@@ -18,7 +19,7 @@ for(const token of [
  'grid-template-columns:repeat(2,minmax(0,1fr))',
  'display:flex!important','white-space:normal!important',
  '@media screen and (max-width:720px)','@media screen and (max-width:340px)',
- 'var(--flow)','@media (prefers-reduced-motion:reduce)'
+ '@media (prefers-reduced-motion:reduce)'
 ])assert(css.includes(token),'Missing complete launcher layout: '+token);
 const attrs={visibility:'unknown'},state={jobs:2},calls={base:0,saves:0};
 const classes=new Set(['mf476-widget','mf462-ready']);
