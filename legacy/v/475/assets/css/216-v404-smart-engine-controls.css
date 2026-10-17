@@ -1,0 +1,16 @@
+/* MediaFlow v404: branded diagnostics + low-overhead shared recommendation toggles */
+.mf404-recommendations-card .settings-toggle-row{min-width:0;align-items:center;gap:16px}
+.mf404-recommendations-card .settings-toggle-row>div:first-child{min-width:0;flex:1 1 auto}
+.mf404-recommendations-card .settings-toggle-row>button.toggle{flex:0 0 auto;margin-inline-start:auto}
+.mf404-recommend-setting{margin:0!important;padding:0!important;border:0!important;background:transparent!important;display:flex!important;flex-flow:row wrap!important;align-items:center;gap:12px 16px;min-width:0}
+.mf404-recommend-setting .mf401-setting-copy{flex:1 1 210px;min-width:0}
+.mf404-recommend-setting button[role="switch"]{margin-left:auto;flex:none}
+.mf404-recommend-setting .mf401-setting-note[hidden]{display:none}
+.mf401-diagnostics summary,.mf402-coverage summary,.mf381-diagnostics strong{overflow-wrap:anywhere;word-break:normal;max-width:100%}
+.mf380-provider-select,.mf380-provider-select select,.mf380-provider-panel{min-width:0;max-width:100%}
+.mf380-provider-select select{white-space:normal;text-overflow:ellipsis}
+@media(max-width:650px){
+  .mf404-recommend-setting{gap:10px!important}
+  .mf404-recommend-setting .mf401-setting-copy{flex:1 1 min(185px,calc(100% - 65px))}
+  .mf401-diagnostics summary,.mf402-coverage summary{line-height:1.45}
+}

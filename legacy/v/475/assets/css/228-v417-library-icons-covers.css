@@ -1,0 +1,12 @@
+/* MediaFlow v417: canonical Overview icons, one Normal Library status icon, visible missing-cover tiles. */
+.mf415-overview-item .mf417-total-label,.mf415-overview-item .mf415-status-label{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%}
+.mf415-overview-item .mf417-count-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:15px;height:15px;color:inherit;opacity:.84}
+.mf415-overview-item .mf417-count-icon .v225-btn-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex:none}
+.mf415-overview-item .mf417-count-icon svg{width:15px;height:15px;display:block}
+.mf415-overview-item .mf415-status-label>span:last-child{min-width:0;overflow-wrap:anywhere}
+#view-root .v261-library-chip.mf417-single-status-icon .v261-chip-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}
+#view-root .item-row>.mf417-cover-placeholder{box-sizing:border-box;align-items:center;justify-content:center;overflow:hidden;flex:none;min-width:0;padding:5px;line-height:1;background:var(--panel-raised,var(--panel));color:var(--text,var(--flow))}
+#view-root .mf417-cover-placeholder .v144-cat-icon-img{max-width:100%;max-height:100%;object-fit:contain}
+#view-root .mf417-cover-placeholder .v144-cat-icon-emoji{font-size:clamp(18px,3vw,30px);line-height:1}
+#view-root .v181-cover-tile .mf417-tile-placeholder{align-items:center;justify-content:center}
+@media(max-width:420px){.mf415-overview-item .mf417-count-icon,.mf415-overview-item .mf417-count-icon .v225-btn-icon{width:14px;height:14px}.mf415-overview-item .mf417-count-icon svg{width:14px;height:14px}}
