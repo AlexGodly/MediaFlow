@@ -30,7 +30,7 @@ const item={id:'anime1',progress:9,total:14};
 let touches=0,renders=0,syncs=0,updates=[],toasts=[];
 let control=null;
 const context={
- S:{logging:true,logDraft:{v369Interface:'quick',entries:[{libraryId:'anime1',qty:2,v179StartProgress:9,v179EndProgress:11}]},entryDraft:{libraryId:'anime1',qty:1}},
+ S:{logging:true,library:[item],logDraft:{v369Interface:'quick',entries:[{libraryId:'anime1',qty:2,v179StartProgress:9,v179EndProgress:11}]},entryDraft:{libraryId:'anime1',qty:1}},
  App:{v179SetLogEntryEnd:(index,next)=>updates.push(['quick-progress',index,next]),v394SetQuantity:(index,next)=>updates.push(['advanced',index,next])},
  window:{scrollY:0,scrollX:0,scrollTo(){}},
  document:{addEventListener(){},querySelector(){return null},querySelectorAll(){return control?[control]:[]}},
@@ -61,7 +61,8 @@ context.App.mf504SetQuickAmount(0,'3');
 assert.equal(context.S.logDraft.entries[0].qty,3);
 assert.equal(syncs,1);assert.equal(touches,1);
 assert.equal(renders,1);
-assert.equal(context.S.library,undefined,'Never create or mutate Library data');
+assert.equal(context.S.library[0].progress,9,'Never modify saved Library progress');
+assert.equal(context.S.library[0].total,14,'Never modify saved Library totals');
 const input={value:'3'};
 const minus={disabled:false,focus(){}},plus={disabled:false,focus(){}};
 control={dataset:{mf504Kind:'quick-amount',mf504Index:'0'},
