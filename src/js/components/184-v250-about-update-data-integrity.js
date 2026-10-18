@@ -346,8 +346,22 @@ v142OrderExportPayload=function(){
 };
 const v250ImportOrderBase=v142ImportOrder;
 v142ImportOrder=async function(file){
+  if(!file)return;
+  if(!AUTH_USER?.id||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Restore your cloud account before importing Personal Order.');return;}
+  const before=v250Fingerprint(S.orderPlan||{});
+  const accountId=String(AUTH_USER?.id||'');
   const result=await v250ImportOrderBase.apply(this,arguments);
-  try{await saveState();await saveQueue;}catch(_){ }
+  // Avoid a redundant write after an invalid file; old importers swallow parse errors.
+  if(before!==v250Fingerprint(S.orderPlan||{})){
+    try{
+      const saved=await saveState();await saveQueue;
+      if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud upload failed');
+      await mf507VerifyImportedCloud('Personal Order',accountId);
+    }catch(error){
+      console.warn('MediaFlow v507: Personal Order cloud verification failed',error);
+      showToast('Personal Order updated locally, but cloud verification failed. Keep your export and retry Sync Now.');
+    }
+  }
   return result;
 };
 App.v142ImportOrder=v142ImportOrder;

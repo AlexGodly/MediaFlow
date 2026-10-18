@@ -1,0 +1,77 @@
+name: Publish MediaFlow v507 Stable
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify v507 deployed source equals its immutable full archive
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "507" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/507/$entry")"
+          done
+          test "$(git show HEAD:legacy/v/507/VERSION | tr -d '\r\n')" = 507
+          git cat-file -e HEAD:legacy/v/507/assets/js/mediaflow-v507.bundle.js
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+      - name: Package complete v507 snapshot
+        if: steps.verify.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v507_Stable.zip HEAD:legacy/v/507
+          sha256sum MediaFlow_v507_Stable.zip > MediaFlow_v507_Stable.sha256
+          test -s MediaFlow_v507_Stable.zip
+      - name: Publish release 507 with changelog
+        if: steps.verify.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 507 >/dev/null 2>&1; then
+            echo "Release tag 507 already exists; not overwriting."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## MediaFlow v507 Stable — Complete Data Integrity & Update Reliability
+
+          Builds on v506 Stable, keeping backward-compatible cloud and export schemas.
+
+          - **Cloud & Sync Now:** stop anonymous/unhydrated uploads and verify the authenticated account identity throughout cloud reads, merge, uploads and readback.
+          - **Full Data & Automatic Export:** derive backed-up fields from the actual current persistent cloud snapshot, including future persistent fields, not an older fixed list. Scheduled backups continue to use the same current full builder.
+          - **Data import / Settings import:** require successful cloud upload and authenticated full-state readback before reporting imported data as cloud-verified.
+          - **Collections & Personal Order import:** keep merge semantics and inform users when imported changes are local but cloud verification is pending or failed; prevent silent confirmations.
+          - **Settings export/import:** include current settings, backup and automatic update preferences, without copying unrelated Library/History data to a settings-only preset.
+          - **History / XP:** confirm complete Library History, consumption session metadata, per-unit logging timestamps and XP ledgers remain in canonical backups; retain History/XP CSV and JSON exporters. No XP rewards are re-awarded during auditing.
+          - **PWA / automatic updates:** rebuild v507 app and versioned service-worker cache, preserving safe auth-aware automatic update and reload behavior.
+          - **Read-only audit:** expose `MediaFlowV507.audit()` and `App.v507ExportAuditReport()` to inspect local export parity and download a concise status report. Live cloud verification still requires Sync Now under a signed-in account.
+          - **Regression checks:** run synthetic complete snapshot / automatic export / cloud readback / account-change / import contract / PWA tests, JavaScript syntax check and project verification.
+          - **No data migrations:** do not change existing account data, Supabase schema or older archived releases.
+
+          Includes the complete v507 project archive and SHA-256 checksum.
+          NOTES
+          gh release create 507 MediaFlow_v507_Stable.zip MediaFlow_v507_Stable.sha256 \
+            --target "$RELEASE_SHA" --title "v507 Stable" --notes-file release-notes.md

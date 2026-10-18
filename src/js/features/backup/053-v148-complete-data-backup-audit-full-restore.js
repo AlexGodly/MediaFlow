@@ -261,6 +261,8 @@ App.exportJSON=function(){
 // FINAL full import used at runtime.
 App.importJSON=function(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing data.');return;}
 
   showDataProgress('Importing complete MediaFlow backup','Reading and validating backup file…',5);
 
@@ -283,6 +285,7 @@ App.importJSON=function(file){
         return;
       }
 
+      if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated)throw new Error('Your active account changed during import. No data was applied.');
       updateDataProgress(26,'Restoring complete account state…');
 
       // Existing wrapper chain restores all modern account fields:
@@ -314,9 +317,10 @@ App.importJSON=function(file){
       v148FinalizeImportedRuntime();
 
       updateDataProgress(84,'Saving restored complete state to protected cloud storage…');
-      await saveState();
+      const saved=await saveState();
       await saveQueue;
-      if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
+      if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
+      await mf507VerifyImportedCloud('Full Data Backup',importAccountId);
 
       render();
 
@@ -330,7 +334,9 @@ App.importJSON=function(file){
       finishDataProgress(
         false,
         'Import failed',
-        lastSaveFailed?'The backup was read but the cloud save failed. Keep your backup file and retry Sync Now.':'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
+        /cloud|account|verif|sync/i.test(String(e?.message||''))
+          ?String(e?.message||'Cloud verification failed. Keep the backup and retry Sync Now.')
+          :lastSaveFailed?'The backup was read but the cloud save failed. Keep your backup file and retry Sync Now.':'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
       );
     }
   };

@@ -1,0 +1,75 @@
+name: Publish MediaFlow v506 Stable
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify v506 deployed source equals its immutable full archive
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "506" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/506/$entry")"
+          done
+          test "$(git show HEAD:legacy/v/506/VERSION | tr -d '\r\n')" = 506
+          git cat-file -e HEAD:legacy/v/506/assets/js/mediaflow-v506.bundle.js
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+      - name: Package complete v506 snapshot
+        if: steps.verify.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v506_Stable.zip HEAD:legacy/v/506
+          sha256sum MediaFlow_v506_Stable.zip > MediaFlow_v506_Stable.sha256
+          test -s MediaFlow_v506_Stable.zip
+      - name: Publish release 506 with changelog
+        if: steps.verify.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 506 >/dev/null 2>&1; then
+            echo "Release tag 506 already exists; not overwriting."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## MediaFlow v506 Stable — Authentication and Cloud Session Continuity
+
+          Builds on v505 Stable while preserving prior Library, Logging, themes, recovery, and archived releases.
+
+          - **No blank workspace during reload:** restores the existing Supabase session before starting cloud-data hydration. MediaFlow never treats transient missing authentication as an empty new account.
+          - **Transient SIGNED_OUT handled safely:** distinguishes Supabase refresh/startup notifications from explicit user-requested Logout. Delayed stale events trigger verified session recovery rather than forcibly displaying an anonymous account.
+          - **More reliable PWA session restoration:** increases the bounded session retry window; when a persisted login cannot yet be verified, offers **Retry restoring my account** or **Sign in instead**, without displaying a blank Library.
+          - **Cloud safety:** keeps writes blocked while login or data loading is unresolved and checks account identity before accepting late cloud/hydration responses. Wrong-account data is not rendered or uploaded.
+          - **Manual Log out remains reliable:** user-initiated sign out is respected immediately; repeated asynchronous auth events cannot reopen it.
+          - **Automated regressions:** execute the actual authentication coordinator against mocked delayed/null Supabase responses, transient and explicit sign-outs, authenticated recovery, and stale cloud hydration.
+          - **PWA:** rebuilt v506 application bundle, service worker, and offline-cache version.
+          - **No migrations:** no changes to Supabase schemas or user data; previous archive versions remain intact.
+
+          Full project source ZIP and SHA-256 checksum included.
+          NOTES
+          gh release create 506 MediaFlow_v506_Stable.zip MediaFlow_v506_Stable.sha256 \
+            --target "$RELEASE_SHA" --title "v506 Stable" --notes-file release-notes.md
