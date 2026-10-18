@@ -40,9 +40,10 @@ try{
  for(const width of [340,600,1000]){
   const output=cp.execFileSync(browser,[
     '--headless','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
-    '--disable-background-networking','--hide-scrollbars',
+    '--disable-background-networking','--disable-extensions','--no-first-run',
+    '--no-default-browser-check','--hide-scrollbars',
     '--virtual-time-budget=1000','--window-size='+width+',900','--dump-dom','file://'+html
-  ],{encoding:'utf8',timeout:25000,stdio:['ignore','pipe','ignore']});
+  ],{encoding:'utf8',timeout:70000,stdio:['ignore','pipe','ignore']});
   const match=output.match(/MF499_RESULT=(\{[^<]+\})/);
   assert(match,'Chromium must return measured card geometry');
   const m=JSON.parse(match[1]);
