@@ -71,6 +71,10 @@ const context={
  mf484ImageUrl:s=>String(s||''),mf484Hex:(value,fallback='#8B5CF6')=> /^#[0-9a-f]{6}$/i.test(value||'')?value:fallback,
  mf484AllowMotion:()=>true,
  mf484ApplyAtmosphere(p){
+  // Match v484's real Legacy+Off no-op/cleanup branch.
+  if(prefs.mode==='legacy'&&prefs.living.mode==='off'){
+   context.mf484Clear();return;
+  }
   counts.atmosphere++;
   rootElement.dataset.mf484Mode=prefs.mode;
   rootElement.style.setProperty('--mf484-a',p.primary||p.flow);
