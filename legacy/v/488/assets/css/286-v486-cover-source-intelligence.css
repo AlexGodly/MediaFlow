@@ -1,0 +1,41 @@
+/* MediaFlow v486 — Source Intelligence diagnostics; compatible with
+ * dynamic dark/light Theme Collections and mobile Settings Center.
+ */
+.mf486-source-panel{display:grid;gap:14px;border:1px solid var(--border-soft);
+ padding:16px;border-radius:16px;
+ background:linear-gradient(135deg,color-mix(in srgb,var(--panel-raised) 92%,var(--flow)),var(--panel));
+ color:var(--text);min-width:0}
+.mf486-source-panel>p{font-size:12px;line-height:1.6;color:var(--text-dim);margin:0}
+.mf486-source-panel>small{font-size:11px;line-height:1.5;color:var(--text-mute)}
+.mf486-status{border:1px solid var(--border-soft);background:var(--panel);
+ padding:14px;border-radius:12px;display:grid;gap:10px;min-width:0}
+.mf486-status-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mf486-status-head>div{display:grid;gap:4px;min-width:0}
+.mf486-status-head b{font-size:13px;overflow-wrap:anywhere}
+.mf486-status-head small{font-size:11px;color:var(--text-mute)}
+.mf486-mode{font-size:10px;color:var(--flow);border:1px solid var(--border);
+ padding:5px 9px;border-radius:999px;text-transform:uppercase;font-weight:800;letter-spacing:.06em}
+.mf486-status p{font-size:12px;line-height:1.5;color:var(--text-dim);margin:0}
+.mf486-meta{font-size:11px;color:var(--text-mute);font-variant-numeric:tabular-nums}
+.mf486-list{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto;
+ display:grid;gap:6px;overscroll-behavior:contain;scrollbar-gutter:stable}
+.mf486-source-entry{display:flex;align-items:center;gap:10px;padding:9px;
+ border-radius:10px;border:1px solid var(--border-soft);
+ background:var(--panel-raised);min-width:0}
+.mf486-rank{width:25px;height:25px;flex:0 0 25px;display:grid;place-items:center;
+ border-radius:7px;background:color-mix(in srgb,var(--flow) 13%,var(--panel));
+ color:var(--flow);font-size:11px;font-weight:800}
+.mf486-source-entry>span:nth-child(2){flex:1;min-width:0;display:grid;gap:3px}
+.mf486-source-entry strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf486-source-entry small{font-size:10px;color:var(--text-mute)}
+.mf486-source-entry em{font-size:10px;color:var(--healthy,#3FC7A6);
+ font-style:normal;font-weight:800}
+.mf486-alert{color:var(--overused,#E8607A);font-size:11px}
+.mf486-actions{display:flex;gap:10px;flex-wrap:wrap}
+.mf486-actions .btn{min-height:36px}
+@media(max-width:480px){
+ .mf486-source-panel{padding:12px}
+ .mf486-status{padding:10px}
+ .mf486-actions{display:grid;grid-template-columns:1fr}
+ .mf486-actions .btn{width:100%;white-space:normal}
+}

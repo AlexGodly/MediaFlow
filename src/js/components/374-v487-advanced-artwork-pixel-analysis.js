@@ -268,7 +268,7 @@ function mf487AnalyzeImage(url){
     if(!ctx)return finish(null,'Browser canvas unavailable');
     ctx.drawImage(img,0,0,w,h);
     const bytes=ctx.getImageData(0,0,w,h).data;
-    const outcome=mf487AnalyzePixelData(bytes,w,h);
+    const outcome=mf487AnalyzePixelData(bytes,w,h,u);
     if(!outcome)return finish(null,'No usable opaque artwork pixels');
     outcome.visualCoverUrl=u;
     outcome.sourceIntegrity='pixel-sampled';
