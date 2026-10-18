@@ -1,0 +1,64 @@
+<!doctype html>
+<html data-mf484-mode="advanced" data-mf484-living="advanced" data-mf497-motion="on" data-mf497-performance="full">
+<head><meta charset="utf-8">
+<style>
+:root{--v370-cover-size:74px;--v240-logged-cover-width:48px;--panel-raised:#20293b;--panel:#192339;
+ --text:#eef2ff;--text-dim:#a9b2c5;--flow:#9bb7ff;--border-soft:#5c6f86}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#151d2d}
+.log-form{margin:0 auto;padding:6px}
+.v370-title-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:start;padding:8px}
+.v370-title-head>.v370-title-cover{grid-column:1;grid-row:1 / 4}
+.v370-title-head>.v370-title-info{grid-column:2;grid-row:1;display:contents}
+.v370-title-info>h3,.v370-title-info>.v370-title-tags,.v370-title-info>.v370-title-stats{grid-column:2}
+.v370-title-info>h3{grid-row:1}
+.v370-title-info>.v370-title-tags{grid-row:2}
+.v370-title-info>.v370-title-stats{grid-row:3}
+.v370-title-info>.mf382-progress-comparison{grid-column:1/-1;grid-row:4;height:250px}
+.mf498-logging-cover{border:1px solid #657da1;border-radius:8px;display:grid;place-items:center;
+ background:#24334a;position:relative;overflow:hidden;color:#accaff;padding:0}
+.v239-logged-title-card{display:grid;grid-template-columns:auto 48px minmax(0,1fr) auto;gap:10px;padding:10px}
+.v239-logged-title-card>.v239-logged-cover{grid-column:1}
+.mf498-cover-icon{display:grid;place-items:center}
+</style>
+<style>/*INJECT_V500_STYLES*/</style>
+</head>
+<body>
+<div class="log-form mf373-logging">
+ <section class="v370-title mf394-title"><header class="v370-title-head">
+  <button type="button" class="v370-title-cover mf498-logging-cover" data-v225-iconified="1" aria-label="Open title details">
+   <img class="mf498-cover-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300'%3E%3Crect width='200' height='300' fill='%2351729d'/%3E%3C/svg%3E">
+   <span class="mf498-cover-icon" hidden>🌸</span>
+  </button>
+  <div class="v370-title-info"><h3>Example anime</h3><div class="v370-title-tags">Watching</div>
+   <div class="v370-title-stats">2 episodes in draft</div>
+   <div class="mf382-progress-comparison">Large progress preview</div></div>
+ </header></section>
+ <article class="v239-logged-title-card"><button type="button" class="v239-logged-cover mf498-logging-cover">
+ <span class="mf498-cover-icon">🌸</span></button><div>Quick logging card</div></article>
+ <section class="mf419-log-recommended"><div class="v253-log-recommended-copy" style="display:flex;align-items:center;gap:10px">
+ <button type="button" class="mf419-cover-art mf419-log-rec-cover mf498-logging-cover" data-v225-iconified="1">
+ <span class="mf498-cover-icon"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span></button>
+ <div>RECOMMENDED TITLE — An example anime<br> 9/14 units</div></div></section>
+</div>
+<output id="mf499-output"></output>
+<script>
+function measure(){
+ const advanced=document.querySelector('.v370-title-cover'),quick=document.querySelector('.v239-logged-cover');
+ const a=advanced.getBoundingClientRect(),q=quick.getBoundingClientRect();
+ const recommended=document.querySelector('.mf419-log-rec-cover');
+ const rec=recommended.getBoundingClientRect();
+ const pic=document.querySelector('.mf498-cover-image');
+ const parent=document.querySelector('.v370-title-head').getBoundingClientRect();
+ document.getElementById('mf499-output').textContent='MF499_RESULT='+JSON.stringify({
+  viewport:innerWidth,advanced:{width:a.width,height:a.height},quick:{width:q.width,height:q.height},recommended:{width:rec.width,height:rec.height},
+  gridHeight:parent.height,objectFit:getComputedStyle(pic).objectFit,
+  clickable:advanced.tagName==='BUTTON',hasOverflow:document.documentElement.scrollWidth>innerWidth+2,
+  categoryIcon:getComputedStyle(quick.querySelector('.mf498-cover-icon')).display,
+ iconSize:getComputedStyle(recommended.querySelector('svg')).width,
+ iconOverlay:!!document.querySelector('.mf498-logging-cover > .v225-btn-icon')
+ });
+}
+window.addEventListener('load',measure);
+</script>
+</body></html>

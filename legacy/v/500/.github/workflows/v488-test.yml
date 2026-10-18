@@ -1,0 +1,80 @@
+name: MediaFlow v488 Composition & Subject Salience Quality Gate
+on:
+  push:
+    branches: [feature/v488-composition-subject-salience]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v488-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "488"
+          python scripts/build.py
+          node --check src/js/components/375-v488-composition-salience.js
+          node --check assets/js/mediaflow-v488.bundle.js
+          node --check src/js/core/rendering/035-render-loop-init.js
+          node scripts/test-v488-composition.cjs
+          node scripts/test-v488-artwork-compat.cjs
+          node scripts/test-v488-source-compat.cjs
+          node scripts/test-v488-ownership-compat.cjs
+          node scripts/test-v488-visual-compat.cjs
+          node scripts/test-v488-recovery-compat.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==488
+          assert 'mediaflow-v488.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=488' in sw
+          assert 'mediaflow-pwa-v488-shell' in sw
+          assert 'mediaflow-v488.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v488 release/PWA coherence PASS')
+          PY
+      - name: Composition salience, prior artwork, source, ownership and recovery contracts
+        run: |
+          node scripts/test-v488-ownership-compat.cjs
+          node scripts/test-v488-visual-compat.cjs
+          node scripts/test-v488-recovery-compat.cjs
+      - name: Archive verified complete v488 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/488
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/488/
+          test "$(cat legacy/v/488/VERSION)" = "488"
+          test -s legacy/v/488/assets/js/mediaflow-v488.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v488.bundle.js
+          git add --sparse -f legacy/v/488
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v488): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v488-composition-subject-salience
+          fi
