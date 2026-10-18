@@ -30,30 +30,54 @@ function render(){
 
 }
 
-/* v475 — PWA update/reload authentication continuity.
- * A Supabase auth-state callback must NEVER await Supabase queries; doing so
- * can deadlock GoTrue's auth lock and strand the app on an empty workspace.
- * Subscribe before getSession(), defer callbacks, serialize hydration per
- * account and keep the workspace guarded until its cloud row has loaded. */
+/* MediaFlow v506 — verified authentication continuity.
+ * Supabase callbacks run outside its auth lock; no event is allowed to turn
+ * an unverified/refreshing account into an empty, writable workspace.
+ * Only the explicit Logout button authorizes immediate logout UX.
+ */
 const V475_AUTH={
-  restoring:true,bootId:null,bootPromise:null,hydrated:false,bootGeneration:0,
-  explicitLogout:false,error:null
+  restoring:false,restorePromise:null,bootId:null,bootPromise:null,
+  hydrated:false,bootGeneration:0,explicitLogout:false,logoutRequested:false,
+  error:null,lastEvent:'',lastCheckedAt:0
 };
 function v475ShowSessionLoading(message='Restoring your MediaFlow account…'){
   const app=document.getElementById('app');
-  if(app&&!app.querySelector('.sidebar')&&!app.querySelector('.auth-screen')){
-    app.innerHTML='<div class="loader-wrap" role="status" aria-live="polite">'+escapeHtml(message)+'</div>';
-  }
+  if(!app)return;
+  // A previously rendered workspace must not remain interactive when its
+  // Supabase session is unverified: edits would otherwise appear saved while
+  // the cloud write guard is intentionally blocking uploads.
+  if(app.querySelector('.mf506-auth-loading'))return;
+  app.innerHTML='<div class="loader-wrap mf506-auth-loading" role="status" aria-live="polite">'+escapeHtml(message)+'</div>';
+}
+function v506PersistedSessionHint(){
+  // This is ONLY a hint for which recovery screen to display, not proof of
+  // authentication. Never parse or transmit stored auth credentials.
+  try{
+    const project=new URL(SUPABASE_URL).hostname.split('.')[0];
+    return !!localStorage.getItem('sb-'+project+'-auth-token');
+  }catch(_){return false;}
+}
+function v506SessionRecoveryScreen(message){
+  V115_STARTUP_GUARD=true;
+  AUTH_READY=false;
+  const app=document.getElementById('app');
+  if(!app)return;
+  app.innerHTML='<div class="auth-screen mf506-recovery-screen"><div class="auth-card">'+
+    '<div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Account recovery</div></div></div>'+
+    '<div class="auth-title">Your saved account is temporarily unavailable</div>'+
+    '<div class="auth-sub">'+escapeHtml(message||'MediaFlow could not confirm your saved session yet. Your cloud Library has not been reset.')+'</div>'+
+    '<div style="display:grid;gap:10px;margin-top:18px">'+
+    '<button type="button" class="btn btn-primary btn-block" onclick="window.MediaFlowAuthContinuity.retry()">Retry restoring my account</button>'+
+    '<button type="button" class="btn btn-block" onclick="window.MediaFlowAuthContinuity.showLogin()">Sign in instead</button></div>'+
+    '<div class="auth-foot">No cloud data has been replaced. MediaFlow does not load a blank workspace while login or cloud recovery is unresolved.</div></div></div>';
 }
 async function startAuthenticatedApp(){
   const uid=String(AUTH_USER?.id||'');
   if(!uid)return false;
   if(V475_AUTH.bootPromise&&V475_AUTH.bootId===uid)return V475_AUTH.bootPromise;
   if(V475_AUTH.hydrated&&V475_AUTH.bootId===uid)return true;
-  // This is NOT permission to write empty account state. The v115 guard stays
-  // active until the real user's Supabase snapshot is safely accepted.
   V115_STARTUP_GUARD=true;
-  AUTH_READY=true;
+  AUTH_READY=true; // The startup guard still blocks writes until cloud data is loaded.
   V475_AUTH.bootId=uid;
   V475_AUTH.hydrated=false;
   V475_AUTH.error=null;
@@ -64,16 +88,15 @@ async function startAuthenticatedApp(){
       const result=await v115SafeBootstrap();
       if(generation!==V475_AUTH.bootGeneration||String(AUTH_USER?.id||'')!==uid)return false;
       V475_AUTH.hydrated=result===true;
-      // false means the recovery/error guard owns the UI; do not render a
-      // synthetic zero-title Library or trigger any cloud save.
+      if(result!==true){V115_STARTUP_GUARD=true;AUTH_READY=false;}
       return result===true;
     }catch(error){
       if(generation!==V475_AUTH.bootGeneration)return false;
       V475_AUTH.error=String(error?.message||error);
       V115_STARTUP_GUARD=true;
-      console.error('MediaFlow v475: account hydration failed',error);
-      const app=document.getElementById('app');
-      if(app)app.innerHTML='<div class="auth-screen"><div class="auth-card"><div class="auth-title">Could not load your saved MediaFlow account</div><div class="auth-sub">Your cloud data has not been replaced. Check your connection and retry.</div><button class="btn btn-primary btn-block" onclick="window.MediaFlowAuthContinuity.retry()">Retry loading my account</button></div></div>';
+      AUTH_READY=false;
+      console.error('MediaFlow v506: account hydration failed',error);
+      v506SessionRecoveryScreen('Your login was found but the saved workspace could not be loaded. Check your connection and retry.');
       return false;
     }
   })();
@@ -81,12 +104,29 @@ async function startAuthenticatedApp(){
   try{return await running;}
   finally{if(V475_AUTH.bootPromise===running)V475_AUTH.bootPromise=null;}
 }
+function v506CompleteExplicitLogout(){
+  V475_AUTH.explicitLogout=true;
+  V475_AUTH.logoutRequested=false;
+  V475_AUTH.restoring=false;
+  ++V475_AUTH.bootGeneration;
+  V475_AUTH.bootId=null;
+  V475_AUTH.hydrated=false;
+  V475_AUTH.bootPromise=null;
+  V115_STARTUP_GUARD=true;
+  AUTH_USER=null;
+  AUTH_READY=false;
+  renderAuthScreen('login','You have been logged out.');
+}
 function v475HandleAuthEvent(event,session){
-  const next=session?.user||null;
+  V475_AUTH.lastEvent=String(event||'');
   if(event==='SIGNED_OUT'){
-    // Only an actual SIGNED_OUT event (not INITIAL_SESSION:null or a temporary
-    // refresh delay) can close an already authenticated workspace.
-    V475_AUTH.explicitLogout=true;
+    if(V475_AUTH.logoutRequested){v506CompleteExplicitLogout();return;}
+    if(V475_AUTH.explicitLogout)return; // Ignore the delayed event from a completed user logout.
+    // Supabase can emit SIGNED_OUT during refresh/restore. During initial
+    // bootstrap it is not evidence that the user clicked Logout.
+    if(V475_AUTH.restoring)return;
+    // Revalidate from Supabase before changing the logged-in UI. The result
+    // can be a recovered user, a verified logout, or a guarded retry screen.
     ++V475_AUTH.bootGeneration;
     V475_AUTH.bootId=null;
     V475_AUTH.hydrated=false;
@@ -94,13 +134,16 @@ function v475HandleAuthEvent(event,session){
     V115_STARTUP_GUARD=true;
     AUTH_USER=null;
     AUTH_READY=false;
-    renderAuthScreen('login','Your session ended. Sign in to restore your cloud data.');
+    v475ShowSessionLoading('Verifying your saved MediaFlow login…');
+    void v475RestoreSavedSession();
     return;
   }
-  if(!next?.id)return; // NEVER treat a transient INITIAL_SESSION:null as logout.
-  if(V475_AUTH.explicitLogout&&event==='INITIAL_SESSION')return;
+  const next=session?.user||null;
+  if(!next?.id)return; // INITIAL_SESSION:null never creates an empty account.
+  if(V475_AUTH.logoutRequested||V475_AUTH.explicitLogout&&event==='INITIAL_SESSION')return;
   V475_AUTH.explicitLogout=false;
-  const changed=String(AUTH_USER?.id||'')!==String(next.id);
+  const uid=String(next.id);
+  const changed=String(AUTH_USER?.id||'')!==uid;
   if(changed){
     V115_STARTUP_GUARD=true;
     V475_AUTH.hydrated=false;
@@ -109,46 +152,67 @@ function v475HandleAuthEvent(event,session){
     AUTH_READY=false;
   }
   AUTH_USER=next;
-  if(V475_AUTH.bootId!==String(next.id))void startAuthenticatedApp();
+  // While restore probes are still active, they own startup ordering.
+  if(!V475_AUTH.restoring&&V475_AUTH.bootId!==uid)void startAuthenticatedApp();
 }
 async function v475RestoreSavedSession(){
-  V475_AUTH.restoring=true;
-  V475_AUTH.explicitLogout=false;
-  v475ShowSessionLoading();
-  // getSession() can initially be null while the PWA's refreshed app shell
-  // and Supabase persisted session are being initialized. Do not show the
-  // empty account or login screen during this recovery window.
-  const intervals=[0,220,500,900,1450];
-  let lastError=null;
-  for(const delay of intervals){
-    if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
-    if(AUTH_USER?.id||V475_AUTH.explicitLogout)break;
-    try{
-      const {data,error}=await supabase.auth.getSession();
-      if(error)lastError=error;
-      if(data?.session?.user?.id){
-        v475HandleAuthEvent('SESSION_RESTORED',data.session);
-        break;
-      }
-    }catch(err){lastError=err;}
-  }
-  V475_AUTH.restoring=false;
-  if(AUTH_USER?.id)return startAuthenticatedApp();
-  if(!V475_AUTH.explicitLogout){
+  if(V475_AUTH.restorePromise)return V475_AUTH.restorePromise;
+  const running=(async()=>{
+    V475_AUTH.restoring=true;
+    V475_AUTH.explicitLogout=false;
     V115_STARTUP_GUARD=true;
-    AUTH_READY=false;
-    renderAuthScreen('login',lastError
-      ?'Your saved session could not be restored yet. Retry refreshing the app, or sign in to access your existing cloud data.'
-      :'Sign in to access your existing MediaFlow account. Your saved Library is still in your account.',
-      !!lastError);
-  }
-  return false;
+    v475ShowSessionLoading('Restoring your saved MediaFlow account…');
+    // A cold PWA reload can temporarily return null while GoTrue refreshes.
+    // Allow slow devices/network time to recover, without an unbounded wait.
+    const intervals=[0,250,600,1100,1900,3000,4500];
+    let lastError=null,confirmed=null;
+    try{
+      for(const delay of intervals){
+        if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+        if(V475_AUTH.logoutRequested||V475_AUTH.explicitLogout)return false;
+        if(AUTH_USER?.id){confirmed=AUTH_USER;break;}
+        try{
+          const {data,error}=await supabase.auth.getSession();
+          V475_AUTH.lastCheckedAt=Date.now();
+          if(error){lastError=error;continue;}
+          if(data?.session?.user?.id){
+            confirmed=data.session.user;
+            v475HandleAuthEvent('SESSION_RESTORED',data.session);
+            break;
+          }
+        }catch(err){lastError=err;}
+      }
+      // Last chance for a delayed onAuthStateChange callback.
+      if(!confirmed&&AUTH_USER?.id)confirmed=AUTH_USER;
+      if(confirmed?.id){
+        AUTH_USER=confirmed;
+        return await startAuthenticatedApp();
+      }
+      V115_STARTUP_GUARD=true;
+      AUTH_READY=false;
+      // Inconclusive storage/connection restores require explicit retry,
+      // not a blank default account and not a forced sign-out.
+      if(lastError||v506PersistedSessionHint()){
+        V475_AUTH.error=String(lastError?.message||'Saved session could not be verified');
+        v506SessionRecoveryScreen(lastError
+          ?'Your session could not be checked because of an authentication or network error. Please retry.'
+          :'Your previously saved login is still being verified. Please retry or sign in if the session has expired.');
+      }else{
+        renderAuthScreen('login','Sign in to access your existing MediaFlow account. Your Library is kept in your cloud account.');
+      }
+      return false;
+    }finally{
+      V475_AUTH.restoring=false;
+    }
+  })();
+  V475_AUTH.restorePromise=running;
+  try{return await running;}
+  finally{if(V475_AUTH.restorePromise===running)V475_AUTH.restorePromise=null;}
 }
 async function init(){
   if(!supabase){renderAuthScreen('login');return;}
   try{
-    // Supabase invokes this callback while holding an internal authentication
-    // lock. Schedule all cloud/bootstrap work *after* it releases that lock.
+    // Never await database queries from a GoTrue auth callback.
     const {data,error}=supabase.auth.onAuthStateChange((event,session)=>{
       setTimeout(()=>v475HandleAuthEvent(event,session),0);
     });
@@ -157,15 +221,26 @@ async function init(){
   }catch(err){
     V475_AUTH.restoring=false;
     V115_STARTUP_GUARD=true;
-    console.error('MediaFlow v475: auth initialization',err);
-    renderAuthScreen('login','Could not restore your saved login. Your account data remains in the cloud. Please retry or sign in.',true);
+    AUTH_READY=false;
+    console.error('MediaFlow v506: auth initialization',err);
+    v506SessionRecoveryScreen('MediaFlow could not initialize your saved session. Try again without refreshing repeatedly.');
   }
 }
 window.MediaFlowAuthContinuity={
   state:V475_AUTH,
   retry:async()=>{
-    if(AUTH_USER?.id){V475_AUTH.hydrated=false;V475_AUTH.bootId=null;return startAuthenticatedApp();}
+    if(V475_AUTH.restorePromise)return V475_AUTH.restorePromise;
+    if(AUTH_USER?.id){
+      V475_AUTH.hydrated=false;
+      V475_AUTH.bootId=null;
+      return startAuthenticatedApp();
+    }
     return v475RestoreSavedSession();
+  },
+  showLogin:()=>{
+    V115_STARTUP_GUARD=true;
+    AUTH_READY=false;
+    renderAuthScreen('login','Sign in to reconnect your existing cloud account.');
   }
 };
 init();

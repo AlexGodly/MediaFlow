@@ -107,6 +107,8 @@ function v115RenderSafetyScreen(ctx){
   app.innerHTML=`<div class="auth-screen"><div class="auth-card" style="width:min(560px,100%)"><div class="auth-brand"><div class="brand-mark"></div><div><div class="auth-brand-name">MediaFlow</div><div class="brand-sub">Cloud data protection</div></div></div><div class="auth-title">${title}</div><div class="auth-sub">${message}</div>${localSummary}<div style="margin-top:16px">${actions}</div><div class="auth-foot">Safety rule: a missing, failed, or suspicious cloud read can never automatically overwrite your MediaFlow account.</div></div></div>`;
 }
 async function v115StartWithData(data){
+  const userId=String(AUTH_USER?.id||'');
+  if(!userId)return false;
   V115_STARTUP_GUARD=true;
   V115_BOOTSTRAP_DATA=data;
   V115_BOOTSTRAP_OVERRIDE=true;
@@ -114,14 +116,25 @@ async function v115StartWithData(data){
     await loadAll();
   }finally{
     V115_BOOTSTRAP_OVERRIDE=false;
+    V115_BOOTSTRAP_DATA=undefined;
+  }
+  // A refresh/sign-out from another tab can invalidate auth while loadAll()
+  // is still running. Never render the previous account's data or enable
+  // uploads under a different/no longer authenticated user.
+  if(String(AUTH_USER?.id||'')!==userId||V475_AUTH.logoutRequested){
+    V115_STARTUP_GUARD=true;
+    return false;
   }
   V115_STARTUP_GUARD=false;
   // Cache the exact source snapshot, not a newly timestamped snapshot. This keeps
   // savedAt meaningful so a normal app launch is never mistaken for an unsynced edit.
   try{if(data&&typeof data==='object')v115WriteRecoveryCache(data);}catch(_){}
   renderShell();
+  return true;
 }
 async function v115SafeBootstrap(){
+  const userId=String(AUTH_USER?.id||'');
+  if(!userId)return false;
   V115_STARTUP_GUARD=true;
   let cache=null;
   try{cache=await v115ReadRecoveryCache();}catch(_){}
@@ -129,9 +142,10 @@ async function v115SafeBootstrap(){
   try{
     cloud=await v115FetchCloudState();
   }catch(error){
-    v115RenderSafetyScreen({kind:'cloud-error',error,cache});
+    if(String(AUTH_USER?.id||'')===userId)v115RenderSafetyScreen({kind:'cloud-error',error,cache});
     return false;
   }
+  if(String(AUTH_USER?.id||'')!==userId||V475_AUTH.logoutRequested)return false;
   const localState=cache?.state;
   const localStats=v115StateStats(localState);
   const cloudStats=v115StateStats(cloud.state);
@@ -142,8 +156,7 @@ async function v115SafeBootstrap(){
       v115RenderSafetyScreen({kind:'missing',cloud,cache});
       return false;
     }
-    await v115StartWithData(undefined);
-    return true;
+    return await v115StartWithData(undefined)===true;
   }
 
   // If cloud is effectively empty but this account has a populated local cache,
@@ -163,8 +176,7 @@ async function v115SafeBootstrap(){
   }
 
   try{if(cloud.state&&typeof cloud.state==='object')v115WriteRecoveryCache(cloud.state);}catch(_){}
-  await v115StartWithData(cloud.state);
-  return true;
+  return await v115StartWithData(cloud.state)===true;
 }
 window.MediaFlowRecovery={
   async retry(){

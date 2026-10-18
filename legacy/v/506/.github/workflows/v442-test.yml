@@ -1,0 +1,113 @@
+name: MediaFlow v442 Recovery Integration & Performance Quality Gate
+on:
+  push:
+    branches: [feature/v442-recovery-hardening]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v442-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v442 from source
+        run: |
+          test "$(cat VERSION)" = "442"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v442.bundle.js
+          node --check src/js/components/312-v431-dashboard-auto-save-navigation.js
+          node --check scripts/test-v431-cover-autosave.cjs
+          node --check src/js/components/313-v433-provider-registry-foundation.js
+          node --check src/js/components/314-v434-provider-connection.js
+          node --check scripts/test-v434-gateway.cjs
+          node --check scripts/test-v435-omdb.cjs
+          node --check scripts/test-v433-id-foundation.cjs
+          node --check scripts/test-v432-avatar-icon.cjs
+          node --check src/js/components/316-v437-universal-metadata-ratings.js
+          node --check scripts/test-v437-universal-metadata.cjs
+          node --check scripts/test-v437-browser.cjs
+          node --check src/js/components/317-v438-unified-provider-management.js
+          node --check scripts/test-v438-provider-registry.cjs
+          node --check scripts/test-v442-browser.cjs
+          node --check src/js/components/318-v439-metadata-adapters.js
+          node --check src/js/components/319-v439-metadata-recovery.js
+          node --check scripts/test-v439-metadata-engine.cjs
+          node --check src/js/components/318-v439-metadata-adapters.js
+          node --check src/js/components/319-v439-metadata-recovery.js
+          node --check scripts/test-v439-metadata-engine.cjs
+          node --check src/js/components/320-v440-universal-cover-adapters.js
+          node --check scripts/test-v440-cover-adapters.cjs
+          node --check src/js/components/321-v441-recovery-workspace.js
+          node --check scripts/test-v441-recovery-workspace.cjs
+          node --check src/js/components/322-v442-recovery-hardening.js
+          node --check scripts/test-v442-recovery-hardening.cjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck authenticated gateway source
+        run: deno check --node-modules-dir=auto supabase/functions/mediaflow-api-gateway/index.ts
+      - name: Verify cover validation, navigation and existing recovery features
+        run: |
+          node scripts/test-v431-cover-autosave.cjs
+          node scripts/test-v433-id-foundation.cjs
+          node scripts/test-v434-gateway.cjs
+          node scripts/test-v435-omdb.cjs
+          node scripts/test-v437-universal-metadata.cjs
+          node scripts/test-v437-editor-layout.cjs
+          node scripts/test-v438-provider-registry.cjs
+          node scripts/test-v439-metadata-engine.cjs
+          node scripts/test-v440-cover-adapters.cjs
+          node scripts/test-v441-recovery-workspace.cjs
+          node scripts/test-v442-recovery-hardening.cjs
+          node scripts/test-v432-avatar-icon.cjs
+          node scripts/test-v430-recovery-polish.cjs
+          node scripts/test-v424-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v427-cover-universal-id.cjs
+          node scripts/test-v427-on-this-day.cjs
+          node scripts/check-settings-style.cjs
+          python scripts/check.py
+      - name: Desktop and 360px mobile Chromium browser smoke
+        run: node scripts/test-v442-browser.cjs
+      - name: Commit built and archive full v442 recovery hardening release
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/442
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/442/
+          test "$(cat legacy/v/442/VERSION)" = 442
+          test -s legacy/v/442/assets/js/mediaflow-v442.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v442.bundle.js
+          git add --sparse -f legacy/v/442
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v442): verified site and full legacy archive [skip ci]'
+            git push origin HEAD:feature/v442-recovery-hardening
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v442-verified-smoke
+          path: |
+            artifacts/v442-browser-smoke/
+            version.json

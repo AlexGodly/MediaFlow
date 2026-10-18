@@ -1,0 +1,78 @@
+name: MediaFlow v506 Build, Verify and Archive
+on:
+  push:
+    branches: [update/v506-auth-session-continuity]
+    paths:
+      - 'src/js/**'
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'scripts/test-v506.cjs'
+      - '.github/workflows/v506-build-verify.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v506 from the checked-in modular source
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 506
+          python scripts/build.py
+          node --check assets/js/mediaflow-v506.bundle.js
+          node scripts/test-v506.cjs
+          python scripts/check.py
+      - name: Archive exact v506 files without changing earlier releases
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/506
+          # Include the complete deployed source + assets + release scripts,
+          # but never recursively copy old archives or beta directories.
+          git add -- assets/js/mediaflow-v506.bundle.js sw.js index.html version.json manifest.json
+          python - <<'PY'
+          from pathlib import Path
+          from subprocess import check_output
+          import shutil
+          root=Path('.')
+          dest=root/'legacy/v/506'
+          for name in check_output(['git','ls-files','-z']).decode().split('\0'):
+              if not name or name.startswith(('legacy/','beta/')): continue
+              src=root/name
+              if not src.is_file(): continue
+              target=dest/name
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copy2(src,target)
+          print('v506 full archive staged')
+          PY
+          git add --sparse -- legacy/v/506
+          test "$(cat legacy/v/506/VERSION)" = 506
+          cmp assets/js/mediaflow-v506.bundle.js legacy/v/506/assets/js/mediaflow-v506.bundle.js
+          cmp sw.js legacy/v/506/sw.js
+      - name: Commit verified build and full archive on feature branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --cached --quiet; then
+            echo "Generated assets and v506 archive already match."
+          else
+            git commit -m "build(v506): verified app, PWA and complete legacy archive [skip ci]"
+            git push origin HEAD:update/v506-auth-session-continuity
+          fi

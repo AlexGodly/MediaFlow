@@ -1,0 +1,53 @@
+name: Verify MediaFlow v428 Live Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-v428-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v428:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check live version, HTML, PWA cache and JS/CSS assets
+        shell: bash
+        env:
+          SITE_URL: https://alexgodly.github.io/MediaFlow/
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            echo "v428 public live verification attempt $attempt"
+            if curl -fsSL --max-time 30 "${SITE_URL}version.json?verify=428-${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live-version.json" \
+              && curl -fsSL --max-time 30 "${SITE_URL}index.html?verify=428-${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live-index.html" \
+              && curl -fsSL --max-time 30 "${SITE_URL}sw.js?verify=428-${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/live-sw.js" \
+              && curl -fsSIL --max-time 30 "${SITE_URL}assets/js/mediaflow-v428.bundle.js" -o "$RUNNER_TEMP/live-js-headers.txt" \
+              && curl -fsSIL --max-time 30 "${SITE_URL}assets/css/239-v428-background-recovery.css" -o "$RUNNER_TEMP/live-css-headers.txt"; then
+              if python - <<'PY'
+          from pathlib import Path
+          import json,os
+          p=Path(os.environ['RUNNER_TEMP'])
+          version=json.loads((p/'live-version.json').read_text())
+          index=(p/'live-index.html').read_text()
+          sw=(p/'live-sw.js').read_text()
+          assert version['appVersion']==428,version.get('appVersion')
+          assert 'mediaflow-v428.bundle.js' in index
+          assert '239-v428-background-recovery.css' in index
+          assert 'mediaflow-pwa-v428-shell-v1' in sw
+          assert (p/'live-js-headers.txt').stat().st_size>0
+          assert (p/'live-css-headers.txt').stat().st_size>0
+          print('MediaFlow v428 is live: version 428, JS bundle, theme CSS and PWA cache verified')
+          PY
+              then
+                exit 0
+              fi
+            fi
+            sleep 12
+          done
+          echo "Live v428 checks failed; do not claim the deployed app was verified." >&2
+          exit 1
