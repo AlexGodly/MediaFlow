@@ -1,0 +1,59 @@
+name: MediaFlow v502 Rollback Verification — Exact v483 Source
+on:
+  push:
+    branches: [rollback/v502-restore-v483]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact v483 application snapshot and retained archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "483"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          version=json.loads(Path('version.json').read_text())
+          assert version['version']==483 and version['appVersion']==483 and version['build']==483
+          html=Path('index.html').read_text()
+          assert '<meta name="mediaflow-version" content="483">' in html
+          assert 'mediaflow-v483.bundle.js' in html
+          assert 'mediaflow-v501.bundle.js' not in html
+          sw=Path('sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=483' in sw
+          assert 'mediaflow-pwa-v483-shell' in sw
+          print('v483 PWA/version coherence PASS')
+          PY
+          for file in VERSION version.json index.html manifest.json sw.js LICENSE; do
+            test "$(git rev-parse "HEAD:$file")" = "$(git rev-parse "HEAD:legacy/v/483/$file")"
+          done
+          for folder in assets src scripts supabase docs; do
+            test "$(git rev-parse "HEAD:$folder")" = "$(git rev-parse "HEAD:legacy/v/483/$folder")"
+          done
+          test "$(git rev-parse 'HEAD:legacy/v/502')" = "$(git rev-parse 'HEAD:legacy/v/483')"
+          test "$(git show 'HEAD:legacy/v/501/VERSION' | tr -d '\r\n')" = 501
+          test -e assets/js/mediaflow-v483.bundle.js
+          test ! -e assets/js/mediaflow-v501.bundle.js
+          echo 'Exact v483 snapshot, rollback archive, v501 preservation PASS'
+      - name: Check archived v483 bundle syntax and repository integrity
+        run: |
+          set -euo pipefail
+          node --check assets/js/mediaflow-v483.bundle.js
+          python scripts/check.py
