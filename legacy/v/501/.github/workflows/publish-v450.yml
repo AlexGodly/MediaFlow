@@ -1,0 +1,55 @@
+name: Publish MediaFlow v450 Stable Archive
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify built and archived v450
+        id: match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "450" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git cat-file -e HEAD:legacy/v/450/VERSION
+          test "$(git show HEAD:legacy/v/450/VERSION | tr -d '\r\n')" = 450
+          git cat-file -e HEAD:legacy/v/450/assets/js/mediaflow-v450.bundle.js
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - name: Zip archived source and checksum
+        if: steps.match.outputs.release == 'true'
+        run: |
+          git archive --format=zip --output=MediaFlow_v450_Modular.zip HEAD:legacy/v/450
+          sha256sum MediaFlow_v450_Modular.zip > MediaFlow_v450_Modular.sha256
+          test -s MediaFlow_v450_Modular.zip
+      - name: Publish numeric release 450
+        if: steps.match.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view 450 >/dev/null 2>&1; then
+            echo "Release 450 already exists; no overwrite."
+            exit 0
+          fi
+          gh release create 450 MediaFlow_v450_Modular.zip MediaFlow_v450_Modular.sha256 \
+            --target "$GITHUB_SHA" --title "v450 Stable" \
+            --notes-file docs/CHANGELOG_v450.md

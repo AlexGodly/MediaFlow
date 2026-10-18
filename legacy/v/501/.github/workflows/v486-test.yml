@@ -1,0 +1,78 @@
+name: MediaFlow v486 Universal Cover Source Intelligence Quality Gate
+on:
+  push:
+    branches: [feature/v486-universal-cover-source-intelligence]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v486-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "486"
+          python scripts/build.py
+          node --check src/js/components/373-v486-universal-cover-source-intelligence.js
+          node --check assets/js/mediaflow-v486.bundle.js
+          node --check src/js/core/rendering/035-render-loop-init.js
+          node scripts/test-v486-cover-source-contract.cjs
+          node scripts/test-v486-ownership-compat.cjs
+          node scripts/test-v486-visual-compat.cjs
+          node scripts/test-v486-recovery-compat.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==486
+          assert 'mediaflow-v486.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=486' in sw
+          assert 'mediaflow-pwa-v486-shell' in sw
+          assert 'mediaflow-v486.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v486 release/PWA coherence PASS')
+          PY
+      - name: Behavioral six-collection cover source, ownership and recovery regression
+        run: |
+          node scripts/test-v486-ownership-compat.cjs
+          node scripts/test-v486-visual-compat.cjs
+          node scripts/test-v486-recovery-compat.cjs
+      - name: Archive verified complete v486 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/486
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/486/
+          test "$(cat legacy/v/486/VERSION)" = "486"
+          test -s legacy/v/486/assets/js/mediaflow-v486.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v486.bundle.js
+          git add --sparse -f legacy/v/486
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v486): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v486-universal-cover-source-intelligence
+          fi

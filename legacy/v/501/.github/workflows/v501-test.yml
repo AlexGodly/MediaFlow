@@ -1,0 +1,95 @@
+name: MediaFlow v501 Category Icon Logging Fallback & Scale Quality Gate
+on:
+  push:
+    branches: [feature/v501-library-parity-logging-missing-covers]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v501-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "501"
+          python scripts/build.py
+          node --check src/js/components/389-v501-logging-library-cover-fallback.js
+          node --check assets/js/mediaflow-v501.bundle.js
+          node --check src/js/core/rendering/035-render-loop-init.js
+          node scripts/test-v501-category-cover-parity.cjs
+          node scripts/test-v501-category-cover-browser.cjs
+          node scripts/test-v501-poster-icons.cjs
+          node scripts/test-v501-poster-browser.cjs
+          node scripts/test-v501-logging-interactions.cjs
+          node scripts/test-v501-cover-browser.cjs
+          node scripts/test-v501-logging-visual-parity.cjs
+          node scripts/test-v501-recovery-parity.cjs
+          node scripts/test-v501-visual-direction.cjs
+          node scripts/test-v501-unified-renderer.cjs
+          node scripts/test-v501-artwork-reliability.cjs
+          node scripts/test-v501-preview-laboratory.cjs
+          node scripts/test-v501-cover-compat.cjs
+          node scripts/test-v501-expressiveness-compat.cjs
+          node scripts/test-v501-readability-compat.cjs
+          node scripts/test-v501-mood-compat.cjs
+          node scripts/test-v501-harmony-compat.cjs
+          node scripts/test-v501-composition-compat.cjs
+          node scripts/test-v501-artwork-compat.cjs
+          node scripts/test-v501-source-compat.cjs
+          node scripts/test-v501-ownership-compat.cjs
+          node scripts/test-v501-visual-compat.cjs
+          node scripts/test-v501-recovery-compat.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==501
+          assert 'mediaflow-v501.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=501' in sw
+          assert 'mediaflow-pwa-v501-shell' in sw
+          assert 'mediaflow-v501.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v501 release/PWA coherence PASS')
+          PY
+      - name: Artwork pixel provenance, stale results, preview isolation and Legacy compatibility
+        run: |
+          node scripts/test-v501-ownership-compat.cjs
+          node scripts/test-v501-visual-compat.cjs
+          node scripts/test-v501-recovery-compat.cjs
+      - name: Archive verified complete v501 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/501
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/501/
+          test "$(cat legacy/v/501/VERSION)" = "501"
+          test -s legacy/v/501/assets/js/mediaflow-v501.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v501.bundle.js
+          git add --sparse -f legacy/v/501
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v501): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v501-library-parity-logging-missing-covers
+          fi
