@@ -18,7 +18,7 @@ html[data-mf496-renderer="on"][data-mf484-intensity="subtle"] #mf484-atmosphere{
 html[data-mf496-renderer="on"][data-mf484-intensity="balanced"] #mf484-atmosphere{opacity:.58}
 html[data-mf496-renderer="on"][data-mf484-intensity="vivid"] #mf484-atmosphere{opacity:.81}
 html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-gradients{
- inset:-24%;opacity:calc(.28 + var(--mf496-power,.65) * .4);
+ inset:-24%;opacity:var(--mf496-gradient-opacity,.54);
  background:
  radial-gradient(ellipse 43% 38% at 20% 27%,
   color-mix(in srgb,var(--mf496-primary) 56%,transparent),transparent 84%),
@@ -34,7 +34,7 @@ html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-lighting{
   color-mix(in srgb,var(--mf496-tertiary) 14%,transparent) 46%,
   color-mix(in srgb,var(--mf496-primary) 7%,transparent) 50%,transparent 74%);
  filter:blur(clamp(18px,4vw,48px));
- opacity:calc(.24 + var(--mf496-glow,.5) * .66);
+ opacity:var(--mf496-light-opacity,.54);
 }
 html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-depth{
  left:-12%;bottom:-34%;width:125%;height:85%;border-radius:50%;
@@ -42,17 +42,17 @@ html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-depth{
   color-mix(in srgb,var(--mf496-secondary) 14%,transparent),transparent 70%);
  box-shadow:inset 0 50px 160px color-mix(in srgb,var(--mf496-primary) 11%,transparent);
  transform:perspective(950px) rotateX(63deg);
- opacity:calc(.25 + var(--mf496-power,.65) * .38);
+ opacity:var(--mf496-depth-opacity,.44);
 }
 html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-materials{
- inset:0;opacity:calc(.13 + var(--mf496-glow,.5) * .28);
+ inset:0;opacity:var(--mf496-material-opacity,.26);
  background:linear-gradient(132deg,transparent 10%,
   color-mix(in srgb,var(--mf496-tertiary) 18%,transparent) 36%,
   transparent 44% 60%,
   color-mix(in srgb,var(--mf496-primary) 9%,transparent) 75%,transparent 83%);
 }
 html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-textures{
- inset:0;opacity:calc(.03 + var(--mf496-density,.3) * .18);
+ inset:0;opacity:var(--mf496-texture-opacity,.08);
  background:repeating-linear-gradient(120deg,
   transparent 0 60px,color-mix(in srgb,var(--mf496-secondary) 62%,transparent) 61px 62px,
   transparent 63px 115px);
@@ -63,10 +63,10 @@ html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-organic{
  background:radial-gradient(ellipse,
   color-mix(in srgb,var(--mf496-secondary) 18%,transparent),transparent 72%);
  filter:blur(clamp(35px,6vw,80px));
- opacity:calc(.23 + var(--mf496-density,.3) * .34);
+ opacity:var(--mf496-organic-opacity,.33);
 }
 html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-particles{
- inset:0;opacity:calc(.10 + var(--mf496-glow,.5) * .35);
+ inset:0;opacity:var(--mf496-particles-opacity,.25);
  background-image:
  radial-gradient(circle,var(--mf496-tertiary) 0 1px,transparent 2px),
  radial-gradient(circle,var(--mf496-secondary) 0 1px,transparent 2px);
