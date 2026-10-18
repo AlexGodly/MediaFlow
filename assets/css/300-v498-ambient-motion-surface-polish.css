@@ -1,0 +1,39 @@
+/* MediaFlow v498 — ambient motion and interactive surfaces, opt-in only.
+ * Advanced/Custom + already-enabled Living Themes motion is the sole owner.
+ * Motion uses opacity/transform; never animates layout or re-samples covers.
+ */
+@media (hover:hover) and (pointer:fine){
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf484-living="advanced"][data-mf497-motion="on"] .card{
+  transition:transform .22s cubic-bezier(.2,.75,.3,1),
+   border-color .22s ease,box-shadow .26s ease;
+ }
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf484-living="advanced"][data-mf497-motion="on"] .card:not(:has(input:focus,textarea:focus,select:focus)):hover{
+  box-shadow:0 13px 34px color-mix(in srgb,var(--mf497-color-a,var(--flow)) 9%,transparent),
+   inset 0 1px color-mix(in srgb,var(--mf497-color-c,var(--flow)) 13%,transparent);
+ }
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf484-living="advanced"][data-mf497-motion="on"] .btn:not(:disabled){
+  transition:background-color .18s ease,color .18s ease,border-color .18s ease,
+   box-shadow .2s ease;
+ }
+}
+html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf484-living="advanced"][data-mf497-motion="on"] .btn:focus-visible{
+ outline:2px solid var(--flow);outline-offset:2px;
+}
+html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf484-living="advanced"][data-mf497-motion="on"] #mf484-atmosphere{
+ transition:opacity .55s ease;
+}
+@media (max-width:800px),(pointer:coarse){
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf497-motion="on"] .card{transform:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])
+ [data-mf497-motion] :is(.card,.btn,#mf484-atmosphere){
+  animation:none!important;transition:none!important;transform:none!important;
+ }
+}
