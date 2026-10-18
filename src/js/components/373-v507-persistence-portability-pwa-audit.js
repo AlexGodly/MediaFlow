@@ -94,6 +94,10 @@ async function mf507VerifyImportedCloud(kind,expectedUserId){
   throw new Error(kind+': account changed while verifying imported data.');
  if(!remote?.found||!remote.state)
   throw new Error(kind+': cloud state is missing after the save. Keep the imported file.');
+ // snapshot() regenerates savedAt on every call; the cloud was written a
+ // moment earlier. Compare the actual uploaded timestamp, not a new clock tick.
+ if(mf507Own(remote.state,'savedAt'))expected.savedAt=remote.state.savedAt;
+ else delete expected.savedAt;
  const result=v155VerifyCloudState(remote.state,expected);
  if(!result.ok)throw new Error(kind+': cloud verification failed ('+
    (result.missing||[]).slice(0,5).join(', ')+'). Keep the import file and retry Sync Now.');
