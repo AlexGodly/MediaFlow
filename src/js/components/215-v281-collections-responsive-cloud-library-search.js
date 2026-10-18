@@ -116,6 +116,8 @@ function v281ExportCollections(){
 }
 async function v281ImportCollections(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing Collections.');return;}
   let parsed;
   try{parsed=JSON.parse(await file.text());}catch(_){showToast('Could not read that Collections file.');return;}
   const rows=Array.isArray(parsed)?parsed:Array.isArray(parsed?.collections)?parsed.collections:null;
@@ -133,6 +135,7 @@ async function v281ImportCollections(file){
     confirmLabel:'Import collections'
   });
   if(!ok)return;
+  if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Account changed during Collections import. No changes applied.');return;}
   const byId=new Map(v274EnsureCollections().map(c=>[String(c.id),c])),now=v274Now();
   const tomb=new Map((S.collectionTombstones||[]).filter(x=>x?.id).map(x=>[String(x.id),{id:String(x.id),deletedAt:v274Num(x.deletedAt,0)}]));
   const sourceById=new Map(rows.filter(x=>x?.id).map(x=>[String(x.id),x]));
@@ -167,7 +170,7 @@ async function v281ImportCollections(file){
   let cloudVerified=false;
   try{
     if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save blocked or failed');
-    await mf507VerifyImportedCloud('Collections',AUTH_USER?.id);
+    await mf507VerifyImportedCloud('Collections',importAccountId);
     cloudVerified=true;
   }catch(error){
     console.warn('MediaFlow v507: Collections cloud verification failed',error);
