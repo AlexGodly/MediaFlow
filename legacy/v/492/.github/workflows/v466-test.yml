@@ -1,0 +1,66 @@
+name: MediaFlow v466 Recommended Metadata Refresh Quality Gate
+on:
+  push:
+    branches: [feature/v466-auto-recommended-metadata-refresh]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v466-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and unit-test v466 automatic metadata refresh
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "466"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v466.bundle.js
+          node --check src/js/components/350-v466-auto-recommended-metadata-refresh.js
+          node --check scripts/test-v466-auto-refresh.cjs
+          node --check scripts/test-v466-browser.cjs
+          node scripts/test-v466-auto-refresh.cjs
+          python scripts/check.py
+      - name: Chromium desktop and 360px mobile; v462-v465 recovery regressions
+        run: node scripts/test-v466-browser.cjs
+      - name: Commit v466 verified bundle and complete source archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/466
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/466/
+          test "$(cat legacy/v/466/VERSION)" = 466
+          test -s legacy/v/466/assets/js/mediaflow-v466.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v466.bundle.js
+          git add --sparse -f legacy/v/466
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v466): verified site and complete modular legacy archive [skip ci]'
+            git push origin HEAD:feature/v466-auto-recommended-metadata-refresh
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v466-recommended-metadata-refresh
+          path: |
+            artifacts/v466-browser-smoke/
+            version.json
