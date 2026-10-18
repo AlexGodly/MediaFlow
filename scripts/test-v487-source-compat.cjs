@@ -10,7 +10,7 @@ const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
 assert(order.includes('components/373-v486-universal-cover-source-intelligence.js'));
 assert.equal(order.at(-1),'components/374-v487-advanced-artwork-pixel-analysis.js');
 assert.equal(fs.readFileSync('VERSION','utf8').trim(),'487');
-assert.match(fs.readFileSync('index.html','utf8'),/mediaflow-v486\.bundle\.js/);
+assert.match(fs.readFileSync('index.html','utf8'),/mediaflow-v487\.bundle\.js/);
 assert.match(fs.readFileSync('index.html','utf8'),/286-v486-cover-source-intelligence\.css/);
 const css=fs.readFileSync('assets/css/286-v486-cover-source-intelligence.css','utf8');
 assert.match(css,/max-width:480px/);
