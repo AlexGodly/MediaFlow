@@ -9,7 +9,7 @@ const source=fs.readFileSync(file,'utf8');
 execFileSync('node',['--check',file]);
 assert.equal(fs.readFileSync('VERSION','utf8').trim(),'497');
 assert.equal(JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8')).at(-1),
- 'components/383-v496-unified-living-themes-renderer.js');
+ 'components/385-v497-living-visual-direction.js');
 assert.match(fs.readFileSync('index.html','utf8'),/296-v496-unified-living-themes-renderer\.css/);
 const css=fs.readFileSync('assets/css/296-v496-unified-living-themes-renderer.css','utf8');
 assert.match(css,/prefers-reduced-motion:reduce/);
