@@ -1,0 +1,11 @@
+/* v433 — responsive, theme-inherited provider readiness and ID finder. */
+.mf433-id-search{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:var(--text-dim);margin:12px 0}
+.mf433-id-search input{flex:1 1 170px;min-width:0;background:var(--panel);border:1px solid var(--border-soft);color:var(--text);border-radius:9px;padding:10px 11px;font:inherit}
+.mf377-ids-grid [data-v377-id-row][hidden]{display:none!important}
+.mf433-provider-readiness{margin:14px 0;padding:13px 15px;border:1px solid var(--border-soft);background:var(--panel);border-radius:var(--radius,12px);color:var(--text)}
+.mf433-provider-readiness summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:7px 14px}
+.mf433-provider-readiness summary small{color:var(--text-dim);font-weight:400}
+.mf433-provider-readiness p{color:var(--text-dim);font-size:12px;line-height:1.5}
+.mf433-readiness-grid{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.mf433-readiness-grid span{font-size:11px;background:var(--panel-raised);border:1px solid var(--border-soft);padding:9px 11px;border-radius:10px}
+@media(max-width:650px){.mf433-id-search{display:block}.mf433-id-search input{display:block;width:100%;margin-top:6px}.mf433-provider-readiness{padding:11px}.mf433-provider-readiness summary{align-items:flex-start}}

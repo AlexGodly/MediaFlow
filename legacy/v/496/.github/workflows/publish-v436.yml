@@ -1,0 +1,55 @@
+name: Publish MediaFlow v436 Beta Archive
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify built and archived v436
+        id: match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "436" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git cat-file -e HEAD:legacy/v/436/VERSION
+          test "$(git show HEAD:legacy/v/436/VERSION | tr -d '\r\n')" = 436
+          git cat-file -e HEAD:legacy/v/436/assets/js/mediaflow-v436.bundle.js
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - name: Zip archived source and checksum
+        if: steps.match.outputs.release == 'true'
+        run: |
+          git archive --format=zip --output=MediaFlow_v436_Modular.zip HEAD:legacy/v/436
+          sha256sum MediaFlow_v436_Modular.zip > MediaFlow_v436_Modular.sha256
+          test -s MediaFlow_v436_Modular.zip
+      - name: Publish numeric release 436
+        if: steps.match.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view 436 >/dev/null 2>&1; then
+            echo "Release 436 already exists; no overwrite."
+            exit 0
+          fi
+          gh release create 436 MediaFlow_v436_Modular.zip MediaFlow_v436_Modular.sha256 \
+            --target "$GITHUB_SHA" --title "v436 Beta" --prerelease \
+            --notes-file docs/CHANGELOG_v436.md
