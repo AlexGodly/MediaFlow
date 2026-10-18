@@ -71,6 +71,10 @@ assert(results.bright.lightness>results.dark.lightness+.28,'Light vs dark art sh
 assert(results.neon.saturation>results.gray.saturation+.35,'Vivid vs gray separation');
 assert(results.neon.texture>results.warm.texture+.10,'Busy vs flat texture');
 assert(results.gray.saturation<.08,'Grayscale must remain low chroma');
+assert(Math.abs(results.gray.temperature)<.03,'Achromatic artwork must have neutral temperature');
+assert(results.neon.signature==='neon-energetic','Vivid textured artwork should register energetic signature');
+assert(results.warm.signature==='warm-atmospheric','Distinct warm artwork should register warm signature');
+assert(results.cool.signature==='cool-serene','Distinct cool artwork should register cool signature');
 assert(results.dark.shadows>results.bright.shadows+.40,'Dark shadows detected');
 assert(results.bright.highlights>results.dark.highlights+.40,'Light highlights detected');
 assert(results.neon.energy>results.gray.energy+.18,'High-contrast vivid energetic art detected');
