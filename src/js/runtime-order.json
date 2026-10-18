@@ -234,5 +234,6 @@
   "components/377-v490-artwork-mood-atmosphere.js",
   "components/378-v491-perceptual-readability.js",
   "components/379-v492-smart-palette-expressiveness.js",
-  "components/380-v493-cover-intelligence-corrections.js"
+  "components/380-v493-cover-intelligence-corrections.js",
+  "components/381-v494-theme-preview-laboratory.js"
 ]

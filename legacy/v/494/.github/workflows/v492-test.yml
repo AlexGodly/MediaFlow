@@ -1,0 +1,84 @@
+name: MediaFlow v492 Smart Palette & Expressiveness Quality Gate
+on:
+  push:
+    branches: [feature/v492-smart-palette-expressiveness]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v492-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "492"
+          python scripts/build.py
+          node --check src/js/components/379-v492-smart-palette-expressiveness.js
+          node --check assets/js/mediaflow-v492.bundle.js
+          node --check src/js/core/rendering/035-render-loop-init.js
+          node scripts/test-v492-expressiveness.cjs
+          node scripts/test-v492-readability-compat.cjs
+          node scripts/test-v492-mood-compat.cjs
+          node scripts/test-v492-harmony-compat.cjs
+          node scripts/test-v492-composition-compat.cjs
+          node scripts/test-v492-artwork-compat.cjs
+          node scripts/test-v492-source-compat.cjs
+          node scripts/test-v492-ownership-compat.cjs
+          node scripts/test-v492-visual-compat.cjs
+          node scripts/test-v492-recovery-compat.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==492
+          assert 'mediaflow-v492.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=492' in sw
+          assert 'mediaflow-pwa-v492-shell' in sw
+          assert 'mediaflow-v492.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v492 release/PWA coherence PASS')
+          PY
+      - name: Palette expressiveness, readability, mood, source and Legacy compatibility
+        run: |
+          node scripts/test-v492-ownership-compat.cjs
+          node scripts/test-v492-visual-compat.cjs
+          node scripts/test-v492-recovery-compat.cjs
+      - name: Archive verified complete v492 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/492
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/492/
+          test "$(cat legacy/v/492/VERSION)" = "492"
+          test -s legacy/v/492/assets/js/mediaflow-v492.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v492.bundle.js
+          git add --sparse -f legacy/v/492
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v492): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v492-smart-palette-expressiveness
+          fi
