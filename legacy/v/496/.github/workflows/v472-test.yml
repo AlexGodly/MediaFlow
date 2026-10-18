@@ -1,0 +1,72 @@
+name: MediaFlow v472 Showcase Simkl Hover and Shadows Quality Gate
+on:
+  push:
+    branches: [feature/v472-showcase-simkl-hover-shadows]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v472-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "472"
+          python scripts/build.py
+          node --check src/js/components/359-v472-showcase-hover-depth.js
+          node --check assets/js/mediaflow-v472.bundle.js
+          node scripts/test-v472-showcase-depth.cjs
+          node scripts/test-v472-pwa-contract.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==472
+          assert 'mediaflow-v472.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=472' in sw
+          assert 'mediaflow-pwa-v472-shell' in sw
+          assert 'mediaflow-v472.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v472 release/PWA coherence PASS')
+          PY
+      - name: Chromium mobile and desktop regression suite
+        run: node scripts/test-v472-browser.cjs
+      - name: Archive verified complete v472 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/472
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/472/
+          test "$(cat legacy/v/472/VERSION)" = "472"
+          test -s legacy/v/472/assets/js/mediaflow-v472.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v472.bundle.js
+          git add --sparse -f legacy/v/472
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v472): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v472-showcase-simkl-hover-shadows
+          fi

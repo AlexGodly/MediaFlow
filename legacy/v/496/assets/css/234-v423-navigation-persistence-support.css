@@ -1,0 +1,43 @@
+/* v423: remove redundant centered brand while preserving the real primary logo. */
+.mf422-glowing-brand{display:none!important}
+.mf422-nav-choice>svg,.mf422-nav-choice>i,.mf422-nav-choice>[data-lucide],
+.mf421-dock-progress>svg,.mf421-dock-progress>i,.mf421-dock-progress>[data-lucide]{display:none!important}
+.mf422-nav-choice::before,.mf422-nav-choice::after,
+.mf421-dock-progress::before,.mf421-dock-progress::after{content:none!important;display:none!important}
+.mf423-dock-avatar{width:29px;height:29px;border-radius:50%;object-fit:cover;display:block;aspect-ratio:1/1;border:1px solid color-mix(in srgb,var(--flow) 27%,var(--border-soft))}
+.mf421-dock-account:has(.mf423-dock-avatar){padding:4px!important;min-height:39px;min-width:39px}
+/* Fix the v420 first-paint full-sidebar scrollbar before the v421 body classes arrive. */
+@media(min-width:861px){
+ body.v260-redesign .sidebar{scrollbar-width:none!important;scrollbar-gutter:auto!important}
+ body.v260-redesign .sidebar::-webkit-scrollbar{width:0!important;display:none!important}
+ body.mf421-sidebar .sidebar.mf421-sidebar,body.mf421-mini .sidebar.mf421-sidebar{overflow:visible!important}
+ body.mf421-sidebar .sidebar.mf421-sidebar>.nav,body.mf421-mini .sidebar.mf421-sidebar>.nav{overflow-x:hidden!important;overflow-y:auto!important;scrollbar-width:none!important}
+ body.mf421-sidebar .sidebar.mf421-sidebar>.nav::-webkit-scrollbar,body.mf421-mini .sidebar.mf421-sidebar>.nav::-webkit-scrollbar{width:0!important}
+ body.mf421-top .main{padding-top:calc(80px + env(safe-area-inset-top))!important}
+ body.mf421-bottom .main{padding-bottom:calc(97px + env(safe-area-inset-bottom))!important}
+}
+/* About — inviting, distinct split-panel support hero without excessive blank space. */
+.mf383-about .mf423-support-hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.85fr);align-items:stretch;gap:clamp(18px,3vw,42px);padding:clamp(20px,3.5vw,45px)!important;text-align:left!important;isolation:isolate;position:relative;background:radial-gradient(ellipse at 0% 0%,color-mix(in srgb,var(--flow) 14%,transparent),transparent 65%),linear-gradient(125deg,var(--panel-raised),color-mix(in srgb,var(--panel) 75%,var(--flow)));overflow:hidden;border:1px solid color-mix(in srgb,var(--flow) 35%,var(--border-soft));box-shadow:0 19px 55px rgba(0,0,0,.11)}
+.mf423-support-hero::after{content:'✦';position:absolute;right:31%;top:-135px;font-size:335px;line-height:1;color:color-mix(in srgb,var(--flow) 5%,transparent);pointer-events:none;z-index:-1}
+.mf423-support-content{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:17px;min-width:0}
+.mf423-support-eyebrow{color:var(--flow);font-size:11px;font-weight:850;letter-spacing:.13em;display:inline-flex;gap:8px;align-items:center;max-width:100%}
+.mf423-support-spark{font-size:20px}
+.mf383-about .mf423-support-hero h2{font-family:inherit!important;font-size:clamp(29px,3.55vw,48px)!important;line-height:1.13!important;letter-spacing:-.055em;max-width:590px;margin:0!important;text-wrap:balance}
+.mf423-support-hero h2 em{color:var(--flow);font-style:normal}
+.mf383-about .mf423-support-hero .mf423-support-lede{font-size:clamp(12px,1.25vw,15px);line-height:1.75;max-width:570px;margin:0!important;color:var(--text-dim)}
+.mf423-support-benefits{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mf423-support-benefits span{display:inline-flex;border:1px solid color-mix(in srgb,var(--flow) 18%,var(--border-soft));border-radius:50px;padding:8px 11px;font-size:11px;background:color-mix(in srgb,var(--panel-raised) 92%,var(--flow));font-weight:700}
+.mf383-about .mf423-support-hero .mf423-support-credit{font-size:11px;color:var(--text-mute);margin:0!important;line-height:1.55}
+.mf423-support-action{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:13px;text-align:center;min-width:0;padding:clamp(20px,3vw,32px);border:1px solid color-mix(in srgb,var(--flow) 29%,var(--border-soft));border-radius:22px;background:color-mix(in srgb,var(--panel-raised) 94%,var(--flow));box-shadow:0 15px 34px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.10)}
+.mf423-support-emblem{width:70px;height:70px;border-radius:20px;display:grid;place-items:center;background:color-mix(in srgb,var(--flow) 14%,var(--panel));box-shadow:0 0 0 8px color-mix(in srgb,var(--flow) 4%,transparent),0 0 29px color-mix(in srgb,var(--flow) 12%,transparent);font-size:34px;color:var(--flow)}
+.mf423-support-action strong{font-size:clamp(16px,1.5vw,21px);letter-spacing:-.025em;line-height:1.25}
+.mf383-about .mf423-support-action p{color:var(--text-dim);max-width:270px;font-size:12px;line-height:1.65;margin:0!important}
+.mf423-support-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:50px;border-radius:13px;font-size:14px;font-weight:850;text-align:center;text-decoration:none!important;background:var(--flow);color:var(--bg)!important;border:1px solid color-mix(in srgb,var(--flow) 65%,var(--text));box-shadow:0 8px 20px color-mix(in srgb,var(--flow) 20%,transparent);transition:transform .17s ease,box-shadow .17s ease,filter .17s ease}
+.mf423-support-cta:hover{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 11px 26px color-mix(in srgb,var(--flow) 32%,transparent)}
+.mf423-support-cta:focus-visible,.mf423-donate-replacement:focus-visible{outline:2px solid var(--flow);outline-offset:3px}
+.mf423-support-action small{font-size:10px;line-height:1.5;color:var(--text-dim)}
+.mf423-support-signer{font-size:10px;color:var(--text-mute);border-top:1px solid var(--border-soft);padding-top:12px;width:100%;text-align:center}
+.mf423-donate-replacement{display:inline-flex!important;align-items:center;justify-content:center;gap:7px}
+@media(max-width:780px){.mf383-about .mf423-support-hero{grid-template-columns:minmax(0,1fr);gap:19px}.mf423-support-action{width:100%}.mf423-support-content{gap:13px}}
+@media(max-width:400px){.mf383-about .mf423-support-hero{padding:17px!important;border-radius:17px}.mf423-support-action{padding:20px 15px}.mf423-support-eyebrow{font-size:9px;letter-spacing:.07em}}
+@media(prefers-reduced-motion:reduce){.mf423-support-cta{transition:none!important}.mf423-support-cta:hover{transform:none!important}}

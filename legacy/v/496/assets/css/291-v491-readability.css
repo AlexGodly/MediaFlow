@@ -1,0 +1,46 @@
+/* MediaFlow v491 — scoped to opt-in themes with verified palette guard.
+ * Override the old fixed gold hover / dark label on primary actions, while
+ * preserving every Legacy and static collection button style.
+ */
+html[data-mf491-readability="on"][data-mf484-mode="advanced"] .btn-primary,
+html[data-mf491-readability="on"][data-mf484-mode="custom"] .btn-primary{
+ background:var(--flow);
+ border-color:var(--flow);
+ color:var(--mf491-on-accent,#FFFFFF);
+}
+html[data-mf491-readability="on"][data-mf484-mode="advanced"] .btn-primary:hover,
+html[data-mf491-readability="on"][data-mf484-mode="custom"] .btn-primary:hover{
+ background:var(--flow);
+ border-color:var(--flow);
+ filter:brightness(.95);
+ color:var(--mf491-on-accent,#FFFFFF);
+}
+html[data-mf491-readability="on"][data-mf484-mode="advanced"] :is(.btn,button,input,select,textarea,a,[role="button"]):focus-visible,
+html[data-mf491-readability="on"][data-mf484-mode="custom"] :is(.btn,button,input,select,textarea,a,[role="button"]):focus-visible{
+ outline:2px solid var(--mf491-focus-outline,var(--flow));
+ outline-offset:2px;
+}
+.mf491-readability-panel{display:grid;gap:14px;min-width:0;padding:17px;
+ border:1px solid var(--border-soft);border-radius:15px;
+ background:linear-gradient(145deg,color-mix(in srgb,var(--panel-raised) 90%,var(--flow)),var(--panel))}
+.mf491-readability-panel>div>strong{font-size:13px;color:var(--text)}
+.mf491-readability-panel p{margin:6px 0 0;font-size:12px;color:var(--text-dim);line-height:1.6}
+.mf491-readability-panel>small{font-size:11px;line-height:1.6;color:var(--text-mute)}
+#mf491-readability-status{display:grid;gap:11px;min-width:0;padding:13px;border:1px solid var(--border-soft);
+ border-radius:11px;background:var(--panel);font-variant-numeric:tabular-nums}
+#mf491-readability-status p,#mf491-readability-status small{margin:0;color:var(--text-dim);font-size:11px;line-height:1.6}
+.mf491-status-title{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:9px}
+.mf491-status-title strong{font-size:12px;color:var(--flow)}
+.mf491-status-title small{color:var(--text-mute)}
+.mf491-audit-rows{display:grid;gap:5px}
+.mf491-audit-row{display:grid;grid-template-columns:minmax(90px,1fr) 58px 90px 12px;align-items:center;
+ gap:7px;padding:7px 9px;background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:9px}
+.mf491-audit-row span{font-size:11px;color:var(--text-dim);overflow-wrap:anywhere}
+.mf491-audit-row strong{font-size:11px;text-align:right;color:var(--text)}
+.mf491-audit-row small{text-align:right;font-size:10px;color:var(--text-mute)}
+.mf491-audit-row i{width:9px;height:9px;border-radius:50%;display:block}
+.mf491-audit-row .mf491-pass{background:var(--healthy,#3FC7A6)}
+.mf491-audit-row .mf491-warning{background:var(--overused,#E8607A)}
+#mf491-readability-status .mf491-warning-text{color:var(--overused,#E8607A)}
+@media(max-width:480px){.mf491-readability-panel{padding:12px}.mf491-audit-row{grid-template-columns:minmax(65px,1fr) 48px 68px 10px;gap:5px;padding:7px}.mf491-audit-row small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){html[data-mf491-readability="on"] .btn-primary:hover{transition:none}}
