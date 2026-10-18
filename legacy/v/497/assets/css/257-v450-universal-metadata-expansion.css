@@ -1,0 +1,40 @@
+/* MediaFlow v450 — compact, recognizable external-rating sources.
+ * Theme-derived colors only; no remote logos, font downloads or fixed widths. */
+.mf437-rating>strong{
+ display:flex;align-items:center;gap:9px;min-width:0;flex-wrap:wrap;
+}
+.mf450-source-mark{
+ display:inline-grid;place-items:center;flex:0 0 auto;min-width:33px;
+ max-width:100%;min-height:30px;padding:5px 7px;
+ font-family:inherit;font-size:9px;font-weight:900;line-height:1.1;
+ letter-spacing:-.025em;text-align:center;overflow-wrap:anywhere;
+ border:1px solid color-mix(in srgb,var(--flow) 32%,var(--border-soft));
+ border-radius:8px;color:var(--flow);
+ background:color-mix(in srgb,var(--flow) 12%,var(--panel-raised));
+ box-sizing:border-box;
+}
+.mf450-source-mark[data-mf450-source="imdb"]{background:color-mix(in srgb,#f6c945 28%,var(--panel-raised));color:var(--text)}
+.mf450-source-mark[data-mf450-source="rottentomatoes_critics"],
+.mf450-source-mark[data-mf450-source="rottentomatoes_audience"]{font-size:17px;letter-spacing:0}
+.mf450-source-mark[data-mf450-source="letterboxd"]{font-size:15px;letter-spacing:-.23em;padding-right:11px}
+.mf450-source-mark[data-mf450-source="steam"]{font-size:8px}
+.mf450-rating-provider{display:flex;align-items:center;gap:8px;min-width:0}
+.mf450-rating-provider small{font-size:11px;font-weight:800;color:var(--text);line-height:1.3}
+.mf450-rating-display{
+ gap:8px;justify-content:flex-start;min-height:104px;
+ border-color:color-mix(in srgb,var(--flow) 17%,var(--border-soft));
+}
+.mf450-rating-display>strong{font-size:17px;line-height:1.25;color:var(--text)}
+.mf450-rating-display>strong span{font-size:12px;font-weight:600;color:var(--text-dim)}
+.mf450-rating-display>small{font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.mf437-rating .mf450-source-mark{max-width:100%}
+@media(max-width:720px){
+ .mf450-rating-display{min-height:0;padding:12px}
+ .mf450-rating-provider small{font-size:11px}
+}
+@media(max-width:360px){
+ .mf437-rating .mf450-source-mark{min-width:29px;min-height:28px;padding:4px 5px}
+ .mf437-rating>strong{gap:6px}
+ .mf450-rating-display>strong{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){.mf450-source-mark{transition:none}}
