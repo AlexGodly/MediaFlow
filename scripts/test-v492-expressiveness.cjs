@@ -12,11 +12,16 @@ assert.match(fs.readFileSync('index.html','utf8'),/292-v492-expressiveness\.css/
 assert.match(fs.readFileSync('assets/css/292-v492-expressiveness.css','utf8'),/max-width:500px/);
 let saved=0,scheduled=0,customs=0,toast=[];
 const DEFAULT_SETTINGS={};
+const v145MixHex=(a,b,w)=>{
+ const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+ const x=rgb(a),y=rgb(b);const v=x.map((c,i)=>Math.round(c*w+y[i]*(1-w)));
+ return '#'+v.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+};
 const prefs={mode:'advanced',expressiveness:'balanced'};
 const S={view:'settings',settings:{dynamicCoverTheme:true},v146DynamicThemeState:{palette:null}};
 const doc={getElementById:()=>null,querySelector:()=>null};
 const ctx={console,Math,JSON,Number,String,Object,Array,Set,Map,Date,
- S,DEFAULT_SETTINGS,document:doc,window:{MediaFlowSettingsCenter:null},
+ S,DEFAULT_SETTINGS,v145MixHex,document:doc,window:{MediaFlowSettingsCenter:null},
  MediaFlowRuntime:{registerPageEnhancer:()=>{},version:491},MF485:{appliedKey:'was-saved',pending:null,pendingKey:''},
  MF484_CUSTOM_SEQ:0,V146_DYNAMIC_SEQ:0,
  mf484Prefs:()=>prefs,mf484Store:p=>{prefs.expressiveness=p.expressiveness;saved++;return p;},
