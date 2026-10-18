@@ -10,7 +10,7 @@ const MF492_PRESETS=Object.freeze({
  balanced:Object.freeze({saturation:56,accent:57,depth:54,tint:52}),
  vivid:Object.freeze({saturation:81,accent:82,depth:78,tint:75})
 });
-const MF492_STATS={compositions:0,modified:0,errors:0,last:null};
+const MF492_STATS={compositions:0,modified:0,errors:0,last:null,lastPalette:null};
 DEFAULT_SETTINGS.v492Palette=null;
 function mf492Clamp(n,min=0,max=100){
  const x=Number(n);
@@ -106,6 +106,7 @@ mf484Compose=function(data,appearance,expressiveness){
   if(tuned!==palette){
    MF492_STATS.compositions++;
    MF492_STATS.last=tuned.expressivenessV492;
+   MF492_STATS.lastPalette=tuned;
    mf492Render();
   }
   return tuned;
@@ -165,6 +166,19 @@ function mf492Reset(){
  mf492RefreshControls();
  showToast('Palette tuning reset to the selected expressiveness preset');
 }
+// Preserve the original v484 settings dropdown as an equal entry point.
+// Changing Subtle / Balanced / Vivid there resets the fine-tuning override.
+const mf492OriginalOption=App.mf484SetOption;
+App.mf484SetOption=function(key,value){
+ if(key==='expressiveness'&&Object.hasOwn(MF492_PRESETS,value)&&
+    mf484Prefs().expressiveness!==value){
+  S.settings=S.settings||{};
+  S.settings.v492Palette=null;
+ }
+ const result=mf492OriginalOption.apply(this,arguments);
+ if(key==='expressiveness')mf492RefreshControls();
+ return result;
+};
 function mf492Status(){
  const cfg=mf492Config();
  return {version:492,mode:mf484Prefs().mode,preset:cfg.preset,
@@ -197,7 +211,7 @@ function mf492Render(){
  mf492RefreshControls();
  const preview=document.getElementById('mf492-visual-preview');
  if(!preview)return;
- const p=S.v146DynamicThemeState?.palette;
+ const p=MF492_STATS.lastPalette||S.v146DynamicThemeState?.palette;
  if(mf484Prefs().mode==='legacy'||!p?.expressivenessV492){
   preview.textContent='Apply an Advanced or Custom theme to inspect its composed palette.';
   return;
