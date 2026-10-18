@@ -34,6 +34,7 @@ const state={
   savedAt:1234,cloudSyncVersion:201
 };
 const original=JSON.stringify(state);
+let snapshotTick=2000;
 const calls={remote:null,toast:[],downloads:[]};
 const methods=['syncNow','exportJSON','importJSON','exportSettingsPreset','importSettingsPreset',
  'v271ExportConsumptionCSV','v271ExportLogsCSV','v348ExportXPHistory','calculateXPNow',
@@ -44,7 +45,7 @@ const mock={
  App,S:{...state},AUTH_USER:{id:'synthetic-account'},V115_STARTUP_GUARD:false,
  V475_AUTH:{hydrated:true,restoring:false,logoutRequested:false},lastSaveFailed:false,
  saveQueue:Promise.resolve(),saveState:()=>Promise.resolve(true),
- v161CurrentVersion:()=>507,snapshot:()=>state,
+ v161CurrentVersion:()=>507,snapshot:()=>({...state,savedAt:++snapshotTick}),
  v148BuildFullBackup:()=>({mediaFlowVersion:506,backupVersion:506,backupManifest:{}}),
  backupSnapshot:()=>({}),
  v196BuildSettingsPreset:()=>({settings:{theme:'old'},presetManifest:{},mediaFlowVersion:506}),
@@ -88,6 +89,7 @@ assert.equal(JSON.stringify(state),original,'Export and audit must not mutate an
 assert.equal(audit.fields.customFuturePersistentField.equal,true);
 async function test(){
  await vm.runInContext("mf507VerifyImportedCloud('Synthetic Import','synthetic-account')",mock);
+ assert.equal(state.savedAt,1234,'Cloud readback must not overwrite the original savedAt');
  calls.remote={found:true,state:{...state,library:[]}};
  await assert.rejects(vm.runInContext("mf507VerifyImportedCloud('Synthetic Import','synthetic-account')",mock),/cloud verification failed/i);
  calls.remote={found:false,state:null};
@@ -107,8 +109,10 @@ async function test(){
   collections:'src/js/components/215-v281-collections-responsive-cloud-library-search.js',
   order:'src/js/components/184-v250-about-update-data-integrity.js'
  };
- for(const [key,file] of Object.entries(importerPaths))
+ for(const [key,file] of Object.entries(importerPaths)){
   assert.ok(read(file).includes('mf507VerifyImportedCloud('),key+' must verify imported cloud row');
+  assert.ok(read(file).includes('V475_AUTH.hydrated'),key+' must reject unhydrated account imports');
+ }
  const sync=read('src/js/services/cloud-sync/058-v155-complete-cloud-state-full-sync-now.js');
  assert.ok(sync.includes('v507ConfirmSyncAccount()'),'Sync Now must check user before cloud mutation');
  assert.ok(sync.includes("const syncAccountId=String(AUTH_USER?.id||'')"),'Sync Now must preserve initial user id');
