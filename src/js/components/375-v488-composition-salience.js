@@ -171,6 +171,9 @@ mf487AnalyzePixelData=function(data,width,height,sourceUrl=''){
  }
 };
 function mf488SetFocus(region){
+ if(mf484Prefs().mode==='legacy'){
+  showToast('Legacy keeps the original cover theme behavior');return;
+ }
  if(region!=='auto'&&!MF488_LABELS.includes(region))return;
  const url=mf488SourceUrl(),key=mf488Key(url);
  if(!key){showToast('No readable artwork source is selected for this theme');return;}
