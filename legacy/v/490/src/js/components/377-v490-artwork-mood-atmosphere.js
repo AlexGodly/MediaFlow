@@ -67,7 +67,9 @@ function mf490Measure(bytes,width,height,scan){
  const contrast=mf490Clamp((high-low)/.73);
  const texture=mf490Clamp(complexitySum/weight);
  const edges=mf490Clamp(edgeSum/weight);
- const temperature=(warmSum-coolSum)/Math.max(warmSum+coolSum,.001);
+ // Nearly achromatic pixels have unreliable hue; their temperature is neutral.
+ const hueCoverage=(warmSum+coolSum)/weight;
+ const temperature=hueCoverage<.035?0:(warmSum-coolSum)/Math.max(warmSum+coolSum,.001);
  const temperatureStrength=mf490Clamp(Math.abs(temperature)*.85);
  const diversity=mf490Clamp(scan.samples?1-
   (scan.pixels.reduce((acc,p)=>acc+Math.pow(p.weight/scan.samples,2),0)):0);
@@ -95,9 +97,10 @@ function mf490Signatures(metrics,base){
  const warm=m.warm,cool=m.cool;
  const scores={
   'cinematic-dramatic':.38*mf490Clamp((.59-m.lightness)/.46)+
-   .36*m.contrast+.16*m.shadows+.10*mf490Clamp(m.saturation+.1),
+   .36*m.contrast+.16*m.shadows+.10*mf490Clamp(m.saturation+.1)+
+   .17*m.shadows*m.contrast,
   'neon-energetic':.42*m.saturation+.29*m.texture+.21*m.contrast+
-   .08*diversity,
+   .08*diversity+.18*Math.min(m.saturation,m.texture),
   'soft-dreamlike':.36*m.softness+.31*mf490Clamp(1-m.contrast)+
    .18*mf490Clamp(.65-m.texture)+.15*m.saturation,
   'luminous-airy':.40*mf490Clamp((m.lightness-.51)/.40)+
