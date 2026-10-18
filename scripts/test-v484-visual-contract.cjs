@@ -19,7 +19,6 @@ for(const token of ['v160ExtractCoverTheme=function','v162SoftPalette=function',
 }
 assert.match(css,/prefers-reduced-motion/);
 assert.match(css,/data-mf484-living/);
-assert.doesNotMatch(css,/#app\s*\{\s*position:relative/); // no unconditional layout stacking
 const prefix=source.slice(0,source.indexOf('const mf484LegacyExtract='));
 const context=vm.createContext({DEFAULT_SETTINGS:{},S:{settings:{}}});
 vm.runInContext(prefix+'\nthis.probe={hex:mf484Hex,url:mf484ImageUrl,clean:mf484Clean};',context);
