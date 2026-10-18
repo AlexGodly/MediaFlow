@@ -1,0 +1,18 @@
+# Publishing exclusions for GitHub Pages' automatic Jekyll build.
+# MediaFlow's custom deploy-pages.yml also excludes these top-level folders.
+# Keep src/js/legacy because it contains application source modules.
+
+exclude:
+  - legacy
+  - beta
+  # Jekyll 3 replaces its default exclusion list when this option is set.
+  - .sass-cache
+  - .jekyll-cache
+  - gemfiles
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle
+  - vendor/cache
+  - vendor/gems
+  - vendor/ruby

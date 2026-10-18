@@ -1,5 +1,5 @@
 /* v421 — no full-sidebar scroll: brand + navigation scroller + progression */
-@media(min-width:861px){
+@media(min-width:1081px){
   body.v260-redesign.mf421-desktop .sidebar.mf421-sidebar{height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow:visible!important;scrollbar-gutter:auto!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important}
   body.mf421-desktop .sidebar.mf421-sidebar>.brand{flex:none!important;min-height:0!important;cursor:grab;touch-action:pan-y}
   body.mf421-desktop .sidebar.mf421-sidebar>.brand:active{cursor:grabbing}
@@ -35,8 +35,8 @@ body.mf421-bottom .mf421-dock-menu{top:auto;bottom:calc(100% + 12px)}
 .mf421-style-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);color:var(--text);padding:12px 6px;min-height:72px;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
 .mf421-style-tab.active{background:color-mix(in srgb,var(--flow) 13%,var(--panel));border-color:var(--flow);box-shadow:inset 0 0 0 1px var(--flow)}.mf421-style-symbol{font-size:25px;line-height:1}
 @media(max-width:560px){.mf421-style-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:861px) and (max-width:1050px){.mf421-dock-brand .mf421-dock-name{display:none}.mf421-dock-link{padding:7px 8px}.mf421-dock{gap:5px}}
-@media(max-width:860px){.mf421-dock{display:none!important}}
+@media(min-width:1081px) and (max-width:1280px){.mf421-dock-brand .mf421-dock-name{display:none}.mf421-dock-link{padding:7px 8px}.mf421-dock{gap:5px}}
+@media(max-width:1080px){.mf421-dock{display:none!important}}
 /* Logging Show: prevent duplicated native arrows, stray pseudo-icon, and glyph collision. */
 .log-form .mf383-logging-body .v224-log-tools>.mf406-membership{position:relative!important;isolation:isolate}
 .log-form .mf383-logging-body .v224-log-tools>.mf406-membership>select{
@@ -51,13 +51,13 @@ body.mf421-bottom .mf421-dock-menu{top:auto;bottom:calc(100% + 12px)}
 .log-form .mf383-logging-body .v224-log-tools>.mf406-membership::after{content:''!important;position:absolute!important;bottom:18px!important;right:17px!important;width:8px!important;height:8px!important;border-right:2px solid var(--text-dim)!important;border-bottom:2px solid var(--text-dim)!important;transform:rotate(45deg)!important;pointer-events:none!important}
 .log-form .mf383-logging-body .v224-log-tools>.mf406-membership select::-ms-expand{display:none}
 @media(prefers-reduced-motion:reduce){.mf421-dock *{transition:none!important}}
-@media(min-width:861px){
+@media(min-width:1081px){
  body.v260-redesign.mf421-desktop.mf421-top .sidebar.mf421-sidebar,body.v260-redesign.mf421-desktop.mf421-bottom .sidebar.mf421-sidebar{display:none!important}
 }
 .mf421-dock-progress{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:10px;border:1px solid var(--border-soft);background:color-mix(in srgb,var(--flow) 8%,var(--panel));color:var(--text);font:inherit;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex:none}
 .mf421-dock-progress:hover{border-color:var(--flow)}.mf421-dock-progress[hidden]{display:none!important}
-@media(min-width:861px) and (max-width:1260px){.mf421-dock-progress{display:none!important}}
-@media(min-width:861px){
+@media(min-width:1081px) and (max-width:1260px){.mf421-dock-progress{display:none!important}}
+@media(min-width:1081px){
   body.mf421-bottom .mf397-dock{bottom:calc(94px + env(safe-area-inset-bottom,0px))!important}
   body.mf421-bottom .mf419-back-to-logging{bottom:calc(158px + env(safe-area-inset-bottom,0px))!important}
 }

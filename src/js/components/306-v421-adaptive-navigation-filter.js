@@ -49,8 +49,12 @@ function mf421InjectSettings(){
 }
 try{MediaFlowRuntime.registerPageEnhancer('settings',mf421InjectSettings);}catch(_){ }
 
+/* Use the same physical breakpoint as the v277/v278 mobile bottom bar.
+ * Device-layout preference flags must not keep a desktop dock visible while
+ * the viewport already renders mobile navigation. */
+const MF421_NAV_BREAKPOINT=1080;
 function mf421DeskAllowed(){
-  return window.innerWidth>860&&!['mobile','tablet'].includes(document.documentElement.dataset.v238Layout||'');
+  return window.innerWidth>MF421_NAV_BREAKPOINT;
 }
 function mf421AddDock(){
   let bar=document.querySelector('.mf421-dock');
@@ -102,6 +106,7 @@ function mf421RefreshDock(bar,force=false){
 }
 function mf421Apply(force=false){
   const mode=mf421Mode(),desk=mf421DeskAllowed(),body=document.body;
+  if(!desk&&mf421Drag){mf421Drag=null;mf421Zones(false);}
   body.classList.toggle('mf421-desktop',desk);
   for(const key of MF421_MODES)body.classList.toggle('mf421-'+key,desk&&mode===key);
   body.classList.toggle('mf265-sidebar-collapsed',desk&&mode==='mini');
@@ -115,7 +120,7 @@ function mf421Apply(force=false){
   }
   let bar=document.querySelector('.mf421-dock');
   if(desk&&(mode==='top'||mode==='bottom')){
-    bar=mf421AddDock();bar.hidden=false;
+    bar=mf421AddDock();bar.hidden=false;bar.inert=false;
     const progress=bar.querySelector('.mf421-dock-progress');
     if(progress){
       try{
@@ -126,7 +131,7 @@ function mf421Apply(force=false){
       }catch(_){progress.hidden=true;}
     }
     mf421RefreshDock(bar,force);
-  }else if(bar){bar.hidden=true;mf421DropOpen=false;mf421UpdateMore(bar);}
+  }else if(bar){bar.hidden=true;bar.inert=true;mf421DropOpen=false;mf421UpdateMore(bar);}
 }
 function mf421Target(e){
   if(e.clientY<Math.max(96,window.innerHeight*.13))return 'top';

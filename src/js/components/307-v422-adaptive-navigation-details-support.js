@@ -147,7 +147,15 @@ mf421Apply=function(force){
   const result=mf422OriginalApply.apply(this,arguments);
   if(mf421Mode()==='sidebar'&&mf421DeskAllowed())mf422RestoreExpandedWidth();
   mf422EnhanceDock();mf422RefreshSettingsTabs();
-  if(!['top','bottom'].includes(mf421Mode()))mf422PopupOpen=false;
+  // Responsive handoff: never reopen a desktop progression popup after
+  // shrinking to mobile and expanding the window again.
+  if(!mf421DeskAllowed()||!['top','bottom'].includes(mf421Mode())){
+    mf422PopupOpen=false;
+    const bar=document.querySelector('.mf421-dock');
+    const popup=bar?.querySelector('.mf422-progress-popup');
+    if(popup)popup.hidden=true;
+    bar?.querySelector('.mf421-dock-progress')?.setAttribute('aria-expanded','false');
+  }
   return result;
 };
 document.addEventListener('pointerdown',function(e){
