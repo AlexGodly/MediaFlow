@@ -1,0 +1,75 @@
+name: MediaFlow v461 Background Processes Shortcut Layout Quality Gate
+on:
+  push:
+    branches: [feature/v461-background-shortcut-icon-layout]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v461-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v461 and validate module, bundled JS and site layout
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "461"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v461.bundle.js
+          node --check src/js/components/345-v461-background-shortcut-layout.js
+          node --check scripts/test-v461-shortcut-layout.cjs
+          node --check scripts/test-v461-browser.cjs
+          node scripts/test-v461-shortcut-layout.cjs
+      - name: Run v460 shortcut behavior regression against its original version
+        run: |
+          set -euo pipefail
+          cp src/js/runtime-order.json "$RUNNER_TEMP/runtime-order-v461.json"
+          node -e "const fs=require('fs'),p='src/js/runtime-order.json',a=JSON.parse(fs.readFileSync(p));if(a.pop()!=='components/345-v461-background-shortcut-layout.js')throw Error('Unexpected v461 runtime');fs.writeFileSync(p,JSON.stringify(a,null,2))"
+          echo 460 > VERSION
+          node scripts/test-v460-floating-shortcuts.cjs
+          cp "$RUNNER_TEMP/runtime-order-v461.json" src/js/runtime-order.json
+          echo 461 > VERSION
+          python scripts/check.py
+      - name: Chromium desktop and 360px mobile smoke, including old recovery flows
+        run: node scripts/test-v461-browser.cjs
+      - name: Commit verified bundle and complete v461 source archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/461
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/461/
+          test "$(cat legacy/v/461/VERSION)" = 461
+          test -s legacy/v/461/assets/js/mediaflow-v461.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v461.bundle.js
+          git add --sparse -f legacy/v/461
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v461): verified site and full source archive [skip ci]'
+            git push origin HEAD:feature/v461-background-shortcut-icon-layout
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v461-shortcut-smoke
+          path: |
+            artifacts/v461-browser-smoke/
+            version.json

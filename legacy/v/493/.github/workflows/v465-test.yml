@@ -1,0 +1,66 @@
+name: MediaFlow v465 Fresh Episodes Card Visibility Quality Gate
+on:
+  push:
+    branches: [feature/v465-fresh-episodes-title-card-label-visibility]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v465-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v465 and verify strict seasonal/manual gating
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "465"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v465.bundle.js
+          node --check src/js/components/349-v465-recommended-fresh-card-title-seasonal-visibility.js
+          node --check scripts/test-v465-fresh-card-visibility.cjs
+          node --check scripts/test-v465-browser.cjs
+          node scripts/test-v465-fresh-card-visibility.cjs
+          python scripts/check.py
+      - name: Desktop and 360px mobile Chromium suite, v462-v464 regression
+        run: node scripts/test-v465-browser.cjs
+      - name: Archive verified complete v465 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/465
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/465/
+          test "$(cat legacy/v/465/VERSION)" = 465
+          test -s legacy/v/465/assets/js/mediaflow-v465.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v465.bundle.js
+          git add --sparse -f legacy/v/465
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v465): verified site and complete legacy archive [skip ci]'
+            git push origin HEAD:feature/v465-fresh-episodes-title-card-label-visibility
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v465-recommended-fresh-tile
+          path: |
+            artifacts/v465-browser-smoke/
+            version.json
