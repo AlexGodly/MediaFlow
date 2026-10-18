@@ -1,0 +1,121 @@
+/* MediaFlow v496 — Unified Living Themes Renderer.
+ * Active only in Advanced or Custom when Living Themes are enabled.
+ * Legacy selectors intentionally absent.
+ */
+html[data-mf496-renderer="on"] body{
+ background:
+ radial-gradient(ellipse 85vw 75vh at 5% 0%,
+  color-mix(in srgb,var(--mf496-primary) 12%,transparent),transparent 72%),
+ radial-gradient(ellipse 75vw 70vh at 96% 14%,
+  color-mix(in srgb,var(--mf496-secondary) 9%,transparent),transparent 75%),var(--bg);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere{
+ isolation:isolate;overflow:hidden;contain:layout style paint;
+}
+#mf484-atmosphere .mf496-layer{display:block;position:absolute;pointer-events:none;
+ transform:translateZ(0);will-change:auto;mix-blend-mode:screen;}
+html[data-mf496-renderer="on"][data-mf484-intensity="subtle"] #mf484-atmosphere{opacity:.35}
+html[data-mf496-renderer="on"][data-mf484-intensity="balanced"] #mf484-atmosphere{opacity:.58}
+html[data-mf496-renderer="on"][data-mf484-intensity="vivid"] #mf484-atmosphere{opacity:.81}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-gradients{
+ inset:-24%;opacity:var(--mf496-gradient-opacity,.54);
+ background:
+ radial-gradient(ellipse 43% 38% at 20% 27%,
+  color-mix(in srgb,var(--mf496-primary) 56%,transparent),transparent 84%),
+ radial-gradient(ellipse 43% 48% at 86% 73%,
+  color-mix(in srgb,var(--mf496-secondary) 42%,transparent),transparent 85%),
+ radial-gradient(ellipse 29% 36% at 64% 12%,
+  color-mix(in srgb,var(--mf496-tertiary) 34%,transparent),transparent 83%);
+ filter:blur(clamp(34px,6vw,92px));
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-lighting{
+ left:16%;top:-58%;width:68%;height:190%;
+ background:linear-gradient(var(--mf496-axis,105deg),transparent 9%,
+  color-mix(in srgb,var(--mf496-tertiary) 14%,transparent) 46%,
+  color-mix(in srgb,var(--mf496-primary) 7%,transparent) 50%,transparent 74%);
+ filter:blur(clamp(18px,4vw,48px));
+ opacity:var(--mf496-light-opacity,.54);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-depth{
+ left:-12%;bottom:-34%;width:125%;height:85%;border-radius:50%;
+ background:radial-gradient(ellipse closest-side,
+  color-mix(in srgb,var(--mf496-secondary) 14%,transparent),transparent 70%);
+ box-shadow:inset 0 50px 160px color-mix(in srgb,var(--mf496-primary) 11%,transparent);
+ transform:perspective(950px) rotateX(63deg);
+ opacity:var(--mf496-depth-opacity,.44);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-materials{
+ inset:0;opacity:var(--mf496-material-opacity,.26);
+ background:linear-gradient(132deg,transparent 10%,
+  color-mix(in srgb,var(--mf496-tertiary) 18%,transparent) 36%,
+  transparent 44% 60%,
+  color-mix(in srgb,var(--mf496-primary) 9%,transparent) 75%,transparent 83%);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-textures{
+ inset:0;opacity:var(--mf496-texture-opacity,.08);
+ background:repeating-linear-gradient(120deg,
+  transparent 0 60px,color-mix(in srgb,var(--mf496-secondary) 62%,transparent) 61px 62px,
+  transparent 63px 115px);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-organic{
+ width:min(85vw,850px);height:min(85vw,850px);left:-18%;bottom:-44%;
+ border-radius:46% 54% 63% 37%;
+ background:radial-gradient(ellipse,
+  color-mix(in srgb,var(--mf496-secondary) 18%,transparent),transparent 72%);
+ filter:blur(clamp(35px,6vw,80px));
+ opacity:var(--mf496-organic-opacity,.33);
+}
+html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-particles{
+ inset:0;opacity:var(--mf496-particles-opacity,.25);
+ background-image:
+ radial-gradient(circle,var(--mf496-tertiary) 0 1px,transparent 2px),
+ radial-gradient(circle,var(--mf496-secondary) 0 1px,transparent 2px);
+ background-size:175px 190px,287px 235px;
+ background-position:15px 23px,73px 100px;
+}
+@keyframes mf496-drift{
+ 0%{transform:translate3d(-2%,0,0) scale(1)}
+ 100%{transform:translate3d(3%,3%,0) scale(1.06)}
+}
+@keyframes mf496-light-shift{
+ 0%{transform:translate3d(-3%,0,0) rotate(-2deg)}
+ 100%{transform:translate3d(4%,1%,0) rotate(3deg)}
+}
+@keyframes mf496-particle-shift{
+ to{background-position:15px -167px,73px -135px}
+}
+html[data-mf496-renderer="on"][data-mf496-motion="on"] #mf484-atmosphere .mf496-gradients{
+ animation:mf496-drift 32s ease-in-out infinite alternate}
+html[data-mf496-renderer="on"][data-mf496-motion="on"] #mf484-atmosphere .mf496-lighting{
+ animation:mf496-light-shift 39s ease-in-out infinite alternate}
+html[data-mf496-renderer="on"][data-mf496-motion="on"] #mf484-atmosphere .mf496-particles{
+ animation:mf496-particle-shift 92s linear infinite}
+html[data-mf496-renderer="on"][data-mf496-motion="off"] #mf484-atmosphere .mf496-layer{
+ animation:none!important;transition:none!important;will-change:auto!important}
+.mf496-panel{display:grid;gap:13px;min-width:0;padding:18px;
+ border:1px solid var(--border-soft);border-radius:16px;
+ background:linear-gradient(140deg,
+ color-mix(in srgb,var(--panel-raised) 89%,var(--flow)),var(--panel));color:var(--text)}
+.mf496-panel>strong{font-size:14px;font-weight:800}
+.mf496-panel>p,.mf496-panel p{margin:0;color:var(--text-dim);
+ font-size:12px;line-height:1.65}
+#mf496-status{min-width:0;display:grid;gap:12px;padding:13px;
+ border-radius:12px;border:1px solid var(--border-soft);background:var(--panel)}
+.mf496-status-line{display:flex;align-items:center;justify-content:space-between;
+ gap:10px;flex-wrap:wrap}
+.mf496-status-line strong{font-size:12px;color:var(--flow)}
+.mf496-status-line span{color:var(--text-mute);font-size:11px;text-transform:capitalize}
+.mf496-layer-list{display:flex;gap:7px;flex-wrap:wrap}
+.mf496-layer-list span{border:1px solid var(--border-soft);border-radius:999px;
+ background:var(--panel-raised);color:var(--text-dim);font-size:10px;padding:5px 9px;
+ text-transform:capitalize}
+#mf496-status>small,.mf496-layer-list small{font-size:11px;color:var(--text-mute)}
+@media(max-width:520px){
+ html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-lighting{left:-5%;width:110%}
+ .mf496-panel{padding:12px}
+ .mf496-layer-list{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-mf496-renderer="on"] #mf484-atmosphere .mf496-layer{
+ animation:none!important;transition:none!important;will-change:auto!important}
+}

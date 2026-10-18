@@ -1,0 +1,66 @@
+name: MediaFlow v463 Recommended Fresh Episodes Quality Gate
+on:
+  push:
+    branches: [feature/v463-recommended-title-fresh-left]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v463-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v463 and check fresh title presentation
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "463"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v463.bundle.js
+          node --check src/js/components/347-v463-recommended-title-fresh-left.js
+          node --check scripts/test-v463-recommendation-fresh.cjs
+          node --check scripts/test-v463-browser.cjs
+          node scripts/test-v463-recommendation-fresh.cjs
+          python scripts/check.py
+      - name: Chromium desktop + 360px mobile, v462 recovery regression
+        run: node scripts/test-v463-browser.cjs
+      - name: Commit verified bundle and archive full v463 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/463
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/463/
+          test "$(cat legacy/v/463/VERSION)" = 463
+          test -s legacy/v/463/assets/js/mediaflow-v463.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v463.bundle.js
+          git add --sparse -f legacy/v/463
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v463): verified site and complete legacy archive [skip ci]'
+            git push origin HEAD:feature/v463-recommended-title-fresh-left
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v463-fresh-recommendation-smoke
+          path: |
+            artifacts/v463-browser-smoke/
+            version.json
