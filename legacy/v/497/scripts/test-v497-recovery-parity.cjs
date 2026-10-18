@@ -27,7 +27,7 @@ function group(){
   button("App.mf447Open('both')",'Recover Both')];
  const classes=new Set();
  return {buttons,attrs:{},classList:{add:x=>classes.add(x)},
-  setAttribute(k,v){this.attrs[k]=v;},
+  setAttribute(k,v){this.attrs[k]=v;},remove(){this.removed=true;},
   querySelectorAll:s=>s==='button'?buttons:[],
   get classes(){return classes;}};
 }
@@ -94,7 +94,8 @@ assert.equal(draft[1].attrs['aria-label'],'Metadata Recovery — save title firs
 assert.equal(draft.every(x=>x.disabled),true,'draft actions must remain disabled');
 const before=api.status().details;
 detailsEnabled=false;ctx.v181TitleDetailsHtml({id:'another-title'});
-assert.equal(api.status().details,before,'respect Details shortcut preference');
+assert.equal(api.status().details,before+1,'hidden preference must remove legacy recovery controls');
+assert.equal(actionState.group.buttons.length,3,'previously generated control is not duplicated');
 assert.equal(writes,0,'never persist settings or launch jobs during markup');
 assert(!/S\.library\s*=|S\.history\s*=|mf447StartCombined\s*\(/.test(code));
 console.log('v497 recovery parity PASS: 3 actions, ID scope, labels, duplicates, Edit/Delete, disabled drafts');
