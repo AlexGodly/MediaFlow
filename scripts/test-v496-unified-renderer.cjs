@@ -19,13 +19,16 @@ const attrs={},vars={},host={dataset:{},children:[],
  replaceChildren(...nodes){this.children=nodes;}};
 const root={dataset:{},style:{
  setProperty(k,v){vars[k]=v;},removeProperty(k){delete vars[k];}},
- hasAttribute(k){return Object.prototype.hasOwnProperty.call(attrs,k);},
+ hasAttribute(k){return Object.prototype.hasOwnProperty.call(attrs,k)||
+  (k==='data-mf496-renderer'&&!!root.dataset.mf496Renderer);},
  removeAttribute(k){delete attrs[k];const n=k.replace(/^data-/,'').replace(/-([a-z])/g,(_,x)=>x.toUpperCase());delete root.dataset[n];}};
 const profile={id:'mine',source:'manual',imageUrl:'',colors:['#112233','#DDAA33','#4499CC']};
 const living={mode:'advanced',intensity:'balanced',source:'intelligent',performance:'auto',
  effects:{gradients:true,lighting:true,particles:true,depth:true,materials:true,
  textures:true,organic:true,transitions:true}};
-const document={documentElement:root,getElementById:id=>id==='mf484-atmosphere'?host:null};
+const document={documentElement:root,getElementById:id=>id==='mf484-atmosphere'?host:null,
+ createElement:tag=>({tagName:tag,className:'',attrs:{},
+  setAttribute(key,value){this.attrs[key]=value;}})};
 const ctx={console,JSON,Math,Date,String,Number,Object,Array,Set,Map,
  document,window:{matchMedia:q=>({matches:q.includes('prefers-reduced-motion')?reduced:small})},
  navigator:{connection:{get saveData(){return dataSaver}}},
