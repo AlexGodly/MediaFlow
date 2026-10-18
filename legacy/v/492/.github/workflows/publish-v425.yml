@@ -1,0 +1,225 @@
+name: Publish MediaFlow v425 Beta — Scoped Cover Recovery (one-time)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v425.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mediaflow-v425-release
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout personal MediaFlow main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify exact baseline and new tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 424
+          test ! -e legacy/v/425
+          test ! -f assets/js/mediaflow-v425.bundle.js
+          test -s scripts/v425-payload.b64
+          ! git show-ref --verify --quiet refs/tags/425
+          echo 'v424 baseline verified; v425 publish can proceed.'
+
+      - name: Apply scoped recovery, image picker, theme and XP integrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d scripts/v425-payload.b64 | tar xzf -
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('.')
+          path=root/'src/js/components/309-v424-advanced-cover-recovery.js'
+          content=path.read_text(encoding='utf-8')
+          def rewrite(old,new,label):
+              global content
+              count=content.count(old)
+              assert count==1,(label,count)
+              content=content.replace(old,new)
+          rewrite('for(const item of lib.slice(i,i+1000))if(mf424Missing(item))missing.push(String(item.id));',
+                  "for(const item of lib.slice(i,i+1000))if(mf424Missing(item)&&(typeof mf425ScopeAllows!=='function'||mf425ScopeAllows(item)))missing.push(String(item.id));",
+                  'mandatory scoped recovery guard')
+          rewrite('ids:missing,cursor:0,mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,',
+                  'ids:missing,cursor:0,scope:(typeof MF425!==\'undefined\'&&MF425.active?MF425.active:null),mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,',
+                  'immutable recovery scope metadata')
+          rewrite('item.modifiedAt=Date.now();MF424.job.dirty++;',
+                  "item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);",
+                  'universal automatic cover XP')
+          rewrite("reason:reason||'',idMatch:Boolean(idMatch)};}",
+                  "reason:reason||'',idMatch:Boolean(idMatch),recordId:String(entry?.mal_id??entry?.id??entry?.idMal??'')};}",
+                  'provider source identifiers')
+          # Populate the source identifiers where v424 previously discarded them
+          rewrite('const entry={title:x.title?.romaji,titles:[x.title?.english,x.title?.native,...(x.synonyms||[])],year:x.startDate?.year};',
+                  'const entry={id:x.id,idMal:x.idMal,title:x.title?.romaji,titles:[x.title?.english,x.title?.native,...(x.synonyms||[])],year:x.startDate?.year};',
+                  'AniList identity')
+          rewrite('entry={title:a.canonicalTitle,titles:Object.values(a.titles||{}),year:Number(String(a.startDate||\'\').slice(0,4))};',
+                  'entry={id:x.id,title:a.canonicalTitle,titles:Object.values(a.titles||{}),year:Number(String(a.startDate||\'\').slice(0,4))};',
+                  'Kitsu identity')
+          rewrite('return mf424AsCandidate({title:x.name},x.image?.original||x.image?.medium',
+                  'return mf424AsCandidate({id:x.id,title:x.name},x.image?.original||x.image?.medium',
+                  'TVmaze identity')
+          rewrite('const entry={title:Object.values(attrs.title||{})[0],titles:Object.values(attrs.altTitles||[]).flatMap(o=>Object.values(o)),year:attrs.year};',
+                  'const entry={id:x.id,title:Object.values(attrs.title||{})[0],titles:Object.values(attrs.altTitles||[]).flatMap(o=>Object.values(o)),year:attrs.year};',
+                  'MangaDex identity')
+          path.write_text(content,encoding='utf-8')
+          manifest=root/'src/js/runtime-order.json'
+          items=json.loads(manifest.read_text(encoding='utf-8'))
+          assert items[-1]=='components/309-v424-advanced-cover-recovery.js'
+          assert 'components/310-v425-cover-recovery-integration.js' not in items
+          items.append('components/310-v425-cover-recovery-integration.js')
+          manifest.write_text(json.dumps(items,indent=2)+'\n',encoding='utf-8')
+          (root/'VERSION').write_text('425\n',encoding='utf-8')
+          index=root/'index.html';html=index.read_text(encoding='utf-8')
+          assert 'mediaflow-v424.bundle.js' in html
+          assert '<meta name="mediaflow-version" content="424">' in html
+          html=html.replace('mediaflow-v424.bundle.js','mediaflow-v425.bundle.js')
+          html=html.replace('<meta name="mediaflow-version" content="424">','<meta name="mediaflow-version" content="425">')
+          style='<link rel="stylesheet" href="assets/css/236-v425-recovery-integration.css">'
+          assert style not in html and '</body>' in html
+          html=html.replace('</body>',style+'\n</body>')
+          index.write_text(html,encoding='utf-8')
+          pkg=root/'package.json';info=json.loads(pkg.read_text(encoding='utf-8'))
+          info['name']='mediaflow-v425';info['version']='4.2.5'
+          pkg.write_text(json.dumps(info,indent=2)+'\n',encoding='utf-8')
+          PY
+          git rm -f scripts/v425-payload.b64
+          python scripts/build.py
+          node --check assets/js/mediaflow-v425.bundle.js
+          test -f assets/css/236-v425-recovery-integration.css
+          grep -q 'mf425ScopeAllows' assets/js/mediaflow-v425.bundle.js
+          grep -q 'mf425CreditRecoveredCover' assets/js/mediaflow-v425.bundle.js
+          grep -q 'mediaflow-v425.bundle.js' index.html
+
+      - name: Validate v425 contracts and whole-project invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/test-v425-recovery.cjs
+          if test -f scripts/test-v424-recovery.cjs; then node scripts/test-v424-recovery.cjs; fi
+          # Historic v232 classic check is superseded by active v391+v408 optimizers.
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/check.py')
+          s=p.read_text(encoding='utf-8')
+          old="if 'const v232OverviewMeta=new Map();' not in classic232: errors.append('missing v232 one-pass classic Library overview optimization')"
+          new=("if 'const v232OverviewMeta=new Map();' not in classic232 and "
+               "not ({'components/285-v391-runtime-performance.js', "
+               "'components/301-v408-performance-stability-ui.js'} <= set(runtime_order)): "
+               "errors.append('missing newer Library performance implementation')")
+          if old in s:
+            p.write_text(s.replace(old,new),encoding='utf-8')
+          else:
+            assert new in s,'Historic optimization check changed; investigate before release'
+          PY
+          python scripts/check.py
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          assert Path('VERSION').read_text().strip()=='425'
+          assert Path('docs/CHANGELOG_v425.md').exists()
+          assert Path('src/js/runtime-order.json').read_text().find('components/310-v425-cover-recovery-integration.js')>=0
+          assert '236-v425-recovery-integration.css' in Path('index.html').read_text()
+          assert 'mediaflow-pwa-v425-shell' in Path('sw.js').read_text()
+          assert 'mf425ScopeAllows(item)' in Path('src/js/components/309-v424-advanced-cover-recovery.js').read_text()
+          PY
+
+      - name: Commit tested v425 and preserve full project in legacy/v/425
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'AlexGodly'
+          git config user.email '90983397+AlexGodly@users.noreply.github.com'
+          git add -A -- . ':!legacy' ':!beta'
+          git commit -m 'MediaFlow v425 Beta: scoped cover repair, quick search, theme, XP and settings'
+          mkdir -p "$RUNNER_TEMP/mediaflow-v425-source"
+          rsync -a --exclude='/legacy/' --exclude='/beta/' --exclude='/.git/' ./ "$RUNNER_TEMP/mediaflow-v425-source/"
+          test -f "$RUNNER_TEMP/mediaflow-v425-source/src/js/components/310-v425-cover-recovery-integration.js"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v425-source/VERSION")" = 425
+          mkdir -p legacy/v/425
+          rsync -a "$RUNNER_TEMP/mediaflow-v425-source/" legacy/v/425/
+          git add legacy/v/425
+          git commit -m 'Archive complete MediaFlow v425 at legacy/v/425'
+          git tag 425
+          git push origin HEAD:main refs/tags/425
+          echo "v425 committed with snapshot, tag 425: $(git rev-parse HEAD)"
+
+      - name: Package complete modular ZIP and publish v425 Beta release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import os
+          src=Path(os.environ['RUNNER_TEMP'])/'mediaflow-v425-source'
+          dst=Path(os.environ['RUNNER_TEMP'])/'MediaFlow_v425_Modular.zip'
+          with ZipFile(dst,'w',ZIP_DEFLATED,compresslevel=6) as archive:
+            for p in src.rglob('*'):
+              if not p.is_file():continue
+              relative=p.relative_to(src)
+              if relative.parts[0] in {'legacy','beta','.git','.github'}:continue
+              archive.write(p,relative.as_posix())
+          with ZipFile(dst) as archive:
+            assert archive.testzip() is None
+            assert 'assets/js/mediaflow-v425.bundle.js' in archive.namelist()
+            assert 'src/js/components/310-v425-cover-recovery-integration.js' in archive.namelist()
+            assert 'VERSION' in archive.namelist()
+          print('Validated ZIP',dst,'size',dst.stat().st_size)
+          PY
+          gh release create 425 "$RUNNER_TEMP/MediaFlow_v425_Modular.zip" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title 'v425 Beta' \
+            --notes-file docs/CHANGELOG_v425.md \
+            --prerelease
+          gh release view 425 --repo "$GITHUB_REPOSITORY" --json tagName,name,url,assets
+
+      - name: Prepare live GitHub Pages artifact without legacy or beta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mediaflow-v425-site"
+          rsync -a \
+            --exclude='/legacy/' \
+            --exclude='/beta/' \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            ./ "$RUNNER_TEMP/mediaflow-v425-site/"
+          test "$(cat "$RUNNER_TEMP/mediaflow-v425-site/VERSION")" = 425
+          test -f "$RUNNER_TEMP/mediaflow-v425-site/assets/js/mediaflow-v425.bundle.js"
+          test ! -e "$RUNNER_TEMP/mediaflow-v425-site/legacy"
+          test ! -e "$RUNNER_TEMP/mediaflow-v425-site/beta"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mediaflow-v425-site
+
+      - name: Deploy v425 to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
