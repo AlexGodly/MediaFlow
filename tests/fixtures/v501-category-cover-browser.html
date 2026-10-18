@@ -1,0 +1,72 @@
+<!doctype html><html data-mf484-mode="advanced"><head><meta charset="utf-8">
+<style>
+:root{--v370-cover-size:74px;--v240-logged-cover-width:48px;--mf419-log-rec-scale:1;
+ --panel-raised:#292338;--panel:#211b2d;--text:#fff;--flow:#d37b9d;--border-soft:#78657b}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#17131e}
+.log-form{padding:10px}
+.v370-title-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px}
+.v370-title-head>.v370-title-cover{grid-column:1;grid-row:1 / 4}
+.v370-title-head>.v370-title-info{grid-column:2;grid-row:1;display:contents}
+.v370-title-info>h3,.v370-title-info>.v370-title-tags,.v370-title-info>.v370-title-stats{grid-column:2}
+.v370-title-info>h3{grid-row:1}.v370-title-info>.v370-title-tags{grid-row:2}
+.v370-title-info>.v370-title-stats{grid-row:3}
+.v370-title-info>.mf382-progress-comparison{grid-column:1/-1;grid-row:4;height:245px}
+.mf498-logging-cover{border:1px solid var(--border-soft);border-radius:9px;display:grid;place-items:center;position:relative;overflow:hidden;background:var(--panel-raised);padding:0}
+.v239-logged-title-card{display:grid;grid-template-columns:auto 48px minmax(0,1fr) auto;gap:10px;padding:8px}
+.v239-logged-cover{grid-column:2}
+.mf419-log-recommended{display:flex;gap:10px;align-items:center;padding:12px}
+.v253-log-recommended-copy{display:flex;gap:10px;align-items:center}
+</style><style>/*INJECT_V501_STYLES*/</style></head><body>
+<div class="log-form mf373-logging">
+ <section class="v370-title mf394-title"><header class="v370-title-head">
+  <button class="v370-title-cover mf498-logging-cover mf501-library-cover is-missing" type="button" aria-label="Open title details" data-mf501-source="category-icon">
+   <span class="mf498-cover-icon mf501-category-fallback" role="img"><span class="mf501-category-art"><svg viewBox="0 0 100 100" data-category="anime"><circle cx="50" cy="50" r="35" fill="currentColor"/></svg></span></span>
+  </button>
+  <div class="v370-title-info"><h3>Title name</h3><div class="v370-title-tags">Watching</div>
+   <div class="v370-title-stats">2 episodes in draft</div>
+   <div class="mf382-progress-comparison">Large progress preview</div></div>
+ </header></section>
+ <article class="v239-logged-title-card">
+  <button class="v239-logged-cover mf498-logging-cover mf501-library-cover" type="button" data-mf501-source="title">
+   <img class="mf498-cover-image mf501-cover-image" src="file:///missing-image-v501.svg" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+   <span class="mf498-cover-icon mf501-category-fallback" hidden><span class="mf501-category-art"><svg data-category="quick" viewBox="0 0 100 100"><path fill="currentColor" d="M0 0h100v100H0z"/></svg></span></span>
+  </button><div class="v239-logged-title-copy">Quick logging missing remote artwork</div>
+ </article>
+ <section class="mf419-log-recommended">
+  <div class="v253-log-recommended-copy">
+   <button class="mf419-cover-art mf419-log-rec-cover mf498-logging-cover mf501-library-cover is-missing" type="button" data-mf501-source="category-icon">
+    <span class="mf498-cover-icon mf501-category-fallback"><span class="mf501-category-art"><span class="v144-cat-icon-emoji">🌸</span></span></span>
+   </button>
+   <div>RECOMMENDED TITLE · Category icon</div>
+  </div>
+ </section>
+</div><output id="mf501-result"></output>
+<script>
+function measure(){
+ const area=document.querySelector('.log-form');
+ const adv=document.querySelector('.v370-title-cover'),quick=document.querySelector('.v239-logged-cover'),rec=document.querySelector('.mf419-log-rec-cover');
+ function size(node){const b=node.getBoundingClientRect();return {width:b.width,height:b.height};}
+ const a=size(adv),q=size(quick),r=size(rec);
+ const ai=size(adv.querySelector('.mf501-category-art')),ri=size(rec.querySelector('.mf501-category-art'));
+ const quickFallback=quick.querySelector('.mf501-category-fallback');
+ document.documentElement.style.setProperty('--v370-cover-size','190px');
+ document.documentElement.style.setProperty('--mf419-log-rec-scale','1.6');
+ const largerAdv=size(adv),largerRec=size(rec);
+ const largerAdvIcon=size(adv.querySelector('.mf501-category-art'));
+ const largerRecIcon=size(rec.querySelector('.mf501-category-art'));
+ document.getElementById('mf501-result').textContent='MF501_RESULT='+JSON.stringify({
+  viewport:innerWidth,advanced:a,quick:q,recommended:r,
+  advancedIcon:ai,recommendedIcon:ri,
+  largerAdvanced:largerAdv,largerRecommended:largerRec,
+  largerAdvancedIcon:largerAdvIcon,largerRecommendedIcon:largerRecIcon,
+  quickImageHidden:quick.querySelector('img').hidden,
+  quickIconVisible:getComputedStyle(quickFallback).display!=='none',
+  advancedIconVisible:getComputedStyle(adv.querySelector('.mf501-category-fallback')).display!=='none',
+  recommendedIconVisible:getComputedStyle(rec.querySelector('.mf501-category-fallback')).display!=='none',
+  coverClickable:adv.tagName==='BUTTON'&&rec.tagName==='BUTTON',
+  pageOverflow:document.documentElement.scrollWidth>innerWidth+3
+ });
+}
+window.addEventListener('load',()=>setTimeout(measure,180));
+</script></body></html>
