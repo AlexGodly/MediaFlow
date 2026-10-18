@@ -184,8 +184,10 @@ function mf494Scene(palette,label){
   '<strong>MEDIAFLOW</strong><span>Dashboard &nbsp; Library &nbsp; Collections</span></div>'+
   '<div class="mf494-scene-hero" style="background:linear-gradient(130deg,'+
    c('raised')+','+c('panel')+');border-color:'+c('border')+'">'+
-  '<small style="color:'+c('textDim')+'">NEXT IN YOUR LIBRARY</small>'+
-  '<h4>Discover your next story</h4>'+
+  '<small style="color:'+c('textDim')+'">'+
+  (MF494_STATE.scene==='library'?'YOUR LIBRARY':MF494_STATE.scene==='details'?'TITLE DETAILS':'NEXT IN YOUR LIBRARY')+'</small>'+
+  '<h4>'+(MF494_STATE.scene==='library'?'Your next discoveries':
+   MF494_STATE.scene==='details'?'Title overview':'Discover your next story')+'</h4>'+
   '<p style="color:'+c('textDim')+'">Preview cards, navigation, badges and typography.</p>'+
   '<span class="mf494-scene-action" style="background:'+c('flow')+
    ';color:'+c('onAccent')+'">Preview action</span></div>'+
@@ -198,6 +200,16 @@ function mf494Scene(palette,label){
    '">Watching</em></span><div style="background:'+c('raised')+
    '"><i style="width:64%;background:'+c('flow')+'"></i></div>'+
    '<small style="color:'+c('textDim')+'">Progress · 64%</small></div>'+
+  '<div class="mf494-scene-extras" style="background:'+c('panel')+';border-color:'+c('border')+'">'+
+  (MF494_STATE.scene==='details'?
+    '<strong>Title details</strong><p>Runtime · Rating · Personal Order</p>':
+   MF494_STATE.scene==='library'?
+    '<strong>Library filters</strong><p>Watching · Completed · Planned</p>':
+    '<strong>Activity snapshot</strong><p>Recently logged · Today</p>')+
+  '<div class="mf494-scene-dialog" style="background:'+c('raised')+';border-color:'+c('border')+'">'+
+    '<strong>Settings dialog</strong><small style="color:'+c('textDim')+'">Example option · Read-only</small>'+
+    '<span class="mf494-scene-action" style="background:'+c('flow')+';color:'+c('onAccent')+'">Save changes</span>'+
+  '</div></div>'+
   '<div class="mf494-scene-swatches">'+swatches+'</div></div>';
 }
 function mf494Candidate(source,index){
@@ -214,7 +226,8 @@ function mf494Candidate(source,index){
   '" aria-label="Candidate '+name+' '+key+'" oninput="App.mf494Tune('+
   index+',\''+key+'\',this.value)"></label>').join('');
  return '<article class="mf494-comparison-card"><div class="mf494-card-head">'+
-  '<strong>Candidate '+name+'</strong><small>Draft · not applied</small></div>'+
+  '<strong>Candidate '+name+'</strong><small>Draft · not applied'+
+  (p?.readability?.ratios?.text?' · '+p.readability.ratios.text+':1 text':'')+'</small></div>'+
   '<div data-mf494-preview="'+index+'">'+mf494Scene(p,'Candidate '+name)+'</div>'+
   '<div class="mf494-card-controls">'+select+rows+
   '<button type="button" class="btn btn-primary" '+(!p?'disabled':'')+
