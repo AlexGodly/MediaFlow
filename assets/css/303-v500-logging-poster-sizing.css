@@ -1,0 +1,152 @@
+/* MediaFlow v500 — readable, large added/recommended Logging artwork.
+ * v499 protected 2:3 geometry but 'min(100%,74px)' inside an auto grid
+ * track lets a textless cover button collapse to near zero pixels.
+ * Reserve REAL, explicit grid space, then size posters from those tracks.
+ * All rules stay inside Logging; Library/History artwork untouched.
+ */
+.log-form{
+ --mf500-advanced-poster:clamp(116px,max(128px,var(--v370-cover-size,74px)),210px);
+ --mf500-quick-poster:clamp(76px,max(88px,var(--v240-logged-cover-width,48px)),168px);
+ --mf500-recommended-poster:clamp(86px,calc(100px * var(--mf419-log-rec-scale,1)),min(29vw,210px));
+}
+/* The first track cannot be auto, or a button with only positioned artwork
+ * has no intrinsic preferred width and collapses to a few pixels. */
+.log-form .v370-title-head:has(> .v370-title-cover.mf498-logging-cover){
+ grid-template-columns:var(--mf500-advanced-poster) minmax(0,1fr) auto;
+}
+.log-form .v370-title-head > .v370-title-cover.mf498-logging-cover,
+.log-form .mf394-title .v370-title-head > .v370-title-cover.mf498-logging-cover{
+ inline-size:var(--mf500-advanced-poster)!important;
+ width:var(--mf500-advanced-poster)!important;
+ max-inline-size:100%!important;
+ max-width:100%!important;
+ min-inline-size:0!important;
+ min-width:0!important;
+ block-size:auto!important;
+ height:auto!important;
+ min-height:0!important;
+ aspect-ratio:2 / 3!important;
+ align-self:start!important;
+ justify-self:start!important;
+ grid-column:1;
+ overflow:hidden;
+}
+/* Maintain v394's multirow metadata/progress placement but never let the
+ * progress region set the image's aspect ratio or height. */
+.log-form .mf394-title .v370-title-head > .v370-title-cover.mf498-logging-cover{
+ grid-row:1 / 4;
+}
+/* Quick Logging uses its own poster track. Keep the existing order controls. */
+.log-form .mf373-logging .v239-logged-title-card:has(> .v239-logged-cover.mf498-logging-cover),
+.log-form .v239-logged-title-card:has(> .v239-logged-cover.mf498-logging-cover){
+ grid-template-columns:auto var(--mf500-quick-poster) minmax(0,1fr) auto!important;
+}
+.log-form .v239-logged-title-card > .v239-logged-cover.mf498-logging-cover{
+ width:var(--mf500-quick-poster)!important;
+ inline-size:var(--mf500-quick-poster)!important;
+ max-inline-size:100%!important;
+ max-width:100%!important;
+ min-height:0!important;
+ height:auto!important;
+ block-size:auto!important;
+ aspect-ratio:2 / 3!important;
+ align-self:start!important;
+ justify-self:start!important;
+}
+/* Larger recommendation poster, retaining the independent recommended-cover
+ * size scaling setting. It is a flex item, so prevent flex-shrink to 0. */
+.log-form .mf419-log-recommended .v253-log-recommended-copy > .mf419-log-rec-cover.mf498-logging-cover,
+.log-form .mf419-log-recommended .mf419-log-rec-cover.mf498-logging-cover{
+ box-sizing:border-box!important;
+ flex:0 0 var(--mf500-recommended-poster)!important;
+ inline-size:var(--mf500-recommended-poster)!important;
+ width:var(--mf500-recommended-poster)!important;
+ min-inline-size:0!important;
+ max-width:min(38vw,210px)!important;
+ height:auto!important;
+ min-height:0!important;
+ aspect-ratio:3 / 4!important;
+ align-self:center!important;
+ justify-self:start!important;
+}
+/* Big, centered category identities for ALL missing/broken covers.
+ * No text badge is added. The poster remains a keyboard-focusable button. */
+.log-form .mf498-logging-cover .mf498-cover-icon{
+ display:grid;place-items:center;inline-size:100%;block-size:100%;
+ padding:0!important;
+ overflow:hidden;
+ container-type:inline-size;
+}
+.log-form .mf498-logging-cover .mf498-cover-icon[hidden]{display:none!important}
+.log-form .mf498-logging-cover .mf498-cover-icon svg{
+ width:clamp(22px,55cqw,108px)!important;
+ height:clamp(22px,55cqw,108px)!important;
+ max-width:78%!important;max-height:78%!important;
+ margin:auto!important;
+}
+.log-form .mf498-logging-cover .mf498-cover-icon .v144-cat-icon-img{
+ width:58%!important;
+ max-width:78%!important;
+ height:auto!important;
+ max-height:76%!important;
+ object-fit:contain!important;
+}
+.log-form .mf498-logging-cover .mf498-cover-icon .v144-cat-icon-emoji{
+ font-size:clamp(26px,51cqw,100px)!important;
+ line-height:1!important;
+}
+/* Global v225 auto-actions are never part of an image-only button.
+ * CSS is only a defensive fallback if an older page already injected one. */
+.log-form button.mf498-logging-cover > .v225-btn-icon{
+ display:none!important;
+}
+.log-form button.mf498-logging-cover{
+ gap:0!important;
+ padding:0!important;
+ justify-content:center!important;
+ align-items:center!important;
+ text-align:center!important;
+}
+/* Existing poster image still displays in full, never stretch or crop. */
+.log-form .mf498-logging-cover > .mf498-cover-image{
+ width:100%!important;height:100%!important;
+ object-fit:contain!important;object-position:center!important;
+}
+/* Tablets preserve v398's 2-column structure and full-width progress bar. */
+@media(max-width:1020px){
+ .log-form{
+  --mf500-advanced-poster:clamp(94px,max(106px,var(--v370-cover-size,74px)),158px);
+  --mf500-quick-poster:clamp(72px,max(80px,var(--v240-logged-cover-width,48px)),124px);
+ }
+ .log-form .v370-title-head:has(> .v370-title-cover.mf498-logging-cover){
+  grid-template-columns:minmax(0,var(--mf500-advanced-poster)) minmax(0,1fr);
+ }
+ .log-form .v370-title-head > .v370-title-actions{
+  grid-column:1/-1;
+ }
+ .log-form .v239-logged-title-card:has(> .v239-logged-cover.mf498-logging-cover){
+  grid-template-columns:var(--mf500-quick-poster) minmax(0,1fr)!important;
+ }
+ .log-form .v239-logged-title-card > .v239-logged-cover.mf498-logging-cover{grid-column:1;grid-row:1}
+ .log-form .v239-logged-title-card > .v239-logged-title-copy{grid-column:2;grid-row:1}
+ .log-form .v239-logged-title-card > .mf373-row-controls{grid-column:1/-1;grid-row:2}
+ .log-form .v239-logged-title-card > .v239-logged-title-actions{grid-column:1/-1;grid-row:3}
+}
+@media(max-width:440px){
+ .log-form{
+  --mf500-advanced-poster:clamp(76px,27vw,108px);
+  --mf500-quick-poster:clamp(66px,22vw,86px);
+  --mf500-recommended-poster:clamp(74px,24vw,94px);
+ }
+ .log-form .mf419-log-recommended .mf419-log-rec-cover.mf498-logging-cover{
+  max-width:32vw!important;
+ }
+ .log-form .v370-title-head:has(> .v370-title-cover.mf498-logging-cover){
+  grid-template-columns:minmax(0,var(--mf500-advanced-poster)) minmax(0,1fr);
+  column-gap:9px;
+ }
+}
+/* Motion or decoration never obscures cover clicks. */
+@media(prefers-reduced-motion:reduce){
+ .log-form button.mf498-logging-cover{transition:none!important;transform:none!important}
+}
