@@ -49,21 +49,19 @@ function mf497IsOldDetailsRecovery(button){
   /^(?:Fix Cover|Fix Metadata|Covers?\s*\+\s*Metadata Recovery)$/i.test(name);
 }
 function mf497DetailsMarkup(raw,item){
- if(item?.id===null||item?.id===undefined||!mf447Prefs().details)return raw;
+ if(item?.id===null||item?.id===undefined)return raw;
  try{
   const host=document.createElement('div');host.innerHTML=String(raw||'');
   const actions=host.querySelector('.v181-detail-actions');
   if(!actions)return raw;
-  const group=mf497RecoveryGroup(item.id);
-  if(!group)return raw;
+  const group=mf447Prefs().details?mf497RecoveryGroup(item.id):null;
   actions.querySelectorAll('button').forEach(button=>{
    if(mf497IsOldDetailsRecovery(button)){
     button.remove();MF497_RECOVERY_STATE.retired++;
    }
   });
   actions.querySelectorAll('.mf447-shortcut-group').forEach(old=>old.remove());
-  group.setAttribute('aria-label','Title recovery actions');
-  actions.prepend(group);
+  if(group){group.setAttribute('aria-label','Title recovery actions');actions.prepend(group);}
   MF497_RECOVERY_STATE.details++;
   return host.innerHTML;
  }catch(error){
