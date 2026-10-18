@@ -1,7 +1,7 @@
 name: MediaFlow v485 Visual Engine Architecture & Hardening Quality Gate
 on:
   push:
-    branches: [feature/v485-visual-evolution-foundation]
+    branches: [feature/v485-visual-engine-hardening]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -55,7 +55,8 @@ jobs:
           PY
       - name: Behavioral theme ownership, Legacy preservation and recovery compatibility
         run: |
-          node scripts/test-v485-visual-contract.cjs
+          node scripts/test-v485-visual-ownership.cjs
+          node scripts/test-v485-visual-compat.cjs
           node scripts/test-v485-recovery-compat.cjs
       - name: Archive verified complete v485 project
         if: github.event_name == 'push'
@@ -72,5 +73,5 @@ jobs:
           git add --sparse -f legacy/v/485
           if ! git diff --cached --quiet; then
             git commit -m 'build(v485): verified PWA and complete source archive [skip ci]'
-            git push origin HEAD:feature/v485-visual-evolution-foundation
+            git push origin HEAD:feature/v485-visual-engine-hardening
           fi
