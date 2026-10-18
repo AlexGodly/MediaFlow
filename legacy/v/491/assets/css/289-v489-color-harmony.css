@@ -1,0 +1,16 @@
+/* MediaFlow v489 — harmony inspector; scoped to Appearance diagnostics */
+.mf489-harmony-panel{display:grid;gap:13px;padding:17px;min-width:0;
+ border:1px solid var(--border-soft);border-radius:15px;
+ background:linear-gradient(135deg,color-mix(in srgb,var(--panel-raised) 91%,var(--flow)),var(--panel))}
+.mf489-harmony-panel strong{font-size:13px;color:var(--text)}
+.mf489-harmony-panel p{font-size:12px;line-height:1.55;color:var(--text-dim);margin:6px 0 0}
+#mf489-harmony-status{display:grid;gap:12px;padding:12px;background:var(--panel);border:1px solid var(--border-soft);border-radius:11px}
+#mf489-harmony-status>small{font-size:11px;color:var(--text-mute);line-height:1.55}
+.mf489-harmony-top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.mf489-harmony-top small{font-size:11px;color:var(--text-dim)}
+.mf489-role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mf489-color-role{min-width:0;display:grid;gap:5px;padding:9px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised)}
+.mf489-color-role i{width:100%;height:32px;display:block;border:1px solid var(--border);border-radius:7px}
+.mf489-color-role span{font-size:11px;color:var(--text);min-width:0}
+.mf489-color-role small{display:block;font-size:10px;color:var(--text-mute);line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:560px){.mf489-harmony-panel{padding:12px}.mf489-role-grid{grid-template-columns:1fr}.mf489-color-role{grid-template-columns:52px 1fr;align-items:center}.mf489-color-role i{height:35px}.mf489-harmony-top{align-items:flex-start}}
