@@ -306,6 +306,16 @@ function v155VerifyCloudState(cloudState,expected){
 
 async function v155SyncNow(){
   if(v134OperationBusy('sync'))return;
+  // Never merge/upload an anonymous, stale, or still-hydrating account.
+  const syncAccountId=String(AUTH_USER?.id||'');
+  if(!syncAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated||V475_AUTH.restoring||V475_AUTH.logoutRequested){
+    showToast('Finish restoring your MediaFlow cloud account before using Sync Now.');
+    return;
+  }
+  const v507ConfirmSyncAccount=()=>{
+    if(String(AUTH_USER?.id||'')!==syncAccountId||V115_STARTUP_GUARD||V475_AUTH.logoutRequested||!V475_AUTH.hydrated)
+      throw new Error('The MediaFlow account changed during Sync Now. Upload cancelled to protect your data.');
+  };
   V134_HEAVY_OPERATION='sync';
   showDataProgress('Sync now','Preparing complete protected MediaFlow synchronization…',3);
 
@@ -329,6 +339,7 @@ async function v155SyncNow(){
       throw new Error(`Cloud read failed. Nothing was written. ${String(error?.message||error)}`);
     }
 
+    v507ConfirmSyncAccount();
     // Preserve v115's core safety invariant: missing/suspicious cloud reads do
     // not automatically become writes, even when Sync Now is pressed.
     if(!cloud?.found){
@@ -352,6 +363,7 @@ async function v155SyncNow(){
     }
     await v134Yield();
 
+    v507ConfirmSyncAccount();
     updateDataProgress(34,'Applying Library, History, Settings, Order and Old System…');
     v46ApplyState(merged);
     v155ApplyPortableExtras(merged.portableExtras);
@@ -372,6 +384,7 @@ async function v155SyncNow(){
 
     // Use rawSet directly here so Sync Now receives the real cloud-write error.
     // saveState() intentionally catches errors for normal UI autosaves.
+    v507ConfirmSyncAccount();
     updateDataProgress(91,'Uploading one complete protected cloud state…');
     const finalState=snapshot();
     await rawSet(STATE_KEY,finalState);
@@ -381,6 +394,7 @@ async function v155SyncNow(){
     if(!verify?.found||!verify.state){
       throw new Error('Cloud upload could not be verified after writing.');
     }
+    v507ConfirmSyncAccount();
     const verification=v155VerifyCloudState(verify.state,finalState);
     if(!verification.ok){
       throw new Error(`Cloud verification found incomplete data: ${verification.missing.join(', ')}.`);
