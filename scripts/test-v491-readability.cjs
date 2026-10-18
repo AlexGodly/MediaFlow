@@ -102,7 +102,7 @@ assert(api.contrast(fixed.border,fixed.panel)>=1.5);
 const noChange=JSON.stringify(poor);
 const repaired=api.audit(poor);
 assert.equal(JSON.stringify(poor),noChange,'Original theme object must be unchanged');
-assert.deepEqual(repaired.readability.violations,[]);
+assert.equal(repaired.readability.violations.length,0,'All sampled contrast targets must pass');
 const recommended=ctx.v146ApplyFullPalette({...poor},source);
 assert.equal(recommended,true);
 assert(last?.readability?.version===491);
