@@ -93,7 +93,10 @@ function mf496Clear(){
  root.removeAttribute('data-mf496-motion');
  root.removeAttribute('data-mf496-composition');
  for(const k of ['--mf496-power','--mf496-glow','--mf496-density',
-  '--mf496-axis','--mf496-primary','--mf496-secondary','--mf496-tertiary'])
+  '--mf496-axis','--mf496-primary','--mf496-secondary','--mf496-tertiary',
+  '--mf496-gradient-opacity','--mf496-light-opacity','--mf496-depth-opacity',
+  '--mf496-material-opacity','--mf496-texture-opacity','--mf496-organic-opacity',
+  '--mf496-particles-opacity'])
   root.style.removeProperty(k);
  MF496_STATS.lastKey='';
  MF496_STATS.last=null;
@@ -141,6 +144,13 @@ function mf496Render(palette){
  root.style.setProperty('--mf496-glow',plan.glow.toFixed(3));
  root.style.setProperty('--mf496-density',plan.density.toFixed(3));
  root.style.setProperty('--mf496-axis',plan.axis+'deg');
+ const opacities={gradient:.25+plan.power*.45,light:.2+plan.glow*.7,
+  depth:.18+plan.power*.4,material:.1+plan.glow*.3,
+  texture:.04+plan.density*.12,organic:.18+plan.density*.35,
+  particles:.09+plan.glow*.35};
+ Object.entries(opacities).forEach(([name,value])=>
+  root.style.setProperty('--mf496-'+name+'-opacity',value.toFixed(3)));
+
  // Reuse the existing transition switch. No unapproved animation mode.
  root.dataset.mf484Transitions=plan.transitions?'on':'off';
  MF496_STATS.renders++;
