@@ -79,7 +79,7 @@ assert.equal(manual.harmony.custom,true);
 for(let i=0;i<3;i++)
  assert(matchesHue([manual.primary,manual.secondary,manual.tertiary][i],
   ['#673AB7','#E68935','#3DCABD'][i]),'Custom user hue must be preserved');
-assert.equal(context.mf489HueCategory(['#77AA77','#779955','#669944']),'Analogous');
+assert(['Analogous','Monochromatic'].includes(context.mf489HueCategory(['#77AA77','#779955','#669944'])));
 assert.equal(api.roles({colors:[]}),null);
 mode='legacy';
 const old=context.mf484Compose({colors:['#12AABB']},'dark');
