@@ -45,16 +45,12 @@ function mf504Bounds(kind,index){
  }
  if(kind==='quick-entry-amount'){
   const item=(S.library||[]).find(x=>String(x.id)===String(S.entryDraft?.libraryId||''));
-  return {min:0,max:mf504QuickMax(item)};
+  return {min:1,max:Math.max(1,mf504QuickMax(item))};
  }
  if(kind==='quick-amount'){
   return {min:0,max:mf504QuickMax(v369ItemTitle(S.logDraft?.entries?.[index]))};
  }
  return {min:0,max:MF504_STEP_LIMIT};
-}
-function mf504Label(kind){
- return kind==='quick-entry-progress'||kind==='quick-progress'||kind==='advanced'&&v394Method(v394Entry(0))==='last'
-  ?'last progress':'amount consumed';
 }
 function mf504WrapInput(input,kind,index,labelText){
  if(!input||input.dataset.mf504Enhanced)return;
