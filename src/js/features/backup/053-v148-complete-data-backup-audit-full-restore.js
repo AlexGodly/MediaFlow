@@ -314,9 +314,10 @@ App.importJSON=function(file){
       v148FinalizeImportedRuntime();
 
       updateDataProgress(84,'Saving restored complete state to protected cloud storage…');
-      await saveState();
+      const saved=await saveState();
       await saveQueue;
-      if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
+      if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
+      await mf507VerifyImportedCloud('Full Data Backup',AUTH_USER?.id);
 
       render();
 
