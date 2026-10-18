@@ -35,7 +35,7 @@ body.mf421-bottom .mf421-dock-menu{top:auto;bottom:calc(100% + 12px)}
 .mf421-style-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);color:var(--text);padding:12px 6px;min-height:72px;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
 .mf421-style-tab.active{background:color-mix(in srgb,var(--flow) 13%,var(--panel));border-color:var(--flow);box-shadow:inset 0 0 0 1px var(--flow)}.mf421-style-symbol{font-size:25px;line-height:1}
 @media(max-width:560px){.mf421-style-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:1081px) and (max-width:1050px){.mf421-dock-brand .mf421-dock-name{display:none}.mf421-dock-link{padding:7px 8px}.mf421-dock{gap:5px}}
+@media(min-width:1081px) and (max-width:1280px){.mf421-dock-brand .mf421-dock-name{display:none}.mf421-dock-link{padding:7px 8px}.mf421-dock{gap:5px}}
 @media(max-width:1080px){.mf421-dock{display:none!important}}
 /* Logging Show: prevent duplicated native arrows, stray pseudo-icon, and glyph collision. */
 .log-form .mf383-logging-body .v224-log-tools>.mf406-membership{position:relative!important;isolation:isolate}
