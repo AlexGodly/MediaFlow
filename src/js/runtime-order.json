@@ -226,5 +226,6 @@
   "components/369-v482-readable-class-assignments.js",
   "components/370-v483-recovery-category-scroll-continuity.js",
   "components/371-v503-recovery-cover-contrast.js",
-  "components/372-v504-logging-quantity-steppers.js"
+  "components/372-v504-logging-quantity-steppers.js",
+  "components/373-v507-persistence-portability-pwa-audit.js"
 ]
