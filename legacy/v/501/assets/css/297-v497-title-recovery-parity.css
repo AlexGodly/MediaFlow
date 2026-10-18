@@ -1,0 +1,52 @@
+/* v497 — matching recovery actions in Title Details and Add/Edit Title.
+ * Explicit word gaps correct fonts that visually swallow ordinary spaces.
+ */
+.v181-detail-actions .mf497-recovery-actions,
+.mf449-editor-recovery-toolbar .mf497-recovery-actions{
+ display:inline-flex;align-items:center;align-content:center;flex-wrap:wrap;
+ column-gap:8px;row-gap:8px;min-width:0;max-width:100%;
+}
+.v181-detail-actions .mf497-recovery-actions{
+ flex:1 1 100%;margin:2px 0 9px;
+}
+.v181-detail-actions .mf497-recovery-actions .btn,
+.mf449-editor-recovery-toolbar .mf497-recovery-actions .btn{
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ min-height:38px;min-width:0;max-width:100%;
+ padding:8px 12px;box-sizing:border-box;
+ border:1px solid var(--border-soft,var(--border));
+ border-radius:10px;background:var(--panel-raised,var(--panel));
+ color:var(--text);font-size:11px;line-height:1.35;font-weight:750;
+ white-space:normal;text-align:center;letter-spacing:normal;word-spacing:normal;
+}
+.v181-detail-actions .mf497-recovery-actions .btn:hover,
+.mf449-editor-recovery-toolbar .mf497-recovery-actions .btn:hover{
+ border-color:var(--flow);color:var(--flow);
+ background:color-mix(in srgb,var(--panel) 89%,var(--flow) 11%);
+}
+.mf497-recovery-actions .btn svg,.mf449-editor-recovery-toolbar .mf497-action-label~svg{
+ flex:0 0 auto;
+}
+.mf497-action-label{
+ display:inline-flex;align-items:baseline;justify-content:center;flex-wrap:wrap;
+ column-gap:5px;row-gap:0;white-space:normal;
+}
+.mf497-action-label>span{display:inline-block;white-space:nowrap;}
+.mf449-editor-draft-actions .mf497-action-label{gap:5px;}
+.mf497-recovery-actions button:focus-visible{
+ outline:2px solid var(--flow);outline-offset:2px;
+}
+@media(max-width:720px){
+ .v181-detail-actions .mf497-recovery-actions,
+ .mf449-editor-recovery-toolbar .mf497-recovery-actions{width:100%;}
+ .v181-detail-actions .mf497-recovery-actions .btn,
+ .mf449-editor-recovery-toolbar .mf497-recovery-actions .btn{
+  flex:1 1 auto;min-height:40px;font-size:11px;padding:8px 10px;
+ }
+}
+@media(max-width:380px){
+ .v181-detail-actions .mf497-recovery-actions .btn,
+ .mf449-editor-recovery-toolbar .mf497-recovery-actions .btn{
+  flex:1 1 100%;justify-content:flex-start;
+ }
+}
