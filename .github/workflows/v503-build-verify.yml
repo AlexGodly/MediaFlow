@@ -62,7 +62,7 @@ jobs:
               shutil.copy2(src,target)
           print('v503 full archive staged')
           PY
-          git add -- legacy/v/503
+          git add --sparse -- legacy/v/503
           test "$(cat legacy/v/503/VERSION)" = 503
           cmp assets/js/mediaflow-v503.bundle.js legacy/v/503/assets/js/mediaflow-v503.bundle.js
           cmp sw.js legacy/v/503/sw.js
