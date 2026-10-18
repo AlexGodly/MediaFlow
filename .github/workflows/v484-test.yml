@@ -37,7 +37,7 @@ jobs:
           node --check assets/js/mediaflow-v484.bundle.js
           node --check src/js/core/rendering/035-render-loop-init.js
           node scripts/test-v484-visual-contract.cjs
-          node scripts/test-v483-recovery-scroll.cjs
+          node scripts/test-v484-recovery-compat.cjs
           python scripts/check.py
           python - <<'PY'
           import json
@@ -55,7 +55,7 @@ jobs:
       - name: Additional visual and legacy compatibility contract
         run: |
           node scripts/test-v484-visual-contract.cjs
-          node scripts/test-v483-recovery-scroll.cjs
+          node scripts/test-v484-recovery-compat.cjs
       - name: Archive verified complete v484 project
         if: github.event_name == 'push'
         shell: bash
