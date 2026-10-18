@@ -113,6 +113,13 @@
  outline-offset:3px!important;
 }
 @media(max-width:440px){
+ /* v500's fixed mobile sizes ignored Settings sliders. Bind the cover
+  * dimension itself to the same setting without overflowing narrow phones. */
+ .log-form{
+  --mf500-advanced-poster:clamp(76px,max(27vw,min(var(--v370-cover-size,74px),34vw)),min(35vw,138px));
+  --mf500-quick-poster:clamp(66px,max(22vw,min(var(--v240-logged-cover-width,48px),29vw)),min(30vw,112px));
+  --mf500-recommended-poster:clamp(74px,max(24vw,calc(100px * var(--mf419-log-rec-scale,1))),min(34vw,124px));
+ }
  .log-form .mf501-category-fallback > .mf501-category-art{
   width:74cqw!important;
   max-width:84%!important;
