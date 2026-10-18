@@ -1,0 +1,68 @@
+name: Publish MediaFlow v502 Rollback to v483
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify deployed v483 is identical to original archive
+        id: match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "483" ] || ! git cat-file -e HEAD:legacy/v/502/VERSION; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          test "$(git show HEAD:legacy/v/502/VERSION | tr -d '\r\n')" = 483
+          for entry in VERSION version.json index.html sw.js assets src supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/502/$entry")"
+          done
+          test "$(git rev-parse 'HEAD:legacy/v/502')" = "$(git rev-parse 'HEAD:legacy/v/483')"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - name: Package untouched archived v483 rollback and checksum
+        if: steps.match.outputs.release == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v502_Rollback_to_v483.zip HEAD:legacy/v/502
+          sha256sum MediaFlow_v502_Rollback_to_v483.zip > MediaFlow_v502_Rollback_to_v483.sha256
+          test -s MediaFlow_v502_Rollback_to_v483.zip
+      - name: Publish rollback release with numeric tag 502
+        if: steps.match.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 502 >/dev/null 2>&1; then
+            echo "Rollback release 502 already exists; no overwrite."
+            exit 0
+          fi
+          cat > rollback-notes.md <<'NOTES'
+          # MediaFlow rollback to v483
+
+          This numeric GitHub release **502** records the rollback of the deployed MediaFlow personal edition from v501 to the **exact archived v483 application**. The app still identifies itself as **v483**, not v502. No v484–v501 features, styles, bundles or later theme engines are active.
+
+          The source archive is byte-for-byte the previously archived v483 snapshot at `legacy/v/483`; it is also preserved at `legacy/v/502`. Previous numeric releases, later legacy archives, and Git history are retained.
+
+          This rollback changes deployed application code only. It does **not** erase or reset Supabase Library, Logging, History, Collections, or Personal Order data. Settings written by later versions may not be understood by v483; export a backup if you plan to use both versions.
+          NOTES
+          gh release create 502 MediaFlow_v502_Rollback_to_v483.zip MediaFlow_v502_Rollback_to_v483.sha256 \
+            --target "$RELEASE_SHA" --title "v502 Rollback to v483" --notes-file rollback-notes.md
