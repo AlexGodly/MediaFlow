@@ -1,0 +1,74 @@
+name: Publish MediaFlow v503 Stable
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify v503 deployed source equals its immutable full archive
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "503" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/503/$entry")"
+          done
+          test "$(git show HEAD:legacy/v/503/VERSION | tr -d '\r\n')" = 503
+          git cat-file -e HEAD:legacy/v/503/assets/js/mediaflow-v503.bundle.js
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+      - name: Package complete v503 snapshot
+        if: steps.verify.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v503_Stable.zip HEAD:legacy/v/503
+          sha256sum MediaFlow_v503_Stable.zip > MediaFlow_v503_Stable.sha256
+          test -s MediaFlow_v503_Stable.zip
+      - name: Publish release 503 with changelog
+        if: steps.verify.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 503 >/dev/null 2>&1; then
+            echo "Release tag 503 already exists; not overwriting."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## MediaFlow v503 Stable — Recovery & Logging Parity
+
+          Built on the restored v483 baseline; historical versions remain archived.
+
+          - **Title Details:** replace redundant Fix Cover / Fix Metadata links with the theme-native **Cover Recovery**, **Metadata Recovery**, and **Recover Both** shortcuts, reusing their existing handlers.
+          - **Labels:** consistently display **Metadata Recovery** (with a space) inside Add/Edit Title and Title Details.
+          - **Logging Library:** selected-title text adapts to the actual selected row background, across theme colors and all five picker modes.
+          - **Advanced Logging:** title covers now reuse Library's category-aware cover source and icon fallback. No generic Missing cover caption; built-in/emoji/custom category icons scale with the configured cover width.
+          - **Recommended Title in Logging:** the same Library cover fallback and click-through Title Details interaction; broken cover URLs fall back to the category icon.
+          - **PWA:** regenerated v503 bundle, service worker and cache manifest; responsive styling and automated source/PWA checks.
+          - **Data safety:** no database, Supabase schema or user-library migration.
+
+          Includes complete version source snapshot and SHA-256 checksum.
+          NOTES
+          gh release create 503 MediaFlow_v503_Stable.zip MediaFlow_v503_Stable.sha256 \
+            --target "$RELEASE_SHA" --title "v503 Stable" --notes-file release-notes.md

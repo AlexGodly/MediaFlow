@@ -1,0 +1,49 @@
+/* MediaFlow v257 — static dashboard tool icons, Settings rail, mobile PWA, update backup */
+
+/* Stopwatch + Runtime Calculator header identity icons never rotate. */
+.v256-accordion-toggle .v225-btn-icon,
+.v256-accordion-card.is-collapsed .v256-accordion-toggle .v225-btn-icon{
+  transform:none!important;
+  transition:none!important;
+}
+
+/* Horizontal Settings navigation never exposes a visual scrollbar. */
+.v221-settings-nav.v257-settings-nav-horizontal,
+html[data-v238-layout="mobile"] .v221-settings-nav,
+html[data-v238-layout="tablet"] .v221-settings-nav{
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x pan-y;
+}
+.v221-settings-nav.v257-settings-nav-horizontal::-webkit-scrollbar,
+html[data-v238-layout="mobile"] .v221-settings-nav::-webkit-scrollbar,
+html[data-v238-layout="tablet"] .v221-settings-nav::-webkit-scrollbar{
+  display:none!important;width:0!important;height:0!important;
+}
+.v221-settings-nav.v257-settings-nav-horizontal{cursor:grab!important;user-select:none}
+.v221-settings-nav.v257-settings-nav-dragging{cursor:grabbing!important;scroll-snap-type:none!important}
+.v221-settings-nav.v257-settings-nav-dragging .v221-settings-nav-item{pointer-events:none}
+.v221-settings-nav-item.v231-active{scroll-margin-inline:14px}
+
+/* PWA platform guidance remains compact inside the v247-style card. */
+.v257-pwa-platform-hint{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 10px;margin-top:10px;border:1px solid var(--border-soft);border-radius:10px;background:color-mix(in srgb,var(--panel-raised) 78%,transparent);font-size:10px}
+.v257-pwa-platform-hint b{color:var(--text)}
+.v257-pwa-platform-hint span{color:var(--text-mute)}
+.v257-pwa-help-note{margin-top:10px;padding:10px;border-radius:10px;border:1px solid var(--border-soft);background:var(--panel-raised);font-size:10.5px;color:var(--text-dim);line-height:1.5}
+
+/* Optional pre-update Full Backup switch, shared by About + APP UPDATES. */
+.v257-update-backup-option{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 11px;border:1px solid var(--border-soft);border-radius:11px;background:color-mix(in srgb,var(--panel-raised) 78%,transparent);cursor:pointer}
+.v257-update-backup-option>span{display:grid;gap:2px;min-width:0}
+.v257-update-backup-option b{font-size:11px;color:var(--text)}
+.v257-update-backup-option small{font-size:9.5px;color:var(--text-mute);line-height:1.4}
+.v257-update-backup-option input{width:18px;height:18px;accent-color:var(--flow);flex:0 0 auto;cursor:pointer}
+.v250-managed-update-panel>.v257-update-backup-option{margin-top:10px}
+
+@media (max-width:700px){
+  .v257-update-backup-option{align-items:flex-start}
+  .v257-pwa-platform-hint{display:grid;grid-template-columns:1fr}
+}
+@media (max-width:320px){
+  .v257-update-backup-option{padding:9px}
+}
