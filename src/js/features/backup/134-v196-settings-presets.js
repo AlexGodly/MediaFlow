@@ -152,9 +152,10 @@ App.importSettingsPreset=async function(file){
     try{restartBackupTimer();}catch(_){ }
 
     updateDataProgress(72,'Saving imported settings to your MediaFlow account…');
-    await saveState();
+    const saved=await saveState();
     await saveQueue;
-    if(lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed. Imported settings are still in memory; use Sync Now after your cloud connection recovers.');
+    if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed. Keep the Settings Preset file and retry Sync Now.');
+    await mf507VerifyImportedCloud('Settings Preset',AUTH_USER?.id);
     render();
     finishDataProgress(true,'Settings Preset imported','Settings and category configuration were applied. Library, History, XP and profile data were left untouched.');
   }catch(e){
