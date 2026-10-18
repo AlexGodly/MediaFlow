@@ -27,7 +27,7 @@ function group(){
   button("App.mf447Open('both')",'Recover Both')];
  const classes=new Set();
  return {buttons,attrs:{},classList:{add:x=>classes.add(x)},
-  setAttribute(k,v){this.attrs[k]=v;},
+  setAttribute(k,v){this.attrs[k]=v;},remove(){this.removed=true;},
   querySelectorAll:s=>s==='button'?buttons:[],
   get classes(){return classes;}};
 }
