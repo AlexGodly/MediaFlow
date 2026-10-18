@@ -4,7 +4,7 @@
  * Legacy is read-only; Custom manual never consumes Library cover data.
  */
 const MF494_VERSION=494;
-const MF494_STATE={key:'',candidates:null,previews:0,applies:0,blocked:0};
+const MF494_STATE={key:'',candidates:null,scene:'dashboard',previews:0,applies:0,blocked:0};
 const MF494_TUNING=['saturation','accent','depth','tint'];
 function mf494Source(){
  const prefs=mf484Prefs(),mode=prefs.mode;
@@ -14,7 +14,7 @@ function mf494Source(){
   const colors=(profile.colors||[]).slice(0,3);
   if(colors.length!==3||!colors.every(mf489HexValid))return null;
   return {mode,manual:true,profile,appearance:profile.appearance,
-   key:'manual|'+profile.id+'|'+profile.appearance+'|'+colors.join(','),
+   key:'manual|'+profile.id+'|'+profile.appearance+'|'+(profile.variation||'')+'|'+colors.join(','),
    data:{colors,naturalMode:profile.appearance},variants:['automatic']};
  }
  const state=window.MediaFlowV493?.status();
@@ -28,7 +28,7 @@ function mf494Source(){
  const appearance=mode==='custom'?profile.appearance:
   S.v146DynamicThemeState?.palette?.mode||sample.naturalMode||'dark';
  return {mode,manual:false,profile,appearance,data:sample,
-  key:state.scope+'|'+mf487Key(expected)+'|'+colors.join(','),
+  key:state.scope+'|'+mf487Key(expected)+'|'+appearance+'|'+(profile?.variation||'')+'|'+colors.join(','),
   scope:state.scope,saved:mf493Settings()[state.scope]||null,
   variants:state.variants.map(x=>x.key),activeVariant:state.variant||'automatic'};
 }
@@ -84,17 +84,24 @@ function mf494ApplySlots(candidate,source){
  for(let i=0;i<3;i++)if(!App.mf493Slot(i,candidate.slots[i]))return false;
  return true;
 }
+function mf494Color(value,fallback){
+ const s=String(value||'').trim();
+ if(mf489HexValid(s))return s.toUpperCase();
+ const short=/^#([0-9a-f]{3})$/i.exec(s);
+ if(short)return '#'+short[1].split('').map(c=>c+c).join('').toUpperCase();
+ const rgb=/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i.exec(s);
+ if(rgb)return mf487Hex(+rgb[1],+rgb[2],+rgb[3]);
+ return fallback;
+}
 function mf494Current(){
  const root=document.documentElement;
  const css=typeof getComputedStyle==='function'?getComputedStyle(root):null;
- const read=(variable,fallback)=>{
-  const v=css?.getPropertyValue(variable)?.trim();
-  return mf489HexValid(v)?v:fallback;
- };
+ const read=(variable,fallback)=>mf494Color(css?.getPropertyValue(variable),fallback);
  const bg=read('--bg','#10121B'),panel=read('--panel','#1A1D2C'),
   raised=read('--panel-raised','#252B3A'),flow=read('--flow','#9165E8');
  return {bg,panel,raised,flow,primary:flow,
   secondary:read('--flow-dim','#5A9FA8'),
+  tertiary:read('--text-mute','#A7A5B3'),
   border:read('--border','#485166'),
   text:read('--text','#F7F7FC'),
   textDim:read('--text-dim','#CFD4DF'),
@@ -122,6 +129,12 @@ function mf494Tune(slot,key,value){
  const card=host?.querySelector('[data-mf494-preview="'+i+'"]');
  if(card)card.innerHTML=mf494Scene(mf494Compose(source,MF494_STATE.candidates[i]),'Candidate '+(i?'B':'A'));
  return true;
+}
+function mf494SetScene(scene){
+ if(!['dashboard','library','details'].includes(scene)||!mf494Ready())return false;
+ MF494_STATE.scene=scene;
+ MF494_STATE.previews++;
+ mf494Render();return true;
 }
 function mf494Swap(){
  const source=mf494Ready();if(!source)return false;
@@ -218,7 +231,9 @@ function mf494Render(){
  host.innerHTML='<div class="mf494-lab-tools"><span>'+
   (source.manual?'Custom manual palette':'Pixel-verified '+(source.mode==='custom'?'Custom image':'Advanced cover'))+
   ' · compare without changing the active theme</span>'+
-  '<div><button type="button" class="btn btn-ghost" onclick="App.mf494Swap()">Swap A / B</button>'+
+  '<div><label class="mf494-scene-choice">Compare layout <select aria-label="Preview component layout" onchange="App.mf494SetScene(this.value)">'+
+  ['dashboard','library','details'].map(view=>'<option value="'+view+'"'+(view===MF494_STATE.scene?' selected':'')+'>'+view[0].toUpperCase()+view.slice(1)+'</option>').join('')+'</select></label>'+
+  '<button type="button" class="btn btn-ghost" onclick="App.mf494Swap()">Swap A / B</button>'+
   '<button type="button" class="btn btn-ghost" onclick="App.mf494Reset()">Reset drafts</button></div></div>'+
   '<div class="mf494-comparison-grid"><article class="mf494-comparison-card mf494-live">'+
   '<div class="mf494-card-head"><strong>Current live theme</strong><small>Read-only snapshot</small></div>'+
@@ -230,7 +245,8 @@ function mf494Render(){
 function mf494Status(){
  const source=mf494Ready();
  return {version:494,available:!!source,mode:mf484Prefs().mode,
-  manual:!!source?.manual,applies:MF494_STATE.applies,blocked:MF494_STATE.blocked,
+  manual:!!source?.manual,scene:MF494_STATE.scene,previews:MF494_STATE.previews,
+  applies:MF494_STATE.applies,blocked:MF494_STATE.blocked,
   candidates:source?MF494_STATE.candidates.map(x=>({variant:x.variant,values:{...x.values}})):[]};
 }
 function mf494Mount(){
@@ -249,7 +265,7 @@ function mf494Mount(){
  });
  mf494Render();
 }
-Object.assign(App,{mf494Choose,mf494Tune,mf494Swap,mf494Reset,mf494Apply});
+Object.assign(App,{mf494Choose,mf494Tune,mf494SetScene,mf494Swap,mf494Reset,mf494Apply});
 MediaFlowRuntime.registerPageEnhancer('settings',mf494Mount);
 window.MediaFlowV494=Object.freeze({version:494,status:mf494Status,
  compose:mf494Compose,source:mf494Source});
