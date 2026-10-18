@@ -1,0 +1,68 @@
+name: MediaFlow v467 Title Ratings & Brand Logos Quality Gate
+on:
+  push:
+    branches: [feature/v467-title-external-ratings-refresh-logos]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v467-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v467 with authentic logos; verify ratings safeguards
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "467"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v467.bundle.js
+          node --check src/js/components/351-v467-brand-logos-a.js
+          node --check src/js/components/352-v467-brand-logos-b.js
+          node --check src/js/components/353-v467-rating-refresh-brand-marks.js
+          node --check scripts/test-v467-ratings-logos.cjs
+          node --check scripts/test-v467-browser.cjs
+          node scripts/test-v467-ratings-logos.cjs
+          python scripts/check.py
+      - name: Chromium desktop and 360px mobile, past recovery/rating regressions
+        run: node scripts/test-v467-browser.cjs
+      - name: Commit v467 verified bundle + complete source archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/467
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/467/
+          test "$(cat legacy/v/467/VERSION)" = 467
+          test -s legacy/v/467/assets/js/mediaflow-v467.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v467.bundle.js
+          git add --sparse -f legacy/v/467
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v467): verified site and complete modular source archive [skip ci]'
+            git push origin HEAD:feature/v467-title-external-ratings-refresh-logos
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v467-ratings-logo-browser
+          path: |
+            artifacts/v467-browser-smoke/
+            version.json
