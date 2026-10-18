@@ -163,9 +163,17 @@ async function v281ImportCollections(file){
     S.settings.v274Collections=Object.assign({},S.settings.v274Collections||{},v274Clone(parsed.collectionSettings,{}));
     v274EnsureSettings(S.settings);v281RestoreCollectionUiState();
   }
-  await saveState();V274_UI.activeId='';render();
-  if(lastSaveFailed||V115_STARTUP_GUARD)showToast('Collections applied locally, but cloud save is not confirmed. Retry Sync Now when connected.');
-  else showToast(`${acceptedIds.size.toLocaleString()} collections imported · ${removed.toLocaleString()} older collections removed${incoming.length>acceptedIds.size?` · ${(incoming.length-acceptedIds.size).toLocaleString()} older copies skipped`:''}`);
+  const saved=await saveState();V274_UI.activeId='';render();
+  let cloudVerified=false;
+  try{
+    if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save blocked or failed');
+    await mf507VerifyImportedCloud('Collections',AUTH_USER?.id);
+    cloudVerified=true;
+  }catch(error){
+    console.warn('MediaFlow v507: Collections cloud verification failed',error);
+    showToast('Collections updated locally. Keep your export and retry Sync Now to verify cloud storage.');
+  }
+  if(cloudVerified)showToast(`${acceptedIds.size.toLocaleString()} collections imported · ${removed.toLocaleString()} older collections removed${incoming.length>acceptedIds.size?` · ${(incoming.length-acceptedIds.size).toLocaleString()} older copies skipped`:''}`);
 }
 
 /* ---------- Card cover-size responsiveness ------------------------- */
