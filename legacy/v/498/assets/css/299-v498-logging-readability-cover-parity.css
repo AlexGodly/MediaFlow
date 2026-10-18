@@ -1,0 +1,127 @@
+/* MediaFlow v498 — Logging cover parity and selected-row contrast.
+ * Scoped to the Logging workspace. No Library/History or theme-global overrides.
+ */
+.log-form .mf379-picker .log-suggestion.mf379-picked,
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked){
+ --mf498-selection-bg:color-mix(in srgb,var(--panel-raised,var(--panel)) 91%,var(--flow) 9%);
+ background:var(--mf498-selection-bg)!important;
+ background-color:var(--mf498-selection-bg)!important;
+ border-color:color-mix(in srgb,var(--flow) 60%,var(--border-soft))!important;
+ color:var(--text)!important;
+ outline:2px solid var(--flow)!important;
+ outline-offset:-2px!important;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked :is(.v86-log-result,b,strong,span),
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked) :is(.v86-log-result,b,strong,span){
+ color:var(--text)!important;
+ opacity:1!important;
+ text-shadow:none!important;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked .v86-log-result small,
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked) .v86-log-result small{
+ color:var(--text-dim,var(--text))!important;
+ opacity:1!important;
+ text-shadow:none!important;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked .mf378-add-btn,
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked) .mf378-add-btn{
+ color:var(--text)!important;
+ background:var(--panel)!important;
+ border:1px solid var(--border-soft)!important;
+ opacity:1!important;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked .mf378-add-btn:not(:disabled):hover,
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked) .mf378-add-btn:not(:disabled):hover{
+ color:var(--flow)!important;
+ border-color:var(--flow)!important;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked svg,
+.log-form .mf379-picker .log-suggestion:has(.mf379-integrated-check input:checked) svg{
+ opacity:1;
+}
+.log-form .mf379-picker .log-suggestion.mf379-picked :focus-visible{
+ outline:2px solid var(--flow);outline-offset:2px;
+}
+/* All Logging poster modes use this clickable cover shell. */
+.log-form button.mf498-logging-cover{
+ appearance:none;-webkit-appearance:none;
+ cursor:pointer;display:grid;place-items:center;
+ flex-shrink:0;min-width:0;overflow:hidden;position:relative;
+ padding:0;margin:0;text-align:center;line-height:normal;
+ color:var(--flow);background:var(--panel-raised);
+ border:1px solid var(--border-soft);
+ border-radius:10px;box-sizing:border-box;
+}
+.log-form .mf498-logging-cover:focus-visible{
+ outline:3px solid var(--flow)!important;outline-offset:3px;
+}
+.log-form .mf498-logging-cover .mf498-cover-image{
+ width:100%;height:100%;min-height:0;min-width:0;
+ object-fit:cover;display:block;position:absolute;inset:0;
+ border-radius:inherit;
+}
+.log-form .mf498-logging-cover :is(.mf498-cover-icon,.mf498-cover-image)[hidden]{
+ display:none!important;
+}
+.log-form .mf498-logging-cover .mf498-cover-icon{
+ display:grid;place-items:center;
+ width:100%;height:100%;min-width:0;min-height:0;
+ background:color-mix(in srgb,var(--flow) 8%,var(--panel-raised));
+ color:var(--flow);overflow:hidden;container-type:inline-size;
+ padding:0!important;border-radius:inherit;
+}
+.log-form .mf498-cover-icon :is(.v144-cat-icon-emoji,svg){
+ font-size:clamp(13px,34cqw,110px)!important;
+ max-width:76%;max-height:76%;width:auto;height:auto;line-height:1!important;
+ margin:auto;flex:0 1 auto;
+}
+.log-form .mf498-cover-icon .v144-cat-icon-img{
+ width:43%!important;max-width:76%!important;height:auto!important;
+ max-height:76%!important;object-fit:contain;margin:auto;
+}
+/* v370 advanced cards are usually substantially taller than quick cards. */
+.log-form .v370-title-cover.mf498-logging-cover{
+ width:var(--v370-cover-size,74px);height:auto;aspect-ratio:2/3;
+ align-self:stretch;min-height:88px;max-width:min(32vw,300px);
+}
+/* Quick Logging uses the dimensions of the original v239 poster. */
+.log-form .v239-logged-cover.mf498-logging-cover{
+ width:clamp(36px,var(--v239-cover-width,68px),220px);
+ height:auto;min-height:62px;aspect-ratio:2/3;align-self:center;
+}
+.log-form .mf419-cover-art.mf498-logging-cover{
+ display:grid;aspect-ratio:2/3;
+ border:1px solid var(--border-soft);
+}
+.log-form .mf419-log-rec-cover.mf498-logging-cover{
+ aspect-ratio:3/4;
+}
+.log-form .mf498-logging-cover:hover:not(:disabled){
+ border-color:var(--flow);
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--flow) 25%,transparent);
+}
+/* v498's first opt-in ambient surface refinement: restrained pointer-based
+ * elevation, no content jump and no changes to Legacy/reduced motion. */
+@media (hover:hover) and (pointer:fine){
+ html:is([data-mf484-mode="advanced"],[data-mf484-mode="custom"])[data-mf497-motion="on"]
+  .log-form .mf498-logging-cover:hover{
+  transform:translateY(-1px);
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+ }
+}
+@media(max-width:600px){
+ .log-form .mf379-picker .log-suggestion.mf379-picked .v86-log-result{
+  min-width:0;overflow-wrap:anywhere;
+ }
+ .log-form .v370-title-cover.mf498-logging-cover{
+  min-height:66px;max-width:min(26vw,160px);
+ }
+ .log-form .v239-logged-cover.mf498-logging-cover{
+  min-height:54px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .log-form .mf498-logging-cover{
+  animation:none!important;transition:none!important;transform:none!important;
+ }
+}

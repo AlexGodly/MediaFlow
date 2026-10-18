@@ -1,0 +1,88 @@
+name: MediaFlow v496 Unified Living Themes Quality Gate
+on:
+  push:
+    branches: [feature/v496-unified-living-themes-renderer]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v496-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify latest PWA, data and XP contracts
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "496"
+          python scripts/build.py
+          node --check src/js/components/383-v496-unified-living-themes-renderer.js
+          node --check assets/js/mediaflow-v496.bundle.js
+          node --check src/js/core/rendering/035-render-loop-init.js
+          node scripts/test-v496-unified-renderer.cjs
+          node scripts/test-v496-artwork-reliability.cjs
+          node scripts/test-v496-preview-laboratory.cjs
+          node scripts/test-v496-cover-compat.cjs
+          node scripts/test-v496-expressiveness-compat.cjs
+          node scripts/test-v496-readability-compat.cjs
+          node scripts/test-v496-mood-compat.cjs
+          node scripts/test-v496-harmony-compat.cjs
+          node scripts/test-v496-composition-compat.cjs
+          node scripts/test-v496-artwork-compat.cjs
+          node scripts/test-v496-source-compat.cjs
+          node scripts/test-v496-ownership-compat.cjs
+          node scripts/test-v496-visual-compat.cjs
+          node scripts/test-v496-recovery-compat.cjs
+          python scripts/check.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=Path('.')
+          assert json.loads((r/'version.json').read_text())['appVersion']==496
+          assert 'mediaflow-v496.bundle.js' in (r/'index.html').read_text()
+          sw=(r/'sw.js').read_text()
+          assert 'const MEDIAFLOW_VERSION=496' in sw
+          assert 'mediaflow-pwa-v496-shell' in sw
+          assert 'mediaflow-v496.bundle.js' in sw
+          assert json.loads((r/'manifest.json').read_text())['scope']=='./'
+          print('v496 release/PWA coherence PASS')
+          PY
+      - name: Artwork pixel provenance, stale results, preview isolation and Legacy compatibility
+        run: |
+          node scripts/test-v496-ownership-compat.cjs
+          node scripts/test-v496-visual-compat.cjs
+          node scripts/test-v496-recovery-compat.cjs
+      - name: Archive verified complete v496 project
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/496
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/496/
+          test "$(cat legacy/v/496/VERSION)" = "496"
+          test -s legacy/v/496/assets/js/mediaflow-v496.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v496.bundle.js
+          git add --sparse -f legacy/v/496
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v496): verified PWA and complete source archive [skip ci]'
+            git push origin HEAD:feature/v496-unified-living-themes-renderer
+          fi

@@ -1,0 +1,66 @@
+name: MediaFlow v469 Mobile Background Process Dock Quality Gate
+on:
+  push:
+    branches: [feature/v469-mobile-background-processes-no-overlap]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v469-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v469 and verify responsive control collision logic
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "469"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v469.bundle.js
+          node --check src/js/components/356-v469-mobile-background-safe-dock.js
+          node --check scripts/test-v469-mobile-widget-geometry.cjs
+          node --check scripts/test-v469-browser.cjs
+          node scripts/test-v469-mobile-widget-geometry.cjs
+          python scripts/check.py
+      - name: Chromium desktop and mobile 320/360/390/720 + historical regressions
+        run: node scripts/test-v469-browser.cjs
+      - name: Archive complete verified v469 project and site bundle
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/469
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/469/
+          test "$(cat legacy/v/469/VERSION)" = 469
+          test -s legacy/v/469/assets/js/mediaflow-v469.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v469.bundle.js
+          git add --sparse -f legacy/v/469
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v469): verified responsive site and complete source archive [skip ci]'
+            git push origin HEAD:feature/v469-mobile-background-processes-no-overlap
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v469-mobile-widget-clearance
+          path: |
+            artifacts/v469-browser-smoke/
+            version.json
