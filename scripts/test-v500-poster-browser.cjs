@@ -11,8 +11,9 @@ const cp=require('node:child_process');
 const styles=[
  'assets/css/211-v398-mobile-tablet-responsive-repair.css',
  'assets/css/299-v498-logging-readability-cover-parity.css',
- 'assets/css/301-v500-added-logging-covers.css',
- 'assets/css/302-v500-ambient-motion-corrections.css'
+ 'assets/css/301-v499-added-logging-covers.css',
+ 'assets/css/302-v499-ambient-motion-corrections.css',
+ 'assets/css/303-v500-logging-poster-sizing.css'
 ].map(name=>fs.readFileSync(name,'utf8')).join('\n');
 assert.match(styles,/align-self:start!important/);
 assert.match(styles,/min-height:0!important/);
