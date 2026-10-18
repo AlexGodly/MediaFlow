@@ -12503,6 +12503,8 @@ App.exportJSON=function(){
 // FINAL full import used at runtime.
 App.importJSON=function(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing data.');return;}
 
   showDataProgress('Importing complete MediaFlow backup','Reading and validating backup file…',5);
 
@@ -12525,6 +12527,7 @@ App.importJSON=function(file){
         return;
       }
 
+      if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated)throw new Error('Your active account changed during import. No data was applied.');
       updateDataProgress(26,'Restoring complete account state…');
 
       // Existing wrapper chain restores all modern account fields:
@@ -12559,7 +12562,7 @@ App.importJSON=function(file){
       const saved=await saveState();
       await saveQueue;
       if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed after backup restore. Keep the original backup file and retry Sync Now.');
-      await mf507VerifyImportedCloud('Full Data Backup',AUTH_USER?.id);
+      await mf507VerifyImportedCloud('Full Data Backup',importAccountId);
 
       render();
 
@@ -12573,7 +12576,9 @@ App.importJSON=function(file){
       finishDataProgress(
         false,
         'Import failed',
-        lastSaveFailed?'The backup was read but the cloud save failed. Keep your backup file and retry Sync Now.':'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
+        /cloud|account|verif|sync/i.test(String(e?.message||''))
+          ?String(e?.message||'Cloud verification failed. Keep the backup and retry Sync Now.')
+          :lastSaveFailed?'The backup was read but the cloud save failed. Keep your backup file and retry Sync Now.':'Could not restore that MediaFlow JSON backup. The file may be invalid or corrupted.'
       );
     }
   };
@@ -34700,6 +34705,8 @@ App.exportSettingsPreset=function(){
 
 App.importSettingsPreset=async function(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing settings.');return;}
   showDataProgress('Importing Settings Preset','Reading settings-only preset…',8);
   try{
     const data=JSON.parse(await file.text());
@@ -34708,6 +34715,7 @@ App.importSettingsPreset=async function(file){
       finishDataProgress(false,'Preset rejected',validation.message);
       return;
     }
+    if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated)throw new Error('Active account changed. Settings were not applied.');
     updateDataProgress(30,'Applying MediaFlow settings…');
     S.settings=v196NormalizeImportedSettings(data.settings);
     v196MergePresetCategories(data.categories,data.categoryOrder||data.settings?.categoryOrder||[]);
@@ -34725,12 +34733,12 @@ App.importSettingsPreset=async function(file){
     const saved=await saveState();
     await saveQueue;
     if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed. Keep the Settings Preset file and retry Sync Now.');
-    await mf507VerifyImportedCloud('Settings Preset',AUTH_USER?.id);
+    await mf507VerifyImportedCloud('Settings Preset',importAccountId);
     render();
     finishDataProgress(true,'Settings Preset imported','Settings and category configuration were applied. Library, History, XP and profile data were left untouched.');
   }catch(e){
     console.error(e);
-    finishDataProgress(false,'Settings Preset import failed',lastSaveFailed?'Settings were applied locally, but the cloud save failed. Keep your preset file and retry Sync Now once connected.':'Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
+    finishDataProgress(false,'Settings Preset import failed',/cloud|account|verif|sync/i.test(String(e?.message||''))?String(e?.message||'Cloud verification failed. Keep your preset file.'):lastSaveFailed?'Settings were applied locally, but the cloud save failed. Keep your preset file and retry Sync Now once connected.':'Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
   }finally{
     try{const input=document.getElementById('v196-settings-preset-file');if(input)input.value='';}catch(_){ }
   }
@@ -43350,6 +43358,7 @@ v142OrderExportPayload=function(){
 const v250ImportOrderBase=v142ImportOrder;
 v142ImportOrder=async function(file){
   if(!file)return;
+  if(!AUTH_USER?.id||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Restore your cloud account before importing Personal Order.');return;}
   const before=v250Fingerprint(S.orderPlan||{});
   const accountId=String(AUTH_USER?.id||'');
   const result=await v250ImportOrderBase.apply(this,arguments);
@@ -50169,6 +50178,8 @@ function v281ExportCollections(){
 }
 async function v281ImportCollections(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing Collections.');return;}
   let parsed;
   try{parsed=JSON.parse(await file.text());}catch(_){showToast('Could not read that Collections file.');return;}
   const rows=Array.isArray(parsed)?parsed:Array.isArray(parsed?.collections)?parsed.collections:null;
@@ -50186,6 +50197,7 @@ async function v281ImportCollections(file){
     confirmLabel:'Import collections'
   });
   if(!ok)return;
+  if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Account changed during Collections import. No changes applied.');return;}
   const byId=new Map(v274EnsureCollections().map(c=>[String(c.id),c])),now=v274Now();
   const tomb=new Map((S.collectionTombstones||[]).filter(x=>x?.id).map(x=>[String(x.id),{id:String(x.id),deletedAt:v274Num(x.deletedAt,0)}]));
   const sourceById=new Map(rows.filter(x=>x?.id).map(x=>[String(x.id),x]));
@@ -50220,7 +50232,7 @@ async function v281ImportCollections(file){
   let cloudVerified=false;
   try{
     if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save blocked or failed');
-    await mf507VerifyImportedCloud('Collections',AUTH_USER?.id);
+    await mf507VerifyImportedCloud('Collections',importAccountId);
     cloudVerified=true;
   }catch(error){
     console.warn('MediaFlow v507: Collections cloud verification failed',error);

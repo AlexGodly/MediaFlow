@@ -130,6 +130,8 @@ App.exportSettingsPreset=function(){
 
 App.importSettingsPreset=async function(file){
   if(!file)return;
+  const importAccountId=String(AUTH_USER?.id||'');
+  if(!importAccountId||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Finish restoring your MediaFlow cloud account before importing settings.');return;}
   showDataProgress('Importing Settings Preset','Reading settings-only preset…',8);
   try{
     const data=JSON.parse(await file.text());
@@ -138,6 +140,7 @@ App.importSettingsPreset=async function(file){
       finishDataProgress(false,'Preset rejected',validation.message);
       return;
     }
+    if(importAccountId!==String(AUTH_USER?.id||'')||V115_STARTUP_GUARD||!V475_AUTH.hydrated)throw new Error('Active account changed. Settings were not applied.');
     updateDataProgress(30,'Applying MediaFlow settings…');
     S.settings=v196NormalizeImportedSettings(data.settings);
     v196MergePresetCategories(data.categories,data.categoryOrder||data.settings?.categoryOrder||[]);
@@ -155,12 +158,12 @@ App.importSettingsPreset=async function(file){
     const saved=await saveState();
     await saveQueue;
     if(saved===false||lastSaveFailed||V115_STARTUP_GUARD)throw new Error('Cloud save not confirmed. Keep the Settings Preset file and retry Sync Now.');
-    await mf507VerifyImportedCloud('Settings Preset',AUTH_USER?.id);
+    await mf507VerifyImportedCloud('Settings Preset',importAccountId);
     render();
     finishDataProgress(true,'Settings Preset imported','Settings and category configuration were applied. Library, History, XP and profile data were left untouched.');
   }catch(e){
     console.error(e);
-    finishDataProgress(false,'Settings Preset import failed',lastSaveFailed?'Settings were applied locally, but the cloud save failed. Keep your preset file and retry Sync Now once connected.':'Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
+    finishDataProgress(false,'Settings Preset import failed',/cloud|account|verif|sync/i.test(String(e?.message||''))?String(e?.message||'Cloud verification failed. Keep your preset file.'):lastSaveFailed?'Settings were applied locally, but the cloud save failed. Keep your preset file and retry Sync Now once connected.':'Could not read that preset. Make sure it is a valid MediaFlow Settings Preset JSON file.');
   }finally{
     try{const input=document.getElementById('v196-settings-preset-file');if(input)input.value='';}catch(_){ }
   }
