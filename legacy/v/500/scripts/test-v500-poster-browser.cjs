@@ -37,7 +37,7 @@ const html=path.join(dir,'index.html');
 const source=fs.readFileSync('tests/fixtures/v500-logging-poster-geometry.html','utf8');
 fs.writeFileSync(html,source.replace('/*INJECT_V500_STYLES*/',styles));
 try{
- for(const width of [340,600,1000]){
+ for(const width of [340,600,1000,1440]){
   const output=cp.execFileSync(browser,[
     '--headless','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
     '--disable-background-networking','--disable-extensions','--no-first-run',
