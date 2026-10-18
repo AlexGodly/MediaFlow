@@ -84,7 +84,10 @@ function mf497VisualApply(palette){
 const mf497VisualPreviousAtmosphere=mf484ApplyAtmosphere;
 mf484ApplyAtmosphere=function(palette,imageUrl){
  const result=mf497VisualPreviousAtmosphere.apply(this,arguments);
- if(mf484Prefs().mode==='legacy')return result;
+ if(mf484Prefs().mode==='legacy'){
+  if(document.documentElement.hasAttribute('data-mf497-material'))mf497VisualClear();
+  return result;
+ }
  try{mf497VisualApply(palette);}
  catch(error){console.warn('[MediaFlow v497] Preserved v496 renderer after visual direction failure',error);}
  return result;
