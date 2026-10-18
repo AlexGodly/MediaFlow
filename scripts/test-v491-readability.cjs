@@ -23,7 +23,7 @@ const root={
  dataset:{},
  style:{setProperty:(k,v)=>style.set(k,v),removeProperty:k=>style.delete(k),
    getPropertyValue:k=>style.get(k)||''},
- removeAttribute:k=>attrs.delete(k)
+ removeAttribute:k=>{attrs.delete(k);if(k==='data-mf491-readability')delete root.dataset.mf491Readability;}
 };
 const S={view:'settings',settings:{dynamicCoverTheme:true},
  v146DynamicThemeState:{source:'theme',palette:null}};
