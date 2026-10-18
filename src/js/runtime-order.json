@@ -239,5 +239,6 @@
   "components/382-v495-artwork-reliability-cache.js",
   "components/383-v496-unified-living-themes-renderer.js",
   "components/384-v497-title-recovery-parity.js",
-  "components/385-v497-living-visual-direction.js"
+  "components/385-v497-living-visual-direction.js",
+  "components/386-v498-logging-cover-parity.js"
 ]
