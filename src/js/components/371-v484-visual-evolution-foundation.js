@@ -236,7 +236,8 @@ v146ApplyFullPalette=function(palette,source){
 };
 function mf484CustomPalette(profile,colors,sampled=null){
  const source={colors:colors.slice(0,3),naturalMode:profile.appearance,
-  analysis:sampled?.analysis,atmosphereHints:sampled?.atmosphereHints};
+  analysis:sampled?.analysis,atmosphereHints:sampled?.atmosphereHints,
+  visualCoverUrl:sampled?.visualCoverUrl};
  const prefs=mf484Prefs();
  const p=mf484Compose(source,profile.appearance,prefs.expressiveness);
  if(!p)return null;
