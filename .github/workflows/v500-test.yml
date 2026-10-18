@@ -2,8 +2,6 @@ name: MediaFlow v500 Logging Poster Size & Clean Icon Quality Gate
 on:
   push:
     branches: [feature/v500-logging-cover-size-clean-icons]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
