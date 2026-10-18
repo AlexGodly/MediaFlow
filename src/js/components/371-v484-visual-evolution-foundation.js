@@ -234,8 +234,9 @@ v146ApplyFullPalette=function(palette,source){
    mf484ApplyAtmosphere(palette,source?.source==='custom'?source.url:'');
  return result;
 };
-function mf484CustomPalette(profile,colors){
- const source={colors:colors.slice(0,3),naturalMode:profile.appearance};
+function mf484CustomPalette(profile,colors,sampled=null){
+ const source={colors:colors.slice(0,3),naturalMode:profile.appearance,
+  analysis:sampled?.analysis,atmosphereHints:sampled?.atmosphereHints};
  const prefs=mf484Prefs();
  const p=mf484Compose(source,profile.appearance,prefs.expressiveness);
  if(!p)return null;
@@ -254,14 +255,15 @@ async function mf484ApplyCustom(){
  if(prefs.mode!=='custom')return;
  const profile=mf484ActiveProfile(prefs);
  let colors=profile.colors.slice();
+ let sampled=null;
  if(profile.source!=='manual'&&profile.imageUrl){
-  const sampled=await mf484Analyze(profile.imageUrl);
+  sampled=await mf484Analyze(profile.imageUrl);
   if(seq!==MF484_CUSTOM_SEQ||mf484Prefs().mode!=='custom')return;
   if(sampled){
    colors=profile.source==='image'?[...sampled.colors,profile.colors[3]]:[profile.colors[0],sampled.colors[0],sampled.colors[1],profile.colors[3]];
   }
  }
- const palette=mf484CustomPalette(profile,colors);
+ const palette=mf484CustomPalette(profile,colors,sampled);
  if(!palette)return;
  const root=document.documentElement;
  v146ApplyFullPalette(palette,{source:'custom',label:profile.name,url:''});
