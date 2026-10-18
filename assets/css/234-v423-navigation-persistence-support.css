@@ -7,7 +7,7 @@
 .mf423-dock-avatar{width:29px;height:29px;border-radius:50%;object-fit:cover;display:block;aspect-ratio:1/1;border:1px solid color-mix(in srgb,var(--flow) 27%,var(--border-soft))}
 .mf421-dock-account:has(.mf423-dock-avatar){padding:4px!important;min-height:39px;min-width:39px}
 /* Fix the v420 first-paint full-sidebar scrollbar before the v421 body classes arrive. */
-@media(min-width:861px){
+@media(min-width:1081px){
  body.v260-redesign .sidebar{scrollbar-width:none!important;scrollbar-gutter:auto!important}
  body.v260-redesign .sidebar::-webkit-scrollbar{width:0!important;display:none!important}
  body.mf421-sidebar .sidebar.mf421-sidebar,body.mf421-mini .sidebar.mf421-sidebar{overflow:visible!important}
