@@ -24,7 +24,8 @@ const palette={mode:'dark',primary:'#C45AA8',secondary:'#9AAADD',tertiary:'#DDEE
 const attrs={},vars={};
 const root={dataset:{},style:{
  setProperty(k,v){vars[k]=v;},removeProperty(k){delete vars[k]}},
- hasAttribute(k){return Object.hasOwn(attrs,k)},
+ hasAttribute(k){return Object.hasOwn(attrs,k)||
+  (k==='data-mf497-material'&&root.dataset.mf497Material!==undefined)},
  removeAttribute(k){delete attrs[k];delete root.dataset[k.replace(/^data-/,'').replace(/-([a-z])/g,(_,c)=>c.toUpperCase())];}};
 const ctx={console,document:{documentElement:root,getElementById:()=>null,
  querySelector:()=>null},window:{matchMedia:q=>({matches:q.includes('max-width')?small:reduced})},
