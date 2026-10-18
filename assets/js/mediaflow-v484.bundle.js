@@ -79242,7 +79242,27 @@ function mf484ApplyAtmosphere(palette,imageUrl){
  else root.style.removeProperty('--mf484-photo');
  let host=document.getElementById('mf484-atmosphere');
  if(!host){host=document.createElement('div');host.id='mf484-atmosphere';host.setAttribute('aria-hidden','true');document.body.insertBefore(host,document.body.firstChild);}
- const allowed=(k)=>enabled&&live.effects[k]&&(live.mode==='advanced'||['gradients','lighting','transitions'].includes(k))&&
+ // Intelligent effects are selective: artwork warmth, chroma, contrast
+ // and brightness influence which atmosphere families are appropriate.
+ const sample=[a,b,c].map(hex=>{
+  const rgb=mf484Rgb(hex),hsl=v145RgbToHsl(rgb.r,rgb.g,rgb.b);
+  return {l:hsl.l/100,s:hsl.s/100,h:hsl.h};
+ });
+ const vivid=sample.reduce((sum,x)=>sum+x.s,0)/sample.length;
+ const luminous=sample.reduce((sum,x)=>sum+x.l,0)/sample.length;
+ const contrast=Math.max(...sample.map(x=>x.l))-Math.min(...sample.map(x=>x.l));
+ const coverAware=live.source!=='custom';
+ const preferred=new Set(['gradients','lighting','transitions']);
+ if(!coverAware){Object.keys(live.effects).forEach(k=>preferred.add(k));}
+ else{
+  if(vivid>.31)preferred.add('materials');
+  if(vivid>.50&&contrast>.09)preferred.add('particles');
+  if(luminous<.57||contrast>.20)preferred.add('depth');
+  if(vivid<.46||luminous<.35)preferred.add('textures');
+  if(vivid>.22&&vivid<.76)preferred.add('organic');
+ }
+ const allowed=(k)=>enabled&&live.effects[k]&&preferred.has(k)&&
+  (live.mode==='advanced'||['gradients','lighting','transitions'].includes(k))&&
   (live.performance!=='optimized'||!['particles','organic','depth'].includes(k));
  host.innerHTML=['gradients','lighting','particles','depth','materials','textures','organic'].filter(allowed).map(k=>'<i class="mf484-fx mf484-fx-'+k+'"></i>').join('');
  root.dataset.mf484Transitions=allowed('transitions')?'on':'off';
@@ -79289,6 +79309,13 @@ async function mf484ApplyCustom(){
  root.dataset.mf484Mode='custom';
  mf484ApplyAtmosphere(palette,profile.imageUrl);
 }
+// Preserve Custom's cover independence even if an older theme/appearance
+// handler clears the dynamic accent while navigating or changing pages.
+const mf484LegacyClearDynamic=v145ClearDynamicAccent;
+v145ClearDynamicAccent=function(){
+ if(mf484Prefs().mode==='custom'){mf484ApplyCustom();return;}
+ return mf484LegacyClearDynamic.apply(this,arguments);
+};
 const mf484LegacyRefresh=v146RefreshDynamicTheme;
 v146RefreshDynamicTheme=async function(){
  if(mf484Prefs().mode==='custom'){await mf484ApplyCustom();return;}
