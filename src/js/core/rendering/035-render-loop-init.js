@@ -120,6 +120,7 @@ function v475HandleAuthEvent(event,session){
   V475_AUTH.lastEvent=String(event||'');
   if(event==='SIGNED_OUT'){
     if(V475_AUTH.logoutRequested){v506CompleteExplicitLogout();return;}
+    if(V475_AUTH.explicitLogout)return; // Ignore the delayed event from a completed user logout.
     // Supabase can emit SIGNED_OUT during refresh/restore. During initial
     // bootstrap it is not evidence that the user clicked Logout.
     if(V475_AUTH.restoring)return;
