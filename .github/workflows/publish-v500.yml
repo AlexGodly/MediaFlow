@@ -1,0 +1,55 @@
+name: Publish MediaFlow v500 Beta Archive
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify built and archived v500
+        id: match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "500" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git cat-file -e HEAD:legacy/v/500/VERSION
+          test "$(git show HEAD:legacy/v/500/VERSION | tr -d '\r\n')" = 500
+          git cat-file -e HEAD:legacy/v/500/assets/js/mediaflow-v500.bundle.js
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - name: Zip archived source and checksum
+        if: steps.match.outputs.release == 'true'
+        run: |
+          git archive --format=zip --output=MediaFlow_v500_Modular.zip HEAD:legacy/v/500
+          sha256sum MediaFlow_v500_Modular.zip > MediaFlow_v500_Modular.sha256
+          test -s MediaFlow_v500_Modular.zip
+      - name: Publish numeric release 500
+        if: steps.match.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view 500 >/dev/null 2>&1; then
+            echo "Release 500 already exists; no overwrite."
+            exit 0
+          fi
+          gh release create 500 MediaFlow_v500_Modular.zip MediaFlow_v500_Modular.sha256 \
+            --target "$GITHUB_SHA" --title "v500 Beta" \
+            --notes-file docs/CHANGELOG_v500.md
