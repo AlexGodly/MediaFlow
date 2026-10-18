@@ -172,6 +172,7 @@ function mf484Clear(){
  const root=document.documentElement;
  root.removeAttribute('data-mf484-mode');root.removeAttribute('data-mf484-living');
  root.removeAttribute('data-mf484-intensity');root.removeAttribute('data-mf484-motion');
+ root.removeAttribute('data-mf484-transitions');
  for(const key of ['--mf484-a','--mf484-b','--mf484-c','--mf484-glow','--mf484-photo'])root.style.removeProperty(key);
  const node=document.getElementById('mf484-atmosphere');if(node)node.remove();
 }
