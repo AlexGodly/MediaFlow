@@ -172,7 +172,10 @@ function mf493Slot(position,hex){
    !mf493Colors(entry.active.sample).some(x=>x.hex===color))return false;
  const draft=MF493_STATE.draft;
  const defaults=mf493Pick(entry.active.sample,draft.variant);
- const chosen=draft.slots?draft.slots.slice():defaults.slice();
+ const pool=mf493Colors(entry.active.sample);
+ const chosen=draft.slots?draft.slots.slice():defaults.map(x=>
+  pool.find(y=>y.hex===x)?.hex||pool.slice().sort((a,b)=>
+   mf489Separation(a.hex,x)-mf489Separation(b.hex,x))[0]?.hex||x);
  chosen[i]=color;
  draft.slots=chosen;draft.dirty=true;
  mf493Render();
