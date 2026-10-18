@@ -150,7 +150,8 @@ vm.createContext(context);vm.runInContext(source,context,{filename:'v485-theme-o
  const beforeStatic=counts.applies;
  context.v146ApplyFullPalette({...normal},{source:'recommended',label:'stale'});
  assert.equal(counts.applies,beforeStatic);
- // Legacy/off never installs a new atmosphere.
+ // Living Effects are optional even on Legacy. Explicit Off must clear them.
+ context.App.mf484SetOption('living.mode','off');
  context.mf484ApplyAtmosphere(normal,'');
  assert.ok(!hosts.has('mf484-atmosphere'));
  assert.equal(api.status().mode,'legacy');
