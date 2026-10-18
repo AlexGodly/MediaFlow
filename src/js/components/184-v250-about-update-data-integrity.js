@@ -347,6 +347,7 @@ v142OrderExportPayload=function(){
 const v250ImportOrderBase=v142ImportOrder;
 v142ImportOrder=async function(file){
   if(!file)return;
+  if(!AUTH_USER?.id||V115_STARTUP_GUARD||!V475_AUTH.hydrated){showToast('Restore your cloud account before importing Personal Order.');return;}
   const before=v250Fingerprint(S.orderPlan||{});
   const accountId=String(AUTH_USER?.id||'');
   const result=await v250ImportOrderBase.apply(this,arguments);
