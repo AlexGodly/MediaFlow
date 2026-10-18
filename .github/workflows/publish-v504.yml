@@ -56,9 +56,9 @@ jobs:
             exit 0
           fi
           cat > release-notes.md <<'NOTES'
-          ## MediaFlow v504 Stable — Recovery & Logging Parity
+          ## MediaFlow v504 Stable — Quick & Advanced Logging Steppers
 
-          Built on the restored v483 baseline; historical versions remain archived.
+          Built on v503 Stable (restored v483 foundation). Historical versions remain archived.
 
           - **Quick Logging — Amount Consumed:** adjustable draft quantity with + / - controls and direct numeric editing, including added-title rows and the initial title input.
           - **Quick Logging — Last Progress:** accessible + / - buttons beside the existing last watched/read inputs. Saved start and total bounds are respected.
