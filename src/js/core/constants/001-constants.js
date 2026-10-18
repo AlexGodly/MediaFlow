@@ -18,7 +18,28 @@ function renderAuthScreen(mode='login',message='',isError=false){
 function friendlyAuthError(err){return String(err?.message||err||'Authentication failed.').replace('Invalid login credentials','Incorrect email or password.').replace('User already registered','That email is already registered. Try logging in.');}
 async function authSubmit(e){e.preventDefault();const email=document.getElementById('auth-email')?.value.trim(),password=document.getElementById('auth-password')?.value||'';if(AUTH_MODE==='signup'&&password!==document.getElementById('auth-confirm')?.value){renderAuthScreen('signup','Passwords do not match.',true);return false;}try{if(AUTH_MODE==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined}});if(error)throw error;if(data.session){AUTH_USER=data.user;await startAuthenticatedApp();}else renderAuthScreen('login','Account created. Check your email to confirm your account, then log in.');}else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;AUTH_USER=data.user;await startAuthenticatedApp();}}catch(err){renderAuthScreen(AUTH_MODE,friendlyAuthError(err),true);}return false;}
 async function resetPassword(){const email=prompt('Enter your MediaFlow account email:');if(!email)return;try{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:(location.protocol==='http:'||location.protocol==='https:')?location.href:undefined});if(error)throw error;renderAuthScreen('login','Password reset email sent. Check your inbox.');}catch(err){renderAuthScreen('login',friendlyAuthError(err),true);}}
-async function signOut(){if(AUTH_USER&&supabase)await supabase.auth.signOut();AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
+async function signOut(){
+  if(!supabase)return;
+  // An actual click on Log out is different from Supabase's transient
+  // SIGNED_OUT event during token renewal and cold PWA reload.
+  if(typeof V475_AUTH!=='undefined'){
+    V475_AUTH.logoutRequested=true;
+    V475_AUTH.explicitLogout=true;
+  }
+  try{
+    const {error}=await supabase.auth.signOut();
+    if(error)throw error;
+    if(typeof v506CompleteExplicitLogout==='function')v506CompleteExplicitLogout();
+    else{AUTH_USER=null;AUTH_READY=false;renderAuthScreen('login','You have been logged out.');}
+  }catch(error){
+    if(typeof V475_AUTH!=='undefined'){
+      V475_AUTH.logoutRequested=false;
+      V475_AUTH.explicitLogout=false;
+    }
+    console.error('MediaFlow: sign out was not completed',error);
+    if(typeof showToast==='function')showToast('Could not sign out. Check your connection and try again.');
+  }
+}
 function getDisplayName(){const name=String(AUTH_USER?.user_metadata?.display_name||'').trim();return name||String(AUTH_USER?.email||'').trim()||'Account';}
 function profileInitials(){const display=getDisplayName();const parts=display.split(/\s+/).filter(Boolean);if(parts.length>1)return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();return display.slice(0,1).toUpperCase()||'?';}
 function getAvatarUrl(){return String(S.profilePicture||AUTH_USER?.user_metadata?.avatar_url||'').trim();}
