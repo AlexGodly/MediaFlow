@@ -1,0 +1,72 @@
+/* MediaFlow v384 — strong, full-surface color driven exclusively by live theme vars.
+ * The whole clickable Browse Library header is themed edge-to-edge, not just
+ * its borders or badges. No fixed brand color and no dependency on a single theme. */
+.log-form .mf383-logging-library{
+  --mf384-lib-shade:color-mix(in srgb,var(--accent) 68%,var(--panel) 32%);
+  border-color:color-mix(in srgb,var(--accent) 62%,var(--border-soft));
+  background:var(--mf384-lib-shade);
+  box-shadow:0 14px 34px color-mix(in srgb,var(--accent) 22%,transparent),0 10px 32px color-mix(in srgb,#000 7%,transparent);
+}
+.log-form .mf383-logging-library[open]{
+  border-color:color-mix(in srgb,var(--accent) 72%,var(--border-soft));
+  box-shadow:0 16px 42px color-mix(in srgb,var(--accent) 25%,transparent),0 9px 30px color-mix(in srgb,#000 8%,transparent);
+}
+.log-form .mf383-logging-library > .mf383-logging-summary{
+  isolation:isolate;
+  overflow:hidden;
+  background:linear-gradient(109deg,
+    color-mix(in srgb,var(--accent) 77%,var(--panel-raised) 23%) 0%,
+    color-mix(in srgb,var(--accent) 55%,var(--panel) 45%) 47%,
+    color-mix(in srgb,var(--accent) 69%,var(--panel-raised) 31%) 100%);
+  border-radius:19px;
+  color:var(--text);
+  transition:background .2s ease,filter .2s ease;
+}
+.log-form .mf383-logging-library[open] > .mf383-logging-summary{border-radius:19px 19px 0 0}
+.log-form .mf383-logging-library > .mf383-logging-summary:hover{filter:brightness(1.045)}
+.log-form .mf383-logging-library > .mf383-logging-summary::after{
+  content:'';position:absolute;inset:-160% -13% auto auto;width:47%;aspect-ratio:1;
+  border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,color-mix(in srgb,var(--text) 13%,transparent),transparent 68%);
+}
+.log-form .mf383-logging-summary::before{
+  width:5px;z-index:1;opacity:.85;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 70%,var(--accent)),color-mix(in srgb,var(--text) 22%,transparent));
+}
+.log-form .mf383-logging-summary > *{position:relative;z-index:1}
+.log-form .mf383-logging-summary .mf383-lib-kicker{color:color-mix(in srgb,var(--text) 85%,var(--accent))}
+.log-form .mf383-logging-summary .mf383-lib-heading>b{color:var(--text);text-shadow:0 1px 15px color-mix(in srgb,var(--panel) 25%,transparent)}
+.log-form .mf383-logging-summary .mf383-lib-heading>small{color:color-mix(in srgb,var(--text) 83%,var(--panel))}
+.log-form .mf383-logging-summary .mf383-lib-icon{
+  color:var(--text);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--text) 19%,transparent),color-mix(in srgb,var(--panel) 26%,transparent));
+  border-color:color-mix(in srgb,var(--text) 35%,transparent);
+  box-shadow:inset 0 1px color-mix(in srgb,var(--text) 20%,transparent);
+}
+.log-form .mf383-logging-summary .mf383-lib-stats>span{
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--text) 31%,transparent);
+  background:color-mix(in srgb,var(--panel) 37%,transparent);
+  box-shadow:inset 0 1px color-mix(in srgb,var(--text) 11%,transparent);
+}
+.log-form .mf383-logging-summary .mf383-lib-chevron,
+.log-form .mf383-logging-library[open] .mf383-lib-chevron{
+  color:var(--text);
+  border-color:color-mix(in srgb,var(--text) 37%,transparent);
+  background:color-mix(in srgb,var(--panel) 36%,transparent);
+}
+.log-form .mf383-logging-summary:focus-visible{outline:3px solid var(--text);outline-offset:-4px}
+/* About Studio: the existing packaged PWA logo, not an emoji or generic SVG. */
+.mf384-about .mf384-brand-logo{
+  width:66px;height:66px;flex:none;display:grid;place-items:center;
+  border-radius:19px;overflow:hidden;padding:0;
+  background:transparent;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border-soft));
+  box-shadow:0 9px 24px color-mix(in srgb,#000 16%,transparent);
+}
+.mf384-about .mf384-brand-logo img{display:block;width:100%;height:100%;object-fit:contain}
+.mf384-about .mf383-hero-label{gap:0}
+@media(max-width:690px){
+  .mf384-about .mf384-brand-logo{width:50px;height:50px;border-radius:14px}
+  .log-form .mf383-logging-library > .mf383-logging-summary::after{width:80%;inset:-80% -22% auto auto}
+}
+@media(prefers-reduced-motion:reduce){.log-form .mf383-logging-library > .mf383-logging-summary{transition:none}}
