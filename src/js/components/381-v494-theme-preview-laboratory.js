@@ -29,16 +29,18 @@ function mf494Source(){
   S.v146DynamicThemeState?.palette?.mode||sample.naturalMode||'dark';
  return {mode,manual:false,profile,appearance,data:sample,
   key:state.scope+'|'+mf487Key(expected)+'|'+colors.join(','),
+  scope:state.scope,saved:mf493Settings()[state.scope]||null,
   variants:state.variants.map(x=>x.key),activeVariant:state.variant||'automatic'};
 }
 function mf494ResetDraft(source){
  const initial=mf492Config().values;
  MF494_STATE.key=source.key;
  MF494_STATE.candidates=[
-  {variant:source.activeVariant||'automatic',values:{...initial}},
+  {variant:source.activeVariant||'automatic',values:{...initial},
+   slots:source.saved?.slots?.slice()||null},
   {variant:source.manual?'automatic':
    (source.variants.includes('focal')?'focal':'dominant'),
-   values:{...MF492_PRESETS.vivid}}
+   values:{...MF492_PRESETS.vivid},slots:null}
  ];
 }
 function mf494Ready(){
@@ -51,7 +53,7 @@ function mf494Compose(source,candidate){
  if(!source||!candidate)return null;
  try{
   const colors=source.manual?source.data.colors.slice():
-   window.MediaFlowV493.choose(source.data,candidate.variant);
+   mf493Pick(source.data,candidate.variant,candidate.slots||null);
   if(!colors||colors.length<3||!colors.every(mf489HexValid))return null;
   const selected=source.mode==='custom'&&source.profile?.source==='hybrid'?
    [source.profile.colors[0],colors[0],colors[1]]:colors.slice(0,3);
@@ -60,10 +62,27 @@ function mf494Compose(source,candidate){
   if(!base)return null;
   const tuned=mf492ComposePalette(base,{preset:'comparison',customized:true,
    values:{...candidate.values}});
-  const safe=mf491ProtectPalette(tuned);
+  const varied=mf494CustomVariation(tuned,source.profile,source.mode);
+  const safe=mf491ProtectPalette(varied);
   return safe&&['bg','panel','raised','text','flow','onAccent','border']
    .every(k=>mf489HexValid(safe[k]))?safe:null;
  }catch(e){return null;}
+}
+function mf494CustomVariation(input,profile,mode){
+ if(mode!=='custom'||!profile||!input)return input;
+ const p={...input},light=p.mode==='light';
+ if(profile.variation==='ethereal')p.bg=v145MixHex(p.bg,light?'#F9F0FF':'#18122F',.58);
+ else if(profile.variation==='futuristic')p.border=v145MixHex(p.secondary,p.border,.48);
+ else if(profile.variation==='artistic')p.bg=v145MixHex(p.bg,p.tertiary,.79);
+ return p;
+}
+function mf494ApplySlots(candidate,source){
+ if(!candidate.slots)return true;
+ if(!Array.isArray(candidate.slots)||candidate.slots.length!==3)return false;
+ const available=mf493Colors(source.data).map(x=>x.hex);
+ if(!candidate.slots.every(x=>available.includes(x)))return false;
+ for(let i=0;i<3;i++)if(!App.mf493Slot(i,candidate.slots[i]))return false;
+ return true;
 }
 function mf494Current(){
  const root=document.documentElement;
@@ -86,6 +105,7 @@ function mf494Choose(slot,variant){
  if(!source||!Number.isInteger(i)||i<0||i>1||
   !source.variants.includes(variant))return false;
  MF494_STATE.candidates[i].variant=variant;
+ MF494_STATE.candidates[i].slots=null;
  MF494_STATE.previews++;
  mf494Render();return true;
 }
@@ -126,7 +146,7 @@ function mf494Apply(slot){
   // v493 owns per-artwork corrections, source identity, and guarded refresh.
   // Set the new tuning before its single persisted correction commit.
   S.settings.v492Palette=next;
-  if(!App.mf493Preview(candidate.variant)||!App.mf493Commit()){
+  if(!App.mf493Preview(candidate.variant)||!mf494ApplySlots(candidate,source)||!App.mf493Commit()){
    S.settings.v492Palette=previous;MF494_STATE.blocked++;
    mf494Render();return false;
   }
