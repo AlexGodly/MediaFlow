@@ -36,7 +36,7 @@ function setup({getSession,hasStoredSession=false,bootstrap}={}){
  const app={innerHTML:'',querySelector(){return null;}};
  const page={getElementById(){return app;}};
  const sessionUser={id:'acct1',email:'user@example.invalid'};
- const client={auth:{getSession:getSession||async()=>({data:{session:{user:sessionUser}},error:null}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}},error:null})}};
+ const client={auth:{getSession:getSession||(async()=>({data:{session:{user:sessionUser}},error:null})),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}},error:null})}};
  const sandbox={
   AUTH_USER:null,AUTH_READY:false,V115_STARTUP_GUARD:true,
   SUPABASE_URL:'https://testproj.supabase.co',
