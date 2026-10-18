@@ -6892,9 +6892,10 @@ const V475_AUTH={
 function v475ShowSessionLoading(message='Restoring your MediaFlow account…'){
   const app=document.getElementById('app');
   if(!app)return;
-  // While an existing workspace is visible, protect it from writes and keep
-  // displaying the last good data until the session has been confirmed.
-  if(app.querySelector('.sidebar'))return;
+  // A previously rendered workspace must not remain interactive when its
+  // Supabase session is unverified: edits would otherwise appear saved while
+  // the cloud write guard is intentionally blocking uploads.
+  if(app.querySelector('.mf506-auth-loading'))return;
   app.innerHTML='<div class="loader-wrap mf506-auth-loading" role="status" aria-live="polite">'+escapeHtml(message)+'</div>';
 }
 function v506PersistedSessionHint(){
