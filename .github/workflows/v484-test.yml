@@ -37,7 +37,7 @@ jobs:
           node --check assets/js/mediaflow-v484.bundle.js
           node --check src/js/core/rendering/035-render-loop-init.js
           node scripts/test-v484-visual-contract.cjs
-          node scripts/test-v484-recovery-scroll.cjs
+          node scripts/test-v483-recovery-scroll.cjs
           python scripts/check.py
           python - <<'PY'
           import json
@@ -52,21 +52,23 @@ jobs:
           assert json.loads((r/'manifest.json').read_text())['scope']=='./'
           print('v484 release/PWA coherence PASS')
           PY
-      - name: Chromium mobile and desktop regression suite
-        run: node scripts/test-v484-visual-contract.cjs
+      - name: Additional visual and legacy compatibility contract
+        run: |
+          node scripts/test-v484-visual-contract.cjs
+          node scripts/test-v483-recovery-scroll.cjs
       - name: Archive verified complete v484 project
         if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p legacy/v/483
+          mkdir -p legacy/v/484
           rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/484/
           test "$(cat legacy/v/484/VERSION)" = "484"
           test -s legacy/v/484/assets/js/mediaflow-v484.bundle.js
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v484.bundle.js
-          git add --sparse -f legacy/v/483
+          git add --sparse -f legacy/v/484
           if ! git diff --cached --quiet; then
             git commit -m 'build(v484): verified PWA and complete source archive [skip ci]'
             git push origin HEAD:feature/v484-visual-evolution-foundation
