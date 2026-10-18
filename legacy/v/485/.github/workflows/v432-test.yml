@@ -1,0 +1,75 @@
+name: MediaFlow v432 Account Avatar Icon Root-Cause Quality Gate
+on:
+  push:
+    branches: [feature/v432-account-avatar-icon-root-fix]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v432-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v432 from source
+        run: |
+          test "$(cat VERSION)" = "432"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v432.bundle.js
+          node --check src/js/components/312-v431-dashboard-auto-save-navigation.js
+          node --check scripts/test-v431-cover-autosave.cjs
+          node --check scripts/test-v432-avatar-icon.cjs
+      - name: Verify cover validation, navigation and existing recovery features
+        run: |
+          node scripts/test-v431-cover-autosave.cjs
+          node scripts/test-v432-avatar-icon.cjs
+          node scripts/test-v430-recovery-polish.cjs
+          node scripts/test-v424-recovery.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v427-recovery.cjs
+          node scripts/test-v427-cover-universal-id.cjs
+          node scripts/test-v427-on-this-day.cjs
+          node scripts/check-settings-style.cjs
+          python scripts/check.py
+      - name: Desktop and 360px mobile Chromium browser smoke
+        run: node scripts/test-v432-browser.cjs
+      - name: Commit built site and full archived v432 project to feature branch
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/432
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/432/
+          test "$(cat legacy/v/432/VERSION)" = 432
+          test -s legacy/v/432/assets/js/mediaflow-v432.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v432.bundle.js
+          git add --sparse -f legacy/v/432
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v432): verified site and full legacy archive [skip ci]'
+            git push origin HEAD:feature/v432-account-avatar-icon-root-fix
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v432-verified-smoke
+          path: |
+            artifacts/v432-browser-smoke/
+            version.json
