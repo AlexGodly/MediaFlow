@@ -87,5 +87,5 @@ jobs:
           git add --sparse -f legacy/v/497
           if ! git diff --cached --quiet; then
             git commit -m 'build(v497): verified PWA and complete source archive [skip ci]'
-            git push origin HEAD:feature/v497-unified-living-themes-renderer
+            git push origin HEAD:feature/v497-living-materials-title-recovery-parity
           fi
