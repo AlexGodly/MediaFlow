@@ -230,7 +230,5 @@
   "components/373-v507-persistence-portability-pwa-audit.js",
   "components/374-v508-unified-category-panels.js",
   "components/375-v514-canonical-category-settings.js",
-  "components/376-v518-library-remaining-sort.js",
-  "components/377-v520-title-actions.js",
-  "components/378-v521-title-actions-mounted.js"
+  "components/376-v518-library-remaining-sort.js"
 ]
