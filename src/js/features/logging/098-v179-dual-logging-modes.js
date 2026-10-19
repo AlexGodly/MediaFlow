@@ -108,7 +108,7 @@ function v179ModeSwitchHtml(kind){
 
     <div class="v179-log-mode-help">${
       mode==='progress'
-        ?'Select a Library title and enter the progress reached in that category's unit. MediaFlow calculates how much you consumed from the starting progress.'
+        ?'Select a Library title and enter the progress reached using its category unit. MediaFlow calculates how much you consumed from the starting progress.'
         :'Enter directly how many units you consumed in this session.'
     }</div>
   </div>`;

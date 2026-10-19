@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-v527.yml'
   workflow_dispatch:
   # v527 universal category types, 15 units, Progress Reached and dynamic Stats/XP
+  # CI rerun following Quick Logging message syntax correction
   # Corrected v70 and v53 legacy Library dropdowns and narrowed bundle checks to sorter-specific text.
   # Release workflow registration trigger: tests and full archive required
 permissions:
