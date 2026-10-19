@@ -1,0 +1,78 @@
+name: Build archive and release MediaFlow v532
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v532.yml'
+  workflow_dispatch:
+  # v532: History filters and Statistics Media Type Mix recognize all four activity types.
+  # Regression test accepts blank template interpolation whitespace around unselected options.
+  # CI rerun after completing the CommonJS test source identifier migration
+  # Corrected v70 and v53 legacy Library dropdowns and narrowed bundle checks to sorter-specific text.
+  # Release workflow registration trigger: tests and full archive required
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v532-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 532
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v532.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v532.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/532
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/532/; fi
+          done
+          test -f legacy/v/532/assets/js/mediaflow-v532.bundle.js
+          test -f legacy/v/532/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json assets/js/mediaflow-v532.bundle.js legacy/v/532
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v532' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v532_Stable.zip HEAD:legacy/v/532
+          sha256sum MediaFlow_v532_Stable.zip > MediaFlow_v532_Stable.sha256
+          if ! gh release view 532 >/dev/null 2>&1; then
+            gh release create 532 MediaFlow_v532_Stable.zip MediaFlow_v532_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v532 Stable' --notes 'v532 Stable: Fix History Media type View Options and legacy filters to show Watching, Reading, Playing, Listening and Other. Update Statistics Media Type Mix to display four canonical media types and unmatched Other with correctly aggregated non-skipped consumption minutes. Preserve existing type IDs, session records, Supabase/cloud state and category editor. Includes regression coverage, complete legacy/v/532 archive and Pages deployment.'
+          fi

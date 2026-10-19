@@ -14,7 +14,7 @@ function renderHistory(){
 
   if(f.category && f.category!=='all') list = list.filter(s=>s.categoryId===f.category);
 
-  if(f.type && f.type!=='all') list = list.filter(s=>getCategory(s.categoryId).type===f.type);
+  if(f.type && f.type!=='all') list = list.filter(s=>v532SessionMediaType(s)===f.type);
 
   if(f.range==='today') list = list.filter(s=>s.date===todayISO());
 
@@ -101,11 +101,7 @@ function renderHistory(){
 
         <select onchange="App.setHistFilter('type', this.value)">
 
-          <option value="all">All media types</option>
-
-          <option value="video" ${f.type==='video'?'selected':''}>Video</option>
-
-          <option value="reading" ${f.type==='reading'?'selected':''}>Reading</option>
+          ${v532MediaTypeOptions(f.type)}
 
         </select>
 

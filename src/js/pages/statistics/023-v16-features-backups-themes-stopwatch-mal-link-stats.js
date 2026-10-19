@@ -223,8 +223,7 @@ function renderStatsV14(){
  const catData=enabledCats.map(c=>({c,m:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').reduce((a,s)=>a+(Number(s.minutes)||0),0),tasks:S.sessions.filter(s=>s.categoryId===c.id&&s.status!=='skipped').length})).sort((a,b)=>b.m-a.m);
  const statusData=['planned','active','paused','completed','dropped'].map(k=>({label:v199StatusLabel(k),value:S.library.filter(i=>i.status===k).length}));
  const priorityData=['high','medium','low'].map(k=>({label:k[0].toUpperCase()+k.slice(1),value:S.library.filter(i=>i.priority===k).length}));
- const mediaMap={}; S.sessions.forEach(s=>{if(s.status==='skipped')return;const cat=S.categories.find(c=>c.id===s.categoryId);const type=cat?.type||'other';mediaMap[type]=(mediaMap[type]||0)+(Number(s.minutes)||0);});
- const mediaData=Object.entries(mediaMap).map(([label,value])=>({label,value}));
+ const mediaData=v532MediaTypeMix(S.sessions,S.categories);
  const totalUnits=life.episodes+life.chapters+life.movies+life.issues;
  const avgDaily7=Math.round(last7.reduce((a,d)=>a+d.minutes,0)/7), avgSession=v331LogicalSessionCount(S.sessions)?Math.round(life.minutes/v331LogicalSessionCount(S.sessions)):0;
  const longestDay=Math.max(...last30.map(d=>d.minutes),0), mostActiveDay=last30.find(d=>d.minutes===longestDay)?.date;
