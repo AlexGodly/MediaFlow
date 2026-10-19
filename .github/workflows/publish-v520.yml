@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/publish-v520.yml'
   workflow_dispatch:
-  # v520 title actions; build archive, smoke tests, and stable release
+  # v520 title actions; cross-realm test assertion fix + stable release
   # Release workflow registration trigger: tests and full archive required
 permissions:
   contents: write
