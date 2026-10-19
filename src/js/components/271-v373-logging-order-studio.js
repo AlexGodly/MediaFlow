@@ -7,6 +7,7 @@ const V373_SORTS=[
   ['logAdded','Added to Logging'],
   ['progress','Current progress'],
   ['total','Total episodes / chapters'],
+  ['remaining','Remaining episodes / chapters'],
   ['priority','Priority'],
   ['title','Alphabetical'],
   ['logging','Last updated by logging'],
@@ -20,10 +21,18 @@ const V373_PICKER_SORTS=V373_SORTS.filter(([key])=>key!=='custom');
 const V373_ALLOWED=new Set(V373_SORTS.map(x=>x[0]));
 function v373OrderState(){
   const draft=S.logDraft;
-  if(!draft||typeof draft!=='object')return {sort:'logAdded',dir:'asc',manualIds:[],randomSeed:1};
-  if(!draft.v373Ordering||typeof draft.v373Ordering!=='object')draft.v373Ordering={sort:'logAdded',dir:'asc',manualIds:[],randomSeed:1};
+  if(!draft||typeof draft!=='object')return {sort:'added',dir:'desc',manualIds:[],randomSeed:1};
+  if(!draft.v373Ordering||typeof draft.v373Ordering!=='object')
+    draft.v373Ordering={sort:'added',dir:'desc',manualIds:[],randomSeed:1,v517DefaultApplied:true};
   const st=draft.v373Ordering;
-  if(!V373_ALLOWED.has(st.sort))st.sort='logAdded';
+  // Upgrade untouched legacy defaults without resetting deliberate custom sorts.
+  if(st.v517DefaultApplied!==true){
+    const untouched=st.sort==='logAdded'&&st.dir==='asc'&&
+      (!Array.isArray(st.manualIds)||st.manualIds.length===0);
+    if(untouched){st.sort='added';st.dir='desc';}
+    st.v517DefaultApplied=true;
+  }
+  if(!V373_ALLOWED.has(st.sort)){st.sort='added';st.dir='desc';}
   st.dir=st.dir==='desc'?'desc':'asc';
   if(!Array.isArray(st.manualIds))st.manualIds=[];
   if(!Number.isSafeInteger(st.randomSeed)||st.randomSeed<1)st.randomSeed=1;
@@ -47,6 +56,34 @@ function v373Timestamp(v){
   if(typeof v==='string'){const d=Date.parse(v);return Number.isFinite(d)?d:0;}
   return 0;
 }
+/* Compute remaining episode/chapter units from canonical saved progress.
+ * Seasons with missing totals make the complete remaining count unknown;
+ * never silently sort those as zero. This helper never mutates the Library.
+ * Completed titles have zero remaining units when total is known. */
+function v373RemainingUnits(item){
+  if(!item||typeof item!=='object')return null;
+  const validTotal=value=>{
+    if(value==null||value==='')return null;
+    const n=Number(value);
+    return Number.isFinite(n)&&n>0?Math.floor(n):null;
+  };
+  const progress=value=>{
+    const n=Number(value);
+    return Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
+  };
+  const seasons=Array.isArray(item.seasons)?item.seasons:[];
+  if(seasons.length){
+    let sum=0;
+    for(const season of seasons){
+      const total=validTotal(season?.total??season?.totalEpisodes??season?.total_episodes);
+      if(total===null)return null;
+      sum+=Math.max(0,total-progress(season?.progress));
+    }
+    return sum;
+  }
+  const total=validTotal(item.total);
+  return total===null?null:Math.max(0,total-progress(item.progress));
+}
 function v373CompareData(a,b,field,dir){
   const sign=dir==='desc'?-1:1;
   const itemA=a.item||{},itemB=b.item||{};
@@ -54,6 +91,14 @@ function v373CompareData(a,b,field,dir){
   if(field==='priority'){
     const ranks={low:0,medium:1,high:2};
     return sign*((ranks[String(itemA.priority||'medium').toLowerCase()]??1)-(ranks[String(itemB.priority||'medium').toLowerCase()]??1));
+  }
+  if(field==='remaining'){
+    const av=v373RemainingUnits(itemA),bv=v373RemainingUnits(itemB);
+    // Unknown totals always sort last in both directions.
+    if(av===null&&bv!==null)return 1;
+    if(av!==null&&bv===null)return -1;
+    if(av===null&&bv===null)return 0;
+    return sign*(av-bv);
   }
   let av=0,bv=0;
   const num=(v)=>Number.isFinite(Number(v))?Number(v):0;
@@ -155,9 +200,9 @@ function v373LiveUpdate(){
 }
 function v373Persist(){v369Touch();v373LiveUpdate();}
 function v373SetSort(value){
-  const st=v373OrderState(),next=V373_ALLOWED.has(value)?value:'logAdded';
+  const st=v373OrderState(),next=V373_ALLOWED.has(value)?value:'added';
   if(next==='custom'&&st.sort!=='custom')st.manualIds=v373OrderedEntries().map(x=>x.id);
-  if(next==='logAdded'&&st.sort!=='logAdded')st.dir='desc';
+  if((next==='logAdded'||next==='added'||next==='remaining')&&st.sort!==next)st.dir='desc';
   st.sort=next;
   v373Persist();
 }
@@ -252,13 +297,19 @@ function v373NormalizePickerSort(){
   if(!st.v373Ready){
     st.v373Ready=true;
     if(!st.sortBase||st.sortBase==='title'||st.sort==='relevance'){
-      st.sortBase='added';st.sortDir='asc';st.sort='added-asc';
+      st.sortBase='added';st.sortDir='desc';st.sort='added-desc';
     }
     st.v373RandomSeed=1;
   }
+  if(st.v517DefaultApplied!==true){
+    // Old untouched picker default was Date added ascending.
+    if(st.sortBase==='added'&&st.sortDir==='asc'&&st.sort==='added-asc')
+      st.sortDir='desc';
+    st.v517DefaultApplied=true;
+  }
   const allowed=new Set(V373_PICKER_SORTS.map(x=>x[0]));
-  if(!allowed.has(st.sortBase))st.sortBase='added';
-  st.sortDir=st.sortDir==='desc'?'desc':'asc';
+  if(!allowed.has(st.sortBase)){st.sortBase='added';st.sortDir='desc';}
+  st.sortDir=st.sortDir==='asc'?'asc':'desc';
   if(!Array.isArray(st.categories))st.categories=[];
   st.sort=v224SortKey(st.sortBase,st.sortDir);
   return st;
@@ -296,12 +347,12 @@ logTitleCandidates=function(query){
 App.v224LogSetSort=function(value){
   const st=v373NormalizePickerSort(),allowed=new Set(V373_PICKER_SORTS.map(x=>x[0]));
   st.sortBase=allowed.has(value)?value:'added';
-  if(value==='logAdded')st.sortDir='desc';
+  if(value==='logAdded'||value==='added'||value==='remaining')st.sortDir='desc';
   st.sort=v224SortKey(st.sortBase,st.sortDir);st.page=0;renderLogSuggestions();
 };
 App.v224LogClearFilters=function(){
   const st=v373NormalizePickerSort();
-  st.categories=[];st.status='all';st.priority='all';st.sortBase='added';st.sortDir='asc';st.sort='added-asc';st.page=0;renderLogSuggestions();
+  st.categories=[];st.status='all';st.priority='all';st.sortBase='added';st.sortDir='desc';st.sort='added-desc';st.page=0;renderLogSuggestions();
 };
 App.v373ShufflePicker=function(){
   const st=v373NormalizePickerSort();st.sortBase='random';st.sortDir='asc';st.v373RandomSeed=(Date.now()%2147483647)||1;
