@@ -101,6 +101,24 @@ App.mf508MoveCategory('todayBalance','movies',0);
 assert.equal(same(api.inspect().todayCategoryIds),'movies,anime,books');
 App.mf508SetCategory('todayBalance','anime',false);
 assert.equal(same(api.inspect().todayCategoryIds),'movies,books');
+// Both custom panels must use native checkboxes. The former button was
+// auto-iconified by v225/v226, rendering a circle-arrow beside the minus.
+App.mf508SetSource('libraryOverview','custom');
+const customMarkup=pageRenderers.get('settings')();
+for(const key of ['todayBalance','libraryOverview']){
+  const start=customMarkup.indexOf('data-mf508-panel="'+key+'"');
+  const finish=customMarkup.indexOf('</section>',start);
+  assert(start>=0&&finish>start,'custom panel must render for '+key);
+  const html=customMarkup.slice(start,finish);
+  assert.match(html,/<input type="checkbox" class="mf508-cat-toggle"/,'native checkbox required for '+key);
+  assert(!html.includes('<button type="button" class="mf508-cat-toggle'),'no auto-iconified toggle buttons in '+key);
+  assert(!html.includes('v225-btn-icon'),'no decorative circle-arrow in '+key);
+  assert(!html.includes('>−</button>'),'unchecked state must not contain a minus glyph');
+  assert(html.includes("App.mf508SetCategory('"+key+"','movies',this.checked)"),'checkbox must control visibility for '+key);
+  assert(html.includes('aria-label="Show Movies in '),'checkbox must remain accessible for '+key);
+}
+const toggleCss=fs.readFileSync(path.join(root,'assets/css/287-v508-category-panel-studio.css'),'utf8');
+assert(toggleCss.includes('-webkit-appearance:checkbox;'),'native checkboxes must retain their browser rendering');
 App.mf508SetSource('libraryOverview','todayBalance');
 assert.equal(same(api.inspect().overviewCategoryIds),'movies,books','follow-other mirrors visibility and order');
 App.mf508SetSource('todayBalance','libraryOverview');
@@ -129,4 +147,4 @@ const older={settings:{v508Panels:{todayBalance:{source:'categories',modifiedAt:
 const merged=context.mergeStates(older,state);
 assert.equal(merged.settings.v508Panels.todayBalance.source,'custom','cloud merge preserves newer settings');
 assert.equal(merged.settings.v183LibraryOverview.showOverview,false);
-console.log('PASS: canonical v221/v365 Settings Center sections, search metadata, XP preservation, sources, ordering, following, visibility, health scope, persistence and cloud merge.');
+console.log('PASS: canonical v221/v365 Settings Center sections, search metadata, XP preservation, sources, ordering, following, visibility, health scope, persistence and cloud merge, icon-free checkboxes.');
