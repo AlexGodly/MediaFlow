@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/publish-v512.yml'
   workflow_dispatch:
+  # v512 PWA lifecycle repair release
 permissions:
   contents: write
 concurrency:
