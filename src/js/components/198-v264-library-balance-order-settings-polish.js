@@ -97,7 +97,7 @@ function v264GuidanceMeta(todayStatus,overallStatus,text){
   return {label,clean};
 }
 function v264BalanceMarkup(){
-  const cats=(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled)),today=todaysSessions();
+  const cats=(typeof mf508VisibleCategories==='function'?mf508VisibleCategories('todayBalance'):(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled))),today=todaysSessions();
   if(!cats.length)return '<div class="mf264-balance-empty">No categories selected for Today’s Balance.</div>';
   const labelMap={healthy:'Healthy',neglected:'Neglected',overused:'Overused',due:'Due'};
   const rows=cats.map(cat=>{
