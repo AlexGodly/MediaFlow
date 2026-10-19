@@ -1,0 +1,45 @@
+/* ============================================================
+   MediaFlow v235 — Missing Covers live URL preview + validation
+   ============================================================ */
+
+.v192-cover-placeholder.v235-cover-preview-active{
+  padding:0!important;
+  overflow:hidden;
+  background:var(--panel-raised);
+}
+.v235-live-cover-preview{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+}
+.v235-cover-url-notice{
+  margin-top:7px;
+  min-height:17px;
+  font-size:11.5px;
+  line-height:1.42;
+  font-weight:650;
+  color:var(--text-mute);
+}
+.v235-cover-url-notice.is-checking{color:var(--text-dim)}
+.v235-cover-url-notice.is-valid{color:var(--success,#45c486)}
+.v235-cover-url-notice.is-invalid{color:var(--danger,#ff6b73)}
+
+#v192-cover-url-input.v235-cover-valid{
+  border-color:var(--success,#45c486)!important;
+  box-shadow:inset 0 0 0 1000px var(--panel-raised),0 0 0 3px color-mix(in srgb,var(--success,#45c486) 14%,transparent)!important;
+}
+#v192-cover-url-input.v235-cover-invalid{
+  border-color:var(--danger,#ff6b73)!important;
+  box-shadow:inset 0 0 0 1000px var(--panel-raised),0 0 0 3px color-mix(in srgb,var(--danger,#ff6b73) 12%,transparent)!important;
+}
+#v192-cover-url-input.v235-cover-checking{
+  border-color:var(--flow-dim)!important;
+}
+#v235-save-cover-btn:disabled{
+  cursor:not-allowed!important;
+  opacity:.48!important;
+  filter:saturate(.45);
+  pointer-events:none;
+}
