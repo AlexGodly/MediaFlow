@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/publish-v513.yml'
   workflow_dispatch:
-  # v513 service-worker parse and deployment integrity repair
+  # v513 service-worker syntax, activation, and deployment integrity repair
 permissions:
   contents: write
 concurrency:
