@@ -55,7 +55,6 @@ const ids=a=>Array.from(a,x=>x.id||x.item?.id);
 // New drafts and previously untouched drafts default to newest first.
 assert.equal(run('v373OrderState().sort'),'added');
 assert.equal(run('v373OrderState().dir'),'desc');
-assert.deepEqual(ids(run('v373OrderedEntries()')).map(x=>x),[]);
 assert.deepEqual(Array.from(run('v373OrderedEntries()'),x=>x.item.id),
   ['newer','over','short','unknown','seasonal','partial','older']);
 S.logDraft.v373Ordering={sort:'logAdded',dir:'asc',manualIds:[],randomSeed:1};
