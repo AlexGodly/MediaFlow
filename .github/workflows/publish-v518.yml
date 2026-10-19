@@ -1,0 +1,63 @@
+name: Build archive and release MediaFlow v518
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v518.yml'
+  workflow_dispatch:
+  # v518 remaining episodes/chapters and newest-first in Normal + Dynamic Library
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v518-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 518
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v518.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v518.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/518
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/518/; fi
+          done
+          test -f legacy/v/518/assets/js/mediaflow-v518.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v518.bundle.js legacy/v/518
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v518' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v518_Stable.zip HEAD:legacy/v/518
+          sha256sum MediaFlow_v518_Stable.zip > MediaFlow_v518_Stable.sha256
+          if ! gh release view 518 >/dev/null 2>&1; then
+            gh release create 518 MediaFlow_v518_Stable.zip MediaFlow_v518_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v518 Stable' --notes 'Extend the v517 Remaining episodes / chapters sorter to Normal Library and Dynamic Library, with ascending/descending support and season-aware remaining counts. Make Date added to Library (most recent first) the default on both Library modes, safely upgrade untouched old Alphabetic defaults, and preserve distinct existing sorter choices. Titles with unknown totals sort last. Both modes share one sorter and render consistent results in all five Library display modes. Preserve title data, Library progress, History, XP, cloud synchronization and PWA integrity. Regression tests for both Library modes, full legacy/v/518 archive, GitHub Release and Pages deployment.'
+          fi
