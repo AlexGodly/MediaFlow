@@ -256,6 +256,13 @@ async function rawGet(key){
 
 async function rawSet(key,value){
   if(!AUTH_USER||!supabase)throw new Error('MediaFlow cloud session is unavailable.');
+  // v535: fence the entire async upload to the account that requested it.
+  // A delayed retry must never switch its destination after a login/logout.
+  const uploadAccountId=String(AUTH_USER.id);
+  const assertUploadAccount=()=>{
+    if(V115_STARTUP_GUARD||String(AUTH_USER?.id||'')!==uploadAccountId)
+      throw new Error('Cloud account changed while saving. Upload cancelled; local recovery copy retained.');
+  };
 
   // v134: one full JSON serialization feeds cloud compression and both protected
   // recovery caches. v133 could stringify the same very large state three times.
@@ -272,7 +279,9 @@ async function rawSet(key,value){
   for(let attempt=0;attempt<delays.length;attempt++){
     if(delays[attempt]) await new Promise(r=>setTimeout(r,delays[attempt]));
     try{
-      const {error}=await supabase.from('mediaflow_states').upsert({user_id:AUTH_USER.id,state_data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+      assertUploadAccount();
+      const {error}=await supabase.from('mediaflow_states').upsert({user_id:uploadAccountId,state_data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+      assertUploadAccount();
       if(!error) return true;
       lastError=error;
       const code=String(error?.code||'');
@@ -333,7 +342,7 @@ function mergeStates(a,b){
   const sessions=new Map(); [...(b.sessions||[]),...(a.sessions||[])].forEach(x=>sessions.set(x.id||uid(),x)); out.sessions=[...sessions.values()].sort((x,y)=>(x.timestamp||0)-(y.timestamp||0));
   out.xpLedger=Object.assign({libraryAdditions:{}},b.xpLedger||{},a.xpLedger||{}); out.xpLedger.libraryAdditions=Object.assign({},b.xpLedger?.libraryAdditions||{},a.xpLedger?.libraryAdditions||{});
   const activityById=new Map(); [...(b.activityLog||[]),...(a.activityLog||[])].forEach(x=>{if(!x||typeof x!=='object')return;const k=x.id||`${x.timestamp||0}::${x.action||''}::${x.detail||''}`;const prev=activityById.get(k);if(!prev||Number(x.timestamp||0)>=Number(prev.timestamp||0))activityById.set(k,x);});
-  out.activityLog=[...activityById.values()].sort((x,y)=>Number(y.timestamp||0)-Number(x.timestamp||0)).slice(0,1000);
+  out.activityLog=[...activityById.values()].sort((x,y)=>Number(y.timestamp||0)-Number(x.timestamp||0));
   out.migrations=Object.assign({},b.migrations||{},a.migrations||{});
   out.categories=a.categories||b.categories; out.categoryOrder=a.categoryOrder||a.settings?.categoryOrder||b.categoryOrder||b.settings?.categoryOrder||[]; out.settings=Object.assign({},b.settings||{},a.settings||{}); if(out.categoryOrder.length) out.settings.categoryOrder=out.categoryOrder.slice(); out.currentTask=a.currentTask||b.currentTask; out.sessionActive=a.sessionActive??b.sessionActive; out.profilePicture=a.profilePicture||b.profilePicture||'';
   return out;
@@ -353,7 +362,7 @@ function snapshot(){
     completionTimeline: S.completionTimeline || [],
     // v50: Library History is account data, not device-only UI state.
     // Persist it in the same atomic cloud snapshot as Library + consumption History.
-    activityLog: Array.isArray(S.activityLog) ? S.activityLog.slice(0,1000) : [],
+    activityLog: Array.isArray(S.activityLog) ? S.activityLog.slice() : [],
     migrations: S.migrations || {},
 
     savedAt: Date.now(),
@@ -364,26 +373,41 @@ function snapshot(){
 
 // Serialize saves so two rapid actions never race each other; always await the tail.
 
+/* v535: Coalesce saves that are still pending, but never coalesce into an
+ * already-started upload. Later edits therefore always get their own final
+ * snapshot. Save errors remain visible and a protected account switch aborts.
+ * One failed write never poisons the entire queue. */
+let v535PendingSave=null;
 function saveState(){
-  // v115: startup/load code is never allowed to upload defaults or partial state.
-  // Normal writes are enabled only after the cloud/local source has been resolved safely.
   if(V115_STARTUP_GUARD){
-    console.warn('MediaFlow v115: blocked a cloud save during protected startup/recovery.');
+    console.warn('MediaFlow: blocked a cloud save during protected startup/recovery.');
     return Promise.resolve(false);
   }
-  // Serialize saves so concurrent UI actions cannot overwrite each other.
-  // Each queued save snapshots only when its turn begins, so a burst of actions
-  // always ends with the newest state rather than a pile of stale uploads.
-  saveQueue = saveQueue.then(async ()=>{
+  const accountId=String(AUTH_USER?.id||'');
+  if(!accountId||!supabase)return Promise.resolve(false);
+  if(v535PendingSave&&v535PendingSave.accountId===accountId&&!v535PendingSave.started)
+    return v535PendingSave.promise;
+  const pending={accountId,started:false,promise:null};
+  pending.promise=Promise.resolve(saveQueue).catch(error=>{
+    console.warn('MediaFlow: recovering cloud save queue after rejection',error);
+  }).then(async()=>{
+    pending.started=true;
+    if(V115_STARTUP_GUARD||String(AUTH_USER?.id||'')!==accountId)return false;
     try{
-      await rawSet(STATE_KEY, snapshot());
-      if(lastSaveFailed){ lastSaveFailed=false; hideSaveError(); }
-    }catch(e){
-      console.error('MediaFlow: save failed', e);
-      lastSaveFailed = true; showSaveError();
+      await rawSet(STATE_KEY,snapshot());
+      lastSaveFailed=false;
+      hideSaveError();
+      return true;
+    }catch(error){
+      console.error('MediaFlow: save failed',error);
+      lastSaveFailed=true;
+      showSaveError();
+      return false;
     }
   });
-  return saveQueue;
+  v535PendingSave=pending;
+  saveQueue=pending.promise;
+  return pending.promise;
 }
 
 function showSaveError(){
