@@ -6,7 +6,7 @@ on:
       - '.github/workflows/publish-v526.yml'
   workflow_dispatch:
   # v526 universal title-progress sorter labels, no logic or schema changes
-  # Update v517/v518 literal and regex assertions to universal wording.
+  # Added source-path audit to find remaining obsolete sorter labels in compiled JS.
   # Release workflow registration trigger: tests and full archive required
 permissions:
   contents: write

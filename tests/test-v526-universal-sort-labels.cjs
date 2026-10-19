@@ -53,6 +53,27 @@ const deprecated=[
   'Total episodes / chapters','Remaining episodes / chapters',
   'Current progress'
 ];
+
+function walk(dir){
+  return fs.readdirSync(dir,{withFileTypes:true}).flatMap(d=>{
+    const full=path.join(dir,d.name);
+    return d.isDirectory()?walk(full):(d.isFile()&&full.endsWith('.js')?[full]:[]);
+  });
+}
+const findings=[];
+for(const file of walk(path.join(root,'src/js'))){
+ const source=fs.readFileSync(file,'utf8');
+ for(const term of deprecated){
+  let from=0,idx;
+  while((idx=source.indexOf(term,from))!==-1){
+   findings.push({file:path.relative(root,file),term,
+      around:source.slice(Math.max(0,idx-70),Math.min(source.length,idx+term.length+70)).replace(/\\s+/g,' ')});
+   from=idx+term.length;
+  }
+ }
+}
+if(findings.length)console.log('AUDIT old phrases: '+JSON.stringify(findings).slice(0,12000));
+
 const remaining=deprecated.filter(x=>bundle.includes(x));
 assert.deepEqual(remaining,[],'Deprecated sorter labels in deployed bundle: '+remaining.join(', '));
 const standalone=[/\['progress','Progress'\]/g,/\['total','Total'\]/g];
