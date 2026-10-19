@@ -36,6 +36,12 @@ const checks=[
   ['src/js/components/208-v274-collections-library-rating-order-layout.js',[
     '>Consumed progress</option>','>Total progress</option>'
   ]],
+  ['src/js/pages/library/013-v70-expanded-library-display-ordering.js',[
+    'Consumed progress: Most → Least','Total progress: Least → Most'
+  ]],
+  ['src/js/pages/library/122-v53-cached-library-filtering-now-understands-the-v189.js',[
+    'Consumed progress: Most → Least','Total progress: Ascending'
+  ]],
   ['src/js/components/256-v358-personal-order-rebuild.js',[
     "['progress','Total progress']"
   ]]
@@ -50,8 +56,7 @@ for(const [file,needles] of checks){
 const bundle=read('assets/js/mediaflow-v526.bundle.js');
 const deprecated=[
   'Progress watched/read','Total episodes/chapters',
-  'Total episodes / chapters','Remaining episodes / chapters',
-  'Current progress'
+  'Total episodes / chapters','Remaining episodes / chapters'
 ];
 
 function walk(dir){

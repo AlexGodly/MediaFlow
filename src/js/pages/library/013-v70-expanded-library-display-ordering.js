@@ -183,10 +183,10 @@ function renderLibrary(){
 <option value="title-desc" ${S.histFilters.libSort==='title-desc'?'selected':''}>Title: Z → A</option>
 <option value="rating-desc" ${S.histFilters.libSort==='rating-desc'?'selected':''}>Rating: High → Low</option>
 <option value="rating-asc" ${S.histFilters.libSort==='rating-asc'?'selected':''}>Rating: Low → High</option>
-<option value="progress-desc" ${S.histFilters.libSort==='progress-desc'?'selected':''}>Progress watched/read: Most → Least</option>
-<option value="progress-asc" ${S.histFilters.libSort==='progress-asc'?'selected':''}>Progress watched/read: Least → Most</option>
-<option value="total-desc" ${S.histFilters.libSort==='total-desc'?'selected':''}>Total episodes/chapters: Most → Least</option>
-<option value="total-asc" ${S.histFilters.libSort==='total-asc'?'selected':''}>Total episodes/chapters: Least → Most</option>
+<option value="progress-desc" ${S.histFilters.libSort==='progress-desc'?'selected':''}>Consumed progress: Most → Least</option>
+<option value="progress-asc" ${S.histFilters.libSort==='progress-asc'?'selected':''}>Consumed progress: Least → Most</option>
+<option value="total-desc" ${S.histFilters.libSort==='total-desc'?'selected':''}>Total progress: Most → Least</option>
+<option value="total-asc" ${S.histFilters.libSort==='total-asc'?'selected':''}>Total progress: Least → Most</option>
 </select>
 
         <select onchange="App.setLibFilter('libStatus', this.value)">
