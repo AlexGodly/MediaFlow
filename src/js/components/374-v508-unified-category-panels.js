@@ -103,7 +103,86 @@ function mf508HealthSummaryHtml(visibleCats){
     '<div class="mf508-health-groups"><div><b>Today (72 hours)</b><div class="mf508-health-counts">'+detail(current)+'</div></div>'+
     '<div><b>Overall (lifetime)</b><div class="mf508-health-counts">'+detail(lifetime)+'</div></div></div></div>';
 }
-function mf508Persist(key){
+/* v516: Settings Center owns the live controls. A full render() destroys its
+ * expanded section and scroll state, so update those controls in place instead.
+ * Checkbox/Show All actions never replace their focused DOM elements. */
+function mf508RefreshActiveSettings(key,change){
+  if(String(S.view||'')!=='settings'||typeof document==='undefined')return false;
+  const center=document.querySelector('.mf365-settings-center');
+  if(!center)return false;
+  const panels=[...center.querySelectorAll('.mf508-panel[data-mf508-panel]')];
+  if(!panels.length)return false;
+  const stage=center.querySelector('.mf365-stage');
+  const docScroll=document.scrollingElement||document.documentElement;
+  const pageTop=docScroll?.scrollTop||0,stageTop=stage?.scrollTop||0;
+  let replaced=false;
+  for(const panel of panels){
+    const panelKey=panel.getAttribute('data-mf508-panel');
+    if(!MF508_PANEL_KEYS.includes(panelKey))continue;
+    const cfg=mf508Ensure()[panelKey];
+    const sectionToggle=panel.querySelector('.mf508-master input');
+    if(sectionToggle)sectionToggle.checked=cfg.enabled;
+    const controls=panel.querySelector('.mf508-panel-controls');
+    controls?.classList.toggle('mf508-panel-disabled',!cfg.enabled);
+    if(panelKey===key&&(change==='source'||change==='order')){
+      const scratch=document.createElement('div');
+      scratch.innerHTML=mf508PanelHtml(panelKey);
+      const newControls=scratch.querySelector('.mf508-panel-controls');
+      if(!controls||!newControls)return false;
+      const active=document.activeElement;
+      let oldList=controls.querySelector('.mf508-order-list');
+      const listTop=oldList?.scrollTop||0,listLeft=oldList?.scrollLeft||0;
+      const row=active?.closest?.('.mf508-order-row');
+      const id=row?.getAttribute('data-mf508-category-id');
+      const controlIndex=row?[...row.querySelectorAll('button,input')].indexOf(active):-1;
+      const focusSource=change==='source'&&controls.contains(active);
+      if(change==='source'){
+        controls.innerHTML=newControls.innerHTML;
+        replaced=true;
+      }else{
+        const list=controls.querySelector('.mf508-order-list');
+        const replacement=newControls.querySelector('.mf508-order-list');
+        if(list&&replacement){list.innerHTML=replacement.innerHTML;replaced=true;}
+      }
+      oldList=controls.querySelector('.mf508-order-list');
+      if(oldList){oldList.scrollTop=listTop;oldList.scrollLeft=listLeft;}
+      if(id){
+        const nextRow=[...controls.querySelectorAll('.mf508-order-row')].find(el=>
+          el.getAttribute('data-mf508-category-id')===id);
+        const nextControl=nextRow?.querySelectorAll('button,input')?.[controlIndex];
+        try{nextControl?.focus({preventScroll:true});}catch(_){}
+      }else if(focusSource){
+        try{controls.querySelector('.mf508-field select')?.focus({preventScroll:true});}catch(_){}
+      }
+    }
+    // Keep selected categories checked without replacing a focused checkbox.
+    panel.querySelectorAll('.mf508-order-row').forEach(row=>{
+      const id=row.getAttribute('data-mf508-category-id');
+      const input=row.querySelector('input.mf508-cat-toggle');
+      if(input)input.checked=!cfg.hiddenIds.includes(String(id));
+    });
+    const preview=panel.querySelector('.mf508-follow-preview');
+    if(preview){
+      const names=mf508VisibleCategories(panelKey).map(c=>String(c.name));
+      const count=preview.querySelector('b'),items=preview.querySelector('span');
+      if(count)count.textContent=names.length+' categories shown';
+      if(items)items.textContent=names.slice(0,12).join(' · ')+(names.length>12?' · …':'');
+    }
+    const insight=panel.querySelector('.mf508-field select[onchange*="mf508SetMetricScope"]');
+    if(insight)insight.value=cfg.metrics;
+  }
+  // No page-wide render, so Settings Center remains expanded and in position.
+  if(replaced){
+    const restore=()=>{
+      if(docScroll)docScroll.scrollTop=pageTop;
+      if(stage)stage.scrollTop=stageTop;
+    };
+    restore();
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(restore);
+  }
+  return true;
+}
+function mf508Persist(key,change='general'){
   const cfg=mf508Ensure(),panel=cfg[key];
   if(!panel)return;
   panel.modifiedAt=Date.now();
@@ -112,12 +191,13 @@ function mf508Persist(key){
   const dashboard=v192EnsureDashboardSettings(S.settings||DEFAULT_SETTINGS);
   dashboard.showTodayBalance=cfg.todayBalance.enabled;
   v183EnsureLibraryOverview(S.settings||DEFAULT_SETTINGS).showOverview=cfg.libraryOverview.enabled;
-  persistSettings();render();
+  persistSettings();
+  if(!mf508RefreshActiveSettings(key,change))render();
 }
 function mf508SetEnabled(key,on){
   if(!MF508_PANEL_KEYS.includes(key))return;
   mf508Ensure()[key].enabled=on===true;
-  mf508Persist(key);
+  mf508Persist(key,'enabled');
 }
 function mf508SetSource(key,source){
   if(!MF508_PANEL_KEYS.includes(key)||!MF508_SOURCES.includes(source)||source===key)return;
@@ -136,7 +216,7 @@ function mf508SetSource(key,source){
     panel.order=[...current,...mf508AllCategories().map(c=>String(c.id)).filter(id=>!shown.has(id))];
   }
   panel.source=source;
-  mf508Persist(key);
+  mf508Persist(key,'source');
 }
 function mf508SetCategory(key,id,show){
   if(!MF508_PANEL_KEYS.includes(key))return;
@@ -147,14 +227,14 @@ function mf508SetCategory(key,id,show){
   const hidden=new Set(panel.hiddenIds);
   if(show)hidden.delete(String(id));else hidden.add(String(id));
   panel.hiddenIds=[...hidden];
-  mf508Persist(key);
+  mf508Persist(key,'category');
 }
 function mf508SetAll(key,show){
   if(!MF508_PANEL_KEYS.includes(key))return;
   const panel=mf508Ensure()[key];
   if(panel.source!=='custom')return;
   panel.hiddenIds=show?[]:mf508AllCategories().map(c=>String(c.id));
-  mf508Persist(key);
+  mf508Persist(key,'all');
 }
 function mf508MoveCategory(key,id,position){
   if(!MF508_PANEL_KEYS.includes(key))return;
@@ -166,12 +246,12 @@ function mf508MoveCategory(key,id,position){
   if(from===target)return;
   all.splice(from,1);all.splice(target,0,String(id));
   panel.order=all;
-  mf508Persist(key);
+  mf508Persist(key,'order');
 }
 function mf508SetMetricScope(scope){
   const panel=mf508Ensure().todayBalance;
   panel.metrics=scope==='visible'?'visible':'all';
-  mf508Persist('todayBalance');
+  mf508Persist('todayBalance','metric');
 }
 function mf508SourceOptions(key){
   const linked=key==='todayBalance'?'libraryOverview':'todayBalance';
@@ -202,7 +282,7 @@ function mf508ListHtml(key){
       const c=known.get(id);if(!c)return '';
       const on=!p.hiddenIds.includes(id);
       const safe=escapeHtml(id);
-      return '<div class="mf508-order-row"><input type="checkbox" class="mf508-cat-toggle" '+
+      return '<div class="mf508-order-row" data-mf508-category-id="'+safe+'"><input type="checkbox" class="mf508-cat-toggle" '+
         (on?'checked ':'')+'aria-label="Show '+escapeHtml(c.name)+' in '+(key==='todayBalance'?"Today\'s Balance":'Library Overview')+'" '+
         'onchange="App.mf508SetCategory(\''+key+'\',\''+safe+'\',this.checked)">'+
         '<span class="mf508-cat-name">'+v144CategoryIconHtml(c)+' '+escapeHtml(c.name)+'</span>'+
