@@ -1,0 +1,42 @@
+/* MediaFlow v504 — accessible, compact quantity steppers.
+ * Theme tokens only; no changes to Library cover styling or data mutations. */
+.mf504-step-field{display:flex;align-items:center;gap:7px;min-width:0;max-width:100%;color:var(--text-dim)}
+.mf504-step-label{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;line-height:1.35;color:var(--text-dim);min-width:0}
+.mf504-stepper{display:inline-flex;align-items:center;flex:0 1 auto;min-width:0;gap:4px;padding:3px;border:1px solid var(--border-soft,var(--border));border-radius:10px;background:var(--panel-raised,var(--panel));max-width:100%;box-sizing:border-box}
+.mf504-stepper>input[type=number]{flex:1 1 56px;min-width:56px!important;width:76px!important;max-width:130px!important;height:36px!important;margin:0!important;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.2;color:var(--text)!important;background:var(--panel,var(--surface));border:1px solid var(--border-soft,var(--border));border-radius:7px}
+.mf504-stepper>.mf504-step-button{flex:0 0 32px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:32px;height:34px;min-width:32px;min-height:34px;padding:5px!important;border:1px solid transparent;border-radius:7px;color:var(--text);background:transparent;cursor:pointer;transition:background .14s ease,border-color .14s ease}
+.mf504-stepper>.mf504-step-button svg{display:block;width:17px;height:17px;flex:none;pointer-events:none}
+.mf504-stepper>.mf504-step-button:hover:not(:disabled){background:color-mix(in srgb,var(--flow) 15%,var(--panel));color:var(--text);border-color:color-mix(in srgb,var(--flow) 30%,var(--border-soft))}
+.mf504-stepper>.mf504-step-button:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+.mf504-stepper>.mf504-step-button:disabled{opacity:.35;cursor:not-allowed}
+.mf504-amount-inline{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-width:0}
+.mf504-amount-inline>.mf504-step-label{display:none}
+.mf504-amount-inline>.mf504-step-field{display:inline-flex}
+.mf504-amount-unit{font-size:10px;color:var(--text-dim);white-space:normal;max-width:120px}
+.v239-logged-title-actions .mf504-step-field{display:inline-flex;flex-wrap:wrap;justify-content:flex-start}
+.v239-logged-title-actions .v239-logged-progress.mf504-step-field{gap:7px}
+.v239-logged-title-actions .mf504-stepper>input{width:57px!important;min-width:48px!important}
+.v239-logged-title-actions .mf504-stepper>.mf504-step-button{flex-basis:30px;width:30px;min-width:30px}
+.mf394-bulk>.mf394-field.mf504-step-field{display:grid;align-content:start;justify-items:stretch;grid-template-columns:minmax(0,1fr);gap:7px}
+.mf394-bulk>.mf394-field.mf504-step-field>.mf504-step-label{font-size:12px}
+.mf394-bulk>.mf394-field.mf504-step-field>.mf504-stepper{display:flex;width:100%;max-width:100%;min-width:0;align-items:center}
+.mf394-bulk>.mf394-field.mf504-step-field>.mf504-stepper>input{flex:1 1 auto!important;max-width:none!important;width:100%!important;height:41px!important}
+.log-form .mf504-entry-step-field{display:inline-flex;flex-wrap:wrap;align-items:center;gap:7px}
+.log-form .mf504-entry-step-field>.mf504-step-label{font-size:12px}
+.log-form .mf504-entry-step-field .mf504-stepper{max-width:100%}
+.log-form .v179-inline-progress.mf504-entry-step-field{display:flex;flex-wrap:wrap}
+@media(max-width:760px){
+ .v239-logged-title-actions .mf504-step-field{flex-wrap:wrap}
+ .v239-logged-title-actions .mf504-stepper{max-width:100%}
+ .mf504-stepper>.mf504-step-button{flex-basis:36px;width:36px;min-width:36px;min-height:38px;height:38px}
+ .mf504-stepper>input[type=number]{height:38px!important}
+}
+@media(max-width:380px){
+ .mf504-stepper{gap:3px;padding:2px}
+ .mf504-stepper>.mf504-step-button{flex-basis:29px;width:29px;min-width:29px;height:35px;min-height:35px}
+ .v239-logged-title-actions .mf504-stepper>input{width:53px!important;min-width:46px!important}
+ .mf504-amount-unit{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mf504-stepper>.mf504-step-button{transition:none}
+}
