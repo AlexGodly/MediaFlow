@@ -55,6 +55,7 @@ jobs:
           node tests/test-v531-status-labels.cjs
           node tests/test-v532-media-type-history-stats.cjs
           node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js

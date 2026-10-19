@@ -209,7 +209,7 @@ function v480PanelHtml(){
     '<span class="mf480-avatar" style="--mf480-accent:'+escapeHtml(g.color)+'">'+v480Icon(g)+'</span>'+
     '<div class="mf480-class-title"><b>'+escapeHtml(g.name)+'</b><small>Weight '+g.weight+' · '+label(g.enabled)+'</small></div>'+
     '<div class="mf480-class-actions"><button type="button" class="btn btn-sm btn-ghost" onclick="App.v480OpenClassEditor('+escapeHtml(JSON.stringify(g.id))+')">Edit</button>'+
-    '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v480DeleteClass('+escapeHtml(JSON.stringify(g.id))+')">Delete</button></div></div>'+
+    '<button type="button" class="btn btn-sm btn-ghost" onclick="App.v480DeleteClass('+escapeHtml(JSON.stringify(g.id))+',this)">Delete</button></div></div>'+
     '<div class="mf480-chips">'+(assigned.length?assigned.map(c=>'<span class="mf480-chip'+(c.enabled===false?' mf480-disabled':'')+'">'+v480Icon(c)+escapeHtml(c.name)+(c.enabled===false?' · Disabled':'')+'</span>').join(''):'<small>No categories assigned</small>')+'</div>'+
     '<div class="mf480-class-stats">Last 7 days: '+Math.round(v480ClassMinutes(g,7))+' min · Last 30 days: '+Math.round(v480ClassMinutes(g,30))+' min</div>'+
     '</article>';
@@ -298,14 +298,89 @@ function v480SaveClass(id,button){
   v480Write(config);v480CloseClassEditor();showToast('Category Class saved');
  }catch(e){if(button)button.disabled=false;showToast('Unable to save Category Class');console.error('v480 save',e);}
 }
-function v480DeleteClass(id){
- const prefs=v480Prefs(),existing=prefs.classes.find(c=>c.id===String(id));
- if(!existing)return;
- // Native confirmation is intentionally used only for deletion. It does not
- // delete categories, history, or titles.
- if(!window.confirm('Delete class "'+existing.name+'"? Categories and History will remain unchanged.'))return;
- prefs.classes=prefs.classes.filter(c=>c.id!==existing.id);
- v480Write(prefs);showToast('Class deleted. Categories remain unchanged.');
+/* MediaFlow v534 — themed, accessible Category Class deletion confirmation.
+   No class or category data is mutated until the destructive action is chosen. */
+let V534_CLASS_DELETE_ORIGIN=null;
+function v480CloseDeleteClass(){
+ const root=document.querySelector('#modal-root[data-mf534-class-delete]');
+ if(!root)return;
+ root.remove();
+ const origin=V534_CLASS_DELETE_ORIGIN;
+ V534_CLASS_DELETE_ORIGIN=null;
+ if(origin?.isConnected)origin.focus({preventScroll:true});
+ else document.querySelector('.mf480-heading button,.mf480-panel button')?.focus?.({preventScroll:true});
+}
+function v480DeleteClass(id,trigger){
+ const group=v480Prefs().classes.find(c=>c.id===String(id));
+ if(!group||document.getElementById('modal-root'))return;
+ V534_CLASS_DELETE_ORIGIN=trigger||document.activeElement;
+ const assigned=group.categoryIds?.length||0;
+ const root=document.createElement('div');
+ root.id='modal-root';
+ root.dataset.mf534ClassDelete=group.id;
+ root.innerHTML=`<div class="modal-overlay mf534-delete-overlay"
+     onclick="if(event.target===this)App.v480CloseDeleteClass()">
+   <section class="modal mf534-delete-dialog" role="alertdialog" aria-modal="true"
+      aria-labelledby="mf534-delete-title" aria-describedby="mf534-delete-description">
+     <header class="mf534-delete-header">
+       <span class="mf534-delete-icon" aria-hidden="true">
+         <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16m-11 0V4h6v2m3 0-.7 13a2 2 0 0 1-2 2H8.7a2 2 0 0 1-2-2L6 6m4 4v7m4-7v7"/></svg>
+       </span>
+       <div class="mf534-delete-heading"><small>CATEGORY CLASSES</small>
+         <h2 id="mf534-delete-title">Delete Category Class?</h2>
+         <p id="mf534-delete-description">You're about to delete <strong>${escapeHtml(group.name)}</strong>.</p>
+       </div>
+       <button type="button" class="mf534-delete-dismiss" aria-label="Close confirmation"
+         onclick="App.v480CloseDeleteClass()">×</button>
+     </header>
+     <div class="mf534-delete-content">
+       <div class="mf534-delete-safe">
+         <span aria-hidden="true">✓</span>
+         <div><b>Your media data stays safe</b>
+           <p>${assigned===0?'This class has no assigned categories.':
+              `${assigned} assigned categor${assigned===1?'y':'ies'} will become unassigned.`}
+             Your categories, Library, History, XP and progress will remain unchanged.</p>
+         </div>
+       </div>
+       <p class="mf534-delete-warning">The class and its recommendation grouping will be removed. This action cannot be undone.</p>
+     </div>
+     <footer class="mf534-delete-actions">
+       <button type="button" class="btn btn-ghost mf534-delete-cancel" onclick="App.v480CloseDeleteClass()">Cancel</button>
+       <button type="button" class="btn btn-danger mf534-delete-confirm" onclick="App.v480ConfirmDeleteClass(this)">
+         <span aria-hidden="true">×</span> Delete Category Class
+       </button>
+     </footer>
+   </section>
+ </div>`;
+ root.addEventListener('keydown',event=>{
+   if(event.key==='Escape'){event.preventDefault();App.v480CloseDeleteClass();return;}
+   if(event.key!=='Tab')return;
+   const buttons=[...root.querySelectorAll('button:not([disabled])')];
+   if(!buttons.length)return;
+   const first=buttons[0],last=buttons[buttons.length-1];
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+ });
+ document.body.appendChild(root);
+ root.querySelector('.mf534-delete-cancel')?.focus({preventScroll:true});
+}
+function v480ConfirmDeleteClass(button){
+ const root=document.querySelector('#modal-root[data-mf534-class-delete]');
+ if(!root||button?.disabled||!root.contains(button))return;
+ const id=root.dataset.mf534ClassDelete;
+ const prefs=v480Prefs();
+ if(!prefs.classes.some(c=>c.id===id)){v480CloseDeleteClass();return;}
+ if(button)button.disabled=true;
+ try{
+   prefs.classes=prefs.classes.filter(c=>c.id!==id);
+   v480Write(prefs);
+   v480CloseDeleteClass();
+   showToast('Category Class deleted. Categories and History remain unchanged.');
+ }catch(error){
+   if(button)button.disabled=false;
+   showToast('Unable to delete Category Class');
+   console.error('v534 delete Category Class',error);
+ }
 }
 function v480MountSettings(){
  if(String(S.view)!=='settings'||!window.MediaFlowSettingsCenter?.mountSection)return;
@@ -323,7 +398,8 @@ function v480MountSettings(){
  });
 }
 Object.assign(App,{
- v480SetSetting,v480OpenClassEditor,v480CloseClassEditor,v480SaveClass,v480DeleteClass
+ v480SetSetting,v480OpenClassEditor,v480CloseClassEditor,v480SaveClass,v480DeleteClass,
+ v480CloseDeleteClass,v480ConfirmDeleteClass
 });
 MediaFlowRuntime.registerPageEnhancer('settings',v480MountSettings);
 window.MediaFlowV480=Object.freeze({version:480,prefs:v480Prefs,preview:v480PanelHtml,openEditor:v480OpenClassEditor,closeEditor:v480CloseClassEditor,
