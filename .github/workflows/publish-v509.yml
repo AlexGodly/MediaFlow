@@ -41,7 +41,7 @@ jobs:
             if [ -e "$entry" ]; then cp -a "$entry" legacy/v/509/; fi
           done
           test -f legacy/v/509/assets/js/mediaflow-v509.bundle.js
-          git add VERSION index.html sw.js manifest.json assets/js/mediaflow-v509.bundle.js legacy/v/509
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v509.bundle.js legacy/v/509
           git add -u
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v509' || true
           git push origin HEAD:main
