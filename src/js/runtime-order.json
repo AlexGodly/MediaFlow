@@ -228,5 +228,6 @@
   "components/371-v503-recovery-cover-contrast.js",
   "components/372-v504-logging-quantity-steppers.js",
   "components/373-v507-persistence-portability-pwa-audit.js",
-  "components/374-v508-unified-category-panels.js"
+  "components/374-v508-unified-category-panels.js",
+  "components/375-v514-canonical-category-settings.js"
 ]
