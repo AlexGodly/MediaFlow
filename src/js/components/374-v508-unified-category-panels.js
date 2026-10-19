@@ -227,7 +227,7 @@ function mf508PanelHtml(key){
     (today?'<label class="mf508-field"><span>Balance insights scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
       '<option value="all"'+(p.metrics==='all'?' selected':'')+'>All categories, including hidden (default)</option>'+
       '<option value="visible"'+(p.metrics==='visible'?' selected':'')+'>Only displayed categories</option>'+
-      '</select></label><p class="mf508-footnote">Only these Today’s Balance insights change: visible/all consumption and time totals, plus the Today/Overall category-health overview. Each category retains its recorded 72-hour and lifetime health. No History, XP, task scores or other Dashboard totals change.</p>':
+      '</select></label><p class="mf508-footnote">Only the Today/Overall category-health overview follows this scope. Category health, consumption, time totals, History, XP and task scores keep their existing calculations.</p>':
       '<p class="mf508-footnote">The Library-wide completion percentage retains its original all-Library meaning. Only category rows and their order change.</p>')+
     '</div></section>';
 }
@@ -292,23 +292,6 @@ window.MediaFlowV508={version:508,resolve:mf508VisibleCategories,
   inspect:()=>({settings:mf508Ensure(),todayBalance:mf508VisibleCategories('todayBalance').map(c=>c.id),
     libraryOverview:mf508VisibleCategories('libraryOverview').map(c=>c.id)})};
 
-// v511: Insert sections INSIDE v220 Settings content, before the empty-state
-// sentinel. The previous wrapper appended them outside the Settings root.
-if(typeof MediaFlowRuntime!=='undefined'&&typeof v220RenderSettingsPage==='function'){
-  MediaFlowRuntime.registerPageRenderer('settings',function(){
-    let html=String(v220RenderSettingsPage.apply(this,arguments)||'');
-    const marker='<div id="v220-settings-empty"';
-    const at=html.indexOf(marker);
-    if(at<0)return html;
-    const panels='<div class="section-label">TODAY\'S BALANCE</div>'+
-      mf508PanelHtml('todayBalance')+
-      '<div class="section-label">LIBRARY OVERVIEW DISPLAY</div>'+
-      mf508PanelHtml('libraryOverview')+
-      '<div class="section-label">PWA UPDATE RECOVERY</div>'+
-      '<div class="card"><b>App update stuck?</b><p class="hint">Fetch the latest deployed app without deleting your data.</p><button class="btn btn-primary" onclick="App.mf510ForcePwaRefresh()">Force latest app update</button></div>';
-    return html.slice(0,at)+panels+html.slice(at);
-  });
-}
 // v510: Always expose an explicit update path, even when an old controller
 // reports no waiting worker. Never clear IndexedDB, localStorage or user data.
 async function mf510ForcePwaRefresh(){
