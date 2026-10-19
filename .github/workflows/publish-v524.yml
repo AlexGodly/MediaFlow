@@ -1,0 +1,67 @@
+name: Build archive and release MediaFlow v524
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v524.yml'
+  workflow_dispatch:
+  # v524 professional README presentation, no app-data or behavior changes
+  # Release workflow registration trigger: tests and full archive required
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v524-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 524
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v524.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v524.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/524
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/524/; fi
+          done
+          test -f legacy/v/524/assets/js/mediaflow-v524.bundle.js
+          test -f legacy/v/524/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json assets/js/mediaflow-v524.bundle.js legacy/v/524
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v524' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v524_Stable.zip HEAD:legacy/v/524
+          sha256sum MediaFlow_v524_Stable.zip > MediaFlow_v524_Stable.sha256
+          if ! gh release view 524 >/dev/null 2>&1; then
+            gh release create 524 MediaFlow_v524_Stable.zip MediaFlow_v524_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v524 Stable' --notes 'MediaFlow by Alex Godly documentation refresh: replace the empty root README with a polished, branded and accessible general product overview, centered logo and navigation links, core Library, Dashboard, Logging, Collections, Personal Order, Statistics, XP, themes, recovery and fresh-release features, PWA/mobile/cloud information, getting-started guide, illustrative desktop/mobile screenshots, development resources, and accurate proprietary licensing. Documentation-only release: no media data, settings, library, Personal Order, Supabase schema or runtime behavior changed. Include README, logo and LICENSE in the full legacy/v/524 archive, preserve all existing regression and PWA checks, deploy and publish v524 Stable.'
+          fi
