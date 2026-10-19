@@ -99,6 +99,9 @@ function mf508SetEnabled(key,on){
 }
 function mf508SetSource(key,source){
   if(!MF508_PANEL_KEYS.includes(key)||!MF508_SOURCES.includes(source)||source===key)return;
+  // Resolve the old selection BEFORE grabbing the mutable config; resolving
+  // itself normalizes settings, which otherwise invalidated panel references.
+  const current=source==='custom'?mf508VisibleCategories(key).map(c=>String(c.id)):[];
   const cfg=mf508Ensure(),other=key==='todayBalance'?'libraryOverview':'todayBalance';
   if(source===other&&cfg[other].source===key){
     showToast('These sections cannot follow each other in a loop. Change the other source first.');
@@ -106,7 +109,6 @@ function mf508SetSource(key,source){
   }
   const panel=cfg[key];
   if(source==='custom'&&panel.source!=='custom'){
-    const current=mf508VisibleCategories(key).map(c=>String(c.id));
     const shown=new Set(current);
     panel.hiddenIds=mf508AllCategories().filter(c=>!shown.has(String(c.id))).map(c=>String(c.id));
     panel.order=[...current,...mf508AllCategories().map(c=>String(c.id)).filter(id=>!shown.has(id))];
