@@ -1,0 +1,61 @@
+name: Build archive and release MediaFlow v514
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v514.yml'
+  workflow_dispatch:
+  # v514 service-worker syntax, activation, and deployment integrity repair
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v514-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 514
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v514.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          grep -q 'registerPageRenderer.*settings' src/js/components/374-v508-unified-category-panels.js
+          grep -q 'mediaflow-v514.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/514
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/514/; fi
+          done
+          test -f legacy/v/514/assets/js/mediaflow-v514.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v514.bundle.js legacy/v/514
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v514' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v514_Stable.zip HEAD:legacy/v/514
+          sha256sum MediaFlow_v514_Stable.zip > MediaFlow_v514_Stable.sha256
+          if ! gh release view 514 >/dev/null 2>&1; then
+            gh release create 514 MediaFlow_v514_Stable.zip MediaFlow_v514_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v514 Stable' --notes 'Restore Today’s Balance and Library Overview Display settings to the canonical v221/v365 Settings Center. Categories default enabled and follow Category Settings, with MediaFlow System/Custom/follow-other sources, show/hide/reorder, loop prevention, and independent balance-health scope (all or visible). Preserve existing XP, History, scheduler and consumption totals. Add automated Settings integration tests plus validated PWA, full source archive and cloud-compatible settings persistence.'
+          fi
