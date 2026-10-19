@@ -22,8 +22,8 @@ const expected=[['video','Watching'],['reading','Reading'],['playing','Playing']
 function choices(html){
  const m=html.match(/<select id="m-type">([\s\S]*?)<\/select>/);
  assert(m,'Category form must have its Type dropdown');
- return [...m[1].matchAll(/<option value="([^"]+)"( selected)?>([^<]*)<\/option>/g)]
-  .map(x=>({value:x[1],selected:!!x[2],label:x[3]}));
+ return [...m[1].matchAll(/<option value="([^"]+)"\s*(selected)?\s*>([^<]*)<\/option>/g)]
+  .map(x=>({value:x[1],selected:x[2]==='selected',label:x[3]}));
 }
 for(const isNew of [true,false]){
  for(const [type] of expected){

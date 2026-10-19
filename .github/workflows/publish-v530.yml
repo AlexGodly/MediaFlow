@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-v530.yml'
   workflow_dispatch:
   # v530: fix active category editor type choices after v144 override
+  # Regression test accepts blank template interpolation whitespace around unselected options.
   # CI rerun after completing the CommonJS test source identifier migration
   # Corrected v70 and v53 legacy Library dropdowns and narrowed bundle checks to sorter-specific text.
   # Release workflow registration trigger: tests and full archive required
