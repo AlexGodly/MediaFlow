@@ -1,0 +1,74 @@
+name: Publish MediaFlow v504 Stable
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify v504 deployed source equals its immutable full archive
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "504" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/504/$entry")"
+          done
+          test "$(git show HEAD:legacy/v/504/VERSION | tr -d '\r\n')" = 504
+          git cat-file -e HEAD:legacy/v/504/assets/js/mediaflow-v504.bundle.js
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+      - name: Package complete v504 snapshot
+        if: steps.verify.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v504_Stable.zip HEAD:legacy/v/504
+          sha256sum MediaFlow_v504_Stable.zip > MediaFlow_v504_Stable.sha256
+          test -s MediaFlow_v504_Stable.zip
+      - name: Publish release 504 with changelog
+        if: steps.verify.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 504 >/dev/null 2>&1; then
+            echo "Release tag 504 already exists; not overwriting."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## MediaFlow v504 Stable — Quick & Advanced Logging Steppers
+
+          Built on v503 Stable (restored v483 foundation). Historical versions remain archived.
+
+          - **Quick Logging — Amount Consumed:** adjustable draft quantity with + / - controls and direct numeric editing, including added-title rows and the initial title input.
+          - **Quick Logging — Last Progress:** accessible + / - buttons beside the existing last watched/read inputs. Saved start and total bounds are respected.
+          - **Advanced Logging:** + / - controls for Amount Consumed and Last Watched/Read Unit, preserving season limits and the 2,000-unit guard through the canonical logging handler.
+          - **Safety & UX:** draft-only updates, instant recalculation of quantity/consumption previews, stable timestamps/runtime and keyboard focus, adaptive theme colors and mobile layouts.
+          - **No missing-cover changes:** the already completed cover behavior from v503 remains untouched.
+          - **PWA:** regenerated v504 bundle, service worker and cache manifest; responsive styling and automated source/PWA checks.
+          - **Data safety:** no database, Supabase schema or user-library migration.
+
+          Includes complete version source snapshot and SHA-256 checksum.
+          NOTES
+          gh release create 504 MediaFlow_v504_Stable.zip MediaFlow_v504_Stable.sha256 \
+            --target "$RELEASE_SHA" --title "v504 Stable" --notes-file release-notes.md
