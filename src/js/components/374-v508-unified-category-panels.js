@@ -291,3 +291,19 @@ Object.assign(App,{mf508SetEnabled,mf508SetSource,mf508SetCategory,mf508SetAll,
 window.MediaFlowV508={version:508,resolve:mf508VisibleCategories,
   inspect:()=>({settings:mf508Ensure(),todayBalance:mf508VisibleCategories('todayBalance').map(c=>c.id),
     libraryOverview:mf508VisibleCategories('libraryOverview').map(c=>c.id)})};
+
+// The v220 Settings page captured the original renderer before this module loaded.
+// Register the final page explicitly so its navigation/search can discover these controls.
+if(typeof MediaFlowRuntime!=='undefined'&&typeof v220RenderSettingsPage==='function'){
+  MediaFlowRuntime.registerPageRenderer('settings',function(){
+    const html=String(v220RenderSettingsPage.apply(this,arguments)||'');
+    if(html.includes('data-mf508-panel="todayBalance"')&&html.includes('data-mf508-panel="libraryOverview"'))return html;
+    const sections='<div class="section-label">TODAY\'S BALANCE</div>'+
+      mf508PanelHtml('todayBalance')+
+      '<div class="section-label">LIBRARY OVERVIEW DISPLAY</div>'+
+      mf508PanelHtml('libraryOverview');
+    const anchor='<div id="v220-settings-empty"';
+    const at=html.indexOf(anchor);
+    return at>=0?html.slice(0,at)+sections+html.slice(at):html+sections;
+  });
+}
