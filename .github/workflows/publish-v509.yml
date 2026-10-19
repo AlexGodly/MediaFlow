@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/publish-v510.yml'
+      - '.github/workflows/publish-v509.yml'
   workflow_dispatch:
 permissions:
   contents: write
