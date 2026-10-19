@@ -147,4 +147,79 @@ const older={settings:{v508Panels:{todayBalance:{source:'categories',modifiedAt:
 const merged=context.mergeStates(older,state);
 assert.equal(merged.settings.v508Panels.todayBalance.source,'custom','cloud merge preserves newer settings');
 assert.equal(merged.settings.v183LibraryOverview.showOverview,false);
-console.log('PASS: canonical v221/v365 Settings Center sections, search metadata, XP preservation, sources, ordering, following, visibility, health scope, persistence and cloud merge, icon-free checkboxes.');
+
+// v516: Simulate Settings Center 2.0 already mounted with both category lists
+// scrolled mid-way. A click must not rebuild the page or lose native checkbox
+// focus, scroll positions, cloud-save behavior, or other panel preferences.
+App.mf508SetSource('libraryOverview','custom');
+App.mf508SetSource('todayBalance','custom');
+S.view='settings';
+const pageScroll={scrollTop:763};
+const stageScroll={scrollTop:417};
+const checkboxByPanel={};
+function fakePanel(key){
+  const ids=categories.map(c=>c.id);
+  const checkboxes=Object.create(null);
+  const rows=ids.map(id=>{
+    const input={checked:false};
+    checkboxes[id]=input;
+    return {
+      getAttribute(name){return name==='data-mf508-category-id'?id:null;},
+      querySelector(selector){return selector==='input.mf508-cat-toggle'?input:null;}
+    };
+  });
+  checkboxByPanel[key]=checkboxes;
+  const master={checked:true},classChanges=[];
+  const controls={
+    classList:{toggle(name,value){classChanges.push({name,value});}},
+    querySelector(){return null;}
+  };
+  return {
+    getAttribute(name){return name==='data-mf508-panel'?key:null;},
+    querySelector(selector){
+      if(selector==='.mf508-master input')return master;
+      if(selector==='.mf508-panel-controls')return controls;
+      return null;
+    },
+    querySelectorAll(selector){return selector==='.mf508-order-row'?rows:[];}
+  };
+}
+const fakeToday=fakePanel('todayBalance'),fakeLibrary=fakePanel('libraryOverview');
+const fakeCenter={
+  querySelector(selector){return selector==='.mf365-stage'?stageScroll:null;},
+  querySelectorAll(selector){
+    return selector==='.mf508-panel[data-mf508-panel]'?[fakeToday,fakeLibrary]:[];
+  }
+};
+const fakeDocument={
+  scrollingElement:pageScroll,
+  activeElement:checkboxByPanel.todayBalance.movies,
+  querySelector(selector){return selector==='.mf365-settings-center'?fakeCenter:null;}
+};
+context.document=fakeDocument;
+const startRender=renders,startSaves=saves;
+App.mf508SetCategory('todayBalance','movies',true);
+assert.equal(renders,startRender,'checking Today’s Balance must not rebuild Settings');
+assert.equal(saves,startSaves+1,'checking Today’s Balance must save settings');
+assert.equal(pageScroll.scrollTop,763,'Today’s Balance must keep document scroll');
+assert.equal(stageScroll.scrollTop,417,'Today’s Balance must keep Settings Center scroll');
+assert.equal(checkboxByPanel.todayBalance.movies.checked,true,'Today’s Balance checkbox must remain selected');
+assert.strictEqual(fakeDocument.activeElement,checkboxByPanel.todayBalance.movies,'checkbox focus must survive the update');
+App.mf508SetCategory('libraryOverview','books',false);
+assert.equal(renders,startRender,'checking Library Overview must not rebuild Settings');
+assert.equal(checkboxByPanel.libraryOverview.books.checked,false,'Library Overview visibility updates inline');
+assert.equal(pageScroll.scrollTop,763);
+assert.equal(stageScroll.scrollTop,417);
+App.mf508SetAll('libraryOverview',false);
+assert.equal(renders,startRender,'Hide All must not rebuild Settings');
+for(const input of Object.values(checkboxByPanel.libraryOverview))assert.equal(input.checked,false,'Hide All checkbox state must update');
+App.mf508SetAll('libraryOverview',true);
+for(const input of Object.values(checkboxByPanel.libraryOverview))assert.equal(input.checked,true,'Show All checkbox state must update');
+App.mf508SetMetricScope('visible');
+assert.equal(renders,startRender,'balance insights scope must not jump to top');
+App.mf508SetEnabled('todayBalance',false);
+assert.equal(renders,startRender,'master section toggle must not jump to top');
+assert.equal(pageScroll.scrollTop,763);
+assert.equal(stageScroll.scrollTop,417);
+context.document=undefined;
+console.log('PASS: canonical v221/v365 Settings Center sections, search metadata, XP preservation, sources, ordering, following, visibility, health scope, persistence and cloud merge, icon-free checkboxes and no-scroll inline Settings edits.');
