@@ -1,0 +1,94 @@
+name: MediaFlow v450 Universal Metadata & External Ratings Quality Gate
+on:
+  push:
+    branches: [feature/v450-universal-metadata-ratings-expansion]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v450-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build v450 and verify syntax
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = "450"
+          python scripts/build.py
+          node --check assets/js/mediaflow-v450.bundle.js
+          node --check src/js/components/330-v450-universal-metadata-expansion.js
+          node --check scripts/test-v450-metadata-expansion.cjs
+          node --check scripts/test-v450-browser.cjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Validate existing authenticated provider gateway
+        run: deno check --node-modules-dir=auto supabase/functions/mediaflow-api-gateway/index.ts
+      - name: Verify metadata, recovery, existing features and PWA
+        run: |
+          set -euo pipefail
+          node scripts/test-v450-metadata-expansion.cjs
+          node scripts/test-v437-universal-metadata.cjs
+          node scripts/test-v437-editor-layout.cjs
+          node scripts/test-v439-metadata-engine.cjs
+          node scripts/test-v438-provider-registry.cjs
+          node scripts/test-v440-cover-adapters.cjs
+          node scripts/test-v441-recovery-workspace.cjs
+          node scripts/test-v442-recovery-hardening.cjs
+          node scripts/test-v443-provider-availability.cjs
+          node scripts/test-v444-recovery-ui.cjs
+          node scripts/test-v445-workspace.cjs
+          node scripts/test-v446-recovery-controls.cjs
+          node scripts/test-v447-universal-recovery.cjs
+          node scripts/test-v448-smart-autofill.cjs
+          node scripts/test-v431-cover-autosave.cjs
+          node scripts/test-v433-id-foundation.cjs
+          node scripts/test-v434-gateway.cjs
+          node scripts/test-v435-omdb.cjs
+          node scripts/test-v425-recovery.cjs
+          node scripts/test-v427-cover-universal-id.cjs
+          node scripts/check-settings-style.cjs
+          python scripts/check.py
+      - name: Desktop and 360px mobile Chromium browser smoke
+        run: node scripts/test-v450-browser.cjs
+      - name: Commit verified bundle and complete v450 source archive
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/450
+          rsync -a --exclude='/.git/' --exclude='/legacy/' --exclude='/beta/' --exclude='/artifacts/' ./ legacy/v/450/
+          test "$(cat legacy/v/450/VERSION)" = 450
+          test -s legacy/v/450/assets/js/mediaflow-v450.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html sw.js version.json manifest.json assets/js/mediaflow-v450.bundle.js
+          git add --sparse -f legacy/v/450
+          if ! git diff --cached --quiet; then
+            git commit -m 'build(v450): verified site and full legacy archive [skip ci]'
+            git push origin HEAD:feature/v450-universal-metadata-ratings-expansion
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mediaflow-v450-verified-smoke
+          path: |
+            artifacts/v450-browser-smoke/
+            version.json

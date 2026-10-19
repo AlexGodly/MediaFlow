@@ -229,7 +229,7 @@ function v265Guidance(todayStatus,overallStatus,cat){
   return {label,clean:clean||'Keep this category in your normal rotation.'};
 }
 function v265BalanceMarkup(){
-  const cats=(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled)),today=todaysSessions();
+  const cats=(typeof mf508VisibleCategories==='function'?mf508VisibleCategories('todayBalance'):(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled))),today=todaysSessions();
   if(!cats.length)return '<div class="mf265-balance-empty">No categories are enabled for Today’s Balance.</div>';
   const labelMap={healthy:'Healthy',neglected:'Neglected',overused:'Overused',due:'Due'};
   const rows=cats.map(cat=>{
@@ -242,13 +242,16 @@ function v265BalanceMarkup(){
       <div class="mf265-balance-guidance"><b>${v265Esc(g.label)}</b><span>${v265Esc(g.clean)}</span></div>
     </article>`;
   }).join('');
-  const consumed=today.filter(s=>s.status!=='skipped'),units=consumed.reduce((a,s)=>a+(Number(s.actualAmount)||0),0),minutes=consumed.reduce((a,s)=>a+(Number(s.minutes)||0),0),streak=computeDayStreak(),unrated=(S.library||[]).filter(i=>!(Number(i.rating)>0)).length;
+  const metricScope=typeof mf508MetricScope==='function'?mf508MetricScope():'all';
+  const selectedIds=new Set(cats.map(c=>String(c.id)));
+  const consumed=today.filter(s=>s.status!=='skipped'&&(metricScope==='all'||selectedIds.has(String(s.categoryId))));
+  const units=consumed.reduce((a,s)=>a+(Number(s.actualAmount)||0),0),minutes=consumed.reduce((a,s)=>a+(Number(s.minutes)||0),0),streak=computeDayStreak(),unrated=(S.library||[]).filter(i=>!(Number(i.rating)>0)).length;
   return `<div class="mf265-balance-list">${rows}</div><div class="mf265-balance-summary">
     <div><small>Consumed today</small><b>${units.toLocaleString()}</b><span>units</span></div>
     <div><small>Time invested</small><b>${fmtMinutes(minutes)}</b><span>today</span></div>
     <div><small>Current streak</small><b>${streak}</b><span>days</span></div>
     <div><small>Rating queue</small><b>${unrated.toLocaleString()}</b><span>unrated titles</span></div>
-  </div>`;
+  </div>${typeof mf508HealthSummaryHtml==='function'?mf508HealthSummaryHtml(cats):''}`;
 }
 function v265EnhanceBalance(){
   if(String(S.view||'')!=='dashboard')return;

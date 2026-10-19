@@ -147,7 +147,7 @@ function v261OpenBalanceCategory(id){
   const cfg=v181EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);cfg.activeCategoryId=String(id);S.view='library';persistSettings();render();
 }
 function v261BalanceMarkup(){
-  const cats=(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled));
+  const cats=(typeof mf508VisibleCategories==='function'?mf508VisibleCategories('todayBalance'):(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled)));
   const today=todaysSessions();
   if(!cats.length)return '<div class="v261-balance-empty">No categories selected for Today’s Balance.</div>';
   const labelMap={healthy:'Healthy',neglected:'Neglected',overused:'Overused',due:'Due'};

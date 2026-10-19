@@ -31,7 +31,7 @@ function v183EnsureLibraryOverview(settings=S.settings){
 }
 
 function v183LibraryOverviewEnabled(){
-  return v183EnsureLibraryOverview(S.settings||DEFAULT_SETTINGS).showOverview!==false;
+  return typeof mf508Ensure==='function'?mf508Ensure().libraryOverview.enabled:v183EnsureLibraryOverview(S.settings||DEFAULT_SETTINGS).showOverview!==false;
 }
 
 function v183LibraryOverviewToggleHtml(){
@@ -95,7 +95,7 @@ function v183LibraryOverviewEstimate(cat,x){
 
 function v183LibraryOverviewHtml(){
   const ov=v53LibraryOverview();
-  const rows=(S.categories||[]).map(cat=>{
+  const rows=(typeof mf508VisibleCategories==='function'?mf508VisibleCategories('libraryOverview'):(S.categories||[]).filter(c=>c.enabled!==false)).map(cat=>{
     const x=ov.byCat.get(cat.id)||{
       items:0,
       done:0,

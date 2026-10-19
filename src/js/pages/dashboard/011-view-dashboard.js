@@ -166,7 +166,7 @@ function renderDashboard(){
 
   }
 
-  const cats = (typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled));
+  const cats = (typeof mf508VisibleCategories==='function'?mf508VisibleCategories('todayBalance'):(typeof v186ScopeCategories==='function'?v186ScopeCategories('todayBalance'):S.categories.filter(c=>c.enabled)));
 
    const balanceHtml = cats.length===0 ? `<div class="empty-state"><div class="em-icon">🗂️</div><div class="em-title">No categories selected</div><div>Choose categories in Settings → Dashboard Settings.</div></div>` : ` 
 

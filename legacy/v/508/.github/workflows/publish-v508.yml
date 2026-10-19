@@ -1,0 +1,78 @@
+name: Publish MediaFlow v508 Stable
+on:
+  workflow_run:
+    workflows: ['Deploy MediaFlow (exclude legacy and beta)']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Verify v508 deployed source equals its immutable full archive
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat VERSION)" != "508" ]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            test "$(git rev-parse "HEAD:$entry")" = "$(git rev-parse "HEAD:legacy/v/508/$entry")"
+          done
+          test "$(git show HEAD:legacy/v/508/VERSION | tr -d '\r\n')" = 508
+          git cat-file -e HEAD:legacy/v/508/assets/js/mediaflow-v508.bundle.js
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+      - name: Package complete v508 snapshot
+        if: steps.verify.outputs.valid == 'true'
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v508_Stable.zip HEAD:legacy/v/508
+          sha256sum MediaFlow_v508_Stable.zip > MediaFlow_v508_Stable.sha256
+          test -s MediaFlow_v508_Stable.zip
+      - name: Publish release 508 with changelog
+        if: steps.verify.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if gh release view 508 >/dev/null 2>&1; then
+            echo "Release tag 508 already exists; not overwriting."
+            exit 0
+          fi
+          cat > release-notes.md <<'NOTES'
+          ## MediaFlow v508 Stable — Unified Category Visibility & Ordering
+
+          Built from v507 Stable without changing Library records, Supabase schemas or older release archives.
+
+          - **Today's Balance and Library Overview:** independent Show section switches (default ON), plus a single consistent category source and order resolver across Dashboard rendering, late enhancers, initial load and both Library modes.
+          - **Follow Categories (default):** honor the main category enabled/disabled toggles; disabled Movies is omitted from both individual category lists.
+          - **Follow MediaFlow System:** follow the current rotation category selection (including its independent custom scope).
+          - **Custom:** selectively show/hide each category, reorder by arrows or numeric position and preserve those settings across reloads.
+          - **Follow other panel:** Today's Balance can follow Library Overview, and Library Overview can follow Today's Balance. Cyclic settings are rejected and recovered safely.
+          - **Balance summary metric scope:** optionally show Today's Balance consumption/time summaries for all logged categories, even hidden, or only categories currently visible; this does not modify stored consumption, XP, scheduler weights, existing tasks or other Dashboard metrics.
+          - **Library Overview:** fixes the old renderer that unconditionally listed every category. The existing global known-total completion percentage retains its meaning.
+          - **Persistence:** cloud-synced settings are included in Full Data export/import, Settings Presets, automatic exports and Sync Now; per-panel cross-device changes merge by modified timestamp, retaining old visibility preferences.
+          - **Polished settings:** compact, responsive, dynamic-theme-aware category lists and clear source / enabled / visibility controls.
+          - **PWA:** rebuilt v508 JavaScript bundle, service worker, offline-cache version and stylesheet.
+          - **Regression tests:** execute real Library Overview and Today’s Balance renderers against synthetic categories, account settings and History, including disabled Movies, per-category ordering, linked configurations, cycle safety, metric scope and cloud merge.
+
+          No user data migrations. Complete v508 source ZIP and SHA-256 checksum included.
+          NOTES
+          gh release create 508 MediaFlow_v508_Stable.zip MediaFlow_v508_Stable.sha256 \
+            --target "$RELEASE_SHA" --title "v508 Stable" --notes-file release-notes.md
