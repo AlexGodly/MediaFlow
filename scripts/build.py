@@ -46,3 +46,16 @@ except subprocess.CalledProcessError as e:
 # PWA files are release artifacts too. Every future build refreshes the cache name
 # and discovers the current local CSS/JS assets from index.html automatically.
 subprocess.run([sys.executable,str(ROOT/'scripts/pwa.py')],check=True)
+
+# Never publish an installable PWA with a broken service worker. The v512
+# deployment had a syntax error in sw.js although its main JS bundle passed.
+# Exercise the worker's update handshake and critical-only install lifecycle.
+try:
+    subprocess.run(['node','--check',str(ROOT/'sw.js')],check=True)
+    subprocess.run(['node',str(ROOT/'scripts/check-pwa-release.js')],check=True)
+    print('PWA service worker syntax and upgrade smoke test: OK')
+except FileNotFoundError:
+    print('Node not found; skipped PWA check locally (CI must run Node checks)')
+except subprocess.CalledProcessError as e:
+    sys.exit(e.returncode)
+
