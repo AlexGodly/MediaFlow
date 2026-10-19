@@ -1,0 +1,75 @@
+name: Build archive and release MediaFlow v530
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v530.yml'
+  workflow_dispatch:
+  # v530: fix active category editor type choices after v144 override
+  # CI rerun after completing the CommonJS test source identifier migration
+  # Corrected v70 and v53 legacy Library dropdowns and narrowed bundle checks to sorter-specific text.
+  # Release workflow registration trigger: tests and full archive required
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v530-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 530
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v530.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v530.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/530
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/530/; fi
+          done
+          test -f legacy/v/530/assets/js/mediaflow-v530.bundle.js
+          test -f legacy/v/530/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json assets/js/mediaflow-v530.bundle.js legacy/v/530
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v530' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v530_Stable.zip HEAD:legacy/v/530
+          sha256sum MediaFlow_v530_Stable.zip > MediaFlow_v530_Stable.sha256
+          if ! gh release view 530 >/dev/null 2>&1; then
+            gh release create 530 MediaFlow_v530_Stable.zip MediaFlow_v530_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v530 Stable' --notes 'v530 Stable: Fix the actual Add/Edit Category renderer inherited from v144, which still showed only Video and Reading despite the v527 universal-media expansion. All category modals now show Watching, Reading, Playing and Listening; retain the internal video identifier for legacy compatibility and existing category data. Verify rendered HTML, selected edit values, stable cloud save path and full PWA bundle. Preserve 24 packaged category icons, 15 units, XP and cloud data. No Supabase migration.'
+          fi

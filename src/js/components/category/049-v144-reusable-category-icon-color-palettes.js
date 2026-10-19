@@ -245,7 +245,7 @@ categoryModalHtml=function(d){
 
     <div class="field-row">
       <div class="field"><label class="field-label">Type</label>
-        <select id="m-type"><option value="video" ${d.type==='video'?'selected':''}>Video</option><option value="reading" ${d.type==='reading'?'selected':''}>Reading</option></select>
+        <select id="m-type"><option value="video" ${d.type==='video'?'selected':''}>Watching</option><option value="reading" ${d.type==='reading'?'selected':''}>Reading</option><option value="playing" ${d.type==='playing'?'selected':''}>Playing</option><option value="listening" ${d.type==='listening'?'selected':''}>Listening</option></select>
       </div>
       <div class="field"><label class="field-label">Unit</label>
         <select id="m-unit">${Object.keys(UNITS).map(u=>`<option value="${u}" ${d.unit===u?'selected':''}>${UNITS[u].label}</option>`).join('')}</select>
