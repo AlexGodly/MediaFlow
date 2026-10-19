@@ -5,6 +5,7 @@
 const V373_RELEASE=373;
 const V373_SORTS=[
   ['logAdded','Added to Logging'],
+  ['draftUpdated','Last updated in draft'],
   ['progress','Current progress'],
   ['total','Total episodes / chapters'],
   ['remaining','Remaining episodes / chapters'],
@@ -17,13 +18,14 @@ const V373_SORTS=[
   ['random','Random'],
   ['custom','Custom order']
 ];
-const V373_PICKER_SORTS=V373_SORTS.filter(([key])=>key!=='custom');
+// Draft-specific recency is ONLY for Arrange your session; never extend the all-Library picker.
+const V373_PICKER_SORTS=V373_SORTS.filter(([key])=>key!=='custom'&&key!=='draftUpdated');
 const V373_ALLOWED=new Set(V373_SORTS.map(x=>x[0]));
 function v373OrderState(){
   const draft=S.logDraft;
-  if(!draft||typeof draft!=='object')return {sort:'added',dir:'desc',manualIds:[],randomSeed:1};
+  if(!draft||typeof draft!=='object')return {sort:'logAdded',dir:'desc',manualIds:[],randomSeed:1};
   if(!draft.v373Ordering||typeof draft.v373Ordering!=='object')
-    draft.v373Ordering={sort:'added',dir:'desc',manualIds:[],randomSeed:1,v517DefaultApplied:true};
+    draft.v373Ordering={sort:'logAdded',dir:'desc',manualIds:[],randomSeed:1,v517DefaultApplied:true,v525DefaultApplied:true};
   const st=draft.v373Ordering;
   // Upgrade untouched legacy defaults without resetting deliberate custom sorts.
   if(st.v517DefaultApplied!==true){
@@ -32,7 +34,17 @@ function v373OrderState(){
     if(untouched){st.sort='added';st.dir='desc';}
     st.v517DefaultApplied=true;
   }
-  if(!V373_ALLOWED.has(st.sort)){st.sort='added';st.dir='desc';}
+  // v525 restores a session-only default of Added to Logging, newest first.
+  // Migrate the previous v517 implicit default once; never overwrite custom,
+  // random, reverse, or other consciously selected sorting choices.
+  if(st.v525DefaultApplied!==true){
+    if(st.sort==='added'&&st.dir==='desc'&&
+        (!Array.isArray(st.manualIds)||st.manualIds.length===0)){
+      st.sort='logAdded';st.dir='desc';
+    }
+    st.v525DefaultApplied=true;
+  }
+  if(!V373_ALLOWED.has(st.sort)){st.sort='logAdded';st.dir='desc';}
   st.dir=st.dir==='desc'?'desc':'asc';
   if(!Array.isArray(st.manualIds))st.manualIds=[];
   if(!Number.isSafeInteger(st.randomSeed)||st.randomSeed<1)st.randomSeed=1;
@@ -84,6 +96,16 @@ function v373RemainingUnits(item){
   const total=validTotal(item.total);
   return total===null?null:Math.max(0,total-progress(item.progress));
 }
+// Prefer the real last edit of the draft title, not a Library metadata
+// update or a manually adjusted watched-at timestamp. Per-unit timestamps
+// handle restored older drafts that lack an entry-level edit stamp.
+function v373DraftModifiedAt(entry){
+  if(!entry||typeof entry!=='object')return 0;
+  const units=Array.isArray(entry.v369Units)?entry.v369Units:[];
+  let stamp=v373Timestamp(entry.v369UpdatedAt);
+  for(const u of units)stamp=Math.max(stamp,v373Timestamp(u?.v369UpdatedAt));
+  return stamp||v373Timestamp(entry.loggedAt);
+}
 function v373CompareData(a,b,field,dir){
   const sign=dir==='desc'?-1:1;
   const itemA=a.item||{},itemB=b.item||{};
@@ -103,7 +125,11 @@ function v373CompareData(a,b,field,dir){
   let av=0,bv=0;
   const num=(v)=>Number.isFinite(Number(v))?Number(v):0;
   switch(field){
-    case 'logAdded':av=v373Timestamp(a.entry.loggedAt)||a.index+1;bv=v373Timestamp(b.entry.loggedAt)||b.index+1;break;
+    // Session insertion order is canonical and does not change when someone
+    // edits a watched-at timestamp. The last-update sorter is separate.
+    case 'logAdded':av=a.index;bv=b.index;break;
+    case 'draftUpdated':
+      av=v373DraftModifiedAt(a.entry);bv=v373DraftModifiedAt(b.entry);break;
     case 'progress':av=num(itemA.progress);bv=num(itemB.progress);break;
     case 'total':av=num(itemA.total);bv=num(itemB.total);break;
     case 'logging':av=v373Timestamp(a.item?v53LastTouched(itemA):0);bv=v373Timestamp(b.item?v53LastTouched(itemB):0);break;
@@ -112,7 +138,7 @@ function v373CompareData(a,b,field,dir){
     case 'added':av=v373Timestamp(itemA.createdAt);bv=v373Timestamp(itemB.createdAt);break;
   }
   // Unknown timestamps always go last regardless of direction.
-  if(['logging','edited','seen','added'].includes(field)){
+  if(['draftUpdated','logging','edited','seen','added'].includes(field)){
     if(!av&&bv)return 1;
     if(av&&!bv)return -1;
   }
@@ -200,9 +226,9 @@ function v373LiveUpdate(){
 }
 function v373Persist(){v369Touch();v373LiveUpdate();}
 function v373SetSort(value){
-  const st=v373OrderState(),next=V373_ALLOWED.has(value)?value:'added';
+  const st=v373OrderState(),next=V373_ALLOWED.has(value)?value:'logAdded';
   if(next==='custom'&&st.sort!=='custom')st.manualIds=v373OrderedEntries().map(x=>x.id);
-  if((next==='logAdded'||next==='added'||next==='remaining')&&st.sort!==next)st.dir='desc';
+  if((next==='logAdded'||next==='draftUpdated'||next==='added'||next==='remaining')&&st.sort!==next)st.dir='desc';
   st.sort=next;
   v373Persist();
 }
