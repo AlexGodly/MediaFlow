@@ -1,0 +1,148 @@
+/* v437 UI hotfix — full-width, theme-aware Title Metadata workspace.
+ * Must span the v240 12-column edit-title grid and precede imported metadata. */
+.v240-library-editor>.mf437-editor,
+.v238-library-editor>.mf437-editor{
+  grid-column:1/-1!important;order:39!important;min-width:0!important;
+  width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+  align-self:stretch;justify-self:stretch;margin:4px 0 2px!important;
+}
+.mf437-editor{
+  border:1px solid var(--border-soft,var(--border,rgba(127,127,127,.22)));
+  border-radius:16px;overflow:hidden;background:color-mix(in srgb,var(--panel) 94%,var(--flow) 6%);
+  color:var(--text);font-family:inherit;
+}
+.mf437-editor *{box-sizing:border-box;min-width:0}
+.mf437-editor>details{display:block;width:100%;min-width:0}
+.mf437-editor>details>summary{
+  display:flex;align-items:center;gap:11px;min-width:0;min-height:52px;
+  padding:12px 16px;cursor:pointer;list-style:none;line-height:1.4;
+  font-size:13px;font-weight:800;color:var(--text);overflow-wrap:anywhere;
+  background:color-mix(in srgb,var(--panel-raised) 82%,var(--panel) 18%);
+}
+.mf437-editor>details>summary::-webkit-details-marker{display:none}
+.mf437-editor>details>summary strong{font:inherit;flex:1;min-width:0}
+.mf437-editor>details>summary::after{
+  content:"";display:block;flex:none;width:8px;height:8px;
+  border-right:2px solid var(--text-dim);border-bottom:2px solid var(--text-dim);
+  transform:rotate(45deg);transition:transform .18s ease;margin-left:auto;
+}
+.mf437-editor>details[open]>summary{border-bottom:1px solid var(--border-soft)}
+.mf437-editor>details[open]>summary::after{transform:rotate(225deg)}
+.mf437-section-icon{
+  display:grid;place-items:center;flex:none;width:28px;height:28px;
+  border:1px solid var(--border-soft);border-radius:9px;color:var(--flow);
+  background:color-mix(in srgb,var(--flow) 7%,transparent);
+}
+.mf437-section-icon svg{width:17px;height:17px;display:block}
+.mf437-editor>details>.hint,
+.mf437-editor .mf437-ratings>.hint{
+  margin:15px 16px 12px;font-size:12px;line-height:1.6;color:var(--text-dim);
+  max-width:85ch;
+}
+.mf437-editor>details>.field{display:grid;gap:6px;margin:0 16px 8px;max-width:480px}
+.mf437-editor .field-label{display:block;margin:0;font-size:11px!important;font-weight:800;color:var(--text-dim)}
+.mf437-editor .field select{width:100%;min-width:0;max-width:100%}
+.mf437-group{padding:6px 16px 18px;margin:0;min-width:0}
+.mf437-group[hidden]{display:none!important}
+.mf437-group h4,.mf437-details h4{
+  font-size:11px;font-weight:800;letter-spacing:.095em;text-transform:uppercase;
+  color:var(--text-dim);margin:12px 0 11px;
+}
+.mf437-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
+  gap:11px;align-items:stretch;min-width:0;
+}
+.mf437-field{
+  display:flex;flex-direction:column;gap:8px;min-width:0;
+  padding:12px;border:1px solid var(--border-soft);
+  border-radius:12px;background:color-mix(in srgb,var(--panel-raised) 75%,var(--panel) 25%);
+}
+.mf437-field>label:first-child{display:grid;gap:7px;font-size:11px;font-weight:750;color:var(--text)}
+.mf437-field>label:first-child>span{display:block;line-height:1.35;overflow-wrap:break-word}
+.mf437-field input:not([type="checkbox"]),
+.mf437-field textarea,
+.mf437-editor select,
+.mf437-rating input:not([type="checkbox"]){
+  width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+  background:var(--panel-raised)!important;color:var(--text)!important;
+  border:1px solid var(--border-soft)!important;border-radius:10px!important;
+  padding:9px 11px!important;font-family:inherit;font-size:12px!important;
+  line-height:1.45!important;box-shadow:none!important;
+}
+.mf437-field textarea{
+  display:block;min-height:100px!important;height:auto!important;
+  max-height:220px;resize:vertical;
+}
+.mf437-field small,.mf437-rating small,.mf437-detail small,.mf437-rating-display small{
+  font-size:10px;color:var(--text-dim);overflow-wrap:anywhere;
+}
+/* Legacy v239/v240 form selectors force all inputs, even checkboxes, to be
+ * full-width 42px fields. Reset that inherited rule specifically for locks. */
+.v240-library-editor .mf437-lock,
+.v238-library-editor .mf437-lock{
+  display:inline-flex!important;align-items:center!important;align-self:flex-start;
+  justify-content:flex-start;gap:8px;margin:2px 0 0;padding:2px 0;
+  font-size:11px!important;font-weight:650!important;color:var(--text-dim);
+  line-height:1.4!important;cursor:pointer;white-space:normal;
+}
+.v240-library-editor .mf437-lock input[type="checkbox"],
+.v238-library-editor .mf437-lock input[type="checkbox"]{
+  appearance:auto!important;-webkit-appearance:checkbox!important;
+  flex:0 0 16px!important;display:inline-block!important;
+  width:16px!important;min-width:16px!important;max-width:16px!important;
+  height:16px!important;min-height:16px!important;max-height:16px!important;
+  margin:0!important;padding:0!important;border-radius:4px!important;
+  box-shadow:none!important;accent-color:var(--flow)!important;
+}
+.mf437-ratings{
+  display:block;margin:0;padding:10px 16px 17px;
+  border-top:1px solid var(--border-soft);
+}
+.mf437-ratings>summary{
+  padding:10px 0;cursor:pointer;font-size:12px;font-weight:800;
+  color:var(--text);line-height:1.5;overflow-wrap:anywhere;
+}
+.mf437-ratings>summary small{font-size:10px;font-weight:500;color:var(--text-dim)}
+.mf437-ratings>.hint{margin:8px 0 12px!important}
+.mf437-ratings-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+  gap:11px;min-width:0;
+}
+.mf437-rating{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(64px,75px) minmax(68px,85px);
+  gap:9px;align-items:end;min-width:0;padding:13px;
+  border:1px solid var(--border-soft);border-radius:12px;
+  background:color-mix(in srgb,var(--panel-raised) 75%,var(--panel) 25%);
+}
+.mf437-rating>strong{grid-column:1/-1;font-size:12px;line-height:1.4}
+.mf437-rating>label:not(.mf437-lock){display:grid;gap:6px;font-size:10px;font-weight:700;color:var(--text-dim)}
+.mf437-rating>.mf437-lock{grid-column:1/3}
+.mf437-rating>small{justify-self:end;align-self:center}
+.mf437-details{margin:17px 0 24px}
+.mf437-detail-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));
+  gap:9px;min-width:0;
+}
+.mf437-detail,.mf437-rating-display{
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  padding:12px;border-radius:12px;border:1px solid var(--border-soft);
+  background:var(--panel-raised);overflow-wrap:anywhere;
+}
+.mf437-detail b,.mf437-rating-display strong{font-size:12px;white-space:pre-wrap}
+@media(max-width:720px){
+  .mf437-editor>details>summary{min-height:48px;padding:11px 12px;font-size:12px}
+  .mf437-section-icon{width:26px;height:26px}
+  .mf437-editor>details>.hint{margin:12px;font-size:11px}
+  .mf437-editor>details>.field{margin:0 12px 8px;max-width:none}
+  .mf437-group{padding:6px 12px 14px}
+  .mf437-ratings{padding:9px 12px 15px}
+  .mf437-grid,.mf437-ratings-grid,.mf437-detail-grid{grid-template-columns:1fr}
+  .mf437-field,.mf437-rating{padding:11px}
+}
+@media(max-width:360px){
+  .mf437-rating{grid-template-columns:minmax(0,1fr) 62px 70px;gap:6px}
+  .mf437-editor>details>summary{font-size:11.5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mf437-editor>details>summary::after{transition:none}
+}
