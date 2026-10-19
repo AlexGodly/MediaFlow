@@ -1,0 +1,7 @@
+/* v402: one aligned action column for the Dashboard recommendation rows */
+.settings-toggle-row{min-width:0}.settings-toggle-row>div:first-child{flex:1 1 auto;min-width:0}.settings-toggle-row>button.toggle{flex:0 0 auto;margin-left:auto}
+.mf402-recommend-setting{display:flex;flex-wrap:nowrap;margin:0;padding:0;border:0;background:none;gap:16px}
+.mf402-recommend-separator{height:1px;background:var(--border-soft,var(--border));margin:16px 0}
+.mf402-coverage{margin:12px 0;padding:12px;border:1px solid var(--border-soft,var(--border));border-radius:12px}
+.mf402-coverage summary{cursor:pointer;font-weight:650}.mf402-coverage .mf401-diagnostics-list{margin-top:10px}
+@media(max-width:650px){.mf402-recommend-setting{gap:10px}.mf402-coverage{padding:9px}}
