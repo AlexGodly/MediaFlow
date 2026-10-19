@@ -1,14 +1,14 @@
-name: Build archive and release MediaFlow v509
+name: Build archive and release MediaFlow v510
 on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/publish-v509.yml'
+      - '.github/workflows/publish-v510.yml'
   workflow_dispatch:
 permissions:
   contents: write
 concurrency:
-  group: mediaflow-v509-publish
+  group: mediaflow-v510-publish
   cancel-in-progress: false
 jobs:
   publish:
@@ -28,30 +28,30 @@ jobs:
       - name: Build and check
         run: |
           set -euo pipefail
-          test "$(cat VERSION)" = 509
+          test "$(cat VERSION)" = 510
           python3 scripts/build.py
-          node --check assets/js/mediaflow-v509.bundle.js
+          node --check assets/js/mediaflow-v510.bundle.js
           grep -q 'registerPageRenderer.*settings' src/js/components/374-v508-unified-category-panels.js
-          grep -q 'mediaflow-v509.bundle.js' index.html
+          grep -q 'mediaflow-v510.bundle.js' index.html
       - name: Archive complete version
         run: |
           set -euo pipefail
-          mkdir -p legacy/v/509
+          mkdir -p legacy/v/510
           for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
-            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/509/; fi
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/510/; fi
           done
-          test -f legacy/v/509/assets/js/mediaflow-v509.bundle.js
-          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v509.bundle.js legacy/v/509
+          test -f legacy/v/510/assets/js/mediaflow-v510.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v510.bundle.js legacy/v/510
           git add -u
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v509' || true
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v510' || true
           git push origin HEAD:main
       - name: Package and publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git archive --format=zip --output=MediaFlow_v509_Stable.zip HEAD:legacy/v/509
-          sha256sum MediaFlow_v509_Stable.zip > MediaFlow_v509_Stable.sha256
-          if ! gh release view 509 >/dev/null 2>&1; then
-            gh release create 509 MediaFlow_v509_Stable.zip MediaFlow_v509_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v509 Stable' --notes 'Fix missing Today’s Balance and Library Overview settings in active Settings renderer. Both panels are now visible to Settings navigation and search. Rebuilt JS and PWA, preserved cloud settings, archived full v509 project.'
+          git archive --format=zip --output=MediaFlow_v510_Stable.zip HEAD:legacy/v/510
+          sha256sum MediaFlow_v510_Stable.zip > MediaFlow_v510_Stable.sha256
+          if ! gh release view 510 >/dev/null 2>&1; then
+            gh release create 510 MediaFlow_v510_Stable.zip MediaFlow_v510_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v510 Stable' --notes 'Fix missing Today’s Balance and Library Overview settings in active Settings renderer. Both panels are now visible to Settings navigation and search. Rebuilt JS and PWA, preserved cloud settings, archived full v510 project.'
           fi
