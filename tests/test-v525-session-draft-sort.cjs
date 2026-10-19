@@ -51,7 +51,8 @@ assert.equal(evalSource('v373OrderState().sort'),'custom','Manual sort preserved
 assert.equal(evalSource('v373OrderState().manualIds[0]'),'x');
 assert.equal(evalSource('V373_PICKER_SORTS.find(x=>x[0]==="added")[0]'),'added','Library picker options unchanged');
 vm.runInContext(extra,ctx);
-assert.equal(ctx.window.MediaFlowV525.inspect().scope,'Logging / Arrange your session only');
+assert.equal(ctx.window.MediaFlowV525.scope,'Logging / Arrange your session only');
+assert.equal(ctx.window.MediaFlowV525.defaultSort,'logAdded');
 S.logDraft.v373Ordering.sort='draftUpdated';S.logDraft.v373Ordering.dir='desc';
 S.logDraft.v369Interface='quick';entries[1].v179EndProgress=4;
 const oldStamp=entries[1].v369UpdatedAt;
