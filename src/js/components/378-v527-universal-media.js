@@ -24,10 +24,13 @@ function v527NormalizeSortSelect(select){
 }
 function v527AddUnitXPControls(root){
   if(!root?.querySelectorAll)return;
+  // v528: never treat controls produced by this helper as original settings
+  // fields. Without both guards the MutationObserver reinserts recursively.
+  if(root.matches?.('.mf527-unit-xp')||root.closest?.('.mf527-unit-xp'))return;
   const inputs=[...root.querySelectorAll('input[onchange*="updateLevelingUnit"]')];
   if(!inputs.length)return;
   const anchor=inputs[inputs.length-1].closest('.field-row')||inputs[inputs.length-1].closest('.field');
-  if(!anchor||anchor.parentElement?.querySelector(':scope > .mf527-unit-xp'))return;
+  if(!anchor||anchor.closest?.('.mf527-unit-xp')||anchor.parentElement?.querySelector(':scope > .mf527-unit-xp'))return;
   const frame=document.createElement('div');
   frame.className='mf527-unit-xp';
   frame.setAttribute('aria-label','Additional media unit XP rates');
