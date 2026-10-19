@@ -158,42 +158,30 @@ function replyMessage(event,payload){
 }
 
 self.addEventListener('install',event=>{
+  // A long 244-file pre-cache previously kept new versions waiting for minutes
+  // (or indefinitely on weak mobile connections). Install only critical files.
   event.waitUntil((async()=>{
-    try{
-      // Fault tolerant: one missing/temporary asset must never reject the whole
-      // service-worker installation. Diagnostics/repair exposes any misses.
-      await cacheShellAssets(APP_SHELL);
-    }catch(err){
-      console.warn('[MediaFlow PWA] app-shell pre-cache was incomplete',err);
+    const critical=APP_SHELL.filter(url=>url==='./index.html'||
+      /\\/assets\\/js\\/mediaflow-v\\d+\\.bundle\\.js$/.test(url)||
+      url==='./version.json');
+    try{await cacheShellAssets(critical);}catch(err){
+      console.warn('[MediaFlow PWA] critical shell cache incomplete',err);
     }
+    await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
-    // Retry missing assets first. Do not delete the previous working offline
-    // cache when a required v402 asset could not be cached. This is especially
-    // important during transient update failures on mobile networks.
-    let safeToPrune=false;
-    try{
-      let diag=await shellDiagnostics();
-      if(diag.missingCached.length)await cacheShellAssets(diag.missingCached);
-      diag=await shellDiagnostics();
-      const critical=APP_SHELL.filter(url=>url==='./index.html'||
-        /\/assets\/js\/mediaflow-v\d+\.bundle\.js$/.test(url)||
-        /\/assets\/css\/00-foundation\.css$/.test(url));
-      safeToPrune=critical.every(url=>!diag.missingCached.includes(url));
-    }catch(err){console.warn('[MediaFlow PWA] cache verification incomplete',err);}
-    if(safeToPrune){
-      const keys=await caches.keys();
-      await Promise.all(keys.filter(key=>
-        (key.startsWith(CACHE_PREFIX)||key.startsWith('mediaflow-v'))&&key!==SHELL_CACHE
-      ).map(key=>caches.delete(key)));
-    }
-
+    // Claim immediately; noncritical assets cache lazily as requested.
     await self.clients.claim();
     const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     clients.forEach(client=>client.postMessage({type:'MEDIAFLOW_SW_ACTIVATED',version:MEDIAFLOW_VERSION}));
+    // Do not block activation on 244 remote fetches.
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>
+      (key.startsWith(CACHE_PREFIX)||key.startsWith('mediaflow-v'))&&key!==SHELL_CACHE
+    ).map(key=>caches.delete(key)));
   })());
 });
 
