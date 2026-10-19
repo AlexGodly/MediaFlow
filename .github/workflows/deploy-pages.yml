@@ -43,6 +43,7 @@ jobs:
           node scripts/check-pwa-release.js
           node tests/test-v514-category-settings.cjs
           node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
