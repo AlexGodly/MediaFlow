@@ -34,7 +34,8 @@ const start=history.indexOf('function v253HistoryFilteredList(){');
 const end=history.indexOf('function v253HistoryPageData(){',start);
 assert(start>=0&&end>start,'active History filtering function located');
 vm.runInContext(history.slice(start,end),ctx);
-for(const [type,ids] of [['video',['a']],['reading',['b']],['playing',['c']],['listening',['d']],['other',['e','f']]]){
+// History retains skipped logs, while consumption-minute Statistics excludes them.
+for(const [type,ids] of [['video',['a']],['reading',['b']],['playing',['c','skip']],['listening',['d']],['other',['e','f']]]){
  ctx.S.histFilters.type=type;
  const found=vm.runInContext('v253HistoryFilteredList().map(s=>s.id).join(",")',ctx);
  assert.equal(found,ids.join(','),'History filtering for '+type);

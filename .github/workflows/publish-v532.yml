@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-v532.yml'
   workflow_dispatch:
   # v532: History filters and Statistics Media Type Mix recognize all four activity types.
+  # Verify skipped History entries remain filterable while skipped minutes are excluded.
   # Regression test accepts blank template interpolation whitespace around unselected options.
   # CI rerun after completing the CommonJS test source identifier migration
   # Corrected v70 and v53 legacy Library dropdowns and narrowed bundle checks to sorter-specific text.
