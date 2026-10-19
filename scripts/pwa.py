@@ -244,7 +244,8 @@ function isAppDocument(url){
 async function networkFirst(request,fallbackUrl){
   const cache=await caches.open(SHELL_CACHE);
   try{
-    const response=await fetch(request);
+    // v522: bypass the HTTP disk cache so installed apps cannot reload stale HTML/version metadata.
+    const response=await fetch(request,{cache:'reload'});
     if(response&&response.ok)eventualPut(cache,request,response.clone());
     return response;
   }catch(err){

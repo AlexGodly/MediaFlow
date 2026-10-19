@@ -46,6 +46,7 @@ jobs:
           node tests/test-v518-library-sort.cjs
           node tests/test-v520-title-actions.cjs
           node tests/test-v521-visible-title-actions.cjs
+          node tests/test-v522-canonical-title-buttons.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js

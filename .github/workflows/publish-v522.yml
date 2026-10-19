@@ -1,0 +1,67 @@
+name: Build archive and release MediaFlow v522
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v522.yml'
+  workflow_dispatch:
+  # v522 canonical title markup and hard PWA network revalidation
+  # Release workflow registration trigger: tests and full archive required
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v522-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 522
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v522.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v520-title-actions.cjs
+          node tests/test-v521-visible-title-actions.cjs
+          node tests/test-v522-canonical-title-buttons.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v522.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/522
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/522/; fi
+          done
+          test -f legacy/v/522/assets/js/mediaflow-v522.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v522.bundle.js legacy/v/522
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v522' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v522_Stable.zip HEAD:legacy/v/522
+          sha256sum MediaFlow_v522_Stable.zip > MediaFlow_v522_Stable.sha256
+          if ! gh release view 522 >/dev/null 2>&1; then
+            gh release create 522 MediaFlow_v522_Stable.zip MediaFlow_v522_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v522 Stable' --notes 'Correct the absent Personal Order and Add to Collection buttons by placing both controls directly inside the canonical Add/Edit Title and Title Details renderers instead of depending on post-render injection. Preserve v520 membership toggles, multi-select popup and cloud persistence; prevent duplicate injection; add tests that execute both original renderers and assert visible button HTML, existing membership counts and action wiring. Force network revalidation of app documents in the PWA to prevent installed copies from loading stale application HTML. Pass all previous tests, archive legacy/v/522 and publish Stable.'
+          fi

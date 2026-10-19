@@ -164,7 +164,19 @@ function v181TitleDetailsHtml(item){
         ${cover}
 
         <div class="v181-title-hero-copy">
-          <h2>${escapeHtml(cleanTitle(item.title))}</h2><div class="v181-title-hero-meta">
+          <h2>${escapeHtml(cleanTitle(item.title))}</h2>
+
+    <section class="mf520-title-actions mf521-action-bar mf522-native-actions" data-mf520-scope="details" data-mf520-id="${escapeHtml(String(item.id||''))}" data-mf522-canonical="1" aria-label="Personal Order and Collections">
+      <button type="button" class="btn btn-sm mf520-order-btn" aria-pressed="${!!window.MediaFlowV520?.isOrdered?.(item.id)}" onclick="App.mf520ToggleOrder('${escapeHtml(String(item.id||''))}')">
+        <span class="mf521-action-icon" aria-hidden="true">☷</span>
+        <span>${window.MediaFlowV520?.isOrdered?.(item.id)?'Added to Personal Order':'Add to Personal Order'}</span>
+      </button>
+      <button type="button" class="btn btn-sm mf520-collections-btn" onclick="App.mf520OpenCollections('${escapeHtml(String(item.id||''))}')">
+        <span class="mf521-action-icon" aria-hidden="true">▣</span>
+        <span>Add to Collection (${Number(window.MediaFlowV520?.membershipCount?.(item.id)||0)})</span>
+      </button>
+    </section>
+<div class="v181-title-hero-meta">
             <span class="pill">${v144CategoryIconHtml(cat)} ${escapeHtml(cat.name)}</span>
             <span class="pill">${escapeHtml(v199StatusLabel(item.status))}</span>
             <span class="pill">${escapeHtml(item.priority||'medium')} priority</span>

@@ -107,6 +107,7 @@ function saveCollections(){
 const editorBase=libraryModalHtml;
 libraryModalHtml=function(item){
  const html=txt(editorBase.apply(this,arguments));
+ if(html.includes('data-mf522-canonical="1"'))return html;
  try{
   const host=document.createElement('div');host.innerHTML=html;
   const editor=host.querySelector('.v240-library-editor, .v238-library-editor');
@@ -121,6 +122,7 @@ libraryModalHtml=function(item){
 const detailBase=v181TitleDetailsHtml;
 v181TitleDetailsHtml=function(item){
  const html=txt(detailBase.apply(this,arguments));
+ if(html.includes('data-mf522-canonical="1"'))return html;
  try{
   const host=document.createElement('div');host.innerHTML=html;
   const copy=host.querySelector('.v181-title-hero-copy')||host.querySelector('.v181-title-details-body');
