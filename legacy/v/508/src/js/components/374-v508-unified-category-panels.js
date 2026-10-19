@@ -81,6 +81,28 @@ function mf508VisibleCategories(key,seen=new Set()){
   return (Array.isArray(result)?result:[]).filter(Boolean);
 }
 function mf508MetricScope(){return mf508Ensure().todayBalance.metrics;}
+function mf508HealthSummaryHtml(visibleCats){
+  const scope=mf508MetricScope();
+  const subjects=scope==='visible'?(Array.isArray(visibleCats)?visibleCats:[]):mf508AllCategories();
+  const countFor=fn=>{
+    const counts={healthy:0,due:0,neglected:0,overused:0,other:0};
+    for(const c of subjects){
+      let status='other';try{status=String(fn(c)||'other');}catch(_){}
+      if(!Object.prototype.hasOwnProperty.call(counts,status))status='other';
+      counts[status]++;
+    }
+    return counts;
+  };
+  const current=countFor(categoryStatus),lifetime=countFor(overallCategoryStatus);
+  const detail=c=>'<span>'+c.healthy+' healthy</span><span>'+c.due+' due</span>'+
+    '<span>'+c.neglected+' neglected</span><span>'+c.overused+' overused</span>';
+  return '<div class="mf508-health-summary" aria-label="Category balance health overview">'+
+    '<div class="mf508-health-header"><strong>Balance health overview</strong><small>'+
+    (scope==='visible'?'Only displayed categories':'All categories, including hidden')+
+    ' · '+subjects.length+' total</small></div>'+
+    '<div class="mf508-health-groups"><div><b>Today (72 hours)</b><div class="mf508-health-counts">'+detail(current)+'</div></div>'+
+    '<div><b>Overall (lifetime)</b><div class="mf508-health-counts">'+detail(lifetime)+'</div></div></div></div>';
+}
 function mf508Persist(key){
   const cfg=mf508Ensure(),panel=cfg[key];
   if(!panel)return;
@@ -202,10 +224,10 @@ function mf508PanelHtml(key){
     '<div class="mf508-panel-controls '+(!p.enabled?'mf508-panel-disabled':'')+'">'+
     '<label class="mf508-field"><span>Category source</span><select onchange="App.mf508SetSource(\''+key+'\',this.value)">'+
       mf508OptionsHtml(key)+'</select></label>'+mf508ListHtml(key)+
-    (today?'<label class="mf508-field"><span>Balance summary scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
+    (today?'<label class="mf508-field"><span>Balance insights scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
       '<option value="all"'+(p.metrics==='all'?' selected':'')+'>All categories, including hidden (default)</option>'+
       '<option value="visible"'+(p.metrics==='visible'?' selected':'')+'>Only displayed categories</option>'+
-      '</select></label><p class="mf508-footnote">This only affects the Today’s Balance summary consumption/time figures; individual category health badges keep their recorded 72-hour and lifetime history. No logs, XP, task scores or other Dashboard totals change.</p>':
+      '</select></label><p class="mf508-footnote">Only these Today’s Balance insights change: visible/all consumption and time totals, plus the Today/Overall category-health overview. Each category retains its recorded 72-hour and lifetime health. No History, XP, task scores or other Dashboard totals change.</p>':
       '<p class="mf508-footnote">The Library-wide completion percentage retains its original all-Library meaning. Only category rows and their order change.</p>')+
     '</div></section>';
 }

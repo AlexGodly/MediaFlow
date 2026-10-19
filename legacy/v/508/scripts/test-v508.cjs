@@ -38,6 +38,7 @@ for(const f of legacyBalance)assert.ok(read(f).includes("mf508VisibleCategories(
 assert.ok(library.includes("mf508VisibleCategories('libraryOverview')"),'Library Overview must honor main categories rather than all');
 assert.ok(library.includes("typeof mf508Ensure==='function'?mf508Ensure().libraryOverview.enabled"),'Overview toggle must reflect unified setting');
 assert.ok(b265.includes("metricScope==='all'||selectedIds.has(String(s.categoryId))"),'Balance summary scope must be visual-only');
+assert.ok(b265.includes('mf508HealthSummaryHtml(cats)'),'Balance renderer must show scope-aware health overview');
 assert.ok(code.includes("if(source===other&&cfg[other].source===key)"),'Mutual follow must be prevented');
 assert.ok(code.includes("mergeStates=function(a,b)"),'Cloud merging must preserve independent settings');
 const cats=[
@@ -76,7 +77,7 @@ const markup=vm.runInContext('renderSettings()',ctx);
 assert.ok(markup.includes('Library Overview'));
 assert.ok(markup.includes('Follow MediaFlow System rotation'));
 assert.ok(markup.includes('Show section'));
-assert.ok(markup.includes('Balance summary scope'));
+assert.ok(markup.includes('Balance insights scope'));
 assert.ok(!markup.includes('OBSOLETE TODAY FILTER'),'Do not display contradictory v186 Today settings');
 ctx.App.mf508SetSource('todayBalance','system');
 assert.deepEqual(resolve('todayBalance'),['movies','tv'],'System scope can deliberately include main-disabled Movies');
@@ -163,9 +164,11 @@ vm.runInContext(b265.slice(x,y),ctx,{filename:'balance-v265'});
 const visible=vm.runInContext('v265BalanceMarkup()',ctx);
 assert.doesNotMatch(visible,/Movies/,'Today balance row does not include main-disabled Movies');
 assert.match(visible,/>4<\/b><span>units<\/span>/,'Visible-only consumption summary excludes hidden Movies');
+assert.match(visible,/Only displayed categories · 3 total/,'Visible-only health summary counts three displayed categories');
 ctx.App.mf508SetMetricScope('all');
 const overall=vm.runInContext('v265BalanceMarkup()',ctx);
 assert.match(overall,/>103<\/b><span>units<\/span>/,'All-category balance summary includes hidden Movies');
+assert.match(overall,/All categories, including hidden · 4 total/,'All-category health overview counts hidden Movies');
 assert.equal(sessions[1].actualAmount,99,'Reporting must not modify history');
 const stored=ctx.S.settings.v508Panels;
 assert.deepEqual(JSON.parse(JSON.stringify(stored.todayBalance.hiddenIds)),['movies'],
