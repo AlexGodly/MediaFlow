@@ -1,0 +1,60 @@
+name: Build archive and release MediaFlow v513
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v513.yml'
+  workflow_dispatch:
+  # v513 service-worker parse and deployment integrity repair
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v513-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 513
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v513.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          grep -q 'registerPageRenderer.*settings' src/js/components/374-v508-unified-category-panels.js
+          grep -q 'mediaflow-v513.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/513
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/513/; fi
+          done
+          test -f legacy/v/513/assets/js/mediaflow-v513.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v513.bundle.js legacy/v/513
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v513' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v513_Stable.zip HEAD:legacy/v/513
+          sha256sum MediaFlow_v513_Stable.zip > MediaFlow_v513_Stable.sha256
+          if ! gh release view 513 >/dev/null 2>&1; then
+            gh release create 513 MediaFlow_v513_Stable.zip MediaFlow_v513_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v513 Stable' --notes 'Repair invalid v512 service worker (regex syntax error blocked PWA updates), enforce generated worker syntax and lifecycle smoke tests, build exact current source on every GitHub Pages deployment, retain v511 Today’s Balance and Library Overview settings, and archive full v513 project. No cloud schema or user data changes.'
+          fi
