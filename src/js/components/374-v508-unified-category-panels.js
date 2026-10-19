@@ -227,7 +227,7 @@ function mf508PanelHtml(key){
     (today?'<label class="mf508-field"><span>Balance insights scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
       '<option value="all"'+(p.metrics==='all'?' selected':'')+'>All categories, including hidden (default)</option>'+
       '<option value="visible"'+(p.metrics==='visible'?' selected':'')+'>Only displayed categories</option>'+
-      '</select></label><p class="mf508-footnote">This only affects the Today’s Balance summary consumption/time figures; individual category health badges keep their recorded 72-hour and lifetime history. No logs, XP, task scores or other Dashboard totals change.</p>':
+      '</select></label><p class="mf508-footnote">Only these Today’s Balance insights change: visible/all consumption and time totals, plus the Today/Overall category-health overview. Each category retains its recorded 72-hour and lifetime health. No History, XP, task scores or other Dashboard totals change.</p>':
       '<p class="mf508-footnote">The Library-wide completion percentage retains its original all-Library meaning. Only category rows and their order change.</p>')+
     '</div></section>';
 }
