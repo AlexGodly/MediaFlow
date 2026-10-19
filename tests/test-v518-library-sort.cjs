@@ -86,7 +86,7 @@ assert.deepEqual(Array.from(run('V224_LIBRARY_SORT_OPTIONS')).filter(([key])=>ke
 
 run("App.v69SetLibrarySort('remaining')");
 assert.equal(run('v224LibrarySortState().key'),'remaining-desc');
-both(['seasons','older','short','newer','over','partial','unknown'],'most remaining first; unknown last');
+both(['seasons','older','short','over','newer','partial','unknown'],'most remaining first; unknown last');
 const remHtml=run('v189SortControlHtml()');
 assert.match(remHtml,/<option value="remaining" selected/,'remaining visibly selected');
 assert.equal(run('v373RemainingUnits(S.library[2])'),20,'per-season 2+18');
@@ -96,7 +96,7 @@ assert.equal(run('v373RemainingUnits(S.library[5])'),0,'overprogress clamps to z
 
 run('App.v224ToggleLibrarySortDirection()');
 assert.equal(run('v224LibrarySortState().key'),'remaining-asc');
-both(['newer','over','short','older','seasons','partial','unknown'],'least remaining first, unknown last');
+both(['over','newer','short','older','seasons','partial','unknown'],'least remaining first, unknown last');
 run("App.v69SetLibrarySort('added')");
 assert.equal(run('v224LibrarySortState().key'),'added-desc','choosing Date added resets to newest first');
 both(['newer','over','short','unknown','seasons','partial','older'],'newest-first');
