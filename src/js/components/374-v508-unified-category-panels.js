@@ -81,6 +81,28 @@ function mf508VisibleCategories(key,seen=new Set()){
   return (Array.isArray(result)?result:[]).filter(Boolean);
 }
 function mf508MetricScope(){return mf508Ensure().todayBalance.metrics;}
+function mf508HealthSummaryHtml(visibleCats){
+  const scope=mf508MetricScope();
+  const subjects=scope==='visible'?(Array.isArray(visibleCats)?visibleCats:[]):mf508AllCategories();
+  const countFor=fn=>{
+    const counts={healthy:0,due:0,neglected:0,overused:0,other:0};
+    for(const c of subjects){
+      let status='other';try{status=String(fn(c)||'other');}catch(_){}
+      if(!Object.prototype.hasOwnProperty.call(counts,status))status='other';
+      counts[status]++;
+    }
+    return counts;
+  };
+  const current=countFor(categoryStatus),lifetime=countFor(overallCategoryStatus);
+  const detail=c=>'<span>'+c.healthy+' healthy</span><span>'+c.due+' due</span>'+
+    '<span>'+c.neglected+' neglected</span><span>'+c.overused+' overused</span>';
+  return '<div class="mf508-health-summary" aria-label="Category balance health overview">'+
+    '<div class="mf508-health-header"><strong>Balance health overview</strong><small>'+
+    (scope==='visible'?'Only displayed categories':'All categories, including hidden')+
+    ' · '+subjects.length+' total</small></div>'+
+    '<div class="mf508-health-groups"><div><b>Today (72 hours)</b><div class="mf508-health-counts">'+detail(current)+'</div></div>'+
+    '<div><b>Overall (lifetime)</b><div class="mf508-health-counts">'+detail(lifetime)+'</div></div></div></div>';
+}
 function mf508Persist(key){
   const cfg=mf508Ensure(),panel=cfg[key];
   if(!panel)return;
