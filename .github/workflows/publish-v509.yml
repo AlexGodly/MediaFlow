@@ -1,0 +1,58 @@
+name: Build archive and release MediaFlow v509
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v509.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v509-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 509
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v509.bundle.js
+          grep -q 'registerPageRenderer.*settings' src/js/components/374-v508-unified-category-panels.js
+          grep -q 'mediaflow-v509.bundle.js' index.html
+          python3 -m compileall -q scripts
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/509
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/509/; fi
+          done
+          test -f legacy/v/509/assets/js/mediaflow-v509.bundle.js
+          git add VERSION index.html sw.js manifest.json assets/js/mediaflow-v509.bundle.js legacy/v/509
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v509' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v509_Stable.zip HEAD:legacy/v/509
+          sha256sum MediaFlow_v509_Stable.zip > MediaFlow_v509_Stable.sha256
+          if ! gh release view 509 >/dev/null 2>&1; then
+            gh release create 509 MediaFlow_v509_Stable.zip MediaFlow_v509_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v509 Stable' --notes 'Fix missing Today’s Balance and Library Overview settings in active Settings renderer. Both panels are now visible to Settings navigation and search. Rebuilt JS and PWA, preserved cloud settings, archived full v509 project.'
+          fi
