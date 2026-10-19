@@ -251,7 +251,7 @@ function v265BalanceMarkup(){
     <div><small>Time invested</small><b>${fmtMinutes(minutes)}</b><span>today</span></div>
     <div><small>Current streak</small><b>${streak}</b><span>days</span></div>
     <div><small>Rating queue</small><b>${unrated.toLocaleString()}</b><span>unrated titles</span></div>
-  </div>`;
+  </div>${typeof mf508HealthSummaryHtml==='function'?mf508HealthSummaryHtml(cats):''}`;
 }
 function v265EnhanceBalance(){
   if(String(S.view||'')!=='dashboard')return;
