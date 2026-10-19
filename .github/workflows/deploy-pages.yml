@@ -50,6 +50,7 @@ jobs:
           node tests/test-v526-universal-sort-labels.cjs
           node tests/test-v527-universal-media.cjs
           node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js

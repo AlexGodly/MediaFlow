@@ -24,6 +24,8 @@ const V258_BUILTIN_CATEGORY_ICONS=Object.freeze([
   {label:'Movies Backlog',src:'assets/category-icons/movies-backlog.png'},
   {label:'TV Series',src:'assets/category-icons/tv-series.png'},
   {label:'TV Series Backlog',src:'assets/category-icons/tv-series-backlog.png'},
+  {label:'Games',src:'assets/category-icons/games.png'},
+  {label:'Music',src:'assets/category-icons/music.png'},
   {label:'Books',src:'assets/category-icons/books.png'},
   {label:'Books Backlog',src:'assets/category-icons/books-backlog.png'},
   {label:'Novels',src:'assets/category-icons/novels.png'},
