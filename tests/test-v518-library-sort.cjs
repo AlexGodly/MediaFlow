@@ -94,17 +94,17 @@ const normalHtml=run('v189SortControlHtml()');
 S.settings.v181Library.mode='dynamic';
 const dynamicHtml=run('v189SortControlHtml()');
 for(const [mode,html] of [['Normal',normalHtml],['Dynamic',dynamicHtml]]){
-  assert(html.includes('Remaining episodes / chapters'),mode+' must show Remaining units');
+  assert(html.includes('Remaining progress'),mode+' must show Remaining units');
   assert(html.includes('Date added to Library'),mode+' must show Date added label');
   assert(/<option value="added" selected/.test(html),mode+' must select newest-first');
 }
 const html=dynamicHtml;
-assert.match(html,/<option value="remaining"/,'shared Library control must contain Remaining episodes / chapters');
+assert.match(html,/<option value="remaining"/,'shared Library control must contain Remaining progress');
 assert.match(html,/Remaining episodes \/ chapters/,'correct shared option label');
 assert.match(html,/Date added to Library/,'clear Date added label');
 assert.match(html,/<option value="added" selected/,'newest-first selected by default');
 assert.deepEqual(Array.from(run('V224_LIBRARY_SORT_OPTIONS')).filter(([key])=>key==='remaining').map(x=>Array.from(x)),
-  [['remaining','Remaining episodes / chapters']],'one sorter option only');
+  [['remaining','Remaining progress']],'one sorter option only');
 
 run("App.v69SetLibrarySort('remaining')");
 assert.equal(run('v224LibrarySortState().key'),'remaining-desc');

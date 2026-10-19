@@ -1,4 +1,4 @@
-/* Regression tests for v517 Logging/picker "Remaining episodes / chapters".
+/* Regression tests for v517 Logging/picker "Remaining progress".
  * Use the actual v373 module with browser/Library dependencies stubbed. */
 'use strict';
 const assert=require('node:assert/strict');
@@ -65,7 +65,7 @@ S.logDraft.v373Ordering={sort:'title',dir:'asc',manualIds:[],randomSeed:1};
 assert.equal(run('v373OrderState().sort'),'title','preserve explicitly chosen sort');
 
 const available=run('V373_SORTS');
-assert(available.some(([value,label])=>value==='remaining'&&label==='Remaining episodes / chapters'));
+assert(available.some(([value,label])=>value==='remaining'&&label==='Remaining progress'));
 assert(run('V373_PICKER_SORTS').some(([key])=>key==='remaining'));
 assert.equal(run('v373RemainingUnits(S.library[0])'),5);
 assert.equal(run('v373RemainingUnits(S.library[1])'),0);
