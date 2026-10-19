@@ -162,9 +162,9 @@ self.addEventListener('install',event=>{
   // (or indefinitely on weak mobile connections). Install only critical files.
   event.waitUntil((async()=>{
     const critical=APP_SHELL.filter(url=>url==='./index.html'||
-      /\\/assets\\/js\\/mediaflow-v\\d+\\.bundle\\.js$/.test(url)||
+      (url.includes('/assets/js/mediaflow-v')&&url.endsWith('.bundle.js'))||
       url==='./version.json');
-    try{await cacheShellAssets(critical);}catch(err){
+        try{await cacheShellAssets(critical);}catch(err){
       console.warn('[MediaFlow PWA] critical shell cache incomplete',err);
     }
     await self.skipWaiting();
