@@ -52,13 +52,14 @@ vm.runInContext(src,ctx,{filename:'v373-logging-order-studio.js'});
 const run=s=>vm.runInContext(s,ctx);
 const ids=a=>Array.from(a,x=>x.id||x.item?.id);
 
-// New drafts and previously untouched drafts default to newest first.
-assert.equal(run('v373OrderState().sort'),'added');
+// v525: Session default is Added to Logging, while the independent
+// all-Library picker and normal/dynamic Library still default to added-desc.
+assert.equal(run('v373OrderState().sort'),'logAdded');
 assert.equal(run('v373OrderState().dir'),'desc');
 assert.deepEqual(Array.from(run('v373OrderedEntries()'),x=>x.item.id),
-  ['newer','over','short','unknown','seasonal','partial','older']);
+  ['short','over','partial','unknown','seasonal','newer','older']);
 S.logDraft.v373Ordering={sort:'logAdded',dir:'asc',manualIds:[],randomSeed:1};
-assert.equal(run('v373OrderState().sort'),'added','migrate unchanged old draft default');
+assert.equal(run('v373OrderState().sort'),'logAdded','v525 migrates the legacy implicit session sort to Added to Logging');
 assert.equal(run('v373OrderState().dir'),'desc');
 S.logDraft.v373Ordering={sort:'title',dir:'asc',manualIds:[],randomSeed:1};
 assert.equal(run('v373OrderState().sort'),'title','preserve explicitly chosen sort');
@@ -114,4 +115,4 @@ assert(saves>=2);
 // Read-only sorting: no edits to Library progress, totals, seasons or dates.
 assert.deepEqual(library[2].seasons,[{id:'s1',total:12,progress:10},{id:'s2',total:24,progress:6}]);
 assert.equal(library[0].progress,7);
-console.log('PASS v517: shared Logging and picker sorter, seasons and unknown totals, ASC/DESC, newest-first default, migration and read-only calculations.');
+console.log('PASS v517/v525: session Added to Logging default, picker Date added default, remaining seasons, ASC/DESC, migration and read-only calculations.');

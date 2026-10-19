@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-v525.yml'
   workflow_dispatch:
   # v525 session-only logging sort defaults and draft update recency
+  # Retested legacy v517 sorter expectations after session-only default change.
   # Release workflow registration trigger: tests and full archive required
 permissions:
   contents: write
