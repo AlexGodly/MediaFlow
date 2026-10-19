@@ -1,0 +1,61 @@
+name: Build archive and release MediaFlow v516
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v516.yml'
+  workflow_dispatch:
+  # v516 Settings Center scroll and focus preservation, both category panels
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v516-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 516
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v516.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v516.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/516
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/516/; fi
+          done
+          test -f legacy/v/516/assets/js/mediaflow-v516.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v516.bundle.js legacy/v/516
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v516' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v516_Stable.zip HEAD:legacy/v/516
+          sha256sum MediaFlow_v516_Stable.zip > MediaFlow_v516_Stable.sha256
+          if ! gh release view 516 >/dev/null 2>&1; then
+            gh release create 516 MediaFlow_v516_Stable.zip MediaFlow_v516_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v516 Stable' --notes 'Fix the Settings Center jumping to the top when selecting, hiding, or reordering categories in Today’s Balance and Library Overview Display. Save changes without full page rerenders, keep the current expanded Settings section, preserve scrolling inside category lists and document, retain keyboard focus, and refresh follow-source previews. Regression tests cover both panels, bulk visibility, master toggles, balance scope, and persistence. Fully rebuilt PWA, service worker, release archive and cloud-compatible data.'
+          fi
