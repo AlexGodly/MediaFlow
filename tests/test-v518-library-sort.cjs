@@ -55,15 +55,27 @@ const run=s=>vm.runInContext(s,ctx);
 execute(read('core/runtime/149-v224-sort-foundation.js'),'v224-sort-foundation.js');
 let source=read('pages/library/121-v189-library-sorting-unfinished-filter-dynamic.js');
 execute("const V391_TITLE_COLLATOR=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});\n"+
- source.slice(source.indexOf('function v189CompareLibraryItems')),'v189-compare.js');
+ source.slice(source.indexOf('function v189LibraryRemainingUnits')),'v189-compare.js');
 source=read('pages/library/122-v53-cached-library-filtering-now-understands-the-v189.js');
 execute(source.slice(0,source.indexOf('/* Persistent Last Seen')),'v189-filtering.js');
 execute(read('pages/library/150-v224-library-controls.js'),'v224-library-controls.js');
 source=read('components/271-v373-logging-order-studio.js');
 execute(source.slice(source.indexOf('function v373RemainingUnits'),source.indexOf('function v373CompareData')),'v517-remaining.js');
 
-// Pre-v518 initialization really picks Alphabetic ascending.
-assert.equal(run('v224LibrarySortState().key'),'title-asc');
+// v519 canonical sort controls must be correct BEFORE loading v518's
+// backwards-compatibility runtime extension. This catches the old bug where
+// mocked late hooks passed but the actual shared dropdown stayed Alphabetic.
+assert.equal(run('v224LibrarySortState().key'),'added-desc');
+assert.equal(S.histFilters.v519LibraryDefaultApplied,true);
+const canonicalHtml=run('v189SortControlHtml()');
+assert.match(canonicalHtml,/<option value="remaining"/);
+assert.match(canonicalHtml,/Remaining episodes \/ chapters/);
+assert.match(canonicalHtml,/Date added to Library/);
+assert.match(canonicalHtml,/<option value="added" selected/);
+const compare=run('v189CompareLibraryItems');
+assert(compare(data[2],data[0],'remaining-desc')<0,'direct comparator uses season remaining');
+assert(compare(data[3],data[2],'remaining-desc')>0,'unknown totals sort last even before extensions');
+
 execute(read('components/376-v518-library-remaining-sort.js'),'v518-library-sort.js');
 const normal=()=>ctx.v53FilteredLibrary('all','all','all','');
 const dynamic=()=>ctx.v181DynamicRows();
@@ -76,7 +88,17 @@ assert.equal(run('v224LibrarySortState().key'),'added-desc','default newest-firs
 assert.equal(run('v189SortMode()'),'added-desc');
 assert.equal(S.histFilters.v518DefaultApplied,true);
 both(['newer','over','short','unknown','seasons','partial','older'],'newest-first default');
-const html=run('v189SortControlHtml()');
+// Both Normal and Dynamic mode use this actual v189/v224 control renderer.
+S.settings.v181Library.mode='classic';
+const normalHtml=run('v189SortControlHtml()');
+S.settings.v181Library.mode='dynamic';
+const dynamicHtml=run('v189SortControlHtml()');
+for(const [mode,html] of [['Normal',normalHtml],['Dynamic',dynamicHtml]]){
+  assert(html.includes('Remaining episodes / chapters'),mode+' must show Remaining units');
+  assert(html.includes('Date added to Library'),mode+' must show Date added label');
+  assert(/<option value="added" selected/.test(html),mode+' must select newest-first');
+}
+const html=dynamicHtml;
 assert.match(html,/<option value="remaining"/,'shared Library control must contain Remaining episodes / chapters');
 assert.match(html,/Remaining episodes \/ chapters/,'correct shared option label');
 assert.match(html,/Date added to Library/,'clear Date added label');
