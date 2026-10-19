@@ -202,10 +202,10 @@ function mf508ListHtml(key){
       const c=known.get(id);if(!c)return '';
       const on=!p.hiddenIds.includes(id);
       const safe=escapeHtml(id);
-      return '<div class="mf508-order-row"><button type="button" class="mf508-cat-toggle '+(on?'is-on':'')+
-        '" aria-label="'+(on?'Hide ':'Show ')+escapeHtml(c.name)+'" aria-pressed="'+(on?'true':'false')+
-        '" onclick="App.mf508SetCategory(\''+key+'\',\''+safe+'\','+(on?'false':'true')+')">'+
-        (on?'✓':'−')+'</button><span class="mf508-cat-name">'+v144CategoryIconHtml(c)+' '+escapeHtml(c.name)+'</span>'+
+      return '<div class="mf508-order-row"><input type="checkbox" class="mf508-cat-toggle" '+
+        (on?'checked ':'')+'aria-label="Show '+escapeHtml(c.name)+' in '+(key==='todayBalance'?"Today\'s Balance":'Library Overview')+'" '+
+        'onchange="App.mf508SetCategory(\''+key+'\',\''+safe+'\',this.checked)">'+
+        '<span class="mf508-cat-name">'+v144CategoryIconHtml(c)+' '+escapeHtml(c.name)+'</span>'+
         '<div class="mf508-order-actions"><button type="button" class="btn btn-sm" aria-label="Move up" '+(index===0?'disabled':'')+
         ' onclick="App.mf508MoveCategory(\''+key+'\',\''+safe+'\','+(index-1)+')">↑</button>'+
         '<button type="button" class="btn btn-sm" aria-label="Move down" '+(index===p.order.length-1?'disabled':'')+
