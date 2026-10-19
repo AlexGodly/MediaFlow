@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-v518.yml'
   workflow_dispatch:
   # v518 remaining episodes/chapters and newest-first in Normal + Dynamic Library
+  # Release workflow registration trigger: tests and full archive required
 permissions:
   contents: write
 concurrency:
