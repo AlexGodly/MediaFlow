@@ -21,8 +21,20 @@
 .mf508-custom-actions{display:flex;gap:9px;flex-wrap:wrap}
 .mf508-order-list{display:grid;gap:8px;max-height:410px;overflow:auto;overscroll-behavior:contain;padding:3px 5px 3px 1px}
 .mf508-order-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border-soft,var(--border));border-radius:11px;background:var(--panel-raised,var(--panel));min-width:0}
-.mf508-cat-toggle{flex:0 0 29px;width:29px;height:29px;border-radius:8px;border:1px solid var(--border-soft,var(--border));background:var(--panel);color:var(--text-dim);font:700 16px/1 inherit;cursor:pointer}
-.mf508-cat-toggle.is-on{color:var(--flow,var(--accent));border-color:var(--flow,var(--accent));background:color-mix(in srgb,var(--flow,var(--accent)) 13%,transparent)}
+/* Real checkboxes keep an empty square when unchecked and a native checkmark
+   when checked. They cannot be decorated by the global v225/v226 button icons. */
+.mf508-cat-toggle{
+  appearance:auto;
+  -webkit-appearance:checkbox;
+  flex:0 0 22px;
+  width:22px;
+  height:22px;
+  margin:0;
+  padding:0;
+  accent-color:var(--flow,var(--accent));
+  cursor:pointer;
+}
+.mf508-cat-toggle:focus-visible{outline:2px solid var(--flow,var(--accent));outline-offset:3px}
 .mf508-cat-name{display:flex;align-items:center;gap:8px;flex:1;min-width:0;color:var(--text);font-weight:600;font-size:12px;overflow-wrap:anywhere}
 .mf508-cat-name img{max-width:23px;max-height:23px;object-fit:contain}
 .mf508-order-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap}
