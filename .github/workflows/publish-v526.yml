@@ -6,7 +6,7 @@ on:
       - '.github/workflows/publish-v526.yml'
   workflow_dispatch:
   # v526 universal title-progress sorter labels, no logic or schema changes
-  # Update v517 and v518 legacy label assertions to universal wording.
+  # Update v517/v518 literal and regex assertions to universal wording.
   # Release workflow registration trigger: tests and full archive required
 permissions:
   contents: write

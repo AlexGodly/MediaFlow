@@ -69,7 +69,7 @@ assert.equal(run('v224LibrarySortState().key'),'added-desc');
 assert.equal(S.histFilters.v519LibraryDefaultApplied,true);
 const canonicalHtml=run('v189SortControlHtml()');
 assert.match(canonicalHtml,/<option value="remaining"/);
-assert.match(canonicalHtml,/Remaining episodes \/ chapters/);
+assert.match(canonicalHtml,/Remaining progress/);
 assert.match(canonicalHtml,/Date added to Library/);
 assert.match(canonicalHtml,/<option value="added" selected/);
 const compare=run('v189CompareLibraryItems');
@@ -100,7 +100,7 @@ for(const [mode,html] of [['Normal',normalHtml],['Dynamic',dynamicHtml]]){
 }
 const html=dynamicHtml;
 assert.match(html,/<option value="remaining"/,'shared Library control must contain Remaining progress');
-assert.match(html,/Remaining episodes \/ chapters/,'correct shared option label');
+assert.match(html,/Remaining progress/,'correct shared option label');
 assert.match(html,/Date added to Library/,'clear Date added label');
 assert.match(html,/<option value="added" selected/,'newest-first selected by default');
 assert.deepEqual(Array.from(run('V224_LIBRARY_SORT_OPTIONS')).filter(([key])=>key==='remaining').map(x=>Array.from(x)),
