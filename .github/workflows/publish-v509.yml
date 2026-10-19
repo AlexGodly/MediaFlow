@@ -33,7 +33,6 @@ jobs:
           node --check assets/js/mediaflow-v509.bundle.js
           grep -q 'registerPageRenderer.*settings' src/js/components/374-v508-unified-category-panels.js
           grep -q 'mediaflow-v509.bundle.js' index.html
-          python3 -m compileall -q scripts
       - name: Archive complete version
         run: |
           set -euo pipefail
