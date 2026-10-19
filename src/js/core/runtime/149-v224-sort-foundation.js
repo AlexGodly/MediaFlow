@@ -16,7 +16,7 @@ function v224LegacySortParts(value,fallbackBase=V224_DEFAULT_SORT_BASE,fallbackD
   if(!raw||raw==='relevance')return {base:fallbackBase,dir:fallbackDir};
   if(raw==='priority')return {base:'priority',dir:'desc'};
   if(raw==='random')return {base:'random',dir:'asc'};
-  const m=raw.match(/^(title|priority|rating|progress|total|logging|edited|seen|added)-(asc|desc)$/);
+  const m=raw.match(/^(title|priority|rating|progress|total|remaining|logging|edited|seen|added)-(asc|desc)$/);
   if(m)return {base:m[1],dir:m[2]};
   if(['title','priority','rating','progress','total','logging','edited','seen','added'].includes(raw)){
     return {base:raw,dir:fallbackDir};
@@ -56,6 +56,15 @@ function v224CompareLibraryLike(a,b,base,dir){
     case 'rating': diff=n(a?.rating)-n(b?.rating); break;
     case 'progress': diff=n(a?.progress)-n(b?.progress); break;
     case 'total': diff=n(a?.total)-n(b?.total); break;
+    case 'remaining': {
+      // The canonical Library sorter and other Library-like pickers can
+      // safely reuse the same read-only season-aware value.
+      const av=v189LibraryRemainingUnits(a),bv=v189LibraryRemainingUnits(b);
+      if(av===null&&bv!==null)return 1;
+      if(av!==null&&bv===null)return -1;
+      diff=av===null?0:av-bv;
+      break;
+    }
     case 'logging': diff=n(v53LastTouched(a))-n(v53LastTouched(b)); break;
     case 'edited': diff=n(a?.modifiedAt||a?.createdAt)-n(b?.modifiedAt||b?.createdAt); break;
     case 'seen': diff=n(a?.lastSeenAt)-n(b?.lastSeenAt); break;
