@@ -1,0 +1,64 @@
+name: Build archive and release MediaFlow v519
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v519.yml'
+  workflow_dispatch:
+  # v519 fix canonical v224 Library dropdown, not only late v518 extension
+  # Release workflow registration trigger: tests and full archive required
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v519-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build and check
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 519
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v519.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          grep -q "registerPageRenderer('settings'" src/js/components/375-v514-canonical-category-settings.js
+          grep -q 'mediaflow-v519.bundle.js' index.html
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/519
+          for entry in VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/519/; fi
+          done
+          test -f legacy/v/519/assets/js/mediaflow-v519.bundle.js
+          git add --sparse -f VERSION index.html sw.js manifest.json assets/js/mediaflow-v519.bundle.js legacy/v/519
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v519' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v519_Stable.zip HEAD:legacy/v/519
+          sha256sum MediaFlow_v519_Stable.zip > MediaFlow_v519_Stable.sha256
+          if ! gh release view 519 >/dev/null 2>&1; then
+            gh release create 519 MediaFlow_v519_Stable.zip MediaFlow_v519_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v519 Stable' --notes 'Fix unchanged Normal and Dynamic Library sort menus reported after v518: update the actual canonical v224 dropdown options and defaults, not only the late v518 extension. Add Remaining episodes / chapters to both Library modes, default to Date added to Library (newest first), and migrate the previous Alphabetic ascending default once while preserving subsequent deliberate user sort choices. Implement direct season-aware remaining-unit comparison with unknown totals last, enable shared remaining sort parsing, and enhance regression tests to assert canonical rendered dropdown HTML before late extensions. Preserve existing Library data, settings, cloud synchronization, XP, History and PWA update integrity. Archive full v519 project and publish Stable release.'
+          fi
