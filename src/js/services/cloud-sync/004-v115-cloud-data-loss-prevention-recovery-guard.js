@@ -260,7 +260,7 @@ async function rawSet(key,value){
   // A delayed retry must never switch its destination after a login/logout.
   const uploadAccountId=String(AUTH_USER.id);
   const assertUploadAccount=()=>{
-    if(V115_STARTUP_GUARD||String(AUTH_USER?.id||'')!==uploadAccountId)
+    if(String(AUTH_USER?.id||'')!==uploadAccountId)
       throw new Error('Cloud account changed while saving. Upload cancelled; local recovery copy retained.');
   };
 
