@@ -307,3 +307,31 @@ if(typeof MediaFlowRuntime!=='undefined'&&typeof v220RenderSettingsPage==='funct
     return at>=0?html.slice(0,at)+sections+html.slice(at):html+sections;
   });
 }
+
+// v510: Always expose an explicit update path, even when an old controller
+// reports no waiting worker. Never clear IndexedDB, localStorage or user data.
+async function mf510ForcePwaRefresh(){
+  if(!('serviceWorker' in navigator)){location.reload();return;}
+  try{
+    const reg=await navigator.serviceWorker.getRegistration('./');
+    if(reg){
+      await reg.update();
+      if(reg.waiting){
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
+        const onChange=()=>location.reload();
+        navigator.serviceWorker.addEventListener('controllerchange',onChange,{once:true});
+        setTimeout(()=>location.reload(),4500);
+        return;
+      }
+    }
+    // A new document URL bypasses stale app-shell HTML without touching storage.
+    const url=new URL(location.href);
+    url.searchParams.set('mf_update',String(Date.now()));
+    location.replace(url.href);
+  }catch(error){
+    const url=new URL(location.href);
+    url.searchParams.set('mf_update',String(Date.now()));
+    location.replace(url.href);
+  }
+}
+App.mf510ForcePwaRefresh=mf510ForcePwaRefresh;
