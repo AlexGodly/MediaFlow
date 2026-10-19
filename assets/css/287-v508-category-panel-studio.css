@@ -40,3 +40,16 @@
  .mf508-position{margin-left:auto}
 }
 @media(prefers-reduced-motion:reduce){.mf508-panel *{transition:none!important;animation:none!important}}
+
+
+/* Scope-aware category health summary shown below Today's Balance totals. */
+.mf508-health-summary{margin-top:14px;padding:14px 16px;border:1px solid var(--border-soft,var(--border));border-radius:13px;background:var(--panel-raised,var(--panel));display:grid;gap:12px}
+.mf508-health-header{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between}
+.mf508-health-header strong{color:var(--text);font-size:13px}
+.mf508-health-header small{color:var(--text-dim);font-size:11px}
+.mf508-health-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mf508-health-groups>div{min-width:0;display:grid;gap:8px}
+.mf508-health-groups b{color:var(--text);font-size:11px}
+.mf508-health-counts{display:flex;gap:6px;flex-wrap:wrap}
+.mf508-health-counts span{color:var(--text-dim);border:1px solid var(--border-soft,var(--border));border-radius:30px;padding:5px 9px;font-size:10px;background:var(--panel,var(--surface))}
+@media(max-width:600px){.mf508-health-groups{grid-template-columns:minmax(0,1fr)}}
