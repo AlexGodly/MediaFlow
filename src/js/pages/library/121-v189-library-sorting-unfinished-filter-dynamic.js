@@ -75,6 +75,31 @@ App.v69SetLibrarySort=v69SetLibrarySort;
 // v391: reuse the locale collator instead of allocating collation options for every comparison.
 // The options match the original String.localeCompare contract exactly.
 const V391_TITLE_COLLATOR=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
+// v519: canonical remaining count shared by Normal and Dynamic Library.
+// An unknown total (or any season with an unknown total) is not zero.
+function v189LibraryRemainingUnits(item){
+  if(!item||typeof item!=='object')return null;
+  const knownTotal=value=>{
+    if(value===null||value===undefined||String(value).trim()==='')return null;
+    const n=Number(value);
+    return Number.isFinite(n)&&n>0?Math.floor(n):null;
+  };
+  const watched=value=>{
+    const n=Number(value);
+    return Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
+  };
+  if(Array.isArray(item.seasons)&&item.seasons.length){
+    let sum=0;
+    for(const season of item.seasons){
+      const total=knownTotal(season?.total??season?.totalEpisodes??season?.total_episodes);
+      if(total===null)return null;
+      sum+=Math.max(0,total-watched(season?.progress));
+    }
+    return sum;
+  }
+  const total=knownTotal(item.total);
+  return total===null?null:Math.max(0,total-watched(item.progress));
+}
 function v189CompareLibraryItems(a,b,sort){
   const ai=a?.item||a, bi=b?.item||b;
   const at=cleanTitle(ai?.title||'');
@@ -84,6 +109,14 @@ function v189CompareLibraryItems(a,b,sort){
   const rank={low:0,medium:1,high:2};
   let d=0;
 
+  if(sort==='remaining-desc'||sort==='remaining-asc'){
+    const av=v189LibraryRemainingUnits(ai),bv=v189LibraryRemainingUnits(bi);
+    if(av===null&&bv!==null)return 1;
+    if(av!==null&&bv===null)return -1;
+    if(av===null&&bv===null)return titleCmp();
+    d=(av-bv)*(sort.endsWith('-asc')?1:-1);
+    return d||titleCmp();
+  }
   if(sort==='title-asc')return titleCmp();
   if(sort==='title-desc')return -titleCmp();
   if(sort==='priority-asc')d=(rank[String(ai?.priority||'medium')]??1)-(rank[String(bi?.priority||'medium')]??1);
