@@ -3,7 +3,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const helper=read('src/js/components/379-v532-media-type-history-statistics.js');
+const helper=read('src/js/utils/006-util.js');
 const categories=[
  {id:'anime',type:'video'},{id:'books',type:'reading'},
  {id:'games',type:'playing'},{id:'music',type:'listening'},
@@ -62,7 +62,9 @@ const stats=read('src/js/pages/statistics/023-v16-features-backups-themes-stopwa
 assert(stats.includes('const mediaData=v532MediaTypeMix(S.sessions,S.categories);'),
  'Media Type Mix must render normalized types with stable totals');
 const runtime=JSON.parse(read('src/js/runtime-order.json'));
-assert(runtime.includes('components/379-v532-media-type-history-statistics.js'), 'The helper must be bundled');
+assert(!runtime.includes('components/379-v532-media-type-history-statistics.js'), 'Retire the late startup extension');
+const build=JSON.parse(read('src/js/build-order.json'));
+assert(build.findIndex(x=>x.path==='utils/006-util.js')<build.findIndex(x=>x.path==='pages/history/015-view-history.js'), 'Media type helpers must load before History');
 const category=read('src/js/components/category/049-v144-reusable-category-icon-color-palettes.js');
 assert(category.includes('>Watching</option>'),'Existing category activity labels are not changed');
 console.log('PASS v532: History filters work for Watching, Reading, Playing, Listening and Other; Statistics minutes and labels are correct.');

@@ -101,3 +101,47 @@ function sessionsInRange(days){
 
 }
 
+
+/* MediaFlow v533 — shared media-type helpers loaded before History and Statistics.
+   The v532 end-of-runtime extension initialized these helpers too late for some
+   navigation paths. Keep these declarations in the core utility segment so
+   both old and current page renderers can call them safely. */
+function v532MediaTypeRows(){
+  return [
+    {id:'video',label:'Watching'},
+    {id:'reading',label:'Reading'},
+    {id:'playing',label:'Playing'},
+    {id:'listening',label:'Listening'}
+  ];
+}
+function v532MediaTypeLabel(raw){
+  const row=v532MediaTypeRows().find(x=>x.id===String(raw||''));
+  return row?row.label:'Other';
+}
+function v532MediaTypeOptions(selected='all'){
+  const value=String(selected||'all');
+  const rows=[{id:'all',label:'All media types'},...v532MediaTypeRows(),{id:'other',label:'Other'}];
+  return rows.map(row=>`<option value="${row.id}" ${value===row.id?'selected':''}>${row.label}</option>`).join('');
+}
+function v532SessionMediaType(session){
+  const category=(S.categories||[]).find(c=>String(c?.id)===String(session?.categoryId));
+  const type=String(category?.type||'');
+  return v532MediaTypeRows().some(x=>x.id===type)?type:'other';
+}
+function v532MediaTypeMix(sessions,categories){
+  const rows=v532MediaTypeRows();
+  const types=new Set(rows.map(x=>x.id));
+  const lookup=new Map((Array.isArray(categories)?categories:[]).map(cat=>[String(cat?.id),cat?.type]));
+  const totals=Object.fromEntries(rows.map(x=>[x.id,0]));
+  let hasOther=false;
+  for(const session of Array.isArray(sessions)?sessions:[]){
+    if(!session||session.status==='skipped')continue;
+    const raw=String(lookup.get(String(session.categoryId))||'');
+    const type=types.has(raw)?raw:'other';
+    if(type==='other'){hasOther=true;if(!Object.prototype.hasOwnProperty.call(totals,'other'))totals.other=0;}
+    totals[type]+=(Number(session.minutes)||0);
+  }
+  return [...rows.map(({id,label})=>({label,value:totals[id]})),
+          ...(hasOther?[{label:'Other',value:totals.other}]:[])];
+}
+

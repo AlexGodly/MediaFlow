@@ -232,6 +232,5 @@
   "components/375-v514-canonical-category-settings.js",
   "components/376-v518-library-remaining-sort.js",
   "components/377-v525-logging-draft-sort.js",
-  "components/378-v527-universal-media.js",
-  "components/379-v532-media-type-history-statistics.js"
+  "components/378-v527-universal-media.js"
 ]
