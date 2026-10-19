@@ -54,7 +54,7 @@ assert(repeats.includes('sessions:6')&&repeats.includes('matches:6'),'New repeat
 const runtime=JSON.parse(read('src/js/runtime-order.json'));
 assert(runtime.includes('components/378-v527-universal-media.js'),'Universal media module must be bundled');
 const moduleSource=read('src/js/components/378-v527-universal-media.js');
-assert(moduleSource.includes('MutationObserver')&&module.includes('v527NormalizeSortSelect'),'Late-rendered sort controls must update');
+assert(moduleSource.includes('MutationObserver')&&moduleSource.includes('v527NormalizeSortSelect'),'Late-rendered sort controls must update');
 assert(moduleSource.includes('updateLevelingUnit'),'New unit XP rates must be editable in Settings');
 assert(!read('src/js/core/constants/001-constants.js').includes('type:\'playing\',unit:\'episodes\''),'No inappropriate forced default media-category migration');
 console.log('PASS v527: four activity types, 15 units, shared progress labels, Quick/Advanced Logging, stats, XP/repeat defaults, canonical sorter migration and late-render controls.');
