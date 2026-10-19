@@ -304,7 +304,8 @@ if(typeof MediaFlowRuntime!=='undefined'&&typeof v220RenderSettingsPage==='funct
       mf508PanelHtml('libraryOverview');
     const anchor='<div id="v220-settings-empty"';
     const at=html.indexOf(anchor);
-    return at>=0?html.slice(0,at)+sections+html.slice(at):html+sections;
+    const recovery='<div class="section-label">PWA UPDATE RECOVERY</div><div class="card"><b>App update stuck?</b><p class="hint">Fetch the latest app without deleting user data.</p><button class="btn btn-primary" onclick="App.mf510ForcePwaRefresh()">Force latest app update</button></div>';
+    return (at>=0?html.slice(0,at)+sections+html.slice(at):html+sections)+recovery;
   });
 }
 
@@ -336,10 +337,3 @@ async function mf510ForcePwaRefresh(){
 }
 App.mf510ForcePwaRefresh=mf510ForcePwaRefresh;
 
-// Dedicated Settings recovery section for browsers stuck on an older app shell.
-if(typeof MediaFlowRuntime!=='undefined'&&typeof v220RenderSettingsPage==='function'){
- MediaFlowRuntime.registerPageRenderer('settings',function(){
-  const html=String(v220RenderSettingsPage.apply(this,arguments)||'');
-  return html+'<div class="section-label">PWA UPDATE RECOVERY</div><div class="card"><b>App update stuck?</b><p class="hint">Fetch the latest app without deleting user data.</p><button class="btn btn-primary" onclick="App.mf510ForcePwaRefresh()">Force latest app update</button></div>';
- });
-}
