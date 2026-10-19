@@ -9,8 +9,8 @@ const V224_LOG_SORT_OPTIONS=[
   ['title','Alphabetic'],
   ['priority','Priority'],
   ['rating','Rating'],
-  ['progress','Progress'],
-  ['total','Total']
+  ['progress','Consumed progress'],
+  ['total','Total progress']
 ];
 
 function v224NormalizeLogSort(){

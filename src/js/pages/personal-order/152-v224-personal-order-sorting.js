@@ -9,8 +9,8 @@ const V224_ORDER_PICKER_SORT_OPTIONS=[
   ['title','Alphabetic'],
   ['priority','Priority'],
   ['rating','Rating'],
-  ['progress','Progress'],
-  ['total','Total']
+  ['progress','Consumed progress'],
+  ['total','Total progress']
 ];
 
 const v224EnsureOrderPickerUIBase=v140EnsureOrderPickerUI;

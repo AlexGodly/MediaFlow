@@ -8,8 +8,8 @@ const V224_BATCH_SORT_OPTIONS=[
   ['title','Alphabetic'],
   ['priority','Priority'],
   ['rating','Rating'],
-  ['progress','Progress'],
-  ['total','Total']
+  ['progress','Consumed progress'],
+  ['total','Total progress']
 ];
 
 const v224NormalizeBatchLibraryStateBase=v175NormalizeBatchLibraryState;

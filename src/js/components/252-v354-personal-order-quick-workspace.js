@@ -51,7 +51,7 @@ function v354Select(kind,key,ids,label){
 function v354Toolbar(kind){
   const s=v354State(kind),sortOptions=kind==='collections'
     ?[['queue','Saved queue'],['title','Collection/title name'],['count','Collection size'],['priority','Priority'],['status','Status'],['rating','Rating']]
-    :[['queue','Saved order'],['title','Title A–Z'],['priority','Priority'],['status','Status'],['rating','Rating'],['progress','Progress']];
+    :[['queue','Saved order'],['title','Title A–Z'],['priority','Priority'],['status','Status'],['rating','Rating'],['progress','Consumed progress']];
   const sortSelect=sortOptions.map(([key,label])=>`<option value="${key}" ${s.sort===key?'selected':''}>${label}</option>`).join('');
   const status=v354Select(kind,'status',['all',...v354StatusIds()],x=>x==='all'?'All statuses':v199StatusLabel(x));
   const priority=v354Select(kind,'priority',['all',...v354PriorityIds()],x=>x==='all'?'All priorities':x[0].toUpperCase()+x.slice(1));

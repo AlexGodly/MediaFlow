@@ -6,9 +6,9 @@ const V373_RELEASE=373;
 const V373_SORTS=[
   ['logAdded','Added to Logging'],
   ['draftUpdated','Last updated in draft'],
-  ['progress','Current progress'],
-  ['total','Total episodes / chapters'],
-  ['remaining','Remaining episodes / chapters'],
+  ['progress','Consumed progress'],
+  ['total','Total progress'],
+  ['remaining','Remaining progress'],
   ['priority','Priority'],
   ['title','Alphabetical'],
   ['logging','Last updated by logging'],

@@ -47,6 +47,7 @@ jobs:
           node tests/test-v523-canceled-title-actions.cjs
           node tests/test-v524-readme.cjs
           node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js

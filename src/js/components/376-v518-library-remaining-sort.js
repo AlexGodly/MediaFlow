@@ -7,7 +7,7 @@ const V518_RELEASE=518;
 if(!V224_LIBRARY_SORT_OPTIONS.some(([key])=>key==='remaining')){
   const afterTotal=V224_LIBRARY_SORT_OPTIONS.findIndex(([key])=>key==='total');
   V224_LIBRARY_SORT_OPTIONS.splice(afterTotal<0?V224_LIBRARY_SORT_OPTIONS.length:afterTotal+1,
-    0,['remaining','Remaining episodes / chapters']);
+    0,['remaining','Remaining progress']);
 }
 const v518AddedOption=V224_LIBRARY_SORT_OPTIONS.find(row=>row[0]==='added');
 if(v518AddedOption)v518AddedOption[1]='Date added to Library';

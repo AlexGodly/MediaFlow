@@ -35,7 +35,7 @@ function v392Timestamp(item,key='createdAt'){
   return Number.isFinite(n)&&n>0?n:0;
 }
 function v392SortOptions(selected){
-  const options=[['added','Date added'],['title','Alphabetical'],['priority','Priority'],['rating','Rating'],['progress','Progress'],['total','Total episodes'],['edited','Last edited'],['logged','Last logged'],['random','Random']];
+  const options=[['added','Date added'],['title','Alphabetical'],['priority','Priority'],['rating','Rating'],['progress','Consumed progress'],['total','Total progress'],['edited','Last edited'],['logged','Last logged'],['random','Random']];
   return options.map(([k,label])=>`<option value="${k}" ${selected===k?'selected':''}>${label}</option>`).join('');
 }
 function v392CompareTitles(a,b,sort,dir){
