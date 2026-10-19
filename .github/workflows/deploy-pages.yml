@@ -33,6 +33,19 @@ jobs:
             !/beta/
           sparse-checkout-cone-mode: false
 
+      # Build from the exact checked-out commit, not whichever previous version
+      # was last committed. Source-only VERSION bumps used to deploy stale HTML.
+      - name: Build and verify the actual deployable version
+        run: |
+          set -euo pipefail
+          python3 scripts/build.py
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          version="$(cat VERSION)"
+          grep -q "mediaflow-v${version}.bundle.js" index.html
+          grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
+          test -s "assets/js/mediaflow-v${version}.bundle.js"
+
       - name: Prepare site without legacy or beta
         run: |
           mkdir -p "$RUNNER_TEMP/mediaflow-site"
