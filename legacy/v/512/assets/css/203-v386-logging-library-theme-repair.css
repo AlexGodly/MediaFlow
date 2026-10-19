@@ -1,0 +1,81 @@
+/* MediaFlow v386 — REAL Logging Library theme color repair.
+   v383-v385 rules used --accent, but MediaFlow's canonical, user/theme-controlled
+   accent is --flow. --accent only exists in certain legacy/native-light scopes.
+   An undefined var() invalidated entire gradient declarations, leaving the
+   old gray v238 surface visible. Scope the alias only to this component so
+   historical component tokens inherit the real live theme without changing
+   theme globals or unrelated app surfaces. */
+.log-form details.v238-log-library.mf383-logging-library{
+  --accent:var(--flow,#438cff);
+  --mf386-lib-color:var(--flow,#438cff);
+  border:1px solid color-mix(in srgb,var(--mf386-lib-color) 58%,var(--border-soft) 42%);
+  background:linear-gradient(137deg,
+    color-mix(in srgb,var(--mf386-lib-color) 52%,var(--panel-raised) 48%) 0%,
+    color-mix(in srgb,var(--mf386-lib-color) 39%,var(--panel) 61%) 52%,
+    color-mix(in srgb,var(--mf386-lib-color) 47%,var(--panel-raised) 53%) 100%);
+  box-shadow:0 12px 34px color-mix(in srgb,var(--mf386-lib-color) 16%,transparent),
+             inset 0 1px 0 color-mix(in srgb,var(--text) 15%,transparent);
+  overflow:hidden;
+  transition:background .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+/* The entire clickable header is visibly themed edge-to-edge. */
+.log-form details.mf383-logging-library > summary.mf383-logging-summary{
+  background:linear-gradient(112deg,
+    color-mix(in srgb,var(--mf386-lib-color) 61%,var(--panel-raised) 39%) 0%,
+    color-mix(in srgb,var(--mf386-lib-color) 45%,var(--panel) 55%) 55%,
+    color-mix(in srgb,var(--mf386-lib-color) 54%,var(--panel-raised) 46%) 100%);
+  border-radius:19px;
+  color:var(--text);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 15%,transparent);
+}
+.log-form details.mf383-logging-library[open] > summary.mf383-logging-summary{
+  border-radius:19px 19px 0 0;
+  border-bottom:1px solid color-mix(in srgb,var(--mf386-lib-color) 53%,var(--border-soft));
+}
+/* Colored expanded content, rather than a gray panel below a colored header. */
+.log-form details.mf383-logging-library > .mf383-logging-body{
+  background:linear-gradient(166deg,
+    color-mix(in srgb,var(--mf386-lib-color) 31%,var(--panel-raised) 69%) 0%,
+    color-mix(in srgb,var(--mf386-lib-color) 21%,var(--panel) 79%) 62%,
+    color-mix(in srgb,var(--mf386-lib-color) 27%,var(--panel-raised) 73%) 100%);
+  border-top:1px solid color-mix(in srgb,var(--mf386-lib-color) 39%,var(--border-soft));
+  box-shadow:inset 0 8px 25px color-mix(in srgb,var(--mf386-lib-color) 9%,transparent);
+}
+.log-form .mf383-logging-library .mf383-lib-icon{
+  color:var(--text);
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--mf386-lib-color) 35%,var(--panel) 65%),
+    color-mix(in srgb,var(--mf386-lib-color) 23%,var(--panel-raised) 77%));
+  border-color:color-mix(in srgb,var(--mf386-lib-color) 55%,var(--border-soft));
+}
+.log-form .mf383-logging-library .mf383-lib-stats > span,
+.log-form .mf383-logging-library .mf383-lib-chevron{
+  background:color-mix(in srgb,var(--mf386-lib-color) 14%,var(--panel) 86%);
+  border-color:color-mix(in srgb,var(--mf386-lib-color) 47%,var(--border-soft));
+  color:var(--text);
+}
+.log-form .mf383-logging-library .mf383-lib-kicker,
+.log-form .mf383-logging-body .mf383-lib-body-icon{
+  color:color-mix(in srgb,var(--mf386-lib-color) 61%,var(--text) 39%);
+}
+.log-form .mf383-logging-body .v238-log-library-head{
+  background:color-mix(in srgb,var(--mf386-lib-color) 20%,var(--panel-raised) 80%);
+  border-color:color-mix(in srgb,var(--mf386-lib-color) 40%,var(--border-soft));
+}
+.log-form .mf383-logging-body :is(input,select,textarea){
+  background:color-mix(in srgb,var(--mf386-lib-color) 7%,var(--panel-raised) 93%);
+  border-color:color-mix(in srgb,var(--mf386-lib-color) 33%,var(--border-soft));
+  color:var(--text);
+}
+.log-form .mf383-logging-body :is(input,select,textarea):focus-visible{
+  outline-color:var(--mf386-lib-color);
+  border-color:var(--mf386-lib-color);
+}
+@media(max-width:690px){
+  .log-form details.mf383-logging-library > summary.mf383-logging-summary{min-height:78px}
+  .log-form details.mf383-logging-library > .mf383-logging-body{padding:7px 12px 14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .log-form details.mf383-logging-library,
+  .log-form details.mf383-logging-library > summary.mf383-logging-summary{transition:none}
+}
