@@ -1,0 +1,77 @@
+name: Build archive and release MediaFlow v535
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v535.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v535-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 535
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v535.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          grep -q 'mediaflow-v535.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v535-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 535
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/535
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/535/; fi
+          done
+          test -f legacy/v/535/assets/js/mediaflow-v535.bundle.js
+          test -f legacy/v/535/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v535.bundle.js legacy/v/535
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v535' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v535_Stable.zip HEAD:legacy/v/535
+          sha256sum MediaFlow_v535_Stable.zip > MediaFlow_v535_Stable.sha256
+          if ! gh release view 535 >/dev/null 2>&1; then
+            gh release create 535 MediaFlow_v535_Stable.zip MediaFlow_v535_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v535 Stable' --notes 'v535 Stable: Cloud save account fencing prevents any delayed retry from writing to a switched account; pending autosaves coalesce safely and return success/failure explicitly; complete in-memory Library History survives cloud snapshot and merge rather than being silently clipped at 1,000 events; PWA update/reload requires a confirmed cloud save; read-only integrity audit covers Full/Automatic export, Settings, History, XP, Collections, Personal Order, PWA capabilities and live Supabase readback. Existing import/export formats, Supabase schema, themes and XP math unchanged. Includes cloud recovery regressions, worker/upgrade checks, complete legacy/v/535 archive, GitHub Pages deployment.'
+          fi
