@@ -5,7 +5,7 @@
    - Keeps + Add title as the single right-side header action.
    - Adds cover-presence filter to Normal + Dynamic Library.
    - Replaces direction-duplicated sorts with one sort field + ASC/DESC.
-   - Alphabetic / ASC is the default Library sort.
+   - Date added to Library / DESC (newest first) is the default Library sort.
    ============================================================ */
 const V224_LIBRARY_SORT_OPTIONS=[
   ['title','Alphabetic'],
@@ -13,10 +13,11 @@ const V224_LIBRARY_SORT_OPTIONS=[
   ['rating','Rating'],
   ['progress','Progress watched/read'],
   ['total','Total episodes/chapters'],
+  ['remaining','Remaining episodes / chapters'],
   ['logging','Last updated by logging'],
   ['edited','Last edited'],
   ['seen','Last seen in Title Details'],
-  ['added','Date added'],
+  ['added','Date added to Library'],
   ['random','Random']
 ];
 
@@ -24,14 +25,29 @@ function v224LibrarySortState(){
   S.histFilters=S.histFilters||{};
   const f=S.histFilters;
   const allowed=new Set(V224_LIBRARY_SORT_OPTIONS.map(x=>x[0]));
+  // v519: This migration runs on the actual v224 Library state path, not
+  // only inside a late runtime extension. Fix previously stored implicit
+  // Alphabetic defaults once, preserving later deliberate changes.
+  if(f.v519LibraryDefaultApplied!==true){
+    const previousBase=String(f.libSortBase||'').toLowerCase();
+    const previousDir=String(f.libSortDir||'').toLowerCase();
+    const previousKey=String(f.libSort||'').toLowerCase();
+    if((!previousBase||previousBase==='title')&&
+       (!previousDir||previousDir==='asc')&&
+       (!previousKey||previousKey==='title-asc')){
+      f.libSortBase='added';
+      f.libSortDir='desc';
+      f.libSort='added-desc';
+    }
+    f.v519LibraryDefaultApplied=true;
+  }
   let base=String(f.libSortBase||'').toLowerCase();
   let dir=v224SortDirection(f.libSortDir);
   if(!allowed.has(base)){
-    const parts=v224LegacySortParts(f.libSort,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
-    base=allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE;
+    const parts=v224LegacySortParts(f.libSort,'added','desc');
+    base=allowed.has(parts.base)?parts.base:'added';
     dir=parts.dir;
-    // v224 intentionally replaces the old implicit priority default.
-    if(!f.libSort) {base=V224_DEFAULT_SORT_BASE;dir=V224_DEFAULT_SORT_DIR;}
+    if(!f.libSort) {base='added';dir='desc';}
   }
   if(base==='random')dir='asc';
   f.libSortBase=base;
@@ -46,10 +62,11 @@ v69SetLibrarySort=function(value){
   S.histFilters=S.histFilters||{};
   const allowed=new Set(V224_LIBRARY_SORT_OPTIONS.map(x=>x[0]));
   const raw=String(value||'').toLowerCase();
-  const parts=v224LegacySortParts(raw,V224_DEFAULT_SORT_BASE,V224_DEFAULT_SORT_DIR);
-  const base=allowed.has(raw)?raw:(allowed.has(parts.base)?parts.base:V224_DEFAULT_SORT_BASE);
+  const parts=v224LegacySortParts(raw,'added','desc');
+  const base=allowed.has(raw)?raw:(allowed.has(parts.base)?parts.base:'added');
   const current=v224LibrarySortState();
-  const dir=base==='random'?'asc':(raw.includes('-')?parts.dir:current.dir);
+  const dir=base==='random'?'asc':(raw.includes('-')?parts.dir:
+    (base==='added'||base==='remaining'?'desc':current.dir));
   S.histFilters.libSortBase=base;
   S.histFilters.libSortDir=dir;
   S.histFilters.libSort=v224SortKey(base,dir);
