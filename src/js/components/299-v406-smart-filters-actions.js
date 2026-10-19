@@ -81,7 +81,7 @@ App.v354OpenSheet=function(kind){
   return v406OpenSheetBase.apply(this,arguments);
 };
 
-const V406_STATUS_LABEL={planned:'Plan to Watch',active:'Watching',paused:'On Hold',completed:'Completed',dropped:'Dropped'};
+const V406_STATUS_LABEL={planned:'Planned',active:'Active',paused:'On Hold',completed:'Completed',dropped:'Dropped'};
 const V406_PRIORITY_LABEL={low:'Low',medium:'Medium',high:'High'};
 function v406ActionItems(kind){
   const ids=v230VisibleIds(kind==='category'?'setCategory':kind==='status'?'setStatus':'setPriority');

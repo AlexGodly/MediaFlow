@@ -319,7 +319,7 @@ v181DynamicLibrarySettingsHtml=function(){
       <button type="button" class="btn btn-sm btn-ghost" onclick="App.v181ResetDynamicLibrary()">Reset Dynamic Library layout</button>
     </div>
     <div class="section-label" style="margin-top:16px;">DYNAMIC STATUS ROW</div>
-    <div class="hint">Arrange the order used under every Dynamic Library category. Default: Watching → On Hold → Completed → Dropped → Plan to Watch.</div>
+    <div class="hint">Arrange the order used under every Dynamic Library category. Default: Active → On Hold → Completed → Dropped → Planned.</div>
     <div class="v181-config-list">${statusRows}</div>
   </div>`;
 };

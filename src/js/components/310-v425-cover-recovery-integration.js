@@ -57,7 +57,7 @@ function mf425ScopeChange(){const root=document.getElementById('mf425-scope');if
  if(mode==='categoryStatus'){
   const selected=[...root.querySelectorAll('input[data-mf425-category]:checked')].map(i=>i.value);
   const previous=new Set([...grid.querySelectorAll('input[data-mf425-status]:checked')].map(i=>i.dataset.mf425Status+':'+i.value));
-  const statuses=[['planned','Plan to Watch / Read'],['active','Watching / Reading'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
+  const statuses=[['planned','Planned'],['active','Active'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
   grid.innerHTML=selected.map(id=>{const cat=(S.categories||[]).find(c=>String(c.id)===id);return '<fieldset><legend>'+mf425Esc(cat?.name||id)+'</legend>'+statuses.map(([s,n])=>'<label><input data-mf425-status="'+mf425Esc(id)+'" type="checkbox" value="'+s+'" onchange="App.mf425UpdateCount()" '+(previous.has(id+':'+s)?'checked':'')+'>'+n+'</label>').join('')+'</fieldset>';}).join('');
  }
  mf425UpdateCount();}

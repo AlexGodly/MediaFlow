@@ -13,7 +13,7 @@ function v190NormalLibraryBatchBarHtml(){
       <button type="button" class="btn btn-sm" ${n?'':'disabled'} onclick="App.v69RepairSelectedCompleted()">Fix completed progress</button>
     </div>
     <b>${n.toLocaleString()} selected</b><span class="spacer"></span>
-    <select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Plan to Watch</option><option value="active">Watching</option><option value="paused">On Hold</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select>
+    <select style="width:auto" onchange="if(this.value){App.batchLibraryStatus(this.value);this.value=''}"><option value="">Set status…</option><option value="planned">Planned</option><option value="active">Active</option><option value="paused">On Hold</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select>
     <select style="width:auto" onchange="if(this.value){App.batchLibraryPriority(this.value);this.value=''}"><option value="">Set priority…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
     <select style="width:auto" onchange="if(this.value){App.batchLibraryCategory(this.value);this.value=''}"><option value="">Move to…</option>${(S.categories||[]).map(c=>`<option value="${escapeHtml(String(c.id))}">${v144CategoryIconText(c)} ${escapeHtml(c.name)}</option>`).join('')}</select>
     <button type="button" class="btn btn-sm btn-danger" ${n?'':'disabled'} onclick="App.batchDeleteLibrary()">Delete selected</button>

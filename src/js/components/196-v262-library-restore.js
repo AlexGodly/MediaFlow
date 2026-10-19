@@ -33,7 +33,7 @@ function v262ApplyLibraryToolsState(collapsed=v262LibraryToolsCollapsed()){
 
 function v262StatusLabel(status){
   if(status==='all')return 'All';
-  try{return v199StatusLabel(status);}catch(_){return ({planned:'Plan to Watch',active:'Watching',paused:'On Hold',completed:'Completed',dropped:'Dropped'})[status]||status;}
+  try{return v199StatusLabel(status);}catch(_){return ({planned:'Planned',active:'Active',paused:'On Hold',completed:'Completed',dropped:'Dropped'})[status]||status;}
 }
 function v262CategoryFilterCategories(){
   try{if(typeof v236EffectiveCategoryFilterCategories==='function')return v236EffectiveCategoryFilterCategories().filter(Boolean);}catch(_){ }

@@ -3,7 +3,7 @@
  * confirmations and title writes; the workspace only selects immutable inputs.
  */
 const MF446_VERSION=446;
-const MF446_STATUS=[['planned','Plan to Watch / Read'],['active','Watching / Reading'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
+const MF446_STATUS=[['planned','Planned'],['active','Active'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
 const MF446_MODES=[['all','All'],['library','Library'],['category','By Category'],['categoryStatus','By Category → Status'],['selected','Selected Titles']];
 const MF446={draft:{cover:null,metadata:null},pendingBatchIds:null,coverPreparedMode:''};
 function mf446CleanScope(value){

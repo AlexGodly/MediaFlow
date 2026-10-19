@@ -73,7 +73,7 @@ function v261CategoryButtonHtml(cat,active,onclick){
 }
 function v261LibraryStickyHtml(dynamic){
   const cfg=v181EnsureLibrarySettings(S.settings||DEFAULT_SETTINGS);
-  const statuses=[['all','All'],['planned','Plan to Watch'],['active','Watching'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
+  const statuses=[['all','All'],['planned','Planned'],['active','Active'],['paused','On Hold'],['completed','Completed'],['dropped','Dropped']];
   const activeStatus=dynamic?String(cfg.activeStatus||'active'):String(S.histFilters?.libStatus||'all');
   const activeCategory=dynamic?String(cfg.activeCategoryId||''):String(S.histFilters?.libCategory||'all');
   const visibleCats=dynamic

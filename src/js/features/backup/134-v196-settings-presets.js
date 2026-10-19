@@ -208,11 +208,11 @@ renderSettings=function(){
    MediaFlow v199 — Global Library Status Terminology
    ------------------------------------------------------------
    User-facing Library statuses now use one canonical vocabulary everywhere:
-   active    -> Watching
+   active    -> Active
    paused    -> On Hold
    dropped   -> Dropped
    completed -> Completed
-   planned   -> Plan to Watch
+   planned   -> Planned
 
    Internal status ids stay unchanged for backward compatibility with existing
    Library data, imports, cloud state, backups, Settings Presets and APIs.
@@ -220,11 +220,11 @@ renderSettings=function(){
 function v199StatusLabel(value){
   const key=String(value||'planned').toLowerCase();
   return ({
-    active:'Watching',
+    active:'Active',
     paused:'On Hold',
     dropped:'Dropped',
     completed:'Completed',
-    planned:'Plan to Watch'
-  })[key] || String(value||'Plan to Watch');
+    planned:'Planned'
+  })[key] || String(value||'Planned');
 }
 

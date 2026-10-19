@@ -565,9 +565,9 @@ const App = {
         }
 
         const statusMap={
-          'Watching':'active','Reading':'active','Completed':'completed',
+          'Watching':'active','Active':'active','Reading':'active','Completed':'completed',
           'On-Hold':'paused','Dropped':'dropped',
-          'Plan to Watch':'planned','Plan to Read':'planned'
+          'Plan to Watch':'planned','Planned':'planned','Plan to Read':'planned'
         };
 
         const getTag=(block,name)=>{

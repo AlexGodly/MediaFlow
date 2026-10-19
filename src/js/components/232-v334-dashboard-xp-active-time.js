@@ -115,7 +115,7 @@ persistLibrary=function(){
   return v334PersistLibraryBase.apply(this,arguments);
 };
 
-// The Dashboard logger can create a new title already in Watching state. This
+// The Dashboard logger can create a new title already in Active status. This
 // is a genuine first start (unlike importing an already-started title).
 let V334_ADDING_LOG_ENTRY=false;
 const v334AddLogEntryBase=App.addLogEntry;

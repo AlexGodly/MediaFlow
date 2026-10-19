@@ -119,7 +119,7 @@ function v181DynamicLibrarySettingsHtml(){
 
     <div class="hint">
       Arrange the order used under every Dynamic Library category.
-      Default: Watching → On Hold → Completed → Dropped → Plan to Watch.
+      Default: Active → On Hold → Completed → Dropped → Planned.
     </div>
 
     <div class="v181-config-list">

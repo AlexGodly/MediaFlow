@@ -19,8 +19,8 @@ function v143SelectedLibraryCount(){
 
 function v143StatusLabel(value){
   const map={
-    planned:'Plan to Watch',
-    active:'Watching',
+    planned:'Planned',
+    active:'Active',
     paused:'On Hold',
     completed:'Completed',
     dropped:'Dropped'

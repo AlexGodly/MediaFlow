@@ -40,8 +40,8 @@ v225ButtonIconName=function(el){
 libraryStatusModalHtml=function(d){
   const current=String(d?.status||'planned');
   const options=[
-    {id:'planned',label:'Plan to Watch',desc:'Planned for later, but not started yet.'},
-    {id:'active',label:'Watching',desc:'Currently being watched or read.'},
+    {id:'planned',label:'Planned',desc:'Planned for later, but not started yet.'},
+    {id:'active',label:'Active',desc:'Currently in progress.'},
     {id:'paused',label:'On Hold',desc:'Temporarily set aside without abandoning it.'},
     {id:'completed',label:'Completed',desc:'Finished and kept as part of your history.'},
     {id:'dropped',label:'Dropped',desc:'Abandoned and excluded from recommendations.'}

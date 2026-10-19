@@ -303,8 +303,8 @@ function v181QuickSchema(item,key){
   ]);
 
   const status=[
-    ['planned','Plan to Watch'],
-    ['active','Watching'],
+    ['planned','Planned'],
+    ['active','Active'],
     ['paused','On Hold'],
     ['completed','Completed'],
     ['dropped','Dropped']

@@ -19,7 +19,7 @@ let V238_LOG_LIBRARY_OPEN=false;
 // v232 made option reordering idempotent, but moving <option> nodes can make
 // Chromium temporarily select the final moved option. Preserve the value
 // explicitly around the layout pass so status filters never become visually
-// stuck on Plan to Watch (and their underlying onchange remains authoritative).
+// stuck on Planned (and their underlying onchange remains authoritative).
 const v238ReorderSelectBase=v230ReorderSelect;
 v230ReorderSelect=function(select,surface){
   if(!select)return;
