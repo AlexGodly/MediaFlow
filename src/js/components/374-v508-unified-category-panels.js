@@ -224,7 +224,7 @@ function mf508PanelHtml(key){
     '<div class="mf508-panel-controls '+(!p.enabled?'mf508-panel-disabled':'')+'">'+
     '<label class="mf508-field"><span>Category source</span><select onchange="App.mf508SetSource(\''+key+'\',this.value)">'+
       mf508OptionsHtml(key)+'</select></label>'+mf508ListHtml(key)+
-    (today?'<label class="mf508-field"><span>Balance summary scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
+    (today?'<label class="mf508-field"><span>Balance insights scope</span><select onchange="App.mf508SetMetricScope(this.value)">'+
       '<option value="all"'+(p.metrics==='all'?' selected':'')+'>All categories, including hidden (default)</option>'+
       '<option value="visible"'+(p.metrics==='visible'?' selected':'')+'>Only displayed categories</option>'+
       '</select></label><p class="mf508-footnote">This only affects the Today’s Balance summary consumption/time figures; individual category health badges keep their recorded 72-hour and lifetime history. No logs, XP, task scores or other Dashboard totals change.</p>':
