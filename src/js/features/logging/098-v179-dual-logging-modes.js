@@ -61,15 +61,8 @@ function v179StartProgress(item){
 
 function v179ProgressInputLabel(item){
   const cat=item?getCategory(item.categoryId):null;
-  const unit=String(cat?.unit||'').toLowerCase();
-
-  if(/episode/.test(unit))return 'Last watched episode';
-  if(/chapter/.test(unit))return 'Last read chapter';
-  if(/issue/.test(unit))return 'Last read issue';
-  if(/volume/.test(unit))return 'Last read volume';
-  if(/book/.test(unit))return 'Last read book';
-
-  return 'Final progress';
+  const singular=UNITS[String(cat?.unit||'')]?.singular;
+  return singular?singular.charAt(0).toUpperCase()+singular.slice(1)+' Reached':'Progress Reached';
 }
 
 function v179ProgressNoun(item,amount=2){
@@ -110,13 +103,13 @@ function v179ModeSwitchHtml(kind){
     <button type="button"
       class="btn btn-sm ${mode==='progress'?'active':''}"
       onclick="App.v179SetLogMode('${kind}','progress')">
-      Last progress
+      Progress Reached
     </button>
 
     <div class="v179-log-mode-help">${
       mode==='progress'
-        ?'Select a Library title, enter the last episode/chapter/issue you reached, and MediaFlow calculates how much you consumed from the title’s starting progress.'
-        :'Original logging method: enter directly how many episodes, chapters, issues, movies, or other units you consumed.'
+        ?'Select a Library title and enter the progress reached in that category's unit. MediaFlow calculates how much you consumed from the starting progress.'
+        :'Enter directly how many units you consumed in this session.'
     }</div>
   </div>`;
 }

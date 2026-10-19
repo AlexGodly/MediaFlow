@@ -36,7 +36,8 @@ function v81RepeatTotals(){
 }
 function v81RepeatLabel(item){
   const r=v81RepeatTotals().byTitle.get(item.id); if(!r||!r.amount)return '';
-  const noun=(getCategory(item.categoryId)?.type==='reading')?'Reread':'Rewatched';
+  const activity=getCategory(item.categoryId)?.type;
+  const noun=activity==='reading'?'Reread':activity==='playing'?'Replayed':activity==='listening'?'Relistened':'Rewatched';
   const cycles=r.completedRepeats?` · ${r.completedRepeats} full ${r.completedRepeats===1?'repeat':'repeats'}`:'';
   return `${noun}: ${r.amount.toLocaleString()} ${unitLabel(r.unit,r.amount)}${cycles}`;
 }

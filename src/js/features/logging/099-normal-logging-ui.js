@@ -18,7 +18,7 @@ renderLogForm=function(t,cat){
 
   const inputLabel=selected
     ?v179ProgressInputLabel(selected)
-    :'Last progress';
+    :'Progress Reached';
 
   const start=selected?v179StartProgress(selected):0;
   const suggested=selected

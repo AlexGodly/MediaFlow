@@ -103,7 +103,8 @@ function saturationLevel(cat){
 
 function totalsForSessions(list){
 
-  const out = {minutes:0, episodes:0, chapters:0, movies:0, issues:0, tasks:0};
+  const out = {minutes:0, tasks:0};
+  for(const unit of Object.keys(UNITS))out[unit]=0;
 
   list.forEach(s=>{
 

@@ -178,6 +178,17 @@ const UNITS = {
   movies:   {label:'movies', singular:'movie'},
 
   issues:   {label:'issues', singular:'issue'},
+  sessions: {label:'sessions', singular:'session'},
+  videos:   {label:'videos', singular:'video'},
+  pages:    {label:'pages', singular:'page'},
+  volumes:  {label:'volumes', singular:'volume'},
+  tracks:   {label:'tracks', singular:'track'},
+  albums:   {label:'albums', singular:'album'},
+  levels:   {label:'levels', singular:'level'},
+  missions: {label:'missions', singular:'mission'},
+  matches:  {label:'matches', singular:'match'},
+  lessons:  {label:'lessons', singular:'lesson'},
+  items:    {label:'items', singular:'item'},
 
 };
 
@@ -282,7 +293,7 @@ const DEFAULT_SETTINGS = {
   leveling: {
     enabled: true,
     minuteXP: 1,
-    unitXP: {episodes:10, chapters:3, issues:6, movies:30},
+    unitXP: {episodes:10, chapters:3, issues:6, movies:30, sessions:12, videos:9, pages:1, volumes:14, tracks:2, albums:18, levels:10, missions:10, matches:12, lessons:8, items:5},
     rotationMultiplier: {neglected:10, due:8, healthy:5, overused:2},
     libraryAdditionXP: 25,
     completionXP: 50

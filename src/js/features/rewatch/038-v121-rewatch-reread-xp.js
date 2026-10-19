@@ -9,7 +9,7 @@
    ============================================================ */
 
 DEFAULT_SETTINGS.leveling.repeatUnitXP=Object.assign(
-  {episodes:10,chapters:3,issues:6,movies:30},
+  {episodes:10,chapters:3,issues:6,movies:30,sessions:6,videos:5,pages:1,volumes:7,tracks:1,albums:9,levels:5,missions:5,matches:6,lessons:4,items:3},
   DEFAULT_SETTINGS.leveling.repeatUnitXP||{}
 );
 DEFAULT_SETTINGS.leveling.fullRepeatXP=Number.isFinite(Number(DEFAULT_SETTINGS.leveling.fullRepeatXP))
@@ -370,6 +370,8 @@ renderSettings=function(){
       <div class="field"><label class="field-label">Repeat issue bonus XP</label><input type="number" min="0" value="${l.repeatUnitXP?.issues??6}" onchange="App.updateRepeatUnitXP('issues',this.value)"></div>
       <div class="field"><label class="field-label">Repeat movie bonus XP</label><input type="number" min="0" value="${l.repeatUnitXP?.movies??30}" onchange="App.updateRepeatUnitXP('movies',this.value)"></div>
     </div>
+    ${Object.keys(UNITS).filter(unit=>!['episodes','chapters','issues','movies'].includes(unit)).map(unit=>
+      '<div class="field"><label class="field-label">Repeat '+escapeHtml(UNITS[unit].singular)+' bonus XP</label><input type="number" min="0" value="'+Math.max(0,Number(l.repeatUnitXP?.[unit])||0)+'" onchange="App.updateRepeatUnitXP(\''+unit+'\',this.value)"></div>').join('')}
     <div class="field"><label class="field-label">Full title rewatch / reread XP</label><input type="number" min="0" value="${l.fullRepeatXP??50}" onchange="App.updateLeveling('fullRepeatXP',this.value)"><small class="hint">Awarded each time your logged repeat units complete another full Library title. Regular minute/unit consumption XP still applies, so this is an additional repeat reward.</small></div>
     <div class="hint" style="margin:-4px 0 14px">Tracked repeats: <b>${r.repeatUnits.toLocaleString()}</b> repeat units · <b>${r.fullRepeats.toLocaleString()}</b> full rewatches/rereads · <b>${r.repeatBonusXP.toLocaleString()} XP</b> in repeat bonuses. Manual past-repeat corrections remain history-only and do not create repeat XP.</div>`;
 

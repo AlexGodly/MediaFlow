@@ -176,7 +176,7 @@ function v181SetDefaultLoggingMode(mode){
 
   showToast(
     cfg.defaultMode==='progress'
-      ?'Default logging mode: Last progress'
+      ?'Default logging mode: Progress Reached'
       :'Default logging mode: Amount consumed'
   );
 }

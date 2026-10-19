@@ -131,7 +131,7 @@ function categoryModalHtml(d){
 
       <div class="field"><label class="field-label">Type</label>
 
-        <select id="m-type"><option value="video" ${d.type==='video'?'selected':''}>Video</option><option value="reading" ${d.type==='reading'?'selected':''}>Reading</option></select>
+        <select id="m-type"><option value="video" ${d.type==='video'?'selected':''}>Watching</option><option value="reading" ${d.type==='reading'?'selected':''}>Reading</option><option value="playing" ${d.type==='playing'?'selected':''}>Playing</option><option value="listening" ${d.type==='listening'?'selected':''}>Listening</option></select>
 
       </div>
 

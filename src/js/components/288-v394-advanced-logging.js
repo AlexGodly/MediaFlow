@@ -58,13 +58,13 @@ function v394BulkPanel(e,index,item){
   const note=(!exact?'<p class="mf394-warning">Nonconsecutive '+escapeHtml(noun.toLowerCase())+'s are preserved. Changing this number will replace the selected season’s detailed entries after confirmation.</p>':'')+
     (repeatMixed?'<p class="mf394-warning">Mixed repeat/non-repeat entries are preserved until you explicitly replace them.</p>':'')+
     (hasOther?'<p class="mf394-hint">'+(all.length-units.length)+' draft units in other seasons are preserved. The summary below controls only the selected season.</p>':'');
-  const label=method==='last'?'Last '+(/chapter|page|book|issue/i.test(noun)?'Read':'Watched')+' '+noun:noun+'s consumed';
+  const label=method==='last'?noun+' Reached':unitLabel(getCategory(item.categoryId).unit,2)+' Consumed';
   const value=method==='last'?highest:quantity;
-  return '<div class="mf394-bulk" aria-label="'+escapeHtml(method==='last'?'Last watched':'Amount consumed')+' logging">'+
+  return '<div class="mf394-bulk" aria-label="'+escapeHtml(method==='last'?'Progress Reached':'Amount Consumed')+' logging">'+
     (opts?'<label class="mf394-field">Season <select onchange="App.v394ChooseSeason('+index+',this.value)">'+opts+'</select></label>':'')+
     '<label class="mf394-field">'+escapeHtml(label)+'<input type="number" inputmode="numeric" min="'+(method==='last'?base:0)+'" max="999999" value="'+value+'" onchange="App.v394SetQuantity('+index+',this.value)"></label>'+
     '<div class="mf394-summary"><span>Saved '+escapeHtml(noun.toLowerCase())+' progress: <strong>'+base+'</strong></span><span>Draft amount: <strong>'+quantity+'</strong></span><span>Highest draft '+escapeHtml(noun.toLowerCase())+': <strong>'+highest+'</strong></span></div>'+note+
-    '<div class="mf394-field"><label>When '+(/chapter|page|issue|book/i.test(noun)?'Consumed':'Watched')+' <input type="datetime-local" step="1" aria-label="When watched or consumed" value="'+dateValue+'" onchange="App.v394SetWhen('+index+',this.value)"></label>'+
+    '<div class="mf394-field"><label>Consumed At <input type="datetime-local" step="1" aria-label="Consumed At" value="'+dateValue+'" onchange="App.v394SetWhen('+index+',this.value)"></label>'+
     '<small>Uses the title-added date by default. Editing this field never changes the Per Unit timestamps.</small>'+'</div>'+ 
     '<div class="mf394-runtime"><label class="mf394-runtime-toggle"><input type="checkbox" '+(manual?'checked':'')+' onchange="App.v394ToggleRuntime('+index+',this.checked)"> Customize total runtime</label>'+ 
     (manual?'<label class="mf394-field">Total runtime (HH:MM:SS) <input aria-label="Custom total runtime" type="text" inputmode="numeric" pattern="[0-9]+:[0-5][0-9]:[0-5][0-9]" value="'+v369Hms(Number(e.v394RuntimeSeconds)||0)+'" onchange="App.v394SetRuntime('+index+',this.value)"></label>':'<div class="mf394-auto-runtime">Automatic: <strong>'+v369Hms(duration)+'</strong>'+(v369DefaultSeconds(item)<=0?'<small>Duration metadata is missing; check the category runtime.</small>':'')+'</div>')+'</div>'+ 
@@ -81,7 +81,7 @@ v370TitlePanelHtml=function(e,index,forceExpanded=false){
   const content=panel.querySelector('.v370-title-content');
   if(content){
     const tabs=document.createElement('div');tabs.className='mf394-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Logging method for '+cleanTitle(item.title));
-    const labels=[['unit','Per Unit','unit'],['last','Last Watched','last'],['amount','Amount Consumed','amount']];
+    const labels=[['unit','Per Unit','unit'],['last','Progress Reached','last'],['amount','Amount Consumed','amount']];
     tabs.innerHTML=labels.map(([id,label,icon])=>'<button type="button" role="tab" aria-selected="'+(v394Method(e)===id)+'" class="btn btn-sm '+(v394Method(e)===id?'active':'')+'" onclick="App.v394Switch('+index+',\''+id+'\')"><span class="mf394-tab-icon">'+v370Icon(icon,14)+'</span><span class="mf394-tab-label">'+label+'</span></button>').join('');
     content.insertAdjacentElement('afterbegin',tabs);
     if(v394Method(e)!=='unit'){
@@ -232,5 +232,5 @@ if(typeof v394SettingsRenderer==='function')MediaFlowRuntime.registerPageRendere
 // now-without-Batch NAV_ITEMS. Old batch History remains readable in History.
 const v394SetViewBase=App.setView;
 App.setView=function(view){return v394SetViewBase.call(this,view==='batch'?'dashboard':view);};
-window.MediaFlowV394={version:394,features:['Advanced Logging per-title tabs','Shared Per Unit canonical draft','Last Watched','Amount Consumed','Runtime override','When watched','Batch Log navigation retired'],audit:()=>({mode:S.logDraft?.v369Interface,methods:(S.logDraft?.entries||[]).map(e=>v394Method(e)),units:(S.logDraft?.entries||[]).map(e=>e.v369Units?.length||0),batchNavigation:NAV_ITEMS.some(n=>n.id==='batch')})};
+window.MediaFlowV394={version:394,features:['Advanced Logging per-title tabs','Shared Per Unit canonical draft','Progress Reached','Amount Consumed','Runtime override','When watched','Batch Log navigation retired'],audit:()=>({mode:S.logDraft?.v369Interface,methods:(S.logDraft?.entries||[]).map(e=>v394Method(e)),units:(S.logDraft?.entries||[]).map(e=>e.v369Units?.length||0),batchNavigation:NAV_ITEMS.some(n=>n.id==='batch')})};
 MediaFlowRuntime.version=V394_RELEASE;

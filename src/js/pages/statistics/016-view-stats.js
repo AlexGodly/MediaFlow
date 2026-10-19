@@ -152,7 +152,7 @@ function renderStats(){
 
         <div class="record-row"><span class="k">Average task completion rate</span><span class="v">${avgCompletion}%</span></div>
 
-        <div class="record-row"><span class="k">Total lifetime</span><span class="v">${fmtMinutes(lifetime.minutes)} · ${lifetime.episodes} ep · ${lifetime.chapters} ch · ${lifetime.movies} mv · ${lifetime.issues} is</span></div>
+        <div class="record-row"><span class="k">Total lifetime</span><span class="v">${fmtMinutes(lifetime.minutes)} · ${Object.keys(UNITS).filter(u=>lifetime[u]>0).map(u=>lifetime[u]+' '+unitLabel(u,lifetime[u])).join(' · ')||'No units recorded'}</span></div>
 
       </div>
 
@@ -172,7 +172,7 @@ function statCard(label, t){
 
     <div style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.7;">
 
-      ${t.episodes} episodes · ${t.chapters} chapters<br>${t.movies} movies · ${t.issues} issues
+      ${Object.keys(UNITS).filter(u=>t[u]>0).map(u=>escapeHtml(String(t[u]))+' '+escapeHtml(unitLabel(u,t[u]))).join(' · ')||'No units recorded'}
 
     </div>
 

@@ -23,8 +23,9 @@ function v369ItemTitle(entry){
   return (S.library||[]).find(x=>String(x?.id||'')===id)||null;
 }
 function v369UnitType(item){
-  const u=String(getCategory(item?.categoryId)?.unit||'').toLowerCase();
-  return /chapter/.test(u)?'Chapter':/issue/.test(u)?'Issue':/volume/.test(u)?'Volume':/book/.test(u)?'Book':/movie|film/.test(u)?'Movie':/page/.test(u)?'Page':/track|song/.test(u)?'Track':/game/.test(u)?'Game':'Episode';
+  const unit=String(getCategory(item?.categoryId)?.unit||'episodes');
+  const singular=UNITS[unit]?.singular||'unit';
+  return singular.charAt(0).toUpperCase()+singular.slice(1);
 }
 function v369ValidStamp(value){
   const n=Number(value);
