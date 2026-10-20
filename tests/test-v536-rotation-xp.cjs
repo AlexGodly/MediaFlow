@@ -34,7 +34,10 @@ const catSource=extract(sources.stats,'function categoryStatus(cat){','function 
 const xpSource=extract(sources.xp,'function xpUnitBonus(unit){','function awardLibraryAdditionXP(id){');
 const streakSource=extract(sources.streak,'const v149EstimateCurrentLogXPBase=estimateCurrentLogXP;','function v149SessionRawXPTotal(');
 const previewSource=extract(sources.preview,'function v382XPCardMarkup(x){','function v382UpdateXPPreview(){');
-const submitSource=extract(sources.logging,'function submitLog(){','\n\n/* ============================================================') ;
+const submitStart=sources.logging.indexOf('function submitLog(){');
+const submitEnd=sources.logging.indexOf('\n}\n',submitStart);
+assert(submitStart>=0&&submitEnd>submitStart,'Canonical submitLog source must exist');
+const submitSource=sources.logging.slice(submitStart,submitEnd+2);
 const batchSource=extract(sources.batch,'function ensureBatchDraft(){','function addBatchRow(){')+
   extract(sources.batch,'function submitBatchLog(){','function renderBatchLog(){');
 const modalSource=extract(sources.app,'  saveSessionModal(id){','  deleteSessionFromModal(id){');
