@@ -1,4 +1,5 @@
 name: Build archive and release MediaFlow v538
+# Validates v537 projection plus the v538 final renderer integration.
 on:
   push:
     branches: [main]
