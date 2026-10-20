@@ -234,5 +234,6 @@
   "components/377-v525-logging-draft-sort.js",
   "components/378-v527-universal-media.js",
   "components/380-v535-cloud-portability-performance.js",
-  "components/381-v537-unified-xp-reward-preview.js"
+  "components/381-v537-unified-xp-reward-preview.js",
+  "components/382-v538-unified-xp-renderer-integrity.js"
 ]
