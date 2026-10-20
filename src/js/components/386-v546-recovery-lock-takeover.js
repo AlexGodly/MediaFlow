@@ -201,6 +201,12 @@ async function mf546WaitForLegacyLocks(pending,timeoutMs){
 function mf546RequestHandoff(kind,info){
  const payload={account:mf439Account(),requester:MF546.tabId,targetKind:kind,
   activeKind:info?.ownerKind||'',requestedAt:Date.now(),requestId:mf546Token()};
+ // Pause this tab too if the conflict is a second recovery running locally.
+ if(MF442.process==='cover'&&MF424.running&&MF424.job){
+  MF424.job.pauseRequested=true;
+  for(const controller of MF424.activeControllers||[])try{controller.abort();}catch(_){}
+ }
+ if(MF442.process==='metadata'&&MF439.working&&MF439.job){MF439.cancel=true;MF439.controller?.abort();}
  try{localStorage.setItem('mediaflow-v546-handoff:'+payload.account,JSON.stringify(payload));}catch(_){}
  try{if(typeof BroadcastChannel==='function'){const channel=new BroadcastChannel('mediaflow-v546-recovery');
   channel.postMessage(payload);channel.close();}}catch(_){}
@@ -381,6 +387,93 @@ try{if(typeof BroadcastChannel==='function'){
  const channel=new BroadcastChannel('mediaflow-v546-recovery');
  channel.addEventListener('message',event=>mf546ReceiveHandoff(event.data));
 }}catch(_){}
+
+async function mf546ShowBlockedStart(kind,info){
+ const account=mf439Account();
+ let saved=null;
+ try{saved=await mf546LatestJob(kind,account);}catch(_){}
+ if(saved&&Array.isArray(saved.ids)&&Number(saved.cursor||0)<saved.ids.length){
+  if(kind==='cover'){MF424.job=saved;MF424.account=account;MF424.running=false;}
+  else{MF439.job=saved;MF439.account=account;MF439.working=false;MF439.cancel=false;}
+  mf546OpenConflict(kind,info);return true;
+ }
+ showToast('Another recovery is active. Finish it or resume an existing '+(kind==='cover'?'Cover':'Metadata')+' Recovery queue before creating a new one.');
+ return false;
+}
+async function mf546CheckNewQueueStart(kind){
+ mf546CleanupOwnIdleLock(kind);
+ const info=mf546Conflict(kind);
+ if(!info)return true;
+ await mf546ShowBlockedStart(kind,info);
+ return false;
+}
+async function mf546PrepareNewQueue(kind){
+ const account=mf439Account();
+ mf546CleanupOwnIdleLock(kind);
+ let info=mf546Conflict(kind);
+ if(info){await mf546ShowBlockedStart(kind,info);return false;}
+ if(!mf442AcquireProcess(kind)){
+  info=mf546Conflict(kind);
+  if(info)await mf546ShowBlockedStart(kind,info);
+  else showToast('Recovery ownership could not be secured. No new queue was created.');
+  return false;
+ }
+ let acquired=false;
+ try{acquired=kind==='cover'?mf424Lease():mf439AcquireLease();}catch(_){}
+ if(!acquired){
+  mf442ReleaseProcess(kind);
+  info=mf546Conflict(kind);
+  if(info)await mf546ShowBlockedStart(kind,info);
+  else showToast('Recovery storage is busy. No new queue was created.');
+  return false;
+ }
+ // Rotate away from any queue key an older tab may have cached, even if its
+ // lease just expired. Preserve the previous queue before a confirmed replace.
+ try{
+  let prior=null;
+  try{prior=await mf546LatestJob(kind,account);}catch(_){}
+  if(prior){
+   if(kind==='cover')MF424.job=prior;else MF439.job=prior;
+   await mf546IsolateQueue(kind,account);
+  }
+ }catch(e){
+  if(kind==='cover')mf424Release();else mf439ReleaseLease();
+  mf442ReleaseProcess(kind);
+  showToast('MediaFlow could not preserve the previous recovery checkpoint. The new queue was not created.');
+  return false;
+ }
+ return true;
+}
+function mf546AbortPreparedQueue(kind){
+ try{if(kind==='cover')mf424Release();else mf439ReleaseLease();}catch(_){}
+ try{if(MF442.process===kind)mf442ReleaseProcess(kind);}catch(_){}
+}
+const mf546BaseConfirmMetadata=mf439ConfirmBatch;
+mf439ConfirmBatch=async function(){
+ if(MF439.working)return mf546BaseConfirmMetadata.apply(this,arguments);
+ if(!await mf546CheckNewQueueStart('metadata'))return;
+ const previous=mf442NormalizeJob(MF439.job||mf439ReadJob());
+ if(previous&&previous.cursor<previous.ids.length&&previous.status!=='completed'){
+  if(!await mf444Confirm('Replace unfinished recovery?',
+   'A saved metadata queue is unfinished. Replacing it discards pending work, but previously recovered fields remain saved.',
+   'Replace Queue',true,previous.ids.length-previous.cursor,'metadata'))return;
+ }
+ const ids=mf439BatchCandidates();
+ if(!ids.length){showToast('Check Library titles first. Batches require an explicit selection.');return;}
+ if(!mf439Preferences().enabled.length){showToast('Enable at least one metadata provider.');return;}
+ if(!await mf444Confirm('Start Metadata Recovery?',
+  'MediaFlow will search enabled metadata providers and fill only eligible missing fields. Rate limits can extend processing time.',
+  'Start Recovery',false,ids.length,'metadata'))return;
+ if(!await mf546PrepareNewQueue('metadata'))return;
+ const previousJob=MF439.job;
+ MF439.job={schema:1,account:mf439Account(),ids,cursor:0,changed:0,completed:0,errors:[],startedAt:Date.now(),status:'running'};
+ MF439.account=mf439Account();
+ try{mf439SaveJob();}
+ catch(e){MF439.job=previousJob;mf546AbortPreparedQueue('metadata');
+  showToast('Metadata Recovery could not save its initial checkpoint. The previous queue remains available.');return;}
+ mf439RunBatch();
+};
+App.mf439ConfirmBatch=mf439ConfirmBatch;
 
 const mf546BaseRunCover=mf424Run;
 mf424Run=async function(){
