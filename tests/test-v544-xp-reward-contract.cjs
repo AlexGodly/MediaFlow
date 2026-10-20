@@ -7,7 +7,9 @@ const version=Number(read('VERSION').trim());assert(version>=544);
 const code=read('src/js/components/385-v544-reward-contract.js');
 const bundle=read('assets/js/mediaflow-v'+version+'.bundle.js');
 const order=JSON.parse(read('src/js/runtime-order.json'));
-assert(order.at(-1)==='components/385-v544-reward-contract.js');
+assert(order.includes('components/385-v544-reward-contract.js'));
+if(order.includes('components/386-v546-recovery-lock-takeover.js'))
+ assert(order.indexOf('components/385-v544-reward-contract.js')<order.indexOf('components/386-v546-recovery-lock-takeover.js'), 'The v544 XP contract must initialize before v546 recovery takeover');
 assert(bundle.includes('function mf544ReceiptSum(state)'));
 assert(bundle.includes('window.MediaFlowV544'));
 assert(!/fetch\s*\(|rawSet\s*\(|updateUser\s*\(/.test(code));
