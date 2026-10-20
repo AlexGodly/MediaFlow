@@ -265,7 +265,7 @@ async function mf546LatestJob(kind,account){
  if(!current||current.account!==account||!Array.isArray(current.ids))throw new Error('The saved Metadata Recovery queue could not be found. Nothing was discarded.');
  return mf546Clone(current);
 }
-async function mf546IsolateQueue(kind,account){
+async function mf546IsolateQueue(kind,account,adoptProcessToken=true){
  const snapshot=await mf546LatestJob(kind,account);
  if(!snapshot)throw new Error('Could not copy the saved recovery checkpoint.');
  snapshot.status='paused';
@@ -278,7 +278,7 @@ async function mf546IsolateQueue(kind,account){
    schema:1,kind:'cover',account,key,previousKey:sourceKey,createdAt:Date.now(),generation,version:546
   }));
   mf546QueueKeyCache(account).cover=key;
-  MF424.job=snapshot;MF424.account=account;MF424.running=false;MF424.leaseToken=MF442.owner;
+  MF424.job=snapshot;MF424.account=account;MF424.running=false;if(adoptProcessToken)MF424.leaseToken=MF442.owner;
   await mf424SaveJob();
  }else{
   snapshot.stopRequested=false;
@@ -289,7 +289,7 @@ async function mf546IsolateQueue(kind,account){
    schema:1,kind:'metadata',account,key,previousKey:sourceKey,createdAt:Date.now(),generation,version:546
   }));
   mf546QueueKeyCache(account).metadata=key;
-  MF439.job=snapshot;MF439.account=account;MF439.working=false;MF439.cancel=false;MF439.lease=MF442.owner;
+  MF439.job=snapshot;MF439.account=account;MF439.working=false;MF439.cancel=false;if(adoptProcessToken)MF439.lease=MF442.owner;
   mf439SaveJob();
  }
  return snapshot;
@@ -435,7 +435,7 @@ async function mf546PrepareNewQueue(kind){
   try{prior=await mf546LatestJob(kind,account);}catch(_){}
   if(prior){
    if(kind==='cover')MF424.job=prior;else MF439.job=prior;
-   await mf546IsolateQueue(kind,account);
+   await mf546IsolateQueue(kind,account,false);
   }
  }catch(e){
   if(kind==='cover')mf424Release();else mf439ReleaseLease();
