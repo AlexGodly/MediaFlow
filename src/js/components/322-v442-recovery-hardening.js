@@ -114,7 +114,7 @@ mf439ReadJob=function(){
 const mf442OriginalMetadataConfirm=mf439ConfirmBatch;
 mf439ConfirmBatch=async function(){
  if(MF439.working)return mf442OriginalMetadataConfirm.apply(this,arguments);
- if(mf442CoverLockIsActive()||mf442ProcessLease()?.kind==='cover'){
+ if((mf442CoverLockIsActive()||mf442ProcessLease()?.kind==='cover')&&typeof mf546OpenConflict!=='function'){
   showToast('Cover Recovery is active. Pause it before starting Metadata Recovery.');return;
  }
  const previous=mf442NormalizeJob(MF439.job||mf439ReadJob());
@@ -129,8 +129,11 @@ mf424Run=async function(){
  if(!MF424.job||MF424.running)return;
  if(!mf442AcquireProcess('cover')){
   MF442.lastEvent='Cover Recovery waiting for another recovery process';
-  MF424.job.pauseRequested=true;
-  mf424State('paused');
+  MF424.job.pauseRequested=true;mf424State('paused');
+  if(typeof mf546OpenConflict==='function'){
+   const conflict=mf546Conflict('cover');
+   if(conflict){mf546OpenConflict('cover',conflict);return;}
+  }
   try{await mf424SaveJob();}catch(e){console.warn('Cover pause checkpoint failed',e);}
   showToast('Another recovery is using this account. Resume Cover Recovery after it finishes.');
   return;
@@ -156,17 +159,29 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
   }
  }
  if(mf442CoverLockIsActive()){
-  MF439.job.status='paused';mf439SaveJob();mf439PaintJob();
-  showToast('Cover Recovery is running. Resume metadata after it finishes.');return;
+  MF439.job.status='paused';mf439PaintJob();
+  if(typeof mf546OpenConflict==='function'){
+   const conflict=mf546Conflict('metadata');
+   if(conflict){mf546OpenConflict('metadata',conflict);return;}
+  }
+  mf439SaveJob();showToast('Cover Recovery is running. Resume metadata after it finishes.');return;
  }
  if(!mf442AcquireProcess('metadata')){
-  MF439.job.status='paused';mf439SaveJob();mf439PaintJob();
-  showToast('Another recovery tab is already processing this account.');return;
+  MF439.job.status='paused';mf439PaintJob();
+  if(typeof mf546OpenConflict==='function'){
+   const conflict=mf546Conflict('metadata');
+   if(conflict){mf546OpenConflict('metadata',conflict);return;}
+  }
+  mf439SaveJob();showToast('Another recovery tab is already processing this account.');return;
  }
  if(!mf439AcquireLease()){
   mf442ReleaseProcess('metadata');
-  MF439.job.status='paused';mf439SaveJob();mf439PaintJob();
-  showToast('Metadata Recovery is active in another tab.');return;
+  MF439.job.status='paused';mf439PaintJob();
+  if(typeof mf546OpenConflict==='function'){
+   const conflict=mf546Conflict('metadata');
+   if(conflict){mf546OpenConflict('metadata',conflict);return;}
+  }
+  mf439SaveJob();showToast('Metadata Recovery is active in another tab.');return;
  }
  // Keep the original, current job object, not a detached normalized clone.
  job=MF439.job;
