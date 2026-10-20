@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - 'VERSION'
+      - 'tests/test-v544-xp-reward-contract.cjs'
       - 'tests/test-v545-startup-and-xp-preview.cjs'
       - 'tests/test-v546-recovery-lock-takeover.cjs'
       - 'version.json'

@@ -24,6 +24,7 @@ assert(css.includes('.mf546-overlay')&&css.includes('.mf546-btn-force'));
 assert(takeover.includes('Resume Safely')&&takeover.includes('Force Start')&&takeover.includes('Force Start Anyway'));
 assert(takeover.includes('mf546FenceProcess')&&takeover.includes('mf546IsolateQueue'));
 assert(takeover.includes('mf546WaitForLegacyLocks'));
+assert(takeover.includes('latest=await mf546LatestJob(kind,account);'),'A cleared lock must resume from the latest durable cursor');
 
 const storage=new Map(),db=new Map(),toasts=[],runs={cover:0,metadata:0};
 const account='user-546';
@@ -181,6 +182,15 @@ async function run(){
  assert.equal(JSON.parse(localStorage.getItem(leaseCover)).token,MF424.leaseToken,'Queue lease token remains consistent after key rotation');
  assert.equal(api.conflict('cover'),null,'The newly reserved queue does not trip its own conflict guard');
  vm.runInContext("mf546AbortPreparedQueue('cover')",context);
+
+ // If the lock clears while the modal is open, the no-conflict path must reload
+ // the newer durable cursor rather than restarting the stale in-memory queue.
+ const noLockKey=context.mf424Key();
+ MF424.job.cursor=0;db.set(noLockKey,{...MF424.job,cursor:1,fixed:1});
+ const beforeNoLockResume=runs.cover;
+ await api.takeover('cover','safe');
+ assert.equal(MF424.job.cursor,1,'Lock-clear resume uses the latest persisted cursor');
+ assert.equal(runs.cover,beforeNoLockResume+1,'The queue resumes after refreshing its checkpoint');
 
  // Cross-tab handoff asks a live v546 worker to pause and abort its requests.
  let aborted=0;
