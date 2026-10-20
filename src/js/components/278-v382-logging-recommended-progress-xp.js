@@ -160,9 +160,14 @@ function v382UpdateXPPreview(){
 }
 const v382RefreshXPBase=refreshXPPreview;
 refreshXPPreview=function(){
-  // Legacy method may update model-dependent fields; keep its side effects.
-  const out=v382RefreshXPBase.apply(this,arguments);
-  v382UpdateXPPreview();return out;
+  // v541: the legacy consumption-only estimator is not an input to the
+  // unified preview. A failure in legacy UI refresh must never hide the
+  // independent, source-shared Respect + consumption projection.
+  let out;
+  try{out=v382RefreshXPBase.apply(this,arguments);}
+  catch(error){console.warn('Legacy XP UI refresh failed; attempting unified projection',error);}
+  v382UpdateXPPreview();
+  return out;
 };
 const v382RenderBase=renderLogForm;
 renderLogForm=function(){
