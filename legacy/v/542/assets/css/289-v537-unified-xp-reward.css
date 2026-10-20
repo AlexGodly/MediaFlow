@@ -1,0 +1,55 @@
+/* MediaFlow v537 — living-theme-safe, responsive unified XP forecast. */
+#xp-preview.mf382-xp-host{margin:12px 0 18px!important}
+.mf537-xp-card{color:var(--text);border:1px solid var(--border-soft,var(--border));border-radius:18px;overflow:hidden;background:var(--panel-raised,var(--panel,var(--surface)));box-shadow:0 10px 30px color-mix(in srgb,var(--flow,var(--accent)) 5%,transparent)}
+.mf537-xp-head{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;padding:17px 18px;background:linear-gradient(118deg,color-mix(in srgb,var(--flow,var(--accent)) 15%,transparent),transparent 85%)}
+.mf537-xp-heading{display:flex;align-items:center;gap:11px;min-width:0}.mf537-xp-heading>div{display:grid;gap:3px;min-width:0}
+.mf537-xp-heading small{font-size:10px;letter-spacing:.11em;font-weight:800;color:var(--text-mute,var(--text-dim))}
+.mf537-xp-heading b{font-size:14px;font-weight:800;color:var(--text);line-height:1.3}
+.mf537-xp-icon{display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--flow,var(--accent)) 25%,transparent);background:color-mix(in srgb,var(--flow,var(--accent)) 12%,transparent);border-radius:12px;width:41px;height:41px;flex:none;color:var(--flow,var(--accent))}
+.mf537-xp-total{display:flex;align-items:baseline;gap:5px;min-width:0;color:var(--flow,var(--accent));font-variant-numeric:tabular-nums}
+.mf537-xp-total strong{font-size:clamp(20px,2.8vw,28px);font-weight:900;letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}
+.mf537-xp-total span{font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.mf537-xp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-block:1px solid var(--border-soft,var(--border))}
+.mf537-xp-metrics>div{display:grid;gap:5px;min-width:0;padding:12px 15px;border-right:1px solid var(--border-soft,var(--border))}
+.mf537-xp-metrics>div:last-child{border-right:0}
+.mf537-xp-metrics span{font-size:10px;font-weight:650;color:var(--text-mute,var(--text-dim));line-height:1.35}
+.mf537-xp-metrics strong{font-size:13px;color:var(--text);font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.mf537-xp-status{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:11px 16px;font-size:11px;color:var(--text-dim,var(--text));line-height:1.4}
+.mf537-xp-status>span:first-child{display:inline-flex;align-items:center;gap:7px}
+.mf537-xp-status svg{flex:none;color:var(--flow,var(--accent))}
+.mf537-xp-details{margin:0;border-top:1px solid var(--border-soft,var(--border));background:color-mix(in srgb,var(--panel,var(--surface)) 82%,transparent)}
+.mf537-xp-details summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;color:var(--text);font-size:12px;font-weight:750;list-style:none;user-select:none;transition:background .18s}
+.mf537-xp-details summary::-webkit-details-marker{display:none}
+.mf537-xp-details summary:hover{background:color-mix(in srgb,var(--flow,var(--accent)) 7%,transparent)}
+.mf537-chevron{color:var(--text-dim,var(--text));font-size:18px;transition:transform .2s;line-height:1}
+.mf537-xp-details[open] .mf537-chevron{transform:rotate(180deg)}
+.mf537-xp-detail-body{display:grid;gap:11px;padding:0 16px 15px}
+.mf537-xp-subhead{margin-top:5px;padding-top:9px;border-top:1px solid var(--border-soft,var(--border));text-transform:uppercase;letter-spacing:.07em;font-size:10px;font-weight:800;color:var(--text-mute,var(--text-dim))}
+.mf537-category-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center}
+.mf537-category-name,.mf537-category-values{display:grid;gap:3px;min-width:0}
+.mf537-category-name b{font-size:12px;color:var(--text);overflow-wrap:anywhere}
+.mf537-category-name span,.mf537-category-values span{font-size:10px;color:var(--text-dim,var(--text));line-height:1.5}
+.mf537-category-values{text-align:right}
+.mf537-category-values strong{font-size:12px;color:var(--flow,var(--accent));font-variant-numeric:tabular-nums}
+.mf537-detail-grid,.mf537-xp-formula{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;color:var(--text-dim,var(--text));font-size:11px}
+.mf537-detail-grid strong,.mf537-xp-formula b{font-size:12px;color:var(--text);font-variant-numeric:tabular-nums;text-align:right}
+.mf537-xp-formula{border-top:1px solid var(--border-soft,var(--border));padding-top:11px}
+.mf537-xp-formula b:last-child{color:var(--flow,var(--accent));font-size:14px}
+.mf537-empty{font-size:11px;color:var(--text-mute,var(--text-dim));margin:0}
+.mf537-xp-footnote{margin:0;padding:10px 16px 12px;font-size:10px;line-height:1.55;color:var(--text-mute,var(--text-dim));border-top:1px solid var(--border-soft,var(--border))}
+.mf537-xp-details summary:focus-visible{outline:2px solid var(--flow,var(--accent));outline-offset:-3px;border-radius:6px}
+@media(max-width:640px){.mf537-xp-head{padding:13px;gap:8px}.mf537-xp-heading{gap:8px}.mf537-xp-icon{width:34px;height:34px}.mf537-xp-heading b{font-size:12px}.mf537-xp-total strong{font-size:22px}.mf537-xp-metrics>div{padding:10px 9px}.mf537-xp-metrics span{font-size:9px}.mf537-xp-metrics strong{font-size:11px}.mf537-xp-status,.mf537-xp-details summary,.mf537-xp-footnote{padding-inline:12px}.mf537-xp-detail-body{padding-inline:12px}}
+@media(max-width:370px){.mf537-xp-head{flex-wrap:wrap}.mf537-xp-total{margin-left:42px}.mf537-xp-metrics{grid-template-columns:1fr}.mf537-xp-metrics>div{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border-right:0;border-bottom:1px solid var(--border-soft,var(--border))}.mf537-xp-metrics>div:last-child{border-bottom:0}.mf537-category-row{grid-template-columns:1fr}.mf537-category-values{text-align:left}}
+@media(prefers-reduced-motion:reduce){.mf537-xp-details summary,.mf537-chevron{transition:none}}
+
+/* v538: never mask a calculation failure with a stale XP reward. */
+.mf537-preview-error{padding:14px 16px;border:1px solid var(--border-soft,var(--border));border-radius:14px;background:var(--panel-raised,var(--surface));color:var(--text-dim,var(--text));font-size:12px;line-height:1.6}
+
+/* v542: projected repeat/completion/milestone XP is part of the headline total. */
+.mf542-xp-extra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--border-soft,var(--border))}
+.mf542-xp-extra>div{display:grid;gap:4px;padding:11px 15px;min-width:0}
+.mf542-xp-extra>div+div{border-left:1px solid var(--border-soft,var(--border))}
+.mf542-xp-extra span{font-size:10px;font-weight:650;color:var(--text-mute,var(--text-dim))}
+.mf542-xp-extra strong{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.mf542-detail-grid{margin:0 0 4px}
+@media(max-width:370px){.mf542-xp-extra>div{padding:10px 9px}.mf542-xp-extra strong{font-size:12px}}
