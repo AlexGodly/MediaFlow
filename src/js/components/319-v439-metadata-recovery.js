@@ -19,7 +19,7 @@ function mf439Preferences(){
 }
 function mf439Item(id){return (S.library||[]).find(x=>String(x?.id)===String(id))||null;}
 function mf439Account(){return String(AUTH_USER?.id||'local');}
-function mf439StateKey(){return 'mediaflow-v439-job:'+mf439Account();}
+function mf439StateKey(){return mf546QueueStorageKey('metadata',mf439Account(),'mediaflow-v439-job:'+mf439Account());}
 function mf439LeaseKey(){return 'mediaflow-v439-lock:'+mf439Account();}
 function mf439SaveJob(){
  if(!MF439.job)return;
