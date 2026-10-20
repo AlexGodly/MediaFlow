@@ -51,7 +51,7 @@ const document={
  getElementById(){return null;}
 };
 const ctx=vm.createContext({
- document,window:{},requestAnimationFrame:()=>{},
+ document,window:{},V336_DIALOG_ROOT_ID:'v336-dialog-root',requestAnimationFrame:()=>{},
  v336CleanupDialog:()=>{cleanup++;},v336HandleDialogEscape:()=>{},
  escapeHtml:s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
  Date,Number,String,Promise,Object,console
