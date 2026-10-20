@@ -142,11 +142,13 @@ App.v394SetQuantity=async function(index,value){
     const seasonName=String(season?.name||'').trim()||
       (season?'Season '+String(season.number||''):'This title');
     const titleName=cleanTitle(item.title||'Selected title');
+    const subject=season?seasonName+' in '+titleName:titleName;
     const message=
-      'You are changing '+seasonName+' in '+titleName+'.\\n\\n'+
+      'You are changing detailed entries for '+subject+'.\n\n'+
       'Replacing these '+units.length+' detailed unit entr'+(units.length===1?'y':'ies')+
-      ' may change individual unit numbers, timestamps, runtimes, or repeat flags.\\n\\n'+
-      'Units from other seasons will stay unchanged. This only affects the unsaved Logging draft.';
+      ' may change individual unit numbers, timestamps, runtimes, or repeat flags.\n\n'+
+      (season?'Units in other seasons will remain unchanged. ':'')+
+      'Only the unsaved Logging draft will change. Saved History is unaffected.';
     V539_SEASON_REPLACE_CONFIRM_PENDING=true;
     let approved=false;
     try{
@@ -155,6 +157,8 @@ App.v394SetQuantity=async function(index,value){
           title:'Replace detailed season entries?',
           confirmText:'Replace season entries',
           cancelText:'Keep detailed entries',
+          confirmIcon:'replace',
+          cancelIcon:'keep',
           tone:'warning',
           closeOnOverlay:true
         });
