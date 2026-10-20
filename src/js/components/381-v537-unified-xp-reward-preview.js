@@ -64,7 +64,17 @@ function mf537ProjectXP(){
   const {rows,entries,task,assigned}=draft;
   // v180CalculateRespectAward is used by the real submission path too.
   // Its readOnly flag never mutates respect streaks/recommendation history.
-  const respect=assigned?v180CalculateRespectAward(task,entries,rows,true):null;
+  // Projecting Respect is read-only and should not block consumption XP if
+  // older/restored recommendation metadata is inconsistent. A partial preview
+  // is explicitly labeled rather than inventing bonus XP or changing History.
+  let respect=null,respectUnavailable=false;
+  if(assigned&&rows.length){
+    try{respect=v180CalculateRespectAward(task,entries,rows,true);}
+    catch(error){
+      respectUnavailable=true;
+      console.warn('MediaFlow XP preview: Respect projection unavailable',error);
+    }
+  }
   const streak=typeof v149ProspectiveTodayStreak==='function'?v149ProspectiveTodayStreak():0;
   const dayMultiplier=typeof v149StreakMultiplier==='function'
     ?v149StreakMultiplier(streak):1;
@@ -95,15 +105,17 @@ function mf537ProjectXP(){
   return {total,baseTotal,consumptionTotal,respectTotal,rawSessionTotal,
     streakBonus,streak,dayMultiplier,respect,categories,
     eligible:rows.length>0&&rows.some(row=>row.actualAmount>0),
+    respectUnavailable,
     mode:S.logDraft?.v369Interface==='itemized'?'advanced':'quick',
     note:'Only session consumption and System Respect are projected. Completion, repeat and other independent action rewards are credited separately when eligible.'};
 }
 function mf537XPCardMarkup(){
   const projection=mf537ProjectXP();
   const {total,consumptionTotal,respectTotal,streakBonus,streak,dayMultiplier,
-    categories,respect,eligible}=projection;
+    categories,respect,eligible,respectUnavailable}=projection;
   const icon=(name)=>v382Icon(name,17);
-  const reason=respect?.respected
+  const reason=respectUnavailable?'Respect estimate unavailable (consumption only)'
+    :respect?.respected
     ?'Recommended category respected'
     :categories.length?'Recommended category not included':'Add titles or log a quantity to see rewards';
   const breakdown=categories.map(c=>'<div class="mf537-category-row">'+
@@ -123,7 +135,7 @@ function mf537XPCardMarkup(){
     '<span>Recommended titles ('+matched+'/'+slots+')</span><strong>+'+mf537Fmt(titleXP)+' XP</strong>'+
     '<span>No-Skip · '+mf537Num(respect?.noSkipStreak)+' logs</span><strong>×'+skipMultiplier.toFixed(2)+'</strong>'+
     '<span>First-pick · '+mf537Num(respect?.noRerollStreak)+' logs</span><strong>×'+pickMultiplier.toFixed(2)+'</strong></div>';
-  const heading=eligible?'ESTIMATED TOTAL XP':'XP PREVIEW';
+  const heading=respectUnavailable?'PARTIAL XP ESTIMATE':eligible?'ESTIMATED TOTAL XP':'XP PREVIEW';
   return '<section class="mf537-xp-card" role="group" aria-label="Unified XP reward preview">'+
     '<div class="mf537-xp-head">'+
       '<div class="mf537-xp-heading"><span class="mf537-xp-icon">'+icon('sparkle')+'</span>'+
@@ -131,7 +143,7 @@ function mf537XPCardMarkup(){
       '<div class="mf537-xp-total"><strong>+'+mf537Fmt(total)+'</strong><span>XP</span></div></div>'+
     '<div class="mf537-xp-metrics">'+
       '<div><span>Consumption</span><strong>+'+mf537Fmt(consumptionTotal)+' XP</strong></div>'+
-      '<div><span>System Respect</span><strong>+'+mf537Fmt(respectTotal)+' XP</strong></div>'+
+      '<div><span>System Respect</span><strong>'+(respectUnavailable?'Unavailable':'+'+mf537Fmt(respectTotal)+' XP')+'</strong></div>'+
       '<div><span>Day-streak bonus</span><strong>+'+mf537Fmt(streakBonus)+' XP</strong></div></div>'+
     '<div class="mf537-xp-status"><span>'+icon('shield')+' '+escapeHtml(reason)+'</span>'+
       '<span>Day '+mf537Fmt(streak)+' · ×'+Number(dayMultiplier).toFixed(2)+'</span></div>'+
@@ -143,7 +155,9 @@ function mf537XPCardMarkup(){
         '<div class="mf537-xp-formula"><span>Before day streak</span><b>+'+mf537Fmt(projection.rawSessionTotal)+' XP</b>'+
           '<span>After ×'+Number(dayMultiplier).toFixed(2)+' day streak</span><b>+'+mf537Fmt(total)+' XP</b></div>'+
       '</div></details>'+
-    '<p class="mf537-xp-footnote">Preview updates as you edit. XP is awarded only when you submit. '+
+    '<p class="mf537-xp-footnote">'+(respectUnavailable
+      ?'Partial estimate only: System Respect could not be projected from this draft. Actual eligible rewards are still calculated at submission. '
+      :'')+'Preview updates as you edit. XP is awarded only when you submit. '+
       'Completion, repeat and other separate action rewards may add XP after submission.</p>'+
     '</section>';
 }
