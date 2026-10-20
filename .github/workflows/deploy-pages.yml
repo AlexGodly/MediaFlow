@@ -60,6 +60,7 @@ jobs:
           node tests/test-v536-rotation-xp.cjs
           node tests/test-v537-unified-xp-preview.cjs
           node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
