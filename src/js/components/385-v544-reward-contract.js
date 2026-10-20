@@ -68,8 +68,8 @@ function mf544ReceiptSum(state){
   let xp=0;
   for(const [key,receipt] of Object.entries(receipts)){
     if(!receipt||typeof receipt!=='object')continue;
-    if((receipt.groupId&&validGroups.has(String(receipt.groupId)))||
-      (receipt.sessionId&&validSessions.has(String(receipt.sessionId)))){
+    if(receipt.sessionId?validSessions.has(String(receipt.sessionId)):
+      receipt.groupId&&validGroups.has(String(receipt.groupId))){
       xp+=mf544SafeXP(receipt.xp);
     }
   }
