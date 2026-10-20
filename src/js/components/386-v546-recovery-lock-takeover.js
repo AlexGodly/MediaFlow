@@ -390,6 +390,7 @@ try{if(typeof BroadcastChannel==='function'){
 
 async function mf546ShowBlockedStart(kind,info){
  const account=mf439Account();
+ if(kind==='cover')try{mf424CloseModal();}catch(_){}
  let saved=null;
  try{saved=await mf546LatestJob(kind,account);}catch(_){}
  if(saved&&Array.isArray(saved.ids)&&Number(saved.cursor||0)<saved.ids.length){
