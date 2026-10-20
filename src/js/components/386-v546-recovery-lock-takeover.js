@@ -352,11 +352,11 @@ async function mf546Takeover(kind,mode='safe'){
  if(!info){
   // The other worker may have finished while the dialog was open. Refresh
   // from durable storage before resuming so this tab never restarts an older cursor.
-  try{
-   const latest=await mf546LatestJob(kind,account);
-   if(kind==='cover'){MF424.job=latest;MF424.account=account;MF424.job.pauseRequested=false;MF424.job.stopRequested=false;}
-   else{MF439.job=latest;MF439.account=account;MF439.job.status='paused';MF439.cancel=false;}
-  }catch(_){}
+  let latest;
+  try{latest=await mf546LatestJob(kind,account);}
+  catch(e){mf546SetStatus('The latest saved checkpoint could not be reloaded. No recovery was started; retry or reload the page.','error');return;}
+  if(kind==='cover'){MF424.job=latest;MF424.account=account;MF424.job.pauseRequested=false;MF424.job.stopRequested=false;}
+  else{MF439.job=latest;MF439.account=account;MF439.job.status='paused';MF439.cancel=false;}
   mf546Close();
   if(kind==='cover')return mf424Run();
   return mf439RunBatch();
