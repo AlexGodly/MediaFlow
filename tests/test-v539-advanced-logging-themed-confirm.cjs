@@ -64,7 +64,7 @@ const copy=()=>JSON.stringify(C.S.logDraft.entries[0].v369Units);
  assert.equal(copy(),before);
  finish(true);await approve;
  const after=C.S.logDraft.entries[0];
- assert.deepEqual(after.v369Units.map(u=>u.id).sort(),['a1','b1'],'Only target season is replaced');
+ assert.equal(JSON.stringify(Array.from(after.v369Units,u=>u.id).sort()),JSON.stringify(['a1','b1']),'Only target season is replaced');
  assert(after.v369DeletedUnits.a3,'Removed unit tombstone saved');
  assert.equal(syncs,1);
  C.S.logDraft=draft();const previous=C.S.logDraft;
