@@ -74,6 +74,11 @@ const C=vm.createContext({S:makeState(),App:{},window:{},MediaFlowRuntime:{},
  },
  v149StreakMultiplier:()=>dates.mult
 });
+C.App.submitLog=function(){
+  const xp=vm.runInContext('App.v542XPPreview().total',C);
+  C.S.sessions.push({id:'new-'+(++sessionIndex),xpWithStreak:xp});
+  C.S.logging=false;
+};
 vm.runInContext(source,C);
 const project=()=>vm.runInContext('App.v542XPPreview()',C);
 const clone=()=>JSON.stringify({draft:C.S.logDraft,sessions:C.S.sessions,ledger:C.S.xpLedger,library:C.S.library});
@@ -138,16 +143,6 @@ C.S.settings.leveling.enabled=true;
 C.S.logDraft.entries[0]=newEntry(false,3);
 const forecast=project().total;
 const beforeHistory=C.S.sessions.length;
-C.App.submitLog=function(){
- const xp=forecast;
- C.S.sessions.push({id:'new-'+(++sessionIndex),xpWithStreak:xp});
- C.S.logging=false;
- return undefined;
-};
-// Source wrapper captures App.submitLog at load; reinstall wrapper for audit harness.
-const wrapper=source.slice(source.indexOf('const mf542SubmitBase=App.submitLog;'),
- source.indexOf('App.v542XPPreview=function()'));
-vm.runInContext(wrapper,C);
 vm.runInContext('App.submitLog()',C);
 assert.equal(C.S.sessions.length,beforeHistory+1);
 const actual=C.window.MediaFlowLastLogXPAudit;
