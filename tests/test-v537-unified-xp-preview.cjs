@@ -118,6 +118,7 @@ for(const status of ['healthy','neglected','due','overused']){
  assert.equal(JSON.stringify({sessions:C.S.sessions,task:C.S.currentTask,
    respect:C.S.respectState,settings:C.S.settings}),old,
    'Read-only preview must not mutate data: '+status);
+ const previewCard=projectionMarkup();
  const actual=runActual();
  assert.equal(actual.total,projected.total,status+' projection equals award');
  assert.equal(projected.respectTotal,actual.bonus,status+' Respect projection equals award');
@@ -125,8 +126,8 @@ for(const status of ['healthy','neglected','due','overused']){
  assert.equal(projected.categories[0].status,status);
  assert.equal(projected.categories[0].rotation,defaults.rotationMultiplier[status]);
  assert.equal(projected.streakBonus,actual.total-projected.rawSessionTotal);
- assert(projectionMarkup().includes('System Respect'));
- assert(projectionMarkup().includes('+'+Math.round(projected.total).toLocaleString()));
+ assert(previewCard.includes('System Respect'));
+ assert(previewCard.includes('+'+Math.round(projected.total).toLocaleString()));
  assert(C.S.sessions[0].v165RespectBonusXP===actual.bonus);
  const history=vm.runInContext('v348HistoryEntries()',C);
  assert(history[0].details.includes('Respect'));
