@@ -195,7 +195,7 @@ App.submitLog=function(){
     const earned=mf542AccountXP()-before;
     const report={version:MF542_VERSION,projected:forecast?.total??null,
       actual:earned,matched:forecast?.awardReady===true&&forecast.total===earned,
-      accountId:String(AUTH_USER?.id||''),date:todayISO(),
+      date:todayISO(),
       sessionCount:(S.sessions||[]).length-oldCount,
       breakdown:forecast?{consumption:forecast.consumptionTotal,
         respect:forecast.respectTotal,repeat:forecast.repeatXP,
