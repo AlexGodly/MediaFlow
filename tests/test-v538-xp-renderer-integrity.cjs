@@ -8,7 +8,9 @@ const v382=read('src/js/components/278-v382-logging-recommended-progress-xp.js')
 const guard=read('src/js/components/382-v538-unified-xp-renderer-integrity.js');
 const bundle=read('assets/js/mediaflow-v'+version+'.bundle.js');
 const runtime=JSON.parse(read('src/js/runtime-order.json'));
-assert.equal(runtime.at(-1),'components/382-v538-unified-xp-renderer-integrity.js');
+assert(runtime.includes('components/382-v538-unified-xp-renderer-integrity.js'));
+assert(runtime.indexOf('components/382-v538-unified-xp-renderer-integrity.js')>
+  runtime.indexOf('components/381-v537-unified-xp-reward-preview.js'),'Finalizer follows base XP renderer');
 assert(bundle.includes('function mf538ApplyLiveXP(){'),'Guard must ship in the actual bundle');
 assert(bundle.includes("if(typeof mf537XPCardMarkup==='function')return mf537XPCardMarkup();"),
   'Original v382 renderer must call unified function directly');
