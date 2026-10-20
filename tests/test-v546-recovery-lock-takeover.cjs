@@ -79,6 +79,7 @@ const context={
  mf424Paint:()=>{},mf439PaintJob:()=>{},
  mf424Run:async()=>{runs.cover++;return 'cover-started';},
  mf439RunBatch:async()=>{runs.metadata++;return 'metadata-started';},
+ mf439ConfirmBatch:async()=>{},
  mf424Escape:s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
  mf425Icon:()=>'<svg></svg>',showToast:s=>toasts.push(String(s))
 };
