@@ -40,7 +40,7 @@ const MF424 = {db:null,job:null,running:false,runner:null,leaseTimer:0,leaseToke
   history:[],rate:{},cache:new Map(),account:'',ready:false,status:'idle',toastAt:0};
 function mf424Account(){return String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');}
 function mf424Escape(s){return typeof escapeHtml==='function'?escapeHtml(String(s??'')):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function mf424Key(){return 'job:'+mf424Account();}
+function mf424Key(){return mf546QueueStorageKey('cover',mf424Account(),'job:'+mf424Account());}
 function mf424Defaults(){const s=S.settings||DEFAULT_SETTINGS;const old=s.v424Covers||{};return {...MF424_DEFAULT,...old,
   enabled:Array.isArray(old.enabled)?old.enabled.slice():MF424_DEFAULT.enabled.slice(),
   priorities:Array.isArray(old.priorities)?old.priorities.slice():MF424_DEFAULT.priorities.slice()};}
