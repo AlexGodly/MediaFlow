@@ -8,6 +8,8 @@ on:
     branches: [main]
     paths:
       - 'VERSION'
+      - 'tests/test-v543-xp-preview-recovery.cjs'
+      - '.github/workflows/publish-v543.yml'
   workflow_dispatch:
 permissions:
   contents: write
