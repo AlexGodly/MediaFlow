@@ -236,5 +236,6 @@
   "components/380-v535-cloud-portability-performance.js",
   "components/381-v537-unified-xp-reward-preview.js",
   "components/382-v538-unified-xp-renderer-integrity.js",
-  "components/383-v542-award-parity.js"
+  "components/383-v542-award-parity.js",
+  "components/384-v543-xp-preview-recovery.js"
 ]
