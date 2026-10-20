@@ -1,0 +1,10 @@
+/* v432 — prevent the default v225 circled-arrow from appearing beside the
+   real profile image in top/bottom desktop navigation. */
+.mf421-dock .mf421-dock-account > .v225-btn-icon,
+.mf421-dock .mf421-dock-account > .lucide,
+.mf421-dock .mf421-dock-account > [data-v225-icon]{
+  display:none!important;
+}
+.mf421-dock .mf421-dock-account:has(>img.mf423-dock-avatar)>:not(img.mf423-dock-avatar){
+  display:none!important;
+}
