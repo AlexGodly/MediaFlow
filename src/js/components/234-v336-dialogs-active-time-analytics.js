@@ -19,6 +19,15 @@ const V336_DIALOG_ICONS={
   success:v336Icon('<circle cx="12" cy="12" r="9"/><path d="m8.7 12.2 2.2 2.2 4.5-5"/>'),
   warning:v336Icon('<path d="M12 3.5 2.8 19.2a1 1 0 0 0 .87 1.5h16.66a1 1 0 0 0 .87-1.5L12 3.5Z"/><path d="M12 9v4"/><circle cx="12" cy="16.4" r=".8" fill="currentColor" stroke="none"/>')
 };
+// Explicitly drawn semantic icons are never replaced by v225/v226's
+// generic circled-arrow action icon; the icon enhancers detect an owned SVG.
+function v336ActionIcon(paths){
+  return v336Icon(paths).replace('<svg ','<svg class="v336-dialog-action-icon" ');
+}
+const V336_DIALOG_ACTION_ICONS={
+  keep:v336ActionIcon('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>'),
+  replace:v336ActionIcon('<path d="M4 6h12M4 11h9M4 16h7"/><path d="m13.5 18.5 5.7-5.7a1.6 1.6 0 0 1 2.3 2.3l-5.7 5.7-3.3.7z"/>')
+};
 function v336CleanupDialog(){
   const root=document.getElementById(V336_DIALOG_ROOT_ID);
   if(root){
@@ -39,13 +48,15 @@ function v336Dialog(options={}){
   const message=String(options.message||'');
   const confirmText=String(options.confirmText||'OK');
   const cancelText=String(options.cancelText||'Cancel');
+  const cancelIcon=V336_DIALOG_ACTION_ICONS[String(options.cancelIcon||'')]||'';
+  const confirmIcon=V336_DIALOG_ACTION_ICONS[String(options.confirmIcon||'')]||'';
   const canCancel=options.canCancel!==false&&type!=='info'&&type!=='success';
   const tone=String(options.tone||((type==='warning'||type==='confirm')?'warning':'success'));
   v336CleanupDialog();
   return new Promise(resolve=>{
     const root=document.createElement('div');
     root.id=V336_DIALOG_ROOT_ID;
-    root.innerHTML=`<div class="modal-overlay v336-dialog-overlay" data-v336-close-overlay="${options.closeOnOverlay!==false&&canCancel?'1':'0'}"><div class="modal v336-dialog v336-dialog-${escapeHtml(type)} v336-dialog-tone-${escapeHtml(tone)}" role="dialog" aria-modal="true" aria-labelledby="v336-dialog-title"><div class="v336-dialog-head"><div class="v336-dialog-badge">${V336_DIALOG_ICONS[tone]||V336_DIALOG_ICONS.info}</div><div><div class="v336-dialog-kicker">MEDIAFLOW</div><div class="modal-title" id="v336-dialog-title">${escapeHtml(title)}</div></div></div><div class="v336-dialog-body">${escapeHtml(message).replace(/\n/g,'<br>')}</div><div class="modal-actions v336-dialog-actions">${canCancel?`<button type="button" class="btn btn-ghost" data-v336-dialog-cancel>${escapeHtml(cancelText)}</button>`:''}<button type="button" class="btn ${tone==='warning'?'btn-primary':'btn-primary'}" data-v336-dialog-confirm autofocus>${escapeHtml(confirmText)}</button></div></div></div>`;
+    root.innerHTML=`<div class="modal-overlay v336-dialog-overlay" data-v336-close-overlay="${options.closeOnOverlay!==false&&canCancel?'1':'0'}"><div class="modal v336-dialog v336-dialog-${escapeHtml(type)} v336-dialog-tone-${escapeHtml(tone)}" role="dialog" aria-modal="true" aria-labelledby="v336-dialog-title"><div class="v336-dialog-head"><div class="v336-dialog-badge">${V336_DIALOG_ICONS[tone]||V336_DIALOG_ICONS.info}</div><div><div class="v336-dialog-kicker">MEDIAFLOW</div><div class="modal-title" id="v336-dialog-title">${escapeHtml(title)}</div></div></div><div class="v336-dialog-body">${escapeHtml(message).replace(/\n/g,'<br>')}</div><div class="modal-actions v336-dialog-actions">${canCancel?`<button type="button" class="btn btn-ghost" data-v336-dialog-cancel>${cancelIcon}${escapeHtml(cancelText)}</button>`:''}<button type="button" class="btn ${tone==='warning'?'btn-primary':'btn-primary'}" data-v336-dialog-confirm autofocus>${confirmIcon}${escapeHtml(confirmText)}</button></div></div></div>`;
     document.body.appendChild(root);
     const close=(value)=>{if(typeof window.__v336DialogClose!=='function')return;delete window.__v336DialogClose;v336CleanupDialog();resolve(value);};
     window.__v336DialogClose=close;
@@ -58,8 +69,9 @@ function v336Dialog(options={}){
   });
 }
 function v336Alert(message,title='MediaFlow',tone='success'){return v336Dialog({type:tone==='warning'?'confirm':'success',title,message,confirmText:'OK',canCancel:false,tone});}
-function v336Confirm(message,{title='Please confirm',confirmText='Continue',cancelText='Cancel',tone='warning',closeOnOverlay=true}={}){
-  return v336Dialog({type:'confirm',title,message,confirmText,cancelText,tone,closeOnOverlay});
+function v336Confirm(message,{title='Please confirm',confirmText='Continue',cancelText='Cancel',
+  confirmIcon='',cancelIcon='',tone='warning',closeOnOverlay=true}={}){
+  return v336Dialog({type:'confirm',title,message,confirmText,cancelText,confirmIcon,cancelIcon,tone,closeOnOverlay});
 }
 
 // Replace the browser confirm/alert used in the reported flows with designed dialogs.
