@@ -13,7 +13,10 @@ const xp=read('src/js/core/rendering/010-render-shell.js');
 const stats=read('src/js/pages/statistics/009-derived-stats-helpers.js');
 const html=read('index.html'),css=read('assets/css/289-v537-unified-xp-reward.css');
 const order=JSON.parse(read('src/js/runtime-order.json'));
-assert(order.at(-1)==='components/381-v537-unified-xp-reward-preview.js');
+assert(order.includes('components/381-v537-unified-xp-reward-preview.js'),
+  'The v537 calculator must remain in the runtime on subsequent versions');
+assert(order.indexOf('components/381-v537-unified-xp-reward-preview.js')<order.indexOf('components/382-v538-unified-xp-renderer-integrity.js'),
+  'Runtime renderer integrity guard must load after reward projection');
 assert(bundle.includes('function mf537ProjectXP()'));
 assert(bundle.includes('function v180CalculateRespectAward('));
 assert(html.includes('assets/css/289-v537-unified-xp-reward.css'));
