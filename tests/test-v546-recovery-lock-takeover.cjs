@@ -65,6 +65,18 @@ const context={
  },
  mf424LeaseKey:()=> 'mf-v424-owner-'+account,
  mf439LeaseKey:()=> 'mediaflow-v439-lock:'+account,
+ mf424Lease:()=>{
+  const token=MF424.leaseToken||'cover-lease-'+Date.now();MF424.leaseToken=token;
+  localStorage.setItem('mf-v424-owner-'+account,JSON.stringify({token,expiry:Date.now()+16000}));return true;
+ },
+ mf424Release:()=>{const row=JSON.parse(localStorage.getItem('mf-v424-owner-'+account)||'null');if(row?.token===MF424.leaseToken)localStorage.removeItem('mf-v424-owner-'+account);MF424.leaseToken='';},
+ mf439AcquireLease:()=>{
+  const token=MF439.lease||'metadata-lease-'+Date.now();MF439.lease=token;
+  const row=JSON.parse(localStorage.getItem('mediaflow-v439-lock:'+account)||'null');
+  if(row&&Number(row.expires)>Date.now()&&row.token!==token)return false;
+  localStorage.setItem('mediaflow-v439-lock:'+account,JSON.stringify({token,expires:Date.now()+45000}));return true;
+ },
+ mf439ReleaseLease:()=>{const row=JSON.parse(localStorage.getItem('mediaflow-v439-lock:'+account)||'null');if(row?.token===MF439.lease)localStorage.removeItem('mediaflow-v439-lock:'+account);MF439.lease='';},
  mf424Key:()=>context.mf546QueueStorageKey('cover',account,'job:'+account),
  mf439StateKey:()=>context.mf546QueueStorageKey('metadata',account,'mediaflow-v439-job:'+account),
  mf424Storage:async(action,key,value)=>{
@@ -159,6 +171,16 @@ async function run(){
  localStorage.setItem(leaseCover,JSON.stringify({token:'expired',expiry:Date.now()-1000}));
  localStorage.removeItem(leaseMeta);
  assert.equal(api.conflict('cover'),null,'Expired locks do not block a recovery start');
+
+ // A new queue reserves both leases first and rotates away from a key that an
+ // older tab may have cached, while keeping the process token and queue token distinct.
+ const previousPointer=JSON.parse(localStorage.getItem(pointerCover)).key;
+ const prepared=await vm.runInContext("mf546PrepareNewQueue('cover')",context);
+ assert.equal(prepared,true,'New Cover Recovery queue must acquire process and queue leases');
+ assert.notEqual(JSON.parse(localStorage.getItem(pointerCover)).key,previousPointer,'New queue uses a fresh isolated key');
+ assert.equal(JSON.parse(localStorage.getItem(leaseCover)).token,MF424.leaseToken,'Queue lease token remains consistent after key rotation');
+ assert.equal(api.conflict('cover'),null,'The newly reserved queue does not trip its own conflict guard');
+ vm.runInContext("mf546AbortPreparedQueue('cover')",context);
 
  // Cross-tab handoff asks a live v546 worker to pause and abort its requests.
  let aborted=0;
