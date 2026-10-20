@@ -85,4 +85,38 @@ item.v394RuntimeManual=true;item.v394RuntimeSeconds=7200;
 assert.equal(projectRows()[0].minutes,120,'Changing manual duration should update preview immediately');
 const old=JSON.stringify(item);projectRows();assert.equal(JSON.stringify(item),old,
  'Read-only preview must never modify unit runtime or cloud draft');
+// Test the genuine v537 projection + card with damaged Respect metadata.
+// A single optional bonus failure must not erase valid consumption XP.
+const rest=segment(unified,'function mf537ProjectXP(){','// The existing v382 logging card');
+Object.assign(R,{
+  console:{warn(){}},
+  v180CalculateRespectAward(){throw Error('Stale recommendation metadata');},
+  v149ProspectiveTodayStreak:()=>38,
+  v149StreakMultiplier:()=>1.52,
+  categoryStatus:()=> 'healthy',
+  calculateConsumptionXP:(cat,qty,min)=>({
+    base:Math.round(min)+qty*10,multiplier:5,xp:(Math.round(min)+qty*10)*5
+  }),
+  v382Icon:()=>'<svg></svg>',
+  escapeHtml:String
+});
+vm.runInContext(rest,R);
+const partial=vm.runInContext('mf537ProjectXP()',R);
+assert.equal(partial.respectUnavailable,true);
+assert(partial.total>0&&partial.consumptionTotal>0,'Valid consumption still projected');
+const partialMarkup=vm.runInContext('mf537XPCardMarkup()',R);
+assert(partialMarkup.includes('PARTIAL XP ESTIMATE'));
+assert(partialMarkup.includes('System Respect'));
+assert(partialMarkup.includes('Unavailable'));
+assert(partialMarkup.includes('mf537-xp-card'));
+R.v180CalculateRespectAward=()=>({
+  respected:true,bonus:40,noSkipStreak:3,noRerollStreak:2,
+  categoryXP:10,exactTitleXP:25,match:{matchedCount:1,slotLimit:1},
+  mult:{noSkip:1.08,noReroll:1.14}
+});
+const full=vm.runInContext('mf537ProjectXP()',R);
+assert.equal(full.respectUnavailable,false);
+assert.equal(full.respectTotal,40);
+assert.equal(full.total,Math.round((full.consumptionTotal+40)*1.52));
+assert(vm.runInContext('mf537XPCardMarkup()',R).includes('ESTIMATED TOTAL XP'));
 console.log('PASS v541: no eager legacy estimator, resilient unified refresh and HTML, Advanced Logging 15 sessions, accurate manual 10h runtime, nonmutating XP projection.');
