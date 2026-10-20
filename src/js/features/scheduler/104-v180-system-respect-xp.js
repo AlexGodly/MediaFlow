@@ -35,7 +35,19 @@ function v180LoggedTitleSet(entries,groupRows){
   return {ids,titles};
 }
 
-function v180RespectMatchInfo(task,entries,groupRows){
+/* Read-only version of v180EnsureRecommendationHistory. The preview must
+ * never create IDs, append recommendation slots, or touch account state. */
+function v180PeekRecommendationHistory(task){
+  if(!task||!S.settings?.exactTitleRecommendations)return [];
+  const previous=Array.isArray(task.v180RecommendationHistory)
+    ?task.v180RecommendationHistory.filter(x=>x&&typeof x==='object').map((x,index)=>({
+       libraryId:String(x.libraryId||''),title:cleanTitle(x.title||''),index
+     }))
+    :[];
+  if(previous.length||( !task.libraryId&&!task.title))return previous;
+  return [{libraryId:String(task.libraryId||''),title:cleanTitle(task.title||''),index:0}];
+}
+function v180RespectMatchInfo(task,entries,groupRows,readOnly=false){
   if(!S.settings?.exactTitleRecommendations){
     return {
       slotLimit:0,
@@ -45,7 +57,7 @@ function v180RespectMatchInfo(task,entries,groupRows){
     };
   }
 
-  const history=v180EnsureRecommendationHistory(task);
+  const history=readOnly?v180PeekRecommendationHistory(task):v180EnsureRecommendationHistory(task);
   const slotLimit=v180RespectSlotLimit(task);
   const eligible=history.slice(0,slotLimit);
   const logged=v180LoggedTitleSet(entries,groupRows);
@@ -93,84 +105,49 @@ v165RecommendedTitleLogged=function(task,entries,groupRows){
 // FINAL respect reward implementation. It preserves v167's user-configurable
 // category/title XP and streak multipliers, while changing exact-title credit
 // from one boolean to a per-eligible-title count.
+/* The final v180 award and the v537 estimate share this exact pure
+ * calculation. Preview uses clones of Respect settings/streak state and a
+ * read-only recommendation history. Only submit applies the streak changes. */
+function v180CalculateRespectAward(task,entries,groupRows,readOnly=false){
+  const st=readOnly?v165NormalizeRespectState(S.respectState):v165EnsureRespectState();
+  const cfg=readOnly?v167NormalizeRespectConfig(S.settings?.systemRespectXP):v167RespectConfig();
+  const respected=groupRows.some(s=>s&&s.status!=='skipped'&&
+    String(s.categoryId||'')===String(task?.categoryId||'')&&Number(s.actualAmount)>0);
+  const hadCategoryReroll=st.currentRerolls>0;
+  const noSkipStreak=respected?st.noSkipStreak+1:0;
+  const noRerollStreak=respected?(hadCategoryReroll?0:st.noRerollStreak+1):0;
+  const exactEnabled=!!S.settings?.exactTitleRecommendations;
+  const match=respected?v180RespectMatchInfo(task,entries,groupRows,readOnly):
+    {slotLimit:0,eligible:[],matched:[],matchedCount:0};
+  const categoryXP=respected?Math.max(0,Math.round(Number(cfg.categoryBaseXP)||0)):0;
+  const exactPerTitle=Math.max(0,Math.round(Number(cfg.exactTitleBaseXP)||0));
+  const exactTitleXP=respected&&exactEnabled?exactPerTitle*match.matchedCount:0;
+  const baseRespectXP=categoryXP+exactTitleXP;
+  const mult=v167RespectMultipliersFromConfig(cfg,noSkipStreak,noRerollStreak);
+  const bonus=respected&&levelingSettings().enabled!==false
+    ?Math.max(0,Math.round(baseRespectXP*mult.noSkip*mult.noReroll)):0;
+  return {respected,hadCategoryReroll,noSkipStreak,noRerollStreak,exactEnabled,
+    cfg,match,categoryXP,exactPerTitle,exactTitleXP,baseRespectXP,mult,bonus};
+}
+
+// FINAL Respect reward implementation. Historic stored rewards are immutable.
 v165ApplyRespectReward=function(task,entries,sessionGroupId,assignedCat){
-  const st=v165EnsureRespectState();
-  const cfg=v167RespectConfig();
   const groupRows=v165GroupSessions(sessionGroupId);
-
-  const respected=groupRows.some(s=>
-    s &&
-    s.status!=='skipped' &&
-    String(s.categoryId||'')===
-      String(task?.categoryId||assignedCat?.id||'') &&
-    Number(s.actualAmount)>0
-  );
-
-  if(!respected){
+  const award=v180CalculateRespectAward(task,entries,groupRows,false);
+  const st=v165EnsureRespectState();
+  if(!award.respected){
     st.noSkipStreak=0;
     st.noRerollStreak=0;
     st.currentRerolls=0;
     st.modifiedAt=Date.now();
     return 0;
   }
-
-  // currentRerolls remains CATEGORY rerolls ("Give me something else").
-  // v180 title rerolls never touch this value, therefore browsing next
-  // recommended titles has no first-pick/no-Skip penalty.
-  const hadCategoryReroll=st.currentRerolls>0;
-
-  st.noSkipStreak++;
-
-  if(hadCategoryReroll)st.noRerollStreak=0;
-  else st.noRerollStreak++;
-
-  st.bestNoSkipStreak=Math.max(
-    st.bestNoSkipStreak,
-    st.noSkipStreak
-  );
-  st.bestNoRerollStreak=Math.max(
-    st.bestNoRerollStreak,
-    st.noRerollStreak
-  );
-
-  const exactEnabled=!!S.settings?.exactTitleRecommendations;
-  const match=v180RespectMatchInfo(
-    task,
-    entries,
-    groupRows
-  );
-
-  const categoryXP=Math.max(
-    0,
-    Math.round(Number(cfg.categoryBaseXP)||0)
-  );
-
-  const exactPerTitle=Math.max(
-    0,
-    Math.round(Number(cfg.exactTitleBaseXP)||0)
-  );
-
-  const exactTitleXP=exactEnabled
-    ?exactPerTitle*match.matchedCount
-    :0;
-
-  const baseRespectXP=categoryXP+exactTitleXP;
-  const mult=v165RespectMultipliers(
-    st.noSkipStreak,
-    st.noRerollStreak
-  );
-  const levelingEnabled=levelingSettings().enabled!==false;
-
-  const bonus=levelingEnabled
-    ?Math.max(
-      0,
-      Math.round(
-        baseRespectXP*
-        mult.noSkip*
-        mult.noReroll
-      )
-    )
-    :0;
+  st.noSkipStreak=award.noSkipStreak;
+  st.noRerollStreak=award.noRerollStreak;
+  st.bestNoSkipStreak=Math.max(st.bestNoSkipStreak,st.noSkipStreak);
+  st.bestNoRerollStreak=Math.max(st.bestNoRerollStreak,st.noRerollStreak);
+  const {cfg,match,categoryXP,exactPerTitle,exactTitleXP,baseRespectXP,
+    mult,bonus,exactEnabled}=award;
 
   const target=
     groupRows.find(s=>
