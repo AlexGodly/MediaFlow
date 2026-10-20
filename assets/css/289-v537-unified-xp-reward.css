@@ -41,3 +41,6 @@
 @media(max-width:640px){.mf537-xp-head{padding:13px;gap:8px}.mf537-xp-heading{gap:8px}.mf537-xp-icon{width:34px;height:34px}.mf537-xp-heading b{font-size:12px}.mf537-xp-total strong{font-size:22px}.mf537-xp-metrics>div{padding:10px 9px}.mf537-xp-metrics span{font-size:9px}.mf537-xp-metrics strong{font-size:11px}.mf537-xp-status,.mf537-xp-details summary,.mf537-xp-footnote{padding-inline:12px}.mf537-xp-detail-body{padding-inline:12px}}
 @media(max-width:370px){.mf537-xp-head{flex-wrap:wrap}.mf537-xp-total{margin-left:42px}.mf537-xp-metrics{grid-template-columns:1fr}.mf537-xp-metrics>div{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border-right:0;border-bottom:1px solid var(--border-soft,var(--border))}.mf537-xp-metrics>div:last-child{border-bottom:0}.mf537-category-row{grid-template-columns:1fr}.mf537-category-values{text-align:left}}
 @media(prefers-reduced-motion:reduce){.mf537-xp-details summary,.mf537-chevron{transition:none}}
+
+/* v538: never mask a calculation failure with a stale XP reward. */
+.mf537-preview-error{padding:14px 16px;border:1px solid var(--border-soft,var(--border));border-radius:14px;background:var(--panel-raised,var(--surface));color:var(--text-dim,var(--text));font-size:12px;line-height:1.6}
