@@ -31,6 +31,7 @@ const C=vm.createContext({
  v369ItemTitle:e=>e?.libraryId==='t1'?item:null,
  v394Relevant:e=>{const season=seasons.find(s=>s.id===e.v369SelectedSeasonId);
    return {season,units:e.v369Units.filter(u=>u.seasonId===season?.id)};},
+ v394SameSeason:(u,season)=>String(u.seasonId||'')===String(season?.id||''),
  v394Base:()=>0,v394Method:e=>e.v394Method,
  v394NumberLimit:season=>season.total,
  v394ExactContiguous:(rows,b)=>rows.map(u=>u.number).sort((a,z)=>a-z).every((n,i)=>n===b+i+1),
