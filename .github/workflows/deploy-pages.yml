@@ -66,6 +66,7 @@ jobs:
           node tests/test-v542-xp-award-parity.cjs
           node tests/test-v543-xp-preview-recovery.cjs
           node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v545-startup-and-xp-preview.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
