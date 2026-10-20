@@ -15,6 +15,8 @@ const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('assets/css/290-v546-recovery-lock-takeover.css','utf8');
 assert(coverSource.includes("mf546QueueStorageKey('cover',mf424Account(),'job:'+mf424Account())"));
 assert(metaSource.includes("mf546QueueStorageKey('metadata',mf439Account(),'mediaflow-v439-job:'+mf439Account())"));
+assert(coverSource.includes("mf546CheckNewQueueStart('cover')")&&coverSource.includes("mf546PrepareNewQueue('cover')"));
+assert(takeover.includes("mf546PrepareNewQueue('metadata')"),'Metadata batches must secure ownership before writing a replacement checkpoint');
 assert(lockCore.includes("if(typeof mf546OpenConflict==='function')"),'The old v442 lock-race branches must hand off to the designed dialog');
 assert(lockCore.includes("const conflict=mf546Conflict('cover')")&&lockCore.includes("const conflict=mf546Conflict('metadata')"));
 assert(html.includes('assets/css/290-v546-recovery-lock-takeover.css'));
