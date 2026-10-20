@@ -14,6 +14,7 @@ on:
       - 'src/js/runtime-order.json'
       - 'src/js/components/309-v424-advanced-cover-recovery.js'
       - 'src/js/components/319-v439-metadata-recovery.js'
+      - 'src/js/components/322-v442-recovery-hardening.js'
       - 'src/js/components/386-v546-recovery-lock-takeover.js'
       - 'assets/css/290-v546-recovery-lock-takeover.css'
       - 'src/js/components/375-v514-canonical-category-settings.js'
