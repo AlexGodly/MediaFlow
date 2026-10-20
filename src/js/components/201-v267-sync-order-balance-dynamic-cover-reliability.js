@@ -293,7 +293,7 @@ render=function(){
     try{v265EnhanceBalance();}catch(_){ }
     queueMicrotask(()=>{try{v265EnhanceBalance();}catch(_){ }});
   }
-  requestAnimationFrame(()=>{try{v267EnhanceOrder();v267UpdateVersionChrome();if(String(S.view||'')==='dashboard')v265EnhanceBalance();}catch(error){console.error('MediaFlow v267 enhancement failed',error);}});
+  requestAnimationFrame(()=>{try{v267EnhanceOrder();v267UpdateVersionChrome();if(String(S.view||'')==='dashboard'&&typeof v265EnhanceBalance==='function')v265EnhanceBalance();}catch(error){console.error('MediaFlow v267 enhancement failed',error);}});
   return out;
 };
 
