@@ -1,5 +1,6 @@
 name: Build archive and release MediaFlow v539
 # v539 verifies cancellable, themed Advanced Logging season overwrites.
+# Covers live season drafts and cancellation safety.
 # Validates v537 projection plus the v539 final renderer integration.
 on:
   push:
