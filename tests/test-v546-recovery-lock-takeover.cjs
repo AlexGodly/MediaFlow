@@ -96,6 +96,9 @@ async function run(){
  db.set('job:'+account,latestCover);
  localStorage.setItem(keyFor('cover'),JSON.stringify({token:'old-tab-cover',kind:'cover',expires:Date.now()+60000}));
  localStorage.setItem(leaseCover,JSON.stringify({token:'old-cover-lease',expiry:Date.now()-1000}));
+ await context.mf424Run();
+ assert.equal(runs.cover,0,'A conflicting worker must not start before takeover');
+ assert.equal(db.get('job:'+account).cursor,3,'The blocked tab must not overwrite the newer durable cursor');
  await api.takeover('cover','force');
  assert.equal(runs.cover,1,'Cover Recovery starts after takeover');
  assert.equal(MF424.job.cursor,3,'Latest durable checkpoint wins over a stale in-memory cursor');
