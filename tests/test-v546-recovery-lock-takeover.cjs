@@ -24,6 +24,7 @@ assert(css.includes('.mf546-overlay')&&css.includes('.mf546-btn-force'));
 assert(takeover.includes('Resume Safely')&&takeover.includes('Force Start')&&takeover.includes('Force Start Anyway'));
 assert(takeover.includes('mf546FenceProcess')&&takeover.includes('mf546IsolateQueue'));
 assert(takeover.includes('mf546WaitForLegacyLocks'));
+assert(takeover.includes('const latest=await mf546LatestJob(kind,account);'),'A cleared lock must resume from the latest durable cursor');
 
 const storage=new Map(),db=new Map(),toasts=[],runs={cover:0,metadata:0};
 const account='user-546';
