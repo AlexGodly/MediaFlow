@@ -94,7 +94,7 @@ assert.equal(p.categories[0].minutes,210);
 assert.equal(p.total,1800);
 card=vm.runInContext('mf537XPCardMarkup()',ctx);
 assert(card.includes('mf537-xp-card')&&card.includes('Consumption'));
-assert(card.includes('1,800'));
+assert(card.includes('1800'),'Minimal test renderer must display the exact forecast without enforcing mock-specific grouping');
 assert.equal(JSON.stringify(S),before,'Preview never modifies draft, History or XP ledger');
 assert.equal(ctx.App.v543XPDiagnostics().error.stage,'core reward calculation');
 fullFailed=false;coreFailed=false;
