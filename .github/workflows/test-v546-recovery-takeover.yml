@@ -1,0 +1,53 @@
+name: Test MediaFlow v546 recovery takeover
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/js/components/309-v424-advanced-cover-recovery.js'
+      - 'src/js/components/319-v439-metadata-recovery.js'
+      - 'src/js/components/322-v442-recovery-hardening.js'
+      - 'src/js/components/386-v546-recovery-lock-takeover.js'
+      - 'assets/css/290-v546-recovery-lock-takeover.css'
+      - 'tests/test-v546-recovery-lock-takeover.cjs'
+      - '.github/workflows/test-v546-recovery-takeover.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build production bundle and PWA assets
+        run: python3 scripts/build.py
+      - name: Check production JavaScript
+        run: |
+          node --check assets/js/mediaflow-v546.bundle.js
+          node --check sw.js
+      - name: Test startup and XP baseline
+        run: node tests/test-v545-startup-and-xp-preview.cjs
+      - name: Test recovery takeover, queue isolation and lock fencing
+        run: node tests/test-v546-recovery-lock-takeover.cjs

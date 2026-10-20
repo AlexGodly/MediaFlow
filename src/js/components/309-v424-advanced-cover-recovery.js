@@ -40,7 +40,7 @@ const MF424 = {db:null,job:null,running:false,runner:null,leaseTimer:0,leaseToke
   history:[],rate:{},cache:new Map(),account:'',ready:false,status:'idle',toastAt:0};
 function mf424Account(){return String((typeof AUTH_USER!=='undefined'&&AUTH_USER?.id)||'local');}
 function mf424Escape(s){return typeof escapeHtml==='function'?escapeHtml(String(s??'')):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function mf424Key(){return 'job:'+mf424Account();}
+function mf424Key(){return mf546QueueStorageKey('cover',mf424Account(),'job:'+mf424Account());}
 function mf424Defaults(){const s=S.settings||DEFAULT_SETTINGS;const old=s.v424Covers||{};return {...MF424_DEFAULT,...old,
   enabled:Array.isArray(old.enabled)?old.enabled.slice():MF424_DEFAULT.enabled.slice(),
   priorities:Array.isArray(old.priorities)?old.priorities.slice():MF424_DEFAULT.priorities.slice()};}
@@ -447,6 +447,9 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
 }
 async function mf424Start(){if(MF424.running)return;const settings=mf424ReadForm();
   if(!MF424.ready){showToast('Recovery storage is not ready. Please reload and check IndexedDB permissions.');return;}
+  // Check ownership before scanning or replacing a queue. A second tab must
+  // never overwrite the checkpoint currently being advanced by the owner.
+  if(typeof mf546CheckNewQueueStart==='function'&&!await mf546CheckNewQueueStart('cover'))return;
   const missing=[];const lib=S.library||[];
   for(let i=0;i<lib.length;i+=1000){
     for(const item of lib.slice(i,i+1000))if(mf424Missing(item)&&(typeof mf425ScopeAllows!=='function'||mf425ScopeAllows(item)))missing.push(String(item.id));
@@ -454,11 +457,19 @@ async function mf424Start(){if(MF424.running)return;const settings=mf424ReadForm
   }
   if(!missing.length){showToast('Every Library title already has a cover URL.');return;}
   if(MF424.job&&!['complete','stopped'].includes(MF424.job.status)&&!await mf427ConfirmJobReplace())return;
+  // Recheck after the long Library scan and confirmation, then acquire both
+  // locks before touching the shared checkpoint.
+  if(typeof mf546PrepareNewQueue==='function'&&!await mf546PrepareNewQueue('cover'))return;
+  const previousJob=MF424.job;
   MF424.job={id:'mf424-'+Date.now(),account:mf424Account(),created:Date.now(),updated:Date.now(),ended:0,
     ids:missing,cursor:0,scope:(typeof MF425!=='undefined'&&MF425.active?MF425.active:null),mode:settings.mode,partSize:settings.partSize,continuation:settings.continuation,
     status:'ready',fixed:0,unresolved:0,skipped:0,failed:0,pending:0,processed:0,dirty:0,
     requestCount:0,cooldownEvents:0,rate:{},unresolvedIds:[],results:[],reviews:[],stopRequested:false,pauseRequested:false,stopAfterPart:false};
-  S.settings.v424Covers=settings;await saveState();await mf424SaveJob();mf424CloseModal();mf424Run();
+  S.settings.v424Covers=settings;
+  try{await saveState();await mf424SaveJob();}
+  catch(e){MF424.job=previousJob;if(typeof mf546AbortPreparedQueue==='function')mf546AbortPreparedQueue('cover');
+    showToast('Cover Recovery could not save its initial checkpoint. The previous queue remains available.');return;}
+  mf424CloseModal();mf424Run();
 }
 function mf424ReadForm(){const base=mf424Defaults();const form=document.getElementById('mf424-config');if(!form)return base;
   const val=(n,d)=>form.querySelector('[name="'+n+'"]')?.value||d;
