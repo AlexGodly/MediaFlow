@@ -8,12 +8,12 @@ function mf542RepeatBefore(){
   // Fast exit for normal non-repeat drafts. Historic repeats are counted by
   // the v121 canonical key, not by title names guessed from UI labels.
   const counts=new Map();
-  for(const s of S.sessions||[]){
+  for(const s of (Array.isArray(S.sessions)?S.sessions:[])){
     if(!s||s.status==='skipped')continue;
-    for(const t of s.titles||[]){
+    for(const t of (Array.isArray(s.titles)?s.titles:[])){
       const itemized=t?.v369Itemized&&Array.isArray(t.v369Units);
       if(!t?.repeat&&!itemized)continue;
-      const qty=itemized?t.v369Units.filter(u=>t.repeat||u.isRepeat===true).length:
+      const qty=itemized?t.v369Units.filter(u=>u&&(t.repeat||u.isRepeat===true)).length:
         mf542SafeAmount(t?.qty);
       if(!qty)continue;
       const key=v121RepeatKey(t,s);
@@ -28,14 +28,14 @@ function mf542ProjectRepeat(base){
   const itemized=S.logDraft?.v369Interface==='itemized';
   const L=levelingSettings();
   const perRow=new Map(), running=entries.some(e=>e?.isRepeat||
-    (itemized&&e?.v369Units?.some(u=>u.isRepeat)))?mf542RepeatBefore():new Map();
+    (itemized&&Array.isArray(e?.v369Units)&&e.v369Units.some(u=>u?.isRepeat)))?mf542RepeatBefore():new Map();
   let unitXP=0,fullXP=0,repeatUnits=0,fullRepeats=0;
   if(L.enabled===false)return {perRow,unitXP,fullXP,repeatUnits,fullRepeats};
   for(const row of rows){
     let rowUnitXP=0,rowFullXP=0;
     for(const entry of row.entries||[]){
       const units=itemized&&Array.isArray(entry?.v369Units)?entry.v369Units:null;
-      const qty=units?units.filter(u=>entry.isRepeat||u.isRepeat===true).length:
+      const qty=units?units.filter(u=>u&&(entry.isRepeat||u.isRepeat===true)).length:
         (entry?.isRepeat?mf542SafeAmount(entry.qty):0);
       if(qty<=0)continue;
       const item=entry.libraryId?v369ItemTitle(entry):null;
@@ -101,16 +101,16 @@ function mf542ProjectedMilestones(dayMultiplier){
         out.completionBonusXP+=bonus;
         out.completionStreakXP+=Math.max(0,Math.round(bonus*dayMultiplier)-bonus);
       }
-      const known=typeof V348_LIBRARY_KNOWN!=='undefined'?V348_LIBRARY_KNOWN?.get(id):null;
+      const known=typeof V348_LIBRARY_KNOWN!=='undefined'&&typeof V348_LIBRARY_KNOWN?.get==='function'?V348_LIBRARY_KNOWN.get(id):null;
       if(known&&!known.completed&&!mf542Has(ledger.v348LibraryCompletionBonus,id)){
         out.completionStreakXP+=Math.max(0,v348Multiply(base)-base);
       }
     }
-    const priorStart=typeof V334_KNOWN_TITLE_STATES!=='undefined'?V334_KNOWN_TITLE_STATES?.get(id):null;
+    const priorStart=typeof V334_KNOWN_TITLE_STATES!=='undefined'&&typeof V334_KNOWN_TITLE_STATES?.get==='function'?V334_KNOWN_TITLE_STATES.get(id):null;
     if(priorStart===false&&v334Started(future)&&!mf542Has(ledger.v334StartedTitles,id)){
       out.titleStartXP+=v348Multiply(v334Reward('firstTitleStartXP'));out.starts++;
     }
-    const wasEpisode=typeof V335_KNOWN_EPISODES!=='undefined'?V335_KNOWN_EPISODES?.get(id):null;
+    const wasEpisode=typeof V335_KNOWN_EPISODES!=='undefined'&&typeof V335_KNOWN_EPISODES?.get==='function'?V335_KNOWN_EPISODES.get(id):null;
     if(wasEpisode===0&&progress>0&&v335IsEpisodeTitle(future)&&!mf542Has(ledger.v335FirstEpisodeRewards,id)){
       const amount=Math.max(0,Math.min(100000,Number(L.firstEpisodeXP??V335_FIRST_EPISODE_DEFAULT)||0));
       out.firstEpisodeXP+=v348Multiply(Math.round(amount));out.firstEpisodes++;
