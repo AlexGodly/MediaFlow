@@ -44,3 +44,12 @@
 
 /* v538: never mask a calculation failure with a stale XP reward. */
 .mf537-preview-error{padding:14px 16px;border:1px solid var(--border-soft,var(--border));border-radius:14px;background:var(--panel-raised,var(--surface));color:var(--text-dim,var(--text));font-size:12px;line-height:1.6}
+
+/* v542: projected repeat/completion/milestone XP is part of the headline total. */
+.mf542-xp-extra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--border-soft,var(--border))}
+.mf542-xp-extra>div{display:grid;gap:4px;padding:11px 15px;min-width:0}
+.mf542-xp-extra>div+div{border-left:1px solid var(--border-soft,var(--border))}
+.mf542-xp-extra span{font-size:10px;font-weight:650;color:var(--text-mute,var(--text-dim))}
+.mf542-xp-extra strong{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.mf542-detail-grid{margin:0 0 4px}
+@media(max-width:370px){.mf542-xp-extra>div{padding:10px 9px}.mf542-xp-extra strong{font-size:12px}}
