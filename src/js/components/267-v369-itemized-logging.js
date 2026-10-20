@@ -76,7 +76,7 @@ function v369KnownUnits(item){
   const rows=[];
   for(const session of (S.sessions||[]))for(const t of (session?.titles||[])){
     if(String(t?.libraryId||'')!==id||t.repeat)continue;
-    for(const u of (t.v369Units||[]))if(!u.isRepeat)rows.push(u);
+    for(const u of (Array.isArray(t.v369Units)?t.v369Units:[]))if(u&&!u.isRepeat)rows.push(u);
   }
   return rows;
 }
