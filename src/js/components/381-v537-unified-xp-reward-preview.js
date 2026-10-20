@@ -19,7 +19,10 @@ function mf537DraftRows(){
         ?v369ItemTitle(entry):null;
       const cat=(item&&getCategory(item.categoryId))||assigned;
       if(!cat?.id)continue;
-      const qty=mf537Num(entry.qty);
+      // Itemized submission canonicalizes quantity from exact unit records.
+      // Draft qty can be stale before v369Sync() runs at submit.
+      const qty=itemized&&Array.isArray(entry?.v369Units)
+        ?entry.v369Units.length:mf537Num(entry?.qty);
       if(!groups.has(cat.id))groups.set(cat.id,{cat,entries:[],amount:0,weight:0});
       const group=groups.get(cat.id);
       group.entries.push(entry);
@@ -37,8 +40,16 @@ function mf537DraftRows(){
   let minutesLeft=totalMinutes;
   const rows=grouped.map((g,index)=>{
     const minutes=itemized&&typeof v369Seconds==='function'
-      ?g.entries.reduce((sum,e)=>sum+(Array.isArray(e.v369Units)
-        ?e.v369Units.reduce((v,u)=>v+v369Seconds(u),0):0),0)/60
+      ?g.entries.reduce((sum,e)=>{
+          const units=Array.isArray(e?.v369Units)?e.v369Units:[];
+          if(!units.length)return sum;
+          // v394 distributes a manual TOTAL across units *before* submission;
+          // the preview must use the same effective runtime without editing units.
+          const manual=Number(e.v394RuntimeSeconds);
+          if(e.v394RuntimeManual&&Number.isFinite(manual)&&manual>=0)
+            return sum+Math.round(manual);
+          return sum+units.reduce((v,u)=>v+v369Seconds(u),0);
+        },0)/60
       :(index===grouped.length-1?minutesLeft:
         Math.min(minutesLeft,Math.round(totalMinutes*(g.weight/totalWeight))));
     minutesLeft=Math.max(0,minutesLeft-minutes);
