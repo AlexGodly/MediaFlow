@@ -30,10 +30,10 @@ const C=vm.createContext({
  v394Entry:i=>C.S.logDraft?.entries?.[Number(i)]||null,
  v369ItemTitle:e=>e?.libraryId==='t1'?item:null,
  v394Relevant:e=>{const season=seasons.find(s=>s.id===e.v369SelectedSeasonId);
-   return {season,units:e.v369Units.filter(u=>u.seasonId===season?.id)};},
+   return {season,units:e.v369Units.filter(u=>String(u.seasonId||'')===String(season?.id||''))};},
  v394SameSeason:(u,season)=>String(u.seasonId||'')===String(season?.id||''),
  v394Base:()=>0,v394Method:e=>e.v394Method,
- v394NumberLimit:season=>season.total,
+ v394NumberLimit:season=>season?.total||20,
  v394ExactContiguous:(rows,b)=>rows.map(u=>u.number).sort((a,z)=>a-z).every((n,i)=>n===b+i+1),
  v369Seconds:u=>u.durationSeconds,v369DefaultSeconds:()=>1800,
  v400BulkStamp:()=>10000,v369Sync(){syncs++;},v394Paint(){paints++;},
@@ -96,5 +96,20 @@ const copy=()=>JSON.stringify(C.S.logDraft.entries[0].v369Units);
  const old=copy();await edit(-1);
  assert.equal(copy(),old,'Invalid quantity must not mutate');
  assert(toasts.some(x=>x.includes('valid whole unit number')));
+ // No-season categories (e.g., games/sessions) must read naturally.
+ C.S.logDraft=draft();
+ C.S.logDraft.entries[0].v369SelectedSeasonId='';
+ C.S.logDraft.entries[0].v369Units=[
+   {id:'x1',number:1,seasonId:null,loggedAt:100,durationSeconds:1200,isRepeat:false},
+   {id:'x3',number:3,seasonId:null,loggedAt:300,durationSeconds:2400,isRepeat:false}
+ ];
+ const beforeSeasonless=copy();
+ const seasonless=edit(1);
+ const message=dialogs[dialogs.length-1].message;
+ assert(message.includes('for Demo Anime.'),'No-season title should be named directly');
+ assert(!message.includes('other seasons'),'Do not reference nonexistent seasons');
+ assert(message.includes('\n\n')&&!message.includes('\\n\\n'));
+ finish(false);await seasonless;
+ assert.equal(copy(),beforeSeasonless,'No-season Cancel preserves unit detail');
  console.log('PASS v539: MediaFlow-themed confirmation, Cancel, season safety, concurrent/race guard, tombstones and valid/invalid edits.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
