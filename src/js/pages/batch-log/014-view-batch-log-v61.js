@@ -68,7 +68,7 @@ function submitBatchLog(){
   valid.forEach(r=>{
     const item=S.library.find(x=>x.id===r.libraryId); if(!item)return;
     const cat=getCategory(item.categoryId), qty=Math.max(0,Number(r.qty)||0), minutes=Math.max(0,Number(r.minutes)||0);
-    const healthStatus=categoryStatus(cat).status, xpCalc=calculateConsumptionXP(cat,qty,minutes,healthStatus);
+    const healthStatus=categoryStatus(cat), xpCalc=calculateConsumptionXP(cat,qty,minutes,healthStatus);
     S.sessions.push({id:uid(),timestamp,date,categoryId:cat.id,targetAmount:qty,actualAmount:qty,minutes,
       note,status:'logged',unit:cat.unit,xp:xpCalc.xp,healthStatus,source:'batch',batchGroupId:groupId,
       titles:[{title:cleanTitle(item.title),libraryId:item.id,qty,repeat:(item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total))),loggedAt:v331BatchTitleTimestamp(r,S.batchDraft,date,timestamp)}]});
