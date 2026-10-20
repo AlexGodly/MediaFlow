@@ -349,7 +349,18 @@ async function mf546Takeover(kind,mode='safe'){
  }
  const account=mf439Account();
  const info=mf546Conflict(kind);
- if(!info){mf546Close();if(kind==='cover')return mf424Run();return mf439RunBatch();}
+ if(!info){
+  // The other worker may have finished while the dialog was open. Refresh
+  // from durable storage before resuming so this tab never restarts an older cursor.
+  try{
+   const latest=await mf546LatestJob(kind,account);
+   if(kind==='cover'){MF424.job=latest;MF424.account=account;MF424.job.pauseRequested=false;MF424.job.stopRequested=false;}
+   else{MF439.job=latest;MF439.account=account;MF439.job.status='paused';MF439.cancel=false;}
+  }catch(_){}
+  mf546Close();
+  if(kind==='cover')return mf424Run();
+  return mf439RunBatch();
+ }
  const before=mf546LeaseRows(account);
  const pending={kind,account,token:'',ownerKind:info.ownerKind,startedAt:Date.now(),
   oldProcess:before.process,oldCover:before.cover,oldMetadata:before.metadata,mode};
