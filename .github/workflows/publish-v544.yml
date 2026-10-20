@@ -9,6 +9,10 @@ on:
     paths:
       - 'VERSION'
       - 'tests/test-v544-xp-reward-contract.cjs'
+      - 'src/js/components/385-v544-reward-contract.js'
+      - 'src/js/components/383-v542-award-parity.js'
+      - 'src/js/components/267-v369-itemized-logging.js'
+      - 'src/js/features/rewatch/038-v121-rewatch-reread-xp.js'
       - '.github/workflows/publish-v544.yml'
   workflow_dispatch:
 permissions:
