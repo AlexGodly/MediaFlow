@@ -1,0 +1,82 @@
+name: Build archive and release MediaFlow v539
+# Validates v537 projection plus the v539 final renderer integration.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v539.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v539-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 539
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v539.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          grep -q 'mediaflow-v539.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v539-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 539
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/539
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/539/; fi
+          done
+          test -f legacy/v/539/assets/js/mediaflow-v539.bundle.js
+          test -f legacy/v/539/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v539.bundle.js legacy/v/539
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v539' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v539_Stable.zip HEAD:legacy/v/539
+          sha256sum MediaFlow_v539_Stable.zip > MediaFlow_v539_Stable.sha256
+          if ! gh release view 539 >/dev/null 2>&1; then
+            gh release create 539 MediaFlow_v539_Stable.zip MediaFlow_v539_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v539 Stable' --notes 'v539 Stable: Replace the native JavaScript window.confirm used by Advanced Logging's Progress Reached / Amount Consumed bulk unit replacement with MediaFlow's existing fully themed, responsive warning dialog. New contextual confirmation identifies the selected title and season, warns that detailed unit numbers, timestamps, runtimes and repeat flags may change, and explicitly states other seasons and saved History are untouched. Buttons: Keep detailed entries / Replace season entries; Cancel, overlay dismissal and Escape remain nondestructive. Concurrent/stale confirmations cannot overwrite changed logging drafts or different seasons, preserving deletion tombstones and cloud-draft integrity. Regression tests execute actual v394 handler and verify cancellation, commit, other-season retention, race safety, plus existing v537/v538 XP and cloud/PWA tests. No Supabase schema change or historical XP alteration. Full legacy/v/539 archive, ZIP, SHA256 and GitHub Pages release.'
+          fi
