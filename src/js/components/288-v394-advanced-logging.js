@@ -115,7 +115,11 @@ App.v394ChooseSeason=function(index,id){
   if(!e||!item||!v394Seasons(item).some(s=>String(s.id)===String(id)))return;
   e.v369SelectedSeasonId=String(id);v394Paint(index);
 };
-App.v394SetQuantity=function(index,value){
+/* v539: one destructive season replacement prompt at a time.
+ * Promise resolution must never overwrite a different/stale logging draft. */
+let V539_SEASON_REPLACE_CONFIRM_PENDING=false;
+App.v394SetQuantity=async function(index,value){
+  const originalDraft=S.logDraft;
   const e=v394Entry(index),item=v369ItemTitle(e);if(!e||!item)return;
   const {season,units}=v394Relevant(e,item),base=v394Base(e,item,season),mode=v394Method(e);
   if(mode==='unit')return;
@@ -129,8 +133,64 @@ App.v394SetQuantity=function(index,value){
   const distinctTimes=new Set(units.map(u=>Number(u.loggedAt))).size>1;
   const distinctDurations=new Set(units.map(u=>v369Seconds(u))).size>1;
   const repeatMix=units.some(u=>!!u.isRepeat!==!!e.isRepeat);
-  if((inconsistent||distinctTimes||distinctDurations||repeatMix) && !window.confirm('This will replace the selected season’s detailed unit entries, including their individual numbers, timestamps, runtimes or repeat flags. Other seasons will remain unchanged. Continue?')){
-    v394Paint(index);return;
+  if(inconsistent||distinctTimes||distinctDurations||repeatMix){
+    if(V539_SEASON_REPLACE_CONFIRM_PENDING){
+      v394Paint(index);return;
+    }
+    const originalUnits=JSON.stringify(e.v369Units||[]);
+    const originalSeasonId=String(season?.id||'');
+    const seasonName=String(season?.name||'').trim()||
+      (season?'Season '+String(season.number||''):'This title');
+    const titleName=cleanTitle(item.title||'Selected title');
+    const message=
+      'You are changing '+seasonName+' in '+titleName+'.\\n\\n'+
+      'Replacing these '+units.length+' detailed unit entr'+(units.length===1?'y':'ies')+
+      ' may change individual unit numbers, timestamps, runtimes, or repeat flags.\\n\\n'+
+      'Units from other seasons will stay unchanged. This only affects the unsaved Logging draft.';
+    V539_SEASON_REPLACE_CONFIRM_PENDING=true;
+    let approved=false;
+    try{
+      if(typeof v336Confirm==='function'){
+        approved=await v336Confirm(message,{
+          title:'Replace detailed season entries?',
+          confirmText:'Replace season entries',
+          cancelText:'Keep detailed entries',
+          tone:'warning',
+          closeOnOverlay:true
+        });
+      }else if(typeof v279Confirm==='function'){
+        approved=await v279Confirm({
+          title:'Replace detailed season entries?',
+          body:message,
+          confirmLabel:'Replace season entries',
+          danger:true
+        });
+      }else{
+        showToast('The confirmation dialog is unavailable. No entries were changed.');
+      }
+    }catch(err){
+      console.warn('MediaFlow season replacement confirmation unavailable',err);
+      showToast('Could not open confirmation. No entries were changed.');
+    }finally{
+      V539_SEASON_REPLACE_CONFIRM_PENDING=false;
+    }
+    if(!approved){
+      if(S.logDraft===originalDraft&&v394Entry(index)===e)v394Paint(index);
+      return;
+    }
+    // An asynchronous confirmation must not apply to a different title,
+    // season, logging method, or draft updated while the modal was open.
+    const current= v394Relevant(e,item);
+    if(S.logDraft!==originalDraft||v394Entry(index)!==e||
+       v369ItemTitle(e)!==item||v394Method(e)!==mode||
+       String(current.season?.id||'')!==originalSeasonId||
+       v394Base(e,item,current.season)!==base||
+       v394NumberLimit(current.season,item)!==limit||
+       JSON.stringify(e.v369Units||[])!==originalUnits){
+      showToast('Logging changed while the dialog was open. Nothing was replaced. Review the current draft.');
+      if(S.logDraft===originalDraft&&v394Entry(index)===e)v394Paint(index);
+      return;
+    }
   }
   // Preserve existing unit IDs, timestamps and per-unit durations wherever
   // identical consecutive positions survive the edit. Removed IDs become
