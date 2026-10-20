@@ -388,8 +388,10 @@ mf424Run=async function(){
  mf546CleanupOwnIdleLock('cover');
  const info=mf546Conflict('cover');
  if(info){
+  // Do not checkpoint this tab's possibly stale in-memory copy while another
+  // worker owns the queue. The owner or the takeover path writes the latest
+  // durable cursor after the old lease is released.
   MF424.job.pauseRequested=true;mf424State('paused');
-  try{await mf424SaveJob();}catch(e){console.warn('Cover checkpoint save before handoff failed',e);}
   mf546OpenConflict('cover',info);return;
  }
  return mf546BaseRunCover.apply(this,arguments);
@@ -400,7 +402,8 @@ mf439RunBatch=async function(){
  mf546CleanupOwnIdleLock('metadata');
  const info=mf546Conflict('metadata');
  if(info){
-  MF439.cancel=false;MF439.job.status='paused';mf439SaveJob();mf439PaintJob();
+  // Avoid overwriting a newer checkpoint from the worker that owns the lock.
+  MF439.cancel=false;MF439.job.status='paused';mf439PaintJob();
   mf546OpenConflict('metadata',info);return;
  }
  return mf546BaseRunMetadata.apply(this,arguments);
