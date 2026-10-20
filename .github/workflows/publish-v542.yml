@@ -1,0 +1,87 @@
+name: Build archive and release MediaFlow v542
+# v542 verifies exact reward forecasting with live post-submit XP audit.
+# Covers live season drafts and cancellation safety.
+# Validates v537 projection plus the v542 confirmation presentation.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v542.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v542-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 542
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v542.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
+          node tests/test-v541-logging-xp-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          grep -q 'mediaflow-v542.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v542-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 542
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/542
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/542/; fi
+          done
+          test -f legacy/v/542/assets/js/mediaflow-v542.bundle.js
+          test -f legacy/v/542/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v542.bundle.js legacy/v/542
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v542' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v542_Stable.zip HEAD:legacy/v/542
+          sha256sum MediaFlow_v542_Stable.zip > MediaFlow_v542_Stable.sha256
+          if ! gh release view 542 >/dev/null 2>&1; then
+            gh release create 542 MediaFlow_v542_Stable.zip MediaFlow_v542_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v542 Stable' --notes 'v542 Stable: Extend unified Logging XP reward preview to include all verified submission rewards: consumption and Rotation XP; System Respect including category, exact-title, No-Skip and First-pick bonuses; day-streak; repeat units and completed full-title repeats; completed-title XP; logged-completion rewards and their day-streak bonuses; first title start XP and first episode XP. All projections are read-only and honor saved settings, one-time XP ledgers, draft units, manual runtimes and separate category sessions. The real submit path measures the post-submit account XP delta against the pre-submit forecast, reports discrepancies without duplicating or modifying earned rewards, and exposes a local read-only audit API for investigation. Add detailed Repeat and Milestone sections to the responsive XP card. Regression tests for completed titles, prior one-time awards, per-unit/full-repeat rewards, disabled leveling and post-submit parity plus prior cloud/PWA/Xp safeguards. No Supabase schema changes or historical XP rewrite. Complete legacy/v/542 archive, stable ZIP, SHA256 and GitHub Pages deploy.'
+          fi
