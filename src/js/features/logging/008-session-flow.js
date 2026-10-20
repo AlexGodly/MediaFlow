@@ -54,7 +54,7 @@ function skipTask(){
 
     categoryId: cat.id, targetAmount: S.currentTask.targetMid, actualAmount: 0,
 
-    minutes: 0, note: '', status: 'skipped', unit: cat.unit, xp: 0, healthStatus: categoryStatus(cat).status,
+    minutes: 0, note: '', status: 'skipped', unit: cat.unit, xp: 0, healthStatus: categoryStatus(cat),
 
   };
 
@@ -244,7 +244,7 @@ function submitLog(){
       else if(g.amount>t.targetMid) status='over';
       else status='complete';
     }
-    const healthStatus=categoryStatus(actualCat).status;
+    const healthStatus=categoryStatus(actualCat);
     const xpCalc=calculateConsumptionXP(actualCat,g.amount,groupMinutes,healthStatus);
     const note=[entriesNote(g.entries),extra].filter(Boolean).join(' — ');
     S.sessions.push({
@@ -272,7 +272,7 @@ function submitLog(){
       assignedCategoryId:assignedCat.id,assignedTargetAmount:t.targetMid,sessionGroupId,
       followedAssignedCategory:false,targetAmount:t.targetMid,actualAmount:0,minutes:0,
       note:'Recommendation not followed',status:'skipped',unit:assignedCat.unit,xp:0,
-      healthStatus:categoryStatus(assignedCat).status,source:'recommendation',titles:[]});
+      healthStatus:categoryStatus(assignedCat),source:'recommendation',titles:[]});
   }
 
   // v165: award System Respect XP once per recommendation/log group.
