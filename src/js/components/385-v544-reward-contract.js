@@ -1,6 +1,6 @@
 /* MediaFlow v544 — truthful XP award contract.
  * Projection and submission use the canonical XP functions. Only completed
- * submissions may create an immutable, group-keyed shortfall receipt. No
+ * submissions may create an immutable, session-keyed shortfall receipt. No
  * estimate, DOM refresh or invalid draft ever writes user data. */
 const MF544_VERSION=544;
 const MF544_MAX_FINITE=Number.MAX_SAFE_INTEGER;
@@ -86,7 +86,7 @@ v150ComputeStateMetrics=function(state){
   m.totalXP+=extra;
   return m;
 };
-// Receipts are keyed by the actual committed session group. Max-merge, never
+// Receipts are keyed by a committed session ID. Max-merge, never
 // sum the same receipt after offline edits or bidirectional cloud restores.
 const mf544MergeBase=mergeStates;
 mergeStates=function(a,b){
@@ -132,7 +132,7 @@ App.submitLog=function(){
   if(S.logging!==false||!submitted.some(s=>s.status!=='skipped'))return result;
   const groupId=String(submitted.find(s=>s?.sessionGroupId)?.sessionGroupId||'');
   const sessionId=String(submitted.find(s=>s?.status!=='skipped')?.id||'');
-  const receiptKey=groupId?'group:'+groupId:'session:'+sessionId;
+  const receiptKey='session:'+sessionId;
   let actual=mf544SafeXP(v150ComputeStateMetrics({
     sessions:S.sessions||[],library:S.library||[],xpLedger:S.xpLedger||{}
   }).totalXP)-before;
