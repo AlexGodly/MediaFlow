@@ -4,8 +4,10 @@
  * Existing XP and cloud state are not changed by rendering or estimation.
  */
 const MF537_RELEASE=537;
-const mf537Num=(n)=>Math.max(0,Number.isFinite(Number(n))?Number(n):0);
-const mf537Fmt=(n)=>Math.round(mf537Num(n)).toLocaleString();
+// Functions are deliberately hoisted. Older Logging renderers can request
+// a preview while late runtime extensions are still initializing.
+function mf537Num(n){return Math.max(0,Number.isFinite(Number(n))?Number(n):0);}
+function mf537Fmt(n){return Math.round(mf537Num(n)).toLocaleString();}
 function mf537DraftRows(){
   const draft=S.logDraft||{},task=S.currentTask||{};
   const assigned=getCategory(task.categoryId||draft.categoryId||'');
