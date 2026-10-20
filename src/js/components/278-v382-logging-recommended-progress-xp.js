@@ -133,6 +133,9 @@ v370TitlePanelHtml=function(entry,index,forceExpanded=false){
   return host.innerHTML;
 };
 function v382XPCardMarkup(x){
+  // v538: use the current unified reward model at the SHARED renderer source.
+  // Avoid relying solely on an end-of-bundle function reassignment.
+  if(typeof mf537XPCardMarkup==='function')return mf537XPCardMarkup();
   const number=(v)=>Number.isFinite(Number(v))?Number(v):0;
   const award=Math.max(0,number(x?.xp)),base=Math.max(0,number(x?.base));
   const rotation=Number.isFinite(Number(x?.multiplier))?Number(x.multiplier):1;
@@ -148,7 +151,11 @@ function v382XPCardMarkup(x){
 function v382UpdateXPPreview(){
   const el=document.getElementById('xp-preview');if(!el)return;
   el.classList.add('mf382-xp-host');el.removeAttribute('style');
-  try{el.innerHTML=v382XPCardMarkup(estimateCurrentLogXP());}catch(error){console.warn('v382 XP preview unavailable',error);}
+  try{el.innerHTML=v382XPCardMarkup(estimateCurrentLogXP());}
+  catch(error){
+    console.warn('XP reward preview unavailable',error);
+    el.innerHTML='<div class="mf537-preview-error" role="status">XP preview could not be calculated. Your saved XP is unaffected. Retry after checking the Logging draft.</div>';
+  }
 }
 const v382RefreshXPBase=refreshXPPreview;
 refreshXPPreview=function(){
@@ -163,7 +170,11 @@ renderLogForm=function(){
   const host=document.createElement('div');host.innerHTML=raw;
   const xp=host.querySelector('#xp-preview');
   if(xp){xp.classList.add('mf382-xp-host');xp.removeAttribute('style');
-    try{xp.innerHTML=v382XPCardMarkup(estimateCurrentLogXP());}catch(_){}}
+    try{xp.innerHTML=v382XPCardMarkup(estimateCurrentLogXP());}
+    catch(error){
+      console.warn('XP reward preview rendering failed',error);
+      xp.innerHTML='<div class="mf537-preview-error" role="status">The XP preview is temporarily unavailable. No XP has been awarded.</div>';
+    }}
   return host.innerHTML;
 };
 window.MediaFlowV382={version:382,feature:'recommended logging direct add, Per Unit progress, XP summary'};
