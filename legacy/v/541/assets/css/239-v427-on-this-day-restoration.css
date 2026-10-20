@@ -1,0 +1,24 @@
+/* v427: On This Day restoration uses the original v159 rotating card and
+   MediaFlow's current dynamic-theme tokens. No new data model or cloud keys. */
+.mf427-otd-section{display:grid;gap:11px;min-width:0;margin:19px 0 21px;scroll-margin-top:95px}
+.mf427-otd-heading{display:flex;align-items:center;gap:11px;min-width:0}
+.mf427-otd-heading-icon{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;
+  border:1px solid color-mix(in srgb,var(--flow) 30%,var(--border-soft));
+  background:color-mix(in srgb,var(--flow) 11%,var(--panel));color:var(--flow);
+  border-radius:12px}
+.mf427-otd-heading .section-label{margin:0;font-size:11px;letter-spacing:.1em;color:var(--text);font-weight:800}
+.mf427-otd-heading p{margin:3px 0 0;font-size:11px;line-height:1.5;color:var(--text-dim)}
+.mf427-otd-section>.on-this-day{margin:0;width:100%;min-width:0}
+.mf427-otd-empty{display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  padding:clamp(17px,2.6vw,25px);border:1px solid var(--border-soft);
+  background:var(--panel);color:var(--text);border-radius:15px;min-width:0}
+.mf427-otd-empty strong{font-size:14px;font-weight:800;color:var(--text)}
+.mf427-otd-empty p{margin:0;font-size:12px;line-height:1.65;color:var(--text-dim);max-width:640px}
+.mf427-otd-empty button{display:inline-flex;min-height:37px;align-items:center;gap:6px}
+.mf427-otd-section :is(button,summary,a):focus-visible{outline:2px solid var(--flow);outline-offset:3px}
+@media(max-width:600px){
+  .mf427-otd-section{margin:14px 0 17px;gap:9px}
+  .mf427-otd-heading-icon{flex-basis:35px;width:35px;height:35px}
+  .mf427-otd-heading p{font-size:10px}
+  .mf427-otd-empty{padding:15px}
+}

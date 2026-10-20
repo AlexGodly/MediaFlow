@@ -1,0 +1,66 @@
+/* MediaFlow v420 — definitive cover fallback composition (after v419). */
+.mf420-cover-stage{position:relative!important;isolation:isolate;display:grid!important;place-items:center!important;box-sizing:border-box!important;min-width:0!important;min-height:0!important;padding:0!important;overflow:hidden!important;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-raised,var(--panel));container-type:inline-size;aspect-ratio:2/3;cursor:pointer}
+.mf420-cover-stage>.mf420-cover-image{position:absolute!important;inset:0!important;display:block;width:100%!important;height:100%!important;object-fit:cover!important;z-index:2}
+.mf420-cover-stage>.mf420-cover-image[hidden]{display:none!important}
+.mf420-cover-fallback{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;background:color-mix(in srgb,var(--mf420-cat-color,var(--flow)) 12%,var(--panel-raised,var(--panel)));color:var(--mf420-cat-color,var(--flow));pointer-events:none}
+.mf420-cover-glyph{width:42cqw!important;height:42cqw!important;max-width:70%!important;max-height:50%!important;display:grid!important;place-items:center!important;line-height:1!important;font-size:36cqw!important;aspect-ratio:1;overflow:visible;box-sizing:border-box}
+.mf420-cover-glyph>.v144-cat-icon-emoji{display:inline-grid!important;place-items:center!important;font-size:1em!important;line-height:1!important;width:100%!important;height:100%!important;max-width:100%!important;text-align:center!important;white-space:nowrap}
+.mf420-cover-glyph>.v144-cat-icon-img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
+.mf420-cover-glyph>.v144-cat-icon-img[style*="display: none"]{display:none!important}
+.mf420-cover-glyph>.v144-cat-icon-img[style*="display:none"]{display:none!important}
+/* v144 custom icon failure can reveal the neighboring emoji without placing a
+   hidden icon on top of it; inline display:none still wins without important. */
+.mf420-cover-glyph>.v144-cat-icon-emoji[style*="display:none"]{display:none!important}
+/* The outer tile must OWN the poster size. v418's 100%-wide placeholder had
+ * used the card width (or zero) instead of the cover slider, leaving an empty
+ * surface behind a tiny category badge in the top-left. */
+#view-root .v181-cover-tile>.mf420-library-poster{
+  width:calc(118px * var(--v177-library-scale,1))!important;
+  height:calc(167px * var(--v177-library-scale,1))!important;
+  max-width:100%!important;max-height:none!important;
+  margin-inline:auto!important;flex:none!important;
+}
+#view-root .library-cover-thumb.mf420-library-thumb{display:grid!important;place-items:center!important;flex:none!important;max-width:100%!important}
+#view-root .item-row .mf420-library-thumb{position:relative!important}
+#view-root .mf274-collection-detail .mf418-title-cover.mf420-collection-cover{display:grid!important;place-items:stretch!important;grid-template: minmax(0,1fr)/minmax(0,1fr)!important;padding:0!important;overflow:hidden!important;width:100%!important;height:auto!important;aspect-ratio:2/3!important;box-sizing:border-box!important}
+#view-root .mf274-collection-detail .mf420-collection-stage{display:grid!important;place-items:center!important;grid-area:1/1!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;aspect-ratio:auto!important;border:0!important;border-radius:inherit!important}
+#view-root .mf274-collection-detail .mf418-poster-tile .mf420-collection-stage{height:100%!important;width:100%!important}
+#view-root .mf274-collection-detail .mf420-collection-cover .mf420-cover-image{object-fit:cover!important}
+/* On missing-cover posters, the centered fallback IS the category icon;
+ * suppress the duplicate top-left category decoration, not statuses/ratings. */
+#view-root .v181-cover-tile:has(.mf420-library-poster.mf420-cover-missing)>.v254-cover-overlay-frame>.v254-cover-category,
+#view-root .item-row:has(.mf420-cover-stage.mf420-cover-missing)>.v254-cover-overlay-frame>.v254-cover-category{display:none!important}
+/* Native membership select — a 42px full-height control with separately
+ * positioned label and reserved arrow gutter. No text overlap at 320px. */
+.log-form .mf383-logging-body .v224-log-tools>.mf406-membership{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;min-width:0!important;max-width:100%!important;overflow:visible!important}
+.log-form .mf383-logging-body .v224-log-tools>.mf406-membership>span{display:block!important;position:static!important;height:auto!important;line-height:1.35!important;white-space:normal!important;transform:none!important;text-align:left!important;overflow:visible!important}
+.log-form .mf383-logging-body .v224-log-tools>.mf406-membership>select{display:block!important;appearance:auto!important;position:static!important;height:42px!important;min-height:42px!important;line-height:normal!important;padding:8px 12px!important;width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow:visible!important;text-indent:0!important;text-align:left!important;font:inherit!important;font-size:13px!important;white-space:nowrap!important;letter-spacing:normal!important}
+/* Desktop menu: allow actual page-height scrolling; reserve all progression
+ * widgets instead of shrinking or hiding the footer below the viewport. */
+@media (min-width:1001px){
+  body.v260-redesign .sidebar{box-sizing:border-box!important;height:100vh!important;height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-gutter:stable;align-content:start}
+  body.v260-redesign .sidebar>.brand,body.v260-redesign .sidebar>.nav,body.v260-redesign .sidebar>.sidebar-foot{flex-shrink:0!important;min-height:max-content}
+  body.v260-redesign .sidebar>.sidebar-foot{margin-top:auto!important;padding-bottom:max(12px,env(safe-area-inset-bottom))!important}
+  body.v260-redesign .sidebar .sidebar-resizer{right:0!important;height:100%!important}
+  body.v260-redesign .sidebar:focus-within{scroll-behavior:smooth}
+}
+/* Dashboard activity: distinct metric cards, themed progress, readable zero
+ * states, stable number widths and useful time/streak visual hierarchy. */
+.today-strip.mf420-activity-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);align-items:stretch}
+.today-strip .stat-box.mf420-activity-card{position:relative;min-width:0;overflow:hidden;box-sizing:border-box;border-radius:18px;padding:clamp(14px,1.5vw,22px);background:linear-gradient(145deg,color-mix(in srgb,var(--flow) 5%,var(--panel-raised)),var(--panel));border:1px solid var(--border-soft);box-shadow:0 8px 26px rgba(0,0,0,.045);display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s,box-shadow .2s}
+.today-strip .mf420-activity-card:hover{border-color:color-mix(in srgb,var(--flow) 36%,var(--border-soft));transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.09)}
+.mf420-activity-card .mf420-stat-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0}
+.mf420-activity-card .mf420-stat-icon{width:39px;height:39px;display:grid;place-items:center;flex:none;color:var(--flow);border-radius:11px;border:1px solid color-mix(in srgb,var(--flow) 25%,var(--border-soft));background:color-mix(in srgb,var(--flow) 10%,var(--panel-raised))}
+.mf420-activity-card .mf420-stat-icon svg{width:21px;height:21px;stroke:currentColor}
+.mf420-activity-card .mf420-stat-percent{display:inline-flex;border:1px solid var(--border-soft);background:var(--panel-2);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;color:var(--text-dim);font-variant-numeric:tabular-nums;flex:none}
+.mf420-activity-card .mf420-stat-numbers{display:flex;align-items:baseline;gap:7px;min-width:0;flex-wrap:wrap;font-variant-numeric:tabular-nums;line-height:1.12}
+.mf420-activity-card .mf420-stat-numbers strong{font-size:clamp(25px,2.5vw,37px);color:var(--text);font-family:var(--font-display);font-weight:850}
+.mf420-activity-card .mf420-stat-numbers span{font-size:clamp(12px,1vw,15px);color:var(--text-dim);font-weight:650}
+.mf420-activity-card .mf420-stat-label{font-size:13px;color:var(--text);font-weight:800}
+.mf420-activity-card .mf420-stat-detail{font-size:11px;color:var(--text-dim);margin-top:auto;line-height:1.4}
+.mf420-activity-card .mf420-stat-track{height:8px;width:100%;border-radius:99px;overflow:hidden;box-sizing:border-box;background:color-mix(in srgb,var(--text) 9%,var(--panel-2));border:1px solid var(--border-soft)}
+.mf420-activity-card .mf420-stat-track>span{display:block;height:100%;max-width:100%;border-radius:inherit;background:linear-gradient(90deg,var(--flow),color-mix(in srgb,var(--flow) 65%,white));transition:width .25s}
+.mf420-activity-card.mf420-streak-card .mf420-stat-icon{color:#e98638;background:color-mix(in srgb,#e98638 11%,var(--panel-raised));border-color:color-mix(in srgb,#e98638 25%,var(--border-soft))}
+@media(max-width:1100px){.today-strip.mf420-activity-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.today-strip.mf420-activity-cards>.mf420-streak-card{grid-column:1/-1}}
+@media(max-width:620px){.today-strip.mf420-activity-cards{grid-template-columns:minmax(0,1fr)}.today-strip.mf420-activity-cards>.mf420-streak-card{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.today-strip .mf420-activity-card,.mf420-activity-card .mf420-stat-track>span{transition:none!important}.today-strip .mf420-activity-card:hover{transform:none!important}}
