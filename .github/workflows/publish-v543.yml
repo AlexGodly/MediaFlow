@@ -1,0 +1,89 @@
+name: Build archive and release MediaFlow v543
+# v543 verifies exact reward forecasting with live post-submit XP audit.
+# Regression suite includes later runtime-extension ordering.
+# Covers live season drafts and cancellation safety.
+# Validates v537 projection plus the v543 confirmation presentation.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v543-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 543
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v543.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
+          node tests/test-v541-logging-xp-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          grep -q 'mediaflow-v543.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v543-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 543
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/543
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/543/; fi
+          done
+          test -f legacy/v/543/assets/js/mediaflow-v543.bundle.js
+          test -f legacy/v/543/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v543.bundle.js legacy/v/543
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v543' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v543_Stable.zip HEAD:legacy/v/543
+          sha256sum MediaFlow_v543_Stable.zip > MediaFlow_v543_Stable.sha256
+          if ! gh release view 543 >/dev/null 2>&1; then
+            gh release create 543 MediaFlow_v543_Stable.zip MediaFlow_v543_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v543 Stable' --notes 'v543 Stable: Repair the Logging XP Award Preview disappearing behind the v382 temporary-unavailable placeholder. Keep v542 full forecast as the primary read-only source. If legacy repeat, completion, or saved recommendation metadata makes supplementary forecast calculation fail, isolate the error and render the verified core Consumption / Rotation / System Respect forecast with an explicit partial indicator rather than blanking the card or falsely claiming +0 XP. Final-runtime renderer repairs both Advanced and Quick Logging HTML and live updates, preserves expanded details, and exposes local diagnostics without personal data. Add regression coverage for a 15-unit 3h30 draft, legacy renderer fallback, partial reward recovery and unmodified full forecast. No Supabase changes, no historical XP recalculation or awards on preview. Archive v543 and release verified ZIP and SHA256; deploy GitHub Pages.'
+          fi
