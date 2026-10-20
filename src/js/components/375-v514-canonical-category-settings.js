@@ -73,11 +73,16 @@ MediaFlowRuntime.registerPageRenderer('settings',function(){
 // Make the configured balance-scope switch functional WITHOUT changing the
 // consumption/time totals, XP, or scheduler. It controls only the additional
 // Today/Overall health-summary counts; the category rows remain visual.
-const mf514OriginalBalanceMarkup=v264BalanceMarkup;
-v264BalanceMarkup=function(){
-  const existing=String(mf514OriginalBalanceMarkup.apply(this,arguments)||'');
-  return existing+mf508HealthSummaryHtml(mf508VisibleCategories('todayBalance'));
-};
+// v545: the old v264 balance renderer is optional in modular builds.
+// An unconditional reference here aborted initialization of every extension
+// after v514, including the unified XP preview and award verification.
+if(typeof v264BalanceMarkup==='function'){
+  const mf514OriginalBalanceMarkup=v264BalanceMarkup;
+  v264BalanceMarkup=function(){
+    const existing=String(mf514OriginalBalanceMarkup.apply(this,arguments)||'');
+    return existing+mf508HealthSummaryHtml(mf508VisibleCategories('todayBalance'));
+  };
+}
 window.MediaFlowV514=Object.freeze({
   version:514,
   settingsSections:MF514_SETTINGS_SECTIONS.map(x=>x.id),
