@@ -1,0 +1,80 @@
+name: Build archive and release MediaFlow v538
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v538.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v538-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 538
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v538.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          grep -q 'mediaflow-v538.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v538-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 538
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/538
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/538/; fi
+          done
+          test -f legacy/v/538/assets/js/mediaflow-v538.bundle.js
+          test -f legacy/v/538/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v538.bundle.js legacy/v/538
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v538' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v538_Stable.zip HEAD:legacy/v/538
+          sha256sum MediaFlow_v538_Stable.zip > MediaFlow_v538_Stable.sha256
+          if ! gh release view 538 >/dev/null 2>&1; then
+            gh release create 538 MediaFlow_v538_Stable.zip MediaFlow_v538_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v538 Stable' --notes 'v538 Stable: Fix the XP preview on mobile and desktop still displaying the old v382 four-field Base/Rotation/Streak/Days card even when MediaFlow reported v537 up to date. Route the original shared XP renderer directly through the v537 unified XP reward calculation; enforce unified markup at the end of renderLogForm and during live DOM refresh. Preserve expanded details when changing drafts and use an honest error notice instead of silently showing obsolete XP values. New regression tests simulate the original stale-card failure on initial Logging render and subsequent live refresh, plus existing v537 projection/actual award parity and cloud/PWA regressions. Includes full legacy/v/538 archive, ZIP, SHA256 and GitHub Pages deployment. No Supabase schema changes or historical XP recalculation.'
+          fi
