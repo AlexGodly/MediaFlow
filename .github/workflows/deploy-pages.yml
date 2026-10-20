@@ -58,6 +58,7 @@ jobs:
           node tests/test-v534-category-class-delete-dialog.cjs
           node tests/test-v535-cloud-reliability.cjs
           node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
