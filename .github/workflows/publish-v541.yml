@@ -1,0 +1,86 @@
+name: Build archive and release MediaFlow v541
+# v541 verifies resilient unified XP rendering and manual itemized runtime.
+# Covers live season drafts and cancellation safety.
+# Validates v537 projection plus the v541 confirmation presentation.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v541.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v541-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 541
+          python3 scripts/build.py
+          node --check assets/js/mediaflow-v541.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
+          node tests/test-v541-logging-xp-recovery.cjs
+          grep -q 'mediaflow-v541.bundle.js' index.html
+          grep -q 'mediaflow-pwa-v541-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 541
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/541
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/541/; fi
+          done
+          test -f legacy/v/541/assets/js/mediaflow-v541.bundle.js
+          test -f legacy/v/541/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v541.bundle.js legacy/v/541
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v541' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v541_Stable.zip HEAD:legacy/v/541
+          sha256sum MediaFlow_v541_Stable.zip > MediaFlow_v541_Stable.sha256
+          if ! gh release view 541 >/dev/null 2>&1; then
+            gh release create 541 MediaFlow_v541_Stable.zip MediaFlow_v541_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v541 Stable' --notes 'v541 Stable: Fix the broken XP preview shown in Advanced Logging despite valid consumed units and runtime. Remove eager calls to legacy consumption-only XP estimation that could throw before the new unified card is rendered, and ensure legacy UI refresh failures cannot suppress the read-only unified calculation. Respect projection failures are now isolated: valid consumption and Rotation XP remain visible as an explicitly labeled partial estimate rather than a blank card or a falsely complete total. Advanced Logging projections use the true per-unit count and user-customized total runtime, as the canonical submission does, without mutating draft units, History, XP or cloud data. New integration regressions simulate broken legacy estimators, bad recommended-title data, 15 consumed sessions and 10 hours manual total runtime. Existing full v514-v540 cloud, PWA, logging and XP tests remain mandatory. Includes complete legacy/v/541 archive, stable ZIP/SHA256 and GitHub Pages deployment. No Supabase schema changes.'
+          fi
