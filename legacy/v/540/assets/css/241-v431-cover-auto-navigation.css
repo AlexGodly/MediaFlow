@@ -1,0 +1,7 @@
+/* v431: strip every generated/decorative action glyph from the actual
+   Level/Streak control, including first paint, rerenders, narrow docks and
+   enhancer-inserted wrappers. Keep badges and keyboard focus untouched. */
+html body .mf421-dock .mf421-dock-progress > :not(.mf422-level-badge):not(.mf422-streak-badge){display:none!important}
+html body .mf421-dock .mf421-dock-progress :is(.v225-btn-icon,svg,i,[data-lucide],.lucide,.iconify){display:none!important}
+html body .mf421-dock .mf421-dock-progress::before,
+html body .mf421-dock .mf421-dock-progress::after{content:none!important;display:none!important}
