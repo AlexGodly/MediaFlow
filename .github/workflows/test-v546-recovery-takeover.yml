@@ -14,6 +14,7 @@ on:
       - 'src/js/components/386-v546-recovery-lock-takeover.js'
       - 'assets/css/290-v546-recovery-lock-takeover.css'
       - 'tests/test-v546-recovery-lock-takeover.cjs'
+      - 'tests/test-v544-xp-reward-contract.cjs'
       - '.github/workflows/test-v546-recovery-takeover.yml'
   workflow_dispatch:
 
