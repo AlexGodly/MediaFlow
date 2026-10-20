@@ -68,8 +68,7 @@ function v167RespectConfig(){
 }
 
 // FINAL multiplier logic now reads the user's saved configuration.
-v165RespectMultipliers=function(noSkipStreak,noRerollStreak){
-  const cfg=v167RespectConfig();
+function v167RespectMultipliersFromConfig(cfg,noSkipStreak,noRerollStreak){
   const skip=Math.max(0,Number(noSkipStreak)||0);
   const reroll=Math.max(0,Number(noRerollStreak)||0);
 
@@ -97,6 +96,9 @@ v165RespectMultipliers=function(noSkipStreak,noRerollStreak){
     noReroll,
     combined:v165RoundMultiplier(noSkip*noReroll)
   };
+}
+v165RespectMultipliers=function(noSkipStreak,noRerollStreak){
+  return v167RespectMultipliersFromConfig(v167RespectConfig(),noSkipStreak,noRerollStreak);
 };
 
 // FINAL reward function: same v165 behavior, but future rewards use the
