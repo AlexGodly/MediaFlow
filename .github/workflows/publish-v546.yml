@@ -1,8 +1,7 @@
 name: Build archive and release MediaFlow v546
-# v546 verifies promised XP equals credited XP, with malformed saved-data hardening.
-# Regression suite includes later runtime-extension ordering.
-# Covers live season drafts and cancellation safety.
-# Validates v537 projection plus the v546 confirmation presentation.
+# v546 adds safe recovery handoff, forced takeover and isolated queue checkpoints.
+# Regression suite verifies the latest saved cursor wins over stale tab memory.
+# No Library, History, XP or Supabase schema changes are part of this release.
 on:
   push:
     branches: [main]
