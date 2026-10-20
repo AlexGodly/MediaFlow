@@ -418,7 +418,7 @@ const App = {
 
     updated.unit = getCategory(updated.categoryId).unit;
     const editCat=getCategory(updated.categoryId);
-    const editHealth=categoryStatus(editCat).status;
+    const editHealth=categoryStatus(editCat);
     updated.healthStatus=editHealth;
     updated.xp=calculateConsumptionXP(editCat,updated.actualAmount,updated.minutes,editHealth).xp;
 
