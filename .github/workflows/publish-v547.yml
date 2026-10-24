@@ -17,6 +17,7 @@ on:
       - 'src/js/components/319-v439-metadata-recovery.js'
       - 'src/js/components/322-v442-recovery-hardening.js'
       - 'src/js/components/386-v546-recovery-lock-takeover.js'
+      - 'src/js/components/318-v439-metadata-adapters.js'
       - 'src/js/components/387-v547-external-ratings-intelligence.js'
       - 'assets/css/291-v547-external-ratings-intelligence.css'
       - 'tests/test-v547-external-ratings-intelligence.cjs'
