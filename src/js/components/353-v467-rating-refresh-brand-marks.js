@@ -210,7 +210,8 @@ document.addEventListener('change',event=>{
  if(input?.matches?.('[data-mf437-rating],[data-mf437-scale],[data-mf437-votes]'))
   input.dataset.mf467Dirty='1';
 },true);
-async function mf467RefreshRatings(id){
+async function mf467RefreshRatings(id,options={}){
+ const quiet=options?.quiet===true;
  id=String(id??'');
  const item=mf439Item(id);
  if(!item||!AUTH_USER||!AUTH_READY||S.loading)
@@ -219,16 +220,16 @@ async function mf467RefreshRatings(id){
   MF442.process||mf442CoverLockIsActive()||mf442MetadataLockIsActive()||
   (typeof MF453Quick!=='undefined'&&MF453Quick.current)){
   const reason='Another recovery or ratings refresh is already running.';
-  showToast(reason);return {ok:false,reason};
+  if(!quiet)showToast(reason);return {ok:false,reason};
  }
- if(!navigator.onLine){showToast('Offline. Ratings need provider access.');return {ok:false,reason:'Offline'};}
+ if(!navigator.onLine){if(!quiet)showToast('Offline. Ratings need provider access.');return {ok:false,reason:'Offline'};}
  const providers=mf467RatingProviders(item);
  if(!providers.length){
   const reason='No ready rating metadata providers. Enable/configure them in Provider Management.';
-  showToast(reason);return {ok:false,reason};
+  if(!quiet)showToast(reason);return {ok:false,reason};
  }
- if(!mf442AcquireProcess('metadata')){showToast('A recovery is already active in another tab.');return {ok:false,reason:'Another tab owns recovery'};}
- if(!mf439AcquireLease()){mf442ReleaseProcess('metadata');showToast('Metadata recovery is already active.');return {ok:false,reason:'Another tab owns metadata'};}
+ if(!mf442AcquireProcess('metadata')){if(!quiet)showToast('A recovery is already active in another tab.');return {ok:false,reason:'Another tab owns recovery'};}
+ if(!mf439AcquireLease()){mf442ReleaseProcess('metadata');if(!quiet)showToast('Metadata recovery is already active.');return {ok:false,reason:'Another tab owns metadata'};}
  const account=mf439Account(),signature=mf442TitleSignature(item),epoch=++MF467.sequence;
  const before=structuredClone(item.universalMetadata?.externalRatings||{});
  const oldAccount=MF439.account,controller=new AbortController(),result={ok:false,changed:0};
@@ -280,7 +281,7 @@ async function mf467RefreshRatings(id){
   mf439ReleaseLease();mf442ReleaseProcess('metadata');
   mf467Paint(item);
  }
- showToast(MF467.note);
+ if(!quiet)showToast(MF467.note);
  return result;
 }
 App.mf467RefreshRatings=mf467RefreshRatings;
