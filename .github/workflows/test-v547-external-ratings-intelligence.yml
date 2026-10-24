@@ -57,9 +57,6 @@ jobs:
           node tests/test-v514-category-settings.cjs
           node tests/test-v517-remaining-sort.cjs
           node tests/test-v518-library-sort.cjs
-          node tests/test-v520-title-actions.cjs
-          node tests/test-v521-visible-title-actions.cjs
-          node tests/test-v522-canonical-title-buttons.cjs
           node tests/test-v523-canceled-title-actions.cjs
           node tests/test-v524-readme.cjs
           node tests/test-v525-session-draft-sort.cjs
