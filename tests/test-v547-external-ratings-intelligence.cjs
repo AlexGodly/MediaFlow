@@ -20,6 +20,7 @@ assert(adapterSource.includes("const known=String(ids.kitsu||'').trim()")&&adapt
 assert(moduleSource.includes('App.mf467RefreshRatings(id,{quiet:true})'),'automatic refresh must reuse verified rating-only refresh');
 assert(moduleSource.includes('mf547Signature(item)')&&moduleSource.includes('mf547Enqueue(item.id,true)'),'external-ID edits must queue an immediate refresh');
 assert(moduleSource.includes('mf547MissingRating(item)'),'missing ratings must be backfilled');
+assert(moduleSource.includes('no enabled, ready rating provider can query it'),'missing provider configuration must be reported instead of silently skipping an ID');
 assert(moduleSource.includes('lastAttemptAt')&&moduleSource.includes('intervalHours'),'retries and periodic refresh must be rate-limited');
 assert(moduleSource.includes('function mf547StateKey(id)')&&moduleSource.includes('localStorage.setItem(key,JSON.stringify(next))'),'per-title retry state must persist without a capped global map');
 assert(moduleSource.includes('mf547Store(id,{signature,providerSignature,lastAttemptAt:now,status:\'checking\'})'),'attempt state must be persisted before requests');
