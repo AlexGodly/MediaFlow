@@ -7,6 +7,7 @@ const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const moduleSource=read('src/js/components/387-v547-external-ratings-intelligence.js');
 const ratingSource=read('src/js/components/353-v467-rating-refresh-brand-marks.js');
+const adapterSource=read('src/js/components/318-v439-metadata-adapters.js');
 const runtime=JSON.parse(read('src/js/runtime-order.json'));
 const index=read('index.html');
 const workflow=read('.github/workflows/publish-v547.yml');
@@ -15,6 +16,7 @@ assert(index.includes('assets/css/291-v547-external-ratings-intelligence.css'),'
 assert(index.includes('mediaflow-v547.bundle.js'),'HTML must load the v547 bundle');
 assert(moduleSource.includes("imdb:{ratings:['imdb'],providers:['omdb']}"),'IMDb ID must prioritize an IMDb-compatible source');
 assert(moduleSource.includes("mal:{ratings:['mal'],providers:['jikan','malofficial']}"),'MAL ID must prioritize Jikan/MAL sources');
+assert(adapterSource.includes("const known=String(ids.kitsu||'').trim()")&&adapterSource.includes("encodeURIComponent(known)"),'Kitsu ID must use a direct record endpoint rather than a title-name search');
 assert(moduleSource.includes('App.mf467RefreshRatings(id,{quiet:true})'),'automatic refresh must reuse verified rating-only refresh');
 assert(moduleSource.includes('mf547Signature(item)')&&moduleSource.includes('mf547Enqueue(item.id,true)'),'external-ID edits must queue an immediate refresh');
 assert(moduleSource.includes('mf547MissingRating(item)'),'missing ratings must be backfilled');
