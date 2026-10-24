@@ -19,14 +19,34 @@ const MF547_ID_RATING_MAP=Object.freeze({
  tvmaze:{ratings:['tvmaze'],providers:['tvmaze']},
  vndb:{ratings:['vndb'],providers:['vndb']},
  watchmode:{ratings:['watchmode'],providers:['watchmode']},
- animeschedule:{ratings:['anilist','mal'],providers:['anilist','jikan','malofficial']},
- metron_series:{ratings:['metacritic'],providers:['metron']},
- episodate:{ratings:['tvmaze'],providers:['episodate','tvmaze']}
 });
+const mf547BaseRatingProviders=mf467RatingProviders;
+function mf547ProvidersForIds(item){
+ const ids=mf547SupportedIds(item);
+ if(!Object.keys(ids).length)return mf547BaseRatingProviders(item);
+ const prefs=mf439Preferences(),enabled=new Set(prefs.enabled);
+ const readyRaw=typeof mf453Ready==='function'?mf453Ready('metadata',item):prefs.enabled;
+ const ready=new Set(Array.isArray(readyRaw)?readyRaw:[]);
+ const providers=[];
+ for(const key of Object.keys(ids)){
+  for(const provider of MF547_ID_RATING_MAP[key]?.providers||[]){
+   if(enabled.has(provider)&&ready.has(provider)&&MF467_RATING_PROVIDERS.has(provider)&&!providers.includes(provider))
+    providers.push(provider);
+  }
+ }
+ return providers.slice(0,4);
+}
+// When a supported ID is present, only query providers that can use that ID.
+// Never fall back to an unrelated provider's title-name search for an ID-bound title.
+mf467RatingProviders=function(item){
+ const ids=mf547SupportedIds(item);
+ return Object.keys(ids).length?mf547ProvidersForIds(item):mf547BaseRatingProviders(item);
+};
+const MF547_LIMITS={perHour:10,perDay:50,minGapMs:30000,retryHours:24,scanChunk:500};
 const MF547={
  working:false,lastRunAt:0,timer:null,runTimer:null,forced:new Map(),
- seen:new Map(),lastNote:'Waiting for eligible titles',processed:0,updated:0,
- currentId:'',sweepRequested:false
+ seen:new Map(),stateCache:new Map(),usageCache:null,scanCursor:0,libraryRef:null,
+ lastNote:'Waiting for eligible titles',processed:0,updated:0,currentId:'',sweepRequested:false
 };
 function mf547Prefs(){
  const raw=S.settings?.v547ExternalRatingRefresh||{};
@@ -36,9 +56,21 @@ function mf547Prefs(){
   refreshExisting:raw.refreshExisting===true
  };
 }
-function mf547State(){
- const raw=S.settings?.v547ExternalRatingRefreshState;
- return raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
+function mf547StateKey(id){
+ return 'mediaflow-v547-rating-refresh:'+encodeURIComponent(String(AUTH_USER?.id||'local'))+':'+encodeURIComponent(String(id??''));
+}
+function mf547State(id){
+ const key=mf547StateKey(id);
+ try{
+  const raw=localStorage.getItem(key);
+  if(raw){
+   const parsed=JSON.parse(raw);
+   if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)){
+    MF547.stateCache.set(key,parsed);return parsed;
+   }
+  }
+ }catch(_){}
+ return MF547.stateCache.get(key)||{};
 }
 function mf547SupportedIds(item){
  const ids=item?.externalIds&&typeof item.externalIds==='object'?item.externalIds:{};
@@ -69,14 +101,38 @@ function mf547CanRefresh(item){
   mf467RatingProviders(item).length);
 }
 function mf547Store(id,patch){
- const key=String(id),next={...mf547State()},old=next[key]&&typeof next[key]==='object'?next[key]:{};
- next[key]={...old,...patch};
- const entries=Object.entries(next).sort((a,b)=>
-  Math.max(Number(b[1]?.lastAttemptAt)||0,Number(b[1]?.lastSuccessAt)||0)-
-  Math.max(Number(a[1]?.lastAttemptAt)||0,Number(a[1]?.lastSuccessAt)||0)).slice(0,1200);
- S.settings=S.settings||{};
- S.settings.v547ExternalRatingRefreshState=Object.fromEntries(entries);
- Promise.resolve(persistSettings()).catch(e=>console.warn('v547 rating refresh state sync failed',e));
+ const key=mf547StateKey(id),next={...mf547State(id),...patch};
+ MF547.stateCache.set(key,next);
+ try{localStorage.setItem(key,JSON.stringify(next));}
+ catch(e){console.warn('v547 rating refresh checkpoint is memory-only',e);}
+ return next;
+}
+function mf547UsageKey(){
+ return 'mediaflow-v547-rating-usage:'+encodeURIComponent(String(AUTH_USER?.id||'local'));
+}
+function mf547Usage(){
+ const now=new Date(),hourKey=now.toISOString().slice(0,13),dayKey=now.toISOString().slice(0,10);
+ let saved=null;
+ try{saved=JSON.parse(localStorage.getItem(mf547UsageKey())||'null');}catch(_){}
+ if(!saved||typeof saved!=='object')saved=MF547.usageCache||{};
+ const next={
+  hourKey,dayKey,
+  hourCount:saved.hourKey===hourKey?Math.max(0,Number(saved.hourCount)||0):0,
+  dayCount:saved.dayKey===dayKey?Math.max(0,Number(saved.dayCount)||0):0
+ };
+ MF547.usageCache=next;
+ return next;
+}
+function mf547WithinLimits(){
+ const usage=mf547Usage();
+ return usage.hourCount<MF547_LIMITS.perHour&&usage.dayCount<MF547_LIMITS.perDay;
+}
+function mf547RecordStart(priority){
+ if(priority)return;
+ const usage=mf547Usage();
+ usage.hourCount++;usage.dayCount++;
+ MF547.usageCache=usage;
+ try{localStorage.setItem(mf547UsageKey(),JSON.stringify(usage));}catch(_){}
 }
 function mf547SetStatus(note){
  MF547.lastNote=String(note||'').slice(0,220);
@@ -95,14 +151,18 @@ function mf547Enqueue(id,force=false){
  MF547.runTimer=setTimeout(()=>{MF547.runTimer=null;void mf547RunNext();},900);
 }
 function mf547Eligible(item,now=Date.now()){
- if(!mf547CanRefresh(item))return false;
+ if(!item||item.id==null||!Object.keys(mf547SupportedIds(item)).length)return false;
  const prefs=mf547Prefs(),id=String(item.id),signature=mf547Signature(item);
- const state=mf547State()[id]||{},oldSig=String(state.signature||'');
- const changed=Boolean(oldSig&&oldSig!==signature);
+ const providerSignature=mf547ProvidersForIds(item).join(',');
+ const state=mf547State(id);
+ if(!state.signature)return true;
+ const changed=state.signature!==signature||
+  String(state.providerSignature||'')!==providerSignature;
  if(changed)return true;
+ if(!providerSignature)return false;
  if(mf547MissingRating(item)){
   const last=Number(state.lastAttemptAt)||0;
-  return !last||now-last>=6*60*60*1000;
+  return !last||now-last>=MF547_LIMITS.retryHours*60*60*1000;
  }
  if(!prefs.refreshExisting&&!Number(state.lastSuccessAt))return false;
  const last=Number(state.lastSuccessAt)||Number(state.lastAttemptAt)||0;
@@ -115,45 +175,71 @@ function mf547ChooseNext(){
   const item=mf439Item(id);
   if(!item||mf547Signature(item)!==entry.signature){MF547.forced.delete(id);continue;}
   if(mf547CanRefresh(item))return {item,force:true};
-  MF547.forced.delete(id);
+  // Keep a changed-ID request queued while a matching provider is unavailable.
+  if(!Object.keys(mf547SupportedIds(item)).length)MF547.forced.delete(id);
  }
- if(!Array.isArray(S.library))return null;
- for(const item of S.library){
+ const library=S.library;
+ if(!Array.isArray(library)||!library.length)return null;
+ if(MF547.libraryRef!==library){MF547.libraryRef=library;MF547.scanCursor=0;}
+ const total=library.length,limit=Math.min(MF547_LIMITS.scanChunk,total);
+ for(let scanned=0;scanned<limit;scanned++){
+  const index=MF547.scanCursor%total,item=library[index];
+  MF547.scanCursor=(index+1)%total;
   if(!mf547Eligible(item,now))continue;
-  const id=String(item.id);
-  const seen=MF547.seen.get(id);
-  const signature=mf547Signature(item);
-  if(!seen){
-   MF547.seen.set(id,{signature,at:now});
-   const saved=mf547State()[id];
-   // Existing populated ratings are not mass-refreshed on first launch unless
-   // the user opted in. Missing scores still get a bounded first attempt.
-   if(!mf547MissingRating(item)&&!saved&&!mf547Prefs().refreshExisting)continue;
+  const id=String(item.id),signature=mf547Signature(item);
+  const providerSignature=mf547ProvidersForIds(item).join(',');
+  const saved=mf547State(id),missing=mf547MissingRating(item);
+  if(!mf547CanRefresh(item)){
+   if(!saved.signature||saved.signature!==signature||
+      String(saved.providerSignature||'')!==providerSignature)
+    mf547Store(id,{signature,providerSignature,status:'waiting-provider'});
+   continue;
   }
+  const changed=Boolean(saved.signature&&(saved.signature!==signature||
+   String(saved.providerSignature||'')!==providerSignature));
+  // Record a lightweight local baseline for already-populated titles on first
+  // scan, so later ID/provider changes are detected without mass-refreshing them.
+  if(!saved.signature&&!missing&&!mf547Prefs().refreshExisting){
+   mf547Store(id,{signature,providerSignature,baselineAt:now,status:'baseline'});
+   continue;
+  }
+  if(!missing&&!mf547Prefs().refreshExisting&&!changed)continue;
   return {item,force:false};
  }
  return null;
 }
-async function mf547RunNext(){
+async function mf547RunNext(pickedOverride=null){
  if(MF547.working||!mf547Prefs().enabled||!AUTH_USER||!AUTH_READY||S.loading||!navigator.onLine)return;
- if(Date.now()-MF547.lastRunAt<30000)return;
+ if(Date.now()-MF547.lastRunAt<MF547_LIMITS.minGapMs)return;
  if(MF467?.working||MF466?.working||MF439?.working||MF424?.running||MF442?.process||
    (typeof mf442CoverLockIsActive==='function'&&mf442CoverLockIsActive())||
    (typeof mf442MetadataLockIsActive==='function'&&mf442MetadataLockIsActive()))return;
- const picked=mf547ChooseNext();
- if(!picked){mf547SetStatus(MF547.forced.size?'Waiting for another metadata task to finish.':'No missing or outdated ID-based ratings due.');return;}
- const item=picked.item,id=String(item.id),signature=mf547Signature(item),now=Date.now();
+ if(!MF547.forced.size&&!mf547WithinLimits()){
+  mf547SetStatus('Automatic refresh is paused at the safety limit of '+MF547_LIMITS.perHour+' titles/hour and '+MF547_LIMITS.perDay+' titles/day. New ID changes remain queued.');
+  return;
+ }
+ const picked=pickedOverride||mf547ChooseNext();
+ if(!picked){mf547SetStatus(MF547.forced.size?'Waiting for an enabled ID-compatible provider or another metadata task.':'No missing or outdated ID-based ratings due.');return;}
+ const item=picked.item,id=String(item.id),signature=mf547Signature(item);
+ const providerSignature=mf547ProvidersForIds(item).join(','),now=Date.now();
+ if(!mf547CanRefresh(item)){
+  if(picked.force)MF547.forced.set(id,{signature,queuedAt:Date.now(),force:true});
+  mf547SetStatus('No enabled, ready provider can query this title’s saved External IDs.');
+  return;
+ }
  MF547.working=true;MF547.currentId=id;MF547.lastRunAt=now;MF547.processed++;
- if(picked.force)MF547.forced.delete(id);
- mf547Store(id,{signature,lastAttemptAt:now});
+ if(picked.force)MF547.forced.delete(id);else mf547RecordStart(false);
+ mf547Store(id,{signature,providerSignature,lastAttemptAt:now,status:'checking'});
  mf547SetStatus('Refreshing ratings for '+String(item.title||'selected title').slice(0,90)+'…');
  try{
   const result=await App.mf467RefreshRatings(id,{quiet:true});
   const current=mf439Item(id);
-  const state=mf547State()[id]||{};
   if(current===item&&mf547Signature(current)===signature){
    const ok=Boolean(result?.ok&&MF467?.success===true);
-   mf547Store(id,{signature,lastAttemptAt:Date.now(),...(ok?{lastSuccessAt:Date.now()}:{})});
+   const finishedAt=Date.now();
+   mf547Store(id,{signature,providerSignature,lastAttemptAt:finishedAt,
+    ...(ok?{lastSuccessAt:finishedAt,status:result.changed?'updated':'current'}:
+      {status:'no-match'})});
    if(ok){
     MF547.updated+=Number(result.changed)||0;
     mf547SetStatus(result.changed?String(result.changed)+' external rating(s) updated for '+String(item.title||'title')+'.':'Ratings checked; no changes needed.');
@@ -162,7 +248,7 @@ async function mf547RunNext(){
    }
   }else mf547SetStatus('Title or external IDs changed during refresh. The result was not applied to a different title.');
  }catch(e){
-  mf547Store(id,{signature,lastAttemptAt:Date.now()});
+  mf547Store(id,{signature,providerSignature,lastAttemptAt:Date.now(),status:'error'});
   mf547SetStatus(String(e?.message||e||'Rating refresh failed'));
   console.warn('v547 automatic external-rating refresh failed',e);
  }finally{
@@ -176,8 +262,14 @@ async function mf547RunNext(){
 function mf547Check(){
  if(!mf547Prefs().enabled||MF547.working||!AUTH_USER||!AUTH_READY||S.loading||!navigator.onLine)return;
  if(MF547.forced.size){void mf547RunNext();return;}
+ if(Date.now()-MF547.lastRunAt<MF547_LIMITS.minGapMs)return;
+ if(!mf547WithinLimits()){
+  mf547SetStatus('Automatic refresh is paused at the safety limit of '+MF547_LIMITS.perHour+' titles/hour and '+MF547_LIMITS.perDay+' titles/day.');
+  return;
+ }
  const picked=mf547ChooseNext();
- if(picked){void mf547RunNext();return;}
+ if(picked){void mf547RunNext(picked);return;}
+ if(MF547.scanCursor===0)mf547SetStatus('No missing or outdated ID-based ratings due.');
 }
 function mf547SettingsHtml(){
  const p=mf547Prefs();
@@ -252,7 +344,7 @@ App.saveLibraryModal=function(id){
  },350);
  return result;
 };
-MF547.timer=setInterval(mf547Check,15000);
+MF547.timer=setInterval(mf547Check,2500);
 window.addEventListener('online',()=>setTimeout(mf547Check,1200));
 setTimeout(mf547Check,4500);
 window.MediaFlowV547=Object.freeze({
