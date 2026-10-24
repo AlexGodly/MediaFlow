@@ -186,13 +186,13 @@ function mf547SettingsHtml(){
   '<div><strong>Automatic external-rating intelligence</strong>'+
   '<small>Use saved external IDs to retrieve verified ratings across your Library.</small></div></div>'+
   '<label class="mf547-option"><input type="checkbox" '+(p.enabled?'checked ':'')+
-  'onchange="App.mf547Set(\\'enabled\\',this.checked)"><span>Automatically retrieve ratings when IDs change and backfill missing ratings</span></label>'+
-  '<label class="mf547-interval"><span>Refresh interval for previously retrieved ratings</span><select onchange="App.mf547Set(\\'intervalHours\\',Number(this.value))">'+
+  'onchange="App.mf547Set(\'enabled\',this.checked)"><span>Automatically retrieve ratings when IDs change and backfill missing ratings</span></label>'+
+  '<label class="mf547-interval"><span>Refresh interval for previously retrieved ratings</span><select onchange="App.mf547Set(\'intervalHours\',Number(this.value))">'+
   MF547_INTERVALS.map(h=>'<option value="'+h+'" '+(p.intervalHours===h?'selected':'')+'>'+
    (h===24?'Every 24 hours':h===72?'Every 3 days':h===168?'Every 7 days':'Every 30 days')+'</option>').join('')+
   '</select></label>'+
   '<label class="mf547-option"><input type="checkbox" '+(p.refreshExisting?'checked ':'')+
-  'onchange="App.mf547Set(\\'refreshExisting\\',this.checked)"><span>Periodically refresh existing ratings too</span></label>'+
+  'onchange="App.mf547Set(\'refreshExisting\',this.checked)"><span>Periodically refresh existing ratings too</span></label>'+
   '<div class="mf547-status" data-mf547-status role="status" aria-live="polite">'+escapeHtml(MF547.lastNote)+'</div>'+
   '<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf547ScanNow()">'+mf425Icon('refresh',15)+' Scan Library for missing ratings</button>'+
   '<p class="mf547-note">Runs gradually while MediaFlow is open and online. A saved IMDb ID can use a configured IMDb-compatible source; MAL IDs can use Jikan or the official MAL gateway. Provider access, credentials, and rate limits still apply. Existing personal ratings and manually locked external ratings are never overwritten.</p>'+
