@@ -123,13 +123,17 @@ async function mf439LookupPublic(provider,item,signal){
   }
  }
  if(provider==='kitsu'){
-  const url=mf439Url('https://kitsu.io/api/edge/anime',{ 'filter[text]':title,'page[limit]':6});
+  const known=String(ids.kitsu||'').trim();
+  const kind=String(item?.universalMetadata?.mediaType||'').toLowerCase()==='manga'?'manga':'anime';
+  const url=known?'https://kitsu.io/api/edge/'+kind+'/'+encodeURIComponent(known):
+   mf439Url('https://kitsu.io/api/edge/'+kind,{'filter[text]':title,'page[limit]':6});
   const d=await mf439Fetch(provider,url,null,signal);
-  for(const v of (d.data||[]).slice(0,6)){const a=v.attributes||{},y=mf439Year(a.startDate);
+  const values=Array.isArray(d?.data)?d.data:(d?.data?[d.data]:[]);
+  for(const v of values.slice(0,6)){const a=v.attributes||{},y=mf439Year(a.startDate);
    pull(mf439Entry(provider,v.id,a.canonicalTitle||a.titles?.en||a.titles?.en_jp,{
     year:y,aliases:mf439StringList(Object.values(a.titles||{})),
     externalIds:{kitsu:String(v.id)},legacy:{synopsis:mf439Plain(a.synopsis),year:y,mediaFormat:a.subtype||''},
-    fields:{originalTitle:a.titles?.ja_jp||'',episodeCount:a.episodeCount||null},
+    fields:{originalTitle:a.titles?.ja_jp||'',episodeCount:a.episodeCount||null,chapterCount:a.chapterCount||null,volumeCount:a.volumeCount||null},
     ratings:{kitsu:mf439Score(a.averageRating,100,a.userCount)}}));
   }
  }
