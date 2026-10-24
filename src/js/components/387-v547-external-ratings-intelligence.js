@@ -104,9 +104,9 @@ function mf547Eligible(item,now=Date.now()){
   const last=Number(state.lastAttemptAt)||0;
   return !last||now-last>=6*60*60*1000;
  }
- if(!prefs.refreshExisting)return false;
+ if(!prefs.refreshExisting&&!Number(state.lastSuccessAt))return false;
  const last=Number(state.lastSuccessAt)||Number(state.lastAttemptAt)||0;
- if(!last)return true;
+ if(!last)return prefs.refreshExisting;
  return now-last>=prefs.intervalHours*60*60*1000;
 }
 function mf547ChooseNext(){
