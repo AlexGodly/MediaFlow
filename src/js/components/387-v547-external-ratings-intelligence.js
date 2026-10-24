@@ -18,7 +18,6 @@ const MF547_ID_RATING_MAP=Object.freeze({
  simkl:{ratings:['simkl'],providers:['simkl']},
  tvmaze:{ratings:['tvmaze'],providers:['tvmaze']},
  vndb:{ratings:['vndb'],providers:['vndb']},
- watchmode:{ratings:['watchmode'],providers:['watchmode']},
 });
 const mf547BaseRatingProviders=mf467RatingProviders;
 function mf547ProvidersForIds(item){
