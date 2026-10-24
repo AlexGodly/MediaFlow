@@ -142,7 +142,12 @@ function mf547Enqueue(id,force=false){
  id=String(id??'');
  if(!id||!mf547Prefs().enabled)return;
  const item=mf439Item(id);
- if(!mf547CanRefresh(item))return;
+ if(!item)return;
+ if(!mf547CanRefresh(item)){
+  const labels=Object.keys(mf547SupportedIds(item)).map(k=>({imdb:'IMDb',mal:'MAL',anilist:'AniList',tmdb:'TMDB',tmdb_tv:'TMDB TV'}[k]||k.toUpperCase()));
+  if(labels.length)mf547SetStatus('Saved '+labels.join(', ')+' ID, but no enabled, ready rating provider can query it. Configure a compatible provider in Provider Management.');
+  return;
+ }
  const signature=mf547Signature(item);
  MF547.forced.set(id,{signature,queuedAt:Date.now(),force:!!force});
  mf547SetStatus(force?'External IDs changed. Rating refresh queued.':'Rating refresh queued.');
