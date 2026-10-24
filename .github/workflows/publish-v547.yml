@@ -1,0 +1,119 @@
+name: Build archive and release MediaFlow v547
+# v547 adds ID-first automatic external rating retrieval and bounded missing-rating backfill.
+# Regression suite verifies the latest saved cursor wins over stale tab memory.
+# No Library, History, XP or Supabase schema changes are part of this release.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'tests/test-v544-xp-reward-contract.cjs'
+      - 'tests/test-v545-startup-and-xp-preview.cjs'
+      - 'tests/test-v546-recovery-lock-takeover.cjs'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/js/components/309-v424-advanced-cover-recovery.js'
+      - 'src/js/components/319-v439-metadata-recovery.js'
+      - 'src/js/components/322-v442-recovery-hardening.js'
+      - 'src/js/components/386-v546-recovery-lock-takeover.js'
+      - 'src/js/components/318-v439-metadata-adapters.js'
+      - 'src/js/components/387-v547-external-ratings-intelligence.js'
+      - 'assets/css/291-v547-external-ratings-intelligence.css'
+      - 'tests/test-v547-external-ratings-intelligence.cjs'
+      - 'assets/css/290-v546-recovery-lock-takeover.css'
+      - 'src/js/components/375-v514-canonical-category-settings.js'
+      - 'src/js/components/381-v537-unified-xp-reward-preview.js'
+      - 'src/js/components/201-v267-sync-order-balance-dynamic-cover-reliability.js'
+      - 'src/js/components/383-v542-award-parity.js'
+      - 'src/js/components/267-v369-itemized-logging.js'
+      - 'src/js/features/rewatch/038-v121-rewatch-reread-xp.js'
+      - '.github/workflows/publish-v547.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v547-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and check cloud safety
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 547
+          python3 scripts/build.py
+          python3 scripts/pwa.py
+          node --check assets/js/mediaflow-v547.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
+          node tests/test-v541-logging-xp-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v545-startup-and-xp-preview.cjs
+          node tests/test-v546-recovery-lock-takeover.cjs
+          node tests/test-v547-external-ratings-intelligence.cjs
+          grep -q 'mediaflow-v547.bundle.js' index.html
+          grep -q 'assets/css/290-v546-recovery-lock-takeover.css' index.html
+          grep -q 'components/386-v546-recovery-lock-takeover.js' src/js/runtime-order.json
+          grep -q 'components/387-v547-external-ratings-intelligence.js' src/js/runtime-order.json
+          grep -q 'assets/css/291-v547-external-ratings-intelligence.css' index.html
+          grep -q 'mediaflow-pwa-v547-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 547
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/547
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/547/; fi
+          done
+          test -f legacy/v/547/assets/js/mediaflow-v547.bundle.js
+          test -f legacy/v/547/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v547.bundle.js legacy/v/547
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v547' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v547_Stable.zip HEAD:legacy/v/547
+          sha256sum MediaFlow_v547_Stable.zip > MediaFlow_v547_Stable.sha256
+          if ! gh release view 547 >/dev/null 2>&1; then
+            gh release create 547 MediaFlow_v547_Stable.zip MediaFlow_v547_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v547 Stable' --notes 'v547 Stable: Add ID-first External Ratings Intelligence with automatic rating refresh and missing-rating backfill across saved Library titles. External Ratings Intelligence uses saved IMDb, MAL, AniList, Kitsu, TMDB, Trakt, SIMKL, TVmaze, VNDB and other supported IDs to prioritize compatible providers. Saving changed IDs queues an automatic refresh; missing ratings across existing Library titles are backfilled gradually while MediaFlow is open and online. Refresh reuses the existing verified provider adapters and rating-only merge path, respects provider configuration, auth readiness, rate limits and recovery locks, preserves existing ratings on failure, and never overwrites manually locked ratings or personal ratings. Periodic refresh of already-populated ratings is opt-in; newly retrieved ratings are eligible for scheduled refresh. Regression tests cover ID-provider mapping, automatic enqueue, bounded retry state, auth/online guards, lock coordination and preservation of existing Library/History/XP data. No Supabase schema change.'
+          fi
