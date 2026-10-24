@@ -88,7 +88,7 @@ jobs:
           node tests/test-v547-external-ratings-intelligence.cjs
           grep -q 'mediaflow-v547.bundle.js' index.html
           grep -q 'assets/css/290-v546-recovery-lock-takeover.css' index.html
-          grep -q 'components/386-v547-recovery-lock-takeover.js' src/js/runtime-order.json
+          grep -q 'components/386-v546-recovery-lock-takeover.js' src/js/runtime-order.json
           grep -q 'components/387-v547-external-ratings-intelligence.js' src/js/runtime-order.json
           grep -q 'assets/css/291-v547-external-ratings-intelligence.css' index.html
           grep -q 'mediaflow-pwa-v547-shell' sw.js
