@@ -41,7 +41,7 @@ mf467RatingProviders=function(item){
  const ids=mf547SupportedIds(item);
  return Object.keys(ids).length?mf547ProvidersForIds(item):mf547BaseRatingProviders(item);
 };
-const MF547_LIMITS={perHour:10,perDay:50,minGapMs:30000,retryHours:24,scanChunk:500};
+const MF547_LIMITS={perHour:10,perDay:50,minGapMs:30000,retryHours:24,scanChunk:200};
 const MF547={
  working:false,lastRunAt:0,timer:null,runTimer:null,forced:new Map(),
  seen:new Map(),stateCache:new Map(),usageCache:null,scanCursor:0,libraryRef:null,
