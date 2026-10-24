@@ -1,5 +1,5 @@
 name: Build archive and release MediaFlow v547
-# v547 adds safe recovery handoff, forced takeover and isolated queue checkpoints.
+# v547 adds ID-first automatic external rating retrieval and bounded missing-rating backfill.
 # Regression suite verifies the latest saved cursor wins over stale tab memory.
 # No Library, History, XP or Supabase schema changes are part of this release.
 on:
@@ -9,18 +9,18 @@ on:
       - 'VERSION'
       - 'tests/test-v544-xp-reward-contract.cjs'
       - 'tests/test-v545-startup-and-xp-preview.cjs'
-      - 'tests/test-v547-recovery-lock-takeover.cjs'
+      - 'tests/test-v546-recovery-lock-takeover.cjs'
       - 'version.json'
       - 'index.html'
       - 'src/js/runtime-order.json'
       - 'src/js/components/309-v424-advanced-cover-recovery.js'
       - 'src/js/components/319-v439-metadata-recovery.js'
       - 'src/js/components/322-v442-recovery-hardening.js'
-      - 'src/js/components/386-v547-recovery-lock-takeover.js'
+      - 'src/js/components/386-v546-recovery-lock-takeover.js'
       - 'src/js/components/387-v547-external-ratings-intelligence.js'
       - 'assets/css/291-v547-external-ratings-intelligence.css'
       - 'tests/test-v547-external-ratings-intelligence.cjs'
-      - 'assets/css/290-v547-recovery-lock-takeover.css'
+      - 'assets/css/290-v546-recovery-lock-takeover.css'
       - 'src/js/components/375-v514-canonical-category-settings.js'
       - 'src/js/components/381-v537-unified-xp-reward-preview.js'
       - 'src/js/components/201-v267-sync-order-balance-dynamic-cover-reliability.js'
@@ -84,10 +84,10 @@ jobs:
           node tests/test-v543-xp-preview-recovery.cjs
           node tests/test-v544-xp-reward-contract.cjs
           node tests/test-v545-startup-and-xp-preview.cjs
-          node tests/test-v547-recovery-lock-takeover.cjs
+          node tests/test-v546-recovery-lock-takeover.cjs
           node tests/test-v547-external-ratings-intelligence.cjs
           grep -q 'mediaflow-v547.bundle.js' index.html
-          grep -q 'assets/css/290-v547-recovery-lock-takeover.css' index.html
+          grep -q 'assets/css/290-v546-recovery-lock-takeover.css' index.html
           grep -q 'components/386-v547-recovery-lock-takeover.js' src/js/runtime-order.json
           grep -q 'components/387-v547-external-ratings-intelligence.js' src/js/runtime-order.json
           grep -q 'assets/css/291-v547-external-ratings-intelligence.css' index.html
