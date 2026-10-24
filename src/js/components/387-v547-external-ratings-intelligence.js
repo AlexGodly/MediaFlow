@@ -150,6 +150,13 @@ function mf547Enqueue(id,force=false){
  if(MF547.runTimer)clearTimeout(MF547.runTimer);
  MF547.runTimer=setTimeout(()=>{MF547.runTimer=null;void mf547RunNext();},900);
 }
+function mf547HasRunnablePriority(){
+ for(const [id,entry] of MF547.forced){
+  const item=mf439Item(id);
+  if(item&&mf547Signature(item)===entry.signature&&mf547CanRefresh(item))return true;
+ }
+ return false;
+}
 function mf547Eligible(item,now=Date.now()){
  if(!item||item.id==null||!Object.keys(mf547SupportedIds(item)).length)return false;
  const prefs=mf547Prefs(),id=String(item.id),signature=mf547Signature(item);
@@ -214,7 +221,7 @@ async function mf547RunNext(pickedOverride=null){
  if(MF467?.working||MF466?.working||MF439?.working||MF424?.running||MF442?.process||
    (typeof mf442CoverLockIsActive==='function'&&mf442CoverLockIsActive())||
    (typeof mf442MetadataLockIsActive==='function'&&mf442MetadataLockIsActive()))return;
- if(!MF547.forced.size&&!mf547WithinLimits()){
+ if(!mf547HasRunnablePriority()&&!mf547WithinLimits()){
   mf547SetStatus('Automatic refresh is paused at the safety limit of '+MF547_LIMITS.perHour+' titles/hour and '+MF547_LIMITS.perDay+' titles/day. New ID changes remain queued.');
   return;
  }
@@ -263,6 +270,12 @@ function mf547Check(){
  if(!mf547Prefs().enabled||MF547.working||!AUTH_USER||!AUTH_READY||S.loading||!navigator.onLine)return;
  if(MF547.forced.size){void mf547RunNext();return;}
  if(Date.now()-MF547.lastRunAt<MF547_LIMITS.minGapMs)return;
+ if(MF467?.working||MF466?.working||MF439?.working||MF424?.running||MF442?.process||
+   (typeof mf442CoverLockIsActive==='function'&&mf442CoverLockIsActive())||
+   (typeof mf442MetadataLockIsActive==='function'&&mf442MetadataLockIsActive())){
+  mf547SetStatus('Waiting for the current recovery or metadata task to finish.');
+  return;
+ }
  if(!mf547WithinLimits()){
   mf547SetStatus('Automatic refresh is paused at the safety limit of '+MF547_LIMITS.perHour+' titles/hour and '+MF547_LIMITS.perDay+' titles/day.');
   return;
@@ -287,7 +300,7 @@ function mf547SettingsHtml(){
   'onchange="App.mf547Set(\'refreshExisting\',this.checked)"><span>Periodically refresh existing ratings too</span></label>'+
   '<div class="mf547-status" data-mf547-status role="status" aria-live="polite">'+escapeHtml(MF547.lastNote)+'</div>'+
   '<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf547ScanNow()">'+mf425Icon('refresh',15)+' Scan Library for missing ratings</button>'+
-  '<p class="mf547-note">Runs gradually while MediaFlow is open and online. A saved IMDb ID can use a configured IMDb-compatible source; MAL IDs can use Jikan or the official MAL gateway. Provider access, credentials, and rate limits still apply. Existing personal ratings and manually locked external ratings are never overwritten.</p>'+
+  '<p class="mf547-note">Runs gradually while MediaFlow is open and online, with a safety cap of 10 background titles per hour and 50 per day. Newly changed IDs are prioritized. A saved IMDb ID can use a configured IMDb-compatible source; MAL IDs can use Jikan or the official MAL gateway. Provider access, credentials, and rate limits still apply. Existing personal ratings and manually locked external ratings are never overwritten.</p>'+
   '</section>';
 }
 const mf547SettingsBase=V219_PAGE_RENDERERS.get('settings');
@@ -333,6 +346,7 @@ App.saveLibraryModal=function(id){
  const beforeSignature=before?mf547Signature(before):'';
  const beforeIds=before?JSON.stringify(before.externalIds||{}):'';
  const result=mf547SaveModalBase.apply(this,arguments);
+ if(result===false)return result;
  setTimeout(()=>{
   let item=id!=null?mf439Item(id):null;
   if(!item)item=(S.library||[])[(S.library||[]).length-1]||null;
