@@ -9,6 +9,7 @@ on:
       - 'index.html'
       - 'src/js/runtime-order.json'
       - 'src/js/components/353-v467-rating-refresh-brand-marks.js'
+      - 'src/js/components/318-v439-metadata-adapters.js'
       - 'src/js/components/387-v547-external-ratings-intelligence.js'
       - 'assets/css/291-v547-external-ratings-intelligence.css'
       - 'tests/test-v547-external-ratings-intelligence.cjs'
