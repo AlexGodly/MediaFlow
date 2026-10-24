@@ -27,7 +27,7 @@ assert(moduleSource.includes('AUTH_READY')&&moduleSource.includes('navigator.onL
 assert(moduleSource.includes('mf442MetadataLockIsActive'),'refresh must respect existing recovery locks');
 assert(moduleSource.includes('refreshExisting:false'),'large-library periodic refresh must be opt-in');
 assert(moduleSource.includes('MF547_LIMITS={perHour:10,perDay:50,minGapMs:30000'),'background refresh must enforce per-hour, per-day and inter-request limits');
-assert(moduleSource.includes('scanChunk:500')&&moduleSource.includes('const total=library.length,limit=Math.min(MF547_LIMITS.scanChunk,total)'),'large libraries must be scanned in bounded chunks');
+assert(moduleSource.includes('scanChunk:200')&&moduleSource.includes('const total=library.length,limit=Math.min(MF547_LIMITS.scanChunk,total)'),'large libraries must be scanned in bounded chunks');
 assert(moduleSource.includes('mf547ProvidersForIds(item)')&&moduleSource.includes('return Object.keys(ids).length?mf547ProvidersForIds(item):mf547BaseRatingProviders(item);'),'titles with supported IDs must use ID-compatible providers only');
 assert(ratingSource.includes('async function mf467RefreshRatings(id,options={})')&&ratingSource.includes('if(!quiet)showToast(MF467.note);'),'automatic refresh must not spam user-facing toast notifications');
 assert(!moduleSource.includes('v547ExternalRatingRefreshState'),'per-title checkpoints must not grow a capped global map that can starve later titles');
