@@ -106,7 +106,7 @@ function mf547Eligible(item,now=Date.now()){
  }
  if(!prefs.refreshExisting)return false;
  const last=Number(state.lastSuccessAt)||Number(state.lastAttemptAt)||0;
- if(!last)return false;
+ if(!last)return true;
  return now-last>=prefs.intervalHours*60*60*1000;
 }
 function mf547ChooseNext(){
@@ -128,7 +128,7 @@ function mf547ChooseNext(){
    const saved=mf547State()[id];
    // Existing populated ratings are not mass-refreshed on first launch unless
    // the user opted in. Missing scores still get a bounded first attempt.
-   if(!mf547MissingRating(item)&&!saved)continue;
+   if(!mf547MissingRating(item)&&!saved&&!mf547Prefs().refreshExisting)continue;
   }
   return {item,force:false};
  }
