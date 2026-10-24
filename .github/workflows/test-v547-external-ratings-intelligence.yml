@@ -1,0 +1,84 @@
+name: Test MediaFlow v547 External Ratings Intelligence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/js/components/353-v467-rating-refresh-brand-marks.js'
+      - 'src/js/components/387-v547-external-ratings-intelligence.js'
+      - 'assets/css/291-v547-external-ratings-intelligence.css'
+      - 'tests/test-v547-external-ratings-intelligence.cjs'
+      - '.github/workflows/test-v547-external-ratings-intelligence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build production bundle and PWA shell
+        run: python3 scripts/build.py
+      - name: Check JavaScript and PWA upgrade behavior
+        run: |
+          set -euo pipefail
+          node --check assets/js/mediaflow-v547.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          grep -q 'mediaflow-v547.bundle.js' index.html
+          grep -q 'assets/css/291-v547-external-ratings-intelligence.css' index.html
+          grep -q 'components/387-v547-external-ratings-intelligence.js' src/js/runtime-order.json
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 547
+      - name: Run full stable regression suite
+        run: |
+          set -euo pipefail
+          node tests/test-v514-category-settings.cjs
+          node tests/test-v517-remaining-sort.cjs
+          node tests/test-v518-library-sort.cjs
+          node tests/test-v523-canceled-title-actions.cjs
+          node tests/test-v524-readme.cjs
+          node tests/test-v525-session-draft-sort.cjs
+          node tests/test-v526-universal-sort-labels.cjs
+          node tests/test-v527-universal-media.cjs
+          node tests/test-v528-xp-observer.cjs
+          node tests/test-v529-category-icons.cjs
+          node tests/test-v530-category-types.cjs
+          node tests/test-v531-status-labels.cjs
+          node tests/test-v532-media-type-history-stats.cjs
+          node tests/test-v533-history-stats-pages.cjs
+          node tests/test-v534-category-class-delete-dialog.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          node tests/test-v536-rotation-xp.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v538-xp-renderer-integrity.cjs
+          node tests/test-v539-advanced-logging-themed-confirm.cjs
+          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
+          node tests/test-v541-logging-xp-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v545-startup-and-xp-preview.cjs
+          node tests/test-v546-recovery-lock-takeover.cjs
+          node tests/test-v547-external-ratings-intelligence.cjs
