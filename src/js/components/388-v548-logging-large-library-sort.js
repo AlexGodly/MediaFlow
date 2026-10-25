@@ -8,27 +8,38 @@ const V548_TITLE_COLLATOR=new Intl.Collator(undefined,{numeric:true,sensitivity:
 const V548_PRIORITY_RANK={low:0,medium:1,high:2};
 let V548_SOURCE_LIBRARY=null;
 let V548_SOURCE_LENGTH=-1;
+let V548_CATEGORY_SIGNATURE='';
+let V548_CATEGORY_NAMES=new Map();
 let V548_LOG_INDEX=[];
 let V548_SORTED_INDEXES=new Map();
 let V548_INDEX_BUILDS=0;
 let V548_SORT_BUILDS=0;
 
-function v548ReadSnapshot(item){
-  let category=null;
-  try{
-    if(typeof getCategory==='function')category=getCategory(item?.categoryId);
-  }catch(_){}
-  if(!category){
-    const categories=Array.isArray(S.categories)?S.categories:[];
-    category=categories.find(c=>String(c?.id||'')===String(item?.categoryId||''))||null;
+function v548SyncCategoryNames(){
+  const categories=Array.isArray(S.categories)?S.categories:[];
+  const signature=categories.map(c=>
+    (c?.id==null?'':String(c.id))+'\\u0000'+(c?.name==null?'':String(c.name))
+  ).join('\\u0001');
+  if(signature===V548_CATEGORY_SIGNATURE)return false;
+  V548_CATEGORY_SIGNATURE=signature;
+  const names=new Map();
+  for(const category of categories){
+    if(category?.id==null)continue;
+    names.set(String(category.id),String(category.name||''));
   }
+  V548_CATEGORY_NAMES=names;
+  return true;
+}
+function v548ReadSnapshot(item){
+  const categoryKey=item?.categoryId==null?'':String(item.categoryId);
+  const categoryName=V548_CATEGORY_NAMES.get(categoryKey)||'';
   const tags=Array.isArray(item?.tags)?item.tags.map(value=>String(value??'')).join(' '):'';
   return {
     item,
     id:item?.id,
     titleRaw:item?.title,
     categoryIdRaw:item?.categoryId,
-    categoryName:String(category?.name||''),
+    categoryName,
     statusRaw:item?.status,
     priorityRaw:item?.priority,
     sourceRaw:item?.source,
@@ -69,8 +80,9 @@ function v548BuildEntry(s){
   };
 }
 function v548EnsureLogIndex(){
+  const categoryChanged=v548SyncCategoryNames();
   const library=Array.isArray(S.library)?S.library:[];
-  let changed=library!==V548_SOURCE_LIBRARY||library.length!==V548_SOURCE_LENGTH;
+  let changed=categoryChanged||library!==V548_SOURCE_LIBRARY||library.length!==V548_SOURCE_LENGTH;
   if(!changed){
     let pos=0;
     for(const item of library){

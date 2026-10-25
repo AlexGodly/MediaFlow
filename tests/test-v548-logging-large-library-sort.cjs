@@ -110,7 +110,7 @@ assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount+1,
   'relevant Library edits must invalidate cached sorted indexes and rebuild only the requested sort');
 
 S.categories[0].name='Animation';
-assert.deepEqual(ids(ctx.logTitleCandidates('animation')),['a10','a4','a2','a3'],
+assert.deepEqual(ids(ctx.logTitleCandidates('animation')),['a3','a10','a2','a4'],
   'category renames must refresh the cached search text');
 
 const largeLibrary=Array.from({length:30000},(_,i)=>({
