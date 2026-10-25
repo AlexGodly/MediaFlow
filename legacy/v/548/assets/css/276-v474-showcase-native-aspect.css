@@ -1,0 +1,97 @@
+/* MediaFlow v474 — only Collections browser Showcase cover hovers.
+ * Expand to the image's natural aspect ratio: portrait/square/wide covers
+ * each receive the width needed to reveal the artwork at the row height.
+ * No empty flat-color side bars around properly sized posters. */
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster{
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  transform:none!important;
+  transition:flex-grow 360ms cubic-bezier(.19,.79,.24,1),
+    flex-basis 360ms cubic-bezier(.19,.79,.24,1),
+    box-shadow 280ms ease,filter 280ms ease!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover{
+  /* Override v473's fixed 2.3x flex-grow and its lifted/clipped scaling.
+   * Native CSS custom property is measured from img.naturalWidth/Height. */
+  flex:0 0 var(--mf474-native-width,108px)!important;
+  width:var(--mf474-native-width,108px)!important;
+  min-width:0!important;
+  max-width:100%!important;
+  z-index:15!important;
+  transform:none!important;
+  filter:none!important;
+  box-shadow:0 12px 25px rgba(0,0,0,.51),
+    0 4px 12px rgba(0,0,0,.31),
+    0 0 0 1px color-mix(in srgb,var(--flow) 28%,transparent)!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf473-poster-full{
+  object-fit:contain!important;
+  object-position:center!important;
+  /* At native ratio it covers the entire slot naturally. Should a very wide
+   * image need clamping on a narrow phone, the cropped image behind it fills
+   * the remainder rather than the v473 empty gray sidebars. */
+  background:transparent!important;
+  transition:opacity 270ms cubic-bezier(.17,.7,.22,1)!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover>.mf473-poster-full{
+  opacity:1!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover>.mf473-poster-crop{
+  opacity:.34!important;
+  filter:blur(5px) brightness(.66) saturate(.8)!important;
+  transform:scale(1.04)!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster:not(:hover)>.mf473-poster-crop{
+  filter:none!important;
+  transform:none!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster>.mf473-poster-crop{
+  transition:opacity 270ms ease,filter 270ms ease,transform 270ms ease!important;
+}
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster::after{
+  pointer-events:none!important;
+}
+/* Ensure portrait and landscape posters sit fully inside the existing gallery
+ * height. No lifting the image above the clip boundary. */
+.mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover>.mf473-poster-full{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+@media(pointer:coarse){
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover:not(:active){
+    flex:1 1 0!important;
+    width:0!important;
+    z-index:1!important;
+    transform:none!important;
+  }
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover:not(:active)>.mf473-poster-full{
+    opacity:0!important;
+  }
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:hover:not(:active)>.mf473-poster-crop{
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:active{
+    flex:0 0 var(--mf474-native-width,108px)!important;
+    width:var(--mf474-native-width,108px)!important;
+    transform:none!important;
+    z-index:15!important;
+  }
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:active>.mf473-poster-full{
+    opacity:1!important;
+  }
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster:active>.mf473-poster-crop{
+    opacity:.34!important;
+  }
+}
+/* Works at narrow 320px mobile width without overflow or forcing five posters
+ * offscreen: available frame space is measured with a small peek per neighbor. */
+@media(prefers-reduced-motion:reduce){
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster,
+  .mf274-collections-browser .mf474-showcase-frame .mf474-poster>img{
+    transition:none!important;
+  }
+}
