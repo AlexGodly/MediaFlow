@@ -39,7 +39,7 @@ const ctx={
   V548_TEST_SORT_STATE:{sortBase:'title',sortDir:'asc',categories:[],status:'all',priority:'all'},
   cleanTitle:v=>String(v||'').trim(),getCategory:id=>categories.find(c=>String(c.id)===String(id))||null,
   v53InvalidateLibraryCache(){this.V53_LIB.libraryToken++;},
-  v224NormalizeLogSort(){return this.V548_TEST_SORT_STATE;},v224SortDirection:v=>v,
+  v224NormalizeLogSort(){return ctx.V548_TEST_SORT_STATE;},v224SortDirection:v=>v,
   v224CompareLibraryLike:(a,b)=>String(a.title).localeCompare(String(b.title)),
   v175NormalizeBatchLibraryState(){return batchState;},
   v175BatchLibraryMatches(){return library.slice();},
