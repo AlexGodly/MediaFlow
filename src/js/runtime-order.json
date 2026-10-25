@@ -240,5 +240,6 @@
   "components/384-v543-xp-preview-recovery.js",
   "components/385-v544-reward-contract.js",
   "components/386-v546-recovery-lock-takeover.js",
-  "components/387-v547-external-ratings-intelligence.js"
+  "components/387-v547-external-ratings-intelligence.js",
+  "components/388-v548-logging-large-library-sort.js"
 ]
