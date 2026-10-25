@@ -42,6 +42,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
+    if: ${{ github.ref == 'refs/tags/548' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

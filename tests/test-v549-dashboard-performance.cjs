@@ -55,7 +55,7 @@ const ctx={
   V53_LIB:{libraryToken:1},
   todayISO:()=>fixedToday,
   hoursAgo:h=>Date.now()-h*3600000,
-  daysSince:ts=>ts==null?Infinity:Math.max(0,(Date.now()-Number(ts))/86400000),
+  daysSince:ts=>ts==null?Infinity:Math.max(0,(now-Number(ts))/86400000),
   schedulerConsumptionSessions:()=>S.sessions.filter(s=>s&&s.status!=='skipped'&&((Number(s.minutes)||0)>0||(Number(s.actualAmount)||0)>0)),
   v186ScopeCategories:()=>S.categories.filter(c=>c.enabled),
   lastSessionFor:catId=>{
