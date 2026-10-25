@@ -3,6 +3,10 @@ name: Deploy MediaFlow (exclude legacy and beta)
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: ["Build archive and release MediaFlow v550"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +20,10 @@ concurrency:
 
 jobs:
   deploy:
+    # A release workflow can publish its generated commit using GITHUB_TOKEN,
+    # which does not trigger another push workflow. workflow_run explicitly
+    # chains Pages deployment after the v550 release workflow completes.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,8 +41,6 @@ jobs:
             !/beta/
           sparse-checkout-cone-mode: false
 
-      # Build from the exact checked-out commit, not whichever previous version
-      # was last committed. Source-only VERSION bumps used to deploy stale HTML.
       - name: Build and verify the actual deployable version
         run: |
           set -euo pipefail
