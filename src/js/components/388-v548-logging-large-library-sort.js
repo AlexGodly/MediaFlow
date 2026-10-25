@@ -14,6 +14,9 @@ let V548_LOG_INDEX=[];
 let V548_SORTED_INDEXES=new Map();
 let V548_INDEX_BUILDS=0;
 let V548_SORT_BUILDS=0;
+let V548_SOURCE_TOKEN=-1;
+let V548_ENSURE_CALLS=0;
+let V548_VALIDATION_ROWS_SCANNED=0;
 
 function v548SyncCategoryNames(){
   const categories=Array.isArray(S.categories)?S.categories:[];
@@ -80,20 +83,12 @@ function v548BuildEntry(s){
   };
 }
 function v548EnsureLogIndex(){
+  V548_ENSURE_CALLS++;
   const categoryChanged=v548SyncCategoryNames();
   const library=Array.isArray(S.library)?S.library:[];
-  let changed=categoryChanged||library!==V548_SOURCE_LIBRARY||library.length!==V548_SOURCE_LENGTH;
-  if(!changed){
-    let pos=0;
-    for(const item of library){
-      if(!item?.id)continue;
-      const previous=V548_LOG_INDEX[pos];
-      const snapshot=v548ReadSnapshot(item);
-      if(!v548SnapshotMatches(previous,snapshot)){changed=true;break;}
-      pos++;
-    }
-    if(pos!==V548_LOG_INDEX.length)changed=true;
-  }
+  const token=typeof V53_LIB!=='undefined'?Number(V53_LIB.libraryToken)||0:0;
+  const changed=categoryChanged||library!==V548_SOURCE_LIBRARY||
+    library.length!==V548_SOURCE_LENGTH||token!==V548_SOURCE_TOKEN;
   if(changed){
     const next=[];
     for(const item of library){
@@ -102,6 +97,7 @@ function v548EnsureLogIndex(){
     }
     V548_SOURCE_LIBRARY=library;
     V548_SOURCE_LENGTH=library.length;
+    V548_SOURCE_TOKEN=token;
     V548_LOG_INDEX=next;
     V548_SORTED_INDEXES.clear();
     V548_INDEX_BUILDS++;
@@ -161,7 +157,10 @@ window.MediaFlowV548=Object.freeze({
     indexedTitles:V548_LOG_INDEX.length,
     indexBuilds:V548_INDEX_BUILDS,
     sortBuilds:V548_SORT_BUILDS,
-    cachedSorts:V548_SORTED_INDEXES.size
+    cachedSorts:V548_SORTED_INDEXES.size,
+    ensureCalls:V548_ENSURE_CALLS,
+    validationRowsScanned:V548_VALIDATION_ROWS_SCANNED,
+    sourceToken:V548_SOURCE_TOKEN
   })
 });
 MediaFlowRuntime.version=V548_RELEASE;

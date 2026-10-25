@@ -6,36 +6,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'VERSION'
-      - 'tests/test-v544-xp-reward-contract.cjs'
-      - 'tests/test-v545-startup-and-xp-preview.cjs'
-      - 'tests/test-v546-recovery-lock-takeover.cjs'
-      - 'version.json'
-      - 'index.html'
-      - 'src/js/runtime-order.json'
-      - 'src/js/components/390-v550-dashboard-responsiveness.js'
-      - 'src/js/components/309-v424-advanced-cover-recovery.js'
-      - 'src/js/components/319-v439-metadata-recovery.js'
-      - 'src/js/components/322-v442-recovery-hardening.js'
-      - 'src/js/components/386-v546-recovery-lock-takeover.js'
-      - 'src/js/components/318-v439-metadata-adapters.js'
-      - 'src/js/components/387-v547-external-ratings-intelligence.js'
-      - 'src/js/components/388-v548-logging-large-library-sort.js'
-      - 'src/js/core/runtime/149-v224-sort-foundation.js'
-      - 'src/js/features/logging/153-v224-dashboard-logging-sorting.js'
-      - 'tests/test-v548-logging-large-library-sort.cjs'
-      - 'tests/test-v550-dashboard-responsiveness.cjs'
-      - '.github/workflows/test-v548-logging-large-library-sort.yml'
-      - 'assets/css/291-v547-external-ratings-intelligence.css'
-      - 'tests/test-v547-external-ratings-intelligence.cjs'
-      - 'assets/css/290-v546-recovery-lock-takeover.css'
-      - 'src/js/components/375-v514-canonical-category-settings.js'
-      - 'src/js/components/381-v537-unified-xp-reward-preview.js'
-      - 'src/js/components/201-v267-sync-order-balance-dynamic-cover-reliability.js'
-      - 'src/js/components/383-v542-award-parity.js'
-      - 'src/js/components/267-v369-itemized-logging.js'
-      - 'src/js/features/rewatch/038-v121-rewatch-reread-xp.js'
-      - '.github/workflows/publish-v550.yml'
+      - 'legacy/v/550/README.md'
   workflow_dispatch:
 permissions:
   contents: write

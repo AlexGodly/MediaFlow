@@ -38,6 +38,8 @@ const state={sortBase:'title',sortDir:'asc',categories:[],status:'all',priority:
 const ctx={
   S,App:{},window:{},MediaFlowRuntime:{version:0},
   V548_TEST_SORT_STATE:state,
+  V53_LIB:{libraryToken:0},
+  v53InvalidateLibraryCache:()=>{ctx.V53_LIB.libraryToken++;},
   cleanTitle:value=>String(value||'').trim(),
   escapeHtml:value=>String(value??''),
   getCategory:id=>S.categories.find(c=>String(c.id)===String(id))||null,
@@ -95,12 +97,15 @@ ctx.logTitleCandidates('show');
 ctx.logTitleCandidates('anime');
 assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount,
   'typing and changing search queries must reuse the sorted index');
+assert.equal(ctx.window.MediaFlowV548.inspect().validationRowsScanned,0,
+  'searches must not revalidate every Library row on each interaction');
 stateForCache.sortBase='priority';stateForCache.sortDir='desc';
 ctx.logTitleCandidates('');
 assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount,
   'switching to a sort field that is already cached must reuse that index');
 const buildsBeforeMutation=ctx.window.MediaFlowV548.inspect().indexBuilds;
 data[0].title='Aardvark';
+ctx.v53InvalidateLibraryCache();
 ctx.V548_TEST_SORT_STATE=stateForCache;
 assert.deepEqual(ids(ctx.logTitleCandidates('aardvark')),['a10'],
   'title edits must invalidate the search index and become searchable immediately');
@@ -129,4 +134,6 @@ const largeSortCount=ctx.window.MediaFlowV548.inspect().sortBuilds;
 assert.equal(ctx.logTitleCandidates('bulk').length,30000,'broad searches must include all matching titles');
 assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,largeSortCount,
   '30,000-title searches must not re-sort for each query');
+assert.equal(ctx.window.MediaFlowV548.inspect().validationRowsScanned,0,
+  '30,000-title query changes must not rescan the Library to validate the cache');
 console.log('PASS v548: Logging search/filter/sort parity, cache invalidation, natural sorting and 30,000-title index reuse.');

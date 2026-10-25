@@ -243,5 +243,6 @@
   "components/387-v547-external-ratings-intelligence.js",
   "components/388-v548-logging-large-library-sort.js",
   "components/389-v549-dashboard-performance.js",
-  "components/390-v550-dashboard-responsiveness.js"
+  "components/390-v550-dashboard-responsiveness.js",
+  "components/391-v551-app-wide-performance.js"
 ]
