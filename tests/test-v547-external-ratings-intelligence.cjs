@@ -13,7 +13,7 @@ const index=read('index.html');
 const workflow=read('.github/workflows/publish-v547.yml');
 assert(runtime.includes('components/387-v547-external-ratings-intelligence.js'),'v547 module must be in runtime order');
 assert(index.includes('assets/css/291-v547-external-ratings-intelligence.css'),'v547 settings styles must be loaded');
-assert(index.includes('mediaflow-v547.bundle.js'),'HTML must load the v547 bundle');
+assert(index.includes('mediaflow-v'+Number(read('VERSION').trim())+'.bundle.js'),'HTML must load the current release bundle');
 assert(moduleSource.includes("imdb:{ratings:['imdb'],providers:['omdb']}"),'IMDb ID must prioritize an IMDb-compatible source');
 assert(moduleSource.includes("mal:{ratings:['mal'],providers:['jikan','malofficial']}"),'MAL ID must prioritize Jikan/MAL sources');
 assert(adapterSource.includes("const known=String(ids.kitsu||'').trim()")&&adapterSource.includes("encodeURIComponent(known)"),'Kitsu ID must use a direct record endpoint rather than a title-name search');
