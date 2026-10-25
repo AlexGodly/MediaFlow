@@ -1,0 +1,25 @@
+/* v550 Dashboard responsiveness and background-work contract tests. */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const source=read('src/js/components/390-v550-dashboard-responsiveness.js');
+const runtime=JSON.parse(read('src/js/runtime-order.json'));
+const version=Number(read('VERSION').trim());
+const versionJson=JSON.parse(read('version.json'));
+const index=read('index.html');
+assert.equal(version,550,'VERSION must be v550');
+assert.equal(versionJson.build,550,'version.json build must match VERSION');
+assert.equal(versionJson.version,550,'version.json version must match VERSION');
+assert(runtime.includes('components/390-v550-dashboard-responsiveness.js'),'v550 optimizer must be loaded');
+assert(index.includes('mediaflow-v550.bundle.js'),'HTML must point to the v550 bundle');
+assert(source.includes('MF547_LIMITS.scanChunk=24'),'automatic rating scans must use small chunks');
+assert(source.includes('MF550_BACKGROUND_SCAN_INTERVAL=8000'),'background scan cadence must be bounded');
+assert(source.includes('MF550_CHECKPOINT_TTL=60000'),'rating checkpoints must use a short-lived memory cache');
+assert(source.includes('MF547.forced&&MF547.forced.size'),'explicit ID-change refreshes must bypass background throttling');
+assert(source.includes("document.visibilityState==='hidden'"),'background rating scans must pause in hidden tabs');
+assert(!/S\.(?:library|sessions|history)\s*=/.test(source),'performance code must not replace core user data');
+assert(source.includes('MF550_STATS.checkpointCacheHits'),'cache behavior must be observable for diagnostics');
+console.log('v550 Dashboard responsiveness/background-work contract: OK');
