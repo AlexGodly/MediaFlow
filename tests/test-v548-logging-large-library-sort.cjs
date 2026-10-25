@@ -12,11 +12,11 @@ const runtime=JSON.parse(read('src/js/runtime-order.json'));
 const version=Number(read('VERSION').trim());
 const versionJson=JSON.parse(read('version.json'));
 const index=read('index.html');
-assert.equal(version,548,'VERSION must be v548');
-assert.equal(versionJson.build,548,'version.json build must match VERSION');
-assert.equal(versionJson.version,548,'version.json version must match VERSION');
+assert(version>=548,'VERSION must be at least v548');
+assert.equal(versionJson.build,version,'version.json build must match VERSION');
+assert.equal(versionJson.version,version,'version.json version must match VERSION');
 assert(runtime.includes('components/388-v548-logging-large-library-sort.js'),'v548 optimizer must be loaded');
-assert(index.includes('mediaflow-v548.bundle.js'),'HTML must point to the v548 bundle');
+assert(index.includes('mediaflow-v'+version+'.bundle.js'),'HTML must point to the current bundle');
 assert(source.includes("new Intl.Collator(undefined,{numeric:true,sensitivity:'base'})"),
   'sorting must reuse one collator instead of constructing locale options for every comparison');
 assert(source.includes('V548_SORTED_INDEXES')&&source.includes('v548SortedLogIndex'),
