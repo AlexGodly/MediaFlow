@@ -1,0 +1,16 @@
+/* MediaFlow v380 — theme-aware providers, semantic icon controls, reliable toolbars */
+.mf380-provider-panel{display:grid;gap:12px;padding:16px;margin:12px 0;border:1px solid var(--border-soft,var(--border));border-radius:13px;background:var(--panel-raised,var(--surface))}
+.mf380-provider-head{display:grid;gap:4px}.mf380-provider-head b{font-size:14px}.mf380-provider-head small,.mf380-provider-note,.mf380-provider-stats,.mf380-provider-source{font-size:12px;color:var(--text-dim,var(--text-mute));line-height:1.5;margin:0}
+.mf380-provider-select{display:grid;gap:6px;font-size:12px;font-weight:650}.mf380-provider-select select{width:100%;max-width:440px;min-height:40px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
+.mf380-provider-source a{color:var(--flow,var(--accent));text-decoration:underline}
+.mf380-icon{display:inline-grid;place-items:center;width:16px;height:16px;flex:0 0 16px;vertical-align:middle;pointer-events:none}.mf380-icon svg{display:block;width:100%;height:100%;stroke:currentColor}
+.mf380-toggle-list{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.mf380-toggle-list .mf380-icon{width:17px;height:17px;flex-basis:17px}
+.mf379-logging .v370-logging-actions .mf380-toggle-list{margin:0!important}
+.mf379-logging .v370-logging-actions .v370-clear-btn{margin:0!important}
+.mf380-added-panels[hidden]{display:none!important}
+.mf373-dir{display:inline-flex!important;align-items:center;justify-content:center;gap:6px}.mf373-dir .mf380-icon{width:15px;height:15px}
+.mf379-picker .mf378-add-btn[data-mf380-icon=added]{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.mf379-picker .mf378-add-btn[data-mf380-icon=added] .mf380-icon{color:var(--success,#4baf8b)}
+.mf377-report-actions button:has(.mf380-icon),.mf377-report-toolbar button:has(.mf380-icon),.mf377-jikan-report-actions button:has(.mf380-icon){display:inline-flex;align-items:center;justify-content:center;gap:6px}
+@media(max-width:640px){.mf380-provider-panel{padding:12px}.mf379-logging .v370-logging-actions{gap:8px;justify-content:flex-start;flex-wrap:wrap}.mf380-toggle-list,.mf379-logging .v370-logging-actions .v370-clear-btn{max-width:100%}}
