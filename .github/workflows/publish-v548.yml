@@ -121,6 +121,6 @@ jobs:
           set -euo pipefail
           git archive --format=zip --output=MediaFlow_v548_Stable.zip HEAD:legacy/v/548
           sha256sum MediaFlow_v548_Stable.zip > MediaFlow_v548_Stable.sha256
-          if ! gh release view 547 >/dev/null 2>&1; then
+          if ! gh release view 548 >/dev/null 2>&1; then
             gh release create 548 MediaFlow_v548_Stable.zip MediaFlow_v548_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v548 Stable' --notes 'v548 Stable: Fixes severe responsiveness stalls in Dashboard Logging with large Libraries. Logging now builds a cached search index with precomputed normalized sort keys and a single reusable natural-language collator, then reuses sorted indexes as the user types or changes filters. Search, category/status/priority filtering, ascending/descending sorting and stable tie behavior are preserved. Relevant Library or category-name changes invalidate the cache before results are returned. Regression coverage compares old and optimized search/filter/sort results and exercises 30,000 titles. This is a read-only performance optimization: no Library, progress, History, XP, personal order, collection, cloud data, or Supabase schema changes.'
           fi
