@@ -97,8 +97,8 @@ assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount,
   'typing and changing search queries must reuse the sorted index');
 stateForCache.sortBase='priority';stateForCache.sortDir='desc';
 ctx.logTitleCandidates('');
-assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount+1,
-  'changing sort field/direction should build only that missing index');
+assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount,
+  'switching to a sort field that is already cached must reuse that index');
 const buildsBeforeMutation=ctx.window.MediaFlowV548.inspect().indexBuilds;
 data[0].title='Aardvark';
 ctx.V548_TEST_SORT_STATE=stateForCache;
@@ -106,11 +106,11 @@ assert.deepEqual(ids(ctx.logTitleCandidates('aardvark')),['a10'],
   'title edits must invalidate the search index and become searchable immediately');
 assert.equal(ctx.window.MediaFlowV548.inspect().indexBuilds,buildsBeforeMutation+1,
   'relevant Library edits must rebuild the cached search index');
-assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount+2,
-  'relevant Library edits must invalidate cached sorted indexes');
+assert.equal(ctx.window.MediaFlowV548.inspect().sortBuilds,sortCount+1,
+  'relevant Library edits must invalidate cached sorted indexes and rebuild only the requested sort');
 
 S.categories[0].name='Animation';
-assert.deepEqual(ids(ctx.logTitleCandidates('animation')),['a10','a2','a3','a4'],
+assert.deepEqual(ids(ctx.logTitleCandidates('animation')),['a10','a4','a2','a3'],
   'category renames must refresh the cached search text');
 
 const largeLibrary=Array.from({length:30000},(_,i)=>({
