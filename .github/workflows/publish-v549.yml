@@ -96,6 +96,7 @@ jobs:
           node tests/test-v546-recovery-lock-takeover.cjs
           node tests/test-v547-external-ratings-intelligence.cjs
           node tests/test-v548-logging-large-library-sort.cjs
+          node tests/test-v549-dashboard-performance.cjs
           grep -q 'mediaflow-v549.bundle.js' index.html
           grep -q 'assets/css/290-v546-recovery-lock-takeover.css' index.html
           grep -q 'components/386-v546-recovery-lock-takeover.js' src/js/runtime-order.json
@@ -126,5 +127,5 @@ jobs:
           git archive --format=zip --output=MediaFlow_v549_Stable.zip HEAD:legacy/v/549
           sha256sum MediaFlow_v549_Stable.zip > MediaFlow_v549_Stable.sha256
           if ! gh release view 549 >/dev/null 2>&1; then
-            gh release create 549 MediaFlow_v549_Stable.zip MediaFlow_v549_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v549 Stable' --notes 'v549 Stable: Fixes severe responsiveness stalls in Dashboard Logging with large Libraries. Logging now builds a cached search index with precomputed normalized sort keys and a single reusable natural-language collator, then reuses sorted indexes as the user types or changes filters. Search, category/status/priority filtering, ascending/descending sorting and stable tie behavior are preserved. Relevant Library or category-name changes invalidate the cache before results are returned. Regression coverage compares old and optimized search/filter/sort results and exercises 30,000 titles. This is a read-only performance optimization: no Library, progress, History, XP, personal order, collection, cloud data, or Supabase schema changes.'
+            gh release create 549 MediaFlow_v549_Stable.zip MediaFlow_v549_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v549 Stable' --notes 'v549 Stable: Removes repeated whole-History scans from Dashboard category health and balance rendering. One render-scoped pass aggregates recent consumption, lifetime category totals, last activity, today amounts, streak days, and scheduler balance windows; Dashboard category rows and suggested-session calculations reuse the snapshot. Valid-date results are parity-tested against legacy calculations, while malformed timestamps fall back to canonical logic. The On This Day Library lookup is reused until Library content changes, and Dashboard Balance avoids an unnecessary detached-DOM parse before mounting. Regression coverage includes 30,000 History records. This is read-only and does not change Library, progress, History, XP awards, collections, personal order, cloud data, or Supabase schema.'
           fi
