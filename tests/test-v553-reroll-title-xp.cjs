@@ -42,6 +42,8 @@ let p=vm.runInContext('mf537ProjectXP()',ctx);
 assert.equal(p.rerollTitleUnits,3);
 assert.equal(p.rerollTitleXP,30);
 assert.equal(p.rerollTitleAwardXP,54);
+assert.equal(p.rerollTitleRotationXP,6);
+assert.equal(p.rerollTitleStreakXP,18);
 assert.equal(p.total,154,'preview total must include unit XP, rotation and day-streak rounding');
 let html=vm.runInContext('mf537XPCardMarkup()',ctx);
 assert(html.includes('Reroll title reward'));
