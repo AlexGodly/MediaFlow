@@ -36,6 +36,14 @@ const ctx={S,App:{},window:{},MediaFlowRuntime:{},Map,Set,Object,Array,String,Nu
   v150ComputeStateMetrics:()=>({totalXP:S.sessions.reduce((n,s)=>n+(Number(s.xp)||0),0)}),
   showToast(){},todayISO:()=> '2026-10-26'
 };
+let nextSession=0;
+ctx.App.submitLog=function(){
+  assert.equal(vm.runInContext('mf537ProjectXP().total',ctx),100,
+    'v544 must see the original projection while it verifies the base submission');
+  S.sessions.push({id:'session-'+(++nextSession),categoryId:'anime',actualAmount:3,status:'logged',xp:100});
+  S.logging=false;
+  return true;
+};
 vm.createContext(ctx);
 vm.runInContext(source,ctx,{filename:'v553-reroll-title-xp.js'});
 let p=vm.runInContext('mf537ProjectXP()',ctx);
@@ -68,13 +76,6 @@ assert.equal(p.total,136);
 // A real submit adds the same projected incremental award once and persists it.
 S.logDraft.v369Interface='quick';
 S.logDraft.entries=[{libraryId:'reroll-a',title:'Reroll A',qty:3}];
-ctx.App.submitLog=function(){
-  assert.equal(vm.runInContext('mf537ProjectXP().total',ctx),100,
-    'v544 must see the original projection while it verifies the base submission');
-  S.sessions.push({id:'session-1',categoryId:'anime',actualAmount:3,status:'logged',xp:100});
-  S.logging=false;
-  return true;
-};
 vm.runInContext('App.submitLog()',ctx);
 assert.equal(S.sessions[0].xp,154);
 assert.equal(S.sessions[0].v553RerollTitleBonusXP,54);
@@ -86,7 +87,6 @@ assert.equal(ctx.window.MediaFlowLastLogXPAudit.rerollTitleXP,54);
 S.logging=true;
 S.currentTask={categoryId:'anime',v180RecommendationHistory:[{libraryId:'initial',title:'Initial'}]};
 S.logDraft={categoryId:'anime',v369Interface:'quick',entries:[{libraryId:'initial',title:'Initial',qty:1}]};
-ctx.App.submitLog=function(){S.sessions.push({id:'session-2',categoryId:'anime',actualAmount:1,status:'logged',xp:10});S.logging=false;return true;};
 vm.runInContext('App.submitLog()',ctx);
 assert.equal(S.sessions[1].xp,10);
 assert.equal(ctx.persistCount,1);
