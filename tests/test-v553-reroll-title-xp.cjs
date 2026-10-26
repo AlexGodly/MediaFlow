@@ -40,7 +40,9 @@ let nextSession=0;
 ctx.App.submitLog=function(){
   assert.equal(vm.runInContext('mf537ProjectXP().total',ctx),100,
     'v544 must see the original projection while it verifies the base submission');
-  S.sessions.push({id:'session-'+(++nextSession),categoryId:'anime',actualAmount:3,status:'logged',xp:100});
+  const reroll=vm.runInContext('mf553RerollUnitRows().units>0',ctx);
+  S.sessions.push({id:'session-'+(++nextSession),categoryId:'anime',
+    actualAmount:reroll?3:1,status:'logged',xp:reroll?100:10});
   S.logging=false;
   return true;
 };
