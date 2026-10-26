@@ -244,6 +244,7 @@
   "components/388-v548-logging-large-library-sort.js",
   "components/389-v549-dashboard-performance.js",
   "components/390-v550-dashboard-responsiveness.js",
-  "components/391-v551-app-wide-performance.js"
-  ,"components/392-v552-collection-delete-confirmation.js"
+  "components/391-v551-app-wide-performance.js",
+  "components/392-v552-collection-delete-confirmation.js",
+  "components/393-v553-reroll-title-xp.js"
 ]

@@ -1,0 +1,78 @@
+name: Build archive and release MediaFlow v553
+# v553 rewards each consumed unit from a rerolled recommendation and shows the same award in XP Preview.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/js/components/393-v553-reroll-title-xp.js'
+      - 'tests/test-v553-reroll-title-xp.cjs'
+      - '.github/workflows/publish-v553.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v553-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and verify
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 553
+          python3 scripts/build.py
+          python3 scripts/pwa.py
+          node --check assets/js/mediaflow-v553.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v553-reroll-title-xp.cjs
+          node tests/test-v552-collection-delete-confirmation.cjs
+          node tests/test-v551-app-wide-performance.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          grep -q 'mediaflow-v553.bundle.js' index.html
+          grep -q 'components/393-v553-reroll-title-xp.js' src/js/runtime-order.json
+          grep -q 'mediaflow-pwa-v553-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 553
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/553
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/553/; fi
+          done
+          test -f legacy/v/553/assets/js/mediaflow-v553.bundle.js
+          test -f legacy/v/553/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v553.bundle.js legacy/v/553
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v553' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v553_Stable.zip HEAD:legacy/v/553
+          sha256sum MediaFlow_v553_Stable.zip > MediaFlow_v553_Stable.sha256
+          if ! gh release view 553 >/dev/null 2>&1; then
+            gh release create 553 MediaFlow_v553_Stable.zip MediaFlow_v553_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v553 Stable' --notes 'v553 Stable: Consuming a title obtained through a reroll earns additional XP for each consumed unit, using the existing per-unit XP settings for that title category. Category rotation and day-streak rounding are included. The unified Logging XP Preview shows reroll units, base per-unit XP, adjustments, and the exact additional total. The original recommendation is not counted as a reroll, itemized logs use their actual unit records, and the award is credited only after a successful submission. No schema or Supabase changes.'
+          fi
