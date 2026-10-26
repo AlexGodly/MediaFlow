@@ -1,0 +1,11 @@
+const fs=require('node:fs');const path=require('node:path');const root=path.resolve(__dirname,'..');
+const source=fs.readFileSync(path.join(root,'src/js/components/392-v552-collection-delete-confirmation.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'assets/css/292-v552-collection-delete-confirmation.css'),'utf8');
+const runtime=JSON.parse(fs.readFileSync(path.join(root,'src/js/runtime-order.json'),'utf8'));
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+for(const token of ['role="alertdialog"','aria-modal="true"','mf552-delete-cancel','mf552-delete-confirm','S.collectionTombstones.push','await saveState()','mf552CloseDeleteDialog()'])if(!source.includes(token))throw Error('Missing delete-dialog contract: '+token);
+if(source.includes('confirm(')||source.includes('window.confirm'))throw Error('Native confirmation remains in the collection deletion override');
+for(const token of ['var(--flow','var(--panel','var(--text','@media(max-width:520px)','prefers-reduced-motion'])if(!css.includes(token))throw Error('Missing theme/responsive styling: '+token);
+if(runtime.at(-1)!=='components/392-v552-collection-delete-confirmation.js')throw Error('v552 module must be last in runtime order');
+if(!index.includes('assets/css/292-v552-collection-delete-confirmation.css'))throw Error('v552 stylesheet is not loaded');
+console.log('v552 collection-delete confirmation contract: OK');
