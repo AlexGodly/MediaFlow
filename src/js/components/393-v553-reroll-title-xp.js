@@ -95,7 +95,7 @@ function mf553EnrichProjection(base){
       mf553SafeNumber(row.respect)+repeat+rawBonus)*multiplier);
     awardDelta+=Math.max(0,after-before);
   }
-  streakXP=awardDelta-rotationXP;
+  streakXP=awardDelta-(reroll.baseXP+rotationXP);
   return {...base,total:mf553SafeNumber(base.total)+awardDelta,
     rerollTitleXP:reroll.baseXP,rerollTitleRotationXP:Math.round(rotationXP),
     rerollTitleStreakXP:Math.round(streakXP),rerollTitleAwardXP:awardDelta,
@@ -166,6 +166,8 @@ App.submitLog=function(){
       target.v553RerollTitleNames=audit.titles;
       try{persistSessions();}
       catch(error){console.error('MediaFlow v553: reroll XP persistence failed',error);}
+      try{if(typeof render==='function')render();}
+      catch(error){console.warn('MediaFlow v553: XP display refresh failed',error);}
       const prior=window.MediaFlowLastLogXPAudit||{};
       window.MediaFlowLastLogXPAudit={...prior,version:MF553_VERSION,
         projected:full?.total??null,actual:Math.max(0,mf553SafeNumber(prior.actual)+delta),
