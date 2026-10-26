@@ -32,7 +32,7 @@ const ctx={S,App:{},window:{},MediaFlowRuntime:{},Map,Set,Object,Array,String,Nu
   v180RespectSlotLimit:()=>1,v369ItemTitle:e=>S.library.find(i=>i.id===e.libraryId)||null,
   mf537ProjectXP:baseProjection,mf537XPCardMarkup:()=>'<section class="mf537-xp-card"><div class="mf537-xp-total"><strong>+100</strong></div><div class="mf537-xp-status"></div><div class="mf537-xp-formula"></div></section>',
   mf537Fmt:n=>Math.round(Number(n)||0).toLocaleString(),escapeHtml:x=>String(x),
-  persistSessions(){this.persistCount=(this.persistCount||0)+1;},persistCount:0,
+  persistSessions(){ctx.persistCount=(ctx.persistCount||0)+1;},persistCount:0,
   v150ComputeStateMetrics:()=>({totalXP:S.sessions.reduce((n,s)=>n+(Number(s.xp)||0),0)}),
   showToast(){},todayISO:()=> '2026-10-26'
 };
