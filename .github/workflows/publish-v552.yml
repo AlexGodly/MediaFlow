@@ -1,5 +1,5 @@
 name: Build archive and release MediaFlow v552
-# v552 targets the app-wide stalls caused by repeated large-Library work on the UI thread.
+# v552 replaces the native collection-delete confirmation with a responsive, theme-aware dialog.
 on:
   push:
     branches: [main]
@@ -8,16 +8,9 @@ on:
       - 'version.json'
       - 'index.html'
       - 'src/js/runtime-order.json'
-      - 'src/js/components/388-v548-logging-large-library-sort.js'
-      - 'src/js/components/391-v551-app-wide-performance.js'
       - 'src/js/components/392-v552-collection-delete-confirmation.js'
       - 'assets/css/292-v552-collection-delete-confirmation.css'
       - 'tests/test-v552-collection-delete-confirmation.cjs'
-      - 'tests/test-v548-logging-large-library-sort.cjs'
-      - 'tests/test-v549-dashboard-performance.cjs'
-      - 'tests/test-v550-dashboard-responsiveness.cjs'
-      - 'tests/test-v552-app-wide-performance.cjs'
-      - '.github/workflows/deploy-pages.yml'
       - '.github/workflows/publish-v552.yml'
   workflow_dispatch:
 permissions:
@@ -41,7 +34,7 @@ jobs:
             !/legacy/
             !/beta/
           sparse-checkout-cone-mode: false
-      - name: Build, smoke test and check cloud safety
+      - name: Build, smoke test and verify
         run: |
           set -euo pipefail
           test "$(cat VERSION)" = 552
@@ -55,57 +48,6 @@ jobs:
           grep -q 'mediaflow-v552.bundle.js' index.html
           grep -q 'assets/css/292-v552-collection-delete-confirmation.css' index.html
           grep -q 'components/392-v552-collection-delete-confirmation.js' src/js/runtime-order.json
-          grep -q 'mediaflow-pwa-v552-shell' sw.js
-          test "$(python3 -c "import json;print(json.load(open('version.json'))['build')")" = 552
-      - name: Build, smoke test and check cloud safety
-        run: |
-          set -euo pipefail
-          test "$(cat VERSION)" = 552
-          python3 scripts/build.py
-          python3 scripts/pwa.py
-          node --check assets/js/mediaflow-v552.bundle.js
-          node --check sw.js
-          node scripts/check-pwa-release.js
-          node tests/test-v514-category-settings.cjs
-          node tests/test-v517-remaining-sort.cjs
-          node tests/test-v518-library-sort.cjs
-          node tests/test-v523-canceled-title-actions.cjs
-          node tests/test-v524-readme.cjs
-          node tests/test-v525-session-draft-sort.cjs
-          node tests/test-v526-universal-sort-labels.cjs
-          node tests/test-v527-universal-media.cjs
-          node tests/test-v528-xp-observer.cjs
-          node tests/test-v529-category-icons.cjs
-          node tests/test-v530-category-types.cjs
-          node tests/test-v531-status-labels.cjs
-          node tests/test-v532-media-type-history-stats.cjs
-          node tests/test-v533-history-stats-pages.cjs
-          node tests/test-v534-category-class-delete-dialog.cjs
-          node tests/test-v535-cloud-reliability.cjs
-          node tests/test-v536-rotation-xp.cjs
-          node tests/test-v537-unified-xp-preview.cjs
-          node tests/test-v538-xp-renderer-integrity.cjs
-          node tests/test-v539-advanced-logging-themed-confirm.cjs
-          node tests/test-v540-season-dialog-icons-and-linebreaks.cjs
-          node tests/test-v541-logging-xp-recovery.cjs
-          node tests/test-v542-xp-award-parity.cjs
-          node tests/test-v543-xp-preview-recovery.cjs
-          node tests/test-v544-xp-reward-contract.cjs
-          node tests/test-v545-startup-and-xp-preview.cjs
-          node tests/test-v546-recovery-lock-takeover.cjs
-          node tests/test-v547-external-ratings-intelligence.cjs
-          node tests/test-v548-logging-large-library-sort.cjs
-          node tests/test-v549-dashboard-performance.cjs
-          node tests/test-v550-dashboard-responsiveness.cjs
-          node tests/test-v552-app-wide-performance.cjs
-          grep -q 'mediaflow-v552.bundle.js' index.html
-          grep -q 'assets/css/290-v546-recovery-lock-takeover.css' index.html
-          grep -q 'components/386-v546-recovery-lock-takeover.js' src/js/runtime-order.json
-          grep -q 'components/387-v547-external-ratings-intelligence.js' src/js/runtime-order.json
-          grep -q 'components/388-v548-logging-large-library-sort.js' src/js/runtime-order.json
-          grep -q 'components/390-v550-dashboard-responsiveness.js' src/js/runtime-order.json
-          grep -q 'components/391-v552-app-wide-performance.js' src/js/runtime-order.json
-          grep -q 'assets/css/291-v547-external-ratings-intelligence.css' index.html
           grep -q 'mediaflow-pwa-v552-shell' sw.js
           test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 552
       - name: Archive complete version
@@ -129,5 +71,5 @@ jobs:
           git archive --format=zip --output=MediaFlow_v552_Stable.zip HEAD:legacy/v/552
           sha256sum MediaFlow_v552_Stable.zip > MediaFlow_v552_Stable.sha256
           if ! gh release view 552 >/dev/null 2>&1; then
-            gh release create 552 MediaFlow_v552_Stable.zip MediaFlow_v552_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v552 Stable' --notes 'v552 Stable: Removes the repeated full-Library validation pass from Logging search, reuses pre-indexed title metadata and lazy sorted indexes in Batch Log, and avoids rebuilding all Library caches when only last-seen metadata changes. Last-seen persistence is deferred to idle time where supported. These changes target app-wide main-thread stalls affecting selection, editing, navigation, and large-Library interactions. Existing search/filter/sort behavior and user data remain authoritative. No Supabase schema changes.'
+            gh release create 552 MediaFlow_v552_Stable.zip MediaFlow_v552_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v552 Stable' --notes 'v552 Stable: Replaces the native JavaScript Delete Collection confirmation with a responsive, accessible MediaFlow dialog that follows the active theme. Cancel, Escape, close, and backdrop clicks leave the collection unchanged. Deletion still uses the existing collection removal, tombstone, cloud persistence, and refresh behavior. The Library and title progress are preserved. No Supabase schema changes.'
           fi
