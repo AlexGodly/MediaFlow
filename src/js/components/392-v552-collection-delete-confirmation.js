@@ -1,4 +1,5 @@
 /* MediaFlow v552 — theme-aware Delete Collection confirmation.
+ * Release validation trigger: custom confirmation replaces native browser confirm.
  * Replaces only the collection deletion confirmation; deletion and tombstone
  * semantics remain identical to v274. No native browser confirmation dialogs.
  */
