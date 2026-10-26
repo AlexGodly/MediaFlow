@@ -13,7 +13,7 @@ const runtime=JSON.parse(read('src/js/runtime-order.json'));
 const version=Number(read('VERSION').trim());
 const versionJson=JSON.parse(read('version.json'));
 const index=read('index.html');
-assert.equal(version,551,'VERSION must be v551');
+assert(version>=551,'VERSION must be v551 or newer');
 assert.equal(versionJson.build,version,'version.json build must match VERSION');
 assert.equal(versionJson.version,version,'version.json version must match VERSION');
 assert(runtime.includes('components/391-v551-app-wide-performance.js'),'v551 performance module must be loaded');
