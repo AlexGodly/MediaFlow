@@ -1,0 +1,78 @@
+name: Build archive and release MediaFlow v554
+# v554 discovers missing external provider IDs across compatible rating sources, supports title/alternate-title matching, and saves only verified provider IDs alongside verified ratings.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/js/components/393-v554-universal-id-discovery.js'
+      - 'tests/test-v554-reroll-title-xp.cjs'
+      - '.github/workflows/publish-v554.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v554-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and verify
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 554
+          python3 scripts/build.py
+          python3 scripts/pwa.py
+          node --check assets/js/mediaflow-v554.bundle.js
+          node --check sw.js
+          node scripts/check-pwa-release.js
+          node tests/test-v554-reroll-title-xp.cjs
+          node tests/test-v552-collection-delete-confirmation.cjs
+          node tests/test-v551-app-wide-performance.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          grep -q 'mediaflow-v554.bundle.js' index.html
+          grep -q 'components/393-v554-reroll-title-xp.js' src/js/runtime-order.json
+          grep -q 'mediaflow-pwa-v554-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 554
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/554
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/554/; fi
+          done
+          test -f legacy/v/554/assets/js/mediaflow-v554.bundle.js
+          test -f legacy/v/554/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v554.bundle.js legacy/v/554
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v554' || true
+          git push origin HEAD:main
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v554_Stable.zip HEAD:legacy/v/554
+          sha256sum MediaFlow_v554_Stable.zip > MediaFlow_v554_Stable.sha256
+          if ! gh release view 554 >/dev/null 2>&1; then
+            gh release create 554 MediaFlow_v554_Stable.zip MediaFlow_v554_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v554 Stable' --notes 'v554 Stable: External ratings refresh now attempts all enabled and ready rating providers instead of narrowing the search to providers matching IDs already saved. Titles without supported IDs remain eligible for title-based discovery. Romanized, English, original and alternate title variants contribute to the title signature, and verified provider IDs are saved through the existing guarded merge while unrelated metadata remains untouched. Existing authentication, provider readiness, metadata locks, request limits and stale-title guards remain in place. No schema or Supabase changes.'
+          fi
