@@ -67,7 +67,17 @@ jobs:
           git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v554.bundle.js legacy/v/554
           git add -u
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v554' || true
-          git push origin HEAD:main
+          pushed=0
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=1
+              break
+            fi
+            sleep 2
+          done
+          test "$pushed" = 1
       - name: Package and publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
