@@ -1,0 +1,24 @@
+/* v554 Universal External ID Discovery contract tests. */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const engine=read('src/js/components/387-v547-external-ratings-intelligence.js');
+const refresh=read('src/js/components/353-v467-rating-refresh-brand-marks.js');
+const index=read('index.html');
+const workflow=read('.github/workflows/publish-v554.yml');
+assert(engine.includes('const MF547_VERSION=554;'),'external ratings engine must identify v554');
+assert(engine.includes('const base=mf547BaseRatingProviders(item);'),'base providers must remain eligible even when IDs are saved');
+assert(engine.includes('const providers=[...base];'),'saved IDs must not restrict the provider set');
+assert(engine.includes('mf467RatingProviders=function(item){return mf547ProvidersForIds(item);}'),'all ready rating providers must be searched');
+assert(engine.includes('if(!Object.keys(ids).length)return providers.length>0;'),'titles without supported IDs must still be eligible');
+assert(engine.includes('titles:mf439TitleVariants(item)'),'title and alternate-title changes must invalidate discovery checkpoints');
+assert(engine.includes('Discover missing provider IDs and retrieve verified ratings'),'settings must explain ID discovery');
+assert(refresh.includes('.sort((a,b)=>b.weight-a.weight||a.index-b.index).map(x=>x.id);'),'provider selection must not arbitrarily stop at four sources');
+assert(refresh.includes('mf466ApplyVerified(item,verified,{ratings:true,metadata:false,ids:true})'),'verified provider IDs must persist without applying unrelated metadata');
+assert(index.includes('mediaflow-v'+Number(read('VERSION').trim())+'.bundle.js'),'HTML must load the generated release bundle');
+assert(workflow.includes('test "$(cat VERSION)" = 554'),'release workflow must guard v554');
+assert(workflow.includes('node tests/test-v554-universal-id-discovery.cjs'),'release workflow must run v554 regression checks');
+console.log('v554 Universal External ID Discovery contract tests passed.');
