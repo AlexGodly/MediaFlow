@@ -193,6 +193,7 @@ async function mf439Discover(item,providers,onProgress=()=>{},signal){
    }catch(e){
     providerFailed=true;
     failures.push({provider,reason:String(e?.message||e).slice(0,180)});
+    break;
    }
   }
   for(const row of providerRows.values())results.push(row);
