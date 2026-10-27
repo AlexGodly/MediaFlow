@@ -35,3 +35,5 @@ if (!html.includes('content="554"') || !html.includes('assets/js/mediaflow-v554.
 html = html.replace('content="554"', 'content="555"').replace('assets/js/mediaflow-v554.bundle.js', 'assets/js/mediaflow-v555.bundle.js');
 fs.writeFileSync(indexPath, html);
 console.log('Generated v555 bundle: alias propagation across providers; removed four-provider auto-rating cap.');
+
+// Trigger validation run after workflow installation.
