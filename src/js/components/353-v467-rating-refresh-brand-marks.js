@@ -82,7 +82,7 @@ function mf467RatingProviders(item){
  return [...new Set(all)].filter(x=>enabled.has(x)&&MF467_RATING_PROVIDERS.has(x))
   .map((id,index)=>({id,index,weight:(keyMap[id]||[id]).some(k=>ids[k])?4:
    Object.entries(saved).some(([token,v])=>token.startsWith('rating.')&&v?.source===id&&v.verified===true)?3:0}))
-  .sort((a,b)=>b.weight-a.weight||a.index-b.index).slice(0,4).map(x=>x.id);
+  .sort((a,b)=>b.weight-a.weight||a.index-b.index).map(x=>x.id);
 }
 
 function mf467IsCurrent(item,id,account,signature){
@@ -255,7 +255,9 @@ async function mf467RefreshRatings(id,options={}){
    MF467.note='No verified rating match was returned.'+errors;
    result.ok=true;result.changed=0;return result;
   }
-  const written=mf466ApplyVerified(item,verified,{ratings:true,metadata:false,ids:false});
+  // Save verified IDs found during title-based provider searches as well as ratings.
+  // Metadata fields remain untouched; uncertain matches are filtered above.
+  const written=mf466ApplyVerified(item,verified,{ratings:true,metadata:false,ids:true});
   result.changed=written.ratings||0;
   if(controller.signal.aborted||epoch!==MF467.sequence||mf439Account()!==account||
     mf439Item(id)!==item)
