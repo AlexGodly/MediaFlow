@@ -85,6 +85,11 @@ function mf547ScoreExists(item,key){
 function mf547MissingRating(item){
  const ids=mf547SupportedIds(item),providers=typeof mf467RatingProviders==='function'?mf467RatingProviders(item):[];
  if(!Object.keys(ids).length)return providers.length>0;
+ // Keep discovery active when any compatible provider's identifier is still missing.
+ for(const [key,map] of Object.entries(MF547_ID_RATING_MAP)){
+  if((key==='tmdb'&&ids.tmdb_tv)||(key==='tmdb_tv'&&ids.tmdb))continue;
+  if(!ids[key]&&map.providers.some(provider=>providers.includes(provider)))return true;
+ }
  for(const [id] of Object.entries(ids)){
   const map=MF547_ID_RATING_MAP[id];
   if(!map||!map.providers.some(p=>providers.includes(p)))continue;
@@ -301,7 +306,7 @@ function mf547SettingsHtml(){
   'onchange="App.mf547Set(\'refreshExisting\',this.checked)"><span>Periodically refresh existing ratings too</span></label>'+
   '<div class="mf547-status" data-mf547-status role="status" aria-live="polite">'+escapeHtml(MF547.lastNote)+'</div>'+
   '<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf547ScanNow()">'+mf425Icon('refresh',15)+' Scan Library for missing ratings</button>'+
-  '<p class="mf547-note">Runs gradually while MediaFlow is open and online, with a safety cap of 10 background titles per hour and 50 per day. Newly changed IDs are prioritized. A saved IMDb ID can use a configured IMDb-compatible source; MAL IDs can use Jikan or the official MAL gateway. Provider access, credentials, and rate limits still apply. Existing personal ratings and manually locked external ratings are never overwritten.</p>'+
+  '<p class="mf547-note">Runs gradually while MediaFlow is open and online, with a safety cap of 10 background titles per hour and 50 per day. Newly changed IDs are prioritized. Titles without IDs are searched by title and alternate-title variants; verified IDs are saved when returned. Provider coverage, credentials, and rate limits still apply. Existing personal ratings and manually locked external ratings are never overwritten.</p>'+
   '</section>';
 }
 const mf547SettingsBase=V219_PAGE_RENDERERS.get('settings');
