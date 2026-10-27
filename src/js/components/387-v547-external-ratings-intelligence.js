@@ -85,6 +85,11 @@ function mf547ScoreExists(item,key){
 function mf547MissingRating(item){
  const ids=mf547SupportedIds(item),providers=typeof mf467RatingProviders==='function'?mf467RatingProviders(item):[];
  if(!Object.keys(ids).length)return providers.length>0;
+ // Keep discovery active when any compatible provider's identifier is still missing.
+ for(const [key,map] of Object.entries(MF547_ID_RATING_MAP)){
+  if((key==='tmdb'&&ids.tmdb_tv)||(key==='tmdb_tv'&&ids.tmdb))continue;
+  if(!ids[key]&&map.providers.some(provider=>providers.includes(provider)))return true;
+ }
  for(const [id] of Object.entries(ids)){
   const map=MF547_ID_RATING_MAP[id];
   if(!map||!map.providers.some(p=>providers.includes(p)))continue;
