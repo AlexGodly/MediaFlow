@@ -10,6 +10,7 @@ on:
       - 'src/js/runtime-order.json'
       - 'src/js/components/387-v547-external-ratings-intelligence.js'
       - 'src/js/components/353-v467-rating-refresh-brand-marks.js'
+      - 'src/js/components/319-v439-metadata-recovery.js'
       - 'tests/test-v554-universal-id-discovery.cjs'
       - '.github/workflows/publish-v554.yml'
   workflow_dispatch:
