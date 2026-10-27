@@ -82399,6 +82399,15 @@ const MF547_ID_RATING_MAP=Object.freeze({
  simkl:{ratings:['simkl'],providers:['simkl']},
  tvmaze:{ratings:['tvmaze'],providers:['tvmaze']},
  vndb:{ratings:['vndb'],providers:['vndb']},
+ watchmode:{ratings:[],providers:['watchmode']},
+ animeschedule:{ratings:[],providers:['animeschedule']},
+ metron_series:{ratings:[],providers:['metron']},
+ episodate:{ratings:[],providers:['episodate']},
+ openlibrary_work:{ratings:[],providers:['openlibrary']},
+ gutendex:{ratings:[],providers:['gutendex']},
+ apple_music_album:{ratings:[],providers:['itunes']},
+ steam_app:{ratings:[],providers:['steam']},
+ musicbrainz_release_group:{ratings:[],providers:['musicbrainz']},
 });
 const mf547BaseRatingProviders=mf467RatingProviders;
 function mf547ProvidersForIds(item){
