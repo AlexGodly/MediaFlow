@@ -14,6 +14,7 @@ assert(engine.includes('const base=mf547BaseRatingProviders(item);'),'base provi
 assert(engine.includes('const providers=[...base];'),'saved IDs must not restrict the provider set');
 assert(engine.includes('mf467RatingProviders=function(item){return mf547ProvidersForIds(item);}'),'all ready rating providers must be searched');
 assert(engine.includes('if(!Object.keys(ids).length)return providers.length>0;'),'titles without supported IDs must still be eligible');
+assert(engine.includes("if(!ids[key]&&map.providers.some(provider=>providers.includes(provider)))return true;"),'titles with some IDs must still search for other missing provider IDs');
 assert(engine.includes('titles:mf439TitleVariants(item)'),'title and alternate-title changes must invalidate discovery checkpoints');
 assert(engine.includes('Discover missing provider IDs and retrieve verified ratings'),'settings must explain ID discovery');
 assert(refresh.includes('.sort((a,b)=>b.weight-a.weight||a.index-b.index).map(x=>x.id);'),'provider selection must not arbitrarily stop at four sources');
