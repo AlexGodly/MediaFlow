@@ -8,8 +8,9 @@ on:
       - 'version.json'
       - 'index.html'
       - 'src/js/runtime-order.json'
-      - 'src/js/components/393-v554-universal-id-discovery.js'
-      - 'tests/test-v554-reroll-title-xp.cjs'
+      - 'src/js/components/387-v547-external-ratings-intelligence.js'
+      - 'src/js/components/353-v467-rating-refresh-brand-marks.js'
+      - 'tests/test-v554-universal-id-discovery.cjs'
       - '.github/workflows/publish-v554.yml'
   workflow_dispatch:
 permissions:
@@ -42,7 +43,8 @@ jobs:
           node --check assets/js/mediaflow-v554.bundle.js
           node --check sw.js
           node scripts/check-pwa-release.js
-          node tests/test-v554-reroll-title-xp.cjs
+          node tests/test-v554-universal-id-discovery.cjs
+          node tests/test-v547-external-ratings-intelligence.cjs
           node tests/test-v552-collection-delete-confirmation.cjs
           node tests/test-v551-app-wide-performance.cjs
           node tests/test-v544-xp-reward-contract.cjs
@@ -50,7 +52,6 @@ jobs:
           node tests/test-v542-xp-award-parity.cjs
           node tests/test-v537-unified-xp-preview.cjs
           grep -q 'mediaflow-v554.bundle.js' index.html
-          grep -q 'components/393-v554-reroll-title-xp.js' src/js/runtime-order.json
           grep -q 'mediaflow-pwa-v554-shell' sw.js
           test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 554
       - name: Archive complete version
