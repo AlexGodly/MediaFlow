@@ -1,0 +1,33 @@
+name: Prepare MediaFlow v555 ratings fix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mediaflow-v555-patch.yml'
+      - 'scripts/patch-v555-ratings.cjs'
+permissions:
+  contents: write
+jobs:
+  patch-and-validate:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate v555 and validate syntax
+        run: |
+          node scripts/patch-v555-ratings.cjs
+          node --check assets/js/mediaflow-v555.bundle.js
+          grep -q 'assets/js/mediaflow-v555.bundle.js' index.html
+      - name: Commit generated release source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/js/mediaflow-v555.bundle.js
+          git commit -m "fix: expand v555 cross-provider ratings discovery [skip ci]"
+          git push origin main
