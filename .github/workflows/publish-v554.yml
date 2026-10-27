@@ -76,4 +76,9 @@ jobs:
           sha256sum MediaFlow_v554_Stable.zip > MediaFlow_v554_Stable.sha256
           if ! gh release view 554 >/dev/null 2>&1; then
             gh release create 554 MediaFlow_v554_Stable.zip MediaFlow_v554_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v554 Stable' --notes 'v554 Stable: External ratings refresh now attempts all enabled and ready rating providers instead of narrowing the search to providers matching IDs already saved. Titles without supported IDs remain eligible for title-based discovery. Romanized, English, original and alternate title variants contribute to the title signature, and verified provider IDs are saved through the existing guarded merge while unrelated metadata remains untouched. Existing authentication, provider readiness, metadata locks, request limits and stale-title guards remain in place. No schema or Supabase changes.'
+          else
+            # Keep the numbered release assets and tag aligned with the final tested archive.
+            git tag -f 554 "$(git rev-parse HEAD)"
+            git push origin refs/tags/554 --force
+            gh release upload 554 MediaFlow_v554_Stable.zip MediaFlow_v554_Stable.sha256 --clobber
           fi
