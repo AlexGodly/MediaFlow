@@ -16,6 +16,9 @@ assert(engine.includes('mf467RatingProviders=function(item){return mf547Provider
 assert(engine.includes('if(!Object.keys(ids).length)return providers.length>0;'),'titles without supported IDs must still be eligible');
 assert(engine.includes("if(!ids[key]&&map.providers.some(provider=>providers.includes(provider)))return true;"),'titles with some IDs must still search for other missing provider IDs');
 assert(engine.includes('titles:mf439TitleVariants(item)'),'title and alternate-title changes must invalidate discovery checkpoints');
+const discovery=read('src/js/components/319-v439-metadata-recovery.js');
+assert(discovery.includes('mf439TitleVariants(item).map(v=>String(v||\'\').trim())'),'provider discovery must search alternate title variants');
+assert(discovery.includes('mf439Evidence(item,row).confidence>=threshold'),'alternate-title results must still pass the existing match-confidence check');
 assert(engine.includes('Discover missing provider IDs and retrieve verified ratings'),'settings must explain ID discovery');
 assert(refresh.includes('.sort((a,b)=>b.weight-a.weight||a.index-b.index).map(x=>x.id);'),'provider selection must not arbitrarily stop at four sources');
 assert(refresh.includes("'openlibrary','gutendex','itunes','steam','musicbrainz'"),'book, music and game catalog providers must participate in ID discovery');
