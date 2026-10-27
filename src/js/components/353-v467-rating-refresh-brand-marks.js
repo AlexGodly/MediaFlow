@@ -65,7 +65,7 @@ const MF467={working:false,titleId:'',account:'',provider:'',note:'',success:nul
  abort:null,sequence:0};
 const MF467_RATING_PROVIDERS=new Set([
  'jikan','anilist','kitsu','tvmaze','vndb','tmdb','omdb',
- 'malofficial','trakt','simkl','watchmode'
+ 'malofficial','trakt','simkl','watchmode','openlibrary','gutendex','itunes','steam','musicbrainz'
 ]);
 function mf467RatingProviders(item){
  // Unlike general Metadata Recovery, avoid wasting the four-slot provider
