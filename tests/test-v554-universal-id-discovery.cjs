@@ -18,6 +18,7 @@ assert(engine.includes("if(!ids[key]&&map.providers.some(provider=>providers.inc
 assert(engine.includes('titles:mf439TitleVariants(item)'),'title and alternate-title changes must invalidate discovery checkpoints');
 assert(engine.includes('Discover missing provider IDs and retrieve verified ratings'),'settings must explain ID discovery');
 assert(refresh.includes('.sort((a,b)=>b.weight-a.weight||a.index-b.index).map(x=>x.id);'),'provider selection must not arbitrarily stop at four sources');
+assert(refresh.includes("'openlibrary','gutendex','itunes','steam','musicbrainz'"),'book, music and game catalog providers must participate in ID discovery');
 assert(refresh.includes('mf466ApplyVerified(item,verified,{ratings:true,metadata:false,ids:true})'),'verified provider IDs must persist without applying unrelated metadata');
 assert(index.includes('mediaflow-v'+Number(read('VERSION').trim())+'.bundle.js'),'HTML must load the generated release bundle');
 assert(workflow.includes('test "$(cat VERSION)" = 554'),'release workflow must guard v554');
