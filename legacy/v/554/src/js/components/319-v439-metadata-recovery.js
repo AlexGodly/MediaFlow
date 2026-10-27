@@ -168,14 +168,36 @@ function mf439Proposals(item,results){
 }
 async function mf439Discover(item,providers,onProgress=()=>{},signal){
  const results=[],failures=[];
+ // Search romanized, English, original and alternate names when the first
+ // provider query has no confidently matching result. This keeps cross-language
+ // discovery bounded while avoiding duplicate records from the same provider.
+ const variants=[...new Set(mf439TitleVariants(item).map(v=>String(v||'').trim()).filter(Boolean))].slice(0,5);
+ const threshold=mf439Preferences().minimumConfidence;
  for(const provider of providers){
   if(signal?.aborted)break;
   onProgress(provider,results.length);
-  try{
-   const found=MF439_GATEWAY.includes(provider)?
-     await mf439LookupGateway(provider,item):await mf439LookupPublic(provider,item,signal);
-   for(const row of found||[])results.push(row);
-  }catch(e){failures.push({provider,reason:String(e?.message||e).slice(0,180)});}
+  const providerRows=new Map();
+  let providerFailed=false;
+  for(const variant of (variants.length?variants:[String(item?.title||'')]).filter(Boolean)){
+   if(signal?.aborted)break;
+   try{
+    const queryItem=variant===item?.title?item:{...item,title:variant};
+    const found=MF439_GATEWAY.includes(provider)?
+     await mf439LookupGateway(provider,queryItem):await mf439LookupPublic(provider,queryItem,signal);
+    for(const row of found||[]){
+     const key=String(row?.provider||provider)+':'+String(row?.recordId||'');
+     if(row?.recordId&&!providerRows.has(key))providerRows.set(key,row);
+    }
+    const rows=[...providerRows.values()];
+    if(rows.some(row=>mf439Evidence(item,row).confidence>=threshold))break;
+   }catch(e){
+    providerFailed=true;
+    failures.push({provider,reason:String(e?.message||e).slice(0,180)});
+    break;
+   }
+  }
+  for(const row of providerRows.values())results.push(row);
+  if(providerFailed&&!providerRows.size)continue;
  }
  return {results,failures,preview:mf439Proposals(item,results)};
 }
