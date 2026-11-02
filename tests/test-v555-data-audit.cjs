@@ -55,6 +55,9 @@ function diffKeys(a,b){const out=lost(a,b);if(out.length)console.log('LOST',out.
   try{
     await p.evaluate(()=>{window.__toasts=[];__MF.wrap('showToast',o=>function(m){window.__toasts.push(String(m));return o.apply(this,arguments);});});
     await p.waitForTimeout(2000);
+    // v556+: run every check on the per-record storage (after the one-time move).
+    const recordStore=await p.evaluate(()=>!!window.MediaFlowV556);
+    if(recordStore)await p.waitForFunction(()=>window.MediaFlowV556.stats().migrated===true,null,{timeout:300000});
     // Normalise once (completion records etc.) exactly as a real account already is.
     const first=await download(()=>App.exportJSON());
     await importFile('importJSON','normalise.json',first.text);
@@ -96,7 +99,7 @@ function diffKeys(a,b){const out=lost(a,b);if(out.length)console.log('LOST',out.
     // 5. Full Backup: export → damage → import → identical (and idempotent).
     console.log('step 5',(Date.now()/1000|0)%10000);
     const full=await download(()=>App.exportJSON());
-    assert.equal(JSON.parse(full.text).mediaFlowVersion,555,'backup stamped v555');
+    assert.equal(JSON.parse(full.text).mediaFlowVersion,Number(fs.readFileSync(path.join(ROOT,'VERSION'),'utf8').trim()),'backup stamped with the current version');
     const base=await snap();
     await p.evaluate(()=>{const S=__MF.S();S.library.splice(0,40);S.sessions.splice(0,25);S.collections=[];S.orderPlan.titleIds=[];});
     await importFile('importJSON','full.json',full.text);
@@ -159,6 +162,7 @@ function diffKeys(a,b){const out=lost(a,b);if(out.length)console.log('LOST',out.
     assert(index.includes('assets/css/mediaflow-v'+v+'.bundle.css'),'index loads the stylesheet bundle');
     const errs=app.errors.filter(e=>!/Failed to load resource/.test(e));
     assert.deepEqual(errs,[],'no page errors');
-    console.log('PASS v555 data audit: cloud reload, Sync Now, XP recount, Full Backup, automatic export, Settings, Personal Order, Collections, History export, PWA shell.');
+    if(recordStore)assert.equal(await p.evaluate(()=>window.MediaFlowV556.stats().migrated),true,'checks ran on record storage');
+    console.log('PASS v555 data audit'+(recordStore?' (record storage)':'')+': cloud reload, Sync Now, XP recount, Full Backup, automatic export, Settings, Personal Order, Collections, History export, PWA shell.');
   }finally{await app.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

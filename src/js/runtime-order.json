@@ -251,5 +251,6 @@
   "components/395-v555-background-save.js",
   "components/396-v555-ratings-engine.js",
   "components/397-v555-id-finder.js",
-  "components/398-v555-interface.js"
+  "components/398-v555-interface.js",
+  "components/399-v556-record-sync.js"
 ]

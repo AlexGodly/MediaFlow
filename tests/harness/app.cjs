@@ -21,6 +21,10 @@ function serve(store){
   return new Promise(resolve=>{
     const server=http.createServer((req,res)=>{
       const url=decodeURIComponent(req.url.split('?')[0]);
+      if(url==='/__harness/db'){
+        let body='';req.setEncoding('utf8');req.on('data',c=>body+=c);
+        req.on('end',()=>{const out=dbOp(store,JSON.parse(body));res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(out));});return;
+      }
       if(url==='/__harness/cloud'){
         if(req.method==='POST'){let body='';req.setEncoding('utf8');req.on('data',c=>body+=c);
           req.on('end',()=>{store.row=JSON.parse(body);store.writes++;res.writeHead(204);res.end();});return;}
@@ -35,6 +39,37 @@ function serve(store){
     server.listen(0,'127.0.0.1',()=>resolve(server));
   });
 }
+// Minimal PostgREST emulation for the record table.
+let DB_CLOCK=Date.parse('2026-11-02T00:00:00Z')*1000;
+// Server time follows the real clock (microseconds, strictly increasing).
+function dbStamp(){DB_CLOCK=Math.max(DB_CLOCK+1+Math.floor(Math.random()*3),Date.now()*1000);const ms=Math.floor(DB_CLOCK/1000),us=String(DB_CLOCK%1000000).padStart(6,'0');
+  return new Date(ms).toISOString().slice(0,19)+'.'+us+'+00:00';}
+function dbOp(store,st){
+  const t=store.tables[st.name]||(store.tables[st.name]=new Map());
+  if(st.rpcPage){
+    // mediaflow_records_page(): rows after (at, kind, id) in that order, up to 10,000.
+    const {p_after_at:at,p_after_kind:kind='',p_after_id:id='',p_limit:lim=10000}=st.rpcPage;
+    const cmp=(a,b)=>a<b?-1:a>b?1:0;
+    let rows=[...t.values()];
+    if(at)rows=rows.filter(r=>(cmp(r.updated_at,at)||cmp(r.kind,kind)||cmp(r.record_id,id))>0);
+    rows.sort((a,b)=>cmp(a.updated_at,b.updated_at)||cmp(a.kind,b.kind)||cmp(a.record_id,b.record_id));
+    rows=rows.slice(0,Math.min(Math.max(1,lim),10000));
+    return {data:rows.map(r=>pick(r,'kind,record_id,pos,data,deleted,device_id,updated_at')),error:null};
+  }
+  if(st.upsert){
+    const keys=(st.onConflict||'id').split(',');const out=[];
+    for(const row of st.upsert)for(const v of Object.values(row))if(typeof v==='string'&&v.includes('\u0000'))return {data:null,error:{code:'22P05',message:'unsupported Unicode escape sequence (NUL in text)'}};
+    for(const row of st.upsert){const k=keys.map(c=>row[c]).join('\u0001');const rec={...(t.get(k)||{}),...row,updated_at:dbStamp()};t.set(k,rec);out.push(rec);store.writes++;}
+    return {data:st.returning?out.map(r=>pick(r,st.cols)):null,error:null};
+  }
+  let rows=[...t.values()].filter(r=>st.filters.every(([op,c,v])=>op==='eq'?String(r[c])===String(v):op==='gt'?r[c]>v:op==='gte'?r[c]>=v:true));
+  rows.sort((a,b)=>{for(const [c,asc] of st.order){if(a[c]<b[c])return asc?-1:1;if(a[c]>b[c])return asc?1:-1;}return 0;});
+  if(st.range)rows=rows.slice(st.range[0],st.range[1]+1);
+  return {data:rows.map(r=>pick(r,st.cols)),error:null};
+}
+// Postgres returns double precision with 15 significant digits.
+const pg15=v=>typeof v==='number'&&Number.isFinite(v)?Number(v.toPrecision(15)):v;
+function pick(r,cols){const src={...r,pos:pg15(r.pos)};if(!cols||cols==='*')return src;const o={};for(const c of cols.split(',').map(x=>x.trim()))o[c]=src[c];return o;}
 function bundleName(){
   const html=fs.readFileSync(path.join(ROOT,'index.html'),'utf8');
   return html.match(/assets\/js\/(mediaflow-v\d+\.bundle\.js)/)[1];
@@ -58,7 +93,7 @@ function cloudRow(state){
 }
 async function openApp(opts={}){
   const state=opts.state||generate({titles:opts.titles??500,...(opts.gen||{})});
-  const store={row:cloudRow(state),writes:0};
+  const store=opts.store||{row:cloudRow(state),writes:0,tables:{}};
   const server=await serve(store);
   const base='http://127.0.0.1:'+server.address().port+'/';
   const browser=await chromium.launch({args:['--no-sandbox','--disable-dev-shm-usage','--js-flags=--max-old-space-size=4096']});
@@ -83,7 +118,7 @@ async function openApp(opts={}){
     if(opts.network){const reply=await opts.network(url,route.request());if(reply)return route.fulfill(reply);}
     return route.fulfill({status:204,body:''});
   });
-  await page.addInitScript(([delay])=>{window.__MF_CLOUD={row:null,uploads:[],reads:0,delayMs:delay};
+  await page.addInitScript(([delay])=>{window.__MF_CLOUD=Object.assign({row:null,uploads:[],reads:0,delayMs:delay},window.__MF_CLOUD||{});
     try{localStorage.setItem('mediaflow-harness','1');}catch(_){}
     // Record long main-thread tasks for freeze budgets.
     window.__MF_LONG=[];
@@ -97,4 +132,4 @@ async function openApp(opts={}){
   return {page,context,browser,base,errors,bootMs,state,store,
     async close(){await browser.close();server.close();}};
 }
-module.exports={openApp,generate,cloudRow,ROOT};
+module.exports={openApp,generate,cloudRow,ROOT,dbOp};

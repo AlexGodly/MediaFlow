@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   workflow_run:
-    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554", "Build archive and release MediaFlow v555"]
+    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554", "Build archive and release MediaFlow v555", "Build archive and release MediaFlow v556"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -82,6 +82,7 @@ jobs:
           node tests/test-v552-collection-delete-confirmation.cjs
           node tests/test-v555-release.cjs
           node tests/test-v555-gateway.cjs
+          node tests/test-v556-release.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
           grep -q "mediaflow-v${version}.bundle.css" index.html

@@ -9,7 +9,9 @@ const decode=row=>JSON.parse(zlib.gunzipSync(Buffer.from(row.state_data.data,'ba
 const strip=s=>{const x={...s};delete x.savedAt;return x;};
 (async()=>{
   const titles=Number(process.env.MF555_TITLES||30000);
-  const app=await openApp({titles});
+  // v556+: exercise the single-row save path (used before an account moves to
+  // records, and as the fallback) by keeping the record table unreachable.
+  const app=await openApp({titles,beforeGoto:async page=>page.addInitScript(()=>{window.__MF_CLOUD=window.__MF_CLOUD||{};window.__MF_CLOUD.failRecords={message:'records offline (single-row path test)'};})});
   const p=app.page;
   try{
     await p.waitForTimeout(1500);
@@ -75,7 +77,7 @@ const strip=s=>{const x={...s};delete x.savedAt;return x;};
     assert.equal(restored.t2,'MF555 later edit','restored the latest local edit');
     const recoveredCloud=decode(app.store.row);
     assert.equal(recoveredCloud.library[2].title,'MF555 later edit','recovered data uploaded to the cloud');
-    assert.deepEqual(app.errors.filter(e=>!/save failed .*Network down/.test(e)),[],'no unexpected page errors');
+    assert.deepEqual(app.errors.filter(e=>!/save failed .*Network down|records offline/.test(e)),[],'no unexpected page errors');
     console.log('PASS v555 background save: identical payload, IndexedDB safety copy, sliced serialization, reload round trip.');
   }finally{await app.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

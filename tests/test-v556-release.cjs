@@ -1,0 +1,32 @@
+/* v556 release contract (no browser): record storage module, database
+ * migration and workflows. Behaviour is covered by test-v556-record-storage. */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const version=Number(read('VERSION').trim());
+assert(version>=556,'VERSION must be v556 or newer');
+const runtime=JSON.parse(read('src/js/runtime-order.json'));
+assert(runtime.indexOf('components/399-v556-record-sync.js')>runtime.indexOf('components/398-v555-interface.js'),'record sync loads after v555');
+const sync=read('src/js/components/399-v556-record-sync.js');
+assert(sync.includes("const MF556_TABLE='mediaflow_records'"),'uses the record table');
+assert(sync.includes('// Switch: the meta row is written last.'),'migration switches only after verification');
+assert(sync.includes('Keyset paging on updated_at'),'keyset paging');
+assert(!/MF556_SEP='\\u0000'/.test(sync),'no NUL characters in record ids (Postgres text)');
+assert(sync.includes('pending deletions until the cloud confirms'),'deletions survive failed uploads');
+assert(sync.includes("from('mediaflow_states')")&&sync.includes('mf556:marker'),'single-row fallback copy kept and marked');
+const sql=read('supabase/migrations/20261102_v556_record_storage.sql');
+assert(/data\s+text/.test(sql),'records stored as exact text, not jsonb');
+assert(sql.includes('enable row level security')&&(sql.match(/create policy/g)||[]).length===4,'row level security on every operation');
+assert(sql.includes('clock_timestamp()'),'server-assigned change times');
+assert(sql.includes("revoke all on public.mediaflow_records from anon"),'no anonymous access');
+assert(/function public\.mediaflow_records_page[\s\S]*security invoker[\s\S]*auth\.uid\(\)[\s\S]*limit least\(greatest\(coalesce\(p_limit,10000\),1\),10000\)/.test(sql),'bulk page function: caller rights, own rows only, capped');
+assert(sql.includes('from public, anon;'),'bulk page function not callable anonymously');
+assert(sync.includes("supabase.rpc('mediaflow_records_page'")&&sync.includes('mf556FetchPaged'),'bulk reads with a plain-paging fallback');
+assert(sync.includes('const MF556_CHUNKS=256'),'local copy stored in chunks');
+const wf=read('.github/workflows/publish-v556.yml');
+assert(wf.includes('test "$(cat VERSION)" = 556')&&wf.includes('legacy/v/556')&&wf.includes('gh release create 556'),'release workflow archives and releases v556');
+assert(read('.github/workflows/deploy-pages.yml').includes('"Build archive and release MediaFlow v556"'),'deploy runs after the v556 release');
+assert(fs.existsSync(path.join(root,'docs/release-v556.md')),'release notes present');
+console.log('PASS v556 release contract: record sync module, verified switch, RLS migration, workflows.');
