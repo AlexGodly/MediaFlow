@@ -68,7 +68,7 @@ function mf535AuditPersistence(){
     settings:v196BuildSettingsPreset().mediaFlowVersion,
     personalOrder:v142OrderExportPayload().mediaFlowVersion,
     collections:v281CollectionsExportPayload().mediaFlowVersion}))
-    if(Number(stamp)!==MF535_VERSION)issues.push(kind+': stale release version');
+    if(Number(stamp)!==(typeof v161CurrentVersion==='function'?Number(v161CurrentVersion()):MF535_VERSION))issues.push(kind+': stale release version');
   const allIssues=[...new Set(issues)];
   return {release:MF535_VERSION,ok:allIssues.length===0,issues:allIssues,fields,
     capabilities,save:{accountReady:mf535AccountReady(String(AUTH_USER?.id||'')),

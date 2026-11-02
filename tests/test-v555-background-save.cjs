@@ -53,7 +53,29 @@ const strip=s=>{const x={...s};delete x.savedAt;return x;};
     await p.waitForFunction(()=>window.__MF&&__MF.S()?.library?.length>0&&document.querySelector('#app .sidebar'),null,{timeout:180000});
     const reloaded=await p.evaluate(()=>__MF.S().library[0].progress);
     assert.equal(reloaded,result.expect.library[0].progress,'reloaded app must show the saved edit');
-    assert.deepEqual(app.errors,[],'no page errors');
+    // 5. A failed upload: the local copy is newer, startup offers recovery,
+    //    and restoring from the IndexedDB copy brings the edit back to the cloud.
+    const failed=await p.evaluate(async()=>{
+      const S=__MF.S();S.library[1].title='MF555 offline edit';S.library[1].modifiedAt=Date.now();__MF_CLOUD.fail={code:'500',message:'Network down'};
+      const ok=await __MF.saveState();return {ok};
+    });
+    assert.equal(failed.ok,false,'a failed upload is reported');
+    await p.waitForTimeout(16000); // the safety check needs the local copy to be >15s newer
+    await p.evaluate(async()=>{__MF_CLOUD.fail=null;const S=__MF.S();S.library[2].title='MF555 later edit';S.library[2].modifiedAt=Date.now();
+      // Simulate the tab closing before the next save: write only the local copy.
+      __MF_CLOUD.fail={code:'500',message:'Network down'};await __MF.saveState();});
+    await p.reload({waitUntil:'domcontentloaded'});
+    await p.waitForFunction(()=>window.MediaFlowRecovery&&/recover|newer|local/i.test(document.body.innerText||''),null,{timeout:120000});
+    const screen=await p.evaluate(()=>document.body.innerText.slice(0,400));
+    assert(/newer|recover/i.test(screen),'startup offers the newer local copy');
+    await p.evaluate(()=>window.MediaFlowRecovery.restore());
+    await p.waitForFunction(()=>window.__MF&&__MF.S()?.library?.length>0&&document.querySelector('#app .sidebar'),null,{timeout:120000});
+    const restored=await p.evaluate(()=>({t1:__MF.S().library[1].title,t2:__MF.S().library[2].title}));
+    assert.equal(restored.t1,'MF555 offline edit','restored the unsaved edit');
+    assert.equal(restored.t2,'MF555 later edit','restored the latest local edit');
+    const recoveredCloud=decode(app.store.row);
+    assert.equal(recoveredCloud.library[2].title,'MF555 later edit','recovered data uploaded to the cloud');
+    assert.deepEqual(app.errors.filter(e=>!/save failed .*Network down/.test(e)),[],'no unexpected page errors');
     console.log('PASS v555 background save: identical payload, IndexedDB safety copy, sliced serialization, reload round trip.');
   }finally{await app.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

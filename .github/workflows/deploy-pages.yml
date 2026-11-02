@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   workflow_run:
-    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554"]
+    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554", "Build archive and release MediaFlow v555"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -80,8 +80,12 @@ jobs:
           node tests/test-v550-dashboard-responsiveness.cjs
           node tests/test-v551-app-wide-performance.cjs
           node tests/test-v552-collection-delete-confirmation.cjs
+          node tests/test-v555-release.cjs
+          node tests/test-v555-gateway.cjs
           version="$(cat VERSION)"
           grep -q "mediaflow-v${version}.bundle.js" index.html
+          grep -q "mediaflow-v${version}.bundle.css" index.html
+          test -s "assets/css/mediaflow-v${version}.bundle.css"
           grep -q "const MEDIAFLOW_VERSION=${version};" sw.js
           test -s "assets/js/mediaflow-v${version}.bundle.js"
 

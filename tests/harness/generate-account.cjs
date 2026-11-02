@@ -19,7 +19,7 @@ function generate(opts={}){
     const status=pick(STATUSES);
     library.push({
       id:'t-'+i,title,categoryId:cat,status,priority:pick(['high','medium','low']),
-      progress:status==='completed'?unit:Math.floor(r()*unit),total:unit,rating:Math.floor(r()*11),
+      progress:status==='completed'?unit:Math.floor(r()*unit),total:unit,rating:r()<0.25?null:1+Math.floor(r()*10),
       year:1990+Math.floor(r()*36),addedAt:now-Math.floor(r()*3000)*day,
       externalIds:i%3===0?{mal:String(1000+i)}:i%3===1?{imdb:'tt'+String(1000000+i)}:{},
       universalMetadata:{externalRatings:i%2?{mal:{score:+(5+r()*4).toFixed(2),scale:10,source:'jikan'}}:{}},
