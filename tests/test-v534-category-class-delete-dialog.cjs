@@ -1,6 +1,7 @@
 /* MediaFlow v534 — Category Class deletion must use a themed, cancellable,
    accessible dialog and never delete saved data before explicit confirmation. */
 'use strict';
+const {stylesheetLoaded}=require('./lib/loaded-assets.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
@@ -14,7 +15,7 @@ assert(src.includes("App.v480DeleteClass('+escapeHtml(JSON.stringify(g.id))+',th
 assert(src.includes('v480CloseDeleteClass,v480ConfirmDeleteClass'),'Dialog actions are attached to public App methods');
 const stylesheet='assets/css/288-v534-category-class-delete-dialog.css';
 const css=read(stylesheet),index=read('index.html');
-assert(index.includes(stylesheet),'Styled dialog asset loaded by the live app');
+assert(stylesheetLoaded(stylesheet),'Styled dialog asset loaded by the live app');
 assert(css.includes('data-mf534-class-delete')&&css.includes('@media(max-width:520px)'),'Theme-scoped responsive styles available');
 assert(css.includes('prefers-reduced-motion'),'Dialog respects reduced motion');
 const state={classes:[

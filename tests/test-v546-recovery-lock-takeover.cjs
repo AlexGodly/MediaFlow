@@ -1,5 +1,6 @@
 /* v546 recovery takeover regression tests: lock fencing, latest checkpoint and queue isolation. */
 'use strict';
+const {stylesheetLoaded}=require('./lib/loaded-assets.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
@@ -19,7 +20,7 @@ assert(coverSource.includes("mf546CheckNewQueueStart('cover')")&&coverSource.inc
 assert(takeover.includes("mf546PrepareNewQueue('metadata')"),'Metadata batches must secure ownership before writing a replacement checkpoint');
 assert(lockCore.includes("if(typeof mf546OpenConflict==='function')"),'The old v442 lock-race branches must hand off to the designed dialog');
 assert(lockCore.includes("const conflict=mf546Conflict('cover')")&&lockCore.includes("const conflict=mf546Conflict('metadata')"));
-assert(html.includes('assets/css/290-v546-recovery-lock-takeover.css'));
+assert(stylesheetLoaded('assets/css/290-v546-recovery-lock-takeover.css'));
 assert(css.includes('.mf546-overlay')&&css.includes('.mf546-btn-force'));
 assert(takeover.includes('Resume Safely')&&takeover.includes('Force Start')&&takeover.includes('Force Start Anyway'));
 assert(takeover.includes('mf546FenceProcess')&&takeover.includes('mf546IsolateQueue'));

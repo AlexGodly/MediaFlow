@@ -1,3 +1,4 @@
+const {stylesheetLoaded}=require('./lib/loaded-assets.cjs');
 const fs=require('node:fs');const path=require('node:path');const root=path.resolve(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'src/js/components/392-v552-collection-delete-confirmation.js'),'utf8');
 const css=fs.readFileSync(path.join(root,'assets/css/292-v552-collection-delete-confirmation.css'),'utf8');
@@ -7,5 +8,5 @@ for(const token of ['role="alertdialog"','aria-modal="true"','mf552-delete-cance
 if(source.includes('confirm(')||source.includes('window.confirm'))throw Error('Native confirmation remains in the collection deletion override');
 for(const token of ['var(--flow','var(--panel','var(--text','@media(max-width:520px)','prefers-reduced-motion'])if(!css.includes(token))throw Error('Missing theme/responsive styling: '+token);
 if(!runtime.includes('components/392-v552-collection-delete-confirmation.js'))throw Error('v552 module is missing from runtime order');
-if(!index.includes('assets/css/292-v552-collection-delete-confirmation.css'))throw Error('v552 stylesheet is not loaded');
+if(!stylesheetLoaded('assets/css/292-v552-collection-delete-confirmation.css'))throw Error('v552 stylesheet is not loaded');
 console.log('v552 collection-delete confirmation contract: OK');

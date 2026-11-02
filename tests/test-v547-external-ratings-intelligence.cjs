@@ -1,5 +1,6 @@
 /* v547 External Ratings Intelligence contract tests. */
 'use strict';
+const {stylesheetLoaded}=require('./lib/loaded-assets.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -12,7 +13,7 @@ const runtime=JSON.parse(read('src/js/runtime-order.json'));
 const index=read('index.html');
 const workflow=read('.github/workflows/publish-v547.yml');
 assert(runtime.includes('components/387-v547-external-ratings-intelligence.js'),'v547 module must be in runtime order');
-assert(index.includes('assets/css/291-v547-external-ratings-intelligence.css'),'v547 settings styles must be loaded');
+assert(stylesheetLoaded('assets/css/291-v547-external-ratings-intelligence.css'),'v547 settings styles must be loaded');
 assert(index.includes('mediaflow-v'+Number(read('VERSION').trim())+'.bundle.js'),'HTML must load the current release bundle');
 assert(moduleSource.includes("imdb:{ratings:['imdb'],providers:['omdb']}"),'IMDb ID must prioritize an IMDb-compatible source');
 assert(moduleSource.includes("mal:{ratings:['mal'],providers:['jikan','malofficial']}"),'MAL ID must prioritize Jikan/MAL sources');

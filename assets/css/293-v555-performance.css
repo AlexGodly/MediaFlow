@@ -1,0 +1,21 @@
+/* MediaFlow v555 — rendering performance for very large accounts.
+ * content-visibility lets the browser skip style, layout and paint for
+ * off-screen sections. contain-intrinsic-size keeps the scrollbar stable.
+ * Purely presentational: no layout change for anything on screen.
+ */
+.mf269-week-stack > *,
+.mf274-browser-results > .mf274-browser-showcase,
+.mf274-browser-results > .mf274-browser-card,
+.v138-order-list > .v138-order-row,
+.card > .item-row{
+  content-visibility:auto;
+}
+.mf269-week-stack > *{contain-intrinsic-size:auto 640px}
+.mf274-browser-results > .mf274-browser-showcase{contain-intrinsic-size:auto 320px}
+.mf274-browser-results > .mf274-browser-card{contain-intrinsic-size:auto 260px}
+.v138-order-list > .v138-order-row{contain-intrinsic-size:auto 76px}
+.card > .item-row{contain-intrinsic-size:auto 64px}
+/* Printing must still show everything. */
+@media print{
+  .mf269-week-stack > *,.mf274-browser-results > *,.v138-order-list > *,.card > .item-row{content-visibility:visible}
+}

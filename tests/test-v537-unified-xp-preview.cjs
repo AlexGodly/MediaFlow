@@ -1,6 +1,7 @@
 /* v537: Real canonical XP+Respect sources agree with the read-only preview.
  * No database, credentials, browser network or user account required. */
 'use strict';
+const {stylesheetLoaded}=require('./lib/loaded-assets.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
@@ -19,7 +20,7 @@ assert(order.indexOf('components/381-v537-unified-xp-reward-preview.js')<order.i
   'Runtime renderer integrity guard must load after reward projection');
 assert(bundle.includes('function mf537ProjectXP()'));
 assert(bundle.includes('function v180CalculateRespectAward('));
-assert(html.includes('assets/css/289-v537-unified-xp-reward.css'));
+assert(stylesheetLoaded('assets/css/289-v537-unified-xp-reward.css'));
 assert(css.includes('prefers-reduced-motion')&&css.includes('max-width:370px'));
 assert(v537.includes('v382XPCardMarkup=function(){return mf537XPCardMarkup();}'));
 assert(v537.includes('v348HistoryEntries=function()'));
