@@ -49,3 +49,64 @@
 .mf555-id-open{flex:0 0 auto;font-size:12px}
 .mf555-id-empty{font-size:13px;color:var(--text-dim,#aab)}
 .mf555-id-link{margin-top:4px}
+
+/* ===== v555 interface ===== */
+/* Top bar: icon-only Sync + Full Backup */
+.v555-icon-btn{display:inline-grid;place-items:center;width:38px;height:38px;padding:0!important;gap:0;border-radius:12px}
+.v555-icon-btn svg{width:17px;height:17px}
+.v260-topbar-actions{display:flex;gap:8px;align-items:center}
+.v555-sync-btn.is-busy svg{animation:mf555spin .9s linear infinite}
+@keyframes mf555spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.v555-sync-btn.is-busy svg{animation:none}}
+.v260-sync-label{display:none}
+
+/* Background Processes menu item: same geometry as the other quick actions
+   (v461's own sizing removed); only the duplicate injected eye stays hidden
+   and its longer label may wrap. */
+#mf397-fan .mf460-widget-action > .v225-btn-icon{display:none!important}
+#mf397-fan .mf460-widget-action strong,#mf397-fan .mf460-widget-action small{overflow-wrap:anywhere}
+
+/* Logging popup */
+.mf555-log-popup{position:fixed;inset:0;z-index:2147482000;display:grid;place-items:center;padding:24px}
+.mf555-log-backdrop{position:absolute;inset:0;background:rgba(5,7,12,.62);backdrop-filter:blur(3px)}
+.mf555-log-sheet{position:relative;width:min(980px,100%);max-height:calc(100dvh - 48px);display:flex;flex-direction:column;
+  background:var(--bg-card,var(--card,#141823));border:1px solid var(--border,#2a3040);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden}
+.mf555-log-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 12px 22px;border-bottom:1px solid var(--border,#2a3040)}
+.mf555-log-head strong{display:block;font-size:17px}
+.mf555-log-head small{color:var(--text-dim,#99a);font-size:12px}
+.mf555-log-body{overflow:auto;overscroll-behavior:contain;padding:6px 18px 20px;outline:none}
+.mf555-log-hero{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+body.mf555-log-popup-open{overflow:hidden}
+body.mf555-log-popup-open #mf397-dock,body.mf555-log-popup-open #mf555-proc-mini{z-index:1}
+.mf555-log-placeholder{display:flex;align-items:center;gap:10px;padding:14px 16px;margin-top:12px;border:1px dashed var(--border,#2a3040);border-radius:14px;color:var(--text-dim,#aab)}
+.mf555-log-placeholder .btn{margin-left:auto}
+@media (max-width:720px){
+  .mf555-log-popup{padding:0;place-items:stretch}
+  .mf555-log-sheet{width:100%;max-height:none;height:100dvh;border-radius:0;border:0}
+  .mf555-log-body{padding:4px 12px calc(20px + env(safe-area-inset-bottom,0px))}
+}
+
+/* Background Processes: minimise + drag */
+#mf441-process-widget .mf555-proc-minimize{position:absolute;top:14px;right:62px;z-index:3;display:grid;place-items:center;width:34px;height:34px;
+  border-radius:11px;border:1px solid var(--border,#2a3040);background:color-mix(in srgb,var(--bg-card,#141823) 85%,#000);color:var(--text,#fff);cursor:pointer}
+#mf441-process-widget .mf555-proc-minimize:hover{border-color:var(--accent,#f0b35a)}
+#mf441-process-widget .mf476-widget-symbol,#mf441-process-widget .mf476-widget-name,
+#mf441-process-widget .mf441-widget-symbol,#mf441-process-widget .mf441-widget-name{cursor:grab;touch-action:none}
+#mf441-process-widget.mf555-dragging{cursor:grabbing;transition:none!important;user-select:none}
+#mf441-process-widget.mf555-dragged{position:fixed!important;margin:0!important;transform:none!important}
+body.mf555-proc-minimized #mf441-process-widget{display:none!important}
+.mf555-proc-mini{position:fixed;z-index:2147481000;display:flex;align-items:center;gap:8px;padding:0;border:0;background:none;cursor:pointer;color:var(--text,#fff)}
+.mf555-proc-mini .mf555-proc-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;
+  background:var(--bg-card,#141823);border:1px solid color-mix(in srgb,var(--accent,#f0b35a) 55%,var(--border,#2a3040));
+  box-shadow:0 10px 26px rgba(0,0,0,.35);color:var(--accent,#f0b35a)}
+.mf555-proc-mini .mf555-proc-bar{width:64px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--text,#fff) 14%,transparent);overflow:hidden}
+.mf555-proc-mini .mf555-proc-bar>i{display:block;height:100%;background:var(--accent,#f0b35a);border-radius:inherit;transition:width .4s ease}
+.mf555-proc-mini.is-active .mf555-proc-icon{animation:mf555pulse 2.2s ease-in-out infinite}
+.mf555-proc-mini.is-done .mf555-proc-icon{color:#50b878;border-color:#50b878;animation:mf555pop .5s ease}
+@keyframes mf555pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent,#f0b35a) 18%,transparent),0 10px 26px rgba(0,0,0,.35)}}
+@keyframes mf555pop{40%{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.mf555-proc-mini .mf555-proc-icon{animation:none!important}}
+
+/* On This Day: recover button */
+.mf427-otd-heading{display:flex;align-items:center}
+.mf427-otd-heading .mf555-otd-recover{margin-left:auto;flex:0 0 auto}

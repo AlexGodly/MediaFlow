@@ -461,7 +461,7 @@ function mf555BulkHtml(){
       '<div class="mf555-bulk-line"><strong>'+b.done.toLocaleString()+' / '+b.total.toLocaleString()+'</strong> titles · '+
         b.ratings.toLocaleString()+' ratings · '+b.ids.toLocaleString()+' IDs saved</div>'+
       '<div class="mf555-bulk-current">'+escapeHtml(b.current||'Preparing…')+'</div>'+
-      '<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf555StopAllMissing()">'+mf425Icon('close',15)+' Stop</button>'
+      '<button type="button" class="btn btn-sm btn-ghost" onclick="App.mf555StopAllMissing()">'+mf425Icon('stop',15)+' Stop</button>'
     :
       '<button type="button" class="btn btn-sm" onclick="App.mf555RefreshAllMissing()">'+mf425Icon('refresh',15)+' Refresh all missing ratings</button>'+
       (b.note?'<div class="mf555-bulk-line">'+escapeHtml(b.note)+'</div>':''))+

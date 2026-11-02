@@ -15,6 +15,7 @@
     about:['mixed','circle:12,12,10|path:M12 16v-4|M12 8h.01']
   };
   function PageIcon({kind}){const spec=PATHS[kind]||PATHS.dashboard,parts=spec[1].split('|');return React.createElement('svg',{viewBox:'0 0 24 24',width:18,height:18,fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true},parts.map((p,i)=>{if(p.startsWith('circle:')){const [cx,cy,r]=p.slice(7).split(',');return React.createElement('circle',{key:i,cx,cy,r});}if(p.startsWith('rect:')){const [x,y,w,h]=p.slice(5).split(',');return React.createElement('rect',{key:i,x,y,width:w,height:h});}const d=p.startsWith('path:')?p.slice(5):p;return React.createElement('path',{key:i,d});}));}
+  function DownloadIcon(){return React.createElement('svg',{viewBox:'0 0 24 24',width:16,height:16,fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true},React.createElement('path',{d:'M12 4v11'}),React.createElement('path',{d:'m7 10.5 5 5 5-5'}),React.createElement('path',{d:'M5 20h14'}))}
   function SyncIcon(){return React.createElement('svg',{viewBox:'0 0 24 24',width:15,height:15,fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true},React.createElement('path',{d:'M20 6v5h-5M4 18v-5h5M18.5 9A7 7 0 0 0 6 6.5L4 9m2 6.5A7 7 0 0 0 18 18l2-2.5'}));}
   function AppChrome(){
     const bridge=window.MediaFlowV260Bridge||window.MediaFlowV261Bridge;
@@ -22,10 +23,13 @@
     const [view,setView]=React.useState(initial),[busy,setBusy]=React.useState(false);
     React.useEffect(()=>{const onUpdate=e=>setView(e?.detail?.view||bridge?.getView?.()||'dashboard');window.addEventListener('mediaflow:v260-update',onUpdate);return()=>window.removeEventListener('mediaflow:v260-update',onUpdate);},[]);
     const meta=PAGE[view]||[view?view.replace(/^./,x=>x.toUpperCase()):'MediaFlow','Professional media management'];
+    // v555: icon-only Sync and one-click Full Backup export.
+    const [saving,setSaving]=React.useState(false)
+    const backup=async()=>{if(saving)return;setSaving(true);try{await (window.MediaFlowV260Bridge?.exportFullBackup?.()||window.MediaFlowV261Bridge?.exportFullBackup?.())}finally{setTimeout(()=>setSaving(false),800)}}
     const sync=async()=>{if(busy)return;setBusy(true);try{await (window.MediaFlowV260Bridge?.syncNow?.()||window.MediaFlowV261Bridge?.syncNow?.());}finally{setTimeout(()=>setBusy(false),450);}};
     return React.createElement('header',{className:'v260-topbar','aria-label':'MediaFlow application header'},
       React.createElement('div',{className:'v260-topbar-main'},React.createElement('div',{className:'v260-topbar-mark v261-page-icon'},React.createElement(PageIcon,{kind:view})),React.createElement('div',{className:'v260-topbar-copy'},React.createElement('b',null,meta[0]),React.createElement('span',null,meta[1]))),
-      React.createElement('div',{className:'v260-topbar-actions'},React.createElement('button',{type:'button',className:'btn btn-sm',onClick:sync,disabled:busy,'aria-label':'Sync MediaFlow now'},React.createElement(SyncIcon),React.createElement('span',{className:'v260-sync-label'},busy?'Syncing…':'Sync Now'))));
+      React.createElement('div',{className:'v260-topbar-actions'},React.createElement('button',{type:'button',className:'btn btn-sm v555-icon-btn v555-backup-btn',onClick:backup,disabled:saving,'aria-label':'Export full backup',title:'Export full backup'},React.createElement(DownloadIcon)),React.createElement('button',{type:'button',className:'btn btn-sm v555-icon-btn v555-sync-btn'+(busy?' is-busy':''),onClick:sync,disabled:busy,'aria-label':busy?'Syncing…':'Sync now',title:busy?'Syncing…':'Sync now'},React.createElement(SyncIcon))));
   }
   function mount(){if(!window.React||!window.ReactDOM||!window.MediaFlowV260Bridge)return false;const host=document.getElementById('v260-react-host');if(!host)return false;if(host.__mfV260Mounted)return true;host.__mfV260Mounted=true;host.replaceChildren();const root=ReactDOM.createRoot?ReactDOM.createRoot(host):null;if(root){root.render(React.createElement(AppChrome));host.__mfV260Root=root;}else ReactDOM.render(React.createElement(AppChrome),host);return true;}
   let tries=0;const timer=setInterval(()=>{tries++;if(mount()||tries>80)clearInterval(timer);},125);window.addEventListener('mediaflow:v260-update',()=>{const host=document.getElementById('v260-react-host');if(host&&!host.__mfV260Mounted)mount();});
