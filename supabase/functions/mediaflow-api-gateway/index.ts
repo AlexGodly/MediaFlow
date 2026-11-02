@@ -57,16 +57,16 @@ async function read(p:string,url:string,headers:Record<string,string>={},body?:u
  return data;
  }finally{clearTimeout(timer);}
 }
-// v555: the manual External ID finder asks for close matches too (loose);
-// automatic paths keep requiring an exact title or a matching saved ID.
-let LOOSE=false;
+// v555: the manual External ID finder asks for close matches too (loose,
+// passed per request); automatic paths keep requiring an exact title or a
+// matching saved ID.
 function record(p:Provider,title:string,ids:IdMap,year:number,v:{
- id:unknown;name:unknown;image?:unknown;link?:unknown;year?:unknown;key:string;other?:Record<string,unknown>}){
+ id:unknown;name:unknown;image?:unknown;link?:unknown;year?:unknown;key:string;other?:Record<string,unknown>},loose=false){
  const name=text(v.name,220),recordId=text(v.id,120),url=cover(v.image),when=yr(v.year);
  if(!name||!recordId)return null;
  const matched=norm(name)===norm(title);
  const direct=Boolean(ids[v.key]&&ids[v.key]===recordId);
- if(!matched&&!direct&&!LOOSE)return null;
+ if(!matched&&!direct&&!loose)return null;
  const confidence=direct?(matched?.99:.84):year&&when&&year===when?.96:year&&when&&year!==when?.35:.7;
  const externalIdCandidates: {key:string;value:string;evidence:string;source:string}[]=[];
  const add=(key:string,input:unknown)=>{const value=text(input,120);
@@ -79,10 +79,10 @@ function record(p:Provider,title:string,ids:IdMap,year:number,v:{
   idMatch:direct,exact:matched||direct,confidence:matched||direct?confidence:.3,reason:direct?"Saved ID matched":!matched?"Similar title; check this":year&&when&&year!==when?"Year conflict; manual review":"Provider title match",
   externalIdKey:v.key,externalIdValue:recordId,externalIdCandidates};
 }
-async function discover(p:Provider,title:string,ids:IdMap,year:number){
+async function discover(p:Provider,title:string,ids:IdMap,year:number,loose=false){
  const rows:any[]=[],secret=RULES[p].env?KEY(RULES[p].env):"";
  if(RULES[p].env&&!secret)throw Error("Provider not configured");
- const add=(v:Parameters<typeof record>[4])=>{const x=record(p,title,ids,year,v);if(x)rows.push(x);};
+ const add=(v:Parameters<typeof record>[4])=>{const x=record(p,title,ids,year,v,loose);if(x)rows.push(x);};
  if(p==="tmdb"){
   for(const type of ["movie","tv"]){
    const id=type==="movie"?ids.tmdb:ids.tmdb_tv;
@@ -402,10 +402,8 @@ Deno.serve(async(req:Request)=>{
    {p_user:account,p_provider:p,p_global_max:rule.cap,p_user_max:rule.perUser});
   if(claim.error)return reply(503,{error:"Gateway quota database is unavailable"});
   if(claim.data!==true)return reply(429,{error:"Safe daily provider quota reached"});
-  LOOSE=data.action==="search"&&data.loose===true;
-  let results;
-  try{results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year);}
-  finally{LOOSE=false;}
+  const loose=data.action==="search"&&data.loose===true;
+  const results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year,loose);
   if(mem.size>300)mem.delete(mem.keys().next().value as string);
   mem.set(cacheKey,{until:Date.now()+1200000,results});
   return reply(200,{provider:p,results,cached:false});
