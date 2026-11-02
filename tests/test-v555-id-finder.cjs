@@ -59,8 +59,9 @@ async function network(url){
     assert(imdb,'IMDb results grouped: '+JSON.stringify(r.groups.map(g=>g.key)));
     assert.equal(imdb.options.filter(o=>o.v).length,3,'all matching IMDb records offered');
     assert(!imdb.options.some(o=>o.v&&o.checked),'two exact matches: nothing preselected, the user chooses');
-    assert(/check this/.test(imdb.text),'close matches are marked');
-    assert(r.groups.some(g=>g.key==='kept'&&/999/.test(g.text)),'saved TVmaze ID is kept, not replaceable');
+    assert(/check this/i.test(imdb.text),'close matches are marked');
+    assert(/TVmaze[\s\S]*999/.test(await p.evaluate(()=>document.querySelector('.mf558-linked')?.textContent||'')),'saved TVmaze ID is kept, not replaceable');
+    assert(!r.groups.some(g=>g.key==='tvmaze'),'a kept ID offers no choices');
     assert(r.sites.some(s=>/TMDB: Daily limit reached/.test(s)),'real reason shown for a failing site: '+r.sites.join(' | '));
     assert(!r.sites.some(s=>/Trakt/.test(s)),'sites that are not set up are not searched under All sites');
     if(process.env.MF555_SHOT){await p.evaluate(()=>document.querySelector('.mf555-id-finder').scrollIntoView());await p.screenshot({path:process.env.MF555_SHOT});}

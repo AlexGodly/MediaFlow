@@ -253,5 +253,6 @@
   "components/397-v555-id-finder.js",
   "components/398-v555-interface.js",
   "components/399-v556-record-sync.js",
-  "components/400-v557-log-library-popup.js"
+  "components/400-v557-log-library-popup.js",
+  "components/401-v558-theme-polish.js"
 ]
