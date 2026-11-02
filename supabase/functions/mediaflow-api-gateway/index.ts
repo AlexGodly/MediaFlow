@@ -5,19 +5,21 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "npm:@supabase/supabase-js@2";
 const ORIGIN="https://alexgodly.github.io";
 const RULES={
-tmdb:{env:"TMDB_API_TOKEN",mode:"cover",cap:120,perUser:30},
-omdb:{env:"OMDB_API_KEY",mode:"cover",cap:70,perUser:20},
-fanart:{env:"FANART_PROJECT_API_KEY",mode:"cover",cap:70,perUser:20},
-animeschedule:{env:"ANIMESCHEDULE_APP_TOKEN",mode:"cover",cap:50,perUser:15},
-malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:70,perUser:20},
-metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:45,perUser:15},
-trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
-simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:45,perUser:15},
-deezer:{env:"",mode:"review",cap:0,perUser:0},
-watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:15,perUser:4},
-episodate:{env:"",mode:"cover",cap:80,perUser:20},
-gutendex:{env:"",mode:"cover",cap:80,perUser:20},
-hardcover:{env:"HARDCOVER_API_TOKEN",mode:"review",cap:0,perUser:0}
+// v555: single-account limits sized for catching up a large Library, kept
+// under each provider's own free-tier limits (OMDb 1,000/day, Watchmode 1,000/month).
+tmdb:{env:"TMDB_API_TOKEN",mode:"cover",cap:3000,perUser:3000,gap:1000},
+omdb:{env:"OMDB_API_KEY",mode:"cover",cap:950,perUser:950,gap:1000},
+fanart:{env:"FANART_PROJECT_API_KEY",mode:"cover",cap:500,perUser:500,gap:1000},
+animeschedule:{env:"ANIMESCHEDULE_APP_TOKEN",mode:"cover",cap:500,perUser:500,gap:1500},
+malofficial:{env:"MAL_CLIENT_ID",mode:"cover",cap:2000,perUser:2000,gap:1000},
+metron:{env:"METRON_API_TOKEN",mode:"mapping",cap:300,perUser:300,gap:3000},
+trakt:{env:"TRAKT_CLIENT_ID",mode:"mapping",cap:1000,perUser:1000,gap:1000},
+simkl:{env:"SIMKL_CLIENT_ID",mode:"mapping",cap:1000,perUser:1000,gap:1000},
+deezer:{env:"",mode:"review",cap:0,perUser:0,gap:10000},
+watchmode:{env:"WATCHMODE_API_KEY",mode:"mapping",cap:30,perUser:30,gap:10000},
+episodate:{env:"",mode:"cover",cap:500,perUser:500,gap:1500},
+gutendex:{env:"",mode:"cover",cap:500,perUser:500,gap:1500},
+hardcover:{env:"HARDCOVER_API_TOKEN",mode:"review",cap:0,perUser:0,gap:10000}
 } as const;
 type Provider=keyof typeof RULES;
 type IdMap=Record<string,string>;
@@ -55,13 +57,16 @@ async function read(p:string,url:string,headers:Record<string,string>={},body?:u
  return data;
  }finally{clearTimeout(timer);}
 }
+// v555: the manual External ID finder asks for close matches too (loose);
+// automatic paths keep requiring an exact title or a matching saved ID.
+let LOOSE=false;
 function record(p:Provider,title:string,ids:IdMap,year:number,v:{
  id:unknown;name:unknown;image?:unknown;link?:unknown;year?:unknown;key:string;other?:Record<string,unknown>}){
  const name=text(v.name,220),recordId=text(v.id,120),url=cover(v.image),when=yr(v.year);
  if(!name||!recordId)return null;
  const matched=norm(name)===norm(title);
  const direct=Boolean(ids[v.key]&&ids[v.key]===recordId);
- if(!matched&&!direct)return null;
+ if(!matched&&!direct&&!LOOSE)return null;
  const confidence=direct?(matched?.99:.84):year&&when&&year===when?.96:year&&when&&year!==when?.35:.7;
  const externalIdCandidates: {key:string;value:string;evidence:string;source:string}[]=[];
  const add=(key:string,input:unknown)=>{const value=text(input,120);
@@ -71,7 +76,7 @@ function record(p:Provider,title:string,ids:IdMap,year:number,v:{
  };
  add(v.key,recordId);for(const [k,x] of Object.entries(v.other||{}))add(k,x);
  return {provider:p,recordId,recordUrl:safeUrl(v.link),title:name,url,year:when,
-  idMatch:direct,confidence,reason:direct?"Saved ID matched":year&&when&&year!==when?"Year conflict; manual review":"Provider title match",
+  idMatch:direct,exact:matched||direct,confidence:matched||direct?confidence:.3,reason:direct?"Saved ID matched":!matched?"Similar title; check this":year&&when&&year!==when?"Year conflict; manual review":"Provider title match",
   externalIdKey:v.key,externalIdValue:recordId,externalIdCandidates};
 }
 async function discover(p:Provider,title:string,ids:IdMap,year:number){
@@ -366,7 +371,7 @@ Deno.serve(async(req:Request)=>{
  let data:any;
  try{data=await req.json();if(!data||typeof data!=="object"||Array.isArray(data))throw Error();}
  catch(_){return reply(400,{error:"Invalid JSON request"});}
- if(data.action==="status")return reply(200,{version:437,ready:true,
+ if(data.action==="status")return reply(200,{version:555,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
    mode:r.mode,testable:r.mode!=="review",metadataSupported:r.mode!=="review"&&["tmdb","omdb","malofficial","trakt","simkl","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
@@ -384,19 +389,23 @@ Deno.serve(async(req:Request)=>{
    if(/^[a-z][a-z0-9_]{0,32}$/.test(k)&&/^[\w.:-]{1,120}$/.test(value))ids[k]=value;
   }
  const year=yr(data.year),account=verified.data.user.id;
- const cacheKey=account+":"+data.action+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
+ const cacheKey=account+":"+data.action+":"+(data.loose===true?"loose":"")+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
  const cached=mem.get(cacheKey);
  if(cached&&cached.until>Date.now())return reply(200,{provider:p,results:cached.results,cached:true});
  const throttle=account+":"+p;
- if((pauses.get(throttle)||0)>Date.now())return reply(429,{error:"Please wait ten seconds before requesting this source"});
- pauses.set(throttle,Date.now()+10000);
+ const gap=Number((rule as any).gap)||10000;
+ if((pauses.get(throttle)||0)>Date.now())return reply(429,{error:"Please wait "+Math.ceil(gap/1000)+" seconds before requesting this source",retryAfterMs:gap});
+ pauses.set(throttle,Date.now()+gap);
  try{
   const admin=createClient(url,service,{auth:{autoRefreshToken:false,persistSession:false}});
   const claim=await admin.rpc("mediaflow_gateway_claim",
    {p_user:account,p_provider:p,p_global_max:rule.cap,p_user_max:rule.perUser});
   if(claim.error)return reply(503,{error:"Gateway quota database is unavailable"});
   if(claim.data!==true)return reply(429,{error:"Safe daily provider quota reached"});
-  const results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year);
+  LOOSE=data.action==="search"&&data.loose===true;
+  let results;
+  try{results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year);}
+  finally{LOOSE=false;}
   if(mem.size>300)mem.delete(mem.keys().next().value as string);
   mem.set(cacheKey,{until:Date.now()+1200000,results});
   return reply(200,{provider:p,results,cached:false});

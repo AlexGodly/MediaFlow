@@ -248,5 +248,7 @@
   "components/392-v552-collection-delete-confirmation.js",
   "components/393-v553-reroll-title-xp.js",
   "components/394-v555-performance-core.js",
-  "components/395-v555-background-save.js"
+  "components/395-v555-background-save.js",
+  "components/396-v555-ratings-engine.js",
+  "components/397-v555-id-finder.js"
 ]

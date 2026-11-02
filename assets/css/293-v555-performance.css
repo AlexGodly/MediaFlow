@@ -19,3 +19,33 @@
 @media print{
   .mf269-week-stack > *,.mf274-browser-results > *,.v138-order-list > *,.card > .item-row{content-visibility:visible}
 }
+
+/* v555 ratings: Refresh all missing ratings */
+.mf555-bulk{display:grid;gap:8px;margin:10px 0 4px}
+.mf555-bulk>.btn{justify-self:start}
+.mf555-bulk-progress{height:6px;border-radius:999px;background:color-mix(in srgb,var(--text,#fff) 10%,transparent);overflow:hidden}
+.mf555-bulk-progress>i{display:block;height:100%;background:var(--accent,#f0b35a);border-radius:inherit;transition:width .3s ease}
+.mf555-bulk-line{font-size:13px;color:var(--text-dim,#aab)}
+.mf555-bulk-current{font-size:12px;color:var(--text-dim,#99a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v555 External ID finder */
+.mf555-id-status{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.mf555-id-site{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--border,#333);color:var(--text-dim,#aab)}
+.mf555-id-site.is-ok{border-color:color-mix(in srgb,#50b878 55%,var(--border,#333))}
+.mf555-id-site.is-error{border-color:color-mix(in srgb,#ff647c 60%,var(--border,#333));color:var(--text,#fff)}
+.mf555-id-site.is-busy{border-color:var(--accent,#f0b35a)}
+.mf555-id-group{border:1px solid var(--border,#333);border-radius:12px;padding:8px 10px 10px;margin:0 0 10px;min-width:0}
+.mf555-id-group legend{font-weight:700;font-size:13px;padding:0 6px}
+.mf555-id-group.is-kept{opacity:.8}
+.mf555-id-kept{font-size:13px}
+.mf555-id-option{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:9px;cursor:pointer;min-width:0}
+.mf555-id-option:hover{background:color-mix(in srgb,var(--text,#fff) 6%,transparent)}
+.mf555-id-finder .mf555-id-option input[type=radio]{all:revert;appearance:auto;-webkit-appearance:radio;flex:0 0 18px;width:18px;height:18px;min-width:0;min-height:0;margin:0;padding:0;border:0;box-shadow:none;background:none;accent-color:var(--accent,#f0b35a)}
+.mf555-id-main{display:grid;gap:2px;min-width:0;flex:1 1 auto}
+.mf555-id-main b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mf555-id-main small{color:var(--text-dim,#99a);overflow-wrap:anywhere}
+.mf555-id-option.is-loose .mf555-id-main b{font-weight:600}
+.mf555-id-main em{color:var(--accent,#f0b35a);font-style:normal}
+.mf555-id-open{flex:0 0 auto;font-size:12px}
+.mf555-id-empty{font-size:13px;color:var(--text-dim,#aab)}
+.mf555-id-link{margin-top:4px}
