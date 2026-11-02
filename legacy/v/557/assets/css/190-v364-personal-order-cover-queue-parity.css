@@ -1,0 +1,141 @@
+/* MediaFlow v364 — poster-safe, responsive Lists/Collection Queues.
+ * Keep every color in the active theme; preserve source DOM / queue handlers. */
+#view-root .mf364-order-workspace{
+  --mf364-title-w:clamp(36px,calc(42px * var(--v177-order-scale,1)),100px);
+  --mf364-collection-w:clamp(42px,var(--mf289-collection-cover-w,58px),104px);
+  --mf364-direct-w:clamp(28px,var(--mf364-direct-cover-w,40px),138px);
+}
+/* Both regular title cards and Collection Queue direct titles have one
+   proportional cover frame. Existing v177 sizing used conflicting width and
+   height !important rules after v363 switched to very narrow columns. */
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row{
+  grid-template-columns:28px minmax(0,min(var(--mf364-title-w),27%)) minmax(0,1fr)!important;
+  align-items:start!important;min-width:0;gap:9px!important;padding:10px!important;
+}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row>div:nth-child(2){
+  width:min(100%,var(--mf364-title-w));aspect-ratio:2/3;min-width:0;height:auto;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2,var(--panel-2));
+  display:grid;place-items:center;overflow:hidden;align-self:start;
+}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover,
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover-ph{
+  display:block;width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important;
+  aspect-ratio:2/3;object-fit:contain!important;border:0!important;border-radius:0!important;
+}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover-ph{display:grid;place-items:center;overflow:hidden}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover-ph[style*="display:none"]{display:none!important}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover-ph img,
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-cover-ph .v144-cat-icon-img{
+  width:56%!important;height:56%!important;max-width:38px;max-height:38px;object-fit:contain!important;
+}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-pos{width:28px;min-width:0;max-width:100%;align-self:center}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-copy{min-width:0;overflow:visible;align-self:center}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-title{white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-meta{font-size:10px;gap:4px;min-width:0;line-height:1.35}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-actions{grid-column:1/-1!important;border-top:1px solid var(--border);padding-top:6px;gap:4px;justify-content:flex-end}
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-actions>.btn{min-height:30px;min-width:28px;font-size:11px;white-space:nowrap}
+/* Cover scaling also applies to All Titles while keeping the canonical DOM. */
+#view-root .mf364-order-workspace.mf363-lists .v138-order-main:not(.mf363-grid-categories) .v138-order-row>div:nth-child(2){min-width:0;align-self:center}
+
+/* Collection Queues now use the same number of *category cards* as regular
+   Category/Title Orders (one shared --mf363-columns preference). */
+@media(min-width:1024px){
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid{
+   display:grid!important;grid-template-columns:repeat(var(--mf363-columns,2),minmax(0,1fr))!important;
+   gap:14px!important;align-items:start;min-width:0;width:100%;
+ }
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid>.mf288-section-heading{grid-column:1/-1;min-width:0;padding:0 2px 2px}
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid>.mf288-collection-queue-group{min-width:0;width:100%;margin:0!important}
+}
+@media(min-width:1024px) and (max-width:1399px){
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid{grid-template-columns:repeat(min(2,var(--mf363-columns,2)),minmax(0,1fr))!important}
+}
+@media(min-width:1400px) and (max-width:1699px){
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid{grid-template-columns:repeat(min(3,var(--mf363-columns,2)),minmax(0,1fr))!important}
+}
+/* The regular category cards and Collection category cards share outer styling. */
+#view-root .mf364-order-workspace .mf288-collection-queue-group{
+  border:1px solid var(--border);border-radius:15px;overflow:hidden;background:var(--panel);
+}
+#view-root .mf364-order-workspace .mf288-collection-queue-group>.mf287-queue-head{padding:14px;gap:10px;align-items:start}
+#view-root .mf364-order-workspace .mf288-collection-queue-group .mf287-queue-head h3{
+  display:flex;align-items:center;gap:7px;min-width:0;overflow-wrap:anywhere;font-size:14px;line-height:1.35;
+}
+#view-root .mf364-order-workspace .mf288-collection-queue-group .mf287-queue-head p{font-size:11px;line-height:1.42;max-width:100%}
+#view-root .mf364-order-workspace .mf288-collection-queue-group .mf287-queue-count{flex:none;font-size:10px}
+#view-root .mf364-order-workspace .mf288-collection-queue-group>.mf287-queue-list{display:grid;gap:8px;padding:10px 12px 12px;min-width:0}
+/* Direct title rows: title/metadata + proportional cover inside a compact card. */
+#view-root .mf364-order-workspace .mf287-queue-title.mf288-queue-title-with-cover{
+  display:grid;grid-template-columns:28px minmax(0,min(var(--mf364-direct-w),28%)) minmax(0,1fr)!important;
+  min-width:0;align-items:center;gap:9px;padding:10px;border-radius:12px;
+  border:1px solid var(--border);background:var(--panel-2,var(--panel));color:var(--text);overflow:hidden;
+}
+#view-root .mf364-order-workspace .mf288-queue-title-with-cover .mf288-direct-cover{
+  width:100%!important;height:auto!important;aspect-ratio:2/3;min-width:0;max-width:100%;
+  display:grid;place-items:center;border-radius:8px;overflow:hidden;border:1px solid var(--border);
+  background:var(--surface2,var(--panel-2));
+}
+#view-root .mf364-order-workspace .mf288-queue-title-with-cover .mf288-direct-cover>img{width:100%;height:100%;object-fit:contain;display:block}
+#view-root .mf364-order-workspace .mf288-queue-title-with-cover .mf288-title-cover-fallback img,
+#view-root .mf364-order-workspace .mf288-queue-title-with-cover .mf288-title-cover-fallback .v144-cat-icon-img{width:55%;height:55%;max-width:42px;max-height:42px;object-fit:contain}
+#view-root .mf364-order-workspace .mf288-direct-copy{min-width:0;overflow:hidden}
+#view-root .mf364-order-workspace .mf288-direct-copy b{font-size:12px;white-space:normal;overflow-wrap:anywhere;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#view-root .mf364-order-workspace .mf288-direct-copy small{min-width:0;flex-wrap:wrap;line-height:1.45;font-size:10px;white-space:normal;overflow-wrap:anywhere}
+/* Assigned Collection blocks must show their real cover/collage at all widths.
+   v363 previously used display:none!important and a two-column template. */
+#view-root .mf364-order-workspace .mf288-assignment-shell,
+#view-root .mf364-order-workspace .mf363-grid-categories .mf288-assignment-shell{
+  display:grid;grid-template-columns:34px minmax(0,min(var(--mf364-collection-w),26%)) minmax(0,1fr)!important;
+  gap:10px;align-items:start;min-width:0;padding:11px;
+  border:1px solid var(--border);border-radius:12px;
+  background:color-mix(in srgb,var(--flow) 7%,var(--panel));
+}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-queue-position{grid-column:1;min-width:0;align-self:center}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-queue-position input{width:32px!important;max-width:100%;padding:6px 2px;font-size:11px}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover{
+  grid-column:2;display:grid!important;min-width:0!important;max-width:100%!important;
+  width:100%!important;height:auto!important;aspect-ratio:2/3;overflow:hidden;
+  align-self:start;border:1px solid var(--border);border-radius:8px;background:var(--surface2,var(--panel-2));
+}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover.single{display:block!important}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover img{display:block;width:100%;height:100%;object-fit:contain;min-width:0;min-height:0}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover.collage{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));
+}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover.collage.count-1{display:block!important}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover.collage.count-2{grid-template-rows:1fr}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover.collage.count-3 img:first-child{grid-row:1/3}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-cover .v144-cat-icon-img{width:75%;height:75%;object-fit:contain}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-main{grid-column:3!important;min-width:0;overflow:visible;align-self:center;gap:7px}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-assignment-title{align-items:center;gap:5px}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-assignment-title b{font-size:13px;overflow-wrap:anywhere;line-height:1.4}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-assignment-meta{font-size:10px;line-height:1.4;gap:4px}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-rule-grid{width:100%;min-width:0;max-width:none;grid-template-columns:minmax(0,1fr)!important;gap:7px}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-rule-grid label{min-width:0}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf287-rule-grid select{width:100%;min-width:0;max-width:100%;font-size:12px}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-assignment-actions{grid-column:1/-1!important;display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding-top:8px;border-top:1px solid var(--border);min-width:0}
+#view-root .mf364-order-workspace .mf288-assignment-shell>.mf288-assignment-details{grid-column:1/-1!important;min-width:0;overflow:hidden}
+#view-root .mf364-order-workspace .mf288-assignment-shell .mf288-collection-title-list{min-width:0}
+/* Fully separated Collection Queue direct-title cover scale. */
+#view-root .mf364-order-workspace .mf289-cover-group .mf364-direct-cover-tool{min-width:0}
+#view-root .mf364-order-workspace .mf289-cover-group .mf364-direct-cover-tool .mf289-cover-inputs{min-width:0}
+@media(max-width:1023px){
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px}
+ #view-root .mf364-order-workspace.mf363-lists .mf364-collection-grid>.mf288-section-heading{grid-column:1}
+ #view-root .mf364-order-workspace .mf288-assignment-shell{grid-template-columns:32px minmax(0,min(var(--mf364-collection-w),26%)) minmax(0,1fr)!important}
+ #view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row{grid-template-columns:26px minmax(0,min(var(--mf364-title-w),26%)) minmax(0,1fr)!important}
+ #view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row .v138-order-actions{grid-column:1/-1!important}
+}
+@media(max-width:480px){
+ #view-root .mf364-order-workspace .mf288-assignment-shell{grid-template-columns:30px minmax(0,min(var(--mf364-collection-w),24%)) minmax(0,1fr)!important;gap:7px;padding:8px}
+ #view-root .mf364-order-workspace .mf288-assignment-shell>.mf287-queue-position input{width:28px!important}
+ #view-root .mf364-order-workspace .mf288-collection-queue-group>.mf287-queue-list{padding:8px}
+ #view-root .mf364-order-workspace .mf288-assignment-shell .mf287-rule-grid select{font-size:11px}
+ #view-root .mf364-order-workspace .mf288-queue-title-with-cover{grid-template-columns:24px minmax(0,min(var(--mf364-direct-w),24%)) minmax(0,1fr)!important;gap:7px}
+}
+/* Specificity correction: v363 forced mixed-queue Collection content into
+   grid column 2 (the cover lane) with !important. The copy owns column 3. */
+#view-root .mf364-order-workspace.mf363-lists .mf363-grid-categories .mf288-assignment-shell>.mf287-assignment-main,
+#view-root .mf364-order-workspace.mf363-lists .mf288-assignment-shell>.mf287-assignment-main{
+  grid-column:3!important;min-width:0!important;width:100%;align-self:center;
+}
