@@ -1,0 +1,28 @@
+/* MediaFlow v338 — Normal Library cover selection regression fix.
+   The legacy cover layouts hide all direct children of each .item-row,
+   including the .mf-select checkbox inserted by mfEnhanceLibraryDom().
+   Restore ONLY that checkbox when Clean Covers is OFF. Dynamic Library,
+   List/Compact/Cards, Clean Covers ON and existing selection APIs are unchanged. */
+#view-root .v191-clean-covers-scope:not(.v191-clean-covers) .library-view-covers .item-row,
+#view-root .v191-clean-covers-scope:not(.v191-clean-covers) .library-view-covers-title .item-row{
+  position:relative!important;
+}
+#view-root .v191-clean-covers-scope:not(.v191-clean-covers) .library-view-covers .item-row > input.mf-select[data-mf-select],
+#view-root .v191-clean-covers-scope:not(.v191-clean-covers) .library-view-covers-title .item-row > input.mf-select[data-mf-select]{
+  display:block!important;
+  position:absolute!important;
+  z-index:12!important;
+  top:11px!important;
+  left:calc(50% - (59px * var(--v177-library-scale,1)) + 11px)!important;
+  width:18px!important;
+  height:18px!important;
+  min-width:18px!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  cursor:pointer;
+  accent-color:var(--flow);
+  border-radius:5px;
+  box-shadow:0 2px 9px rgba(0,0,0,.35);
+}
