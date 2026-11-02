@@ -55,7 +55,8 @@ async function run(viewport,label){
     assert.equal(pop.forms,1,'exactly one Logging workspace exists');
     await shot(p,label+'-logging-popup');
     // Add a title through the workspace's own entry path, then close: draft kept.
-    await p.click('#mf555-log-popup [onclick*="v369SwitchInterface(\'quick\')"]');await p.waitForTimeout(300);
+    // (v557: the popup shows only Browse Library; the rest of the form is hidden, not removed.)
+    await p.evaluate(()=>App.v369SwitchInterface('quick'));await p.waitForTimeout(300);
     await p.evaluate(()=>App.v179SetLogMode('single','amount'));await p.waitForTimeout(200);
     await p.evaluate(()=>{const S=__MF.S(),it=S.library.find(x=>x.categoryId===S.currentTask.categoryId&&x.status!=='dropped')||S.library[0];
       S.entryDraft={title:it.title,qty:2,libraryId:it.id};App.addLogEntry();});
