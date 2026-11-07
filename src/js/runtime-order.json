@@ -256,5 +256,6 @@
   "components/400-v557-log-library-popup.js",
   "components/401-v558-theme-polish.js",
   "components/402-v559-tmdb-covers.js",
-  "components/403-v560-tmdb-saved-job.js"
+  "components/403-v560-tmdb-saved-job.js",
+  "components/404-v561-live-logging-app-time.js"
 ]

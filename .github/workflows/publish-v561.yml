@@ -1,0 +1,106 @@
+name: Build archive and release MediaFlow v561
+# v561: live logging with the MediaFlow app; app time counts for XP and shows in Statistics.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/css-order.json'
+      - 'src/js/components/404-v561-live-logging-app-time.js'
+      - 'tests/test-v561-release.cjs'
+      - '.github/workflows/publish-v561.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v561-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and verify
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 561
+          python3 scripts/build.py
+          python3 scripts/pwa.py
+          node --check assets/js/mediaflow-v561.bundle.js
+          node --check sw.js
+          test -s assets/css/mediaflow-v561.bundle.css
+          node scripts/check-pwa-release.js
+          node tests/test-v561-release.cjs
+          node tests/test-v560-release.cjs
+          node tests/test-v559-release.cjs
+          node tests/test-v558-release.cjs
+          node tests/test-v557-release.cjs
+          node tests/test-v556-release.cjs
+          node tests/test-v555-release.cjs
+          node tests/test-v555-gateway.cjs
+          node tests/test-v554-universal-id-discovery.cjs
+          node tests/test-v547-external-ratings-intelligence.cjs
+          node tests/test-v552-collection-delete-confirmation.cjs
+          node tests/test-v551-app-wide-performance.cjs
+          node tests/test-v548-logging-large-library-sort.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          grep -q 'mediaflow-v561.bundle.js' index.html
+          grep -q 'mediaflow-v561.bundle.css' index.html
+          grep -q 'mediaflow-pwa-v561-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 561
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/561
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/561/; fi
+          done
+          test -f legacy/v/561/assets/js/mediaflow-v561.bundle.js
+          test -f legacy/v/561/assets/css/mediaflow-v561.bundle.css
+          test -f legacy/v/561/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v561.bundle.js assets/css/mediaflow-v561.bundle.css legacy/v/561
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v561' || true
+          pushed=0
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=1
+              break
+            fi
+            sleep 2
+          done
+          test "$pushed" = 1
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v561_Stable.zip HEAD:legacy/v/561
+          sha256sum MediaFlow_v561_Stable.zip > MediaFlow_v561_Stable.sha256
+          if ! gh release view 561 >/dev/null 2>&1; then
+            gh release create 561 MediaFlow_v561_Stable.zip MediaFlow_v561_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v561 Stable' --notes-file docs/release-v561.md
+          else
+            git tag -f 561 "$(git rev-parse HEAD)"
+            git push origin refs/tags/561 --force
+            gh release upload 561 MediaFlow_v561_Stable.zip MediaFlow_v561_Stable.sha256 --clobber
+          fi
