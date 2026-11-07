@@ -52,7 +52,7 @@ fs.writeFileSync(file,harness);
 const run=spawnSync(process.execPath,['--experimental-strip-types','--no-warnings',file],{encoding:'utf8',timeout:60000});
 assert.equal(run.status,0,run.stderr);
 const out=JSON.parse(run.stdout.trim().split('\n').pop());
-assert.equal(out.status.json.version,555,'status reports v555');
+assert(out.status.json.version>=555,'status reports v555 or newer');
 assert.deepEqual(out.strict.json.results.map(r=>r.recordId),['tt0089175'],'automatic search stays exact');
 assert.equal(out.tooSoon.status,429,'per-source spacing still enforced');
 assert.match(out.tooSoon.json.error,/wait 1 seconds/,'spacing is now about a second');

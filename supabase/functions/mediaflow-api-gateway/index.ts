@@ -1,4 +1,4 @@
-/* MediaFlow v434 personal edition: authenticated provider discovery gateway.
+/* MediaFlow v434 personal edition (v559 TMDB cover fixes): authenticated provider discovery gateway.
  * No user data writes, no credentials on the client, no arbitrary outbound URLs.
  * Providers awaiting legal/technical review are fail-closed. */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -79,20 +79,42 @@ function record(p:Provider,title:string,ids:IdMap,year:number,v:{
   idMatch:direct,exact:matched||direct,confidence:matched||direct?confidence:.3,reason:direct?"Saved ID matched":!matched?"Similar title; check this":year&&when&&year!==when?"Year conflict; manual review":"Provider title match",
   externalIdKey:v.key,externalIdValue:recordId,externalIdCandidates};
 }
-async function discover(p:Provider,title:string,ids:IdMap,year:number,loose=false){
+async function discover(p:Provider,title:string,ids:IdMap,year:number,loose=false,kind=""){
  const rows:any[]=[],secret=RULES[p].env?KEY(RULES[p].env):"";
  if(RULES[p].env&&!secret)throw Error("Provider not configured");
  const add=(v:Parameters<typeof record>[4])=>{const x=record(p,title,ids,year,v,loose);if(x)rows.push(x);};
  if(p==="tmdb"){
-  for(const type of ["movie","tv"]){
-   const id=type==="movie"?ids.tmdb:ids.tmdb_tv;
-   const endpoint=/^[1-9]\d*$/.test(id||"")?type+"/"+id:"search/"+type+"?query="+encodeURIComponent(title)+"&include_adult=false";
-   const d=await read(p,"https://api.themoviedb.org/3/"+endpoint,{"Authorization":"Bearer "+secret});
-   for(const r of (endpoint.startsWith("search/")?list(d):[d]).slice(0,8))
-    add({id:r.id,name:r.title||r.name,year:r.release_date||r.first_air_date,key:type==="movie"?"tmdb":"tmdb_tv",
-     image:r.poster_path?"https://image.tmdb.org/t/p/w500"+r.poster_path:"",
-     link:"https://www.themoviedb.org/"+type+"/"+r.id});
+  // v559: one failed ID lookup (e.g. 404) no longer aborts the whole TMDB
+  // request; it falls back to an exact-title search for that type. TV titles
+  // imported with their TMDB TV ID under "tmdb" are looked up as TV when the
+  // client says the title is a TV show.
+  const numeric=(v:string|undefined)=>/^[1-9]\d*$/.test(v||"")?String(v):"";
+  let movieId=numeric(ids.tmdb);
+  if(kind==="tv"&&movieId&&!numeric(ids.tmdb_tv)){ids={...ids,tmdb_tv:movieId};movieId="";}
+  const tvId=numeric(ids.tmdb_tv);
+  const auth={"Authorization":"Bearer "+secret};
+  const errors:unknown[]=[];let calls=0;
+  const push=(type:string,r:any)=>{if(!r?.id)return;
+   add({id:r.id,name:r.title||r.name,year:r.release_date||r.first_air_date,key:type==="movie"?"tmdb":"tmdb_tv",
+    image:r.poster_path?"https://image.tmdb.org/t/p/w500"+r.poster_path:"",
+    link:"https://www.themoviedb.org/"+type+"/"+r.id});};
+  const exactCover=()=>rows.some((x:any)=>x.exact&&x.url);
+  for(const type of kind==="tv"?["tv","movie"]:["movie","tv"]){
+   // The hinted type found an exact cover: skip the other catalogue.
+   if(kind&&type!==kind&&exactCover())break;
+   const id=type==="movie"?movieId:tvId;
+   let direct=false;
+   if(id){
+    try{calls++;const d=await read(p,"https://api.themoviedb.org/3/"+type+"/"+id,auth);
+     const before=rows.length;push(type,d);direct=rows.length>before&&Boolean(d?.poster_path);}
+    catch(e){errors.push(e);}
+   }
+   if(direct)continue;
+   try{calls++;const d=await read(p,"https://api.themoviedb.org/3/search/"+type+"?query="+encodeURIComponent(title)+"&include_adult=false",auth);
+    for(const r of list(d).slice(0,8))push(type,r);}
+   catch(e){errors.push(e);}
   }
+  if(!rows.length&&errors.length===calls&&errors.length)throw errors[0];
  }
  if(p==="omdb"){
   const q=new URL("https://www.omdbapi.com/");q.searchParams.set("apikey",secret);
@@ -371,7 +393,7 @@ Deno.serve(async(req:Request)=>{
  let data:any;
  try{data=await req.json();if(!data||typeof data!=="object"||Array.isArray(data))throw Error();}
  catch(_){return reply(400,{error:"Invalid JSON request"});}
- if(data.action==="status")return reply(200,{version:555,ready:true,
+ if(data.action==="status")return reply(200,{version:559,ready:true,
   providers:Object.entries(RULES).map(([id,r])=>({id,configured:!r.env||Boolean(KEY(r.env)),
    mode:r.mode,testable:r.mode!=="review",metadataSupported:r.mode!=="review"&&["tmdb","omdb","malofficial","trakt","simkl","watchmode","animeschedule","metron","episodate","gutendex"].includes(id)}))});
  if(data.action!=="search"&&data.action!=="metadata")return reply(400,{error:"Invalid action"});
@@ -389,7 +411,9 @@ Deno.serve(async(req:Request)=>{
    if(/^[a-z][a-z0-9_]{0,32}$/.test(k)&&/^[\w.:-]{1,120}$/.test(value))ids[k]=value;
   }
  const year=yr(data.year),account=verified.data.user.id;
- const cacheKey=account+":"+data.action+":"+(data.loose===true?"loose":"")+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year;
+ // v559: optional media hint ("movie"/"tv") so TMDB queries the right catalogue first.
+ const kind=data.kind==="movie"||data.kind==="tv"?data.kind:"";
+ const cacheKey=account+":"+data.action+":"+(data.loose===true?"loose":"")+":"+p+":"+norm(title)+":"+JSON.stringify(ids)+":"+year+":"+kind;
  const cached=mem.get(cacheKey);
  if(cached&&cached.until>Date.now())return reply(200,{provider:p,results:cached.results,cached:true});
  const throttle=account+":"+p;
@@ -403,7 +427,7 @@ Deno.serve(async(req:Request)=>{
   if(claim.error)return reply(503,{error:"Gateway quota database is unavailable"});
   if(claim.data!==true)return reply(429,{error:"Safe daily provider quota reached"});
   const loose=data.action==="search"&&data.loose===true;
-  const results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year,loose);
+  const results=data.action==="metadata"?await metadata(p,title,ids,year):await discover(p,title,ids,year,loose,kind);
   if(mem.size>300)mem.delete(mem.keys().next().value as string);
   mem.set(cacheKey,{until:Date.now()+1200000,results});
   return reply(200,{provider:p,results,cached:false});

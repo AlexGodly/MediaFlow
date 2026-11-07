@@ -35,7 +35,7 @@ const deploy=read('.github/workflows/deploy-pages.yml');
 assert(deploy.includes('"Build archive and release MediaFlow v555"'),'deploy runs after the v555 release');
 assert(fs.existsSync(path.join(root,'docs/release-v555.md')),'release notes present');
 const gw=read('supabase/functions/mediaflow-api-gateway/index.ts');
-assert(gw.includes('version:555')&&gw.includes('loose=false')&&!gw.includes('let LOOSE'),'gateway v555');
+assert(Number((gw.match(/version:(\d+),ready/)||[])[1])>=555&&gw.includes('loose=false')&&!gw.includes('let LOOSE'),'gateway v555');
 assert(fs.existsSync(path.join(root,'supabase/migrations/20261102_v555_gateway_quota_limits.sql')),'quota migration present');
 const save=read('src/js/components/395-v555-background-save.js');
 assert(save.includes('const CH=24576')&&!/const CH=0x8000/.test(save),'base64 chunks are a multiple of 3 bytes');
