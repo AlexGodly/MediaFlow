@@ -1,0 +1,92 @@
+/* ============================================================
+   MediaFlow v278 — responsive bottom navigation visual parity
+   Extends the clean small-screen bottom-nav appearance through the
+   complete <=1080px responsive range. v277 fixed the breakpoint; v278
+   fixes the visual fallback between 861px and 1080px.
+   ============================================================ */
+
+@media(max-width:1080px){
+  body.v260-redesign .mobile-tabbar{
+    background:color-mix(in srgb,var(--bg) 94%,transparent)!important;
+    border:0!important;
+    border-top:1px solid var(--border-soft)!important;
+    box-shadow:0 -8px 28px color-mix(in srgb,#000 8%,transparent)!important;
+    backdrop-filter:blur(14px)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    align-items:center!important;
+  }
+
+  /* Buttons must look like the existing phone/tablet navigation, not the
+     browser-default bordered buttons that appeared at intermediate widths. */
+  body.v260-redesign .mobile-tabbar>.mtab,
+  body.v260-redesign .mobile-more-wrap,
+  body.v260-redesign .mobile-more-wrap>.mtab{
+    border:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+  }
+
+  body.v260-redesign .mobile-tabbar .mtab{
+    appearance:none!important;
+    -webkit-appearance:none!important;
+    outline:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    border-radius:10px!important;
+    min-height:56px!important;
+    max-height:66px!important;
+    padding:5px 3px 4px!important;
+    color:var(--text-mute)!important;
+    transition:color .14s ease,background .14s ease!important;
+  }
+
+  body.v260-redesign .mobile-tabbar .mtab:hover,
+  body.v260-redesign .mobile-tabbar .mtab:focus-visible,
+  body.v260-redesign .mobile-tabbar .mtab:active{
+    border:0!important;
+    box-shadow:none!important;
+    background:color-mix(in srgb,var(--panel-raised) 34%,transparent)!important;
+  }
+
+  body.v260-redesign .mobile-tabbar .mtab.active{
+    color:var(--flow)!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+
+  body.v260-redesign .mobile-tabbar .mtab svg{
+    stroke-width:1.85!important;
+  }
+
+  body.v260-redesign .mobile-more-wrap{
+    border-radius:10px!important;
+    overflow:visible!important;
+  }
+
+  /* Keep the popup itself as a card; only the persistent bottom-bar tabs are
+     borderless. */
+  body.v260-redesign .mobile-more-menu{
+    background:var(--panel-raised)!important;
+    border:1px solid var(--border)!important;
+    border-radius:14px!important;
+    box-shadow:0 18px 50px rgba(0,0,0,.26)!important;
+  }
+}
+
+@media(max-width:600px){
+  body.v260-redesign .mobile-tabbar .mtab{
+    min-height:52px!important;
+    max-height:62px!important;
+    gap:4px!important;
+  }
+}
+
+@media(max-width:360px){
+  body.v260-redesign .mobile-tabbar .mtab{
+    min-height:48px!important;
+    max-height:58px!important;
+    padding-inline:2px!important;
+  }
+}

@@ -1,0 +1,16 @@
+MediaFlow v369 — Release Candidate Validation, October 10, 2026
+
+PASS — node tests/test-v369-itemized-contract.cjs
+PASS — python tests/test-v369-browser-smoke.py
+PASS — python tests/test-v369-repeat-browser.py
+PASS — python scripts/build.py; node --check assets/js/mediaflow-v369.bundle.js
+PASS — python scripts/check.py (CHECK OK)
+PASS — PWA version, compiled entrypoint and cache metadata reference 369
+PASS — Direct read-only Supabase schema inspection: public.mediaflow_states.state_data JSONB; RLS enabled
+
+UNVERIFIED — Live authenticated cross-device/offline draft conflict resolution
+UNVERIFIED — Installed Android/iOS/desktop PWA auto-update on real devices
+UNVERIFIED — Production account restore/import/export round trips
+UNVERIFIED — Comparative 30k–50k Library real-device benchmarks
+
+This artifact has not been deployed to the production GitHub Pages website.
