@@ -1,0 +1,146 @@
+/* v430 — Recovery, Settings and Missing Covers theme-native visual contract.
+   Dynamic tokens are inherited from MediaFlow; no alternate hardcoded theme. */
+html body .mf430-config-modal .mf424-dialog{
+ --mf425-bg:var(--panel);--mf425-raised:var(--panel-raised);
+ --mf425-ink:var(--text);--mf425-muted:var(--text-dim);
+ --mf425-line:var(--border-soft);--mf425-accent:var(--flow);
+ background:var(--panel)!important;color:var(--text)!important;
+ border:1px solid var(--border-soft)!important;border-radius:18px;
+ width:min(960px,100%);max-height:min(94dvh,1000px);
+ box-shadow:0 24px 90px color-mix(in srgb,var(--text) 21%,transparent);
+}
+html body .mf430-config-modal .mf424-heading{
+ padding-bottom:16px;border-bottom:1px solid var(--border-soft);
+ align-items:center;margin-bottom:14px
+}
+html body .mf430-config-modal :is(.mf424-heading h2,.mf424-dialog h3,.mf424-provider strong){
+ color:var(--text)!important;text-shadow:none!important;opacity:1!important
+}
+html body .mf430-config-modal :is(.mf424-heading p,.mf424-note,.mf424-provider small,
+ .mf425-scope-locked,.mf425-scope-select){color:var(--text-dim)!important;opacity:1!important}
+html body .mf430-config-modal .mf424-heading small{color:var(--flow)!important}
+html body .mf430-config-modal :is(.mf424-options select,.mf424-options input,
+ .mf425-scope-select select){background:var(--panel-raised)!important;
+ color:var(--text)!important;border:1px solid var(--border-soft)!important}
+html body .mf430-config-modal select option{background:var(--panel)!important;color:var(--text)!important}
+html body .mf430-config-modal input[type=checkbox]{accent-color:var(--flow)!important;
+ width:18px;height:18px;cursor:pointer}
+html body .mf430-config-modal .mf424-provider-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+html body .mf430-config-modal .mf424-provider{
+ min-width:0;min-height:78px;grid-template-columns:20px minmax(0,1fr) auto;
+ gap:5px 10px;padding:12px 14px;background:var(--panel-raised)!important;
+ border:1px solid var(--border-soft)!important;border-radius:13px;
+ transition:border-color .15s ease,background .15s ease
+}
+html body .mf430-config-modal .mf424-provider:has(input:checked){
+ border-color:color-mix(in srgb,var(--flow) 46%,var(--border-soft))!important;
+ background:color-mix(in srgb,var(--flow) 5%,var(--panel-raised))!important
+}
+html body .mf430-config-modal .mf424-provider>input{grid-column:1;grid-row:1/3;margin:0}
+html body .mf430-config-modal .mf424-provider>strong{grid-column:2;grid-row:1;overflow-wrap:anywhere}
+html body .mf430-config-modal .mf424-provider>small{grid-column:2;grid-row:2;font-size:11px}
+html body .mf430-config-modal .mf424-provider-order{grid-column:3;grid-row:1/3;
+ display:flex;gap:6px;align-items:center;justify-self:end}
+html body .mf430-config-modal .mf424-provider-order button{
+ min-width:34px;min-height:34px;display:grid;place-items:center;
+ color:var(--text)!important;background:var(--panel)!important;
+ border:1px solid var(--border-soft)!important;border-radius:9px
+}
+html body .mf430-config-modal .mf424-provider-order button:hover{
+ color:var(--flow)!important;border-color:var(--flow)!important
+}
+html body .mf430-config-modal .mf424-actions{background:var(--panel)!important;
+ border-top:1px solid var(--border-soft);padding-top:13px}
+html body .mf430-config-modal .mf424-actions .btn{min-height:42px;
+ color:var(--text)!important;background:var(--panel-raised)!important;
+ border-color:var(--border-soft)!important;gap:8px}
+html body .mf430-config-modal .mf424-actions .btn-primary{
+ background:var(--flow)!important;color:var(--btn-primary-text,#fff)!important;
+ border-color:var(--flow)!important
+}
+html body .mf430-config-modal .v225-btn-icon{display:none!important}
+html body .mf430-config-modal :is(button,select,input):focus-visible{
+ outline:2px solid var(--flow)!important;outline-offset:3px
+}
+/* Keep the native Settings section; no nested off-style card. */
+.mf365-section[data-mf365-section="v221-settings-cover-recovery"] .mf425-settings-card{
+ border:0!important;background:transparent!important;box-shadow:none!important;
+ padding:4px 1px!important;border-radius:0!important
+}
+.mf430-settings-providers{border:1px solid var(--border-soft);background:var(--panel);
+ border-radius:13px;margin:18px 0 12px;padding:14px;min-width:0}
+.mf430-settings-providers legend{display:flex;align-items:center;gap:8px;
+ padding:0 6px;font-size:13px;font-weight:800;color:var(--text)}
+.mf430-settings-provider-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.mf430-settings-provider{min-width:0;display:flex;align-items:center;justify-content:space-between;
+ gap:8px;padding:10px 11px;border:1px solid var(--border-soft);
+ background:var(--panel-raised);border-radius:11px}
+.mf430-settings-provider label{display:flex;align-items:center;gap:9px;min-width:0;
+ cursor:pointer;color:var(--text)}
+.mf430-settings-provider label>span{min-width:0;display:grid;gap:3px}
+.mf430-settings-provider small{font-size:10px;color:var(--text-dim)}
+.mf430-settings-provider input[type=checkbox]{width:17px;height:17px;flex:none;accent-color:var(--flow)}
+.mf430-settings-provider-order{display:flex;gap:4px;flex:none}
+.mf430-settings-provider-order .btn{width:32px;height:32px;min-width:32px;
+ min-height:32px;padding:5px;display:grid;place-items:center;
+ background:var(--panel);color:var(--text);border:1px solid var(--border-soft)}
+.mf430-settings-provider-order .btn:hover{color:var(--flow);border-color:var(--flow)}
+.mf430-settings-auto{display:flex;align-items:flex-start!important;gap:10px;
+ padding:13px;border:1px solid var(--border-soft);border-radius:11px;
+ background:var(--panel-raised)}
+.mf430-settings-auto>span{display:grid;gap:5px}
+.mf430-settings-auto strong{font-size:12px;color:var(--text)}
+.mf430-settings-auto small{font-size:11px;color:var(--text-dim);line-height:1.5}
+/* Missing Covers: full-width URL field and a single organized action bar. */
+.v192-missing-covers .v192-cover-control{display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;gap:12px!important;
+ align-items:stretch!important;min-width:0}
+.v192-missing-covers .v192-cover-url-field{width:100%!important;max-width:none!important;
+ min-width:0!important}
+.v192-missing-covers #v192-cover-url-input{width:100%!important;min-width:0!important}
+.v192-missing-covers .v192-cover-actions{display:flex!important;align-items:center!important;
+ flex-wrap:wrap;justify-content:flex-start!important;gap:9px!important;
+ margin:0!important;padding-top:12px;border-top:1px solid var(--border-soft)}
+.v192-missing-covers .v192-cover-actions .btn{display:inline-flex;gap:7px;
+ align-items:center;justify-content:center;min-height:40px;
+ padding:9px 13px;border-radius:10px;white-space:normal;text-align:center}
+.v192-missing-covers .v192-cover-actions .mf430-find-cover{margin-right:auto;
+ border-color:color-mix(in srgb,var(--flow) 35%,var(--border-soft));
+ color:var(--text);background:var(--panel-raised)}
+.v192-missing-covers .v192-cover-actions .btn-primary{margin-left:auto}
+.v192-missing-covers .mf430-missing-auto{display:flex;gap:11px;align-items:flex-start;
+ margin-top:12px;padding:13px 14px;background:var(--panel-raised);
+ border:1px solid var(--border-soft);border-radius:11px;
+ color:var(--text);cursor:pointer}
+.v192-missing-covers .mf430-missing-auto input{width:18px;height:18px;flex:none;
+ margin:2px 0 0;accent-color:var(--flow)}
+.v192-missing-covers .mf430-missing-auto span{display:grid;gap:5px;min-width:0}
+.v192-missing-covers .mf430-missing-auto strong{font-size:12px;font-weight:750}
+.v192-missing-covers .mf430-missing-auto small{font-size:11px;
+ color:var(--text-dim);line-height:1.55}
+.mf430-maintenance-card{margin-bottom:20px}
+.mf430-maintenance-layout{display:flex;gap:16px;align-items:center;
+ justify-content:space-between;flex-wrap:wrap}
+.mf430-maintenance-copy{flex:1 1 280px;min-width:0;overflow-wrap:anywhere}
+.mf430-maintenance-action{flex:0 0 auto;min-height:42px;display:inline-flex;
+ align-items:center;justify-content:center;gap:8px;white-space:normal}
+.mf421-dock-progress[role=button]{display:inline-flex;align-items:center;
+ justify-content:center;cursor:pointer;background:var(--panel-raised);border-radius:12px}
+.mf421-dock-progress[role=button]:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+.mf421-dock-progress[role=button]>.v225-btn-icon{display:none!important}
+@media(max-width:720px){
+ .mf430-settings-provider-list{grid-template-columns:1fr}
+ html body .mf430-config-modal .mf424-provider-grid{grid-template-columns:1fr}
+ .v192-missing-covers .v192-cover-actions .mf430-find-cover{margin:0;flex:1 1 100%}
+ .v192-missing-covers .v192-cover-actions .btn-primary{margin-left:0;flex:1}
+ .mf430-maintenance-action{width:100%}
+}
+@media(max-width:400px){
+ .v192-missing-covers .v192-cover-actions .btn{flex:1 1 calc(50% - 9px)}
+ .v192-missing-covers .v192-cover-actions .mf430-find-cover{flex-basis:100%}
+ html body .mf430-config-modal .mf424-dialog{padding:14px;border-radius:13px}
+ .mf430-settings-providers{padding:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ html body .mf430-config-modal .mf424-provider{transition:none}
+}
