@@ -1,0 +1,20 @@
+/* v557: "Add to Logging" popup shows only Browse Library. */
+#mf555-log-popup.mf557-library-only .mf557-hidden{display:none!important}
+#mf555-log-popup.mf557-library-only .mf557-path{display:block!important;margin:0!important;padding:0!important;border:0!important;
+  background:none!important;box-shadow:none!important;min-height:0!important;max-width:none!important;width:auto!important;overflow:visible!important}
+#mf555-log-popup.mf557-library-only .mf557-path::before,#mf555-log-popup.mf557-library-only .mf557-path::after{display:none!important}
+#mf555-log-popup.mf557-library-only details.v238-log-library{margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important}
+#mf555-log-popup.mf557-library-only details.v238-log-library::before,#mf555-log-popup.mf557-library-only details.v238-log-library::after{display:none!important}
+#mf555-log-popup.mf557-library-only details.v238-log-library > summary{display:none!important}
+#mf555-log-popup.mf557-library-only details.v238-log-library > .v238-log-library-body{display:block!important;padding:4px 0 0!important;border:0!important;margin:0!important;background:none!important;box-shadow:none!important}
+#mf555-log-popup.mf557-library-only .mf555-log-body{padding-top:12px}
+.mf557-head-copy{display:flex;align-items:center;gap:12px;min-width:0}
+.mf557-head-icon{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:11px;flex:0 0 auto;
+  background:color-mix(in srgb,var(--accent,#e8b04a) 16%,transparent);color:var(--accent,#e8b04a)}
+.mf557-head-icon svg{width:20px;height:20px}
+.mf557-head-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf557-added{color:var(--accent,#e8b04a);font-weight:600}
+.mf557-head-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.mf557-open-logging{display:inline-flex;align-items:center;gap:6px}
+.mf557-open-logging svg{width:15px;height:15px}
+@media (max-width:560px){.mf557-open-logging span{display:none}.mf557-open-logging{width:34px;height:34px;padding:0;justify-content:center}}

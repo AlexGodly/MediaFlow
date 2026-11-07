@@ -1,0 +1,67 @@
+/* MediaFlow v534 — themed Category Class deletion. Scoped to this confirmation only. */
+#modal-root[data-mf534-class-delete]{position:fixed!important;inset:0!important;z-index:2147483000!important}
+#modal-root[data-mf534-class-delete] .mf534-delete-overlay{
+ position:fixed!important;inset:0!important;z-index:2147483000!important;
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ padding:clamp(10px,3vw,24px)!important;box-sizing:border-box!important;
+ background:rgba(4,7,14,.70)!important;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)
+}
+#modal-root[data-mf534-class-delete] .mf534-delete-dialog{
+ position:relative!important;display:flex!important;flex-direction:column!important;
+ width:min(100%,500px)!important;max-width:500px!important;max-height:calc(100dvh - 20px)!important;
+ padding:0!important;margin:0!important;box-sizing:border-box!important;overflow-y:auto!important;
+ border:1px solid var(--border-soft,var(--border))!important;
+ border-radius:clamp(16px,2vw,22px)!important;
+ background:linear-gradient(145deg,color-mix(in srgb,var(--flow,#818cf8) 5%,var(--panel,var(--card,#171a24))),var(--panel,var(--card,#171a24)))!important;
+ color:var(--text,var(--fg,#e7e7e7))!important;
+ box-shadow:0 28px 90px rgba(0,0,0,.35),0 3px 18px rgba(0,0,0,.08)!important;
+ animation:mf534-delete-in .20s ease-out both;
+}
+.mf534-delete-header{display:flex;gap:14px;align-items:flex-start;padding:25px 24px 20px;min-width:0}
+.mf534-delete-icon{flex:none;width:51px;height:51px;display:grid;place-items:center;border-radius:16px;
+ background:color-mix(in srgb,var(--overused,#e8607a) 13%,transparent);
+ border:1px solid color-mix(in srgb,var(--overused,#e8607a) 35%,transparent);
+ color:var(--overused,#e8607a);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.mf534-delete-heading{flex:1;min-width:0;overflow-wrap:anywhere}
+.mf534-delete-heading small{font-size:10px;letter-spacing:.12em;font-weight:800;color:var(--overused,#e8607a)}
+.mf534-delete-heading h2{font-size:clamp(19px,2.3vw,24px);line-height:1.2;letter-spacing:-.025em;margin:5px 0 9px;font-weight:800;color:var(--text,var(--fg))}
+.mf534-delete-heading p{margin:0;line-height:1.6;font-size:13px;color:var(--text-dim,var(--muted))}
+.mf534-delete-heading strong{color:var(--text,var(--fg));font-weight:800}
+.mf534-delete-dismiss{flex:none;display:grid;place-items:center;width:32px;height:32px;margin:-4px -4px 0 0;
+ border:1px solid var(--border-soft,var(--border));border-radius:10px;background:var(--surface-elevated,var(--card));
+ color:var(--text-dim,var(--muted));font-size:22px;line-height:1;cursor:pointer}
+.mf534-delete-dismiss:hover{color:var(--text,var(--fg));border-color:var(--flow,#818cf8)}
+.mf534-delete-content{padding:0 24px 22px}
+.mf534-delete-safe{display:flex;gap:12px;align-items:flex-start;border-radius:14px;
+ padding:15px;border:1px solid color-mix(in srgb,var(--flow,#818cf8) 25%,var(--border-soft));
+ background:color-mix(in srgb,var(--flow,#818cf8) 7%,var(--surface,var(--panel)))}
+.mf534-delete-safe>span{flex:none;display:grid;place-items:center;width:25px;height:25px;border-radius:9px;
+ color:var(--flow,#818cf8);background:color-mix(in srgb,var(--flow,#818cf8) 12%,transparent);
+ font-weight:850;font-size:14px}
+.mf534-delete-safe b{font-size:13px;font-weight:750;color:var(--text,var(--fg))}
+.mf534-delete-safe p{font-size:12px;line-height:1.65;color:var(--text-dim,var(--muted));margin:6px 0 0}
+.mf534-delete-warning{font-size:12px;line-height:1.65;color:var(--muted,var(--text-dim));margin:16px 2px 0;
+ padding-left:11px;border-left:2px solid var(--overused,#e8607a)}
+.mf534-delete-actions{border-top:1px solid var(--border-soft,var(--border));display:flex;justify-content:flex-end;
+ align-items:center;gap:10px;padding:17px 24px 20px;background:color-mix(in srgb,var(--surface,var(--panel)) 65%,transparent)}
+.mf534-delete-actions .btn{min-height:43px;white-space:normal;line-height:1.2;font-size:12px;font-weight:750;padding:11px 17px}
+#modal-root[data-mf534-class-delete] .mf534-delete-confirm{display:flex;align-items:center;justify-content:center;gap:8px;
+ color:#fff!important;background:var(--overused,#d63d58)!important;
+ border:1px solid var(--overused,#d63d58)!important;
+ box-shadow:0 5px 15px color-mix(in srgb,var(--overused,#e8607a) 17%,transparent)}
+#modal-root[data-mf534-class-delete] .mf534-delete-confirm:hover{filter:brightness(1.08)}
+#modal-root[data-mf534-class-delete] .mf534-delete-confirm:disabled{opacity:.55;cursor:wait}
+#modal-root[data-mf534-class-delete] :is(button):focus-visible{outline:2px solid var(--flow,#818cf8);outline-offset:3px}
+@media(max-width:520px){
+ #modal-root[data-mf534-class-delete] .mf534-delete-overlay{padding:10px!important}
+ #modal-root[data-mf534-class-delete] .mf534-delete-dialog{width:100%!important;max-width:100%!important;border-radius:17px!important}
+ .mf534-delete-header{padding:19px 15px 15px;gap:10px}
+ .mf534-delete-icon{width:42px;height:42px;border-radius:13px}
+ .mf534-delete-heading h2{font-size:19px}
+ .mf534-delete-content{padding:0 15px 16px}
+ .mf534-delete-actions{padding:13px 15px 16px;flex-wrap:wrap}
+ .mf534-delete-actions .btn{flex:1 1 150px;min-width:0}
+}
+@media(max-width:340px){.mf534-delete-actions{flex-direction:column-reverse}.mf534-delete-actions .btn{width:100%;flex-basis:auto}}
+@media(prefers-reduced-motion:reduce){#modal-root[data-mf534-class-delete] .mf534-delete-dialog{animation:none!important}}
+@keyframes mf534-delete-in{from{opacity:0;transform:translateY(8px) scale(.984)}to{opacity:1;transform:translateY(0) scale(1)}}
