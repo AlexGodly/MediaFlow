@@ -1,0 +1,131 @@
+/* MediaFlow v254 — Covers/Covers+Titles overlay options */
+.v254-cover-overlay-controls{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 12px;
+  padding:10px 12px;
+  border:1px solid var(--border-soft);
+  border-radius:12px;
+  background:color-mix(in srgb,var(--panel-raised) 88%,transparent);
+}
+.v254-cover-overlay-label{display:grid;gap:2px;min-width:0}
+.v254-cover-overlay-label b{font-size:12px;color:var(--text)}
+.v254-cover-overlay-label span{font-size:10.5px;color:var(--text-mute)}
+.v254-cover-overlay-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.v254-cover-overlay-toggle{min-height:34px}
+.v254-cover-overlay-toggle .v254-cover-overlay-state{
+  margin-left:3px;
+  padding:2px 5px;
+  border-radius:999px;
+  font-size:8.5px;
+  font-weight:900;
+  letter-spacing:.05em;
+  background:var(--panel);
+  color:var(--text-mute);
+}
+.v254-cover-overlay-toggle.active .v254-cover-overlay-state{
+  color:var(--flow);
+  background:color-mix(in srgb,var(--flow) 13%,var(--panel));
+}
+
+/* The overlay is always aligned to the actual 118x167 scaled cover rectangle,
+   not to a potentially wider auto-fill grid cell. */
+.v254-cover-overlay-host{position:relative!important}
+.library-view-covers .item-row>.v254-cover-overlay-frame,
+.library-view-covers-title .item-row>.v254-cover-overlay-frame,
+.v181-dynamic-covers .v181-cover-tile>.v254-cover-overlay-frame,
+.v181-dynamic-covers-title .v181-cover-tile>.v254-cover-overlay-frame{
+  display:block!important;
+  position:absolute;
+  z-index:7;
+  top:0;
+  left:50%;
+  width:calc(118px * var(--v177-library-scale,1));
+  height:calc(167px * var(--v177-library-scale,1));
+  transform:translateX(-50%);
+  pointer-events:none;
+  border-radius:9px;
+  overflow:hidden;
+}
+.v254-cover-badge{
+  position:absolute;
+  top:7px;
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--border) 85%,transparent);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--panel) 84%,transparent);
+  color:var(--text);
+  backdrop-filter:blur(7px);
+  box-shadow:0 4px 14px rgba(0,0,0,.23);
+}
+.v254-cover-status{left:7px}
+.v254-cover-category{right:7px}
+.v254-cover-badge .v225-btn-icon{display:grid!important;place-items:center;margin:0!important;width:16px!important;height:16px!important}
+.v254-cover-badge .v225-btn-icon svg{width:16px!important;height:16px!important}
+.v254-cover-badge .v144-cat-icon-img{display:block;width:16px!important;height:16px!important;object-fit:contain}
+.v254-cover-badge .v144-cat-icon-emoji{font-size:15px!important;line-height:1!important}
+.v254-status-active{color:#57e6a3}
+.v254-status-completed{color:#72f0b5}
+.v254-status-paused{color:#f5c15c}
+.v254-status-dropped{color:#ff6f7f}
+.v254-status-planned{color:#8eb7ff}
+
+.v254-cover-rating{
+  position:absolute;
+  right:7px;
+  bottom:10px;
+  min-height:23px;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:3px 6px;
+  border:1px solid rgba(255,213,79,.34);
+  border-radius:999px;
+  background:rgba(12,15,24,.78);
+  color:#ffd75a;
+  font-size:9.5px;
+  font-weight:900;
+  line-height:1;
+  backdrop-filter:blur(7px);
+  box-shadow:0 4px 14px rgba(0,0,0,.22);
+}
+.v254-cover-progress{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:6px;
+  overflow:hidden;
+  background:rgba(5,8,15,.72);
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.v254-cover-progress-fill{
+  display:block;
+  height:100%;
+  min-width:0;
+  background:var(--v254-progress-color,var(--flow));
+  box-shadow:0 0 10px color-mix(in srgb,var(--v254-progress-color,var(--flow)) 65%,transparent);
+  transition:width .18s ease;
+}
+
+/* Dynamic cover selection owns the upper-left corner. Keep the semantic status
+   readable without changing the existing Select title control. */
+.v189-selectable-cover>.v254-cover-overlay-frame>.v254-cover-status{left:41px}
+.v191-clean-covers .v189-selectable-cover>.v254-cover-overlay-frame>.v254-cover-status{left:7px}
+
+@media(max-width:760px){
+  .v254-cover-overlay-controls{align-items:stretch;flex-direction:column}
+  .v254-cover-overlay-actions{justify-content:flex-start}
+}
+@media(max-width:420px){
+  .v254-cover-overlay-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .v254-cover-overlay-toggle{width:100%;justify-content:center}
+}
+@media(max-width:310px){
+  .v254-cover-overlay-actions{grid-template-columns:1fr}
+}
