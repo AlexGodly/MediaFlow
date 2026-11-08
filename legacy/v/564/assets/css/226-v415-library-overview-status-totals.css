@@ -1,0 +1,12 @@
+/* MediaFlow v415 — Library Overview title total and ordered status breakdown. */
+.mf415-overview-item{font-variant-numeric:tabular-nums}
+.mf415-overview-total{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid var(--border-soft,rgba(127,127,127,.2));border-radius:9px;background:var(--panel-raised,rgba(127,127,127,.07));font-size:12px;color:var(--text-dim,var(--text-muted,var(--text)))}
+.mf415-overview-total strong{font-size:16px;line-height:1.2;color:var(--text);font-weight:800}
+.mf415-overview-statuses{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;list-style:none!important;padding:0!important;margin:0!important;min-width:0!important;align-content:start!important}
+.mf415-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;min-width:0;margin:0;padding:7px 9px;border-radius:8px;background:var(--panel-raised,rgba(127,127,127,.07));border:1px solid var(--border-soft,rgba(127,127,127,.13));font-size:11.5px;line-height:1.4;color:var(--text-dim,var(--text-muted,var(--text)))}
+.mf415-status-label{min-width:0;overflow-wrap:anywhere}
+.mf415-status-count{flex:0 0 auto;margin-left:auto;font-weight:700;color:var(--text);font-size:12px}
+.mf415-overview-item .mf413-overview-count{align-self:end;font-size:11.5px}
+@media(max-width:370px){.mf415-overview-statuses{grid-template-columns:minmax(0,1fr)!important}.mf415-status{padding:6px 9px}}
+@media(min-width:780px) and (max-width:1100px){.mf415-overview-statuses{grid-template-columns:minmax(0,1fr)!important}}
+@media(prefers-reduced-motion:reduce){.mf415-overview-item{transition:none}}

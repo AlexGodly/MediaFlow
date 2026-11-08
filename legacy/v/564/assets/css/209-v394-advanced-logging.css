@@ -1,0 +1,26 @@
+/* v394 — Advanced Logging tabs, two summary methods; theme-aware and responsive. */
+.mf394-title .mf394-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:4px;border:1px solid var(--border-soft,var(--border));background:var(--panel,var(--surface));border-radius:11px;margin-bottom:14px}
+.mf394-title .mf394-tabs button{min-width:0;white-space:normal;min-height:40px;text-align:center;padding:8px 6px;font-size:12px}
+.mf394-title .mf394-tabs button.active{background:var(--flow,var(--accent));color:var(--bg,var(--surface));border-color:transparent}
+.mf394-bulk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0}
+.mf394-field{display:grid;gap:7px;font-size:12px;color:var(--text-dim);min-width:0}
+.mf394-field>label{display:grid;gap:7px}
+.mf394-field input,.mf394-field select{width:100%;min-width:0;max-width:none;box-sizing:border-box;height:41px;font-size:14px}
+.mf394-summary{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;padding:12px;border-radius:10px;background:var(--panel,var(--surface));border:1px solid var(--border-soft,var(--border));font-size:12px}
+.mf394-summary span{display:inline-flex;gap:5px;align-items:center}
+.mf394-bulk>.mf394-field:has([type=datetime-local]){grid-column:1/-1}
+.mf394-runtime{grid-column:1/-1;display:grid;gap:10px;border:1px solid var(--border-soft,var(--border));padding:13px;border-radius:11px;background:var(--panel,var(--surface))}
+.mf394-runtime-toggle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600}.mf394-runtime-toggle input{width:17px;height:17px}
+.mf394-auto-runtime{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-dim)}.mf394-auto-runtime strong{color:var(--text)}
+.mf394-auto-runtime small{width:100%}.mf394-hint{grid-column:1/-1;display:block;font-size:11px;color:var(--text-dim)}
+.mf394-warning{grid-column:1/-1;margin:0;padding:10px 12px;border-radius:9px;border:1px solid var(--border);font-size:12px;color:var(--text);background:var(--panel,var(--surface))}
+.mf394-title [hidden]{display:none!important}
+@media(max-width:720px){.mf394-bulk{grid-template-columns:minmax(0,1fr)}.mf394-bulk>.mf394-field,.mf394-bulk>.mf394-field:has([type=datetime-local]){grid-column:1}.mf394-title .mf394-tabs{gap:3px}.mf394-title .mf394-tabs button{font-size:11px;min-height:42px;padding:7px 3px}}
+
+/* v395 — advanced logging tab polish */
+.mf394-title .mf394-tabs button{display:flex;align-items:center;justify-content:center;gap:8px;line-height:1.2}
+.mf394-title .mf394-tab-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:inherit}
+.mf394-title .mf394-tab-icon .v370-icon{display:block}
+.mf394-title .mf394-tab-label{display:inline-flex;align-items:center;justify-content:center;min-width:0;white-space:normal;text-align:center}
+.mf394-title .mf394-tabs button.active .mf394-tab-icon{opacity:1}
+@media(max-width:720px){.mf394-title .mf394-tabs button{gap:6px}.mf394-title .mf394-tab-label{font-size:11px}}
