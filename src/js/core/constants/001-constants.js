@@ -287,7 +287,7 @@ const DEFAULT_SETTINGS = {
   v181CoverSizes: {library:100,order:100,recommended:100,rating:100,onThisDayFirst:100,onThisDayList:100,logging:100,history:100,rerollHistory:100,modifiedAt:0},
   dynamicCoverTheme: false, // v146: dynamic full-cover theme mode; recommended cover -> On This Day -> selected theme
   theme: 'dark',
-  globalAppearanceEnabled: true, // v132: when false, themes use their original/native appearance with no global Light/Dark override
+  globalAppearanceEnabled: false, // v564: off by default (the theme's own colours). v132: when false, themes use their original/native appearance with no global Light/Dark override
   appearanceMode: '', // v106/v132: saved Light/Dark preference used only while Global appearance is enabled
   backup: {enabled:false, interval:60, mode:'single', folderName:'', fileName:'mediaflow-backup.json'},
   leveling: {
