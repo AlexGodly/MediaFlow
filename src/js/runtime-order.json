@@ -258,5 +258,6 @@
   "components/402-v559-tmdb-covers.js",
   "components/403-v560-tmdb-saved-job.js",
   "components/404-v561-live-logging-app-time.js",
-  "components/405-v562-library-history-more.js"
+  "components/405-v562-library-history-more.js",
+  "components/406-v563-fixes.js"
 ]

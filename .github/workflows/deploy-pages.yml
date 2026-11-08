@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   workflow_run:
-    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554", "Build archive and release MediaFlow v555", "Build archive and release MediaFlow v556", "Build archive and release MediaFlow v557", "Build archive and release MediaFlow v558", "Build archive and release MediaFlow v559", "Build archive and release MediaFlow v560", "Build archive and release MediaFlow v561", "Build archive and release MediaFlow v562"]
+    workflows: ["Build archive and release MediaFlow v550", "Build archive and release MediaFlow v551", "Build archive and release MediaFlow v552", "Build archive and release MediaFlow v553", "Build archive and release MediaFlow v554", "Build archive and release MediaFlow v555", "Build archive and release MediaFlow v556", "Build archive and release MediaFlow v557", "Build archive and release MediaFlow v558", "Build archive and release MediaFlow v559", "Build archive and release MediaFlow v560", "Build archive and release MediaFlow v561", "Build archive and release MediaFlow v562", "Build archive and release MediaFlow v563"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
