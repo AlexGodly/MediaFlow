@@ -1,0 +1,27 @@
+/* ============================================================
+   MediaFlow v233 — Dynamic Settings + Title Details cover sizing
+   ============================================================ */
+
+:root{
+  --v233-cover-title-details:1;
+  --v233-cover-title-details-width:92px;
+  --v233-cover-title-details-height:130px;
+}
+
+/* v233 writes concrete responsive dimensions to these variables so scaling
+   works consistently even in engines that do not support CSS multiplication. */
+.v181-title-details-modal .v181-title-hero-cover,
+.v181-title-details-modal .v181-title-hero-placeholder{
+  width:var(--v233-cover-title-details-width)!important;
+  height:var(--v233-cover-title-details-height)!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+
+.v233-dynamic-subsection-label{
+  margin-bottom:10px;
+  color:var(--text-mute);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.04em;
+}

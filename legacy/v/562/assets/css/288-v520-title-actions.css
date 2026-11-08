@@ -1,0 +1,26 @@
+/* MediaFlow v520 — title actions, inheriting the current theme. */
+.mf520-title-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center;max-width:100%;margin:11px 0 14px;padding:10px 0}
+.mf520-title-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:normal;text-align:center;border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.25)));border-radius:12px;background:var(--surface-2,var(--panel,transparent));color:var(--text);min-height:39px;padding:9px 13px;transition:background .16s,border-color .16s,transform .16s}
+.mf520-title-actions .btn:hover{border-color:var(--flow);transform:translateY(-1px)}
+.mf520-title-actions .mf520-active{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 14%,var(--surface-2,var(--panel,transparent)))}
+.mf520-title-actions .btn svg{flex-shrink:0;width:17px;height:17px}
+.v181-title-hero-copy>.mf520-title-actions{margin-top:12px}
+.mf520-backdrop{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 12px calc(16px + env(safe-area-inset-bottom,0px));background:rgba(5,8,17,.7);backdrop-filter:blur(8px)}
+.mf520-dialog{display:flex;flex-direction:column;width:min(720px,100%);max-height:min(780px,92dvh);min-height:0;overflow:hidden;border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.28)));border-radius:20px;background:var(--panel,var(--bg,#10151e));color:var(--text);box-shadow:0 20px 90px rgba(0,0,0,.35)}
+.mf520-dialog-head{padding:22px 22px 15px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--border-soft,var(--border,rgba(150,160,190,.2)))}
+.mf520-dialog-head h2{font-size:20px;margin:4px 0 7px}.mf520-dialog-head p{font-size:13px;line-height:1.5;color:var(--muted,var(--text-secondary,#aaa));margin:0;overflow-wrap:anywhere}
+.mf520-eyebrow{letter-spacing:.13em;color:var(--flow);font-size:10px;font-weight:800}
+.mf520-tools{display:flex;align-items:center;gap:12px;padding:15px 22px;color:var(--muted,var(--text-secondary,#aaa));font-size:12px}
+.mf520-search{flex:1;display:flex;gap:8px;align-items:center;padding:0 12px;background:var(--surface-2,rgba(120,120,120,.08));border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.25)));border-radius:12px}
+.mf520-search:focus-within{border-color:var(--flow)}.mf520-search input{min-width:0;width:100%;padding:11px 0;outline:0;border:0!important;background:transparent!important;color:var(--text)}
+.mf520-list{overflow-y:auto;overscroll-behavior:contain;min-height:100px;padding:0 22px 15px;display:grid;align-content:start;gap:8px}
+.mf520-collection-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.2)));background:var(--surface-2,rgba(120,120,120,.07));border-radius:13px;cursor:pointer;min-width:0}
+.mf520-collection-row:has(input:checked){border-color:var(--flow);background:color-mix(in srgb,var(--flow) 11%,transparent)}
+.mf520-collection-row[hidden],.mf520-empty[hidden]{display:none}
+.mf520-collection-row input{flex-shrink:0;accent-color:var(--flow);width:18px;height:18px}
+.mf520-collection-text{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}.mf520-collection-text b{font-size:13px;overflow-wrap:anywhere}.mf520-collection-text small{color:var(--muted,var(--text-secondary,#aaa));line-height:1.4}
+.mf520-collection-cover{flex:0 0 50px!important;width:50px!important;height:58px!important;min-width:50px!important;max-width:50px!important;border-radius:8px;overflow:hidden}
+.mf520-collection-cover img{height:100%;width:100%;object-fit:cover}
+.mf520-footer{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 22px 18px;border-top:1px solid var(--border-soft,var(--border,rgba(150,160,190,.2)))}
+.mf520-spacer{flex:1}.mf520-empty{font-size:13px;color:var(--muted,var(--text-secondary,#aaa));text-align:center;padding:20px}
+@media(max-width:620px){.mf520-title-actions{display:grid;grid-template-columns:1fr}.mf520-title-actions .btn{width:100%}.mf520-backdrop{padding:5px}.mf520-dialog{max-height:96dvh;border-radius:16px}.mf520-dialog-head{padding:16px}.mf520-tools{padding:12px 16px}.mf520-list{padding:0 12px 12px}.mf520-footer{padding:12px}.mf520-footer .btn{font-size:12px}.mf520-close{font-size:12px}}
