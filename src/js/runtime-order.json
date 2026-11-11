@@ -265,5 +265,8 @@
   "components/409-v565-floating-controls.js",
   "components/410-v565-quick-logging.js",
   "components/411-v565-titles.js",
-  "components/412-v565-collection-cover.js"
+  "components/412-v565-collection-cover.js",
+  "components/413-v565-xp-everywhere.js",
+  "components/414-v565-get-mediaflow.js",
+  "components/415-v565-faq.js"
 ]
