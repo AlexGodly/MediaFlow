@@ -127,7 +127,7 @@ function v89ResetLogPage(){ V89_LOG.page=0; }
 function logTitleCandidates(query){
   const q=String(query||'').trim().toLowerCase();
   if(!q) return [];
-  let rows=S.library.filter(i=>i && cleanTitle(i.title).toLowerCase().includes(q));
+  let rows=S.library.filter(i=>i && (typeof mf565NameMatches==='function'?mf565NameMatches(i,q):cleanTitle(i.title).toLowerCase().includes(q))); // v565: every name of the title
   if(V89_LOG.categories.length) rows=rows.filter(i=>V89_LOG.categories.includes(String(i.categoryId||'')));
   if(V89_LOG.status!=='all') rows=rows.filter(i=>String(i.status||'planned').toLowerCase()===V89_LOG.status);
   if(V89_LOG.priority!=='all') rows=rows.filter(i=>String(i.priority||'medium').toLowerCase()===V89_LOG.priority);
@@ -221,7 +221,7 @@ function submitLog(){
     entries.forEach(e=>{
       const item=e.libraryId?S.library.find(i=>i.id===e.libraryId):null;
       const actualCat=(item&&getCategory(item.categoryId))||assignedCat;
-      const qty=Math.max(0,Number(e.qty)||0);
+      const qty=(typeof mf565ToCategoryAmount==='function'?mf565ToCategoryAmount:(i,c,n)=>n)(item,actualCat,Math.max(0,Number(e.qty)||0)); // v565: title units -> category units
       if(!groups.has(actualCat.id)) groups.set(actualCat.id,{cat:actualCat,entries:[],amount:0,weight:0});
       const g=groups.get(actualCat.id); g.entries.push(e); g.amount+=qty;
       g.weight+=qty*Math.max(1,Number(actualCat.minutesPerUnit)||1);

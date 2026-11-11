@@ -103,7 +103,9 @@ mf555ProcMini=function(state){
   const mini=document.getElementById('mf555-proc-mini');
   if(!mini)return result;
   const prefs=mf565Proc(),active=Number(state?.activeCount)||0;
-  if(prefs.idle==='hide'&&!active&&!mini.classList.contains('is-done')){
+  // "Show Background Processes" (always) wins over hiding when idle.
+  let always=false;try{always=mf441Prefs()?.visibility==='always';}catch(_){}
+  if(prefs.idle==='hide'&&!always&&!active&&!mini.classList.contains('is-done')){
     mini.remove();document.body.classList.remove('mf555-proc-minimized');return result;
   }
   const cover=Number(state?.coverPct)||0,meta=Number(state?.metaPct)||0;

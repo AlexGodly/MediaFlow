@@ -191,7 +191,7 @@ renderBatchLog=function(){
       </div>`;
     }else{
       amountField=`<div class="field">
-        <label class="field-label">Amount ${cat?`(${escapeHtml(unitLabel(cat.unit,2))})`:''}</label>
+        <label class="field-label">Amount ${cat?`(${escapeHtml(unitLabel(typeof mf565UnitKey==='function'?mf565UnitKey(item,cat):cat.unit,2))})`:''}</label>
         <input id="batch-qty-${i}"
           type="number"
           min="0"

@@ -68,8 +68,9 @@ function submitBatchLog(){
   valid.forEach(r=>{
     const item=S.library.find(x=>x.id===r.libraryId); if(!item)return;
     const cat=getCategory(item.categoryId), qty=Math.max(0,Number(r.qty)||0), minutes=Math.max(0,Number(r.minutes)||0);
-    const healthStatus=categoryStatus(cat), xpCalc=calculateConsumptionXP(cat,qty,minutes,healthStatus);
-    S.sessions.push({id:uid(),timestamp,date,categoryId:cat.id,targetAmount:qty,actualAmount:qty,minutes,
+    const catQty=typeof mf565ToCategoryAmount==='function'?mf565ToCategoryAmount(item,cat,qty):qty; // v565: title units -> category units
+    const healthStatus=categoryStatus(cat), xpCalc=calculateConsumptionXP(cat,catQty,minutes,healthStatus);
+    S.sessions.push({id:uid(),timestamp,date,categoryId:cat.id,targetAmount:catQty,actualAmount:catQty,minutes,
       note,status:'logged',unit:cat.unit,xp:xpCalc.xp,healthStatus,source:'batch',batchGroupId:groupId,
       titles:[{title:cleanTitle(item.title),libraryId:item.id,qty,repeat:(item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total))),loggedAt:v331BatchTitleTimestamp(r,S.batchDraft,date,timestamp)}]});
     const v81Repeat=item.status==='completed'||(Number(item.total)>0&&Number(item.progress)>=Number(item.total));
@@ -101,7 +102,7 @@ function renderBatchLog(){
         ${item&&cat?`<div class="batch-selected-title">${v144CategoryIconHtml(cat)} <b>${escapeHtml(cleanTitle(item.title))}</b><span>${escapeHtml(cat.name)}${item.total!=null?` · ${Number(item.progress)||0}/${item.total}`:''}</span></div>`:`<small class="hint">Search across every category, then select the title you consumed.</small>`}
       </div>
       <div class="batch-number-fields">
-        <div class="field"><label class="field-label">Amount ${cat?`(${escapeHtml(unitLabel(cat.unit,2))})`:''}</label><input id="batch-qty-${i}" type="number" min="0" inputmode="decimal" value="${r.qty}" oninput="App.updateBatchRow(${i},'qty',this.value)"></div>
+        <div class="field"><label class="field-label">Amount ${cat?`(${escapeHtml(unitLabel(typeof mf565UnitKey==='function'?mf565UnitKey(item,cat):cat.unit,2))})`:''}</label><input id="batch-qty-${i}" type="number" min="0" inputmode="decimal" value="${r.qty}" oninput="App.updateBatchRow(${i},'qty',this.value)"></div>
         <div class="field"><label class="field-label">Minutes</label><input type="number" min="0" inputmode="numeric" value="${r.minutes}" oninput="App.updateBatchRow(${i},'minutes',this.value)"></div>
       </div>
       <button class="btn btn-danger batch-remove" onclick="App.removeBatchRow(${i})">Remove</button>

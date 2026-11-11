@@ -178,7 +178,7 @@ function v181TitleDetailsHtml(item){
           <div class="v181-title-progress">
             <div class="v181-title-progress-head">
               <span>Progress</span>
-              <b>${progress}${total?` / ${total}`:''} ${escapeHtml(unitLabel(cat.unit,total||progress||2))}</b>
+              <b>${progress}${total?` / ${total}`:''} ${escapeHtml(unitLabel(typeof mf565UnitKey==='function'?mf565UnitKey(item,cat):cat.unit,total||progress||2))}</b>
             </div>
             ${
               total

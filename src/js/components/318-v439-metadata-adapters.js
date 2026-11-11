@@ -97,6 +97,7 @@ async function mf439LookupPublic(provider,item,signal){
    const synopsis=mf439Plain(v.synopsis);
    pull(mf439Entry(provider,v.mal_id,v.title,{year:mf439Year(v.aired?.from||v.published?.from),
     aliases:mf439StringList([v.title_english,v.title_japanese,...(v.title_synonyms||[])]),
+    names:[{lang:'ja-Latn',text:v.title},{lang:'en',text:v.title_english},{lang:'ja',text:v.title_japanese}].filter(n=>n.text), // v565
     externalIds:{mal:String(v.mal_id)},legacy:{synopsis,genres:mf439StringList(v.genres?.map(z=>z.name)),
      studios:mf439StringList(v.studios?.map(z=>z.name)),year:mf439Year(v.aired?.from||v.published?.from),mediaFormat:v.type||''},
     fields:{originalTitle:v.title_japanese||'',animeSeason:v.season?String(v.season):'',episodeCount:v.episodes||null,
@@ -115,6 +116,7 @@ async function mf439LookupPublic(provider,item,signal){
    const y=Number(v.startDate?.year)||0;
    pull(mf439Entry(provider,v.id,v.title?.romaji||v.title?.english||v.title?.native,{
     year:y,aliases:mf439StringList([v.title?.english,v.title?.native,...(v.synonyms||[])]),
+    names:[{lang:'ja-Latn',text:v.title?.romaji},{lang:'en',text:v.title?.english},{lang:mf565ScriptLang(v.title?.native)||'ja',text:v.title?.native}].filter(n=>n.text), // v565
     externalIds:{anilist:String(v.id),...(v.idMal?{mal:String(v.idMal)}:{})},
     legacy:{synopsis:mf439Plain(v.description),genres:mf439StringList(v.genres),studios:mf439StringList(v.studios?.nodes?.map(z=>z.name)),year:y},
     fields:{originalTitle:v.title?.native||'',alternateTitles:mf439StringList(v.synonyms),animeSeason:v.season?String(v.season)+' '+(v.seasonYear||''):'',
@@ -132,6 +134,7 @@ async function mf439LookupPublic(provider,item,signal){
   for(const v of values.slice(0,6)){const a=v.attributes||{},y=mf439Year(a.startDate);
    pull(mf439Entry(provider,v.id,a.canonicalTitle||a.titles?.en||a.titles?.en_jp,{
     year:y,aliases:mf439StringList(Object.values(a.titles||{})),
+    names:Object.entries(a.titles||{}).map(([k,t])=>({lang:({en:'en',en_us:'en',en_jp:'ja-Latn',ja_jp:'ja',zh_cn:'zh',zh_tw:'zh',ko_kr:'ko',en_kr:'ko-Latn',en_cn:'zh-Latn'})[k]||'',text:t})).filter(n=>n.lang&&n.text), // v565
     externalIds:{kitsu:String(v.id)},legacy:{synopsis:mf439Plain(a.synopsis),year:y,mediaFormat:a.subtype||''},
     fields:{originalTitle:a.titles?.ja_jp||'',episodeCount:a.episodeCount||null,chapterCount:a.chapterCount||null,volumeCount:a.volumeCount||null},
     ratings:{kitsu:mf439Score(a.averageRating,100,a.userCount)}}));

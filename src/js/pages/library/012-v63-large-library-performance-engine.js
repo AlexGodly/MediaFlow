@@ -31,7 +31,7 @@ function v53EnsureLibraryIndex(){
   V53_LIB.searchIndex=S.library.map((item,index)=>({
     item,index,
     title:cleanTitle(item.title),
-    search:cleanTitle(item.title).toLocaleLowerCase()
+    search:typeof mf565SearchText==='function'?mf565SearchText(item):cleanTitle(item.title).toLocaleLowerCase() // v565: every name of the title
   }));
   V53_LIB.overview=null;
   V53_LIB.filterKey='';
