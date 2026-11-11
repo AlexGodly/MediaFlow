@@ -1,0 +1,33 @@
+/* MediaFlow v565 — notices and new controls. */
+.mf565-notice{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1500;display:flex;align-items:center;gap:12px;max-width:min(560px,calc(100vw - 32px));padding:12px 14px;border:1px solid var(--border-soft);border-radius:14px;background:var(--panel-raised);color:var(--text);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.mf565-notice>div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mf565-notice b{font-size:13px}
+.mf565-notice span{font-size:12px;color:var(--text-mute)}
+@media(max-width:600px){.mf565-notice{bottom:86px;flex-wrap:wrap}}
+
+/* Task progress: warning colour past the goal's maximum. */
+.mf397-progress.mf565-warn{--mf397-tint:var(--overused,#E8607A)}
+.mf397-progress.mf565-warn #mf397-percent,.mf397-progress.mf565-warn #mf397-mini-percent{color:var(--overused,#E8607A)}
+
+/* Background Processes minimised icon: progress ring and job count. */
+.mf555-proc-mini[data-mf565-icon] .mf555-proc-bar{display:none}
+.mf555-proc-mini .mf555-proc-icon{position:relative}
+.mf555-proc-mini .mf565-ring{position:absolute;inset:-5px;width:calc(100% + 10px)!important;height:calc(100% + 10px)!important;transform:rotate(-90deg);pointer-events:none}
+.mf555-proc-mini .mf565-ring circle{fill:none;stroke-width:3.2}
+.mf555-proc-mini .mf565-ring-track{stroke:color-mix(in srgb,var(--flow) 18%,transparent)}
+.mf555-proc-mini .mf565-ring-fill{stroke:var(--flow);stroke-linecap:round;transition:stroke-dashoffset .4s ease}
+.mf555-proc-mini .mf565-badge{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:800;line-height:1;color:#fff;background:var(--flow);border:2px solid var(--bg,var(--panel))}
+.mf405-floating-row.mf565-row select{max-width:min(240px,46vw)}
+@media (prefers-reduced-motion:reduce){.mf555-proc-mini .mf565-ring-fill{transition:none}}
+
+/* Log any title: dashboard bar and Batch Log popup. */
+.mf565-log-any-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 16px;padding:12px 16px;border:1px solid var(--border-soft);border-radius:16px;background:var(--panel)}
+.mf565-log-any-bar>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mf565-log-any-bar b{font-size:14px}
+.mf565-log-any-bar span{font-size:12px;color:var(--text-mute)}
+.mf565-log-any-bar .btn{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.mf565-log-any-bar .btn svg{width:18px;height:18px}
+.mf565-log-any-bar .btn span{color:inherit;font-size:inherit}
+@media(max-width:600px){.mf565-log-any-bar{flex-direction:column;align-items:stretch}.mf565-log-any-bar .btn{justify-content:center}}
+.mf565-batch-popup .mf555-log-body .view-head{margin-top:0}
+body.mf565-batch-open #mf397-dock{z-index:1}

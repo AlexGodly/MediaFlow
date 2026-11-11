@@ -9,6 +9,8 @@
 .mf562-chip-text{display:flex;flex-direction:column;min-width:0}
 .mf562-chip-text b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mf562-chip-text small{font-size:10px;color:var(--text-mute)}
+/* v565: the More button has its own class; .mf562-more is only the popup. */
+.mf562-more-btn{flex:0 0 auto;align-self:center;white-space:nowrap}
 .mf562-more{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
 .mf562-shade{position:absolute;inset:0;background:rgba(6,7,12,.6);backdrop-filter:blur(3px)}
 .mf562-more-box{position:relative;width:min(640px,100%);max-height:min(82vh,760px);display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--border-soft);border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 24px 70px rgba(0,0,0,.45)}
