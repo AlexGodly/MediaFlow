@@ -95,7 +95,14 @@ function mf565LedgerEvent(key,{kind,base,source,details='',subjectId='',multiply
 }
 
 /* ---------- every App action ---------- */
-function mf565MarkSaved(){if(MF565_XP.depth>0)MF565_XP.saved=true;}
+// A save while an action runs marks that action as a real change. Async
+// actions (dialogs, network) are tracked separately so one that never
+// finishes can't block the others; they expire after 10 minutes.
+const MF565_ASYNC=new Map();let MF565_ASYNC_SEQ=0;
+function mf565MarkSaved(){
+  if(MF565_XP.depth>0)MF565_XP.saved=true;
+  for(const a of MF565_ASYNC.values())a.saved=true;
+}
 persistLibrary=(base=>function(){mf565MarkSaved();return base.apply(this,arguments);})(persistLibrary);
 persistSettings=(base=>function(){mf565MarkSaved();return base.apply(this,arguments);})(persistSettings);
 persistTask=(base=>function(){mf565MarkSaved();return base.apply(this,arguments);})(persistTask);
@@ -105,26 +112,30 @@ function mf565WrapAction(name,fn){
   const wrapped=function(){
     const outer=MF565_XP.depth===0;
     if(outer){MF565_XP.saved=false;MF565_XP.action=name;MF565_XP.subject=mf565Subject(arguments);}
+    const subject=outer?MF565_XP.subject:'';
     MF565_XP.depth++;
-    let result,async=false;
-    try{
-      result=fn.apply(this,arguments);
-      if(outer&&result&&typeof result.then==='function'){
-        async=true;
-        return result.finally(()=>{MF565_XP.depth--;mf565FinishAction(name);});
+    let result;
+    try{result=fn.apply(this,arguments);}
+    finally{
+      MF565_XP.depth=Math.max(0,MF565_XP.depth-1);
+      if(outer){
+        const savedNow=MF565_XP.saved;
+        MF565_XP.saved=false;MF565_XP.action='';MF565_XP.subject='';
+        if(result&&typeof result.then==='function'){
+          const id=++MF565_ASYNC_SEQ,entry={name,subject,saved:savedNow,started:Date.now()};
+          MF565_ASYNC.set(id,entry);
+          const done=()=>{if(!MF565_ASYNC.has(id))return;MF565_ASYNC.delete(id);mf565FinishAction(entry.name,entry.subject,entry.saved);};
+          Promise.resolve(result).then(done,done);
+          setTimeout(()=>MF565_ASYNC.delete(id),10*60*1000);
+        }else mf565FinishAction(name,subject,savedNow);
       }
-      return result;
-    }finally{
-      if(!async){MF565_XP.depth--;if(outer)mf565FinishAction(name);}
     }
+    return result;
   };
   MF565_XP.wrapped.add(wrapped);
   return wrapped;
 }
-function mf565FinishAction(name){
-  if(MF565_XP.depth>0)return;
-  const saved=MF565_XP.saved,subject=MF565_XP.subject;
-  MF565_XP.saved=false;MF565_XP.action='';MF565_XP.subject='';
+function mf565FinishAction(name,subject,saved){
   if(!saved||MF565_ACTION_SKIP.has(name)||/^(v|mf)\d+.*(Open|Close|Show|Hide|Toggle(Menu|Panel|Section)|Paint|Preview|Focus|Scroll|Search|Filter|Sort|Page|Select|Expand|Collapse)/.test(name))return;
   if(mf565AwardAction(name,subject))try{saveState();}catch(_){}
 }

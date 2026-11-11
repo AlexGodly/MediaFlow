@@ -96,6 +96,13 @@ function mf565CloseBatch(){
   MF565_QUICK.batchOpen=false;mf565PaintBatch();
   MF565_QUICK.returnFocus?.focus?.({preventScroll:true});
 }
+// v181 only honours Batch Log's own Amount/Progress switch on the retired
+// Batch page; the popup is Batch Log too.
+const mf565BatchModeBase=v179Mode;
+v179Mode=function(kind){
+  if(kind==='batch'&&MF565_QUICK.batchOpen&&S.batchDraft?.v179Mode)return v179NormalizeMode(S.batchDraft.v179Mode);
+  return mf565BatchModeBase.apply(this,arguments);
+};
 // Logging from the popup keeps you on the page you were on.
 const mf565SubmitBatchBase=App.submitBatchLog;
 App.submitBatchLog=function(){
