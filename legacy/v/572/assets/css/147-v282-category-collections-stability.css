@@ -1,0 +1,48 @@
+/* MediaFlow v282 — category editor / Dynamic row / Collections batch polish */
+
+/* Dynamic Category Row: predictable professional button geometry. */
+.v181-settings-card .mf282-dynamic-category-row{
+  display:grid!important;
+  grid-template-columns:minmax(180px,1fr) 38px 76px auto auto!important;
+  grid-template-areas:"copy drag position orders toggle" "actions actions actions actions actions"!important;
+  align-items:center!important;gap:8px 10px!important;padding:11px 12px!important;
+  border:1px solid var(--border-soft)!important;border-radius:12px!important;background:var(--panel-raised)!important;
+}
+.mf282-dynamic-category-row>.v181-config-copy{grid-area:copy!important;min-width:0}
+.mf282-dynamic-category-row>.v228-dynamic-drag-handle{grid-area:drag!important;width:34px!important;min-width:34px!important;height:34px!important;padding:0!important;display:grid!important;place-items:center!important}
+.mf282-dynamic-category-row>.v186-dynamic-position{grid-area:position!important;width:76px!important;min-width:76px!important}
+.mf282-dynamic-category-row>.v181-order-buttons{grid-area:orders!important;display:flex!important;gap:5px!important;flex-wrap:nowrap!important}
+.mf282-dynamic-category-row>.v181-order-buttons .btn{width:34px!important;min-width:34px!important;height:34px!important;padding:0!important;display:grid!important;place-items:center!important}
+.mf282-dynamic-category-row>.toggle{grid-area:toggle!important;justify-self:end!important}
+.mf282-dynamic-category-row>.mf282-dynamic-actions{grid-area:actions!important;display:flex!important;justify-content:flex-end!important;gap:6px!important;flex-wrap:wrap!important;padding-top:8px!important;border-top:1px solid var(--border-soft)!important}
+.mf282-dynamic-category-row>.mf282-dynamic-actions .btn{min-width:72px!important;justify-content:center!important}
+@media(max-width:700px){
+ .v181-settings-card .mf282-dynamic-category-row{grid-template-columns:minmax(0,1fr) 38px 68px auto!important;grid-template-areas:"copy drag position toggle" "orders orders orders orders" "actions actions actions actions"!important}
+ .mf282-dynamic-category-row>.v181-order-buttons{justify-content:flex-start!important}
+ .mf282-dynamic-category-row>.mf282-dynamic-actions{justify-content:stretch!important}.mf282-dynamic-category-row>.mf282-dynamic-actions .btn{flex:1 1 90px!important}
+}
+
+/* Category add/edit modal remains immediately interactive and independently scrollable. */
+#modal-root .modal:has(.mf282-category-editor){width:min(760px,calc(100vw - 24px))!important;max-width:760px!important;max-height:min(88vh,900px)!important;overflow:hidden!important;padding:0!important}
+.mf282-category-editor{max-height:min(88vh,900px);overflow:auto;overscroll-behavior:contain;padding:22px;scrollbar-gutter:stable}
+.mf282-category-editor .modal-title{position:sticky;top:-22px;z-index:10;margin:-22px -22px 18px;padding:20px 22px 14px;background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft)}
+.mf282-category-editor .modal-actions{position:sticky;bottom:-22px;z-index:10;margin:18px -22px -22px;padding:14px 22px;background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--border-soft)}
+
+/* Collections Compact progress: readable one-piece component. */
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress{display:grid!important;grid-template-columns:auto minmax(120px,1fr)!important;grid-template-areas:"copy track"!important;align-items:center!important;gap:8px 12px!important;width:100%!important;max-width:none!important;margin-top:6px!important}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-copy{grid-area:copy!important;display:flex!important;gap:6px!important;align-items:baseline!important;justify-content:flex-start!important;white-space:nowrap!important}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-copy b{font-size:11px!important}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-copy span{font-size:9px!important;overflow:visible!important}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-track{grid-area:track!important;height:7px!important;width:100%!important;background:color-mix(in srgb,var(--panel-2) 72%,var(--border-soft))!important;border-radius:999px!important;overflow:hidden!important}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-track>span{height:100%!important;display:block!important;background:linear-gradient(90deg,var(--flow),color-mix(in srgb,var(--flow) 68%,white 22%))!important;border-radius:inherit!important}
+@media(max-width:620px){.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress{grid-template-columns:1fr!important;grid-template-areas:"copy" "track"!important}}
+
+/* Main Collections batch mode works in every browser display mode. */
+.mf282-collections-batchbar{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border:1px solid var(--border-soft);border-radius:11px;background:color-mix(in srgb,var(--panel-raised) 86%,transparent)}
+.mf282-collections-batchbar.active{justify-content:space-between}.mf282-batch-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mf282-batch-collection{position:relative;min-width:0}.mf282-batch-collection>article,.mf282-batch-collection>button{width:100%;height:100%;box-sizing:border-box}
+.mf282-batch-checkbox{position:absolute;z-index:30;top:8px;left:8px;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--border-soft);box-shadow:var(--shadow-sm);cursor:pointer}
+.mf282-batch-checkbox input{width:16px;height:16px;margin:0;accent-color:var(--flow)}
+.mf282-batch-collection.selected>article,.mf282-batch-collection.selected>button{outline:2px solid color-mix(in srgb,var(--flow) 75%,transparent);outline-offset:2px}
+.mf274-browser-results.mode-covers>.mf282-batch-collection{align-self:start}.mf274-browser-results.mode-covers>.mf282-batch-collection>.mf274-browser-cover-card{height:auto}
+@media(max-width:620px){.mf282-collections-batchbar.active{align-items:stretch}.mf282-batch-actions{width:100%}.mf282-batch-actions .btn{flex:1 1 120px}}

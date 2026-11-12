@@ -1,0 +1,14 @@
+/* MediaFlow v459: defensive fallback for pre-existing v424 floating markup.
+ * The runtime removes and ceases to create it; CSS prevents a stale legacy
+ * indicator from flashing even if a previously cached document contains it.
+ * Background Processes (#mf441-process-widget) is unaffected.
+ */
+html body #mf424-indicator,
+html body #mf424-indicator.mf425-themed,
+html body #mf424-indicator.mf424-indicator,
+html body #mf424-indicator .mf424-flyout,
+html body #mf424-indicator .mf424-pill{
+ display:none!important;
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
