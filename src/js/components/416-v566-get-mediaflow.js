@@ -13,7 +13,7 @@
  *    app release or the latest website version.
  */
 // v567: the official logos, used as shapes and filled with the theme's colour.
-const MF566_PLATFORM_LOGOS={android:'assets/icons/platforms/android.png',windows:'assets/icons/platforms/windows.png',ios:'assets/icons/platforms/ios.png',web:''};
+const MF566_PLATFORM_LOGOS={android:'assets/icons/platforms/android.png',windows:'assets/icons/platforms/windows.png',ios:'assets/icons/platforms/ios.png',web:'assets/icons/platforms/web.png'};
 const MF566_ICON={
   download:MF565_DOWNLOAD_ICON,
   install:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
