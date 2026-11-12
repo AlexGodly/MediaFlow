@@ -31,7 +31,9 @@ const MF566_STALE_DAYS=60;
 
 function mf566PlatformIcon(id){
   const file=MF566_PLATFORM_LOGOS[id];
-  if(file)return '<span class="mf567-logo" style="--mf567-logo:url(\''+escapeHtml(file)+'\')" aria-hidden="true"></span>';
+  // Full address: a relative url() inside a CSS variable would resolve against the stylesheet.
+  if(file){let href=file;try{href=new URL(file,document.baseURI).href;}catch(_){}
+    return '<span class="mf567-logo" style="--mf567-logo:url(\''+escapeHtml(href)+'\')" aria-hidden="true"></span>';}
   return MF566_ICON[id]||MF566_ICON.web;
 }
 // The page's own version: the build writes it into index.html. (MediaFlowRuntime.version

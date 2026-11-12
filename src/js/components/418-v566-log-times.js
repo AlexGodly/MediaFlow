@@ -73,7 +73,8 @@ function mf566RedateSession(session,draft,mode){
   const keys=[...days.keys()].sort();
   if(keys.length===1){
     const key=keys[0],last=Math.max(...days.get(key).map(p=>p.time));
-    if(session.date!==key||Number(session.timestamp)!==last){
+    // v567: a log that's all on its own save day keeps its save time.
+    if(session.date!==key){
       session.mf566SavedAt=Number(session.timestamp)||Date.now();
       session.date=key;session.timestamp=last;
     }
