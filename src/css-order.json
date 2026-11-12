@@ -654,5 +654,8 @@
   },
   {
     "path": "assets/css/300-v570-release.css"
+  },
+  {
+    "path": "assets/css/301-v571-release.css"
   }
 ]
