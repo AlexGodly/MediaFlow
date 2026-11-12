@@ -1,0 +1,12 @@
+/* v483: Keep Recovery Workspace category scrolling independent of the dialog.
+ * JavaScript preserves the exact scrollTop after selection rerenders the grid.
+ * Disable browser automatic anchoring on the rebuilt category grid only.
+ */
+#mf445-workspace .mf446-category-grid{
+ overflow-anchor:none;
+ overscroll-behavior-y:contain;
+ scrollbar-gutter:stable;
+}
+#mf445-workspace .mf446-categories .mf455-search{
+ overflow-anchor:none;
+}
