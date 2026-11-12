@@ -1,0 +1,155 @@
+/* v427: the v181 Quick Edit overlay lives at 99990. Recovery dialogs must be above it. */
+html body #mf425-instant-modal.mf427-above-editor,
+html body #mf424-modal.mf427-above-editor,
+html body #mf424-review { z-index:100050!important; }
+html body #mf425-instant-modal.mf427-above-editor .mf424-dialog,
+html body #mf424-modal.mf427-above-editor .mf424-dialog { max-height:min(92dvh,930px); }
+html body #mf427-confirm {position:fixed;inset:0;z-index:100110;display:grid;place-items:center;padding:16px;color:var(--text);font-family:inherit;}
+#mf427-confirm *{box-sizing:border-box;}
+#mf427-confirm .mf427-confirm-shade{position:absolute;inset:0;background:rgba(12,13,20,.67);backdrop-filter:blur(7px);}
+#mf427-confirm .mf427-confirm-panel{position:relative;max-width:min(490px,100%);width:100%;border:1px solid var(--border-soft);border-radius:21px;background:var(--panel-raised);color:var(--text);padding:clamp(17px,3vw,27px);box-shadow:0 24px 80px rgba(0,0,0,.38);}
+#mf427-confirm .mf427-confirm-head{display:flex;gap:13px;align-items:start;}
+#mf427-confirm .mf427-confirm-head>svg{flex:0 0 32px;margin-top:3px;color:var(--flow);}
+#mf427-confirm h2{font:inherit;font-size:19px;font-weight:850;line-height:1.25;margin:0 0 9px;color:var(--text);}
+#mf427-confirm p{font:inherit;font-size:13px;line-height:1.6;color:var(--text-dim);margin:0;}
+#mf427-confirm .mf427-confirm-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:23px;}
+#mf427-confirm button{font:inherit;min-height:39px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:9px 15px;cursor:pointer;}
+#mf427-confirm button:focus-visible{outline:2px solid var(--flow);outline-offset:3px;}
+#mf427-confirm .btn-primary{background:var(--flow);color:var(--bg);border-color:var(--flow);}
+#mf427-confirm .btn-danger{background:color-mix(in srgb,#d34559 75%,var(--panel));color:#fff;border-color:#d34559;}
+#mf427-confirm .btn-ghost{background:var(--panel);color:var(--text);border:1px solid var(--border-soft);}
+.mf427-icon{display:inline-block;flex:none;vertical-align:middle;pointer-events:none;}
+/* Never decorate a button which already contains an explicit semantic SVG icon. */
+.mf425-editor-tools .v225-btn-icon,
+.mf425-dashboard-cover-actions .v225-btn-icon,
+.mf425-instant-modal .v225-btn-icon,
+.mf427-search .v225-btn-icon,
+.mf427-action-group .v225-btn-icon {display:none!important;}
+.mf427-settings-confirm{display:flex;align-items:start;gap:12px;padding:14px;margin-top:13px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);color:var(--text);}
+.mf427-settings-confirm input{flex:none;margin-top:3px;accent-color:var(--flow);width:16px;height:16px;}
+.mf427-settings-confirm span{display:grid;gap:5px;}
+.mf427-settings-confirm b{font-size:12px;color:var(--text);}
+.mf427-settings-confirm small{font-size:11px;line-height:1.5;color:var(--text-dim);}
+#mf424-indicator .mf424-stats>.mf427-stat{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap;}
+#mf424-indicator .mf424-stats>.mf427-stat>svg{color:var(--flow);}
+#mf424-indicator .mf424-stats>.mf427-stat:nth-child(2)>svg{color:var(--text-dim);}
+#mf424-indicator .mf424-stats>.mf427-stat:nth-child(4)>svg{color:#e28676;}
+#mf424-indicator .mf424-controls{display:grid!important;grid-template-columns:1fr!important;gap:11px!important;}
+#mf424-indicator .mf427-action-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-top:10px;border-top:1px solid var(--border-soft);}
+#mf424-indicator .mf427-action-group>small{grid-column:1/-1;letter-spacing:.09em;font-size:10px;text-transform:uppercase;font-weight:800;color:var(--text-dim);}
+#mf424-indicator .mf427-action-group>button{width:100%;min-width:0;margin:0;white-space:normal;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 9px;}
+#mf424-indicator .mf427-main-controls>button:first-of-type{grid-column:1/-1;}
+#mf424-indicator .mf427-new-controls{grid-template-columns:1fr;}
+#mf424-indicator .mf427-new-controls>button{background:var(--panel-raised)!important;color:var(--text)!important;border:1px solid var(--border-soft)!important;}
+#mf424-indicator .mf427-action-group .mf427-icon{color:inherit;}
+.mf427-search .mf425-candidate-copy{color:var(--text)!important;}
+.mf427-search .mf425-candidate-copy small,.mf427-search .mf425-candidate-copy span{color:var(--text-dim);}
+.mf427-search .mf425-candidate .btn{display:inline-flex;align-items:center;gap:7px;}
+.mf423-support-benefits span>.mf427-icon{margin-right:4px;}
+@media(max-width:540px){
+ #mf427-confirm .mf427-confirm-actions{display:grid;grid-template-columns:1fr 1fr;}
+ #mf427-confirm .mf427-confirm-actions>button{min-width:0;}
+ #mf424-indicator .mf427-action-group{grid-template-columns:1fr;}
+ #mf424-indicator .mf427-action-group>small,#mf424-indicator .mf427-main-controls>button:first-of-type{grid-column:1;}
+}
+@media(prefers-reduced-motion:reduce){#mf427-confirm *{transition:none!important;animation:none!important;}}
+
+/* Find Cover reuses the exact Cover Recovery registry, with a responsive source picker. */
+.mf427-search .mf427-provider-picker{display:flex;align-items:end;gap:10px;flex-wrap:wrap;padding:12px 15px;margin:4px 0 12px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel);color:var(--text)}
+.mf427-search .mf427-provider-picker label{flex:1 1 210px;min-width:0;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:650;color:var(--text)}
+.mf427-search .mf427-provider-picker select{width:100%;min-width:0;min-height:40px;padding:7px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);color:var(--text);font:inherit}
+.mf427-search .mf427-provider-picker button{flex:0 1 auto;min-height:40px}
+.mf427-search .mf427-provider-summary{margin-top:12px;padding:10px 13px;border:1px solid var(--border-soft);border-radius:11px;background:var(--panel);color:var(--text)}
+.mf427-search .mf427-provider-summary summary{cursor:pointer;font-weight:650}
+.mf427-search .mf427-provider-summary p{margin:8px 0;line-height:1.45;color:var(--text-dim);overflow-wrap:anywhere}
+@media(max-width:540px){.mf427-search .mf427-provider-picker{display:grid;grid-template-columns:minmax(0,1fr)}.mf427-search .mf427-provider-picker button{width:100%}}
+
+/* v427: Manual review uses the same theme surfaces as Find Cover, never a
+   dark legacy card paired with light-theme text. Icons are intentional. */
+html body #mf424-review.mf427-manual-review .mf424-dialog{
+  width:min(900px,100%);background:var(--panel)!important;color:var(--text)!important;
+  border:1px solid var(--border-soft)!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.3);max-height:min(92dvh,960px);
+  border-radius:clamp(14px,2vw,21px);
+}
+#mf424-review.mf427-manual-review .mf424-heading{
+  padding-bottom:15px;border-bottom:1px solid var(--border-soft);margin-bottom:16px;
+}
+#mf424-review.mf427-manual-review .mf424-heading h2{
+  color:var(--text)!important;font-weight:800;line-height:1.2;overflow-wrap:anywhere;
+}
+#mf424-review.mf427-manual-review .mf424-heading small{
+  color:var(--flow)!important;font-weight:800;letter-spacing:.1em;
+}
+#mf424-review.mf427-manual-review .mf424-heading p{
+  color:var(--text-dim)!important;opacity:1!important;font-size:12px;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates article{
+  background:var(--panel-raised)!important;color:var(--text)!important;
+  border:1px solid var(--border-soft)!important;border-radius:13px;
+  padding:13px;align-items:flex-start;gap:13px;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates article>div{gap:7px;flex:1;min-width:0}
+#mf424-review.mf427-manual-review .mf424-review-candidates img{
+  width:90px;max-height:155px;object-fit:contain;box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates b{
+  font-size:14px;line-height:1.4;color:var(--text)!important;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates small,
+#mf424-review.mf427-manual-review .mf424-review-candidates p{
+  font-size:12px;line-height:1.5;color:var(--text-dim)!important;opacity:1!important;
+}
+#mf424-review.mf427-manual-review .mf424-review-candidates a{
+  font-size:12px;color:var(--flow)!important;text-underline-offset:3px;
+}
+#mf424-review.mf427-manual-review .mf424-actions{
+  border-top:1px solid var(--border-soft);padding-top:15px;
+  background:var(--panel)!important;position:sticky;bottom:-1px;
+}
+#mf424-review.mf427-manual-review .mf424-actions .btn,
+#mf424-review.mf427-manual-review .mf424-heading .btn,
+#mf424-review.mf427-manual-review .mf424-review-candidates .btn{
+  opacity:1!important;visibility:visible!important;min-height:39px;
+  display:inline-flex!important;align-items:center;justify-content:center;gap:8px;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  border-radius:10px;padding:9px 13px;text-shadow:none!important;
+}
+#mf424-review.mf427-manual-review .btn-ghost{
+  color:var(--text)!important;background:var(--panel-raised)!important;
+  border:1px solid var(--border-soft)!important;
+}
+#mf424-review.mf427-manual-review .btn-primary{
+  color:var(--bg)!important;background:var(--flow)!important;border-color:var(--flow)!important;
+}
+#mf424-review.mf427-manual-review button:focus-visible,
+#mf424-review.mf427-manual-review a:focus-visible{
+  outline:2px solid var(--flow)!important;outline-offset:3px;
+}
+#mf424-review.mf427-manual-review .v225-btn-icon{display:none!important}
+#mf424-review.mf427-manual-review .btn>svg{width:16px;height:16px;flex:none}
+.mf427-search .mf427-provider-hint{flex-basis:100%;margin:1px 0 0!important;
+  font-size:11px;line-height:1.5;color:var(--text-dim)!important}
+.mf427-search .mf427-provider-picker option:disabled{color:var(--text-dim);opacity:.72}
+@media(max-width:540px){
+ #mf424-review.mf427-manual-review .mf424-heading{align-items:flex-start}
+ #mf424-review.mf427-manual-review .mf424-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #mf424-review.mf427-manual-review .mf424-actions .btn{min-width:0;white-space:normal}
+ #mf424-review.mf427-manual-review .mf424-review-candidates img{width:76px}
+}
+
+/* ID linking is opt-in per selected cover, never a silent metadata rewrite. */
+.mf424-cover-id-control{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  margin:9px 0 10px;padding:9px 11px;min-height:40px;
+  border:1px solid var(--border-soft);background:var(--panel);color:var(--text);
+  border-radius:10px;font-size:12px;line-height:1.55;font-weight:550}
+.mf424-cover-id-control input[type="checkbox"]{width:17px;height:17px;accent-color:var(--flow);
+  flex:none;margin:0;cursor:pointer}
+.mf424-cover-id-control strong{color:var(--flow);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.mf424-cover-id-note,.mf424-cover-id-conflict{display:block;margin:6px 0 9px;
+  font-size:12px;line-height:1.45;color:var(--text-dim)}
+.mf424-cover-id-conflict{color:var(--text)!important;border-inline-start:3px solid var(--flow);
+  padding:6px 10px;background:var(--panel);border-radius:5px}
+.mf425-candidate .mf424-cover-id-control{width:100%}
+#mf424-review .mf424-cover-id-control{max-width:100%}
+.mf424-cover-id-control:focus-within{outline:2px solid var(--flow);outline-offset:2px}

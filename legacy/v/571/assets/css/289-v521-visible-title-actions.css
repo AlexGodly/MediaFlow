@@ -1,0 +1,23 @@
+/* v521 — always-visible, high-priority Personal Order / Collections actions in title editor & details. */
+#modal-root .mf521-action-bar{
+ display:flex!important;flex-wrap:wrap;gap:10px;visibility:visible!important;opacity:1!important;
+ grid-column:1/-1!important;width:100%!important;max-width:100%;order:0;
+ position:relative;z-index:2;margin:10px 0 16px;padding:12px;
+ border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.26)));
+ border-radius:14px;background:color-mix(in srgb,var(--flow) 5%,var(--surface-2,var(--panel,transparent)));
+}
+#v181-title-details-overlay .mf521-action-bar{
+ display:flex!important;flex-wrap:wrap;gap:8px;visibility:visible!important;opacity:1!important;
+ width:100%;position:relative;z-index:2;margin:12px 0;padding:8px 0;
+}
+.mf521-action-bar>.btn{
+ display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px;
+ min-height:42px;padding:10px 13px!important;
+ border:1px solid var(--border-soft,var(--border,rgba(150,160,190,.3)))!important;
+ background:var(--surface-2,var(--panel,transparent));color:var(--text)!important;
+ border-radius:12px;cursor:pointer;font-weight:650;white-space:normal;
+}
+.mf521-action-bar .mf520-active{background:color-mix(in srgb,var(--flow) 16%,var(--surface-2,var(--panel,transparent)))!important;border-color:var(--flow)!important}
+.mf521-action-icon{font-weight:750;font-size:17px;line-height:1.1;min-width:18px;text-align:center}
+@media(max-width:640px){#modal-root .mf521-action-bar,#v181-title-details-overlay .mf521-action-bar{display:grid!important;grid-template-columns:minmax(0,1fr);gap:8px}
+.mf521-action-bar>.btn{width:100%;min-width:0}}
