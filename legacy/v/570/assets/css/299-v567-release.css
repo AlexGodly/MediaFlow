@@ -1,0 +1,7 @@
+/* MediaFlow v567 release styles. */
+
+/* Get MediaFlow: official platform logos as single-colour shapes, filled with
+   the theme's colour (so they follow every MediaFlow theme, light or dark). */
+.mf567-logo{display:block;width:22px;height:22px;background:var(--flow,currentColor);
+  -webkit-mask:var(--mf567-logo) center/contain no-repeat;mask:var(--mf567-logo) center/contain no-repeat}
+.mf566-dev-icon .mf567-logo{width:18px;height:18px}
