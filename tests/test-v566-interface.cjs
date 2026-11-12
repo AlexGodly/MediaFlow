@@ -18,7 +18,7 @@ for(const f of ['416-v566-get-mediaflow','417-v566-recovery-ratings','418-v566-l
   assert(runtime.includes('components/'+f+'.js'),f+' is in the runtime order');
 
 const RELEASE={tag_name:'mediaflowapp-v7.0.0.566',prerelease:false,draft:false,html_url:'https://github.com/AlexGodly/MediaFlowApp/releases/tag/mediaflowapp-v7.0.0.566',published_at:'2026-11-13T10:00:00Z',
-  assets:['Android.apk','Android-arm64-v8a.apk','Android-armeabi-v7a.apk','Android-x86_64.apk','Windows-x64-Setup.exe','Windows-x64-portable.zip','iOS-unsigned.ipa']
+  assets:['Android.apk','Android-arm64-v8a.apk','Android-armeabi-v7a.apk','Android-x86_64.apk','Windows-x64-Setup.exe','Windows-x64-portable.zip','iOS-unsigned.ipa','macOS.dmg','macOS.zip','Linux-x86_64.AppImage','Linux-x86_64.tar.gz']
     .map(s=>({name:'MediaFlow-7.0.0.566-'+s,size:52428800,browser_download_url:'https://example.invalid/'+s}))};
 const DAY=86400000;
 
@@ -38,6 +38,7 @@ const DAY=86400000;
       const S=__MF.S(),now=Date.now();
       S.settings.mf565AppDevices={'app-a':{platform:'android',version:'6.1.0.565',label:'Android phone',lastSeen:now},
         'app-w':{platform:'windows',version:'7.0.0.566',label:'DESKTOP-1',lastSeen:now},
+        'app-m':{platform:'macos',version:'6.1.0.565',label:'MacBook',lastSeen:now},
         'app-old':{platform:'ios',version:'1.0.0',label:'Old iPad',lastSeen:now-400*86400000}};
       MediaFlowV566.reportWebDevice();
     });
@@ -45,7 +46,7 @@ const DAY=86400000;
     assert.equal(web.length,1,'this browser is recorded as a device');
     assert.equal(web[0].platform,'web');assert(Number(web[0].version)>=566,'with the website version');
     await p.evaluate(()=>App.mf565OpenGet());
-    await p.waitForFunction(()=>document.querySelectorAll('#mf565-get .mf565-get-dl').length>=7&&document.querySelector('#mf565-get .mf566-devices'),null,{timeout:10000});
+    await p.waitForFunction(()=>document.querySelectorAll('#mf565-get .mf565-get-dl').length>=11&&document.querySelector('#mf565-get .mf566-devices'),null,{timeout:10000});
     const get=await p.evaluate(()=>{
       const root=document.getElementById('mf565-get');
       return {devices:[...root.querySelectorAll('.mf566-devices li')].map(li=>li.innerText.replace(/\s+/g,' ')),
@@ -54,7 +55,8 @@ const DAY=86400000;
         dlIcons:[...root.querySelectorAll('.mf565-get-dl')].every(a=>a.querySelector('svg')),
         check:!!root.querySelector('.mf565-get-status .mf566-btn svg')};
     });
-    assert.equal(get.devices.length,3,'Your devices: phone, PC and this browser (stale device hidden): '+get.devices.join(' / '));
+    assert.equal(get.devices.length,4,'Your devices: phone, PC, Mac and this browser (stale device hidden): '+get.devices.join(' / '));
+    assert(get.devices.some(d=>/MacBook/.test(d)&&/Update available/.test(d)),'the Mac app is checked for updates');
     assert(get.devices.some(d=>/Android phone/.test(d)&&/Update available/.test(d)),'the phone needs the update');
     assert(get.devices.some(d=>/DESKTOP-1/.test(d)&&/Up to date/.test(d)),'the PC is up to date');
     assert(get.devices.some(d=>/This device/.test(d)&&/Website v/.test(d)),'this browser is checked against the website');

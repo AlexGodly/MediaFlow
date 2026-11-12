@@ -13,7 +13,8 @@
  *    app release or the latest website version.
  */
 // v567: the official logos, used as shapes and filled with the theme's colour.
-const MF566_PLATFORM_LOGOS={android:'assets/icons/platforms/android.png',windows:'assets/icons/platforms/windows.png',ios:'assets/icons/platforms/ios.png',web:'assets/icons/platforms/web.png'};
+const MF566_PLATFORM_LOGOS={android:'assets/icons/platforms/android.png',windows:'assets/icons/platforms/windows.png',ios:'assets/icons/platforms/ios.png',web:'assets/icons/platforms/web.png',
+  macos:'assets/icons/platforms/macos.png',linux:'assets/icons/platforms/linux.png'}; // v568: Mac and Linux
 const MF566_ICON={
   download:MF565_DOWNLOAD_ICON,
   install:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
@@ -26,7 +27,9 @@ const MF566_ICON={
   ios:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="3"/><circle cx="12" cy="18" r=".6" fill="currentColor"/></svg>',
   web:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.6 2.6 3.9 5.8 3.9 9.5s-1.3 6.9-3.9 9.5c-2.6-2.6-3.9-5.8-3.9-9.5S9.4 5.1 12 2.5z"/></svg>'
 };
-const MF566_PLATFORM_NAMES={android:'Android',windows:'Windows',ios:'iPhone & iPad',web:'Web'};
+const MF566_PLATFORM_NAMES={android:'Android',windows:'Windows',ios:'iPhone & iPad',macos:'Mac',linux:'Linux',web:'Web'};
+// v568: every platform, in the order the popup lists them after this device's.
+const MF566_PLATFORM_ORDER=['android','windows','macos','linux','ios','web'];
 const MF566_STALE_DAYS=60;
 
 function mf566PlatformIcon(id){
@@ -109,6 +112,25 @@ function mf566DevicesHtml(latestApp,latestSite){
     }).join('')+'</ul></section>';
 }
 
+/* ---------- v568: Mac and Linux ---------- */
+const mf568PlatformBase=mf565Platform;
+mf565Platform=function(){
+  const ua=navigator.userAgent||'',p=navigator.userAgentData?.platform||navigator.platform||'';
+  const base=mf568PlatformBase();
+  if(base!=='web')return base;
+  if(/CrOS/.test(ua))return 'web';
+  if(/mac/i.test(p)||/Macintosh/.test(ua))return 'macos';
+  if(/linux/i.test(p)||/Linux/.test(ua))return 'linux';
+  return 'web';
+};
+const mf568AssetsBase=mf565Assets;
+mf565Assets=function(release){
+  const out=mf568AssetsBase(release);
+  const list=Array.isArray(release?.assets)?release.assets:[];
+  const pick=re=>list.find(a=>re.test(String(a.name||'')))||null;
+  return Object.assign(out,{dmg:pick(/-macOS\.dmg$/i),maczip:pick(/-macOS\.zip$/i),appimage:pick(/-Linux-x86_64\.AppImage$/i),tarball:pick(/-Linux-x86_64\.tar\.gz$/i)});
+};
+
 /* ---------- popup, rebuilt on the v565 helpers ---------- */
 mf565AssetButton=function(asset,label,primary=false){
   if(!asset)return '';
@@ -125,6 +147,13 @@ mf565PlatformCard=function(id,platform,latest,a){
     '<div class="mf565-get-actions">'+mf565AssetButton(a.arm64,'Most phones',true)+mf565AssetButton(a.apk,'Any phone')+mf565AssetButton(a.armv7,'Older 32-bit phones')+mf565AssetButton(a.x86,'Emulators / Chromebooks')+'</div></section>';
   if(id==='windows')return open()+head('Windows','Windows 10 and 11, 64-bit')+
     '<div class="mf565-get-actions">'+mf565AssetButton(a.setup,'Installer',true)+mf565AssetButton(a.portable,'Portable zip')+'</div></section>';
+  // v568: Mac and Linux apps (unsigned builds).
+  if(id==='macos')return open()+head('Mac','macOS 11 or newer · Apple silicon and Intel')+
+    '<div class="mf565-get-actions">'+mf565AssetButton(a.dmg,'Download .dmg',true)+mf565AssetButton(a.maczip,'Zip')+'</div>'+
+    '<p class="hint">The app is unsigned. The first time, open it, then go to System Settings → Privacy &amp; Security and choose <b>Open Anyway</b>.</p></section>';
+  if(id==='linux')return open()+head('Linux','64-bit (x86_64) · most distributions')+
+    '<div class="mf565-get-actions">'+mf565AssetButton(a.appimage,'AppImage',true)+mf565AssetButton(a.tarball,'.tar.gz')+'</div>'+
+    '<p class="hint">Make the AppImage executable (Properties → Allow executing, or <code>chmod +x</code>), then open it.</p></section>';
   if(id==='ios')return open()+head('iPhone & iPad','Needs re-signing to install')+
     '<div class="mf565-get-actions">'+mf565AssetButton(a.ipa,'Download .ipa',true)+'</div>'+
     '<p class="hint">The .ipa is unsigned. Install it with a re-signing tool such as AltStore or Sideloadly.</p></section>';
@@ -141,7 +170,7 @@ mf565PlatformCard=function(id,platform,latest,a){
 };
 mf565GetHtml=function(){
   const platform=mf565Platform(),release=MF565_GET.release,a=mf565Assets(release),latest=release?mf565ReleaseLabel(release.tag_name):'';
-  const order=[platform,...['android','windows','ios','web'].filter(x=>x!==platform)].filter((x,i,arr)=>arr.indexOf(x)===i);
+  const order=[platform,...MF566_PLATFORM_ORDER.filter(x=>x!==platform)].filter((x,i,arr)=>arr.indexOf(x)===i);
   const status=MF565_GET.loading?'<p class="hint">Checking for updates…</p>':
     MF565_GET.error&&!release?'<p class="hint">Couldn\'t reach GitHub right now. <a href="'+MF565_RELEASES_PAGE+'" target="_blank" rel="noopener">Open the Releases page</a>.</p>':
     latest?'<p class="hint">Latest app: <b>'+escapeHtml(latest)+'</b>'+(release.published_at?' · '+escapeHtml(new Date(release.published_at).toLocaleDateString()):'')+
