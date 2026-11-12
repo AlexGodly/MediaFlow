@@ -85,6 +85,9 @@ function mf441Paint(){
  const old=document.getElementById('mf441-process-widget');
  if(!visible){old?.remove();mf441RefreshSettingsStatus(state);return;}
  const markup=mf441WidgetHtml(prefs,state);
+ // v566: nothing visible changed → keep the DOM (no rebuild, no relayout).
+ if(old&&old.isConnected&&MF441.lastWidgetMarkup===markup){mf441RefreshSettingsStatus(state);return;}
+ MF441.lastWidgetMarkup=markup;
  if(old){
   // Avoid shifting keyboard focus when progress advances.
   const active=document.activeElement;

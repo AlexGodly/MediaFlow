@@ -23,7 +23,9 @@ function mf439StateKey(){return mf546QueueStorageKey('metadata',mf439Account(),'
 function mf439LeaseKey(){return 'mediaflow-v439-lock:'+mf439Account();}
 function mf439SaveJob(){
  if(!MF439.job)return;
- try{localStorage.setItem(mf439StateKey(),JSON.stringify(MF439.job));}
+ // v566: while titles wait for a batched account save, the checkpoint stays at the first unsaved one.
+ const checkpoint=typeof mf566SafeCheckpoint==='function'?mf566SafeCheckpoint('metadata',MF439.job):MF439.job;
+ try{localStorage.setItem(mf439StateKey(),JSON.stringify(checkpoint));}
  catch(e){console.warn('Metadata checkpoint could not be stored',e);}
 }
 function mf439ReadJob(){

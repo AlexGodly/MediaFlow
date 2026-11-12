@@ -228,7 +228,12 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
      // Do not checkpoint until saveState has committed. On failure leave
      // cursor at the same ID; the next resume is safe and idempotent.
      job.pendingSaveId=id;mf439SaveJob();
-     await saveState();
+     // v566: account saves are batched during the job (every 10 titles / 10 s);
+     // the checkpoint never passes the first title that is not saved yet.
+     if(!(typeof mf566DeferRecoverySave==='function'&&mf566DeferRecoverySave('metadata'))){
+      await saveState();
+      if(typeof mf566RecoverySaved==='function')mf566RecoverySaved('metadata');
+     }
      MF442.saves++;job.pendingSaveId='';
      job.changed=(Number(job.changed)||0)+result.changed;
     }
@@ -251,6 +256,7 @@ mf439RunBatch=async function mf442RunMetadataBatch(){
   job.status='paused';mf442Failure(job,'Saved checkpoint preserved: '+String(e?.message||e));
  }finally{
   clearInterval(keepAlive);
+  try{if(typeof mf566FlushRecovery==='function')await mf566FlushRecovery('metadata');}catch(e){job.status='paused';mf442Failure(job,'Saved checkpoint preserved: '+String(e?.message||e));}
   MF439.working=false;
   mf439ReleaseLease();
   mf442ReleaseProcess('metadata');
