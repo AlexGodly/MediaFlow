@@ -61,13 +61,14 @@ function v179StartProgress(item){
 
 function v179ProgressInputLabel(item){
   const cat=item?getCategory(item.categoryId):null;
-  const singular=UNITS[String(cat?.unit||'')]?.singular;
+  const own=typeof mf565OwnUnit==='function'?mf565OwnUnit(item):'';
+  const singular=own?mf565Singular(own):UNITS[String(cat?.unit||'')]?.singular;
   return singular?singular.charAt(0).toUpperCase()+singular.slice(1)+' Reached':'Progress Reached';
 }
 
 function v179ProgressNoun(item,amount=2){
   const cat=item?getCategory(item.categoryId):null;
-  return cat?unitLabel(cat.unit,amount):'units';
+  return cat?unitLabel(typeof mf565UnitKey==='function'?mf565UnitKey(item,cat):cat.unit,amount):'units';
 }
 
 function v179ClampEndProgress(item,value){

@@ -68,7 +68,7 @@ function mf397ReadState(){
     return !!item&&String(item.categoryId||'')===categoryId;
   });
   if(!matching.length)return null;
-  const amount=matching.reduce((sum,e)=>sum+(S.logDraft.v369Interface==='itemized'?Array.isArray(e.v369Units)?e.v369Units.length:0:Math.max(0,Number(e.qty)||0)),0);
+  const amount=matching.reduce((sum,e)=>{const raw=S.logDraft.v369Interface==='itemized'?Array.isArray(e.v369Units)?e.v369Units.length:0:Math.max(0,Number(e.qty)||0);const item=index?.get(String(e.libraryId||''))||(S.library||[]).find(x=>String(x?.id||'')===String(e.libraryId||''));return sum+(typeof mf565ToCategoryAmount==='function'?mf565ToCategoryAmount:(i,c,n)=>n)(item,getCategory(item?.categoryId||t.categoryId),raw);},0);
   const safe=n=>Math.max(0,Number.isFinite(Number(n))?Number(n):0);
   const low=Math.max(1,Math.round(safe(t.low??t.targetMid??1)));
   const high=Math.max(low,Math.round(safe(t.high??t.targetMid??low)));

@@ -29,7 +29,7 @@ function mf562Chip(entry,item){
 function mf562Actions(entry,ids,idx){
  const items=ids.map(id=>idx.byId.get(String(id))).filter(Boolean);
  if(!items.length)return '';
- const more=items.length>V562_INLINE?'<button type="button" class="btn btn-sm mf562-more" onclick="App.mf562OpenMore(\''+mf562Esc(String(entry?.id||''))+'\')">More · '+items.length.toLocaleString()+' titles</button>':'';
+ const more=items.length>V562_INLINE?'<button type="button" class="btn btn-sm mf562-more-btn" onclick="App.mf562OpenMore(\''+mf562Esc(String(entry?.id||''))+'\')">More · '+items.length.toLocaleString()+' titles</button>':'';
  return '<div class="v43-log-actions mf562-actions">'+items.slice(0,V562_INLINE).map(i=>mf562Chip(entry,i)).join('')+more+'</div>';
 }
 /* Runs the existing renderer, then swaps each entry's action row for v562's.

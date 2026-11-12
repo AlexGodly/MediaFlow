@@ -260,5 +260,13 @@
   "components/404-v561-live-logging-app-time.js",
   "components/405-v562-library-history-more.js",
   "components/406-v563-fixes.js",
-  "components/407-v564-native-theme-default.js"
+  "components/407-v564-native-theme-default.js",
+  "components/408-v565-fixes.js",
+  "components/409-v565-floating-controls.js",
+  "components/410-v565-quick-logging.js",
+  "components/411-v565-titles.js",
+  "components/412-v565-collection-cover.js",
+  "components/413-v565-xp-everywhere.js",
+  "components/414-v565-get-mediaflow.js",
+  "components/415-v565-faq.js"
 ]

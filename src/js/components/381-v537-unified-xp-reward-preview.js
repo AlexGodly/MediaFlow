@@ -23,8 +23,8 @@ function mf537DraftRows(){
       if(!cat?.id)continue;
       // Itemized submission canonicalizes quantity from exact unit records.
       // Draft qty can be stale before v369Sync() runs at submit.
-      const qty=itemized&&Array.isArray(entry?.v369Units)
-        ?entry.v369Units.length:mf537Num(entry?.qty);
+      const qty=(typeof mf565ToCategoryAmount==='function'?mf565ToCategoryAmount:(i,c,n)=>n)(item,cat,itemized&&Array.isArray(entry?.v369Units)
+        ?entry.v369Units.length:mf537Num(entry?.qty)); // v565: title units -> category units
       if(!groups.has(cat.id))groups.set(cat.id,{cat,entries:[],amount:0,weight:0});
       const group=groups.get(cat.id);
       group.entries.push(entry);

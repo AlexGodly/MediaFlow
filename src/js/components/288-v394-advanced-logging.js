@@ -58,7 +58,7 @@ function v394BulkPanel(e,index,item){
   const note=(!exact?'<p class="mf394-warning">Nonconsecutive '+escapeHtml(noun.toLowerCase())+'s are preserved. Changing this number will replace the selected season’s detailed entries after confirmation.</p>':'')+
     (repeatMixed?'<p class="mf394-warning">Mixed repeat/non-repeat entries are preserved until you explicitly replace them.</p>':'')+
     (hasOther?'<p class="mf394-hint">'+(all.length-units.length)+' draft units in other seasons are preserved. The summary below controls only the selected season.</p>':'');
-  const label=method==='last'?noun+' Reached':unitLabel(getCategory(item.categoryId).unit,2)+' Consumed';
+  const label=method==='last'?noun+' Reached':unitLabel(typeof mf565UnitKey==='function'?mf565UnitKey(item,getCategory(item.categoryId)):getCategory(item.categoryId).unit,2)+' Consumed';
   const value=method==='last'?highest:quantity;
   return '<div class="mf394-bulk" aria-label="'+escapeHtml(method==='last'?'Progress Reached':'Amount Consumed')+' logging">'+
     (opts?'<label class="mf394-field">Season <select onchange="App.v394ChooseSeason('+index+',this.value)">'+opts+'</select></label>':'')+
