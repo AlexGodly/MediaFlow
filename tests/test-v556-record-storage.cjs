@@ -7,7 +7,7 @@
 const assert=require('node:assert/strict');
 const zlib=require('node:zlib');
 const {openApp,generate,cloudRow}=require('./harness/app.cjs');
-const strip=s=>{const x=JSON.parse(JSON.stringify(s));delete x.savedAt;
+const strip=s=>{const x=JSON.parse(JSON.stringify(s));delete x.savedAt;if(x.settings){delete x.settings.mf566WebDevices;delete x.settings.mf565LastSeenAt;}if(x.xpLedger)delete x.xpLedger.mf565LastSeenAt; // v565: each device stamps when it was last open // v566: each browser records itself
   const d=new Date(),k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   if(x.xpLedger?.v334ActiveTimeDays)delete x.xpLedger.v334ActiveTimeDays[k];
   for(const s of ['v377JikanLedger','v377JikanResults'])if(x.settings)delete x.settings[s];return x;};
@@ -74,6 +74,8 @@ const snap=p=>p.evaluate(()=>JSON.parse(JSON.stringify(__MF.snapshot())));
     assert.deepEqual(strip(await snap(b)),strip(await snap(a)),'both devices identical after merging');
     // Positions survive the database's 15-digit floats: a pull right after a
     // reorder must not look like a change from another device.
+    // (v572: first take B's own background saves, which a save no longer skips.)
+    await a.evaluate(()=>window.MediaFlowV556.pull());
     await a.evaluate(async()=>{const S=__MF.S();for(let n=0;n<6;n++){const m=S.library.splice(70+n,1)[0];S.library.splice(3,0,m);}await __MF.saveState();});
     const echo=await a.evaluate(()=>window.MediaFlowV556.pull());
     assert.equal(echo.changed||0,0,'own reorder does not come back as a remote change: '+JSON.stringify(echo));

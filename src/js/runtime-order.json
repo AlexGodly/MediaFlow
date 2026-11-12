@@ -274,5 +274,6 @@
   "components/418-v566-log-times.js",
   "components/419-v566-recovery-performance.js",
   "components/420-v566-faq.js",
-  "components/421-v569-title-units.js"
+  "components/421-v569-title-units.js",
+  "components/422-v572-sync-cursor.js"
 ]
