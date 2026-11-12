@@ -143,7 +143,7 @@ const RELEASE={tag_name:'mediaflowapp-v6.0.0.565',prerelease:false,draft:false,h
     await p.waitForFunction(()=>document.querySelectorAll('#mf565-get .mf565-get-dl').length>=7,null,{timeout:10000});
     const get=await p.evaluate(()=>({cards:document.querySelectorAll('#mf565-get .mf565-get-card').length,
       text:document.getElementById('mf565-get').innerText}));
-    assert.equal(get.cards,4,'Android, Windows, iPhone and Web');
+    assert.equal(get.cards,6,'Android, Windows, Mac, Linux, iPhone and Web (v568)');
     assert(/6\.0\.0\.565/.test(get.text),'shows the latest stable version');
     await p.evaluate(()=>App.mf565CloseGet());
 
