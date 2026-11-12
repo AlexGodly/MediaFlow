@@ -1,0 +1,7 @@
+/* MediaFlow v344 — Recently Viewed remove title/daypart icons */
+.v344-recent-name>.v225-btn-icon{display:none!important}
+.v344-recent-name{display:block;appearance:none;border:0;background:none;padding:0;margin:1px 0 0 0;text-align:left;cursor:pointer;text-decoration:none!important;line-height:1.42!important;color:var(--text,#fff)!important;font:inherit;font-weight:700}
+.v344-recent-name:hover,.v344-recent-name:focus,.v344-recent-name:active,.v344-recent-name:visited{text-decoration:none!important;border-bottom:0!important;box-shadow:none!important}
+.v344-recent-name:focus-visible{outline:2px solid color-mix(in srgb,var(--flow,#84a7ff) 60%,white);outline-offset:2px;border-radius:6px}
+.v344-daypart-head b{display:inline-flex;align-items:center;gap:0}
+.v344-daypart-head .v343-daypart-icon{display:none!important}

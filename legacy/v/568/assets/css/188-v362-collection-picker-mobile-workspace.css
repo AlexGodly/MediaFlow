@@ -1,0 +1,168 @@
+/* MediaFlow v362 — Collection result views built for phone-sized screens,
+   not wide desktop cards compressed to a one-column mobile list. */
+
+/* The extra section contains the ORIGINAL controls (not copies); hidden by
+   default on desktop. The controls are restored to the toolbar on resize. */
+.mf359-collection-sheet .mf362-display-filter-tools{display:none}
+
+@media screen and (max-width:1023px){
+ .mf359-collection-sheet .mf358-collection-filters[open]{
+   max-height:min(59dvh,510px)!important;overflow:auto!important;
+   overscroll-behavior:contain;
+ }
+ .mf359-collection-sheet.mf362-mobile-tools .mf362-display-filter-tools{
+   display:grid;gap:9px;min-width:0;margin:0 10px 11px;
+   padding-top:11px;border-top:1px solid var(--border);
+ }
+ .mf359-collection-sheet .mf362-tools-heading{
+   color:var(--text);font-size:12px;font-weight:800;letter-spacing:.015em;
+ }
+ .mf359-collection-sheet .mf362-tools-sizing,
+ .mf359-collection-sheet .mf362-tools-paging{min-width:0}
+ .mf359-collection-sheet .mf362-tools-sizing>.mf361-collection-size-controls{
+   display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;
+ }
+ .mf359-collection-sheet .mf362-tools-sizing .mf361-size-field{
+   display:grid!important;grid-template-columns:80px minmax(0,1fr) 38px!important;
+   width:100%;min-width:0;gap:8px!important;padding:9px 10px!important;
+   background:var(--panel-raised,var(--panel));
+ }
+ .mf359-collection-sheet .mf362-tools-sizing .mf361-size-field>span{
+   font-size:11px!important;white-space:nowrap!important;
+ }
+ .mf359-collection-sheet .mf362-tools-sizing .mf361-size-field input[type=range]{
+   min-width:0!important;width:100%!important;
+ }
+ .mf359-collection-sheet .mf362-tools-sizing .mf361-size-field output{
+   text-align:right;min-width:38px!important;font-size:12px!important;
+ }
+ .mf359-collection-sheet .mf362-tools-paging .mf359-page-size-field{
+   display:flex;align-items:center;justify-content:space-between;
+   width:100%;gap:12px;
+ }
+ .mf359-collection-sheet .mf362-tools-paging .mf359-page-size-field>span{
+   display:block!important;font-size:12px!important;font-weight:750;
+ }
+ .mf359-collection-sheet .mf362-tools-paging .mf359-page-size-field>span::after{content:none!important}
+ .mf359-collection-sheet .mf362-tools-paging select{
+   width:110px;min-height:40px;font-size:14px;
+ }
+ .mf359-collection-sheet .mf359-collection-toolbar{
+   padding:5px 2px 9px!important;
+ }
+ .mf359-collection-sheet .mf361-collection-display{
+   padding-bottom:9px!important;
+ }
+ .mf359-collection-sheet .mf361-collection-mode-buttons{
+   justify-content:space-between;min-width:0;
+ }
+ .mf359-collection-sheet .mf361-collection-mode{
+   padding:7px 9px;min-height:36px;font-size:11px;
+ }
+
+ /* Cards are actual Collection cards: two columns when the viewport allows,
+    a centered poster with readable information and a compact action footer. */
+ .mf359-collection-sheet #mf287-collection-results.mf361-collection-results.mf361-mode-cards,
+ .mf359-collection-sheet.mf360-collection-compact #mf287-collection-results.mf361-collection-results.mf361-mode-cards{
+   display:grid!important;
+   grid-template-columns:repeat(auto-fill,minmax(min(100%,clamp(132px,calc(var(--mf361-cover) + 48px),218px)),1fr))!important;
+   align-items:start!important;align-content:start!important;grid-auto-rows:max-content!important;
+   gap:10px!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-row{
+   display:grid!important;
+   grid-template-columns:minmax(0,1fr)!important;
+   grid-template-rows:auto auto minmax(0,1fr) auto!important;
+   justify-items:center!important;align-items:start!important;
+   gap:7px!important;padding:10px!important;
+   width:100%!important;min-height:0!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-cover{
+   grid-column:1!important;grid-row:1!important;
+   width:min(100%,var(--mf361-cover))!important;
+   max-width:100%!important;
+   height:auto!important;aspect-ratio:3/4!important;
+   justify-self:center!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-copy{
+   grid-column:1!important;grid-row:2!important;
+   display:grid!important;gap:3px!important;width:100%!important;
+   min-width:0!important;max-width:100%;text-align:center!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-copy b{
+   display:-webkit-box!important;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+   overflow:hidden!important;overflow-wrap:anywhere!important;
+   line-height:1.35!important;font-size:var(--mf361-text,15px)!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-copy small{
+   font-size:11px!important;line-height:1.35!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-row>.btn{
+   grid-column:1!important;grid-row:4!important;
+   width:100%!important;min-width:0!important;min-height:36px!important;
+   margin:0!important;justify-self:stretch!important;
+ }
+
+ /* Covers & Covers+Titles must be galleries, not a one-column stack of giant
+    empty cards. Their minimum tile width follows the real cover size. */
+ .mf359-collection-sheet #mf287-collection-results.mf361-collection-results:is(.mf361-mode-covers,.mf361-mode-covers-title),
+ .mf359-collection-sheet.mf360-collection-compact #mf287-collection-results.mf361-collection-results:is(.mf361-mode-covers,.mf361-mode-covers-title){
+   --mf362-gallery-tile:clamp(104px,calc(var(--mf361-cover) + 30px),230px);
+   display:grid!important;
+   grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--mf362-gallery-tile)),1fr))!important;
+   align-content:start!important;align-items:start!important;
+   grid-auto-rows:max-content!important;justify-content:start!important;
+   gap:9px!important;
+ }
+ .mf359-collection-sheet .mf361-collection-results:is(.mf361-mode-covers,.mf361-mode-covers-title) .mf287-picker-row{
+   display:flex!important;flex-direction:column!important;
+   justify-content:flex-start!important;align-items:center!important;
+   gap:7px!important;width:100%!important;max-width:100%!important;
+   min-height:0!important;padding:9px 6px!important;
+ }
+ .mf359-collection-sheet .mf361-collection-results:is(.mf361-mode-covers,.mf361-mode-covers-title) .mf287-picker-cover{
+   position:relative!important;display:block;
+   width:min(100%,var(--mf361-cover))!important;
+   height:auto!important;max-height:none!important;
+   aspect-ratio:3/4!important;flex:0 0 auto!important;
+   margin:0 auto!important;overflow:hidden!important;
+ }
+ .mf359-collection-sheet .mf361-mode-covers .mf287-picker-copy{
+   position:absolute!important;width:1px!important;height:1px!important;
+   overflow:hidden!important;clip-path:inset(50%)!important;
+ }
+ .mf359-collection-sheet .mf361-mode-covers-title .mf287-picker-copy{
+   display:block!important;width:100%!important;min-width:0!important;
+   max-width:100%!important;position:static!important;overflow:visible!important;
+   text-align:center!important;
+ }
+ .mf359-collection-sheet .mf361-mode-covers-title .mf287-picker-copy b{
+   display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;
+   overflow:hidden!important;white-space:normal!important;
+   overflow-wrap:anywhere!important;
+   font-size:var(--mf361-text,15px)!important;line-height:1.32!important;
+   max-height:none!important;
+ }
+ .mf359-collection-sheet .mf361-collection-results:is(.mf361-mode-covers,.mf361-mode-covers-title) .mf287-picker-row>.btn{
+   position:static!important;display:flex!important;align-items:center!important;justify-content:center!important;
+   width:100%!important;max-width:100%!important;min-width:0!important;
+   min-height:35px!important;padding:6px 5px!important;
+   margin-top:auto!important;
+ }
+ .mf359-collection-sheet .mf361-collection-results .mf287-picker-cover :is(img,svg){object-fit:cover}
+ .mf359-collection-sheet .mf361-collection-results .mf287-picker-cover.collage :is(img,svg){object-fit:contain}
+}
+
+@media screen and (max-width:360px){
+ .mf359-collection-sheet .mf361-collection-mode{padding:6px 7px;font-size:10.5px}
+ .mf359-collection-sheet .mf362-tools-sizing .mf361-size-field{
+   grid-template-columns:71px minmax(0,1fr) 34px!important;padding:7px 8px!important;
+ }
+ .mf359-collection-sheet .mf361-mode-cards .mf287-picker-row{
+   padding:8px!important;gap:6px!important;
+ }
+ .mf359-collection-sheet .mf361-mode-covers-title .mf287-picker-copy b{line-height:1.25!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .mf359-collection-sheet .mf361-collection-mode{transition:none!important}
+}

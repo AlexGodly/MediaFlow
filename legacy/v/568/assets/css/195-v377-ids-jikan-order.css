@@ -1,0 +1,61 @@
+/* MediaFlow v377 — scoped layout and Jikan report. Existing cover sizing and
+   cropping remain completely unchanged from v376. */
+.v240-library-editor>.v252-seasons-editor{order:17!important;grid-column:1/-1!important}
+.v240-library-editor>.mf377-external-ids{order:18!important;grid-column:1/-1!important;min-width:0}
+.mf377-external-ids{border:1px solid var(--border-soft);background:color-mix(in srgb,var(--panel) 94%,var(--flow) 6%);border-radius:16px;overflow:hidden}
+.mf377-external-ids summary{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;font-weight:800;color:var(--text);font-size:13px;list-style-position:inside}
+.mf377-external-ids summary small{margin-left:auto;color:var(--text-dim);font-size:10px;font-weight:500}
+.mf377-section-icon{display:grid;place-items:center;width:25px;height:25px;border:1px solid var(--border-soft);border-radius:7px;color:var(--flow);font-size:20px}
+.mf377-external-ids details>p{margin:0 15px 12px;font-size:11px}
+.mf377-ids-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 15px 14px}
+.mf377-ids-grid>.field{min-width:0;margin:0}
+.mf377-id-control{display:flex;align-items:center;gap:6px;min-width:0}
+.mf377-id-control input{min-width:0;flex:1;width:100%}
+.mf377-id-control button{flex:none;white-space:nowrap}
+.mf377-mal-preview{padding:0 15px 12px;font-size:11px;color:var(--text-dim);line-height:1.5}
+.mf377-jikan-report-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
+.mf377-jikan-report-hint{margin-bottom:10px}
+#mf377-report-overlay{position:fixed;inset:0;z-index:99999}
+.mf377-report-backdrop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.70);backdrop-filter:blur(6px)}
+.mf377-report-dialog{display:flex;flex-direction:column;width:min(900px,100%);max-height:94dvh;min-height:0;overflow:hidden;border:1px solid var(--border-soft);border-radius:19px;background:var(--panel);color:var(--text);box-shadow:0 25px 90px #0006}
+.mf377-report-dialog header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 13px;border-bottom:1px solid var(--border-soft)}
+.mf377-report-dialog h2{font-size:20px;margin:0}.mf377-report-dialog header p{font-size:12px;color:var(--text-dim);margin:5px 0 0}
+.mf377-report-toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:12px 18px}
+.mf377-report-progress{font-size:11px;color:var(--text-dim);padding:0 18px 9px;min-height:12px}
+.mf377-report-dialog h3{padding:12px 18px 6px;margin:0;font-size:13px;border-top:1px solid var(--border-soft)}
+.mf377-report-list{overflow-y:auto;min-height:0;padding:0 14px 14px}
+.mf377-report-row{display:flex;align-items:center;gap:12px;min-width:0;padding:10px 4px;border-bottom:1px solid var(--border-soft)}
+.mf377-report-check{flex:none}.mf377-report-check input{width:16px;height:16px}
+.mf377-report-cover{position:relative;flex:none;width:48px;height:68px;border:1px solid var(--border-soft);border-radius:8px;background:var(--panel-raised);overflow:hidden}
+.mf377-report-cover img{width:100%;height:100%;object-fit:cover}
+.mf377-report-fallback{width:100%;height:100%;display:grid;place-items:center;font-size:22px}
+.mf377-report-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.mf377-report-copy b{font-size:12px;overflow-wrap:anywhere}
+.mf377-report-copy small{font-size:10px;color:var(--text-dim);overflow-wrap:anywhere}
+.mf377-report-actions{display:flex;flex:none;flex-wrap:wrap;gap:5px}
+/* Only numeric position lanes are changed. Cover columns retain v376 rules. */
+#view-root .mf363-order-workspace{--mf376-number-lane:70px!important}
+#view-root .mf363-order-workspace .v138-order-row>.v138-order-pos,
+#view-root .mf363-order-workspace .mf287-queue-number,
+#view-root .mf363-order-workspace .mf288-inner-pos,
+#view-root .mf363-order-workspace .mf376-global-assignment-position>.mf376-global-number{min-width:70px!important;width:max-content!important;max-width:none!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;box-sizing:border-box!important;text-align:center!important;font-variant-numeric:tabular-nums!important}
+#view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position,
+#view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position input{min-width:70px!important;width:70px!important;max-width:none!important;box-sizing:border-box!important;overflow:visible!important;font-size:13px!important;font-variant-numeric:tabular-nums!important}
+#view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position input{appearance:textfield!important;-moz-appearance:textfield!important;padding:7px 5px!important}
+#view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position input::-webkit-inner-spin-button{display:none}
+@media(max-width:820px){.mf377-ids-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ #view-root .mf363-order-workspace{--mf376-number-lane:66px!important}
+ #view-root .mf363-order-workspace .v138-order-row>.v138-order-pos,
+ #view-root .mf363-order-workspace .mf287-queue-number,
+ #view-root .mf363-order-workspace .mf288-inner-pos,
+ #view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position,
+ #view-root .mf363-order-workspace .mf288-assignment-shell>.mf287-queue-position input{min-width:66px!important;width:66px!important}
+ .mf377-ids-grid{grid-template-columns:1fr}
+ .mf377-report-row{flex-wrap:wrap;gap:8px}
+ .mf377-report-actions{margin-left:auto}
+ .mf377-report-dialog header{padding:13px}
+ .mf377-report-toolbar{padding:10px 13px}
+ .mf377-report-list{padding:0 9px 10px}
+}
+.mf377-details-edit-ids{justify-self:start;align-self:center;width:max-content;min-width:0}

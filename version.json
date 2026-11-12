@@ -1,9 +1,9 @@
 {
-  "appVersion": 567,
+  "appVersion": 568,
   "stableFeatureBase": 201,
   "cloudSyncVersion": 201,
   "fullBackupSchema": 29,
   "settingsPresetSchema": 1,
-  "version": 567,
-  "build": 567
+  "version": 568,
+  "build": 568
 }
