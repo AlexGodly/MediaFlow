@@ -1,0 +1,109 @@
+/* ============================================================
+   MediaFlow v229 — Set Category / Set Status modal polish
+   ============================================================ */
+
+.v229-choice-modal-intro{
+  color:var(--text-dim);
+  font-size:13px;
+  line-height:1.5;
+  margin-bottom:16px;
+}
+
+/* Set Category intentionally has no inner list scrollbar. Up to fifteen
+   choices are rendered at once; larger category collections paginate. */
+.modal:has(.v229-category-modal){
+  max-width:820px;
+  overflow-y:auto;
+}
+.v229-category-choice-list{
+  max-height:none!important;
+  overflow:visible!important;
+  padding-right:0!important;
+  align-items:stretch;
+}
+.v229-category-choice-list-one{grid-template-columns:minmax(0,1fr)}
+.v229-category-choice-list-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.v229-category-choice{min-width:0;height:100%}
+.v229-choice-copy{min-width:0;flex:1;text-align:left}
+.v229-choice-copy>b{display:block;overflow-wrap:anywhere}
+.v229-choice-copy>small{
+  display:block;
+  color:var(--text-mute);
+  font-size:11px;
+  line-height:1.35;
+  margin-top:2px;
+}
+.v229-category-choice-icon{
+  overflow:hidden;
+  padding:3px;
+}
+.v229-category-choice-icon .v144-cat-icon-img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  border-radius:5px!important;
+}
+.v229-category-choice-icon .v144-cat-icon-emoji{
+  font-size:17px;
+  line-height:1;
+}
+.v229-category-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid var(--border-soft);
+}
+.v229-category-page-label{
+  min-width:150px;
+  text-align:center;
+  color:var(--text-dim);
+  font-size:11px;
+}
+.v229-category-empty{
+  grid-column:1 / -1;
+  padding:20px;
+  text-align:center;
+  border:1px dashed var(--border);
+  border-radius:11px;
+  color:var(--text-mute);
+}
+
+/* Set Status uses the same semantic SVGs used by Dynamic Library and does not
+   carry a second generic leading action icon. */
+.v229-status-choice-list{max-height:none;overflow:visible;padding-right:0}
+.v229-status-choice-icon>.v225-btn-icon{
+  width:17px!important;
+  height:17px!important;
+  margin:0!important;
+  flex:0 0 17px!important;
+  color:currentColor!important;
+}
+.v229-status-choice-icon>.v225-btn-icon svg{width:100%;height:100%;display:block}
+
+/* v229 reverses the v227 exception for this one selector: Category Icon URL
+   should visibly communicate that it controls category artwork. */
+select[aria-label="Dynamic Library category row icons"][data-v226-dropdown-icon]{
+  padding-left:38px!important;
+  background-image:
+    var(--v226-dropdown-icon),
+    linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),
+    linear-gradient(135deg,var(--text-dim) 50%,transparent 50%),
+    linear-gradient(to right,var(--border-soft),var(--border-soft))!important;
+  background-position:
+    12px 50%,
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%,
+    calc(100% - 37px) 50%!important;
+  background-size:16px 16px,5px 5px,5px 5px,1px 20px!important;
+  background-repeat:no-repeat!important;
+}
+
+@media(max-width:760px){
+  .modal:has(.v229-category-modal){max-width:560px}
+  .v229-category-choice-list-two{grid-template-columns:minmax(0,1fr)}
+}

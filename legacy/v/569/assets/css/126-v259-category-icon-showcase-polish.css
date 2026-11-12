@@ -1,0 +1,52 @@
+/* MediaFlow v259 — compact built-in category icon showcase */
+.v258-icon-library{
+  grid-template-columns:repeat(auto-fill,minmax(68px,76px));
+  gap:7px;
+  justify-content:start;
+  align-items:start;
+}
+.v258-icon-choice{
+  width:100%;
+  min-height:64px;
+  padding:7px;
+  gap:0;
+  justify-content:center;
+  border-radius:11px;
+}
+.v258-icon-choice-art{
+  width:46px;
+  height:46px;
+  border-radius:10px;
+}
+.v258-icon-choice-art img{
+  width:42px;
+  height:42px;
+}
+/* v259 removes visible names from the packaged artwork grid. The button keeps
+   a title/aria-label so each icon remains identifiable to assistive tech. */
+.v258-icon-choice-label{display:none!important;}
+/* Built-in artwork is itself the button content, so the global action-icon
+   enhancer must never add the neutral arrow above it. */
+.v258-icon-choice>.v225-btn-icon{display:none!important;}
+
+@media (max-width:700px){
+  .v258-icon-library{
+    grid-template-columns:repeat(auto-fill,minmax(62px,70px));
+    gap:6px;
+  }
+  .v258-icon-choice{
+    min-height:58px;
+    padding:6px;
+  }
+  .v258-icon-choice-art{width:42px;height:42px;}
+  .v258-icon-choice-art img{width:38px;height:38px;}
+}
+@media (max-width:360px){
+  .v258-icon-library{
+    grid-template-columns:repeat(auto-fill,minmax(58px,66px));
+    gap:5px;
+  }
+  .v258-icon-choice{min-height:54px;padding:5px;}
+  .v258-icon-choice-art{width:39px;height:39px;}
+  .v258-icon-choice-art img{width:35px;height:35px;}
+}
