@@ -134,16 +134,42 @@ function mf558DecorateMini(state){
     if(badge.textContent!==String(active))badge.textContent=String(active);
   }else badge?.remove();
 }
+// v566: measuring right after a paint forced a full page layout on every
+// progress tick (very slow on big pages). Place it once per frame instead.
+// The button's place only depends on the widget's layout state and the window
+// size, so a progress repaint reuses the last measurement (no page layout).
+let mf558PlacePending=false,mf558PlaceCache=null;
+function mf558PlaceKey(w){return [w.className,window.innerWidth,window.innerHeight,w.querySelector('.mf476-toggle-chevron')?.getAttribute('aria-expanded')||''].join('|');}
+function mf558SchedulePlace(){
+  if(mf558PlacePending)return;
+  mf558PlacePending=true;
+  requestAnimationFrame(()=>{
+    mf558PlacePending=false;
+    try{
+      const w=document.getElementById('mf441-process-widget'),btn=w?.querySelector('.mf555-proc-minimize');
+      if(!btn)return;
+      const key=mf558PlaceKey(w);
+      if(mf558PlaceCache&&mf558PlaceCache.key===key){
+        if(!btn.classList.contains('mf558-placed')){Object.assign(btn.style,mf558PlaceCache.style);btn.classList.add('mf558-placed');}
+        return;
+      }
+      mf558PlaceMinimize();
+      if(btn.classList.contains('mf558-placed'))mf558PlaceCache={key,style:{top:btn.style.top,right:btn.style.right,width:btn.style.width,height:btn.style.height}};
+    }catch(_){}
+  });
+}
+window.addEventListener('resize',()=>{mf558PlaceCache=null;});
 const mf558ProcPaintBase=mf441Paint;
 mf441Paint=function(){
   const out=mf558ProcPaintBase.apply(this,arguments);
-  try{mf558PlaceMinimize();mf558DecorateMini(mf441State());}catch(_){}
+  try{mf558DecorateMini(mf441State());}catch(_){}
+  mf558SchedulePlace();
   return out;
 };
 const mf558LayoutBase=mf469Layout;
 mf469Layout=function(){
   const out=mf558LayoutBase.apply(this,arguments);
-  try{mf558PlaceMinimize();}catch(_){}
+  mf558SchedulePlace();   // v566: cached placement, no forced layout per repaint
   return out;
 };
 addEventListener('resize',()=>{try{mf558PlaceMinimize();}catch(_){}});

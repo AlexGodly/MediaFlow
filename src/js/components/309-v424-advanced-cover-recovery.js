@@ -55,7 +55,10 @@ async function mf424Storage(action,key,value){const db=await mf424DB();return ne
   const req=action==='put'?store.put(value,key):action==='delete'?store.delete(key):store.get(key);
   req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
 });}
-async function mf424SaveJob(){if(!MF424.job)return;MF424.job.updated=Date.now();await mf424Storage('put',mf424Key(),MF424.job);}
+async function mf424SaveJob(){if(!MF424.job)return;MF424.job.updated=Date.now();
+  // v566: while recovered covers wait for a batched save, the checkpoint stays at the first unsaved title.
+  const checkpoint=typeof mf566SafeCheckpoint==='function'?mf566SafeCheckpoint('cover',MF424.job):MF424.job;
+  await mf424Storage('put',mf424Key(),checkpoint);}
 function mf424Item(id){return (S.library||[]).find(i=>String(i?.id)===String(id))||null;}
 function mf424BuildIndex(){MF424.byId=new Map((S.library||[]).filter(i=>i?.id).map(i=>[String(i.id),i]));}
 function mf424Lookup(id){return MF424.byId?.get(String(id))||mf424Item(id);}
@@ -362,11 +365,14 @@ async function mf424Apply(item,candidate,expected,{manual=false,linkId=true}={})
   item.modifiedAt=Date.now();MF424.job.dirty++;if(typeof mf425CreditRecoveredCover==='function')mf425CreditRecoveredCover(item,'',candidate.url,candidate.provider);
   return true;
 }
-async function mf424Flush(){if(!MF424.job?.dirty)return;
+async function mf424Flush(force){if(!MF424.job?.dirty)return;
+  // v566: during a running job, account saves are batched (every 10 titles / 10 s).
+  if(!force&&typeof mf566DeferRecoverySave==='function'&&mf566DeferRecoverySave('cover'))return;
   if(mf424Account()!==MF424.account)throw new Error('Account changed before saving');
   if(MF424.running&&typeof mf442ProcessOwned==='function'&&!mf442ProcessOwned('cover'))throw new Error('Recovery process lock changed; cover save suspended');
   if(typeof v53InvalidateLibraryCache==='function')v53InvalidateLibraryCache();
   await saveState();MF424.job.dirty=0;MF424.byId=null;mf424BuildIndex();
+  if(typeof mf566RecoverySaved==='function')mf566RecoverySaved('cover');
 }
 async function mf424WaitForLibrary(){
   // DOM readiness is not sufficient: cloud state/account hydration is asynchronous.
@@ -435,14 +441,14 @@ async function mf424Run(){if(MF424.running||!MF424.job)return;
       }
       if(job.stopAfterPart&&job.mode==='one'){job.stopRequested=true;break;}
     }
-    await mf424Flush();
+    await mf424Flush(true);
     if(job.stopRequested)mf424State('stopped');
     else if(job.pauseRequested)mf424State('paused');
     else if(job.cursor>=job.ids.length)mf424State(job.pending?'waiting-review':'complete');
     else if(job.status!=='waiting-part')mf424State('paused');
     if(job.status==='complete'||job.status==='stopped')job.ended=Date.now();
     await mf424SaveJob();
-  }catch(e){mf424State('paused');MF424.job.pauseRequested=true;mf424Note('error',String(e.message||e));try{await mf424Flush();await mf424SaveJob();}catch(_) {}}
+  }catch(e){mf424State('paused');MF424.job.pauseRequested=true;mf424Note('error',String(e.message||e));try{await mf424Flush(true);await mf424SaveJob();}catch(_) {}}
   finally{MF424.running=false;mf424Release();mf424Paint();}
 }
 async function mf424Start(){if(MF424.running)return;const settings=mf424ReadForm();
@@ -564,7 +570,7 @@ async function mf424Confirm(i){if(!MF424.job?.reviews.length)return;const x=MF42
     showToast('This title changed after review was queued. Its cover was not overwritten.');return;
   }
   const linkId=document.querySelector('#mf424-review [data-mf424-cover-link-id="'+Number(i)+'"]')?.checked===true;
-  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true,linkId})){await mf424Flush();MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
+  if(await mf424Apply(item,candidate,x.expectedModified,{manual:true,linkId})){await mf424Flush(true);MF424.job.fixed++;mf424Note('recovered','Manual selection: '+candidate.provider,x.id);
     MF424.job.reviews.shift();MF424.job.pending--;await mf424ReviewSave();}else showToast('Unable to validate this cover safely.');
 }
 async function mf424ReviewSave(){if(MF424.job.cursor>=MF424.job.ids.length&&!MF424.job.pending)mf424State('complete');
