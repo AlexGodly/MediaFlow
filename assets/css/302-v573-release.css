@@ -1,0 +1,7 @@
+/* MediaFlow v573 release styles. */
+
+/* Batch Log: date and time side by side. */
+.mf573-when{display:flex;gap:8px;align-items:center;min-width:0}
+.mf573-when input[type="date"]{flex:1 1 auto;min-width:0}
+.mf573-when .mf573-batch-time{flex:0 0 130px;width:130px;min-width:0}
+@media (max-width:420px){.mf573-when{flex-wrap:wrap}.mf573-when .mf573-batch-time{flex:1 1 100%;width:100%}}
