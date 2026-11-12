@@ -1,0 +1,124 @@
+/* ============================================================
+   MediaFlow v224 — Library / Sorting / Recommendation UI
+   ============================================================ */
+.v224-sort-control,
+.v224-sort-pair{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+}
+.v224-sort-control select,
+.v224-sort-pair select{
+  min-width:145px;
+  width:auto;
+}
+.v224-sort-direction{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-width:72px;
+  white-space:nowrap;
+  font-weight:800;
+  letter-spacing:.035em;
+}
+.v224-sort-direction .v224-sort-arrow{
+  font-size:14px;
+  line-height:1;
+}
+.v224-sort-direction.is-asc{
+  border-color:color-mix(in srgb,var(--accent) 48%,var(--border-soft));
+}
+.v224-sort-direction.is-desc{
+  border-color:color-mix(in srgb,var(--flow) 48%,var(--border-soft));
+}
+.v224-cover-filter{width:auto!important;min-width:126px}
+
+/* Batch Log / Personal Order picker keep sort field + direction together. */
+.v224-browser-filterbar .v224-sort-pair{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+}
+.v224-browser-filterbar .v224-sort-pair select{width:100%;min-width:0}
+
+/* Dashboard logging browser is visible immediately, even before typing. */
+.v224-log-tools{
+  margin:8px 0 10px;
+}
+.v224-log-tools .v224-sort-pair{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+}
+
+/* Recommended-title actions: title card on top, all actions directly below. */
+.v174-recommended-title-row{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center!important;
+  gap:8px 9px!important;
+}
+.v174-recommended-title-row>.v50-title-feature,
+.v174-recommended-title-row>.hero-note{
+  grid-column:1/-1;
+  width:100%;
+  min-width:0;
+  margin-bottom:0;
+}
+.v174-recommended-title-row>.v174-recommended-edit{
+  grid-column:1;
+  grid-row:2;
+}
+.v174-recommended-title-row>.v180-rec-actions{
+  grid-column:2;
+  grid-row:2;
+  justify-self:start;
+}
+.v224-rec-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.v224-rec-action{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:34px;
+  border-radius:10px!important;
+}
+.v224-rec-action svg{
+  width:15px;
+  height:15px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex:0 0 auto;
+}
+.v174-recommended-edit.v224-rec-action{
+  padding-inline:11px;
+}
+
+@media(max-width:700px){
+  .v224-sort-control,
+  .v224-sort-pair{width:100%}
+  .v224-sort-control select,
+  .v224-sort-pair select{flex:1 1 auto;width:100%;min-width:0}
+  .v224-sort-direction{flex:0 0 auto}
+  .v174-recommended-title-row{
+    grid-template-columns:1fr!important;
+  }
+  .v174-recommended-title-row>.v174-recommended-edit,
+  .v174-recommended-title-row>.v180-rec-actions{
+    grid-column:1;
+    grid-row:auto;
+    justify-self:stretch;
+  }
+  .v174-recommended-title-row>.v174-recommended-edit{width:100%}
+  .v224-rec-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .v224-rec-actions .btn{width:100%}
+}

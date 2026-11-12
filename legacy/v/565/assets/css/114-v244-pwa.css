@@ -1,0 +1,10 @@
+/* MediaFlow v244 — Progressive Web App UI */
+.v244-pwa-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.v244-pwa-card-main{display:flex;align-items:flex-start;gap:12px;min-width:min(100%,360px);flex:1}
+.v244-pwa-mark{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border:1px solid var(--border);border-radius:12px;background:var(--panel-raised);color:var(--flow);font-size:20px;font-weight:800}
+.v244-pwa-copy{min-width:0;flex:1}
+.v244-pwa-copy>b{display:block;font-size:13px;margin-bottom:4px}
+.v244-pwa-status{margin-top:8px;font-size:11px;color:var(--text-dim);line-height:1.45}
+.v244-pwa-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:680px){.v244-pwa-card{align-items:stretch}.v244-pwa-actions{justify-content:flex-start;width:100%}.v244-pwa-actions .btn{flex:1 1 auto}}
+@media(display-mode:standalone){html{overscroll-behavior:none}body{min-height:100dvh}.sidebar,.mobile-tabbar{padding-bottom:max(env(safe-area-inset-bottom),0px)}}

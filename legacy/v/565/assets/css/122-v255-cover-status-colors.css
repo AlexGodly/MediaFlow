@@ -1,0 +1,4 @@
+/* MediaFlow v255 — Cover overlay status color polish
+   Applies only to the v254 Covers / Covers+Titles status overlay badges. */
+.v254-cover-status.v254-status-completed{color:#4da3ff}
+.v254-cover-status.v254-status-planned{color:#fff}

@@ -1,0 +1,24 @@
+/* ============================================================
+   MediaFlow v237 — Searchable Category Filters Everywhere
+   ============================================================ */
+.v237-category-filter{position:relative;min-width:250px}
+.v237-category-filter-panel{z-index:90}
+.v237-category-filter-search{font-size:11px!important}
+
+/* Personal Order's labelled filter card should let the richer category control
+   use the full row without forcing its summary chips into a narrow column. */
+.v225-order-filter-category .v237-category-filter,
+.v225-order-filter-category .v237-category-filter>summary{width:100%!important;max-width:none!important}
+
+/* Batch Log / Dashboard logging toolbars can wrap naturally when the richer
+   filter needs more horizontal room. */
+.v224-browser-filterbar>.v237-category-filter,
+.v224-log-tools>.v237-category-filter{flex:1 1 250px;max-width:390px}
+
+.v237-category-filter-option{user-select:none}
+.v237-category-filter-pager .btn{white-space:nowrap}
+
+@media(max-width:760px){
+  .v224-browser-filterbar>.v237-category-filter,
+  .v224-log-tools>.v237-category-filter{flex:1 1 100%;max-width:none;width:100%}
+}
