@@ -16,6 +16,7 @@ assert(read('index.html').includes(`mediaflow-v${version}.bundle.js`));
 assert(read('src/js/components/405-v562-library-history-more.js').includes('class="btn btn-sm mf562-more-btn"'),'More button has its own class');
 assert(read('assets/css/296-v562-library-history-more.css').includes('.mf562-more-btn{'));
 if(version===565){const wf=read('.github/workflows/publish-v565.yml');assert(wf.includes('gh release create 565')&&wf.includes('legacy/v/565'));}
+assert(read('docs/release-v565.md').startsWith('## MediaFlow v565 Stable'),'release notes exist for the publish step');
 assert(read('.github/workflows/deploy-pages.yml').includes('"Build archive and release MediaFlow v565"'));
 // Category conversion sits on the logging paths.
 for(const f of ['src/js/features/logging/008-session-flow.js','src/js/pages/batch-log/014-view-batch-log-v61.js','src/js/components/290-v397-floating-dock.js','src/js/components/381-v537-unified-xp-reward-preview.js'])
