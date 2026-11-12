@@ -39,7 +39,7 @@
       return out;};
     const b={
       select(c){st.cols=c||'*';if(st.upsert)st.returning=true;return b;},
-      eq(c,v){st.filters.push(['eq',c,v]);return b;},gt(c,v){st.filters.push(['gt',c,v]);return b;},gte(c,v){st.filters.push(['gte',c,v]);return b;},
+      eq(c,v){st.filters.push(['eq',c,v]);return b;},gt(c,v){st.filters.push(['gt',c,v]);return b;},or(expr){st.filters.push(['or',expr]);return b;},gte(c,v){st.filters.push(['gte',c,v]);return b;},
       order(c,o){st.order.push([c,o?.ascending!==false]);return b;},range(a,z){st.range=[a,z];return b;},limit(n){st.range=[0,n-1];return b;},
       maybeSingle(){st.single=true;return run().then(o=>({data:(o.data||[])[0]||null,error:o.error||null}));},
       single(){return b.maybeSingle();},

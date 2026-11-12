@@ -62,7 +62,9 @@ function dbOp(store,st){
     for(const row of st.upsert){const k=keys.map(c=>row[c]).join('\u0001');const rec={...(t.get(k)||{}),...row,updated_at:dbStamp()};t.set(k,rec);out.push(rec);store.writes++;}
     return {data:st.returning?out.map(r=>pick(r,st.cols)):null,error:null};
   }
-  let rows=[...t.values()].filter(r=>st.filters.every(([op,c,v])=>op==='eq'?String(r[c])===String(v):op==='gt'?r[c]>v:op==='gte'?r[c]>=v:true));
+  const orMatch=(r,expr)=>String(expr).split(',').some(part=>{const [c,op,...rest]=part.split('.');const v=rest.join('.');
+    return op==='is'&&v==='null'?r[c]==null:op==='neq'?r[c]!=null&&String(r[c])!==v:op==='eq'?String(r[c])===v:false;});
+  let rows=[...t.values()].filter(r=>st.filters.every(([op,c,v])=>op==='eq'?String(r[c])===String(v):op==='gt'?r[c]>v:op==='gte'?r[c]>=v:op==='or'?orMatch(r,c):true));
   rows.sort((a,b)=>{for(const [c,asc] of st.order){if(a[c]<b[c])return asc?-1:1;if(a[c]>b[c])return asc?1:-1;}return 0;});
   if(st.range)rows=rows.slice(st.range[0],st.range[1]+1);
   return {data:rows.map(r=>pick(r,st.cols)),error:null};
