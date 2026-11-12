@@ -1,0 +1,146 @@
+/* MediaFlow v410 — restrained mobile quick-access dock and clear action sheet.
+   Extends v409 without altering desktop fan, icons, handlers, user task data,
+   theme support, or the persistent Show Floating Controls preferences. */
+@media screen and (max-width:720px){
+  /* A single low-profile row. In v409 the progress card sat ABOVE the Add
+     button, obscuring two separate sections of Dashboard content. */
+  .mf397-dock{
+    right:max(12px,env(safe-area-inset-right,0px));
+    bottom:calc(76px + env(safe-area-inset-bottom,0px));
+    flex-direction:row-reverse;
+    align-items:center;
+    justify-content:flex-start;
+    gap:9px;
+    width:auto;
+    max-width:calc(100vw - 24px);
+  }
+  .mf397-dock .mf397-plus-holder{flex:0 0 auto;align-self:center}
+  .mf397-dock .mf397-fab{
+    width:48px;height:48px;border-radius:16px;
+    box-shadow:0 9px 20px #0007,0 0 0 2px color-mix(in srgb,var(--flow) 17%,transparent);
+  }
+  .mf397-dock .mf397-fab>svg{width:24px;height:24px}
+  .mf397-dock .mf397-fab::after{inset:-3px;border-radius:19px}
+
+  /* A compact, readable 0%-100% task indicator replaces the large overlay.
+     Users may expand the real task panel via the existing +/- toggle. */
+  .mf397-dock .mf397-progress.compact{
+    position:relative;
+    flex:0 0 auto;
+    width:122px;max-width:calc(100vw - 90px);
+    height:48px;
+    padding:7px 10px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    box-shadow:0 9px 22px #0006;
+  }
+  .mf397-dock .mf397-progress.compact .mf397-head{width:100%;gap:5px}
+  .mf397-dock .mf397-progress.compact .mf397-label{gap:5px;letter-spacing:.08em;font-size:10px;flex:0 1 auto}
+  .mf397-dock .mf397-progress.compact .mf397-label span{display:none}
+  .mf397-dock .mf397-progress.compact .mf397-label::after{content:'TASK';font-size:9px;letter-spacing:.12em}
+  .mf397-dock .mf397-progress.compact .mf397-mini-percent{font-size:15px;line-height:1;font-variant-numeric:tabular-nums;margin-left:auto}
+  .mf397-dock .mf397-progress.compact .mf397-collapse{width:20px;height:27px}
+  .mf397-dock .mf397-progress.compact .mf397-ambient{opacity:.28}
+
+  /* Expanded progress is opt-in, and grows UP from the small dock rather
+     than pushing the Add action out of the available horizontal space. */
+  .mf397-dock .mf397-progress:not(.compact){
+    position:absolute;
+    bottom:calc(100% + 12px);
+    right:0;
+    flex:0 0 auto;
+    width:min(304px,calc(100vw - 24px));
+    max-width:calc(100vw - 24px);
+    padding:12px 14px;
+  }
+
+  /* v409's narrow stack blocked the card directly behind it. Deliberately
+     present a coherent, bounded bottom action sheet with backdrop instead. */
+  .mf397-dock .mf397-fan{
+    position:fixed;
+    left:max(12px,env(safe-area-inset-left,0px));
+    right:max(12px,env(safe-area-inset-right,0px));
+    bottom:calc(139px + env(safe-area-inset-bottom,0px));
+    top:auto;
+    width:auto;
+    max-width:430px;
+    margin-inline:auto;
+    height:auto;
+    max-height:calc(100dvh - 168px - env(safe-area-inset-bottom,0px));
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    padding:15px;
+    border:1px solid color-mix(in srgb,var(--flow) 26%,var(--border));
+    border-radius:20px;
+    background:color-mix(in srgb,var(--panel-raised,var(--panel)) 97%,transparent);
+    box-shadow:0 25px 65px rgba(0,0,0,.54);
+    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(14px);
+    transform:translateY(10px) scale(.985);
+    transform-origin:bottom center;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .2s ease,transform .2s ease,visibility .2s;
+  }
+  .mf397-dock .mf397-fan.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1)}
+  .mf397-dock .mf397-fan::before{
+    content:'QUICK ACTIONS';
+    display:block;
+    font-size:10px;
+    font-weight:850;
+    letter-spacing:.16em;
+    color:var(--text-dim);
+    padding:2px 2px 7px;
+    border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent);
+    margin-bottom:1px;
+  }
+  .mf397-dock .mf397-fan-orbit{display:none}
+  .mf397-dock .mf397-fan .mf397-fan-action,
+  .mf397-dock .mf397-fan .mf397-fan-action.a1,
+  .mf397-dock .mf397-fan .mf397-fan-action.a2,
+  .mf397-dock .mf397-fan .mf397-fan-action.a3{
+    position:relative;
+    inset:auto;
+    display:flex;
+    width:100%;
+    min-height:63px;
+    flex:0 0 auto;
+    max-width:100%;
+    padding:10px 12px;
+    opacity:1;
+    transform:none;
+    transition:border-color .18s ease,background .18s ease;
+    background:color-mix(in srgb,var(--panel) 80%,var(--flow) 5%);
+    box-shadow:none;
+  }
+  .mf397-dock .mf397-fan-action .mf397-action-symbol{flex:0 0 auto}
+  .mf397-dock .mf397-fan-action>span:nth-child(2){flex:1;min-width:0}
+  .mf397-dock .mf397-fan-action strong,
+  .mf397-dock .mf397-fan-action small{white-space:normal;overflow-wrap:break-word}
+  .mf397-dock:has(.mf397-fan.open) .mf397-progress{display:none!important}
+  /* Signpost intentional menu mode without over-blurring readable content. */
+  .mf397-dimmer{background:rgba(0,0,0,.44);-webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
+  /* Users can scroll all content above the fixed controls and mobile nav. */
+  #view-root,.main-content,.page-content{scroll-padding-bottom:200px}
+}
+@media screen and (max-width:355px){
+  .mf397-dock .mf397-fan{padding:12px;gap:7px}
+  .mf397-dock .mf397-fan .mf397-fan-action{padding:8px 10px;min-height:57px}
+  .mf397-dock .mf397-progress.compact{width:108px;padding:6px 8px}
+  .mf397-dock .mf397-progress.compact .mf397-label::after{content:'GOAL'}
+  .mf397-dock .mf397-fab{width:46px;height:46px}
+}
+@media screen and (max-width:720px) and (max-height:520px){
+  .mf397-dock{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  .mf397-dock .mf397-fan{bottom:calc(115px + env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 122px - env(safe-area-inset-bottom,0px))}
+  .mf397-dock .mf397-fan .mf397-fan-action{min-height:49px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mf397-dock .mf397-fan,.mf397-dock .mf397-fan .mf397-fan-action{transition:none!important}
+}
