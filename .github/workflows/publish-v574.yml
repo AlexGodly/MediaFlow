@@ -1,0 +1,121 @@
+name: Build archive and release MediaFlow v574
+# v574: XP preview in Batch Log; the live-sync probe looks strictly after the cursor.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'version.json'
+      - 'index.html'
+      - 'src/js/runtime-order.json'
+      - 'src/css-order.json'
+      - 'src/js/components/424-v574-batch-xp-preview.js'
+      - 'assets/css/303-v574-release.css'
+      - 'assets/icons/platforms/**'
+      - 'src/js/core/constants/001-constants.js'
+      - 'tests/test-v574-release.cjs'
+      - '.github/workflows/publish-v574.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mediaflow-v574-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            /*
+            !/legacy/
+            !/beta/
+          sparse-checkout-cone-mode: false
+      - name: Build, smoke test and verify
+        run: |
+          set -euo pipefail
+          test "$(cat VERSION)" = 574
+          python3 scripts/build.py
+          python3 scripts/pwa.py
+          node --check assets/js/mediaflow-v574.bundle.js
+          node --check sw.js
+          test -s assets/css/mediaflow-v574.bundle.css
+          node scripts/check-pwa-release.js
+          node tests/test-v574-release.cjs
+          node tests/test-v573-release.cjs
+          node tests/test-v572-release.cjs
+          node tests/test-v571-release.cjs
+          node tests/test-v570-release.cjs
+          node tests/test-v569-release.cjs
+          node tests/test-v568-release.cjs
+          node tests/test-v567-release.cjs
+          node tests/test-v566-release.cjs
+          node tests/test-v565-release.cjs
+          node tests/test-v564-release.cjs
+          node tests/test-v562-release.cjs
+          node tests/test-v561-release.cjs
+          node tests/test-v560-release.cjs
+          node tests/test-v559-release.cjs
+          node tests/test-v558-release.cjs
+          node tests/test-v557-release.cjs
+          node tests/test-v556-release.cjs
+          node tests/test-v555-release.cjs
+          node tests/test-v555-gateway.cjs
+          node tests/test-v554-universal-id-discovery.cjs
+          node tests/test-v547-external-ratings-intelligence.cjs
+          node tests/test-v552-collection-delete-confirmation.cjs
+          node tests/test-v551-app-wide-performance.cjs
+          node tests/test-v548-logging-large-library-sort.cjs
+          node tests/test-v544-xp-reward-contract.cjs
+          node tests/test-v543-xp-preview-recovery.cjs
+          node tests/test-v542-xp-award-parity.cjs
+          node tests/test-v537-unified-xp-preview.cjs
+          node tests/test-v535-cloud-reliability.cjs
+          grep -q 'mediaflow-v574.bundle.js' index.html
+          grep -q 'mediaflow-v574.bundle.css' index.html
+          grep -q 'mediaflow-pwa-v574-shell' sw.js
+          test "$(python3 -c "import json;print(json.load(open('version.json'))['build'])")" = 574
+      - name: Archive complete version
+        run: |
+          set -euo pipefail
+          mkdir -p legacy/v/574
+          for entry in README.md LICENSE icon.svg VERSION version.json index.html sw.js manifest.json assets src scripts docs supabase; do
+            if [ -e "$entry" ]; then cp -a "$entry" legacy/v/574/; fi
+          done
+          test -f legacy/v/574/assets/js/mediaflow-v574.bundle.js
+          test -f legacy/v/574/assets/css/mediaflow-v574.bundle.css
+          test -f legacy/v/574/README.md
+          git add --sparse -f README.md VERSION index.html sw.js manifest.json version.json assets/js/mediaflow-v574.bundle.js assets/css/mediaflow-v574.bundle.css legacy/v/574
+          git add -u
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'release: build and archive MediaFlow v574' || true
+          pushed=0
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=1
+              break
+            fi
+            sleep 2
+          done
+          test "$pushed" = 1
+      - name: Package and publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git archive --format=zip --output=MediaFlow_v574_Stable.zip HEAD:legacy/v/574
+          sha256sum MediaFlow_v574_Stable.zip > MediaFlow_v574_Stable.sha256
+          if ! gh release view 574 >/dev/null 2>&1; then
+            gh release create 574 MediaFlow_v574_Stable.zip MediaFlow_v574_Stable.sha256 --target "$(git rev-parse HEAD)" --title 'v574 Stable' --notes-file docs/release-v574.md
+          else
+            git tag -f 574 "$(git rev-parse HEAD)"
+            git push origin refs/tags/574 --force
+            gh release upload 574 MediaFlow_v574_Stable.zip MediaFlow_v574_Stable.sha256 --clobber
+          fi

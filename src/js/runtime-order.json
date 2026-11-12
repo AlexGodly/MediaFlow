@@ -276,5 +276,6 @@
   "components/420-v566-faq.js",
   "components/421-v569-title-units.js",
   "components/422-v572-sync-cursor.js",
-  "components/423-v573-batch-time.js"
+  "components/423-v573-batch-time.js",
+  "components/424-v574-batch-xp-preview.js"
 ]
