@@ -49,7 +49,7 @@ const DAY=86400000;
     const get=await p.evaluate(()=>{
       const root=document.getElementById('mf565-get');
       return {devices:[...root.querySelectorAll('.mf566-devices li')].map(li=>li.innerText.replace(/\s+/g,' ')),
-        icons:[...root.querySelectorAll('.mf565-get-card .mf565-get-icon')].every(i=>i.querySelector('svg,img')),
+        icons:[...root.querySelectorAll('.mf565-get-card .mf565-get-icon')].every(i=>i.querySelector('svg,img,.mf567-logo')),
         emoji:/🤖|🪟|🌐/.test(root.innerHTML),
         dlIcons:[...root.querySelectorAll('.mf565-get-dl')].every(a=>a.querySelector('svg')),
         check:!!root.querySelector('.mf565-get-status .mf566-btn svg')};

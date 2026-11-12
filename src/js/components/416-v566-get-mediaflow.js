@@ -12,7 +12,8 @@
  *    A "Your devices" list at the top shows every device against the latest
  *    app release or the latest website version.
  */
-const MF566_PLATFORM_LOGOS={android:'',windows:'',ios:'',web:''};
+// v567: the official logos, used as shapes and filled with the theme's colour.
+const MF566_PLATFORM_LOGOS={android:'assets/icons/platforms/android.png',windows:'assets/icons/platforms/windows.png',ios:'assets/icons/platforms/ios.png',web:'assets/icons/platforms/web.png'};
 const MF566_ICON={
   download:MF565_DOWNLOAD_ICON,
   install:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
@@ -30,7 +31,9 @@ const MF566_STALE_DAYS=60;
 
 function mf566PlatformIcon(id){
   const file=MF566_PLATFORM_LOGOS[id];
-  if(file)return '<img src="'+escapeHtml(file)+'" alt="" width="22" height="22" decoding="async">';
+  // Full address: a relative url() inside a CSS variable would resolve against the stylesheet.
+  if(file){let href=file;try{href=new URL(file,document.baseURI).href;}catch(_){}
+    return '<span class="mf567-logo" style="--mf567-logo:url(\''+escapeHtml(href)+'\')" aria-hidden="true"></span>';}
   return MF566_ICON[id]||MF566_ICON.web;
 }
 // The page's own version: the build writes it into index.html. (MediaFlowRuntime.version
