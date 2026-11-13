@@ -1,0 +1,183 @@
+/* ============================================================
+   MediaFlow v271 — History UI polish + cover-size surfaces
+   ============================================================ */
+:root{
+  --v181-cover-history-latest:1;
+  --v181-cover-history-week-summary:1;
+  --v181-cover-history-consumption-card:1;
+  --v181-cover-history-recent:1;
+  --v181-cover-history-ratings:1;
+}
+
+/* Category popup: viewport-positioned so sticky/filter containers cannot crop it. */
+.v260-history-page .v241-history-category-filter>.v236-category-filter-panel{
+  position:absolute!important;
+  left:0!important;
+  top:calc(100% + 8px)!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:min(430px,calc(100vw - 24px))!important;
+  min-width:min(330px,calc(100vw - 24px))!important;
+  max-width:calc(100vw - 24px)!important;
+  max-height:min(640px,72vh)!important;
+  z-index:10050!important;
+  overflow:auto!important;
+  isolation:isolate;
+}
+.mf269-filter-shell,.mf269-filterbar,.mf269-filter-left,.mf269-filter-category{overflow:visible!important;}
+.mf269-filter-left{flex-wrap:wrap;}
+@media(max-width:700px){
+  .v260-history-page .v241-history-category-filter>.v236-category-filter-panel{
+    left:12px!important;right:12px!important;top:auto!important;bottom:12px!important;
+    width:auto!important;min-width:0!important;max-width:none!important;max-height:72dvh!important;
+  }
+}
+
+/* Semantic toolbar controls: readable and intentionally spaced. */
+.mf269-filter-shell{padding-bottom:7px;}
+.mf269-filterbar{gap:14px;overflow:visible!important;}
+.mf269-filter-left,.mf269-filter-actions{gap:7px;}
+.mf269-filter-label{font-size:9.5px;line-height:1.2;}
+.mf269-filter-cell select,.mf269-filter-category .v236-category-filter-summary,.mf269-filter-category .v236-category-filter-summary-label{font-size:10.5px!important;}
+.mf269-filter-actions>.btn,.mf269-filter-actions summary,.mf269-select-toggle{font-size:10px!important;min-height:44px;gap:7px;}
+.mf269-selection-bar{top:82px;margin-top:3px;}
+.mf269-selection-bar>div{font-size:10px;}
+.mf269-selection-bar>div:last-child{gap:8px;}
+@media(max-width:900px){.mf269-selection-bar{top:190px;}}
+@media(max-width:680px){.mf269-selection-bar{position:static;margin-top:7px;}}
+
+/* Latest consumed: larger posters, clean alignment, no injected action glyphs. */
+.mf269-latest{padding-top:4px;padding-bottom:16px;}
+.mf269-latest-track{gap:10px;scrollbar-width:none;padding-top:3px;}
+.mf269-latest-track::-webkit-scrollbar{display:none;}
+.mf269-latest-title{
+  width:calc(72px * var(--v181-cover-history-latest));
+  flex-basis:calc(72px * var(--v181-cover-history-latest));
+  gap:5px;
+}
+.mf269-latest-cover{
+  width:calc(72px * var(--v181-cover-history-latest));
+  height:calc(106px * var(--v181-cover-history-latest));
+}
+.mf269-latest-progress{font-size:10.5px;line-height:1.3;}
+.mf269-latest-name{font-size:9.5px;line-height:1.3;}
+.mf269-latest-title>.v225-btn-icon,.mf269-card-main>.v225-btn-icon,.mf269-most-card>.v225-btn-icon{display:none!important;}
+
+/* Week badge: always visible inside the summary's top-right corner. */
+.mf269-week-summary{padding-top:22px;}
+.mf269-week-badge{
+  top:10px;right:12px;z-index:5;
+  font-size:9.5px;font-weight:700;
+  max-width:min(48%,420px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mf269-week-summary-head{padding-right:min(390px,34%);}
+@media(max-width:1180px){
+  .mf269-week-badge{position:static;display:flex;margin:-8px 0 12px auto;max-width:100%;width:max-content;}
+  .mf269-week-summary-head{padding-right:0;}
+}
+
+/* Week category rail: drag horizontally, never show a scrollbar. */
+.mf269-week-categories{
+  scrollbar-width:none!important;
+  cursor:grab;
+  user-select:none;
+  touch-action:pan-y;
+  padding-bottom:2px;
+}
+.mf269-week-categories::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}
+.mf269-week-categories.is-dragging{cursor:grabbing;}
+.mf269-week-category small{font-size:10px;}
+.mf269-week-category b{font-size:18px;}
+
+/* Weekly summary readability. */
+.mf269-week-title span:not(.mf269-hourglass){font-size:16px;}
+.mf269-week-title b{font-size:19px;}
+.mf269-week-metrics small{font-size:9.5px;line-height:1.25;}
+.mf269-week-metrics b{font-size:13.5px;line-height:1.3;}
+.mf269-week-metrics span{font-size:9.5px;}
+.mf269-most-label b{font-size:15.5px;}
+
+/* Most-consumed title cards: larger adjustable covers, consistent rows. */
+.mf269-most-card{
+  grid-template-columns:calc(56px * var(--v181-cover-history-week-summary)) minmax(0,1fr);
+  min-height:max(88px,calc(80px * var(--v181-cover-history-week-summary)));
+  gap:10px;padding:7px;align-items:start;
+}
+.mf269-most-cover{
+  width:calc(56px * var(--v181-cover-history-week-summary));
+  height:calc(78px * var(--v181-cover-history-week-summary));
+}
+.mf269-most-rank{left:calc(61px * var(--v181-cover-history-week-summary));top:8px;}
+.mf269-most-copy{padding-left:26px;padding-top:2px;align-self:start;}
+.mf269-most-copy b{font-size:11.5px;line-height:1.35;}
+.mf269-most-copy small,.mf269-most-copy em{font-size:9.5px;line-height:1.3;}
+
+/* Daily history: remove stray action icons and force one organized cover column. */
+.mf269-day-head b{font-size:11.5px;line-height:1.35;}
+.mf269-day-head small,.mf269-day-head>span{font-size:9.5px;}
+.mf269-card-main{
+  grid-template-columns:calc(66px * var(--v181-cover-history-consumption-card)) minmax(0,1fr);
+  gap:11px;align-items:start;padding:8px 40px 8px 8px;
+}
+.mf269-card-cover{
+  width:calc(66px * var(--v181-cover-history-consumption-card));
+  height:calc(96px * var(--v181-cover-history-consumption-card));
+  align-self:start;
+}
+.mf269-card-copy{padding-top:2px;gap:4px;align-self:start;}
+.mf269-card-copy>small{font-size:9.5px;line-height:1.3;}
+.mf269-card-copy>b{font-size:13px;line-height:1.35;}
+.mf269-card-copy>strong{font-size:11px;line-height:1.3;}
+.mf269-card-copy>em,.mf269-card-time{font-size:9.5px;line-height:1.3;}
+.mf269-history-card{min-height:max(112px,calc(112px * var(--v181-cover-history-consumption-card)));}
+
+/* Recently Viewed + Ratings get independent persistent cover scales. */
+.v260-recent-cover,.v261-recent-cover{
+  width:calc(46px * var(--v181-cover-history-recent))!important;
+  height:calc(62px * var(--v181-cover-history-recent))!important;
+  max-width:none!important;max-height:none!important;
+}
+.v260-rating-cover,.v261-rating-cover{
+  width:calc(38px * var(--v181-cover-history-ratings))!important;
+  height:calc(52px * var(--v181-cover-history-ratings))!important;
+  max-width:none!important;max-height:none!important;
+}
+
+/* Shared History subheads and legacy Library History readability. */
+.v261-history-subhead b{font-size:15px!important;line-height:1.3;}
+.v261-history-subhead span{font-size:10.5px!important;line-height:1.4;}
+.v260-library-history-embed,.v261-history-legacy-embed{font-size:11px;}
+
+/* Increase History readability across every tab, including restored Logs. */
+.v261-history-page .v260-history-tab,.v260-history-tab{font-size:11px;}
+.v261-history-toolbar,.v261-filter-group,.v260-recent-toolbar,.mf271-logs{font-size:inherit;}
+.v261-history-toolbar>span,.v260-recent-toolbar span{font-size:10px;}
+.v261-filter-group select,.v261-filter-group input{font-size:10.5px;}
+.v261-recent-card small,.v260-recent-copy small{font-size:9.5px;}
+.v261-recent-card b,.v260-recent-copy b{font-size:12.5px;line-height:1.35;}
+.v261-recent-card em,.v260-recent-copy em{font-size:10px;}
+.v261-rating-head{font-size:9.5px;}
+.v261-rating-row time{font-size:10px;}.v261-rating-row>strong{font-size:13px;}
+.v261-rating-title b{font-size:12.5px;}.v261-rating-title small{font-size:10px;}
+.v261-rating-stars{font-size:11.5px;}
+.mf271-logs .hist-date,.mf271-logs .hist-cat,.mf271-logs .hist-amt,.mf271-logs .hist-note{font-size:11px;line-height:1.4;}
+.mf271-logs .hist-cat{font-weight:800;}
+.mf271-logs .v253-history-page-size,.mf271-logs .v253-history-batchbar,.mf271-logs .lib-pagination{font-size:10px;}
+
+/* Keep the five unified History tabs comfortable on smaller screens. */
+@media(max-width:900px){
+  .v261-history-page .v260-history-tabs{gap:10px;}
+  .v261-history-page .v260-history-tab{font-size:10.5px;padding-inline:8px;}
+}
+@media(max-width:680px){
+  .mf269-latest-title{width:calc(64px * var(--v181-cover-history-latest));flex-basis:calc(64px * var(--v181-cover-history-latest));}
+  .mf269-latest-cover{width:calc(64px * var(--v181-cover-history-latest));height:calc(94px * var(--v181-cover-history-latest));}
+  .mf269-card-main{grid-template-columns:calc(58px * var(--v181-cover-history-consumption-card)) minmax(0,1fr);}
+  .mf269-card-cover{width:calc(58px * var(--v181-cover-history-consumption-card));height:calc(84px * var(--v181-cover-history-consumption-card));}
+}
+@media(max-width:390px){
+  .v260-history-tab span{display:none;}
+  .v260-history-tab{min-width:44px;}
+  .mf269-card-main{grid-template-columns:calc(52px * var(--v181-cover-history-consumption-card)) minmax(0,1fr);padding-right:35px;}
+  .mf269-card-cover{width:calc(52px * var(--v181-cover-history-consumption-card));height:calc(76px * var(--v181-cover-history-consumption-card));}
+}

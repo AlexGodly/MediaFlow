@@ -1,0 +1,6 @@
+/* MediaFlow v381 — provider health rows and source UI. */
+.mf381-diagnostics{display:grid;gap:8px;margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.mf381-diagnostics>strong{font-size:13px}.mf381-diagnostics>small{font-size:11px;color:var(--text-dim,var(--text-mute))}
+.mf381-diagnostics-row{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid var(--border-soft,var(--border));padding-top:6px}
+.mf381-diagnostics-row>b{font-size:12px}.mf381-diagnostics-row>small{font-size:11px;color:var(--text-dim,var(--text-mute));overflow-wrap:anywhere;text-align:right}
+@media(max-width:650px){.mf381-diagnostics-row{align-items:start;flex-direction:column;gap:3px}.mf381-diagnostics-row>small{text-align:left}}
