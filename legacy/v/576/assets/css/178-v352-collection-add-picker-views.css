@@ -1,0 +1,89 @@
+/* MediaFlow v352 — scoped, responsive Collections Add Titles picker. */
+body.v260-redesign #mf274-add-titles .mf352-picker-settings{
+  display:grid;gap:9px;padding:12px 14px;margin:0 0 10px;
+  border:1px solid var(--border-soft);border-radius:14px;
+  background:var(--panel-2);flex:0 0 auto;
+}
+#mf274-add-titles .mf352-display-header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+#mf274-add-titles .mf352-display-header>b{font-size:14px;color:var(--text)}
+#mf274-add-titles .mf352-display-header>span{font-size:12px;color:var(--text-mute)}
+#mf274-add-titles .mf352-view-modes{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#mf274-add-titles .mf352-view-mode{
+  display:inline-flex;justify-content:center;align-items:center;gap:5px;min-height:36px;
+  padding:7px 12px;line-height:1.2;font:inherit;font-size:13px;font-weight:700;
+  background:var(--panel);border:1px solid var(--border-soft);border-radius:9px;
+  color:var(--text);cursor:pointer;white-space:nowrap;
+}
+#mf274-add-titles .mf352-view-mode.active{border-color:var(--accent,var(--flow));background:color-mix(in srgb,var(--flow) 14%,var(--panel));box-shadow:inset 0 0 0 1px var(--flow)}
+#mf274-add-titles .mf352-adjusters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#mf274-add-titles .mf352-adjuster{display:grid;grid-template-columns:minmax(120px,auto) minmax(70px,1fr) 54px;gap:10px;align-items:center;min-width:0;font-weight:650;font-size:12px;color:var(--text-dim)}
+#mf274-add-titles .mf352-adjuster input{width:100%;min-width:0;accent-color:var(--flow)}
+#mf274-add-titles .mf352-adjuster output{font-variant-numeric:tabular-nums;font-size:12px;text-align:right;color:var(--text)}
+/* Increase the baseline from v274's cramped 10px/8.5px single-line labels.
+   Names always wrap fully (except the intentional poster-only Covers mode). */
+body.v260-redesign #mf274-add-titles .mf352-picker-results{--mf352-text:15px;--mf352-cover:72px;gap:9px;grid-auto-rows:max-content;align-content:start}
+body.v260-redesign #mf274-add-titles .mf352-picker-results .mf352-picker-item{
+  display:grid;grid-template-columns:20px minmax(0,var(--mf352-cover)) minmax(0,1fr);
+  align-items:center;gap:11px;min-width:0;min-height:max-content;padding:10px;
+  cursor:pointer;border-radius:12px;
+}
+#mf274-add-titles .mf352-picker-check{width:17px;height:17px;min-width:17px;accent-color:var(--flow);cursor:pointer}
+#mf274-add-titles .mf352-picker-cover{display:flex;min-width:0;width:100%;align-items:center;justify-content:center}
+body.v260-redesign #mf274-add-titles .mf352-picker-cover .mf274-title-cover{
+  width:100%;height:auto;aspect-ratio:2/3;max-width:none;min-width:0;
+  pointer-events:none;overflow:hidden;border-radius:9px;
+}
+#mf274-add-titles .mf352-picker-cover img{height:100%;width:100%;object-fit:cover}
+#mf274-add-titles .mf352-picker-copy{display:flex;flex-direction:column;gap:5px;min-width:0;max-width:100%;width:100%}
+body.v260-redesign #mf274-add-titles .mf352-picker-title{
+  display:block;font-size:var(--mf352-text);font-weight:740;line-height:1.35;
+  white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;
+  max-width:100%;text-align:left;color:var(--text)
+}
+body.v260-redesign #mf274-add-titles .mf352-picker-meta{
+  display:block;font-size:12px;line-height:1.5;white-space:normal;overflow:visible;
+  text-overflow:clip;overflow-wrap:anywhere;color:var(--text-mute)
+}
+/* Each mode has a genuinely different shape, without altering the shared picker data. */
+body.v260-redesign #mf274-add-titles .mf352-mode-list{grid-template-columns:1fr}
+body.v260-redesign #mf274-add-titles .mf352-mode-compact{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.v260-redesign #mf274-add-titles .mf352-mode-compact .mf352-picker-item{--mf352-cover-effective:calc(var(--mf352-cover) * .65);grid-template-columns:18px minmax(0,var(--mf352-cover-effective)) minmax(0,1fr);gap:8px;padding:8px}
+body.v260-redesign #mf274-add-titles .mf352-mode-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.v260-redesign #mf274-add-titles .mf352-mode-cards .mf352-picker-item{grid-template-columns:20px minmax(0,1fr);align-content:start;align-items:start;grid-template-rows:auto auto;gap:8px}
+#mf274-add-titles .mf352-mode-cards .mf352-picker-cover{grid-column:2;grid-row:1;max-width:var(--mf352-cover);justify-self:start}
+#mf274-add-titles .mf352-mode-cards .mf352-picker-copy{grid-column:1/-1;grid-row:2}
+body.v260-redesign #mf274-add-titles .mf352-mode-covers,
+body.v260-redesign #mf274-add-titles .mf352-mode-covers-title{grid-template-columns:repeat(auto-fill,minmax(min(100%,calc(var(--mf352-cover) + 22px)),1fr));align-content:start}
+body.v260-redesign #mf274-add-titles .mf352-mode-covers .mf352-picker-item,
+body.v260-redesign #mf274-add-titles .mf352-mode-covers-title .mf352-picker-item{
+  position:relative;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:8px;
+}
+#mf274-add-titles .mf352-mode-covers .mf352-picker-cover,
+#mf274-add-titles .mf352-mode-covers-title .mf352-picker-cover{width:100%;max-width:var(--mf352-cover);align-self:center}
+#mf274-add-titles .mf352-mode-covers .mf352-picker-check,
+#mf274-add-titles .mf352-mode-covers-title .mf352-picker-check{
+  position:absolute;top:12px;left:12px;z-index:2;background:var(--panel);border-radius:4px;
+}
+#mf274-add-titles .mf352-mode-covers .mf352-picker-copy{display:none}
+#mf274-add-titles .mf352-mode-covers-title .mf352-picker-copy{text-align:center}
+#mf274-add-titles .mf352-mode-covers-title .mf352-picker-title{text-align:center}
+#mf274-add-titles .mf352-mode-covers-title .mf352-picker-meta{font-size:11px;text-align:center}
+/* Keep the modal filter bar usable and the footer in view. */
+@media(max-width:1023px){
+  body.v260-redesign #mf274-add-titles .mf352-picker-settings{padding:10px;gap:8px}
+  #mf274-add-titles .mf352-adjusters{grid-template-columns:1fr;gap:8px}
+  #mf274-add-titles .mf352-adjuster{grid-template-columns:110px minmax(0,1fr) 48px;gap:8px}
+  body.v260-redesign #mf274-add-titles .mf352-mode-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.v260-redesign #mf274-add-titles .mf352-mode-compact{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  #mf274-add-titles .mf352-view-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  #mf274-add-titles .mf352-view-mode{white-space:normal;min-height:36px;font-size:11px;padding:5px 7px}
+  #mf274-add-titles .mf352-display-header>span{font-size:11px}
+  #mf274-add-titles .mf352-adjuster{grid-template-columns:95px minmax(0,1fr) 41px;font-size:11px}
+  body.v260-redesign #mf274-add-titles .mf352-mode-cards{grid-template-columns:1fr}
+  body.v260-redesign #mf274-add-titles .mf352-picker-results .mf352-picker-item{gap:8px;padding:8px}
+  body.v260-redesign #mf274-add-titles .mf352-picker-meta{font-size:11px}
+  body.v260-redesign #mf274-add-titles .mf352-mode-covers,
+  body.v260-redesign #mf274-add-titles .mf352-mode-covers-title{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
