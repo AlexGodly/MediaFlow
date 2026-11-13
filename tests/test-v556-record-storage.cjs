@@ -116,7 +116,8 @@ const snap=p=>p.evaluate(()=>JSON.parse(JSON.stringify(__MF.snapshot())));
     await a.evaluate(()=>window.MediaFlowV556.pull());
     assert.equal(await a.evaluate(()=>__MF.S().library[2].title),'Unsent on B','recovered change reached the other device');
     // 9. The single-row fallback copy is kept current and marked.
-    await a.evaluate(()=>window.MediaFlowV556.flushFallback());
+    // v575: the copy is throttled; this flushes it now.
+    await a.evaluate(()=>(window.MediaFlowV575?window.MediaFlowV575.flush():window.MediaFlowV556.flushFallback()));
     assert(store.row.state_data.mf556,'fallback copy written by v556');
     const legacy=JSON.parse(zlib.gunzipSync(Buffer.from(store.row.state_data.data,'base64')).toString());
     assert.equal(legacy.library.length,await a.evaluate(()=>__MF.S().library.length),'fallback copy is complete');
