@@ -1,0 +1,160 @@
+/* MediaFlow v360 — proportional title galleries and content-aware Collection sheets.
+   This layer intentionally overrides rigid v358/v359 presentation without
+   introducing a second picker or modifying canonical action handlers. */
+
+/* Keep the selected cover width authoritative. v358 used a min 110px column,
+   then stretched each cover to that column, even at a 36px cover setting. */
+.mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title){
+ --mf360-tile:clamp(62px,calc(var(--mf358-cover,64px) + 16px),194px);
+ display:grid!important;
+ grid-template-columns:repeat(auto-fill,minmax(0,var(--mf360-tile)))!important;
+ grid-auto-rows:max-content!important;
+ align-content:start!important;
+ align-items:start!important;
+ justify-content:start!important;
+ gap:8px!important;
+}
+.mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title) .v138-picker-row.mf276-picker-row{
+ display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+ align-items:center!important;gap:6px!important;
+ padding:7px 5px!important;min-width:0!important;width:100%!important;
+ height:auto!important;min-height:0!important;
+ border-radius:11px;text-align:center;
+}
+.mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title) .mf276-order-picker-cover{
+ box-sizing:border-box!important;display:block!important;
+ width:min(100%,var(--mf358-cover,64px))!important;
+ min-width:0!important;max-width:100%!important;
+ height:auto!important;max-height:none!important;
+ aspect-ratio:2/3!important;flex:0 0 auto!important;
+ align-self:center!important;
+}
+.mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title) .mf276-order-picker-fallback :is(img,svg){
+ width:auto!important;height:auto!important;
+ max-width:72%!important;max-height:72%!important;object-fit:contain!important;
+}
+.mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title) .v138-picker-row input[type=checkbox]{
+ top:9px!important;left:8px!important;z-index:2;
+ width:16px!important;height:16px!important;
+}
+.mf359-title-sheet .mf358-title-results.mf358-mode-covers-title .v138-picker-copy{
+ display:block!important;position:static!important;
+ width:100%!important;height:auto!important;min-width:0!important;
+ overflow:visible!important;clip-path:none!important;
+}
+.mf359-title-sheet .mf358-title-results.mf358-mode-covers-title .v138-picker-copy b{
+ display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;
+ overflow:hidden!important;overflow-wrap:anywhere!important;
+ font-size:clamp(11px,var(--mf358-text,15px),22px)!important;
+ line-height:1.28!important;max-height:none!important;
+}
+/* At 36px, a gallery tile is intentionally small. Keep the title-only copy
+   accessible to screen readers while not making the Covers tile taller. */
+.mf359-title-sheet .mf358-title-results.mf358-mode-covers .v138-picker-copy{
+ position:absolute!important;width:1px!important;height:1px!important;
+ clip-path:inset(50%)!important;overflow:hidden!important;
+}
+
+/* Simplified and organized mobile controls. Preserve all five view buttons,
+   both sliders, matching count, and independent per-page selection. */
+@media screen and (max-width:1023px){
+ .mf359-title-sheet .mf358-title-display{
+   display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+   align-content:start;row-gap:7px!important;padding-bottom:8px;
+ }
+ .mf359-title-sheet .mf358-mode-buttons{
+   display:flex!important;gap:3px!important;width:100%!important;
+   overflow-x:auto!important;scrollbar-width:thin;
+   padding-bottom:2px;
+ }
+ .mf359-title-sheet .mf358-mode-btn{
+   font-size:11px!important;padding:6px 8px!important;
+   min-height:33px!important;
+ }
+ .mf359-title-sheet .mf358-size-controls{
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));
+   align-items:center!important;width:100%!important;gap:8px!important;
+ }
+ .mf359-title-sheet .mf358-size-controls label{
+   display:grid!important;grid-template-columns:auto minmax(24px,1fr) auto;
+   gap:5px!important;min-width:0!important;min-height:34px!important;
+   flex:none!important;align-items:center!important;
+ }
+ .mf359-title-sheet .mf358-size-controls input[type=range]{
+   width:100%!important;min-width:0!important;
+ }
+ .mf359-title-sheet .mf358-size-controls output{
+   min-width:28px!important;font-size:11px!important;text-align:right;
+ }
+ .mf359-title-sheet .mf359-title-paging{
+   display:flex!important;justify-content:space-between!important;
+   align-items:center!important;gap:5px 9px!important;min-width:0;
+ }
+ .mf359-title-sheet .mf359-page-summary{line-height:1.35}
+ .mf359-title-sheet .mf359-page-size-field{flex:0 0 auto}
+ .mf359-title-sheet .mf358-results-panel{min-height:0!important;overflow:hidden!important}
+ .mf359-title-sheet #v140-order-picker-pager{min-height:34px!important}
+ .mf359-title-sheet .v138-picker-actions{flex:none!important}
+}
+@media screen and (max-width:380px){
+ .mf359-title-sheet .mf358-title-results:is(.mf358-mode-covers,.mf358-mode-covers-title){gap:6px!important}
+ .mf359-title-sheet .mf359-title-paging{align-items:flex-start!important}
+ .mf359-title-sheet .mf359-page-size-field select{min-width:66px}
+}
+
+/* For a handful of matching Collections, remove the rigid 93dvh height and
+   prevent flex:1 results/footers from being pushed down into empty space. */
+.mf359-collection-sheet.mf360-collection-compact{
+ height:auto!important;min-height:0!important;
+ max-height:min(93dvh,1050px)!important;
+}
+.mf359-collection-sheet.mf360-collection-compact .mf354-sheet-body{
+ flex:0 1 auto!important;min-height:0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+}
+.mf359-collection-sheet.mf360-collection-compact .mf356-browse-card{
+ flex:0 1 auto!important;min-height:0!important;
+ overflow:visible!important;
+}
+.mf359-collection-sheet.mf360-collection-compact .mf359-collection-results-panel{
+ flex:0 1 auto!important;min-height:0!important;
+ overflow:visible!important;align-self:start!important;
+}
+.mf359-collection-sheet.mf360-collection-compact #mf287-collection-results{
+ flex:0 0 auto!important;min-height:0!important;
+ max-height:none!important;overflow:visible!important;
+ align-content:start!important;align-items:start!important;
+}
+.mf359-collection-sheet.mf360-collection-compact .mf359-collection-footer{
+ margin-top:0!important;padding-top:7px!important;
+}
+
+@media screen and (min-width:1024px){
+ .mf359-collection-sheet.mf360-collection-compact .mf356-browse-card{
+   grid-template-rows:repeat(5,auto)!important;
+   align-content:start!important;
+ }
+ .mf359-collection-sheet.mf360-collection-compact .mf359-collection-results-panel{
+   grid-column:2!important;grid-row:1 / span 5!important;
+ }
+ .mf359-collection-sheet.mf360-collection-compact .mf287-picker-results{
+   grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),min(100%,360px)))!important;
+   justify-content:start!important;
+ }
+}
+@media screen and (max-width:1023px){
+ .mf359-collection-sheet.mf360-collection-compact{
+   width:100%!important;max-width:100%!important;
+   max-height:calc(100dvh - 12px)!important;
+ }
+ .mf359-collection-sheet.mf360-collection-compact .mf356-browse-card{
+   display:flex!important;flex-direction:column!important;
+ }
+ .mf359-collection-sheet.mf360-collection-compact #mf287-collection-results{
+   display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ }
+ .mf359-collection-sheet.mf360-collection-compact .mf359-collection-results-panel{
+   width:100%!important;
+ }
+}
+@media (prefers-reduced-motion:reduce){.mf359-title-sheet .mf358-title-results *{transition:none!important}}

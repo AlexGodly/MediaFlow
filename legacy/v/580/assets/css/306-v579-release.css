@@ -1,0 +1,29 @@
+/* MediaFlow v579 release styles. */
+.mf579-quick-select{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0}
+.mf579-quick-select small{margin-left:auto;color:var(--text-dim,var(--text-mute))}
+.mf579-parts{display:flex;flex-direction:column;gap:1px;margin:3px 0}
+.mf579-parts>small{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim,var(--text-mute))}
+.mf579-parts>span{font-size:12px;font-weight:700;color:var(--flow)}
+/* By-parts logging: the same layout as the app's Log any title. */
+.mf579-parts-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.mf579-parts-head b{font-size:12px;font-weight:800;color:var(--text-dim,var(--text-mute))}
+.mf579-parts-head small{font-size:12px;font-weight:700;color:var(--text-dim,var(--text-mute))}
+.mf577-line.mf579-part-card{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.mf579-part-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.mf579-part-head>b{font-size:13.5px;font-weight:800;min-width:0;overflow-wrap:anywhere}
+.mf579-part-head label{display:flex;flex-direction:column;align-items:stretch;gap:2px;flex:0 0 160px;width:160px;font-size:11px}
+.mf579-part-head label>span{white-space:nowrap;overflow:visible}
+.mf577-line.mf579-part-card input{width:100%;min-width:0}
+.mf577-line.mf579-part-card small{grid-column:auto}
+.mf577-sum{font-weight:700}
+@media (max-width:520px){.mf579-part-head{flex-direction:column;align-items:stretch}.mf579-part-head label{flex:1 1 auto;width:100%}}
+/* Batch Log: the cover already shows the category icon; drop the stray copy
+ * beside the title (it showed as a broken-image emoji). */
+.batch-log-row .batch-selected-title>.v144-cat-icon-img.v144-cat-icon-img,.batch-log-row .batch-selected-title>.v144-cat-icon-emoji.v144-cat-icon-emoji{display:none!important}
+.mf579-next-part{display:block;font-size:12px;font-weight:800;color:var(--flow);margin-top:2px}
+div.mf579-next-part{display:inline-block;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--flow) 14%,transparent);margin:6px 0}
+/* Edit title: "How this title is logged" sits full width right above the
+ * seasons / parts editor (it was a single 1/12 cell at the top of the form). */
+.v240-library-editor>.mf577-mode,.v238-library-editor>.mf577-mode{grid-column:1/-1!important;order:16!important;width:auto;max-width:none;box-sizing:border-box}
+.mf577-mode-pick label{border-radius:999px!important;min-height:0!important;padding:7px 14px!important;white-space:nowrap}
+.mf577-mode-pick input[type=radio]{width:16px!important;height:16px!important;min-width:16px;margin:0!important;flex:0 0 auto;box-shadow:none!important}

@@ -1,0 +1,21 @@
+/* MediaFlow v343 — Recently Viewed spacing + daypart icons */
+.v343-recent-copy{gap:9px;min-height:82px}
+.v343-recent-overline{row-gap:6px;margin-bottom:1px}
+.v343-recent-name,
+.v343-recent-name:hover,
+.v343-recent-name:focus,
+.v343-recent-name:active,
+.v343-recent-name:visited{display:block;text-decoration:none!important;border-bottom:0!important;box-shadow:none!important}
+.v343-recent-name{line-height:1.42!important;margin-top:1px;padding-right:6px;text-decoration-line:none!important;text-decoration-color:transparent!important}
+.v343-recent-facts{margin-top:1px}
+.v343-recent-actions{padding-top:2px}
+.v343-recent-edit{margin-top:2px}
+.v343-recent-period .v261-daypart-head,.v343-daypart-head{align-items:center;gap:10px;padding-bottom:9px}
+.v343-daypart-head b{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.09em;color:var(--text,#fff)}
+.v343-daypart-icon{display:inline-grid;place-items:center;flex:none;width:15px;height:15px;font-size:13px;line-height:1;color:var(--flow,#86aaff);filter:saturate(1.05)}
+.v343-daypart-head small{font-size:10px;color:var(--text-dim,var(--text-mute,#a9b0bb))}
+@media(max-width:700px){
+  .v343-recent-copy{gap:8px;min-height:78px}
+  .v343-daypart-head b{gap:6px}
+  .v343-daypart-icon{width:14px;height:14px;font-size:12px}
+}
