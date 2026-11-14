@@ -35,3 +35,8 @@
 .mf577-bar i{display:block;height:100%;background:var(--flow);border-radius:inherit}
 .mf577-sum{font-size:12px;color:var(--text-dim,var(--text-mute))}
 @media (max-width:520px){.mf577-line{grid-template-columns:1fr}.mf577-line input{width:100%}}
+
+/* A selected season's (or part's) own counter and bar while logging. */
+.mf577-season-bar{display:flex;flex-direction:column;gap:5px;margin:8px 0 2px;padding:8px 10px;border-radius:10px;
+  background:color-mix(in srgb,var(--flow) 7%,var(--panel));border:1px solid var(--border-soft,var(--border));font-size:12.5px}
+.mf577-season-bar b{font-weight:800}
