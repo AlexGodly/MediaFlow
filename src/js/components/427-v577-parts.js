@@ -200,7 +200,7 @@ function mf577ControlsHtml(kind,index,item,list,repeat){
   const parts=mf577Parts(item),chosen=new Map(mf577Clean(item,list).map(r=>[r.id,r.qty]));
   const cat=getCategory(item.categoryId);
   const fn=kind==='batch'?'App.mf577BatchSet':'App.mf577SetPart',tg=kind==='batch'?'App.mf577BatchToggle':'App.mf577TogglePart';
-  const chips=parts.map(p=>'<button type="button" class="mf577-chip'+(chosen.has(String(p.id))?' is-on':'')+'" aria-pressed="'+chosen.has(String(p.id))+'" onclick="'+tg+'('+index+',\''+escapeHtml(String(p.id))+'\')">'+escapeHtml(mf577PartName(p))+'</button>').join('');
+  const chips=parts.map(p=>'<button type="button" data-v225-iconified="1" class="mf577-chip'+(chosen.has(String(p.id))?' is-on':'')+'" aria-pressed="'+chosen.has(String(p.id))+'" onclick="'+tg+'('+index+',\''+escapeHtml(String(p.id))+'\')">'+escapeHtml(mf577PartName(p))+'</button>').join('');
   const lines=parts.filter(p=>chosen.has(String(p.id))).map(p=>{
     const qty=chosen.get(String(p.id))||0,from=Number(p.progress)||0,total=Number(p.total)>0?Number(p.total):0;
     const unit=mf577PartUnitKey(p,item,cat),to=total?Math.min(total,from+qty):from+qty;
