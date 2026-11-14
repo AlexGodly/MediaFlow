@@ -1,0 +1,12 @@
+/* v463 Recommended-title fresh count.
+ * v419 category stats already use responsive auto-fit: a third tile flows
+ * naturally on desktop/tablet and stacks on narrow phones. Theme-safe. */
+.mf419-category-stats .mf463-fresh-stat{
+ border-color:color-mix(in srgb,var(--flow) 34%,var(--border-soft));
+ background:color-mix(in srgb,var(--flow) 9%,var(--panel));
+ min-width:0;
+}
+.mf463-fresh-stat > span{flex-wrap:wrap;overflow-wrap:anywhere}
+.mf463-fresh-stat > strong{color:var(--flow)}
+.mf463-fresh-stat > small{overflow-wrap:anywhere}
+.mf463-fresh-stat[data-mf463-fresh="unknown"] > strong{color:var(--text-dim)}

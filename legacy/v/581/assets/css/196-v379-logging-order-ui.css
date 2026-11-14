@@ -1,0 +1,28 @@
+/* v379 — all display modes have a real integrated checkbox and larger covers. */
+.mf379-library-actions{gap:9px}
+.mf379-picker .log-suggestion{min-width:0;position:relative;box-sizing:border-box;transition:background .14s,border-color .14s}
+.mf379-picker .log-suggestion.mf379-picked{outline:2px solid var(--flow,var(--accent,#8f79dc));outline-offset:-2px;background:color-mix(in srgb,var(--flow,#8f79dc) 9%,var(--surface,#172d3b))}
+.mf379-picker.mf378-list .log-suggestion,.mf379-picker.mf378-compact .log-suggestion{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:10px 12px!important}
+.mf379-picker.mf378-compact .log-suggestion{padding-block:6px!important}
+.mf379-picker.mf378-list .mf379-integrated-check,.mf379-picker.mf378-compact .mf379-integrated-check{grid-column:1;grid-row:1;align-self:center;justify-self:center}
+.mf379-picker.mf378-list .v86-log-result,.mf379-picker.mf378-compact .v86-log-result{grid-column:2;grid-row:1;min-width:0;justify-self:start}
+.mf379-picker.mf378-list .mf378-add-btn,.mf379-picker.mf378-compact .mf378-add-btn{grid-column:3;grid-row:1;white-space:nowrap}
+.mf379-picker.mf378-list .v86-log-cover{height:62px!important;max-height:68px!important;width:auto!important}
+.mf379-picker.mf378-compact .v86-log-cover{height:47px!important;max-height:50px!important;width:auto!important}
+.mf379-picker.mf378-cards,.mf379-picker.mf378-covers,.mf379-picker.mf378-covers-titles{grid-template-columns:repeat(auto-fill,minmax(174px,1fr));gap:12px}
+.mf379-picker.mf378-cards .log-suggestion,.mf379-picker.mf378-covers .log-suggestion,.mf379-picker.mf378-covers-titles .log-suggestion{display:grid!important;grid-template-rows:27px 1fr auto;gap:9px;padding:10px!important;align-items:start}
+.mf379-picker.mf378-cards .mf379-integrated-check,.mf379-picker.mf378-covers .mf379-integrated-check,.mf379-picker.mf378-covers-titles .mf379-integrated-check{grid-row:1;justify-self:start;padding:3px;margin:0;min-height:24px}
+.mf379-picker.mf378-cards .v86-log-result,.mf379-picker.mf378-covers .v86-log-result,.mf379-picker.mf378-covers-titles .v86-log-result{grid-row:2;width:100%;min-height:0;align-self:start}
+.mf379-picker.mf378-cards .mf378-add-btn,.mf379-picker.mf378-covers .mf378-add-btn,.mf379-picker.mf378-covers-titles .mf378-add-btn{grid-row:3;justify-self:stretch;min-height:30px}
+.mf379-picker.mf378-cards .v86-log-cover,.mf379-picker.mf378-covers .v86-log-cover,.mf379-picker.mf378-covers-titles .v86-log-cover{max-height:270px!important;min-height:56px;object-fit:contain}
+.mf379-picker .mf379-integrated-check{cursor:pointer}.mf379-picker .mf379-integrated-check input{accent-color:var(--flow,#987ce8);cursor:pointer}
+.mf379-logging .v379-toggle-list{white-space:nowrap;flex:none}
+.mf379-logging .mf379-added-panels[hidden]{display:none!important}
+.mf379-logging .mf378-collapse-one,.mf379-logging .mf378-collapse-toolbar{display:none!important}
+.mf379-draggable{position:relative}.mf379-draggable.mf379-dragging{opacity:.55}.mf379-drop-before{box-shadow:inset 0 3px 0 var(--flow,#927de3)!important}.mf379-drop-after{box-shadow:inset 0 -3px 0 var(--flow,#927de3)!important}
+.mf379-collection-grip{padding:8px 10px;cursor:grab;color:var(--text-dim);font-size:19px;touch-action:none;user-select:none}
+.mf379-collection-grip:active{cursor:grabbing}
+@media(max-width:620px){.mf379-picker.mf378-cards,.mf379-picker.mf378-covers,.mf379-picker.mf378-covers-titles{grid-template-columns:repeat(2,minmax(0,1fr))}.mf379-picker.mf378-list .log-suggestion,.mf379-picker.mf378-compact .log-suggestion{gap:7px;padding-inline:7px!important}.mf379-picker.mf378-cards .log-suggestion,.mf379-picker.mf378-covers .log-suggestion,.mf379-picker.mf378-covers-titles .log-suggestion{padding:8px!important}.mf379-logging .v370-logging-actions{flex-wrap:wrap}.mf379-logging .v379-toggle-list{margin-left:auto}}
+
+.mf379-logging .mf379-quick-collapsed .v239-logged-progress,.mf379-logging .mf379-quick-collapsed .mf378-quick-amount,.mf379-logging .mf379-quick-collapsed .v239-logged-consumed{display:none!important}
+.mf379-logging .mf379-quick-expand{min-width:72px;white-space:nowrap}

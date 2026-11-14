@@ -1,0 +1,26 @@
+/* MediaFlow v461 — one eye icon, readable label at every breakpoint.
+ * The v460 shortcut has its own semantic icon inside .mf397-action-symbol.
+ * Prevent any earlier injected v225 icon from consuming horizontal space.
+ */
+#mf397-fan .mf460-widget-action > .v225-btn-icon{display:none!important}
+#mf397-fan .mf460-widget-action{
+ display:flex;align-items:center;justify-content:flex-start;gap:9px;
+ min-width:0;width:100%;max-width:100%;overflow:hidden;
+}
+#mf397-fan .mf460-widget-action > .mf397-action-symbol{
+ flex:0 0 38px;width:38px;height:38px;
+}
+#mf397-fan .mf460-widget-action > span:nth-of-type(2){
+ flex:1 1 auto;min-width:0;text-align:left;
+}
+#mf397-fan .mf460-widget-action strong,
+#mf397-fan .mf460-widget-action small{
+ display:block;overflow-wrap:anywhere;white-space:normal;
+}
+#mf397-fan .mf460-widget-action > em{flex:0 0 auto;margin-left:auto}
+@media(max-width:355px){
+ #mf397-fan .mf460-widget-action{gap:7px}
+ #mf397-fan .mf460-widget-action > .mf397-action-symbol{
+  flex-basis:34px;width:34px;height:34px;
+ }
+}

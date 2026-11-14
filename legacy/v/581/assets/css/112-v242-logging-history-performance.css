@@ -1,0 +1,55 @@
+/* ============================================================
+   MediaFlow v242 — Logging clarity / History layout / performance polish
+   ============================================================ */
+
+/* Logging progress labels were too small at 8–10px. Keep them compact but
+   readable beside the numeric input. */
+.v179-inline-progress{min-width:170px;max-width:230px;gap:5px}
+.v179-inline-progress span{font-size:11.5px!important;line-height:1.3!important;font-weight:800!important;color:var(--text-dim)!important;letter-spacing:.01em}
+.v179-inline-progress input{min-height:42px!important;height:42px!important;font-size:13px!important}
+.v239-logged-progress,.v242-logged-progress{gap:9px!important;font-size:11.5px!important;font-weight:750!important;color:var(--text-dim)!important}
+.v239-logged-progress span,.v242-logged-progress span{font-size:11.5px!important;line-height:1.3!important;white-space:nowrap;color:var(--text-dim)!important}
+.v239-logged-progress input,.v242-logged-progress input{width:86px!important;min-width:82px!important;height:39px!important;font-size:12.5px!important}
+.v242-logged-title-card{content-visibility:auto;contain:layout paint style;contain-intrinsic-size:auto 90px}
+
+/* Artwork is the interaction target itself; do not reserve any space for a
+   generic button icon. */
+.v242-clean-cover-button>.v225-btn-icon{display:none!important}
+.v242-clean-cover-button{gap:0!important;padding:0!important}
+
+/* History controls: one professional control card. Main filters stay in the
+   first row, custom dates sit on their own aligned row, Export stays on the
+   right. */
+.v242-history-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px 14px!important;align-items:start!important;padding:14px!important;margin:0 0 14px!important;border:1px solid var(--border-soft)!important;border-radius:14px!important;background:color-mix(in srgb,var(--panel-raised) 82%,var(--panel))!important}
+.v242-history-toolbar .lib-filters{display:grid!important;grid-template-columns:minmax(250px,1.2fr) minmax(145px,.65fr) minmax(145px,.65fr)!important;gap:10px!important;align-items:start!important;width:100%!important}
+.v242-history-toolbar .v241-history-category-filter{grid-column:auto!important;width:100%!important;min-width:0!important}
+.v242-history-toolbar .lib-filters>select{width:100%!important;min-width:0!important;min-height:43px!important}
+.v242-history-toolbar .v241-history-date-filter{grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(150px,210px) minmax(150px,210px) auto!important;gap:10px!important;align-items:end!important;padding-top:2px!important}
+.v242-history-toolbar .v241-history-date-filter label{min-width:0!important;font-size:10.5px!important}
+.v242-history-toolbar .v241-history-date-filter input{width:100%!important;min-height:42px!important}
+.v242-history-toolbar .v241-history-date-filter .btn{min-height:42px!important;align-self:end!important}
+.v242-history-export{min-height:43px!important;align-self:start!important;white-space:nowrap!important}
+.v242-history-head{align-items:flex-start!important;gap:12px!important}
+.v242-history-undo{min-height:40px!important;white-space:nowrap!important}
+
+/* History rows can be numerous; let the browser skip off-screen paint work. */
+.hist-row{content-visibility:auto;contain-intrinsic-size:auto 86px}
+
+@media(max-width:900px){
+  .v242-history-toolbar{grid-template-columns:1fr!important}
+  .v242-history-export{width:100%!important}
+  .v242-history-toolbar .lib-filters{grid-template-columns:1fr 1fr!important}
+  .v242-history-toolbar .v241-history-category-filter{grid-column:1/-1!important}
+  .v242-history-toolbar .v241-history-date-filter{grid-template-columns:1fr 1fr!important}
+  .v242-history-toolbar .v241-history-date-filter .btn{grid-column:1/-1!important;width:100%!important}
+}
+@media(max-width:620px){
+  .v179-inline-progress{min-width:0;max-width:none;width:100%}
+  .v239-logged-progress,.v242-logged-progress{width:100%;justify-content:space-between}
+  .v242-history-toolbar .lib-filters{grid-template-columns:1fr!important}
+  .v242-history-toolbar .v241-history-category-filter,.v242-history-toolbar .v241-history-date-filter{grid-column:1!important}
+  .v242-history-toolbar .v241-history-date-filter{grid-template-columns:1fr!important}
+  .v242-history-toolbar .v241-history-date-filter .btn{grid-column:1!important}
+  .v242-history-head{flex-direction:column!important}
+  .v242-history-undo{width:100%!important}
+}

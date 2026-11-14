@@ -1,0 +1,49 @@
+/* MediaFlow v505 — a single, physical viewport navigation handoff.
+ * Mobile tabbar starts at <=1080px (v277/v278). Desktop sidebar/dock must
+ * never coexist with it, even with saved desktop preferences or stale classes.
+ * This file is intentionally after the historical navigation stylesheets.
+ */
+@media (max-width:1080px){
+  html body.v260-redesign .sidebar,
+  html body.v260-redesign .sidebar.mf421-sidebar,
+  html[data-v238-device-preference="desktop"] body.v260-redesign .sidebar{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html body.v260-redesign .mf421-dock,
+  html body.v260-redesign.mf421-top .mf421-dock,
+  html body.v260-redesign.mf421-bottom .mf421-dock{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html body.v260-redesign .mf421-dropzones{display:none!important}
+  html body.v260-redesign .mobile-tabbar{
+    display:flex!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  html body.v260-redesign #app{
+    min-width:0!important;
+    max-width:100%!important;
+    flex-direction:column!important;
+  }
+  html body.v260-redesign .main{
+    min-width:0!important;
+    max-width:100%!important;
+    width:100%!important;
+    margin-left:0!important;
+    box-sizing:border-box!important;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;
+  }
+}
+/* Above the same breakpoint, the mobile nav is always retired. The user's
+ * selected desktop sidebar/mini/top/bottom mode is restored by mf421Apply().
+ */
+@media (min-width:1081px){
+  html body.v260-redesign .mobile-tabbar{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  html body.v260-redesign.mf421-desktop:is(.mf421-sidebar,.mf421-mini) .sidebar.mf421-sidebar{display:flex!important;visibility:visible!important;pointer-events:auto!important}
+  html body.v260-redesign.mf421-desktop:is(.mf421-top,.mf421-bottom) .sidebar.mf421-sidebar{display:none!important}
+  html body.v260-redesign.mf421-desktop:is(.mf421-top,.mf421-bottom) .mf421-dock:not([hidden]){visibility:visible!important;pointer-events:auto!important}
+}

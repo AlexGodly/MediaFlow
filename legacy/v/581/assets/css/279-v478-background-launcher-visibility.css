@@ -1,0 +1,165 @@
+/* MediaFlow v478 — Background Processes CLOSED widget visibility repair.
+ * Earlier v469 assumed a 49–52px launcher; v476 replaced it with a two-row
+ * ~110px HUD. On mobile v469 still capped the whole widget to the available
+ * room and hid it only below 54px, exposing clipped titles or just status dots.
+ * Show the ENTIRE header + both progress chips, or temporarily hide the
+ * launcher when the task dock leaves no room. Never show cropped fragments.
+ */
+#mf441-process-widget.mf476-widget:not(.mf441-expanded){
+  box-sizing:border-box!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+#mf441-process-widget.mf476-widget:not(.mf441-expanded)>.mf476-widget-toggle{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 28px!important;
+  grid-template-rows:minmax(42px,auto) auto!important;
+  column-gap:11px!important;
+  row-gap:11px!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:123px!important;
+  max-height:none!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+  padding:13px 14px!important;
+}
+#mf441-process-widget.mf476-widget .mf476-widget-toggle .mf476-widget-name{
+  display:grid!important;
+  min-width:0!important;
+  overflow:visible!important;
+  gap:4px!important;
+}
+#mf441-process-widget.mf476-widget .mf476-widget-name strong{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  font-size:12.5px!important;
+  font-weight:840!important;
+  line-height:1.25!important;
+  letter-spacing:-.01em;
+  text-overflow:clip!important;
+  white-space:normal!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  overflow:visible!important;
+}
+#mf441-process-widget.mf476-widget .mf476-widget-name small{
+  display:flex!important;
+  align-items:center!important;
+  min-width:0!important;
+  max-width:100%!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  line-height:1.35!important;
+}
+#mf441-process-widget.mf476-widget .mf476-widget-summary{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  min-width:0!important;
+  width:100%!important;
+  overflow:visible!important;
+  align-self:stretch;
+}
+#mf441-process-widget.mf476-widget .mf476-metric{
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+#mf441-process-widget.mf476-widget .mf476-metric-top{
+  display:flex!important;
+  min-width:0!important;
+  justify-content:space-between!important;
+}
+#mf441-process-widget.mf476-widget .mf476-metric-label{
+  min-width:0!important;
+  overflow:visible!important;
+  font-size:10px!important;
+}
+#mf441-process-widget.mf476-widget .mf476-metric-label>span{
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+#mf441-process-widget.mf476-widget .mf476-metric-value{
+  flex-shrink:0!important;
+  white-space:nowrap!important;
+}
+@media screen and (max-width:720px){
+  /* The whole widget, rather than an icon-sized sliver, is the mobile
+   * launcher. Width is constrained by viewport and respects left/right
+   * Recovery Settings placement from v469. */
+  #mf441-process-widget.mf476-widget.mf462-ready:not(.mf441-expanded){
+    width:min(292px,calc(100vw - 20px))!important;
+    min-width:0!important;
+    max-width:calc(100vw - 20px)!important;
+    height:auto!important;
+    max-height:none!important;
+    /* Width animation could briefly reveal a clipped green dot on paint. */
+    transition:opacity .16s ease,box-shadow .16s ease!important;
+  }
+  #mf441-process-widget.mf476-widget.mf462-ready:not(.mf441-expanded)>.mf476-widget-toggle{
+    grid-template-columns:36px minmax(0,1fr) 24px!important;
+    grid-template-rows:minmax(36px,auto) auto!important;
+    column-gap:9px!important;
+    row-gap:9px!important;
+    min-height:116px!important;
+    max-height:none!important;
+    padding:11px 12px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-symbol{
+    grid-area:1/1/2/2;
+    width:36px!important;height:36px!important;
+    border-radius:11px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-name{
+    grid-area:1/2/2/3!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-name strong{
+    font-size:11.5px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-name small{
+    display:flex!important;
+    font-size:9.5px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-toggle-chevron{
+    grid-area:1/3/2/4!important;
+    width:24px!important;height:27px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-summary{
+    grid-area:2/1/3/4!important;
+    gap:7px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-metric{
+    padding:8px!important;
+    gap:7px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-metric-label{
+    font-size:9.5px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-metric-value{
+    font-size:11px!important;
+  }
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-metric-rail{height:4px!important}
+}
+@media screen and (max-width:340px){
+  #mf441-process-widget.mf476-widget.mf462-ready:not(.mf441-expanded){
+    width:calc(100vw - 20px)!important;
+  }
+}
+@media screen and (max-width:280px){
+  /* For unusually tight windows, two complete percentage labels still stay
+   * visible; stack them rather than shrinking text to a single green dot. */
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded) .mf476-widget-summary{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  #mf441-process-widget.mf476-widget:not(.mf441-expanded){transition:none!important}
+}

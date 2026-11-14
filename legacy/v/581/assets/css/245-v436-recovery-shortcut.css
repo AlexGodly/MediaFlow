@@ -1,0 +1,35 @@
+/* v436: matching Settings Center headers, safe selection previews & fourth floating shortcut. */
+.mf365-settings-center .mf365-section[data-mf365-section="v221-settings-cover-recovery"] .mf365-section-toggle{
+  font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:normal;
+}
+.mf436-find-ids{display:inline-flex!important;align-items:center;justify-content:center;gap:7px}
+.mf436-find-ids>svg{width:16px;height:16px;flex:none}
+.mf436-selection-summary{margin:10px 0 12px;padding:11px 12px;border:1px solid var(--mf425-line,var(--border));border-radius:12px;
+  background:color-mix(in srgb,var(--flow) 6%,var(--panel));color:var(--text)}
+.mf436-selection-summary[hidden]{display:none!important}
+.mf436-selection-summary-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
+.mf436-selection-summary-top>span{margin-left:auto;font-size:11px;color:var(--text-dim)}
+.mf436-selection-summary p{font-size:11px;color:var(--text-dim);margin:7px 0;line-height:1.55}
+.mf436-selection-summary details>summary{font-size:12px;font-weight:700;cursor:pointer;padding:6px 0}
+.mf436-selection-review{display:grid;gap:5px;max-height:220px;overflow:auto;margin-top:6px}
+.mf436-selected-row{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:8px;padding:5px 7px;
+  border:1px solid var(--mf425-line,var(--border));border-radius:9px;background:var(--panel)}
+.mf436-selected-row>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.mf436-selected-row>.btn{min-height:30px;font-size:11px;flex:none}
+.mf397-fan{height:356px}
+.mf397-fan-orbit{height:320px}
+.mf397-fan-action.a1{bottom:251px;transition-delay:.14s}
+.mf397-fan-action.a2{bottom:173px;transition-delay:.10s}
+.mf397-fan-action.a3{bottom:95px;transition-delay:.06s}
+.mf397-fan-action.a4{left:-8px;bottom:18px;transition-delay:.02s}
+.mf397-fan.open .mf397-fan-action.a1{transition-delay:.15s}
+.mf397-fan.open .mf397-fan-action.a2{transition-delay:.11s}
+.mf397-fan.open .mf397-fan-action.a3{transition-delay:.07s}
+.mf397-fan.open .mf397-fan-action.a4{transition-delay:.03s}
+@media(max-width:720px){
+ .mf397-fan{height:340px}
+ .mf397-fan-action.a1{bottom:238px}.mf397-fan-action.a2{bottom:165px}
+ .mf397-fan-action.a3{bottom:92px}.mf397-fan-action.a4{bottom:19px}
+ .mf436-selection-summary-top>span{margin-left:0}
+}
+@media(max-width:390px){.mf397-fan{height:335px}}

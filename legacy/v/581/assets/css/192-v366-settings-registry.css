@@ -1,0 +1,7 @@
+/* v366 — Registry-defined subgroups, unknown-section fallback, dynamic themes. */
+.mf365-settings-center .mf366-subgroup{margin:0 0 21px;min-width:0}
+.mf365-settings-center .mf366-subgroup-heading{margin:0 0 10px;padding:0 2px;color:var(--text-mute,var(--text-dim,var(--text)));font-size:11px;line-height:1.5;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+.mf365-settings-center .mf366-subgroup-content{display:grid;gap:11px;min-width:0}
+.mf365-settings-center .mf366-subgroup-content>.mf365-section{min-width:0}
+.mf365-settings-center .mf365-detail[data-mf365-category="uncategorized"] .mf365-detail-head{border-style:dashed}
+@media(max-width:620px){.mf365-settings-center .mf366-subgroup{margin-bottom:17px}.mf365-settings-center .mf366-subgroup-content{gap:8px}}

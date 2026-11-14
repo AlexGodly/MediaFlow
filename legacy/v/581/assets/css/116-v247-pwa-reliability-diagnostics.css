@@ -1,0 +1,59 @@
+/* ============================================================
+   MediaFlow v247 — PWA install reliability + diagnostics UI
+   ============================================================ */
+.v247-pwa-card{gap:14px}
+.v247-pwa-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.v247-pwa-title-row>b{font-size:13px}
+.v247-diag-badge{display:inline-flex;align-items:center;min-height:22px;padding:3px 8px;border:1px solid var(--border-soft);border-radius:999px;font-size:9px;font-weight:800;line-height:1.2;letter-spacing:.02em;background:var(--panel-raised);color:var(--text-dim)}
+.v247-diag-badge.is-pass{border-color:color-mix(in srgb,#3ddc97 38%,var(--border-soft));color:#3ddc97;background:color-mix(in srgb,#3ddc97 9%,var(--panel-raised))}
+.v247-diag-badge.is-warn{border-color:color-mix(in srgb,#f2b84b 42%,var(--border-soft));color:#f2b84b;background:color-mix(in srgb,#f2b84b 9%,var(--panel-raised))}
+.v247-diag-badge.is-fail{border-color:color-mix(in srgb,#ff6b7a 42%,var(--border-soft));color:#ff7d8b;background:color-mix(in srgb,#ff6b7a 9%,var(--panel-raised))}
+.v247-diag-badge.is-info{color:var(--flow);border-color:color-mix(in srgb,var(--flow) 35%,var(--border-soft));background:color-mix(in srgb,var(--flow) 8%,var(--panel-raised))}
+.v247-pwa-diagnostics{width:100%;border-top:1px solid var(--border-soft);padding-top:12px}
+.v247-pwa-diagnostics>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-size:11px;font-weight:800;color:var(--text);user-select:none;min-height:34px}
+.v247-pwa-diagnostics>summary::-webkit-details-marker{display:none}
+.v247-pwa-diagnostics>summary:after{content:'+';display:grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid var(--border-soft);color:var(--text-dim);font-size:16px;font-weight:500;flex:0 0 24px}
+.v247-pwa-diagnostics[open]>summary:after{content:'−'}
+.v247-pwa-diagnostics>summary span{margin-left:auto;font-size:9px;font-weight:600;color:var(--text-dim)}
+.v247-pwa-diagnostics-body{padding-top:12px}
+.v247-diag-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.v247-diag-head>b,.v247-diag-head>div>b{font-size:12px}
+.v247-diag-head .hint{font-size:10.5px;margin-top:3px;max-width:680px}
+.v247-diag-meta{margin-bottom:10px;padding:8px 10px;border-radius:9px;background:var(--panel-raised);border:1px solid var(--border-soft);font-size:9.5px;color:var(--text-dim);overflow-wrap:anywhere}
+.v247-diag-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.v247-diag-row{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:9px 10px;border:1px solid var(--border-soft);border-radius:10px;background:color-mix(in srgb,var(--panel-raised) 84%,transparent)}
+.v247-diag-mark{display:grid;place-items:center;width:21px;height:21px;flex:0 0 21px;border-radius:7px;background:var(--panel);border:1px solid var(--border-soft);font-size:11px;font-weight:900;color:var(--text-dim)}
+.v247-diag-row.is-pass .v247-diag-mark{color:#3ddc97;border-color:color-mix(in srgb,#3ddc97 35%,var(--border-soft))}
+.v247-diag-row.is-warn .v247-diag-mark{color:#f2b84b;border-color:color-mix(in srgb,#f2b84b 40%,var(--border-soft))}
+.v247-diag-row.is-fail .v247-diag-mark{color:#ff7d8b;border-color:color-mix(in srgb,#ff6b7a 40%,var(--border-soft))}
+.v247-diag-copy{min-width:0;display:grid;gap:2px}
+.v247-diag-copy>b{font-size:10.5px;color:var(--text)}
+.v247-diag-copy>span{font-size:9.5px;line-height:1.45;color:var(--text-dim);overflow-wrap:anywhere;word-break:break-word}
+.v247-diag-empty{padding:11px;border:1px dashed var(--border-soft);border-radius:10px;color:var(--text-dim);font-size:10.5px;line-height:1.5}
+.v247-diag-failures{display:grid;gap:6px;margin-top:10px;padding:10px;border:1px solid color-mix(in srgb,#ff6b7a 35%,var(--border-soft));border-radius:10px;background:color-mix(in srgb,#ff6b7a 6%,var(--panel-raised))}
+.v247-diag-failures>b{font-size:10px;color:#ff7d8b}
+.v247-diag-failures code{display:block;white-space:normal;overflow-wrap:anywhere;font-size:9px;line-height:1.45;color:var(--text-dim);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.v247-diag-error{margin-top:10px;padding:9px 10px;border-radius:9px;background:color-mix(in srgb,#ff6b7a 8%,var(--panel-raised));border:1px solid color-mix(in srgb,#ff6b7a 38%,var(--border-soft));font-size:10px;color:#ff8b97;overflow-wrap:anywhere}
+.v247-diag-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.v247-diag-actions .btn{min-height:38px}
+
+@media(max-width:700px){
+  .v247-diag-grid{grid-template-columns:1fr}
+  .v247-diag-actions{display:grid;grid-template-columns:1fr 1fr}
+  .v247-diag-actions .btn{width:100%;justify-content:center}
+}
+@media(max-width:420px){
+  .v247-pwa-title-row{align-items:flex-start}
+  .v247-pwa-title-row .v247-diag-badge{margin-top:-2px}
+  .v247-pwa-diagnostics>summary{align-items:flex-start;flex-wrap:wrap}
+  .v247-pwa-diagnostics>summary span{order:3;width:100%;margin-left:0}
+  .v247-diag-head{display:grid;grid-template-columns:1fr}
+  .v247-diag-head .v247-diag-badge{justify-self:start}
+  .v247-diag-actions{grid-template-columns:1fr}
+}
+@media(max-width:310px){
+  .v247-diag-row{padding:8px 7px;gap:7px}
+  .v247-diag-copy>b{font-size:10px}
+  .v247-diag-copy>span{font-size:9px}
+  .v247-diag-meta{padding:7px;font-size:9px}
+}

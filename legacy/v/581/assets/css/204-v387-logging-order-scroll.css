@@ -1,0 +1,4 @@
+/* v387: DOM reorder must not re-anchor the entire page while moving cards. */
+.log-form .v370-panels,.log-form .v369-panels,.log-form .v239-logged-title-list{
+  overflow-anchor:none;
+}

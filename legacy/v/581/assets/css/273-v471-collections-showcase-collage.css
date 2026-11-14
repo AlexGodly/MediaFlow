@@ -1,0 +1,165 @@
+/* MediaFlow v471 — scope strictly to Collections browser > Showcase mode.
+ * A continuous, no-gap poster strip inspired by the supplied references.
+ * All other browser modes and the opened collection's title displays keep
+ * their previous CSS, sizes, and behaviors. */
+.mf274-collections-browser .mf471-showcase-entry{
+  grid-template-columns:minmax(0,min(46%,560px)) minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:clamp(12px,1.4vw,22px)!important;
+  min-width:0!important;
+  max-width:100%!important;
+}
+.mf274-collections-browser .mf471-showcase-entry>.mf471-showcase-frame{
+  position:relative!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:clamp(112px,12vw,174px)!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  display:block!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  align-self:center!important;
+  border-radius:11px!important;
+  border:1px solid var(--border-soft)!important;
+  background:var(--panel-2)!important;
+  box-shadow:0 3px 12px color-mix(in srgb,var(--text) 5%,transparent);
+  isolation:isolate;
+}
+.mf274-collections-browser .mf471-showcase-strip{
+  --mf471-min-poster:clamp(36px,4.2vw,62px);
+  display:flex!important;
+  width:100%!important;
+  min-width:0;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  overscroll-behavior-inline:contain;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  background:var(--panel-2);
+  outline-offset:-3px;
+}
+.mf274-collections-browser .mf471-showcase-strip::-webkit-scrollbar{display:none}
+.mf274-collections-browser .mf471-showcase-strip:focus-visible{outline:2px solid var(--flow);border-radius:10px}
+.mf274-collections-browser .mf471-showcase-poster{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative;
+  height:100%!important;
+  flex:0 0 max(var(--mf471-min-poster),calc(100% / var(--mf471-count)))!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  scroll-snap-align:start;
+  background:var(--panel-raised);
+}
+.mf274-collections-browser .mf471-showcase-poster>img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  border:0;
+  border-radius:0;
+  pointer-events:none;
+}
+.mf274-collections-browser .mf471-showcase-poster>img[hidden]{display:none!important}
+.mf274-collections-browser .mf471-showcase-fallback{
+  display:grid;
+  place-items:center;
+  position:absolute;
+  inset:0;
+  color:var(--mf471-category,var(--flow));
+  background:color-mix(in srgb,var(--panel-raised) 86%,var(--mf471-category,var(--flow)) 14%);
+  container-type:inline-size;
+  overflow:hidden;
+}
+.mf274-collections-browser .mf471-showcase-fallback[hidden]{display:none!important}
+.mf274-collections-browser .mf471-showcase-fallback .v144-cat-icon-emoji{font-size:clamp(13px,40cqw,45px)!important;line-height:1!important}
+.mf274-collections-browser .mf471-showcase-fallback .v144-cat-icon-img{width:min(58%,55px);height:auto;object-fit:contain}
+.mf274-collections-browser .mf471-showcase-empty{
+  width:100%;height:100%;display:grid;place-items:center;
+  color:var(--text-mute);font-size:30px;background:var(--panel-2);
+}
+.mf274-collections-browser .mf471-showcase-arrow{
+  position:absolute;z-index:2;top:50%;transform:translateY(-50%);
+  width:30px;height:42px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border-soft);border-radius:8px;cursor:pointer;
+  font-size:27px;line-height:1;color:var(--text);
+  background:color-mix(in srgb,var(--panel) 92%,transparent);
+  box-shadow:0 2px 8px color-mix(in srgb,var(--text) 11%,transparent);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .16s ease;
+}
+.mf274-collections-browser .mf471-prev{left:6px}
+.mf274-collections-browser .mf471-next{right:6px}
+.mf274-collections-browser .mf471-showcase-entry .mf471-showcase-arrow:not(:disabled){
+  pointer-events:auto;
+}
+@media(hover:hover){
+  .mf274-collections-browser .mf471-showcase-frame.mf471-can-scroll:hover>.mf471-showcase-arrow:not(:disabled){opacity:1;visibility:visible}
+}
+.mf274-collections-browser .mf471-showcase-frame.mf471-can-scroll:focus-within>.mf471-showcase-arrow:not(:disabled){
+  opacity:1;visibility:visible;
+}
+.mf274-collections-browser .mf471-showcase-arrow:focus-visible{
+  opacity:1!important;visibility:visible!important;outline:2px solid var(--flow);
+}
+.mf274-collections-browser .mf471-showcase-arrow:disabled{pointer-events:none!important}
+.mf274-collections-browser .mf471-showcase-entry>.mf418-browser-copy{
+  grid-column:2!important;grid-row:1!important;min-width:0!important;
+}
+.mf274-collections-browser .mf471-showcase-entry>.mf418-browser-actions{
+  grid-column:3!important;grid-row:1!important;
+}
+@media(max-width:1050px){
+  .mf274-collections-browser .mf471-showcase-entry{
+    grid-template-columns:minmax(0,43%) minmax(0,1fr)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-entry>.mf418-browser-actions{
+    grid-column:2!important;grid-row:2!important;justify-content:flex-start!important;
+  }
+}
+@media(max-width:680px){
+  .mf274-collections-browser .mf471-showcase-entry{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto!important;
+    gap:10px!important;
+    padding:11px!important;
+  }
+  .mf274-collections-browser .mf471-showcase-entry>.mf471-showcase-frame{
+    grid-column:1!important;grid-row:1!important;
+    width:100%!important;height:clamp(115px,33vw,170px)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-entry>.mf418-browser-copy{
+    grid-column:1!important;grid-row:2!important;
+  }
+  .mf274-collections-browser .mf471-showcase-entry>.mf418-browser-actions{
+    grid-column:1!important;grid-row:3!important;
+    justify-content:flex-start!important;max-width:100%!important;
+  }
+  .mf274-collections-browser .mf471-showcase-strip{--mf471-min-poster:clamp(34px,11.5vw,54px)}
+}
+@media(max-width:360px){
+  .mf274-collections-browser .mf471-showcase-entry{padding:9px!important}
+  .mf274-collections-browser .mf471-showcase-entry>.mf471-showcase-frame{height:112px!important}
+}
+@media(hover:none){
+  .mf274-collections-browser .mf471-showcase-arrow{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .mf274-collections-browser .mf471-showcase-arrow{transition:none!important}
+}

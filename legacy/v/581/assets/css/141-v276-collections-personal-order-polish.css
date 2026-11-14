@@ -1,0 +1,94 @@
+/* ============================================================
+   MediaFlow v276 — Collections + Personal Order polish
+   ============================================================ */
+
+/* Personal Order Add Titles: real poster art, category icon fallback. */
+.v138-picker-row.mf276-picker-row{grid-template-columns:22px 42px minmax(0,1fr);min-height:64px}
+.mf276-order-picker-cover{width:40px;height:56px;border-radius:7px;overflow:hidden;border:1px solid var(--border-soft);background:var(--panel);display:grid;place-items:center;flex:0 0 auto}
+.mf276-order-picker-cover>img{width:100%;height:100%;object-fit:cover;display:block}
+.mf276-order-picker-fallback{width:100%;height:100%;display:grid;place-items:center;color:var(--mf276-cat,var(--flow));background:color-mix(in srgb,var(--panel-2) 84%,var(--mf276-cat,var(--flow)) 16%);font-size:20px}
+.mf276-order-picker-fallback svg{width:22px;height:22px}
+
+/* Main Collections cover modes use portrait/poster proportions. */
+.mf274-browser-results.mode-covers{grid-template-columns:repeat(auto-fill,minmax(132px,170px));align-items:start}
+.mf274-browser-cover-card .mf274-browser-cover{width:100%;height:auto;aspect-ratio:2/3!important;border-radius:12px}
+.mf274-browser-compact{grid-template-columns:58px minmax(0,1fr) auto auto}
+.mf274-browser-compact .mf274-browser-cover{width:52px;height:74px;aspect-ratio:2/3}
+.mf274-browser-list{grid-template-columns:86px minmax(0,1fr) auto}
+.mf274-browser-list .mf274-browser-cover{width:78px;height:112px;aspect-ratio:2/3}
+
+/* Showcase: Simkl-style wide row with up to four vertical cover slices. */
+.mf276-browser-showcase{grid-template-columns:minmax(220px,285px) minmax(0,1fr) auto;min-height:126px;padding:10px 12px}
+.mf276-showcase-cover{width:100%;height:108px;overflow:hidden;border-radius:9px;border:1px solid var(--border-soft);background:var(--panel-2)}
+.mf276-showcase-strip{width:100%;height:100%;display:flex;overflow:hidden;background:var(--panel-2)}
+.mf276-showcase-strip.single img{width:100%;height:100%;object-fit:cover}
+.mf276-showcase-poster{height:100%;flex:1 1 0;min-width:0;overflow:hidden;border-right:1px solid color-mix(in srgb,var(--border-soft) 70%,transparent);display:grid;place-items:center}
+.mf276-showcase-poster:last-child{border-right:0}
+.mf276-showcase-poster img{width:100%;height:100%;object-fit:cover;display:block}
+.mf276-showcase-poster.fallback{color:var(--mf276-cat,var(--flow));background:color-mix(in srgb,var(--panel-raised) 84%,var(--mf276-cat,var(--flow)) 16%);font-size:24px}
+.mf276-showcase-strip.empty{display:grid;place-items:center;color:var(--text-mute);font-size:30px}
+.mf276-showcase-stats{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:9px;color:var(--text-mute);font-size:10px}
+
+/* Collection visual sizing. */
+.mf274-collection-detail{--mf276-cover-scale:var(--mf276-collection-cover-scale,1);--mf276-title-scale:var(--mf276-collection-title-scale,1)}
+.mf274-collection-detail .mf274-collection-items.mode-covers,
+.mf274-collection-detail .mf274-collection-items.mode-covers-title{grid-template-columns:repeat(auto-fill,minmax(calc(118px * var(--mf276-cover-scale)),1fr));align-items:start}
+.mf274-collection-detail .mf274-collection-tile{min-height:0;align-self:start;overflow:visible}
+.mf274-collection-detail .mf274-collection-tile>.mf274-title-cover{width:100%;height:auto;aspect-ratio:2/3}
+.mf274-collection-detail .mf274-tile-title{display:block;position:relative;z-index:2;font-size:calc(10px * var(--mf276-title-scale));line-height:1.3;padding:7px 3px 2px;white-space:normal;overflow:visible;text-overflow:clip;min-height:calc(2.6em + 9px);text-align:center;overflow-wrap:anywhere}
+.mf274-collection-detail .mf274-collection-list-row .mf274-title-link,
+.mf274-collection-detail .mf274-collection-compact .mf274-title-link,
+.mf274-collection-detail .mf274-collection-title-card .mf274-title-link{font-size:calc(12px * var(--mf276-title-scale))}
+.mf274-collection-detail .mf274-collection-list-row .mf274-title-cover{width:calc(72px * var(--mf276-cover-scale));height:calc(102px * var(--mf276-cover-scale))}
+.mf274-collection-detail .mf274-collection-compact .mf274-title-cover{width:calc(42px * var(--mf276-cover-scale));height:calc(58px * var(--mf276-cover-scale))}
+.mf274-collection-detail .mf274-collection-title-card .mf274-title-cover{width:calc(82px * var(--mf276-cover-scale));height:calc(116px * var(--mf276-cover-scale))}
+
+/* Collection sizing / Clean Covers controls. */
+.mf276-collection-sizing{display:grid;grid-template-columns:repeat(2,minmax(240px,1fr)) minmax(220px,.8fr);gap:9px;align-items:stretch;padding:12px 0;border-top:1px solid var(--border-soft);margin-top:10px}
+.mf276-size-control{display:grid;grid-template-columns:auto minmax(120px,1fr) 64px auto;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-2);font-size:10px;font-weight:800;color:var(--text-dim)}
+.mf276-size-control>input[type="range"]{min-width:80px;width:100%}
+.mf276-size-number{width:64px!important;min-width:64px!important;padding:6px 7px!important}
+.mf276-size-control output{min-width:38px;text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+.mf276-clean-covers{margin:0!important;height:100%;justify-content:center;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel-2);padding:9px 10px}
+
+/* Exact numeric ordering follows Personal Order's direct-position idea. */
+.mf276-order-row{grid-template-columns:58px 26px 46px minmax(0,1fr) auto}
+.mf276-order-number{display:block}
+.mf276-order-number input{width:54px;min-width:0;text-align:center;padding:6px 4px;font-size:10px;font-weight:850;font-variant-numeric:tabular-nums}
+
+/* Add Titles category summary stays readable after selections. */
+.mf276-add-category-filter>summary{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px;min-width:0}
+.mf276-cat-summary{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.mf276-cat-count{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:color-mix(in srgb,var(--flow) 15%,transparent);color:var(--flow);font-size:9px;font-weight:900}
+.mf276-cat-count:empty{display:none}
+
+/* Keep the v225 auto-icon layer out of poster-like controls. */
+.mf276-showcase-cover>.v225-btn-icon,.mf276-order-picker-cover .v225-btn-icon{display:none!important}
+
+/* Mobile bottom navigation: stable semantic icon sizes at every width. */
+body.v260-redesign .mobile-tabbar{display:flex;align-items:stretch}
+body.v260-redesign .mobile-tabbar>.mtab,body.v260-redesign .mobile-more-wrap{flex:1 1 0;min-width:0;max-width:none}
+body.v260-redesign .mobile-tabbar .mtab{min-width:0!important;padding-inline:3px!important;overflow:hidden}
+body.v260-redesign .mobile-tabbar .mtab svg{width:clamp(18px,3.2vw,24px)!important;height:clamp(18px,3.2vw,24px)!important;flex:0 0 auto!important}
+body.v260-redesign .mobile-tabbar .mtab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(7.5px,1.5vw,10px)!important}
+body.v260-redesign .mobile-more-item svg{width:19px!important;height:19px!important;flex:0 0 19px!important}
+
+@media(max-width:900px){
+  .mf276-browser-showcase{grid-template-columns:180px minmax(0,1fr)}
+  .mf276-browser-showcase .mf274-browser-actions{grid-column:2;justify-content:flex-start}
+  .mf276-showcase-cover{height:104px}
+  .mf276-collection-sizing{grid-template-columns:1fr 1fr}.mf276-clean-covers{grid-column:1/-1}
+}
+@media(max-width:620px){
+  .mf274-browser-results.mode-covers{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+  .mf276-browser-showcase{grid-template-columns:112px minmax(0,1fr);gap:10px}.mf276-showcase-cover{height:132px}.mf276-showcase-stats{gap:6px;font-size:8.5px}
+  .mf276-collection-sizing{grid-template-columns:1fr}.mf276-clean-covers{grid-column:auto}
+  .mf276-size-control{grid-template-columns:1fr auto}.mf276-size-control>input[type="range"]{grid-column:1/-1}.mf276-size-number{grid-column:1}.mf276-size-control output{grid-column:2}
+  .mf276-order-row{grid-template-columns:52px 22px 40px minmax(0,1fr)}
+}
+@media(max-width:420px){
+  .v138-picker-row.mf276-picker-row{grid-template-columns:20px 36px minmax(0,1fr);padding:6px}.mf276-order-picker-cover{width:34px;height:48px}
+  .mf276-browser-showcase{grid-template-columns:92px minmax(0,1fr)}.mf276-showcase-cover{height:118px}
+  .mf274-browser-compact{grid-template-columns:50px minmax(0,1fr) auto}.mf274-browser-compact .mf274-browser-cover{width:44px;height:64px}
+  .mf274-browser-list{grid-template-columns:70px minmax(0,1fr)}.mf274-browser-list .mf274-browser-cover{width:64px;height:94px}
+}

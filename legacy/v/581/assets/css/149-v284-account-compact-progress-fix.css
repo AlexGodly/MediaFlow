@@ -1,0 +1,31 @@
+/* MediaFlow v284 — sidebar account cleanup + Collections Compact progress alignment */
+
+/* The account row already communicates its signed-in state through the profile and
+   Sync Now surfaces. Keep the username clean by removing the redundant CLOUD pill. */
+.sidebar-foot .account-menu>.cloud-badge{display:none!important}
+
+/* Collections > Compact: one physical track. The progress fill is pinned to the
+   track's top-left and occupies the track itself, eliminating the visually detached
+   colored line seen above/below the empty remainder. */
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-track{
+  position:relative!important;
+  display:block!important;
+  height:7px!important;
+  min-height:7px!important;
+  overflow:hidden!important;
+  border-radius:999px!important;
+  background:color-mix(in srgb,var(--panel-2) 72%,var(--border-soft))!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--border-soft) 82%,transparent)!important;
+}
+.mf279-open-surface[data-mode="compact"] .mf280-browser-compact-progress-track>span{
+  position:absolute!important;
+  inset-block-start:0!important;
+  inset-inline-start:0!important;
+  display:block!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,var(--flow),color-mix(in srgb,var(--flow) 72%,white 18%))!important;
+}

@@ -1,0 +1,89 @@
+/* MediaFlow v409 — mobile floating quick-action layout repair.
+   The v397 fan was anchored with left:0 on mobile, placing its 232px-wide
+   action cards OUTSIDE the right viewport edge. This overrides only the
+   responsive geometry, retaining the live actions, theme, icon and state. */
+@media screen and (max-width:720px){
+  /* The action trigger remains in the right safe area, even with an active
+     task-progress card. Keep the progress panel above rather than forcing
+     the trigger towards the left edge. */
+  .mf397-dock{
+    flex-direction:column-reverse;
+    align-items:flex-end;
+    right:max(12px,env(safe-area-inset-right,0px));
+    bottom:calc(76px + env(safe-area-inset-bottom,0px));
+    gap:10px;
+    max-width:calc(100vw - 24px);
+  }
+  .mf397-dock .mf397-plus-holder{align-self:flex-end;flex:0 0 auto}
+  .mf397-dock .mf397-progress{max-width:min(305px,calc(100vw - 24px))}
+  /* Show the complete menu to the LEFT of the floating button. Mobile
+     action cards are stacked rather than using desktop fan coordinates. */
+  .mf397-dock .mf397-fan{
+    left:auto;
+    right:0;
+    top:auto;
+    bottom:calc(100% + 14px);
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    width:min(260px,calc(100vw - 28px));
+    height:auto;
+    max-height:calc(100dvh - 166px - env(safe-area-inset-bottom,0px));
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    padding:5px 3px 7px;
+    transform:none;
+    transform-origin:bottom right;
+  }
+  .mf397-dock .mf397-fan-orbit{display:none}
+  .mf397-dock .mf397-fan .mf397-fan-action,
+  .mf397-dock .mf397-fan .mf397-fan-action.a1,
+  .mf397-dock .mf397-fan .mf397-fan-action.a2,
+  .mf397-dock .mf397-fan .mf397-fan-action.a3{
+    position:relative;
+    top:auto;
+    right:auto;
+    bottom:auto;
+    left:auto;
+    flex:0 0 auto;
+    width:100%;
+    min-height:61px;
+    max-width:100%;
+    padding:10px 11px;
+    transform:translateY(9px) scale(.96);
+    transform-origin:bottom right;
+    transition-delay:0s;
+  }
+  .mf397-dock .mf397-fan.open .mf397-fan-action,
+  .mf397-dock .mf397-fan.open .mf397-fan-action.a1,
+  .mf397-dock .mf397-fan.open .mf397-fan-action.a2,
+  .mf397-dock .mf397-fan.open .mf397-fan-action.a3{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    transition-delay:0s;
+  }
+  .mf397-dock .mf397-fan-action>span:nth-child(2){min-width:0;flex:1}
+  .mf397-dock .mf397-fan-action strong,
+  .mf397-dock .mf397-fan-action small{
+    overflow-wrap:anywhere;
+    white-space:normal;
+  }
+  /* Do not let the live progress overlay compete with an open quick menu.
+     This is presentation-only: the Logging task keeps running normally. */
+  .mf397-dock:has(.mf397-fan.open) .mf397-progress{display:none!important}
+}
+@media screen and (max-width:355px){
+  .mf397-dock .mf397-fan{width:min(242px,calc(100vw - 22px));gap:7px}
+  .mf397-dock .mf397-fan .mf397-fan-action{min-height:55px;padding:8px 9px}
+  .mf397-dock .mf397-action-symbol{width:34px;height:34px}
+}
+@media screen and (max-width:720px) and (max-height:520px){
+  .mf397-dock{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  .mf397-dock .mf397-fan{max-height:calc(100dvh - 135px - env(safe-area-inset-bottom,0px))}
+  .mf397-dock .mf397-fan .mf397-fan-action{min-height:50px}
+}
+@media (prefers-reduced-motion:reduce){
+  .mf397-dock .mf397-fan .mf397-fan-action{transition:none!important}
+}

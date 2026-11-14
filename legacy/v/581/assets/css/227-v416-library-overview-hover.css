@@ -1,0 +1,60 @@
+/* MediaFlow v416 — refined Library Overview hover and input-mode-safe feedback.
+   Uses each category's configured accent; never changes counts, layout or state. */
+.mf415-overview-item{
+  --mf416-card-accent:var(--mf416-accent,var(--flow,var(--accent,#cc5e87)));
+  position:relative!important;
+  isolation:isolate;
+  will-change:auto;
+  transition:transform .22s cubic-bezier(.2,.8,.25,1),
+             box-shadow .22s ease,border-color .22s ease,
+             background-color .22s ease,background .22s ease!important;
+}
+.mf415-overview-item::before{
+  content:'';position:absolute;z-index:1;left:12px;right:12px;top:0;height:3px;
+  border-radius:0 0 999px 999px;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,var(--mf416-card-accent),transparent);
+  transition:opacity .22s ease!important;
+}
+.mf415-overview-item .mf415-overview-total,
+.mf415-overview-item .mf415-status,
+.mf415-overview-item .mf413-overview-heading,
+.mf415-overview-item .mf413-overview-meter{
+  transition:border-color .2s ease,background-color .2s ease,
+             box-shadow .2s ease,color .2s ease,filter .2s ease!important;
+}
+/* Hover stays mouse/trackpad-only; the effect never sticks on touch screens. */
+@media (hover:hover) and (pointer:fine){
+  .mf415-overview-item:hover{
+    z-index:2;
+    transform:translateY(-3px);
+    border-color:color-mix(in srgb,var(--mf416-card-accent) 43%,var(--border-soft,#b7bac2))!important;
+    background:linear-gradient(145deg,
+      color-mix(in srgb,var(--mf416-card-accent) 7%,var(--panel-raised,var(--panel))),
+      var(--panel,var(--panel-raised)))!important;
+    box-shadow:0 13px 30px rgba(8,12,24,.16),
+      0 0 0 1px color-mix(in srgb,var(--mf416-card-accent) 13%,transparent)!important;
+  }
+  .mf415-overview-item:hover::before{opacity:.85;}
+  .mf415-overview-item:hover .mf415-overview-total{
+    border-color:color-mix(in srgb,var(--mf416-card-accent) 25%,var(--border-soft,#b7bac2))!important;
+    background:color-mix(in srgb,var(--mf416-card-accent) 7%,var(--panel-raised,var(--panel)))!important;
+  }
+  .mf415-overview-item:hover .mf415-status{
+    border-color:color-mix(in srgb,var(--mf416-card-accent) 19%,var(--border-soft,#b7bac2))!important;
+    background:color-mix(in srgb,var(--mf416-card-accent) 5%,var(--panel-raised,var(--panel)))!important;
+  }
+  .mf415-overview-item:hover .mf413-overview-title{color:color-mix(in srgb,var(--mf416-card-accent) 29%,var(--text))!important;}
+  .mf415-overview-item:hover .mf413-overview-meter{
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--mf416-card-accent) 19%,transparent)!important;
+  }
+  .mf415-overview-item:hover .mf413-overview-fill{filter:saturate(1.08) brightness(1.04);}
+}
+/* Motion preference takes priority over decorative elevation. */
+@media (prefers-reduced-motion:reduce){
+  .mf415-overview-item,.mf415-overview-item::before,
+  .mf415-overview-item .mf415-overview-total,.mf415-overview-item .mf415-status,
+  .mf415-overview-item .mf413-overview-heading,.mf415-overview-item .mf413-overview-meter{
+    transition:none!important;animation:none!important;
+  }
+  .mf415-overview-item:hover{transform:none!important;}
+}

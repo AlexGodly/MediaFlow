@@ -1,0 +1,117 @@
+/* MediaFlow v389 — Browse Library responsive control repair.
+ * Target only Logging > Browse Library. All behavior/state stays in the
+ * established v224/v378 handlers. Container queries cover resized desktop
+ * workspaces and tablets where viewport size differs from panel width. */
+.log-form details.mf383-logging-library,
+.log-form details.mf383-logging-library * { box-sizing:border-box; }
+.log-form details.mf383-logging-library > .mf383-logging-body {
+  min-width:0;
+  container-type:inline-size;
+}
+.log-form .mf383-logging-body :is(.v238-log-library-head,.v224-log-tools,.mf378-library-actions,.log-suggestion-list,.v86-log-pager){min-width:0;max-width:100%}
+.log-form .mf383-logging-body .v224-log-tools {
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:9px!important;
+  align-items:stretch!important;
+  padding:12px;
+  overflow:visible;
+}
+.log-form .mf383-logging-body .v224-log-tools > * {
+  min-width:0!important;
+  max-width:100%!important;
+  width:100%!important;
+  margin:0!important;
+  align-self:stretch;
+}
+.log-form .mf383-logging-body .v224-log-tools > .v237-category-filter,
+.log-form .mf383-logging-body .v224-log-tools > .v66-cat-filter {grid-column:span 5!important}
+.log-form .mf383-logging-body .v224-log-tools > .v224-sort-pair {grid-column:span 7!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;align-items:stretch!important}
+.log-form .mf383-logging-body .v224-log-tools > select,
+.log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control,
+.log-form .mf383-logging-body .v224-log-tools > .v87-log-clear {grid-column:span 3!important}
+.log-form .mf383-logging-body .v224-log-tools > .v87-log-count {grid-column:1/-1!important;white-space:normal;line-height:1.45;min-height:0}
+.log-form .mf383-logging-body .v224-log-tools :is(select,.v224-sort-direction,.v66-cat-filter>summary,.v237-category-filter>summary) {box-sizing:border-box;min-width:0!important;width:100%!important;max-width:100%!important;min-height:42px;line-height:1.3}
+.log-form .mf383-logging-body .v224-log-tools .v224-sort-pair select {flex:1 1 auto!important;min-width:0!important;max-width:100%!important}
+.log-form .mf383-logging-body .v224-log-tools .v224-sort-pair .v224-sort-direction {width:auto!important;min-width:66px!important;flex:none!important;white-space:nowrap}
+.log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control {display:flex!important;justify-content:space-between;align-items:center;min-width:0!important;white-space:normal;gap:6px}
+.log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control input {min-width:56px!important;width:70px!important;max-width:45%!important;flex:0 1 70px!important}
+.log-form .mf383-logging-body .v224-log-tools > .v87-log-clear {white-space:normal;overflow-wrap:anywhere;min-height:42px;justify-content:center}
+.log-form .mf383-logging-body .mf378-library-actions {
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  padding:12px;
+  overflow:visible;
+}
+.log-form .mf383-logging-body .mf378-library-actions > * {box-sizing:border-box;min-width:0!important;max-width:100%!important;width:100%!important;margin:0!important;align-self:stretch}
+.log-form .mf383-logging-body .mf378-library-actions > label:first-child {grid-column:span 3!important;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.log-form .mf383-logging-body .mf378-library-actions > label:first-child select {min-width:0!important;width:100%!important;max-width:100%!important;flex:1 1 auto;min-height:42px}
+.log-form .mf383-logging-body .mf378-library-actions > .mf378-clean-toggle {grid-column:span 3!important;display:flex;align-items:center;justify-content:center;gap:7px;white-space:normal;line-height:1.35}
+.log-form .mf383-logging-body .mf378-library-actions > .mf378-clean-toggle input[type="checkbox"] {width:17px!important;height:17px!important;min-width:17px!important;flex:none!important;margin:0!important}
+.log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(1),
+.log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(2),
+.log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(3) {grid-column:span 2!important;min-width:0!important;min-height:42px;white-space:normal!important;overflow-wrap:break-word;line-height:1.3;display:flex!important;align-items:center;justify-content:center;text-align:center;padding:8px!important}
+/* Built-in 2-column/1-column mobile layouts and v260 overrides previously
+ * forced inconsistent columns: container queries below supersede those. */
+@container (max-width:850px) {
+  .log-form .mf383-logging-body .v224-log-tools > :is(.v237-category-filter,.v66-cat-filter,.v224-sort-pair) {grid-column:span 6!important}
+  .log-form .mf383-logging-body .v224-log-tools > select,
+  .log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control,
+  .log-form .mf383-logging-body .v224-log-tools > .v87-log-clear {grid-column:span 6!important}
+  .log-form .mf383-logging-body .mf378-library-actions > label:first-child {grid-column:span 6!important}
+  .log-form .mf383-logging-body .mf378-library-actions > .mf378-clean-toggle {grid-column:span 6!important}
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(1),
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(2) {grid-column:span 4!important}
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(3) {grid-column:span 4!important}
+}
+@container (max-width:550px) {
+  .log-form .mf383-logging-body .v224-log-tools {padding:10px;gap:8px!important}
+  .log-form .mf383-logging-body .v224-log-tools > :is(.v237-category-filter,.v66-cat-filter,.v224-sort-pair) {grid-column:1/-1!important}
+  .log-form .mf383-logging-body .v224-log-tools > select,
+  .log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control,
+  .log-form .mf383-logging-body .v224-log-tools > .v87-log-clear {grid-column:span 6!important}
+  .log-form .mf383-logging-body .mf378-library-actions {padding:10px;gap:8px!important}
+  .log-form .mf383-logging-body .mf378-library-actions > label:first-child {grid-column:1/-1!important;justify-content:space-between}
+  .log-form .mf383-logging-body .mf378-library-actions > label:first-child select {max-width:calc(100% - 76px)!important}
+  .log-form .mf383-logging-body .mf378-library-actions > .mf378-clean-toggle {grid-column:1/-1!important;justify-content:flex-start;min-height:32px}
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(1),
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(2) {grid-column:span 6!important}
+  .log-form .mf383-logging-body .mf378-library-actions > button:nth-of-type(3) {grid-column:1/-1!important}
+}
+@container (max-width:345px) {
+  .log-form .mf383-logging-body .v224-log-tools > select,
+  .log-form .mf383-logging-body .v224-log-tools > .v175-page-size-control,
+  .log-form .mf383-logging-body .v224-log-tools > .v87-log-clear {grid-column:1/-1!important}
+}
+@media(max-width:690px) {
+  .log-form details.mf383-logging-library > .mf383-logging-body {padding:9px 10px 14px}
+  .log-form .mf383-logging-body .v238-log-library-head {min-width:0}
+  .log-form .mf383-logging-body :is(#entry-title,.v238-log-library-body>input) {min-width:0;max-width:100%}
+}
+/* v379 removed the old Clean Covers switch. Use its freed grid slot so the
+ * three selection actions occupy one complete row on tablets and desktops. */
+.log-form .mf383-logging-body .mf379-library-actions > label:first-child {grid-column:span 3!important}
+.log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(1),
+.log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(2),
+.log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(3) {grid-column:span 3!important}
+@container (max-width:850px) {
+ .log-form .mf383-logging-body .mf379-library-actions > label:first-child {grid-column:1/-1!important}
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(1),
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(2),
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(3) {grid-column:span 4!important}
+}
+@container (max-width:550px) {
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(1),
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(2) {grid-column:span 6!important}
+ .log-form .mf383-logging-body .mf379-library-actions > button:nth-of-type(3) {grid-column:1/-1!important}
+}
+/* Cover layouts must not keep a minimum card width wider than the available
+ * container on narrow mobile layouts. */
+@container (max-width:400px) {
+ .log-form .mf383-logging-body .mf379-picker:is(.mf378-cards,.mf378-covers,.mf378-covers-titles) {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@container (max-width:270px) {
+ .log-form .mf383-logging-body .mf379-picker:is(.mf378-cards,.mf378-covers,.mf378-covers-titles) {grid-template-columns:minmax(0,1fr)!important}
+}

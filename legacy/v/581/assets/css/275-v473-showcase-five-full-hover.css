@@ -1,0 +1,140 @@
+/* v473 — Only Collections browser SHOWCASE. Simkl-style poster expansion,
+ * never cropped on hover, exactly five featured covers, no carousel arrows. */
+.mf274-collections-browser .mf473-showcase-entry>.mf473-showcase-frame{
+  overflow:hidden!important;
+  isolation:isolate;
+}
+.mf274-collections-browser .mf473-showcase-frame .mf471-showcase-arrow,
+.mf274-collections-browser .mf473-showcase-entry .mf471-showcase-arrow{
+  display:none!important;
+}
+.mf274-collections-browser .mf473-showcase-strip{
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:stretch!important;
+  gap:0!important;
+  padding:7px 8px 8px!important;
+  overflow:hidden!important;
+  scroll-snap-type:none!important;
+  touch-action:pan-y!important;
+  cursor:pointer;
+  perspective:900px;
+}
+.mf274-collections-browser .mf473-showcase-poster{
+  --mf472-lift:0px;
+  --mf472-zoom:1;
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:block!important;
+  isolation:isolate;
+  z-index:1!important;
+  flex:1 1 0!important;
+  min-width:0!important;
+  width:0!important;
+  height:100%!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:1px!important;
+  overflow:visible!important;
+  transform:translate3d(0,0,0)!important;
+  box-shadow:3px 2px 8px rgba(0,0,0,.33),-2px 2px 6px rgba(0,0,0,.22)!important;
+  background:var(--panel-raised);
+  transition:flex-grow 320ms cubic-bezier(.18,.75,.21,1),
+    box-shadow 300ms ease,filter 300ms ease,transform 320ms cubic-bezier(.18,.75,.21,1)!important;
+  will-change:auto;
+}
+.mf274-collections-browser .mf473-showcase-poster+.mf473-showcase-poster{
+  margin-inline-start:0!important;
+}
+.mf274-collections-browser .mf473-showcase-poster::after{
+  z-index:4!important;
+  border-radius:inherit!important;
+  box-shadow:inset 3px 0 7px rgba(0,0,0,.32),inset -2px 0 6px rgba(0,0,0,.24)!important;
+  pointer-events:none;
+}
+.mf274-collections-browser .mf473-showcase-poster>img,
+.mf274-collections-browser .mf473-showcase-poster>.mf473-fallback{
+  position:absolute!important;
+  inset:0!important;
+  display:block;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:100%!important;
+  border:0!important;
+  border-radius:1px!important;
+  backface-visibility:hidden;
+}
+.mf274-collections-browser .mf473-showcase-poster>img[hidden]{display:none!important}
+.mf274-collections-browser .mf473-showcase-poster>.mf473-fallback[hidden]{display:none!important}
+.mf274-collections-browser .mf473-showcase-poster>.mf473-fallback{
+  display:grid!important;
+  place-items:center;
+}
+.mf274-collections-browser .mf473-showcase-poster>.mf473-poster-crop{
+  z-index:1;
+  object-fit:cover!important;
+  object-position:center;
+  opacity:1;
+  filter:none;
+  transition:opacity 250ms ease,filter 240ms ease!important;
+}
+.mf274-collections-browser .mf473-showcase-poster>.mf473-poster-full{
+  z-index:2;
+  object-fit:contain!important;
+  object-position:center!important;
+  opacity:0;
+  pointer-events:none;
+  background:color-mix(in srgb,var(--panel-2) 78%,black 22%);
+  transition:opacity 260ms cubic-bezier(.2,.72,.24,1)!important;
+}
+/* "Open book" hover animation: highlighted cover grows into a fully visible,
+ * centered 2:3 portrait. Peers gently compress instead of being clipped. */
+.mf274-collections-browser .mf473-showcase-poster:hover{
+  flex-grow:2.3!important;
+  z-index:9!important;
+  transform:translate3d(0,-3px,0)!important;
+  box-shadow:0 12px 24px rgba(0,0,0,.50),0 4px 10px rgba(0,0,0,.30),
+    0 0 0 1px color-mix(in srgb,var(--flow) 30%,transparent)!important;
+}
+.mf274-collections-browser .mf473-showcase-poster:hover>.mf473-poster-full{opacity:1!important}
+.mf274-collections-browser .mf473-showcase-poster:hover>.mf473-poster-crop{opacity:0!important}
+.mf274-collections-browser .mf473-showcase-strip:has(.mf473-showcase-poster:hover) .mf473-showcase-poster:not(:hover){
+  filter:brightness(.88);
+}
+.mf274-collections-browser .mf473-showcase-poster:hover::after{
+  box-shadow:inset 1px 0 3px rgba(0,0,0,.12),inset -1px 0 3px rgba(0,0,0,.10)!important;
+}
+/* All art remains inside the measured Showcase frame, including the hover
+ * shadow and top lift. No 107.5% transform that gets cut off at the sides. */
+@media(pointer:coarse){
+  .mf274-collections-browser .mf473-showcase-poster:hover:not(:active){
+    flex-grow:1!important;
+    transform:none!important;
+    z-index:1!important;
+    box-shadow:3px 2px 8px rgba(0,0,0,.33),-2px 2px 6px rgba(0,0,0,.22)!important;
+  }
+  .mf274-collections-browser .mf473-showcase-poster:hover:not(:active)>.mf473-poster-full{opacity:0!important}
+  .mf274-collections-browser .mf473-showcase-poster:hover:not(:active)>.mf473-poster-crop{opacity:1!important}
+  .mf274-collections-browser .mf473-showcase-poster:active{
+    flex-grow:2.3!important;
+    transform:translate3d(0,-2px,0)!important;
+    z-index:8!important;
+  }
+  .mf274-collections-browser .mf473-showcase-poster:active>.mf473-poster-full{opacity:1!important}
+  .mf274-collections-browser .mf473-showcase-poster:active>.mf473-poster-crop{opacity:0!important}
+}
+@media(max-width:680px){
+  .mf274-collections-browser .mf473-showcase-strip{padding:6px 7px 7px!important}
+  .mf274-collections-browser .mf473-showcase-poster:hover{flex-grow:2!important}
+  .mf274-collections-browser .mf473-showcase-poster:active{flex-grow:2!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .mf274-collections-browser .mf473-showcase-poster,
+  .mf274-collections-browser .mf473-showcase-poster>img{
+    transition:none!important;
+  }
+  .mf274-collections-browser .mf473-showcase-poster:hover,
+  .mf274-collections-browser .mf473-showcase-poster:active{transform:none!important}
+}

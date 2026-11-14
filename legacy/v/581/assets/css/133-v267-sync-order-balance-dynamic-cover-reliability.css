@@ -1,0 +1,27 @@
+/* MediaFlow v267 — targeted reliability fixes */
+
+/* Personal Order category picker is portaled to <body> while open, so no
+   sidebar/grid/transform/overflow ancestor can crop either edge. */
+body.v260-redesign .mf267-order-category-portal{
+  box-sizing:border-box!important;
+  min-width:230px!important;
+  border:1px solid var(--border-soft)!important;
+  border-radius:14px!important;
+  background:var(--panel)!important;
+  color:var(--text)!important;
+  box-shadow:0 24px 72px rgba(0,0,0,.38)!important;
+  backdrop-filter:blur(22px);
+  overscroll-behavior:contain!important;
+  isolation:isolate;
+}
+body.v260-redesign .mf267-order-category-portal *{box-sizing:border-box}
+body.v260-redesign .mf267-order-category-portal .v237-category-filter-search{position:sticky;top:0;z-index:2;background:var(--panel)}
+
+/* Latest Today’s Balance is now emitted in the initial Dashboard HTML. Keep
+   older balance implementations visually suppressed if a stale enhancer ever
+   leaves one behind during a cached-navigation edge case. */
+body.v260-redesign #view-root .v261-balance-card:not(.mf265-balance-card),
+body.v260-redesign #view-root .mf264-balance-card:not(.mf265-balance-card){display:none!important}
+
+/* Dynamic cover filter stays aligned with the redesigned tool surface. */
+html[data-mf262-library="1"] #view-root .v181-dynamic-library .v224-cover-filter{min-width:150px}

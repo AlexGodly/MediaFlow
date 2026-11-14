@@ -1,0 +1,44 @@
+/* MediaFlow v566 release styles. */
+
+/* Get MediaFlow: icons and "Your devices". */
+.mf566-btn{display:inline-flex;align-items:center;gap:6px}
+.mf566-btn svg{width:16px;height:16px;flex:none}
+.mf566-inline{display:inline-flex;align-items:center;gap:6px}
+.mf566-inline svg{width:16px;height:16px;flex:none}
+.mf565-get-icon{color:var(--text)}
+.mf565-get-icon svg,.mf565-get-icon img{width:22px;height:22px;display:block;object-fit:contain}
+.mf566-spin{display:inline-flex;animation:mf566spin 1s linear infinite}
+@keyframes mf566spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mf566-spin{animation:none}}
+.mf566-devices{margin:0 0 12px;padding:12px 14px;border:1px solid var(--border-soft);border-radius:16px;background:var(--panel-raised)}
+.mf566-devices>header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.mf566-devices ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mf566-devices li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--border-soft)}
+.mf566-devices li:first-child{border-top:0}
+.mf566-devices li>div{display:flex;flex-direction:column;flex:1;min-width:0}
+.mf566-devices li b{font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mf566-devices li small{color:var(--text-mute);font-size:12px}
+.mf566-dev-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--panel);flex:none}
+.mf566-dev-icon svg,.mf566-dev-icon img{width:18px;height:18px}
+.mf566-dev-state{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-weight:700;font-size:12px;color:var(--text-mute);flex:none}
+.mf566-dev-state svg,.mf566-dev-sum svg{width:15px;height:15px;flex:none}
+.mf566-dev-state.update,.mf566-dev-sum.update{color:var(--due,#f0b35a)}
+.mf566-dev-state.ok,.mf566-dev-sum.ok{color:var(--healthy,#3fc7a6)}
+.mf566-dev-sum{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700}
+@media (max-width:520px){.mf566-devices li{flex-wrap:wrap}.mf566-dev-state{margin-left:40px}}
+
+/* Details Recovery: Select all / Deselect all, rating updates. */
+.mf566-select-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+.mf566-select-tools small{color:var(--text-mute);font-size:12px;margin-left:auto}
+.mf439-status-update{color:var(--flow)}
+
+/* Log time setting. */
+.mf566-logtime-settings{display:flex;flex-direction:column;gap:10px}
+.mf566-setting-copy{display:flex;flex-direction:column;gap:2px}
+.mf566-setting-copy small{color:var(--text-mute);font-size:12px}
+.mf566-radio-group{display:flex;flex-direction:column;gap:6px}
+.mf566-radio{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border-soft);border-radius:12px;cursor:pointer;background:var(--panel-raised)}
+.mf566-radio:has(input:checked){border-color:color-mix(in srgb,var(--flow) 60%,var(--border-soft))}
+.mf566-radio input{margin-top:3px}
+.mf566-radio span{display:flex;flex-direction:column;gap:2px}
+.mf566-radio small{color:var(--text-mute);font-size:12px}

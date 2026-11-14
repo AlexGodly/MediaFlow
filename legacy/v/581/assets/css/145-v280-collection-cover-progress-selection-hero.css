@@ -1,0 +1,59 @@
+/* ============================================================
+   MediaFlow v280 — Collection cover progress / selection / hero polish
+   ============================================================ */
+
+/* Title progress + rating now belong to the physical title cover, not the
+   entire tile/article. This eliminates v279's duplicated lower progress bar. */
+.mf280-cover-frame{position:relative;display:block;min-width:0;align-self:start;border-radius:9px;overflow:hidden;isolation:isolate}
+.mf280-cover-frame>.mf274-title-cover{width:100%!important;height:100%!important;max-width:none!important;aspect-ratio:2/3;display:grid;margin:0!important;border-radius:inherit!important}
+.mf280-cover-overlay-frame{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;transform:none!important;z-index:7!important;pointer-events:none!important;border-radius:inherit!important;overflow:hidden!important}
+.mf280-cover-overlay-frame>.v254-cover-progress{left:0!important;right:0!important;bottom:0!important;width:auto!important}
+.mf280-cover-overlay-frame>.v254-cover-rating{right:6px!important;bottom:10px!important}
+.mf280-has-selection .mf280-cover-overlay-frame>.v254-cover-status{left:38px!important}
+
+/* The old v279 progress block must never survive inside a Collection title
+   renderer. Its Collection-browser variant is untouched. */
+.mf274-collection-detail :is(.mf274-collection-tile,.mf274-collection-list-row,.mf274-collection-compact,.mf274-collection-title-card)>.mf279-title-progress,
+.mf274-collection-detail :is(.mf274-title-copy)>.mf279-title-progress{display:none!important}
+
+/* Match wrapper geometry to each Collection display mode. */
+.mf274-collection-tile>.mf280-cover-frame{width:100%;aspect-ratio:2/3;border-radius:11px}
+.mf274-collection-list-row>.mf280-cover-frame{width:calc(72px * var(--mf276-cover-scale,1));height:calc(102px * var(--mf276-cover-scale,1))}
+.mf274-collection-compact>.mf280-cover-frame{width:calc(42px * var(--mf276-cover-scale,1));height:calc(58px * var(--mf276-cover-scale,1))}
+.mf274-collection-title-card>.mf280-cover-frame{width:calc(82px * var(--mf276-cover-scale,1));height:calc(116px * var(--mf276-cover-scale,1));grid-row:1/3}
+
+/* Keep Compact genuinely compact: cover-attached progress/rating, then one
+   clean line of metadata instead of a detached progress block. */
+.mf280-collection-compact{grid-template-columns:auto minmax(160px,1fr) minmax(180px,2fr) auto!important;align-items:center!important}
+.mf280-collection-compact .mf274-title-copy{align-self:center;min-width:0}
+.mf280-collection-compact .mf274-title-meta{align-self:center;min-width:0}
+
+/* Collection browser Compact progress: concise, aligned and readable. */
+.mf280-browser-compact-progress{display:grid;grid-template-columns:auto minmax(70px,180px);align-items:center;gap:7px 9px;margin-top:6px;max-width:320px}
+.mf280-browser-compact-progress-copy{display:flex;align-items:center;gap:6px;min-width:0}
+.mf280-browser-compact-progress-copy b{font-size:9.5px;color:var(--text);font-variant-numeric:tabular-nums}
+.mf280-browser-compact-progress-copy span{font-size:8.5px;color:var(--text-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf280-browser-compact-progress-track{height:5px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--panel-2) 84%,var(--text) 4%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--border-soft) 78%,transparent)}
+.mf280-browser-compact-progress-track>span{display:block;height:100%;border-radius:inherit;background:var(--flow)}
+.mf280-compact-title-count{white-space:nowrap;color:var(--text-mute);font-size:9px}
+
+/* Let the Collection backdrop actually read as artwork. Readability is owned
+   locally by the copy panel instead of whitening the entire hero. */
+.mf279-collection-hero{min-height:300px;background:color-mix(in srgb,var(--panel) 82%,var(--flow) 18%)}
+.mf279-hero-bg-panel{filter:blur(2.5px) saturate(1.18) contrast(1.03)!important;transform:scale(1.035)!important;opacity:.88!important}
+.mf279-hero-backdrop.automatic .mf279-hero-bg-panel:nth-child(2){opacity:.80!important}
+.mf279-hero-backdrop.automatic .mf279-hero-bg-panel:nth-child(3){opacity:.84!important}
+.mf279-hero-backdrop.custom .mf279-hero-bg-panel{opacity:.91!important}
+.mf279-hero-overlay{background:linear-gradient(90deg,color-mix(in srgb,var(--panel) 48%,transparent) 0%,color-mix(in srgb,var(--panel) 22%,transparent) 42%,color-mix(in srgb,var(--panel) 14%,transparent) 68%,color-mix(in srgb,var(--panel) 32%,transparent) 100%),linear-gradient(180deg,color-mix(in srgb,var(--bg) 5%,transparent),color-mix(in srgb,var(--bg) 20%,transparent))!important;backdrop-filter:none!important}
+.mf279-hero-copy{background:color-mix(in srgb,var(--panel) 69%,transparent)!important;border-color:color-mix(in srgb,var(--border-soft) 66%,transparent)!important;backdrop-filter:blur(10px) saturate(1.08)!important;box-shadow:0 14px 34px rgba(0,0,0,.14)!important}
+.mf279-hero-stats>span{background:color-mix(in srgb,var(--panel-2) 62%,transparent)!important;backdrop-filter:blur(8px)}
+.mf279-collection-hero .mf274-hero-actions .btn{background-color:color-mix(in srgb,var(--panel) 72%,transparent);backdrop-filter:blur(10px)}
+.mf279-collection-hero .mf274-hero-actions .btn-primary{background:var(--flow);color:var(--flow-contrast,#fff)}
+
+@media(max-width:720px){
+  .mf280-browser-compact-progress{grid-template-columns:1fr;gap:4px}
+  .mf280-compact-title-count{display:none}
+  .mf280-collection-compact{grid-template-columns:auto minmax(0,1fr) auto!important}
+  .mf280-collection-compact>.mf274-title-meta{grid-column:2;white-space:normal}
+  .mf280-collection-compact>.btn{grid-column:3;grid-row:1/3}
+}

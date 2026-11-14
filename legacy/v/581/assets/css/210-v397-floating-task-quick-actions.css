@@ -1,0 +1,88 @@
+/* MediaFlow v397 — prototype v2 floating task progress + GTA-style quick menu.
+   All colors are sourced from MediaFlow's current theme variables. */
+.mf397-dock{position:fixed;z-index:960;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:12px;max-width:calc(100vw - 24px);pointer-events:none;font-family:inherit}
+.mf397-dock>*{pointer-events:auto;box-sizing:border-box}
+.mf397-dock *{box-sizing:border-box}
+.mf397-dock button{cursor:pointer;font:inherit}
+.mf397-dock button:focus-visible{outline:2px solid var(--flow,var(--accent));outline-offset:4px}
+.mf397-dock.mf397-modal-behind{z-index:50;pointer-events:none}
+.mf397-dock.mf397-modal-behind>*{pointer-events:none}
+.mf397-dimmer{position:fixed;inset:0;z-index:959;background:rgba(0,0,0,.24);backdrop-filter:blur(1.5px);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.mf397-dimmer.on{opacity:1;visibility:visible}
+.mf397-plus-holder{position:relative;display:grid;place-items:center;flex:0 0 auto;z-index:3}
+.mf397-fab{position:relative;z-index:2;width:65px;height:65px;border:1px solid color-mix(in srgb,var(--flow) 65%,var(--border-soft,var(--border)));border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--flow) 76%,white),var(--flow) 60%,color-mix(in srgb,var(--flow) 66%,black));color:var(--bg,#161616);display:grid;place-items:center;box-shadow:0 14px 32px #0006,0 0 0 5px color-mix(in srgb,var(--flow) 11%,transparent);transition:transform .24s,box-shadow .24s}
+.mf397-fab:hover{transform:translateY(-4px);box-shadow:0 18px 38px #0007,0 0 0 8px color-mix(in srgb,var(--flow) 14%,transparent)}
+.mf397-fab>svg{transition:transform .35s cubic-bezier(.16,.8,.25,1)}
+.mf397-fab[aria-expanded=true]>svg{transform:rotate(135deg)}
+.mf397-fab:after{content:'';position:absolute;inset:-6px;border-radius:25px;border:1px solid color-mix(in srgb,var(--flow) 42%,transparent);pointer-events:none;animation:mf397-breathe 3.5s ease-in-out infinite}
+@keyframes mf397-breathe{50%{opacity:.35;transform:scale(1.055)}}
+/* The three independent fan actions deliberately retain prototype v2 placement. */
+.mf397-fan{position:absolute;left:-296px;bottom:48px;width:346px;height:278px;pointer-events:none;visibility:hidden}
+.mf397-fan.open{pointer-events:auto;visibility:visible}
+.mf397-fan-orbit{position:absolute;right:38px;bottom:4px;height:235px;width:294px;border-top:1px solid color-mix(in srgb,var(--flow) 45%,transparent);border-left:1px solid color-mix(in srgb,var(--flow) 33%,transparent);border-radius:250px 0 0 0;opacity:0;transform:scale(.83);transform-origin:bottom right;transition:opacity .25s,transform .4s}
+.mf397-fan.open .mf397-fan-orbit{opacity:1;transform:scale(1)}
+.mf397-fan-orbit:before{content:'';position:absolute;right:20px;bottom:14px;width:175px;height:175px;border-top:1px dashed color-mix(in srgb,var(--flow) 37%,transparent);border-left:1px dashed color-mix(in srgb,var(--flow) 33%,transparent);border-radius:170px 0 0 0}
+.mf397-fan-action{position:absolute;display:flex;align-items:center;gap:10px;min-height:65px;width:232px;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--flow) 34%,var(--border));color:var(--text);background:linear-gradient(110deg,color-mix(in srgb,var(--flow) 9%,var(--panel-raised,var(--panel))),color-mix(in srgb,var(--panel) 95%,transparent));backdrop-filter:blur(18px);box-shadow:0 14px 30px #0007;opacity:0;transform:translate(35px,24px) scale(.76);transition:opacity .25s ease,transform .4s cubic-bezier(.1,.8,.2,1),border-color .2s}
+.mf397-fan.open .mf397-fan-action{opacity:1;transform:translate(0,0) scale(1)}
+.mf397-fan-action:hover{border-color:var(--flow);background:color-mix(in srgb,var(--flow) 17%,var(--panel))}
+.mf397-action-symbol{height:38px;width:38px;display:grid;place-items:center;flex:0 0 auto;border-radius:12px;border:1px solid color-mix(in srgb,var(--flow) 49%,var(--border));background:color-mix(in srgb,var(--flow) 16%,var(--panel));color:var(--flow)}
+.mf397-fan-action strong{display:block;font-size:12px;line-height:1.2;font-weight:750}
+.mf397-fan-action small{display:block;color:var(--text-dim);font-size:10px;margin-top:4px;line-height:1.3}
+.mf397-fan-action em{font-style:normal;font-size:10px;align-self:flex-start;margin-left:auto;color:var(--flow)}
+.mf397-fan-action.a1{left:83px;bottom:173px;transition-delay:.09s}
+.mf397-fan-action.a2{left:22px;bottom:96px;transition-delay:.05s}
+.mf397-fan-action.a3{left:-8px;bottom:18px;transition-delay:0s}
+.mf397-fan.open .mf397-fan-action.a1{transition-delay:.11s}
+.mf397-fan.open .mf397-fan-action.a2{transition-delay:.06s}
+.mf397-fan.open .mf397-fan-action.a3{transition-delay:.02s}
+/* Task progress — prototype v2 ambient liquid waves, thick moving bar and right-side percentage. */
+.mf397-progress{--mf397-tint:var(--flow);position:relative;isolation:isolate;overflow:hidden;flex:0 1 390px;width:390px;max-width:calc(100vw - 111px);padding:15px 17px 14px;border:1px solid color-mix(in srgb,var(--mf397-tint) 40%,var(--border));border-radius:21px;background:color-mix(in srgb,var(--panel) 94%,transparent);color:var(--text);box-shadow:0 18px 65px rgba(0,0,0,.3),inset 0 1px color-mix(in srgb,var(--text) 5%,transparent);backdrop-filter:blur(22px);transition:width .3s ease,border-color .25s}
+.mf397-progress[hidden]{display:none!important}
+.mf397-progress.reached{--mf397-tint:var(--healthy,var(--flow))}
+.mf397-progress.over{--mf397-tint:var(--overused,var(--flow))}
+.mf397-ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.mf397-aura{position:absolute;inset:-30% -10% -10%;opacity:.34;background:radial-gradient(circle at 22% 100%,color-mix(in srgb,var(--mf397-tint) 37%,transparent),transparent 64%);animation:mf397-aura 6s ease-in-out infinite alternate}
+.mf397-wave{position:absolute;bottom:-24%;left:0;width:200%;height:110%;color:var(--mf397-tint);opacity:.16;animation:mf397-wave-left 9s linear infinite;will-change:transform}
+.mf397-wave svg{width:100%;height:100%;display:block}
+.mf397-wave.front{bottom:-12%;opacity:.12;color:color-mix(in srgb,var(--mf397-tint) 74%,var(--panel));animation:mf397-wave-right 13s linear infinite}
+.mf397-ambient:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--panel) 75%,transparent),transparent 63%)}
+@keyframes mf397-wave-left{to{transform:translateX(-50%)}}
+@keyframes mf397-wave-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+@keyframes mf397-aura{to{transform:translate3d(5%,2%,0) scale(1.1);opacity:.65}}
+.mf397-progress>.mf397-head,.mf397-progress>.mf397-main,.mf397-progress>.mf397-bottom{position:relative;z-index:2}
+.mf397-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mf397-label{display:flex;align-items:center;gap:8px;min-width:0;color:var(--text-dim);font-size:10px;font-weight:850;letter-spacing:.15em}
+.mf397-label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf397-label i{height:6px;width:6px;background:var(--mf397-tint);box-shadow:0 0 10px var(--mf397-tint);border-radius:100%;flex:0 0 auto}
+.mf397-collapse{width:22px;height:22px;display:grid;place-items:center;padding:0;background:transparent;border:0;color:var(--text-dim);flex:0 0 auto}
+.mf397-collapse:hover{color:var(--text)}
+.mf397-main{display:flex;align-items:center;gap:13px;margin-top:13px}
+.mf397-left{flex:1;min-width:0}
+.mf397-tally{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:9px;font-variant-numeric:tabular-nums}
+.mf397-tally strong{font-size:19px;color:var(--text)}
+.mf397-tally small{font-size:11px;color:var(--text-dim);font-weight:600;white-space:nowrap}
+.mf397-track{height:25px;width:100%;position:relative;overflow:hidden;border:1px solid var(--border-soft,var(--border));background:color-mix(in srgb,var(--bg) 72%,var(--panel));border-radius:999px;box-shadow:inset 0 2px 7px rgba(0,0,0,.35)}
+.mf397-fill{display:block;position:relative;height:100%;width:0%;border-radius:inherit;background:linear-gradient(100deg,var(--mf397-tint) 0%,color-mix(in srgb,var(--mf397-tint) 55%,white) 40%,var(--mf397-tint) 67%,color-mix(in srgb,var(--mf397-tint) 65%,white) 95%);background-size:250% 100%;transition:width .85s cubic-bezier(.18,.7,.22,1);animation:mf397-flow 3s linear infinite;box-shadow:0 0 18px color-mix(in srgb,var(--mf397-tint) 34%,transparent),inset 0 2px rgba(255,255,255,.26)}
+.mf397-fill:before{content:'';position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(110deg,transparent 0 23px,#fff3 28px,transparent 43px);background-size:155px 100%;animation:mf397-lines 2.8s linear infinite;mix-blend-mode:overlay}
+.mf397-fill:after{content:'';position:absolute;inset:0;opacity:.3;background:linear-gradient(180deg,#fff7,transparent 43%)}
+@keyframes mf397-flow{to{background-position:250% 0}}
+@keyframes mf397-lines{to{background-position:155px 0}}
+.mf397-marker{position:absolute;top:0;bottom:0;left:var(--marker);width:2px;background:#fffa;box-shadow:0 0 5px #fff8;pointer-events:none}
+.mf397-marker:before{content:'';position:absolute;top:0;left:-3px;width:8px;height:5px;background:#fff8;border-radius:3px}
+.mf397-percent{min-width:90px;padding-left:12px;border-left:1px solid var(--border-soft,var(--border));display:grid;justify-items:center;align-content:center}
+.mf397-percent strong{color:var(--text);font-size:34px;line-height:1;font-weight:850;letter-spacing:-.055em;font-variant-numeric:tabular-nums;text-shadow:0 0 20px color-mix(in srgb,var(--mf397-tint) 26%,transparent)}
+.mf397-percent small{font-size:9px;letter-spacing:.13em;color:var(--text-dim);margin-top:6px;font-weight:800}
+.mf397-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:12px}
+.mf397-status{display:flex;gap:7px;align-items:center;color:var(--mf397-tint);font-weight:800;font-size:11px}
+.mf397-status i{height:7px;width:7px;background:currentColor;border-radius:50%;box-shadow:0 0 9px currentColor;animation:mf397-breathe 2.1s infinite}
+.mf397-range{font-size:10px;color:var(--text-dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.mf397-progress.goalflash{animation:mf397-goal .7s ease-out}
+@keyframes mf397-goal{30%{box-shadow:0 0 0 7px color-mix(in srgb,var(--mf397-tint) 22%,transparent),0 0 35px color-mix(in srgb,var(--mf397-tint) 34%,transparent),0 18px 65px #0005}}
+.mf397-mini-percent{display:none;font-size:16px;font-weight:850;color:var(--mf397-tint)}
+.mf397-progress.compact{width:177px;flex:0 0 177px}
+.mf397-progress.compact .mf397-main,.mf397-progress.compact .mf397-bottom{display:none}
+.mf397-progress.compact .mf397-mini-percent{display:block}
+@media(max-width:950px){.mf397-dock{right:18px;bottom:19px}.mf397-progress{width:340px;flex-basis:340px}}
+@media(max-width:720px){.mf397-dock{right:12px;bottom:calc(78px + env(safe-area-inset-bottom));gap:9px}.mf397-fab{height:54px;width:54px;border-radius:17px}.mf397-fab>svg{width:27px;height:27px}.mf397-progress{flex-basis:min(305px,calc(100vw - 102px));width:min(305px,calc(100vw - 102px));max-width:calc(100vw - 102px);padding:11px 12px;border-radius:16px}.mf397-main{gap:7px;margin-top:10px}.mf397-percent{min-width:60px;padding-left:7px}.mf397-percent strong{font-size:24px}.mf397-percent small{font-size:7px}.mf397-tally strong{font-size:15px}.mf397-tally small{font-size:9px}.mf397-track{height:20px}.mf397-bottom{margin-top:9px}.mf397-range{font-size:9px}.mf397-status{font-size:10px}.mf397-progress.compact{flex-basis:142px;width:142px}.mf397-fan{left:0;bottom:114px;width:270px;height:282px;transform:scale(.91);transform-origin:bottom left}.mf397-fan-orbit{right:auto;left:4px;transform-origin:bottom left;width:265px}.mf397-fan-action.a1{left:18px}.mf397-fan-action.a2{left:18px}.mf397-fan-action.a3{left:18px}}
+@media(max-width:390px){.mf397-tally small{display:none}.mf397-range{display:none}.mf397-progress{width:min(285px,calc(100vw - 90px));flex-basis:min(285px,calc(100vw - 90px));max-width:calc(100vw - 90px)}.mf397-percent{min-width:54px}.mf397-fan{transform:scale(.82)}}
+@media(prefers-reduced-motion:reduce){.mf397-wave,.mf397-aura,.mf397-fill,.mf397-fill:before,.mf397-fab:after,.mf397-status i{animation:none!important}.mf397-fab,.mf397-fab>svg,.mf397-fill,.mf397-fan-action,.mf397-fan-orbit,.mf397-progress{transition:none!important}}

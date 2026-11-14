@@ -1,0 +1,133 @@
+/* MediaFlow v472 — Simkl-inspired depth for Collections > Showcase ONLY.
+ * Existing title order, scrolling, hover-to-open Collection, other display
+ * modes, storage and exported data are left untouched. */
+.mf274-collections-browser .mf471-showcase-entry{
+  transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease;
+}
+.mf274-collections-browser .mf471-showcase-entry:hover,
+.mf274-collections-browser .mf471-showcase-entry:focus-within{
+  border-color:color-mix(in srgb,var(--flow) 70%,var(--border-soft))!important;
+  box-shadow:0 9px 27px rgba(0,0,0,.19),0 0 0 1px color-mix(in srgb,var(--flow) 16%,transparent)!important;
+}
+.mf274-collections-browser .mf471-showcase-entry>.mf471-showcase-frame{
+  border:1px solid color-mix(in srgb,var(--border-soft) 80%,var(--flow) 20%)!important;
+  box-shadow:0 5px 15px rgba(0,0,0,.25),0 1px 4px rgba(0,0,0,.12)!important;
+  transition:box-shadow .22s ease,border-color .22s ease;
+}
+.mf274-collections-browser .mf471-showcase-entry:hover>.mf471-showcase-frame,
+.mf274-collections-browser .mf471-showcase-entry:focus-within>.mf471-showcase-frame{
+  border-color:color-mix(in srgb,var(--flow) 67%,var(--border-soft))!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.34),0 0 0 1px color-mix(in srgb,var(--flow) 23%,transparent)!important;
+}
+/* Inset gutters reserve breathing room for raised posters and their cast
+ * shadows. The picture row itself stays seamless and scrollable at any count. */
+.mf274-collections-browser .mf471-showcase-strip{
+  box-sizing:border-box!important;
+  padding:8px 9px 9px!important;
+  gap:0!important;
+  align-items:stretch!important;
+  scroll-padding-inline:9px;
+  background:color-mix(in srgb,var(--panel-2) 95%,black 5%)!important;
+}
+.mf274-collections-browser .mf471-showcase-poster{
+  --mf472-lift:0px;
+  --mf472-zoom:1;
+  position:relative!important;
+  isolation:auto!important;
+  flex:1 0 max(var(--mf471-min-poster),calc((100% - 18px) / var(--mf471-count)))!important;
+  height:100%!important;
+  overflow:hidden!important;
+  z-index:1;
+  margin:0!important;
+  transform:translate3d(0,var(--mf472-lift),0) scale(var(--mf472-zoom))!important;
+  transform-origin:center center;
+  border-radius:1px!important;
+  background:var(--panel-raised);
+  box-shadow:2px 1px 7px rgba(0,0,0,.32),-1px 1px 5px rgba(0,0,0,.12)!important;
+  transition:transform .2s cubic-bezier(.2,.82,.22,1),box-shadow .2s ease,filter .18s ease!important;
+}
+.mf274-collections-browser .mf471-showcase-poster+.mf471-showcase-poster{
+  margin-inline-start:-2px!important;
+}
+/* Dark bevels give each vertical slice the same layered-cover depth as Simkl;
+ * the actual image stays sharp and unobstructed by captions. */
+.mf274-collections-browser .mf471-showcase-poster::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  border-radius:inherit;
+  box-shadow:inset 3px 0 6px rgba(0,0,0,.29),inset -2px 0 5px rgba(0,0,0,.24),inset 0 -9px 12px rgba(0,0,0,.07);
+  transition:box-shadow .18s ease;
+}
+.mf274-collections-browser .mf471-showcase-poster>img{
+  transition:filter .18s ease,transform .2s ease!important;
+  backface-visibility:hidden;
+}
+/* The hovered artwork rises in front of its neighbors, not the entire row.
+ * Chromium's headless/desktop environment may report hover:none despite
+ * receiving mouse input. Apply real :hover semantics, then neutralize them
+ * specifically on touch-only devices below. */
+  .mf274-collections-browser .mf471-showcase-poster:hover{
+    --mf472-lift:-3px;
+    --mf472-zoom:1.075;
+    z-index:12!important;
+    border-radius:3px!important;
+    box-shadow:0 11px 20px rgba(0,0,0,.50),0 3px 8px rgba(0,0,0,.38),
+      0 0 0 1px color-mix(in srgb,var(--flow) 45%,transparent)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-poster:hover::after{
+    box-shadow:inset 1px 0 3px rgba(0,0,0,.15),inset -1px 0 3px rgba(0,0,0,.11),
+      inset 0 -11px 18px rgba(0,0,0,.05)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-poster:hover>img{filter:brightness(1.1) saturate(1.12)!important;}
+  .mf274-collections-browser .mf471-showcase-strip:has(.mf471-showcase-poster:hover) .mf471-showcase-poster:not(:hover)>img{
+    filter:brightness(.83) saturate(.91);
+  }
+  .mf274-collections-browser .mf471-showcase-strip:has(.mf471-showcase-poster:hover) .mf471-showcase-poster:not(:hover){
+    z-index:1;
+  }
+/* Preserve touch swiping and horizontal scrolling; tap feedback is restrained
+ * so mobile never triggers a hover-only enlargement or accidental scroll lock. */
+@media(pointer:coarse){
+  .mf274-collections-browser .mf471-showcase-poster:hover:not(:active){
+    --mf472-lift:0px;
+    --mf472-zoom:1;
+    z-index:1!important;
+    border-radius:1px!important;
+    box-shadow:2px 1px 7px rgba(0,0,0,.32),-1px 1px 5px rgba(0,0,0,.12)!important;
+  }
+  .mf274-collections-browser .mf471-showcase-poster:hover:not(:active)>img{filter:none!important;}
+  .mf274-collections-browser .mf471-showcase-strip:has(.mf471-showcase-poster:hover) .mf471-showcase-poster:not(:hover)>img{filter:none!important;}
+  .mf274-collections-browser .mf471-showcase-poster:active{
+    --mf472-lift:0px;
+    --mf472-zoom:1.024;
+    z-index:7;
+    box-shadow:0 6px 12px rgba(0,0,0,.36)!important;
+  }
+}
+@media(max-width:680px){
+  .mf274-collections-browser .mf471-showcase-strip{
+    padding:6px 7px 7px!important;
+    scroll-padding-inline:7px;
+  }
+  .mf274-collections-browser .mf471-showcase-poster{
+    flex-basis:max(var(--mf471-min-poster),calc((100% - 14px) / var(--mf471-count)))!important;
+  }
+}
+/* Accessible keyboard selection stays on the scroll strip; do not introduce
+ * 100+ extra tab stops from its individual poster images. */
+.mf274-collections-browser .mf471-showcase-strip:focus-visible{
+  outline:2px solid var(--flow)!important;
+  outline-offset:-4px;
+}
+@media(prefers-reduced-motion:reduce){
+  .mf274-collections-browser .mf471-showcase-entry,
+  .mf274-collections-browser .mf471-showcase-frame,
+  .mf274-collections-browser .mf471-showcase-poster,
+  .mf274-collections-browser .mf471-showcase-poster::after,
+  .mf274-collections-browser .mf471-showcase-poster>img{
+    transition:none!important;
+  }
+}

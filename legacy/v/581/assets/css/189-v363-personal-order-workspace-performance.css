@@ -1,0 +1,184 @@
+/* MediaFlow v363 — Personal Order: compact navigation and real Queue Tools.
+   All color values inherit dynamic theme variables. */
+#view-root .mf363-order-workspace{max-width:none!important;width:100%;min-width:0}
+#view-root .mf363-order-workspace .mf354-quickbar{display:flex;flex-direction:column;gap:10px;padding:12px 15px}
+#view-root .mf363-order-workspace .mf354-quickbar-intro{width:100%;display:flex!important;align-items:center!important;justify-content:flex-end}
+#view-root .mf363-order-workspace .mf354-quickbar-intro>div:first-child{display:none!important}
+#view-root .mf363-primary-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;min-width:0}
+#view-root .mf363-primary-actions .mf354-quick-switch{display:flex!important;align-items:center;flex-wrap:wrap;gap:6px;margin:0!important}
+#view-root .mf363-primary-actions .mf354-quick-switch>.btn:nth-child(-n+2){display:inline-flex!important}
+#view-root .mf363-primary-actions .mf354-quick-switch>.btn{white-space:nowrap;min-height:38px;padding:9px 11px;border-radius:10px;font-weight:700}
+#view-root .mf363-primary-actions .v138-order-switch{margin:0;padding:4px;border-color:var(--border);background:var(--panel-raised,var(--panel))}
+#view-root .mf363-order-workspace .mf363-legacy-layout{display:none!important}
+#view-root .mf363-order-workspace .mf350-order-toggle-row{display:none!important}
+#view-root .mf363-order-workspace .mf363-list-toolbar{display:none!important}
+#view-root .mf363-order-workspace .mf354-filter-actions .mf354-clear{display:none!important}
+#view-root .mf363-order-workspace .mf354-toggle-filters{display:inline-flex!important;align-items:center;gap:6px;min-height:37px;padding:8px 12px;font-size:12px}
+#view-root .mf363-order-workspace .mf354-toggle-filters :is(svg,.v225-btn-icon,.v226-btn-icon){display:none!important}
+#view-root .mf363-order-workspace .mf354-filter-actions{flex-wrap:nowrap}
+#view-root .mf363-filter-panel .mf354-browse-head small{display:none}
+#view-root .mf363-queue-tools{min-width:0;margin:0 0 9px;border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:12px}
+#view-root .mf363-queue-tools[hidden]{display:none!important}
+#view-root .mf363-advanced-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:1px 5px 11px}
+#view-root .mf363-advanced-head b{font-size:14px}
+#view-root .mf363-advanced-head span{font-size:11px;color:var(--text-dim,var(--text-mute))}
+#view-root .mf363-advanced-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+#view-root .mf363-queue-tools .mf288-queue-controls{display:block!important;min-width:0;margin:0!important;padding:13px!important;border:1px solid var(--border);border-radius:12px}
+#view-root .mf363-queue-tools .mf288-queue-controls-copy{margin:0 0 12px}
+#view-root .mf363-queue-tools .mf288-queue-controls-copy>small{font-size:11px}
+#view-root .mf363-queue-tools .mf288-queue-control-groups{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#view-root .mf363-queue-tools .mf288-control-group:last-child{grid-column:1/-1}
+#view-root .mf363-queue-tools .mf346-queue-controls{display:flex!important;flex-direction:column;align-items:stretch;gap:12px;margin:0!important;padding:13px!important}
+#view-root .mf363-queue-tools .mf346-cover-tool{width:100%;margin:0}
+#view-root .mf363-queue-tools .v181-inline-cover-control{min-width:0;width:100%;display:grid;grid-template-columns:95px minmax(90px,1fr) 75px;gap:9px;align-items:center}
+#view-root .mf363-queue-tools .v181-inline-cover-control input[type=range]{width:100%;max-width:none}
+#view-root .mf363-order-workspace .v138-order-grid{display:block!important;min-width:0}
+#view-root .mf363-order-workspace .v138-order-side{position:absolute!important;left:-200vw!important;width:330px!important;top:0!important;visibility:hidden!important;pointer-events:none!important}
+#view-root .mf363-order-workspace .v138-order-main{width:100%;min-width:0}
+#view-root .mf363-order-workspace.mf363-lists .v138-order-toolbar{display:none!important}
+#view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .mf288-regular-section,
+#view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .v138-order-by-category{display:grid;grid-template-columns:repeat(var(--mf363-columns,2),minmax(0,1fr));gap:14px;align-items:start}
+#view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .mf288-regular-section>.v138-category-card,
+#view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .v138-order-by-category>.v138-category-card{min-width:0;margin:0}
+#view-root .mf363-order-workspace .mf345-tab-layout{max-width:none;width:100%}
+#view-root .mf363-order-workspace .mf345-tab-head,#view-root .mf363-order-workspace .mf345-tab-foot{display:none}
+#view-root .mf363-order-workspace .mf345-main-tabs{width:100%}
+#view-root .mf363-order-workspace .mf345-main-panel{min-width:0}
+#view-root .mf363-columns-control{display:flex;align-items:center;gap:10px;color:var(--text-dim,var(--text-mute));font-size:12px;font-weight:700}
+#view-root .mf363-columns-control>div{display:flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:11px;background:var(--panel-raised,var(--panel))}
+#view-root .mf363-columns-button{min-width:31px;min-height:31px;padding:5px 9px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;cursor:pointer}
+#view-root .mf363-columns-button.active{background:var(--flow);color:var(--panel);font-weight:800}
+#view-root .mf363-tabs .mf363-columns-control{display:none!important}
+#view-root .mf363-order-workspace .mf354-browse-tools{margin:7px 0 12px}
+#view-root .mf363-order-workspace .mf354-browse-head{align-items:center}
+#view-root .mf363-order-workspace :is(button,input,select):focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+@media(min-width:1024px){
+ #view-root .mf363-order-workspace .mf354-browse-tools:not(.mf363-filters-open) .mf354-filter-fields{display:none!important}
+ #view-root .mf363-order-workspace .mf354-browse-tools:not(.mf363-filters-open) .mf354-sort-note{display:none!important}
+ #view-root .mf363-order-workspace .mf354-browse-head{margin:0}
+ #view-root .mf363-order-workspace .mf354-browse-tools.mf363-filters-open .mf354-browse-head{margin-bottom:12px}
+}
+@media(min-width:1024px) and (max-width:1399px){
+ #view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .mf288-regular-section{grid-template-columns:repeat(min(var(--mf363-columns,2),2),minmax(0,1fr))}
+ #view-root .mf363-advanced-grid{grid-template-columns:1fr}
+}
+@media(min-width:1024px) and (max-width:1699px){
+ #view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .mf288-regular-section{grid-template-columns:repeat(min(var(--mf363-columns,2),3),minmax(0,1fr))}
+}
+@media(max-width:1023px){
+ #view-root .mf363-order-workspace{max-width:100%;min-width:0}
+ #view-root .mf363-order-workspace .mf354-quickbar{padding:10px;gap:8px}
+ #view-root .mf363-order-workspace .mf354-quickbar-intro{justify-content:stretch}
+ #view-root .mf363-primary-actions{display:block}
+ #view-root .mf363-primary-actions .mf354-quick-switch{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ #view-root .mf363-primary-actions .mf354-quick-switch>.btn{min-width:0;min-height:42px;padding:8px 5px;white-space:normal}
+ #view-root .mf363-columns-control{display:none!important}
+ #view-root .mf363-order-workspace .mf363-queue-tools{padding:10px}
+ #view-root .mf363-advanced-grid{grid-template-columns:minmax(0,1fr)}
+ #view-root .mf363-queue-tools .mf288-queue-control-groups{grid-template-columns:minmax(0,1fr)}
+ #view-root .mf363-queue-tools .mf288-control-group:last-child{grid-column:auto}
+ #view-root .mf363-order-workspace .mf363-queue-tools .mf288-queue-controls,
+ #view-root .mf363-order-workspace .mf363-queue-tools .mf346-queue-controls{display:flex!important;flex-direction:column}
+ #view-root .mf363-queue-tools .v181-inline-cover-control{grid-template-columns:72px minmax(0,1fr) 65px}
+ #view-root .mf363-order-workspace.mf363-lists .v138-order-main.mf363-grid-categories .mf288-regular-section{display:block!important}
+ #view-root .mf363-order-workspace .mf354-filter-fields .mf354-category-field{display:none}
+ #view-root .mf363-order-workspace .mf354-browse-tools.mf363-filters-open .mf354-filter-fields .mf354-category-field{display:flex}
+ #view-root .mf363-order-workspace .mf354-filter-fields>label:not(.mf354-search-field){display:none}
+ #view-root .mf363-order-workspace .mf354-browse-tools.mf363-filters-open .mf354-filter-fields>label{display:flex!important}
+ #view-root .mf363-order-workspace .mf354-browse-tools .mf354-browse-head{flex-direction:row}
+ #view-root .mf363-order-workspace .mf354-filter-actions .mf354-clear{display:none!important}
+ /* The mobile legacy hide rules intentionally use !important. Queue Tools
+    explicitly overrides them only when its real container is opened. */
+ #view-root .mf363-order-workspace.mf350-order-closed .mf363-queue-tools .mf288-queue-controls,
+ #view-root .mf363-order-workspace.mf350-order-closed .mf363-queue-tools .mf346-queue-controls{display:flex!important}
+ #view-root .mf363-order-workspace .mf354-quick-switch{display:grid!important}
+}
+/* Live Add Titles inputs are MOVED inside filters on mobile: no duplicate sliders */
+.mf359-title-sheet .mf363-title-advanced{display:none}
+@media(max-width:1023px){
+ .mf359-title-sheet.mf363-mobile-title-tools .mf363-title-advanced{display:grid;gap:10px;padding:12px;margin:6px 10px 10px;border-top:1px solid var(--border)}
+ .mf359-title-sheet .mf363-title-advanced>b{font-size:12px;color:var(--text)}
+ .mf359-title-sheet .mf363-title-sizing .mf358-size-controls{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+ .mf359-title-sheet .mf363-title-sizing .mf358-size-controls label{display:grid!important;grid-template-columns:75px minmax(0,1fr) 38px;gap:8px!important;min-width:0;padding:8px;font-size:12px}
+ .mf359-title-sheet .mf363-title-sizing .mf358-size-controls input[type=range]{width:100%!important;max-width:none!important;min-width:0!important}
+ .mf359-title-sheet .mf363-title-page-size .mf359-page-size-field{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+ .mf359-title-sheet .mf363-title-page-size .mf359-page-size-field select{width:110px}
+ .mf359-title-sheet .mf356-title-filters:not([open]) .mf363-title-advanced{display:none!important}
+ .mf359-title-sheet .mf358-title-display>.mf359-page-summary{display:block;font-size:11px;color:var(--text-dim,var(--text-mute));padding:4px 2px}
+}
+/* v345 hid the first two Queue Display groups only because they lived in an
+   oversized desktop card. With the unified tools panel, restore them in Tabs. */
+#view-root .mf363-order-workspace .mf363-queue-tools .mf288-control-group:first-child,
+#view-root .mf363-order-workspace .mf363-queue-tools .mf288-control-group:nth-child(2){display:grid!important}
+#view-root .mf363-queue-tools .mf288-control-group{min-width:0;align-content:start}
+#view-root .mf363-queue-tools .mf288-control-group:last-child{grid-column:auto}
+#view-root .mf363-queue-tools .mf288-control-group .mf288-segmented{display:flex;flex-wrap:wrap}
+#view-root .mf363-queue-tools .mf288-control-group .mf288-segmented>.btn{white-space:normal;text-align:left}
+#view-root .mf363-queue-tools .mf346-cover-tool{flex:none!important;width:100%!important;min-height:0!important}
+#view-root .mf363-queue-tools .mf346-cover-tool .v181-inline-cover-control{width:100%;min-width:0;flex:none!important}
+#view-root .mf363-queue-tools .mf346-cover-tool :is(input[type=range],input[type=number]){max-width:100%}
+#view-root .mf363-queue-tools .mf346-pagination-tools,
+#view-root .mf363-queue-tools .mf346-page-size{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+@media(min-width:1024px){
+ #view-root .mf363-order-workspace .mf354-quickbar{flex-direction:row!important;align-items:center;justify-content:space-between;gap:15px}
+ #view-root .mf363-order-workspace .mf363-primary-actions{order:1;flex:1 1 auto;justify-content:flex-start;gap:12px}
+ #view-root .mf363-order-workspace .mf354-quickbar-intro{order:2;flex:0 0 auto;width:auto!important}
+ #view-root .mf363-queue-tools .mf288-queue-control-groups{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1023px){
+ #view-root .mf363-queue-tools .mf288-control-group{width:100%}
+ #view-root .mf363-queue-tools .mf288-control-group:last-child{grid-column:1}
+ #view-root .mf363-queue-tools .mf288-segmented{display:flex;flex-wrap:wrap}
+}
+/* Lists uses the full advanced-tool width; the same panel uses two balanced
+   groups in Tabs where independent pagination controls are present. */
+@media(min-width:1024px){
+ #view-root .mf363-lists .mf363-advanced-grid{grid-template-columns:minmax(0,1fr)}
+ #view-root .mf363-lists .mf363-queue-display{display:grid!important;grid-template-columns:180px minmax(0,1fr);align-items:start;gap:20px}
+ #view-root .mf363-lists .mf363-queue-display .mf288-queue-controls-copy{margin:0}
+ #view-root .mf363-lists .mf288-queue-control-groups{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ #view-root .mf363-lists .mf288-control-group:last-child{grid-column:auto!important}
+ #view-root .mf363-tabs .mf363-queue-pagination{align-self:start!important;min-height:0!important;height:auto!important}
+ #view-root .mf363-tabs .mf346-cover-tool{margin:0!important;min-height:0!important}
+}
+/* Restrict multi-column cards to their cells. The existing row action system
+   is kept, but moves to its own line when several queues sit side by side. */
+#view-root .mf363-lists .mf363-grid-categories .v138-order-row{
+ grid-template-columns:24px 38px minmax(0,1fr)!important;
+ align-items:center;gap:7px;min-width:0;padding:9px;
+}
+#view-root .mf363-lists .mf363-grid-categories .v138-order-actions{
+ grid-column:2/-1;justify-content:flex-end;min-width:0;max-width:100%;gap:4px;
+}
+#view-root .mf363-lists .mf363-grid-categories .v138-order-copy{min-width:0;overflow:hidden}
+#view-root .mf363-lists .mf363-grid-categories .v138-order-cover,
+#view-root .mf363-lists .mf363-grid-categories .v138-order-cover-ph{width:35px;height:48px;max-width:100%}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell{
+ display:grid;grid-template-columns:38px minmax(0,1fr)!important;min-width:0;gap:9px;padding:10px;
+}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell>.mf287-assignment-cover{display:none!important}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell>.mf287-assignment-main{grid-column:2!important;min-width:0}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell>.mf287-assignment-actions,
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell>.mf288-assignment-details{grid-column:1/-1!important}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell .mf287-rule-grid{grid-template-columns:minmax(0,1fr)!important}
+#view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell .mf287-rule-grid select{max-width:100%;min-width:0}
+@media(min-width:1024px) and (max-width:1400px){
+ #view-root .mf363-lists .mf363-queue-display{grid-template-columns:minmax(0,1fr)}
+ #view-root .mf363-lists .mf288-queue-control-groups{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:1023px){
+ #view-root .mf363-lists .mf363-grid-categories .mf288-assignment-shell{grid-template-columns:40px minmax(0,1fr)!important}
+}
+/* Lists' canonical ordered-title pagination/cover controls live in this
+   toolbar. Never hide it merely because the All Titles/By Category switch was
+   moved to the top navigation. */
+#view-root .mf363-order-workspace.mf363-lists .mf363-queue-tools .v138-order-toolbar.mf363-list-toolbar{
+ display:flex!important;align-items:center;justify-content:flex-start;flex-wrap:wrap;
+ gap:12px;width:100%;margin:0;padding:10px 12px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel-raised,var(--panel));
+}
+#view-root .mf363-order-workspace.mf363-lists .mf363-queue-tools .mf363-list-toolbar>*{min-width:0}
+#view-root .mf363-order-workspace.mf363-lists .mf363-queue-tools .mf363-list-toolbar .v138-order-summary{font-size:11px}
+@media(max-width:1023px){
+ #view-root .mf363-order-workspace.mf363-lists .mf363-queue-tools .v138-order-toolbar.mf363-list-toolbar{display:flex!important}
+}

@@ -1,0 +1,8 @@
+/* v462 first-paint safety: no stale right-position widget can flash.
+ * Visibility becomes available only after the shell and authoritative
+ * user preferences have been resolved and the widget receives mf462-ready.
+ * Position, sizing, color, and animations still use existing theme rules. */
+#mf441-process-widget:not(.mf462-ready){
+ visibility:hidden!important;
+ pointer-events:none!important;
+}

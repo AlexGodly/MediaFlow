@@ -1,0 +1,86 @@
+/* ============================================================
+   MediaFlow v240 — Edit Title / Logged Cover / Profile polish
+   ============================================================ */
+
+/* ---------- Edit Title: use the full desktop canvas intentionally ------ */
+.modal:has(.v240-library-editor-shell){width:min(1380px,calc(100vw - 22px))!important;max-width:1380px!important;max-height:96vh!important;border-radius:20px!important}
+.v240-library-editor-shell{max-height:96vh!important;padding:22px 24px 18px!important;background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 97%,var(--flow) 3%),var(--panel))}
+.v240-library-editor{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:12px 14px!important;align-items:start}
+.v240-library-editor>.v240-field-row{display:contents!important}
+.v240-library-editor>.modal-title{grid-column:1/-1!important;order:0!important;font-size:23px!important;padding-bottom:13px!important}
+.v240-editor-section-label{grid-column:1/-1!important;display:flex;align-items:center;gap:10px;margin:2px 0 -2px;color:var(--text-dim);font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.v240-editor-section-label::after{content:"";height:1px;flex:1;background:var(--border-soft)}
+.v240-section-core{order:1}.v240-section-artwork{order:20}
+
+/* Requested logical pairings. */
+.v240-field-title{grid-column:span 6!important;order:2!important}
+.v240-field-category{grid-column:span 3!important;order:3!important}
+.v240-field-status{grid-column:span 3!important;order:4!important}
+.v240-field-progress{grid-column:span 3!important;order:6!important}
+.v240-field-total{grid-column:span 3!important;order:7!important}
+.v240-field-priority{grid-column:span 3!important;order:8!important}
+.v240-field-rating{grid-column:span 3!important;order:9!important}
+
+.v240-field-cover{grid-column:span 6!important;order:21!important}
+.v240-field-start{grid-column:span 3!important;order:22!important}
+.v240-field-finish{grid-column:span 3!important;order:23!important}
+.v240-field-estimated{grid-column:span 3!important;order:24!important}
+.v240-field-tags{grid-column:span 9!important;order:25!important}
+.v240-repeat-panel{grid-column:1/-1!important;order:30!important;margin:2px 0!important;width:100%!important}
+.v240-rich-editor{grid-column:1/-1!important;order:40!important;width:100%!important}
+.v240-editor-actions{grid-column:1/-1!important;order:50!important}
+
+/* Cleaner field language. */
+.v240-library-editor .field{min-width:0}
+.v240-library-editor .field-label{font-size:10px!important;letter-spacing:.025em;color:var(--text-dim)!important;margin-bottom:6px!important}
+.v240-library-editor :is(input,select,textarea){border-radius:11px!important;background:color-mix(in srgb,var(--panel-raised) 94%,var(--flow) 6%)!important;border-color:color-mix(in srgb,var(--border-soft) 88%,var(--flow) 12%)!important}
+.v240-library-editor :is(input,select){height:42px!important;min-height:42px!important;padding:9px 11px!important;font-size:12px!important}
+.v240-library-editor textarea{min-height:112px!important;max-height:260px!important;padding:11px 12px!important;font-size:12px!important;line-height:1.55!important}
+.v240-library-editor :is(input,select,textarea):hover{border-color:color-mix(in srgb,var(--flow) 34%,var(--border-soft))!important}
+.v240-library-editor :is(input,select,textarea):focus{border-color:color-mix(in srgb,var(--flow) 72%,var(--border-soft))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 13%,transparent)!important}
+
+/* Artwork is a real half-width section instead of leaving unused cells. */
+.v240-field-cover .v44-cover-row{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:12px!important;align-items:start!important;padding:11px!important}
+.v240-field-cover .v44-cover-preview{width:74px!important;height:105px!important;border-radius:9px!important}
+.v240-field-cover .v44-cover-fields{min-width:0!important}
+.v240-field-cover .v44-cover-fields input{width:100%!important}
+.v240-field-cover .v44-cover-fields>div[style*="margin-top"]{gap:7px!important;margin-top:7px!important}
+.v240-field-cover .v44-cover-fields .hint{display:block;margin-top:6px;font-size:9px;line-height:1.35}
+
+/* Repeat information now consumes the available row instead of one quarter. */
+.v240-repeat-panel .v82-repeat-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.v240-repeat-panel .v83-repeat-edit-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.v240-rich-editor .v178-rich-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.v240-rich-editor .v178-rich-wide{grid-column:1/-1!important}
+
+/* ---------- New logged-title cover-size surface ------------------------ */
+:root{--v240-logged-cover-width:48px;--v240-logged-cover-height:68px;--v240-batch-cover-width:38px;--v240-batch-cover-height:54px}
+.v239-logged-title-card{grid-template-columns:var(--v240-logged-cover-width) minmax(0,1fr) auto!important}
+.v239-logged-cover{width:var(--v240-logged-cover-width)!important;height:var(--v240-logged-cover-height)!important;max-width:none!important;max-height:none!important}
+.batch-selected-title>.v239-batch-cover{width:var(--v240-batch-cover-width)!important;height:var(--v240-batch-cover-height)!important;max-width:none!important;max-height:none!important}
+
+/* ---------- Sidebar profile: avatar + name only, no neutral action icon */
+.account-profile-btn>.v225-btn-icon{display:none!important}
+.account-profile-btn.v225-icon-button{gap:0!important}
+
+/* ---------- Responsive editor ----------------------------------------- */
+@media(max-width:1100px){
+  .modal:has(.v240-library-editor-shell){width:min(980px,calc(100vw - 18px))!important}
+  .v240-library-editor{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .v240-field-title{grid-column:1/-1!important}.v240-field-category,.v240-field-status,.v240-field-progress,.v240-field-total,.v240-field-priority,.v240-field-rating{grid-column:span 3!important}
+  .v240-field-cover{grid-column:1/-1!important}.v240-field-start,.v240-field-finish,.v240-field-estimated{grid-column:span 3!important}.v240-field-tags{grid-column:1/-1!important}
+  .v240-repeat-panel .v82-repeat-grid,.v240-rich-editor .v178-rich-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+  .modal:has(.v240-library-editor-shell){width:calc(100vw - 10px)!important;max-height:97vh!important}
+  .v240-library-editor-shell{max-height:97vh!important;padding:16px 13px 13px!important}
+  .v240-library-editor{grid-template-columns:1fr!important;gap:10px!important}
+  .v240-library-editor :is(.v240-field-title,.v240-field-category,.v240-field-status,.v240-field-progress,.v240-field-total,.v240-field-priority,.v240-field-rating,.v240-field-cover,.v240-field-start,.v240-field-finish,.v240-field-estimated,.v240-field-tags){grid-column:1!important}
+  .v240-field-cover .v44-cover-row{grid-template-columns:64px minmax(0,1fr)!important;padding:9px!important}.v240-field-cover .v44-cover-preview{width:64px!important;height:91px!important}
+  .v240-repeat-panel .v82-repeat-grid,.v240-repeat-panel .v83-repeat-edit-grid,.v240-rich-editor .v178-rich-grid{grid-template-columns:1fr!important}
+  .v239-logged-title-card{grid-template-columns:var(--v240-logged-cover-width) minmax(0,1fr)!important}.v239-logged-title-actions{grid-column:1/-1!important;padding-left:calc(var(--v240-logged-cover-width) + 11px)!important}
+}
+@media(max-width:480px){
+  .v240-field-cover .v44-cover-row{grid-template-columns:1fr!important}.v240-field-cover .v44-cover-preview{width:76px!important;height:108px!important}.v240-field-cover .v44-cover-fields{width:100%}
+  .v239-logged-title-actions{padding-left:0!important}
+}

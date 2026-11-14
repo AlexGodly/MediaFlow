@@ -1,0 +1,14 @@
+/* MediaFlow v580 release styles. */
+.mf580-adder{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mf580-adder input{flex:0 1 110px;width:110px;min-width:60px}
+.mf580-adder button{flex:0 0 auto;min-width:34px;font-weight:800}
+.mf580-sum{font-size:12px;font-weight:700;color:var(--flow)}
+.mf579-part-card>.mf580-adder{align-self:flex-end;justify-content:flex-end;width:auto;max-width:100%;margin-top:0}
+.mf579-part-card>.mf580-adder input{flex:0 1 118px;width:118px}
+.mf580-adv-parts{margin:10px 0}
+@media (max-width:520px){.mf579-part-card>.mf580-adder{align-self:stretch;justify-content:flex-start}}
+.mf580-time-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.batch-log-row>.mf580-runtime{grid-column:1/-1;margin-top:8px}
+.batch-log-row .field .mf580-adder{flex-wrap:nowrap}.batch-log-row .field .mf580-adder input{flex:1 1 60px;width:60px;min-width:60px;padding-left:8px;padding-right:4px}
+.mf580-goal-xp{display:flex;flex-direction:column;gap:2px;margin:8px 0;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--flow) 12%,transparent)}.mf580-goal-xp b{color:var(--flow)}.mf580-goal-xp small{color:var(--text-dim,var(--text-mute))}.mf580-goal-card{margin-top:14px}.mf580-goal-switch{display:flex;align-items:center;gap:6px;font-weight:700}
+.mf580-goal-hint{font-size:12px;font-weight:700;color:var(--good,#34d399);margin:4px 0 8px}

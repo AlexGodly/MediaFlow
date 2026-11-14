@@ -1,0 +1,70 @@
+/* MediaFlow v290 — modal-safe Category selector + title-edit visibility setting */
+
+/* The compatibility <select> keeps the established save IDs while the visible
+   trigger provides real Category artwork and a controlled popup. */
+.mf290-category-select{position:relative;min-width:0;width:100%}
+.mf290-category-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important;clip-path:inset(50%)!important;left:0!important;top:0!important}
+.mf290-category-trigger{appearance:none;width:100%;min-width:0;min-height:40px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border)!important;border-radius:10px;background:var(--panel-raised)!important;color:var(--text)!important;text-align:left;cursor:pointer;box-shadow:none;transition:border-color .14s ease,box-shadow .14s ease,background .14s ease}
+.mf290-category-trigger:hover{border-color:color-mix(in srgb,var(--flow) 58%,var(--border))!important;background:color-mix(in srgb,var(--panel-raised) 94%,var(--flow) 6%)!important}
+.mf290-category-trigger:focus-visible,.mf290-category-trigger[aria-expanded="true"]{outline:none;border-color:color-mix(in srgb,var(--flow) 72%,var(--border))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 13%,transparent)!important}
+.mf290-category-trigger-icon,.mf290-category-option-icon{display:grid;place-items:center;min-width:0}
+.mf290-category-trigger-icon img,.mf290-category-option-icon img{width:24px;height:24px;object-fit:contain;display:block}
+.mf290-category-trigger-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.86rem;font-weight:650}
+.mf290-category-trigger-chevron{color:var(--text-mute);font-size:.72rem;transition:transform .16s ease}
+.mf290-category-trigger[aria-expanded="true"] .mf290-category-trigger-chevron{transform:rotate(180deg)}
+
+/* Body-level popup: fixed positioning escapes every editor/modal overflow
+   container, while an opaque panel prevents fields beneath from showing
+   through. */
+.mf290-category-popover{position:fixed;z-index:100250;display:grid;gap:4px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid color-mix(in srgb,var(--border) 88%,var(--flow) 12%);border-radius:12px;background:linear-gradient(var(--panel),var(--panel)),var(--bg);color:var(--text);box-shadow:0 22px 60px rgba(0,0,0,.48),0 0 0 1px color-mix(in srgb,var(--flow) 6%,transparent);scrollbar-gutter:stable;isolation:isolate}
+.mf290-category-popover::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--panel);pointer-events:none}
+.mf290-category-option{appearance:none;width:100%;min-width:0;display:grid;grid-template-columns:32px minmax(0,1fr) 22px;gap:9px;align-items:center;padding:9px;border:1px solid transparent;border-radius:9px;background:var(--panel-raised);color:var(--text);text-align:left;cursor:pointer;transition:border-color .12s ease,background .12s ease,transform .12s ease}
+.mf290-category-option:hover{border-color:color-mix(in srgb,var(--flow) 48%,var(--border));background:color-mix(in srgb,var(--panel-raised) 91%,var(--flow) 9%)}
+.mf290-category-option.selected{border-color:color-mix(in srgb,var(--flow) 62%,var(--border));background:color-mix(in srgb,var(--panel-raised) 86%,var(--flow) 14%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--flow) 18%,transparent)}
+.mf290-category-option-copy{min-width:0;display:grid;gap:2px}
+.mf290-category-option-copy b{min-width:0;font-size:.82rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf290-category-option-copy small{min-width:0;font-size:.65rem;line-height:1.35;color:var(--text-mute);white-space:normal;overflow-wrap:anywhere}
+.mf290-category-option-check{text-align:center;color:var(--flow);font-weight:900}
+.mf290-category-empty{display:grid;gap:4px;padding:12px 11px;border:1px dashed var(--border);border-radius:9px;background:var(--panel-raised)}
+.mf290-category-empty b{font-size:.82rem}.mf290-category-empty span{font-size:.69rem;line-height:1.45;color:var(--text-mute)}
+
+/* v289's older <details> selector is not emitted by v290, but these defensive
+   rules prevent stale markup from opening above the new portal picker during a
+   hot update. */
+.mf290-category-select .mf289-rich-menu{display:none!important}
+
+/* Add/Edit Title: keep the Category control inside its own grid cell and above
+   neighbouring field chrome. The actual options popup lives at body level. */
+.v239-library-editor-shell .field:has(.mf290-category-select),
+.v240-library-editor-shell .field:has(.mf290-category-select){position:relative;z-index:3;overflow:visible!important}
+.v239-library-editor-shell .mf290-category-trigger,
+.v240-library-editor-shell .mf290-category-trigger{height:40px!important;min-height:40px!important;padding:7px 10px!important;font-size:11.5px!important}
+
+/* Title Details quick edit gets a clean non-clipping layout. Only the popup
+   scrolls; Cancel/Save remain in their own footer and are never covered by the
+   category menu boundary calculation. */
+.v181-quick-detail-modal:has(.mf290-category-select){overflow:hidden!important;display:grid;grid-template-rows:auto auto minmax(0,auto) auto;max-height:min(82vh,720px);padding:18px!important}
+.v181-quick-detail-modal:has(.mf290-category-select) .field{min-width:0;margin:0;overflow:visible}
+.v181-quick-detail-modal:has(.mf290-category-select) .v181-quick-detail-actions{position:relative;z-index:2;margin:14px -18px -18px;padding:12px 18px 14px;border-top:1px solid var(--border-soft);background:var(--panel);box-shadow:0 -8px 20px rgba(0,0,0,.08)}
+.v181-quick-detail-modal .mf290-category-trigger{min-height:48px;padding:9px 11px;border-radius:11px}
+
+/* Set Category editor note / opt-in visibility rule. */
+.mf290-editor-visibility-setting{display:grid;gap:8px;margin:10px 0 12px;padding:11px 12px;border:1px solid color-mix(in srgb,var(--border) 88%,var(--flow) 12%);border-radius:11px;background:color-mix(in srgb,var(--panel-raised) 94%,var(--flow) 6%)}
+.mf290-editor-visibility-copy{display:grid;gap:3px}.mf290-editor-visibility-copy b{font-size:.78rem;color:var(--text)}.mf290-editor-visibility-copy small{font-size:.68rem;line-height:1.45;color:var(--text-dim)}
+.mf290-editor-visibility-toggle{display:flex;align-items:flex-start;gap:8px;font-size:.72rem;font-weight:750;color:var(--text);cursor:pointer}
+.mf290-editor-visibility-toggle input{margin-top:2px;accent-color:var(--flow)}
+.mf290-editor-visibility-setting em{font-style:normal;font-size:.64rem;line-height:1.4;color:var(--text-mute)}
+
+@media(max-width:760px){
+  .mf290-category-popover{border-radius:11px;padding:5px}
+  .mf290-category-option{grid-template-columns:30px minmax(0,1fr) 20px;gap:8px;padding:8px}
+  .mf290-category-option-copy b{font-size:.79rem}.mf290-category-option-copy small{font-size:.63rem}
+  .v181-quick-detail-modal:has(.mf290-category-select){width:min(560px,calc(100vw - 16px))!important;padding:15px!important}
+  .v181-quick-detail-modal:has(.mf290-category-select) .v181-quick-detail-actions{margin:13px -15px -15px;padding:11px 15px 12px}
+}
+@media(max-width:420px){
+  .mf290-category-trigger{grid-template-columns:26px minmax(0,1fr) auto;gap:7px;padding-inline:8px}
+  .mf290-category-option{grid-template-columns:28px minmax(0,1fr) 18px;gap:7px;padding:7px}
+  .mf290-category-trigger-icon img,.mf290-category-option-icon img{width:22px;height:22px}
+  .mf290-editor-visibility-setting{padding:10px}
+}

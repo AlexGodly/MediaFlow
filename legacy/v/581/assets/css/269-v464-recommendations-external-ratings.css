@@ -1,0 +1,45 @@
+/* MediaFlow v464 · theme-native saved external ratings.
+ * All colors from dynamic MediaFlow theme; read-only dashboard display.
+ */
+.mf464-recommend-ratings{display:grid;gap:12px;min-width:0}
+.mf464-title{flex-wrap:wrap}
+.mf464-title>svg{flex-shrink:0;color:var(--flow)}
+.mf464-title>span{margin-left:auto;font-size:10px;font-weight:550;color:var(--text-dim)}
+.mf464-aggregate{display:flex;align-items:center;gap:12px;min-width:0;padding:12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--flow) 36%,var(--border-soft));background:color-mix(in srgb,var(--flow) 9%,var(--panel))}
+.mf464-aggregate-score{font-size:clamp(20px,2.8vw,29px);font-weight:850;color:var(--flow);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mf464-aggregate-score small{font-size:11px;color:var(--text-dim)}
+.mf464-aggregate>span:last-child{display:grid;gap:4px;min-width:0}
+.mf464-aggregate>span:last-child strong{font-size:12px;overflow-wrap:anywhere}
+.mf464-aggregate>span:last-child small{font-size:10px;color:var(--text-dim);line-height:1.4}
+.mf464-rating-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:9px;min-width:0}
+.mf464-rating-tile{display:grid;gap:8px;align-content:start;padding:11px;min-width:0;border-radius:11px;background:var(--panel);border:1px solid var(--border-soft)}
+.mf464-provider{display:flex;align-items:center;gap:8px;min-width:0}
+.mf464-provider>.mf450-source-mark{flex:none}
+.mf464-provider strong{font-size:11px;overflow-wrap:anywhere}
+.mf464-score{display:flex;align-items:baseline;gap:5px;font-variant-numeric:tabular-nums}
+.mf464-score>b{font-size:clamp(17px,2vw,22px);color:var(--text)}
+.mf464-score>small{font-size:11px;color:var(--text-dim)}
+.mf464-row-foot{display:flex;flex-wrap:wrap;gap:5px 9px;align-items:center;font-size:10px;color:var(--text-dim);line-height:1.35}
+.mf464-proof{font-weight:700;color:var(--text-dim)}
+.mf464-proof-verified{color:var(--flow)}
+.mf464-no-data,.mf464-no-verification,.mf464-impact{margin:0;color:var(--text-dim);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.mf464-impact{border-top:1px solid var(--border-soft);padding-top:10px}
+.mf464-more>summary{cursor:pointer;font-size:11px;color:var(--flow);font-weight:750;padding:7px}
+.mf464-more>.mf464-rating-grid{margin-top:8px}
+.mf464-settings{display:grid;gap:12px;border:1px solid var(--border-soft);border-radius:14px;background:var(--panel-raised);padding:14px;min-width:0;margin-top:14px;color:var(--text)}
+.mf464-settings *{box-sizing:border-box}
+.mf464-settings-head{display:flex;gap:10px;align-items:center}
+.mf464-settings-head>svg{color:var(--flow);flex:none}
+.mf464-settings-head>div{display:grid;gap:5px;min-width:0}
+.mf464-settings-head strong{font-size:13px}
+.mf464-settings-head small{font-size:11px;color:var(--text-dim);line-height:1.45}
+.mf464-show-setting{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--border-soft);border-radius:10px;font-size:11px;font-weight:700;min-width:0;cursor:pointer}
+.mf464-show-setting input{flex:0 0 17px;width:17px;height:17px;accent-color:var(--flow)}
+.mf464-influence-setting{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:10px;border:1px solid var(--border-soft);border-radius:10px;min-width:0}
+.mf464-influence-setting>span{display:grid;gap:5px;flex:1 1 190px;min-width:0}
+.mf464-influence-setting strong{font-size:11px}
+.mf464-influence-setting small,.mf464-settings-note{font-size:10px;color:var(--text-dim);line-height:1.5}
+.mf464-influence-setting select{flex:1 1 220px;max-width:100%;min-height:39px;min-width:0;background:var(--panel);color:var(--text);border:1px solid var(--border-soft);border-radius:10px;padding:7px}
+.mf464-settings-note{margin:0}
+.mf464-influence-setting select:focus-visible,.mf464-show-setting input:focus-visible,.mf464-more>summary:focus-visible{outline:2px solid var(--flow);outline-offset:3px}
+@media(max-width:390px){.mf464-recommend-ratings{gap:9px}.mf464-aggregate{flex-wrap:wrap;gap:8px}.mf464-title>span{margin-left:0}.mf464-rating-grid{grid-template-columns:minmax(0,1fr)}.mf464-settings{padding:11px}}

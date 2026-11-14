@@ -1,0 +1,145 @@
+/* ============================================================
+   MediaFlow v246 — PWA mobile/tablet + very-tight-width support
+   ============================================================ */
+
+/* PWA card — real MediaFlow icon + touch-friendly working actions. */
+.v246-pwa-card{overflow:visible}
+.v246-pwa-mark{padding:5px;overflow:hidden}
+.v246-pwa-mark img{display:block;width:100%;height:100%;object-fit:contain;border-radius:9px}
+.v246-pwa-actions .btn{min-height:38px;white-space:nowrap}
+.v246-pwa-action-icon{flex:0 0 15px}
+.v246-pwa-help-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.v246-pwa-help-head .modal-title{margin:0 0 3px}
+.v246-pwa-help-icon{width:52px;height:52px;border-radius:13px;object-fit:contain;flex:0 0 52px;border:1px solid var(--border-soft);background:var(--panel-raised)}
+.v246-pwa-help-steps{padding:14px;border:1px solid var(--border-soft);border-radius:12px;background:var(--panel-raised);font-size:13px;line-height:1.6;color:var(--text)}
+.v246-pwa-help-modal{max-width:520px}
+
+/* Global responsive safety. This deliberately targets layout constraints rather
+   than scaling the whole app, so typography and controls remain readable. */
+html,body,#app,.main{max-width:100%}
+.main,.container,.view,.card,.hero,.modal,.log-form,.new-entry-box{min-width:0}
+img,svg,video,canvas{max-width:100%}
+input,select,textarea,button,.btn,details,summary{min-width:0}
+:where(.card,.hero,.modal,.log-form,.new-entry-box,.field,.field-row,.grid-2,.grid-3,.two-col){box-sizing:border-box}
+
+/* Tablet/PWA windows: keep horizontal toolbars readable and wrap earlier. */
+@media (max-width:900px){
+  .main{width:100%;padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  .view-head{align-items:flex-start}
+  .view-head>*{min-width:0}
+  .modal-overlay{padding:12px max(10px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+  .modal{max-width:min(96vw,900px)}
+  .v244-pwa-card{align-items:stretch}
+  .v244-pwa-actions{width:100%;justify-content:flex-start}
+  .v244-pwa-actions .btn{flex:1 1 190px;justify-content:center}
+  .v221-settings-layout{min-width:0}
+  .v221-settings-content{min-width:0}
+  :where(.v224-log-tools,.v87-log-tools,.v86-log-tools,.library-tools,.mf-batchbar){max-width:100%}
+}
+
+/* Phone layout. Inputs are at least 16px to prevent iOS focus zoom. */
+@media (max-width:600px){
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-x:hidden}
+  .main{padding:14px 10px calc(100px + env(safe-area-inset-bottom))}
+  .view-head{margin-bottom:16px;gap:8px}
+  .view-title{font-size:21px;line-height:1.15}
+  .view-desc,.hint{line-height:1.5}
+  .card,.hero,.log-form,.new-entry-box{padding-left:12px;padding-right:12px}
+  input:not([type="checkbox"]):not([type="radio"]),select,textarea{font-size:16px!important}
+  button,.btn,summary{touch-action:manipulation}
+  .btn{min-height:40px;max-width:100%}
+  .modal-overlay{padding:7px max(6px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));align-items:center}
+  .modal{width:100%;max-width:none;max-height:calc(100dvh - 14px - env(safe-area-inset-bottom));padding:15px;border-radius:16px;overscroll-behavior:contain}
+  .modal-title{font-size:20px;margin-bottom:14px}
+  .modal-actions{position:sticky;bottom:-15px;margin:16px -15px -15px;padding:10px 15px calc(10px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--panel) 94%,transparent);border-top:1px solid var(--border-soft);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:5}
+  .modal-actions .btn{flex:1 1 120px;justify-content:center}
+  .v244-pwa-card{padding:14px!important;gap:13px}
+  .v244-pwa-card-main{min-width:0;width:100%;gap:10px}
+  .v244-pwa-mark{width:44px;height:44px;flex-basis:44px}
+  .v244-pwa-copy>b{font-size:14px}
+  .v244-pwa-copy .hint{font-size:11.5px}
+  .v244-pwa-status{font-size:11px}
+  .v244-pwa-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:8px}
+  .v244-pwa-actions .btn{width:100%;min-height:42px;white-space:normal;text-align:center}
+  .v244-pwa-actions .btn:last-child{grid-column:1/-1}
+  .v246-pwa-help-modal{max-width:none}
+  .v246-pwa-help-steps{font-size:12px;padding:12px}
+  .mobile-more-menu{max-height:min(70dvh,520px);overflow:auto;overscroll-behavior:contain}
+  .v66-cat-panel,.v236-category-filter-panel{width:min(420px,calc(100vw - 16px))!important;max-width:calc(100vw - 16px)!important;max-height:min(62dvh,460px)!important}
+  :where(.v221-settings-nav,.v221-settings-toolbar){scrollbar-width:thin}
+  .v221-settings-nav-item{min-height:40px}
+  .mf-batchbar{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+}
+
+/* Very narrow phones: 280-360px class devices and tiny installed PWA windows. */
+@media (max-width:360px){
+  .main{padding:10px 7px calc(92px + env(safe-area-inset-bottom))}
+  .view-title{font-size:19px}
+  .view-desc{font-size:11px}
+  .card,.hero,.log-form,.new-entry-box{padding-left:9px!important;padding-right:9px!important;border-radius:12px}
+  .hero{padding-top:14px!important;padding-bottom:14px!important}
+  .btn{padding-left:9px;padding-right:9px;font-size:11px}
+  .btn-sm{padding-left:7px;padding-right:7px;font-size:10px}
+  .section-label,.field-label{overflow-wrap:anywhere}
+  .mobile-tabbar{padding-left:2px;padding-right:2px;gap:0}
+  .mobile-tabbar>.mtab,.mobile-more-wrap{min-width:0}
+  .mtab{min-height:60px!important;padding:3px 1px!important;gap:4px!important;font-size:8px!important}
+  .mtab svg{width:20px!important;height:20px!important}
+  .mtab span{font-size:8px!important;letter-spacing:-.02em}
+  .mobile-more-menu{right:2px;width:calc(100vw - 8px);max-width:none;padding:6px}
+  .mobile-more-item{padding:10px 9px;font-size:11px}
+  .modal-overlay{padding:4px max(3px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(3px,env(safe-area-inset-left))}
+  .modal{max-height:calc(100dvh - 8px - env(safe-area-inset-bottom));padding:11px;border-radius:13px}
+  .modal-title{font-size:18px;margin-bottom:11px}
+  .modal-actions{bottom:-11px;margin:13px -11px -11px;padding:8px 11px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr}
+  .modal-actions .btn{width:100%}
+  .v244-pwa-card{padding:11px!important}
+  .v244-pwa-card-main{align-items:center}
+  .v244-pwa-mark{width:40px;height:40px;flex-basis:40px;border-radius:10px}
+  .v244-pwa-copy>b{font-size:13px}
+  .v244-pwa-copy .hint{font-size:10.5px}
+  .v244-pwa-status{font-size:10px;line-height:1.4}
+  .v244-pwa-actions{grid-template-columns:1fr}
+  .v244-pwa-actions .btn,.v244-pwa-actions .btn:last-child{grid-column:auto;min-height:42px}
+  .v246-pwa-help-head{align-items:flex-start}
+  .v246-pwa-help-icon{width:44px;height:44px;flex-basis:44px}
+  .v66-cat-panel,.v236-category-filter-panel{left:0!important;right:auto!important;width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;max-height:58dvh!important;padding:7px!important}
+  .v236-category-search{font-size:16px!important}
+  .v225-order-filterbar,.v230-settings-grid,.v140-order-filterbar,.v224-log-tools,.v87-log-tools,.v86-log-tools{grid-template-columns:1fr!important}
+  .v224-sort-pair{grid-template-columns:minmax(0,1fr) auto!important}
+  .v224-sort-direction{min-width:64px!important}
+  .grid-2,.grid-3,.two-col,.field-row{grid-template-columns:1fr!important}
+  .record-row,.profile-stat-hero{min-width:0}
+  .record-row .v{max-width:100%!important;overflow-wrap:anywhere}
+  table{font-size:10px}
+}
+
+@media (max-width:310px){
+  .main{padding-left:5px;padding-right:5px}
+  .card,.hero,.log-form,.new-entry-box{padding-left:7px!important;padding-right:7px!important}
+  .mtab span{display:none!important}
+  .mtab{min-height:48px!important}
+  .mtab svg{width:22px!important;height:22px!important}
+  .mobile-tabbar{padding-top:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom))}
+  .main{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+  .v244-pwa-card-main{align-items:flex-start}
+  .v244-pwa-mark{width:36px;height:36px;flex-basis:36px}
+  .v244-pwa-copy .hint{font-size:10px}
+}
+
+/* Installed PWA safe-area handling for notched phones/tablets and standalone windows. */
+@media (display-mode:standalone){
+  html,body{min-height:100dvh;overscroll-behavior:none}
+  body{padding-top:env(safe-area-inset-top)}
+  .main{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  .mobile-tabbar{padding-left:max(3px,env(safe-area-inset-left));padding-right:max(3px,env(safe-area-inset-right));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  .mobile-more-menu{bottom:calc(100% + 8px + env(safe-area-inset-bottom))}
+}
+
+/* Touch devices: avoid hover-only affordances and reduce repaint-heavy effects. */
+@media (hover:none) and (pointer:coarse){
+  .btn,.card,.nav-item,.library-item,.log-suggestion{transition-duration:.06s!important}
+  .mobile-tabbar,.modal-actions{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  :where(.library-row,.library-item,.log-suggestion,.batch-log-row,.v138-order-row,.history-row){content-visibility:auto;contain-intrinsic-size:auto 92px}
+}

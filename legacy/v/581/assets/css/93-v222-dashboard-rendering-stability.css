@@ -1,0 +1,45 @@
+/* MediaFlow v222 — Dashboard / On This Day rendering stability
+   Chromium can occasionally leave a tiny stale GPU texture fragment when a
+   closed <details> contains content-visibility:auto rows with cover images.
+   Keep the collapsed body out of painting entirely and avoid compositor
+   skipping on the rows. This is display-only and does not change data. */
+
+/* Paint On This Day as one isolated card so cover textures cannot bleed into
+   the gap below the card during Chrome/Chromium compositing. */
+.v126-otd,
+.on-this-day.v126-otd{
+  contain:paint;
+  isolation:isolate;
+}
+
+/* Native <details> already hides this content, but an explicit rule prevents
+   hidden cover rows from retaining a compositor surface while collapsed. */
+.v126-otd:not([open]) > .v126-otd-body{
+  display:none!important;
+}
+
+/* v159 used content-visibility:auto for the expanded rows. On some older GPU /
+   Chromium combinations that can leave a few pixels of a cover texture behind
+   after the details card collapses. The On This Day list is small enough that
+   normal painting is safer here and has negligible performance cost. */
+.v159-otd-row{
+  content-visibility:visible!important;
+  contain-intrinsic-size:auto!important;
+}
+
+/* Do not leave accidental promotion hints on the rotating hero/cover layer. */
+.v159-otd-summary-cover-slot,
+.v159-otd-summary-cover-slot img,
+.v126-otd-summary-cover,
+.v126-otd-row-cover{
+  will-change:auto!important;
+  transform:none!important;
+  image-rendering:auto;
+}
+
+/* The strip immediately below On This Day gets its own paint boundary so a
+   stale texture from the card above cannot be composited over it. */
+.today-strip{
+  isolation:isolate;
+  position:relative;
+}

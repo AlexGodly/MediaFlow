@@ -1,0 +1,82 @@
+/* v469: Background Processes is an independent top-corner mobile launcher;
+ * bottom lane belongs only to Task Progress and + Quick Actions.
+ * Preserve left/right position from Recovery Settings, shell first-paint gate
+ * from v462, MediaFlow dynamic colors, and original desktop behavior.
+ */
+@media screen and (max-width:720px){
+  #mf441-process-widget.mf462-ready{
+    position:fixed;
+    top:calc(70px + env(safe-area-inset-top,0px));
+    bottom:auto!important;
+    right:max(10px,env(safe-area-inset-right,0px));
+    left:auto;
+    width:min(205px,calc(100vw - 20px));
+    max-width:calc(100vw - 20px);
+    max-height:var(--mf469-room,calc(100dvh - 250px));
+    border-radius:13px;
+    z-index:10030;
+    box-sizing:border-box;
+    overflow:hidden;
+    transition:width .18s ease,opacity .15s ease;
+  }
+  #mf441-process-widget.mf462-ready.mf441-position-left{
+    left:max(10px,env(safe-area-inset-left,0px));
+    right:auto;
+  }
+  #mf441-process-widget.mf462-ready:not(.mf441-expanded) .mf441-widget-toggle{
+    gap:6px;
+    padding:7px 8px;
+    min-height:49px;
+    max-height:52px;
+  }
+  #mf441-process-widget:not(.mf441-expanded) .mf441-widget-symbol{
+    width:28px;height:28px;border-radius:8px;
+  }
+  #mf441-process-widget:not(.mf441-expanded) .mf441-widget-symbol svg{
+    width:15px;height:15px;
+  }
+  #mf441-process-widget:not(.mf441-expanded) .mf441-widget-name strong{
+    font-size:10.5px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  #mf441-process-widget:not(.mf441-expanded) .mf441-widget-name small{
+    display:none;
+  }
+  #mf441-process-widget:not(.mf441-expanded) .mf441-widget-percent{
+    font-size:10px;
+  }
+  #mf441-process-widget.mf462-ready.mf441-expanded{
+    width:min(348px,calc(100vw - 20px));
+  }
+  #mf441-process-widget.mf441-expanded .mf441-widget-toggle{
+    min-height:58px;
+  }
+  #mf441-process-widget .mf441-widget-toggle>svg:last-child{
+    transform:rotate(180deg); /* Mobile opens DOWN below the launcher */
+  }
+  #mf441-process-widget .mf441-widget-content{
+    max-height:max(0px,calc(var(--mf469-room,calc(100dvh - 250px)) - 58px));
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  #mf441-process-widget.mf469-no-room,
+  body.mf469-actions-open #mf441-process-widget,
+  body:has(#mf397-fan.open) #mf441-process-widget{
+    opacity:0!important;
+    pointer-events:none!important;
+    visibility:hidden!important;
+  }
+}
+@media screen and (max-width:390px){
+  #mf441-process-widget.mf462-ready{
+    width:min(188px,calc(100vw - 20px));
+  }
+  #mf441-process-widget.mf462-ready.mf441-expanded{
+    width:calc(100vw - 20px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #mf441-process-widget.mf462-ready{transition:none!important}
+}

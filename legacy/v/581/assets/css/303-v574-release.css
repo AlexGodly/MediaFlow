@@ -1,0 +1,12 @@
+/* MediaFlow v574 release styles. */
+
+/* Batch Log: what the batch earns, above the buttons. */
+.mf574-batch-xp{display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding:10px 14px;border-radius:14px;
+  border:1px solid color-mix(in srgb,var(--flow) 30%,var(--border-soft,var(--border)));
+  background:color-mix(in srgb,var(--flow) 9%,var(--panel));color:var(--text)}
+.mf574-batch-xp[hidden]{display:none}
+.mf574-batch-xp>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mf574-batch-xp b{font-size:14px;font-weight:800}
+.mf574-batch-xp small{font-size:12px;color:var(--text-dim,var(--text-mute));overflow-wrap:anywhere}
+.mf574-xp-icon{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:10px;
+  background:color-mix(in srgb,var(--flow) 18%,transparent);color:var(--flow);font-size:15px}

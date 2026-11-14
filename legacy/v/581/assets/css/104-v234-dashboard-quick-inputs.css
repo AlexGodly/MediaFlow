@@ -1,0 +1,93 @@
+/* ============================================================
+   MediaFlow v234 — Dashboard quick-entry fields
+   ============================================================ */
+
+/* Shared visual language for the two Dashboard quick-entry surfaces. */
+#v123-rating-input,
+#v192-cover-url-input{
+  box-sizing:border-box;
+  -webkit-appearance:none;
+  appearance:none;
+  min-height:48px;
+  border:1px solid var(--border)!important;
+  border-radius:12px!important;
+  background:var(--panel-raised)!important;
+  background-color:var(--panel-raised)!important;
+  background-image:none!important;
+  color:var(--text)!important;
+  padding:11px 14px!important;
+  outline:none;
+  box-shadow:inset 0 0 0 1000px var(--panel-raised),0 1px 0 rgba(255,255,255,.025),0 7px 18px rgba(0,0,0,.10);
+  transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
+}
+#v123-rating-input:hover,
+#v192-cover-url-input:hover{
+  border-color:var(--flow-dim)!important;
+}
+#v123-rating-input:focus,
+#v192-cover-url-input:focus{
+  border-color:var(--flow)!important;
+  box-shadow:inset 0 0 0 1000px var(--panel-raised),0 0 0 3px color-mix(in srgb,var(--flow) 18%,transparent),0 8px 22px rgba(0,0,0,.12);
+}
+#v123-rating-input::placeholder,
+#v192-cover-url-input::placeholder{
+  color:var(--text-mute);
+  opacity:.9;
+}
+
+/* Rate Your Library: keep the value/placeholder fully readable even while
+   the action buttons share the same row. */
+.v123-rating-queue:not(.v192-missing-covers) .v123-rating-control>.field{
+  width:190px;
+  min-width:190px;
+  max-width:190px;
+  flex:0 0 190px;
+}
+#v123-rating-input{
+  width:100%;
+  font-size:17px;
+  font-weight:800;
+  line-height:1.2;
+  text-align:center;
+}
+
+/* Missing Covers: URL input now looks and behaves like the polished rating
+   field while retaining the extra width a URL needs. */
+.v192-cover-url-field{
+  min-width:320px;
+  flex:1 1 460px;
+}
+#v192-cover-url-input{
+  width:100%;
+  min-width:0;
+  font-size:14px;
+  font-weight:650;
+  line-height:1.25;
+  text-align:left;
+}
+
+@media(max-width:760px){
+  .v123-rating-queue:not(.v192-missing-covers) .v123-rating-control>.field{
+    width:min(220px,100%);
+    min-width:160px;
+    max-width:220px;
+    flex:1 1 180px;
+  }
+  .v192-cover-url-field{
+    min-width:0;
+    flex:1 1 100%;
+  }
+}
+
+@media(max-width:620px){
+  .v123-rating-queue:not(.v192-missing-covers) .v123-rating-control>.field{
+    width:100%;
+    min-width:0;
+    max-width:none;
+    flex-basis:100%;
+  }
+  #v123-rating-input,
+  #v192-cover-url-input{
+    min-height:46px;
+  }
+}

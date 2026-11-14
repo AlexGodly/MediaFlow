@@ -1,0 +1,104 @@
+/* ============================================================
+   MediaFlow v227 — UI icon corrections / category URL visibility
+   ============================================================ */
+
+/* Dynamic Library category URL icons: v181's older clean-tab rule used
+   #view-root + !important, so v226's lower-specificity override could not win.
+   This selector intentionally outranks that legacy rule. */
+html[data-v226-dynamic-category-icons="category-url"] #view-root .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-img{
+  display:inline-block!important;
+  width:18px!important;
+  height:18px!important;
+  object-fit:cover!important;
+  border-radius:5px!important;
+  flex:0 0 auto!important;
+  vertical-align:middle!important;
+  margin-right:5px!important;
+}
+html[data-v226-dynamic-category-icons="category-url"] #view-root .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-emoji{
+  display:none!important;
+}
+html[data-v226-dynamic-category-icons="none"] #view-root .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-img,
+html[data-v226-dynamic-category-icons="none"] #view-root .v181-dynamic-nav>.v181-dynamic-row:first-child .v144-cat-icon-emoji{
+  display:none!important;
+}
+
+/* The Dynamic category-row icon preference is the explicit exception to the
+   v226 "every dropdown gets a leading icon" rule. Keep only the native arrow. */
+select.v227-dropdown-no-leading-icon{
+  padding-left:12px!important;
+  background-image:
+    linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),
+    linear-gradient(135deg,var(--text-dim) 50%,transparent 50%),
+    linear-gradient(to right,var(--border-soft),var(--border-soft))!important;
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%,
+    calc(100% - 37px) 50%!important;
+  background-size:5px 5px,5px 5px,1px 20px!important;
+  background-repeat:no-repeat!important;
+}
+
+/* Visibility switches now reserve one side for the semantic eye icon. The
+   thumb occupies the opposite side, so the icon is never clipped/covered. */
+.toggle.v225-icon-button{
+  width:50px!important;
+  min-width:50px!important;
+  height:24px!important;
+  padding:0!important;
+  display:block!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.toggle.v225-icon-button::after{
+  top:3px!important;
+  left:3px!important;
+  width:18px!important;
+  height:18px!important;
+  z-index:2!important;
+}
+.toggle.v225-icon-button.on::after{left:29px!important}
+.toggle.v225-icon-button>.v225-btn-icon{
+  position:absolute!important;
+  right:6px!important;
+  left:auto!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:13px!important;
+  height:13px!important;
+  z-index:1!important;
+  color:var(--text-dim)!important;
+  pointer-events:none!important;
+}
+.toggle.v225-icon-button.on>.v225-btn-icon{
+  left:6px!important;
+  right:auto!important;
+  color:#fff!important;
+}
+
+/* Priority choices already had legacy text glyphs (▼ ● ▲). v227 uses the
+   clearer SVG priority icons instead of rendering both systems together. */
+.priority-choice.v225-icon-button>.priority-choice-icon{display:none!important}
+.priority-choice.v225-icon-button>.v225-btn-icon{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+}
+
+/* Automatic / Manual state pills receive their own meaning-specific icons. */
+.v227-mode-pill{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  white-space:nowrap!important;
+}
+.v227-mode-pill>.v225-btn-icon{
+  width:13px!important;
+  height:13px!important;
+}
+
+/* Poster placeholders are artwork/title surfaces. Never allow global action
+   icons to overlay the category image shown in these Dashboard cards. */
+.v123-rating-placeholder>.v225-btn-icon,
+.v186-rating-placeholder-button>.v225-btn-icon,
+.v192-cover-placeholder>.v225-btn-icon{display:none!important}

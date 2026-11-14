@@ -1,0 +1,41 @@
+/* MediaFlow 378: only new Logging Library controls and title numeric inputs.
+   Existing cover rendering, crop and cover-size settings stay untouched. */
+.mf378-library-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:10px;border-radius:12px;background:var(--surface-2,var(--surface));border:1px solid var(--border)}
+.mf378-library-actions label{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim)}.mf378-library-actions select{min-width:110px}.mf378-library-actions button{white-space:normal}
+.mf378-picker .log-suggestion{position:relative;min-width:0}.mf378-picker .mf378-check{display:inline-flex;align-items:center;justify-content:center;padding:4px}.mf378-picker .mf378-check input{width:17px;height:17px}
+.mf378-picker.mf378-compact .log-suggestion{padding:5px 9px;gap:8px}.mf378-picker.mf378-compact .v86-log-cover{max-height:40px}
+.mf378-picker.mf378-cards,.mf378-picker.mf378-covers,.mf378-picker.mf378-covers-titles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-items:stretch}
+.mf378-picker.mf378-cards .log-suggestion,.mf378-picker.mf378-covers .log-suggestion,.mf378-picker.mf378-covers-titles .log-suggestion{display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0;padding:10px}
+.mf378-picker.mf378-cards .v86-log-result,.mf378-picker.mf378-covers .v86-log-result,.mf378-picker.mf378-covers-titles .v86-log-result{flex-direction:column;min-width:0;align-items:stretch}
+.mf378-picker.mf378-cards .v86-log-cover,.mf378-picker.mf378-covers .v86-log-cover,.mf378-picker.mf378-covers-titles .v86-log-cover{width:100%;height:auto;max-height:230px;object-fit:contain;margin:0 auto}
+.mf378-picker.mf378-covers .v86-log-result small{display:none}.mf378-picker.mf378-covers .v86-log-result b{font-size:12px}.mf378-picker.mf378-clean .mf378-check{display:none}
+.mf378-picker.mf378-clean.mf378-covers .mf378-add-btn,.mf378-picker.mf378-clean.mf378-covers-titles .mf378-add-btn{display:none}
+.mf378-collapse-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}.mf378-quick-amount{display:grid;gap:4px;font-size:11px;color:var(--text-dim)}.mf378-quick-amount input{width:86px;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
+.mf378-logging .mf378-collapsed .v370-title-content,.mf378-logging .mf378-collapsed .v369-unit-list,.mf378-logging .mf378-collapsed .v369-add-row,.mf378-logging .mf378-collapsed .mf378-quick-amount,.mf378-logging .mf378-collapsed .v239-logged-consumed,.mf378-logging .mf378-collapsed .v239-remove-log-title,.mf378-logging .mf378-collapsed .v239-logged-progress{display:none!important}
+.mf378-logging .mf378-collapse-one{flex-shrink:0}.mf378-logging .mf378-collapsed.v370-title{padding-bottom:0}
+/* Explicitly fix ordinary title numeric editors, not Collection artwork. */
+.v138-order-view input[type="number"][aria-label*="position" i],.v138-order-view input[type="number"][title*="position" i],.v138-order-view .v138-order-position input,.v138-order-view .v138-order-number input,.v138-order-view .mf287-queue-position input,.mf345-order-tabs-mode input[type="number"][aria-label*="position" i]{box-sizing:border-box!important;width:76px!important;min-width:76px!important;max-width:none!important;flex:none!important;padding:6px 9px!important;text-align:center;font-variant-numeric:tabular-nums;appearance:textfield;-moz-appearance:textfield}
+.v138-order-view input[type="number"]::-webkit-inner-spin-button,.v138-order-view input[type="number"]::-webkit-outer-spin-button,.mf345-order-tabs-mode input[type="number"]::-webkit-inner-spin-button,.mf345-order-tabs-mode input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.mf378-mixed-all .mf287-queue-item{margin:6px 0}
+@media(max-width:600px){.mf378-picker.mf378-cards,.mf378-picker.mf378-covers,.mf378-picker.mf378-covers-titles{grid-template-columns:repeat(2,minmax(0,1fr))}.mf378-library-actions{gap:6px}.mf378-library-actions label{max-width:100%}.mf378-library-actions .btn{flex:1}.mf378-picker .log-suggestion{min-width:0}}
+/* v378 verified target: the legacy v157 title input has stronger later-era
+   sizing selectors than the generic order-number rule. */
+#view-root .mf363-order-workspace .v138-order-row>.v138-order-pos.v157-order-pos,
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row>.v138-order-pos.v157-order-pos{
+  box-sizing:border-box!important;min-width:94px!important;width:94px!important;max-width:none!important;
+  padding:7px 7px!important;display:flex!important;justify-content:center!important;overflow:visible!important
+}
+#view-root .mf363-order-workspace .v138-order-row>.v138-order-pos.v157-order-pos input.v157-position-input,
+#view-root .mf364-order-workspace .mf363-grid-categories .v138-order-row>.v138-order-pos.v157-order-pos input.v157-position-input{
+  box-sizing:border-box!important;width:80px!important;min-width:80px!important;max-width:none!important;
+  padding:5px 8px!important;text-align:center!important;font-variant-numeric:tabular-nums!important;
+  appearance:textfield!important;-moz-appearance:textfield!important
+}
+#view-root .mf363-order-workspace .v138-order-row>.v138-order-pos.v157-order-pos input.v157-position-input::-webkit-inner-spin-button,
+#view-root .mf363-order-workspace .v138-order-row>.v138-order-pos.v157-order-pos input.v157-position-input::-webkit-outer-spin-button{-webkit-appearance:none!important;margin:0!important}
+
+.mf378-verified-result{display:flex;align-items:center;gap:12px;padding:8px;border:1px solid var(--border-soft);border-radius:10px;background:var(--surface-2,var(--panel))}
+.mf378-verified-result img{flex:none;width:45px;height:64px;object-fit:contain;border-radius:5px}
+.mf378-verified-result span{min-width:0;display:flex;flex-direction:column;gap:4px}
+.mf378-verified-result strong{font-size:12px;overflow-wrap:anywhere}
+.mf378-verified-result small{font-size:11px;color:var(--text-dim)}

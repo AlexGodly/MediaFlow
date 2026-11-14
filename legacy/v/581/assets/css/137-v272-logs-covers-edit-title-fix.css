@@ -1,0 +1,100 @@
+/* MediaFlow v272 — Logs title covers + Edit Title header repair */
+:root{--v181-cover-history-logs:1;}
+
+/* History -> Logs: replace the old standalone category glyph column with a
+   stable consumed-title cover/title rail. */
+.mf271-logs .hist-row.mf272-log-row{
+  display:grid!important;
+  grid-template-columns:auto 104px minmax(0,1fr) auto!important;
+  align-items:start!important;
+  gap:14px!important;
+}
+.mf271-logs .mf272-log-row>.v253-history-check{grid-column:1;align-self:start;margin-top:5px;}
+.mf271-logs .mf272-log-row>.hist-date{grid-column:2;align-self:start;padding-top:4px;}
+.mf271-logs .mf272-log-row>.hist-main{grid-column:3;min-width:0!important;}
+.mf271-logs .mf272-log-row>.hist-status{grid-column:4;align-self:start;}
+.mf272-log-title-rail{
+  display:flex;align-items:stretch;gap:10px;overflow-x:auto;overflow-y:hidden;
+  margin:0 0 8px;padding:0 0 2px;scrollbar-width:none;-ms-overflow-style:none;
+  overscroll-behavior-inline:contain;
+}
+.mf272-log-title-rail::-webkit-scrollbar{display:none;width:0;height:0;}
+.mf272-log-title-card{
+  flex:0 0 auto;min-width:min(310px,48vw);max-width:360px;
+  display:grid;grid-template-columns:calc(54px * var(--v181-cover-history-logs)) minmax(0,1fr);
+  gap:10px;align-items:start;padding:0;border:0;background:transparent;color:var(--text);
+  text-align:left;font:inherit;cursor:pointer;min-height:calc(78px * var(--v181-cover-history-logs));
+}
+.mf272-log-title-card:hover .mf272-log-title-copy b{color:var(--flow);}
+.mf272-log-title-cover{
+  width:calc(54px * var(--v181-cover-history-logs));
+  height:calc(78px * var(--v181-cover-history-logs));
+  border-radius:8px;overflow:hidden;display:grid;place-items:center;align-self:start;
+  border:1px solid color-mix(in srgb,var(--border) 72%,transparent);
+  background:color-mix(in srgb,var(--panel-raised) 88%,var(--panel));
+  box-shadow:0 6px 16px color-mix(in srgb,#000 11%,transparent);
+}
+.mf272-log-title-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+.mf272-log-title-cover-fallback{
+  display:grid;place-items:center;color:var(--mf272-log-cat,var(--flow));
+  background:color-mix(in srgb,var(--mf272-log-cat,var(--flow)) 12%,var(--panel));
+}
+.mf272-log-title-cover-fallback>img,.mf272-log-title-cover-fallback svg{max-width:62%;max-height:62%;object-fit:contain;}
+.mf272-log-title-copy{display:flex;flex-direction:column;gap:5px;min-width:0;padding-top:3px;}
+.mf272-log-title-copy b{font-size:13px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;transition:color .15s ease;}
+.mf272-log-title-copy small{font-size:10px;line-height:1.25;color:var(--text-mute);font-weight:800;}
+.mf271-logs .mf272-log-row .hist-cat{margin-top:2px;}
+
+/* The old v239 sticky .modal-title selector was written before v265 moved the
+   title into a shared header with Delete title. Neutralize that inherited
+   geometry and let the header itself own the layout. */
+.v239-library-editor-shell .mf272-edit-title-head,
+.v240-library-editor-shell .mf272-edit-title-head{
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  z-index:2!important;width:100%!important;grid-column:1/-1!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:16px!important;margin:0 0 18px!important;padding:0 0 14px!important;
+  border-bottom:1px solid var(--border-soft)!important;background:transparent!important;
+  backdrop-filter:none!important;overflow:visible!important;
+}
+.v239-library-editor-shell .mf272-edit-title-head .modal-title,
+.v240-library-editor-shell .mf272-edit-title-head .modal-title{
+  position:static!important;inset:auto!important;z-index:auto!important;
+  display:block!important;min-width:0!important;width:auto!important;max-width:none!important;
+  margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+  backdrop-filter:none!important;box-shadow:none!important;
+  font-size:27px!important;line-height:1.08!important;letter-spacing:-.02em!important;
+  white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;
+}
+.v239-library-editor-shell .mf272-edit-title-delete,
+.v240-library-editor-shell .mf272-edit-title-delete{
+  position:static!important;inset:auto!important;flex:0 0 auto!important;
+  width:auto!important;min-width:118px!important;min-height:40px!important;
+  margin:0!important;padding:9px 14px!important;white-space:nowrap!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  font-size:11px!important;line-height:1!important;
+}
+
+@media(max-width:760px){
+  .mf271-logs .hist-row.mf272-log-row{
+    grid-template-columns:auto minmax(0,1fr) auto!important;gap:10px!important;
+  }
+  .mf271-logs .mf272-log-row>.hist-date{display:none!important;}
+  .mf271-logs .mf272-log-row>.hist-main{grid-column:2!important;}
+  .mf271-logs .mf272-log-row>.hist-status{grid-column:3!important;}
+  .mf272-log-title-card{min-width:min(280px,72vw);grid-template-columns:calc(48px * var(--v181-cover-history-logs)) minmax(0,1fr);min-height:calc(70px * var(--v181-cover-history-logs));}
+  .mf272-log-title-cover{width:calc(48px * var(--v181-cover-history-logs));height:calc(70px * var(--v181-cover-history-logs));}
+}
+@media(max-width:560px){
+  .v239-library-editor-shell .mf272-edit-title-head,
+  .v240-library-editor-shell .mf272-edit-title-head{align-items:stretch!important;flex-direction:column!important;gap:10px!important;}
+  .v239-library-editor-shell .mf272-edit-title-delete,
+  .v240-library-editor-shell .mf272-edit-title-delete{width:100%!important;}
+  .v239-library-editor-shell .mf272-edit-title-head .modal-title,
+  .v240-library-editor-shell .mf272-edit-title-head .modal-title{font-size:23px!important;}
+}
+@media(max-width:390px){
+  .mf271-logs .hist-row.mf272-log-row{grid-template-columns:auto minmax(0,1fr)!important;}
+  .mf271-logs .mf272-log-row>.hist-status{grid-column:2!important;width:100%!important;align-items:flex-start!important;margin-top:6px;}
+  .mf272-log-title-card{min-width:min(245px,76vw);}
+}

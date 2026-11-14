@@ -1,0 +1,79 @@
+/* MediaFlow v400 — canonical picker workspace parity, responsive disclosure
+   restoration, and protected mobile Collection List cover proportions. */
+/* Collection Add Titles: desktop Tools & Filters are never left inaccessible
+   by a disclosure collapsed at a narrower breakpoint. */
+@media(min-width:1024px){
+  #mf274-add-titles .mf399-collection-tools>summary{display:none!important}
+  #mf274-add-titles .mf399-collection-tools>.mf399-collection-tool-content{display:grid!important;visibility:visible!important}
+}
+/* Personal Order → Add Titles: same two-column proportions and geometry as
+   Collections → Add Titles; preserve the original order picker DOM and events. */
+.mf400-order-workspace .mf356-browse-card{display:flex!important;flex-direction:column!important;min-height:0!important;min-width:0!important;overflow:hidden!important}
+.mf400-order-workspace .mf356-browse-card>.section-label{flex:0 0 auto!important}
+.mf400-order-workspace .mf356-browse-card>.mf400-picker-intro{font-size:12px!important;letter-spacing:normal!important;font-weight:400!important;text-transform:none!important;color:var(--text-dim,var(--text-mute))!important;text-align:left!important;margin:0 0 6px!important;padding:0!important;align-self:stretch!important}
+.mf400-order-workspace .mf400-order-shell{display:grid;grid-template-columns:minmax(215px,27%) minmax(0,1fr);gap:15px;flex:1 1 auto;min-height:0;min-width:0;overflow:hidden}
+.mf400-order-workspace .mf400-order-sidebar{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.mf400-order-workspace .mf400-order-search{flex:0 0 auto;min-width:0}
+.mf400-order-workspace .mf400-order-search .v138-picker-search{box-sizing:border-box;width:100%!important;height:43px!important;min-height:43px!important;max-width:100%!important;margin:0!important}
+.mf400-order-workspace .mf356-title-filters{display:block!important;flex:0 0 auto!important;min-height:0!important;min-width:0!important;border:1px solid var(--border);border-radius:11px;background:var(--panel-2,var(--panel));overflow:visible}
+.mf400-order-workspace .mf356-title-filters>summary{display:none!important}
+.mf400-order-workspace .mf356-title-filters>.mf400-order-tool-inner{display:grid!important;gap:10px;min-width:0;padding:11px}
+.mf400-order-workspace .mf400-order-tool-inner>*{min-width:0;max-width:100%}
+.mf400-order-workspace .mf400-order-tool-inner .mf359-title-paging{display:flex!important;flex-direction:row;justify-content:space-between;gap:8px;align-items:center;padding:0 0 9px;border-bottom:1px solid var(--border)}
+.mf400-order-workspace .mf400-order-tool-inner .mf359-page-summary{font-size:11px;line-height:1.4;min-width:0}
+.mf400-order-workspace .mf400-order-tool-inner .mf399-title-page-field{min-width:0;display:flex;align-items:center;gap:7px;font-size:11px}
+.mf400-order-workspace .mf400-order-tool-inner .mf392-order-tools{margin:0!important;padding:0!important;display:block!important}
+.mf400-order-workspace .mf400-order-tool-inner .mf358-title-display{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;margin:0!important;padding:9px!important;border:1px solid var(--border);border-radius:10px}
+.mf400-order-workspace .mf400-order-tool-inner .mf358-title-display>.mf358-mode-buttons{grid-column:1!important;grid-row:auto!important;display:flex!important;flex-wrap:wrap!important;gap:5px}
+.mf400-order-workspace .mf400-order-tool-inner .mf358-title-display>.mf358-size-controls{grid-column:1!important;grid-row:auto!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+.mf400-order-workspace .mf400-order-tool-inner .mf358-size-controls label{display:grid!important;grid-template-columns:70px minmax(0,1fr) 38px!important;align-items:center;gap:5px;min-width:0!important}
+.mf400-order-workspace .mf400-order-tool-inner input[type=range]{min-width:0;width:100%}
+.mf400-order-workspace .mf400-order-tool-inner #v140-order-picker-tools{display:block!important;min-width:0!important}
+.mf400-order-workspace .mf400-order-tool-inner #v140-order-picker-tools select{max-width:100%;min-width:0}
+.mf400-order-workspace .mf400-order-main{display:flex;flex-direction:column;gap:8px;flex:1 1 auto;min-height:0;min-width:0;overflow:hidden}
+.mf400-order-workspace .mf400-order-main .mf358-results-panel{display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important;padding:0!important}
+.mf400-order-workspace .mf400-order-main #v138-order-picker-results{flex:1 1 0%!important;min-height:0!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;align-content:start}
+.mf400-order-workspace .mf400-order-main #v140-order-picker-pager,.mf400-order-workspace .mf400-order-main .v138-picker-actions{flex:0 0 auto!important;min-height:0!important}
+/* Avoid legacy desktop display-mode density styles fighting the Collection
+   picker counterpart. The existing per-mode classes remain authoritative. */
+@media(max-width:1023px){
+  .mf400-order-workspace .mf356-browse-card{height:100%!important;max-height:100%!important;gap:7px!important}
+  .mf400-order-workspace .mf400-order-shell{display:flex!important;flex-direction:column!important;gap:7px!important;height:100%!important;flex:1 1 0%!important;min-height:0!important;overflow:hidden!important}
+  .mf400-order-workspace .mf400-order-sidebar{display:flex;flex-direction:column;gap:7px;flex:0 0 auto;overflow:visible!important;padding:0!important}
+  .mf400-order-workspace .mf400-order-search .v138-picker-search{height:41px!important;min-height:41px!important}
+  .mf400-order-workspace .mf356-title-filters>summary{display:flex!important;align-items:center;justify-content:space-between;min-height:36px;padding:8px 10px;cursor:pointer}
+  .mf400-order-workspace .mf356-title-filters:not([open])>.mf400-order-tool-inner{display:none!important}
+  .mf400-order-workspace .mf356-title-filters[open]{max-height:min(49dvh,420px);overflow:auto;overscroll-behavior:contain}
+  .mf400-order-workspace .mf356-title-filters>.mf400-order-tool-inner{padding:9px!important;gap:8px!important}
+  .mf400-order-workspace .mf400-order-tool-inner .mf358-mode-buttons{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}
+  .mf400-order-workspace .mf400-order-tool-inner .mf358-mode-btn{white-space:nowrap;flex:0 0 auto}
+  .mf400-order-workspace .mf400-order-main{flex:1 1 0%!important;min-height:0!important;gap:5px!important}
+  .mf400-order-workspace .mf400-order-main #v138-order-picker-results{flex:1 1 0%!important;min-height:0!important;overflow:auto!important}
+  /* Add Collections: preserve distinct collection views and mobile controls. */
+  .mf400-collection-tools-sheet .mf400-collection-tools-inner{display:grid;gap:9px;min-width:0;padding:9px 0}
+  .mf400-collection-tools-sheet .mf400-collection-tools-inner .mf361-collection-display{min-width:0;margin:0!important;padding:5px!important}
+  .mf400-collection-tools-sheet .mf361-collection-mode-buttons{display:flex;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}
+}
+/* Responsive repositioning also applies to the desktop Add Collections modal:
+   the page-size and modes/sliders are part of the existing disclosure. */
+.mf400-collection-tools-sheet .mf400-collection-tools-inner{display:grid;gap:10px;min-width:0}
+.mf400-collection-tools-sheet .mf400-collection-tools-inner .mf359-page-size-field{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;box-sizing:border-box;min-width:0}
+.mf400-collection-tools-sheet .mf400-collection-tools-inner .mf359-page-size-field select{min-width:104px;max-width:120px;box-sizing:border-box;padding-right:22px}
+.mf400-collection-tools-sheet .mf400-collection-tools-inner .mf361-collection-display{max-width:100%;min-width:0}
+@media(min-width:1024px){
+ .mf400-collection-tools-sheet .mf400-collection-tools-inner{padding:9px 0}
+ .mf400-collection-tools-sheet .mf361-collection-size-controls{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px}
+ .mf400-collection-tools-sheet .mf358-collection-filters{max-height:min(55dvh,560px);overflow-y:auto}
+}
+/* Narrow phone Collection List covers should never collapse to tiny slivers;
+   leave sufficient text space, with the Add action on its own row. */
+@media(max-width:650px){
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf287-picker-row,
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf392-collection-row{display:grid!important;grid-template-columns:64px minmax(0,1fr)!important;grid-auto-rows:auto!important;gap:9px!important;align-items:center!important}
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf287-picker-cover{grid-column:1!important;grid-row:1!important;display:block!important;width:64px!important;min-width:64px!important;max-width:64px!important;height:86px!important;min-height:86px!important;aspect-ratio:3/4!important;object-fit:cover!important;flex:none!important;overflow:hidden!important}
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf287-picker-cover img{height:100%!important;width:100%!important;object-fit:cover!important}
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf287-picker-copy{grid-column:2!important;grid-row:1!important;min-width:0!important;overflow-wrap:anywhere}
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf392-action,
+ .mf400-collection-tools-sheet .mf361-collection-results.mf361-mode-list .mf287-picker-row>.btn{grid-column:1/-1!important;grid-row:2!important;min-width:0!important;width:100%!important;margin:0!important}
+ .mf400-collection-tools-sheet .mf400-collection-tools-inner .mf392-assignment-tools{display:flex;flex-wrap:wrap;min-width:0;gap:6px}
+}

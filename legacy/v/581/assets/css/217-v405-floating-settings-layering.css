@@ -1,0 +1,21 @@
+/* MediaFlow v405 — Floating control preferences and overlay safety */
+.mf405-floating-settings{display:grid;gap:12px;margin-bottom:22px}
+.mf405-group-kicker{font-size:10px;letter-spacing:.12em;font-weight:800;color:var(--text-mute,var(--text-dim));margin-top:4px}
+.mf405-floating-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;padding:5px 0}
+.mf405-floating-copy{min-width:0;flex:1}
+.mf405-floating-copy label{display:block;font-size:13px;font-weight:750;color:var(--text);cursor:pointer}
+.mf405-floating-copy p{font-size:11px;line-height:1.5;margin:5px 0 0;max-width:60ch;color:var(--text-dim)}
+.mf405-floating-divider{height:1px;background:var(--border-soft,var(--border));opacity:.75}
+.mf405-floating-switch{position:relative!important;min-width:47px!important;width:47px!important;height:27px!important;min-height:27px!important;flex:0 0 47px!important;padding:3px!important;border-radius:30px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;border:1px solid var(--border-soft,var(--border))!important;background:var(--panel-raised,var(--surface))!important;cursor:pointer}
+.mf405-floating-switch.on{background:var(--flow,var(--accent))!important;border-color:var(--flow,var(--accent))!important}
+.mf405-floating-switch>span{display:block;width:19px;height:19px;flex:none;border-radius:50%;background:#fff;box-shadow:0 1px 5px #0003;transition:transform .16s}
+.mf405-floating-switch.on>span{transform:translateX(19px)}
+.mf405-floating-switch:focus-visible{outline:2px solid var(--flow,var(--accent));outline-offset:3px}
+.mf397-dock.mf405-hide-add .mf397-plus-holder{display:none!important}
+.mf397-dock.mf405-hide-progress .mf397-progress{display:none!important}
+.mf397-dock.mf405-more-obscured{visibility:hidden!important;pointer-events:none!important}
+.mf397-dimmer.mf405-more-obscured{visibility:hidden!important;pointer-events:none!important}
+/* Immediate CSS safety net even when a legacy click path skips JS wrappers */
+body:has(#mobile-more-menu:not(.hide)) #mf397-dock,
+body:has(#mobile-more-menu:not(.hide)) #mf397-dimmer{visibility:hidden!important;pointer-events:none!important}
+@media(max-width:500px){.mf405-floating-row{gap:9px}.mf405-floating-copy label{font-size:12px}.mf405-floating-copy p{font-size:10.5px}}

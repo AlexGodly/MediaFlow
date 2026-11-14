@@ -1,0 +1,28 @@
+/* v461: prevent the v226 "Show/Hide" semantic icon from duplicating v460's eye. */
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
+assert.equal(fs.readFileSync('VERSION','utf8').trim(),'461');
+const order=JSON.parse(fs.readFileSync('src/js/runtime-order.json','utf8'));
+assert.equal(order.at(-1),'components/345-v461-background-shortcut-layout.js');
+const src=fs.readFileSync('src/js/components/345-v461-background-shortcut-layout.js','utf8');
+const css=fs.readFileSync('assets/css/266-v461-background-shortcut-layout.css','utf8');
+const html=fs.readFileSync('index.html','utf8');
+let passthrough=0;
+const context={window:{},MediaFlowRuntime:{},v225ButtonIconName:el=>{passthrough++;return 'show'}};
+vm.createContext(context);
+vm.runInContext(src,context,{filename:'v461.js'});
+assert.equal(context.window.MediaFlowV461.version,461);
+const widget={matches:selector=>selector==='.mf460-widget-action'};
+const other={matches:()=>false};
+assert.equal(context.v225ButtonIconName(widget),null,'Never insert a semantic icon before v460 eye');
+assert.equal(passthrough,0,'Widget icon must bypass v226/v225');
+assert.equal(context.v225ButtonIconName(other),'show','Existing button iconification remains intact');
+assert.equal(passthrough,1);
+assert.match(css,/\.mf460-widget-action\s*>\s*\.v225-btn-icon\s*\{display:none!important\}/);
+assert.match(css,/overflow-wrap:anywhere/);
+assert.match(css,/min-width:0/);
+assert(html.includes('assets/css/266-v461-background-shortcut-layout.css'));
+assert(html.includes('mediaflow-v461.bundle.js'));
+assert.equal(JSON.parse(fs.readFileSync('version.json','utf8')).appVersion,461);
+assert(!src.includes('mf441SaveSetting'),'Do not change recovery or cloud preferences');
+console.log('PASS v461: no duplicate eye, wrapped legible action label, responsive layout, unchanged recovery state');

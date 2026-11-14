@@ -1,0 +1,175 @@
+/* MediaFlow v291 — searchable, full-view Category picker */
+
+/* Category buttons already carry the real Category artwork. Never allow the
+   global button-icon layer to reserve space for a second generic action icon. */
+.mf291-category-trigger > .v225-btn-icon,
+.mf291-category-option > .v225-btn-icon,
+.mf290-category-trigger > .v225-btn-icon,
+.mf290-category-option > .v225-btn-icon{display:none!important}
+.mf291-category-trigger,.mf291-category-option,
+.mf290-category-trigger,.mf290-category-option{--v225-btn-icon-size:0px}
+
+/* Search lives above the result surface and never scrolls away with results. */
+.mf291-category-popover{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:var(--panel)!important;
+}
+.mf291-category-searchbar{
+  position:relative;
+  z-index:3;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-bottom:1px solid var(--border-soft);
+  background:var(--panel);
+}
+.mf291-category-search{
+  width:100%;
+  min-width:0;
+  min-height:40px;
+  padding:8px 11px;
+  border:1px solid var(--border)!important;
+  border-radius:9px;
+  background:var(--panel-raised)!important;
+  color:var(--text)!important;
+  font:inherit;
+  font-size:.8rem;
+  outline:none;
+}
+.mf291-category-search::placeholder{color:var(--text-mute)}
+.mf291-category-search:focus{
+  border-color:color-mix(in srgb,var(--flow) 72%,var(--border))!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--flow) 13%,transparent)!important;
+}
+.mf291-category-search-count{
+  white-space:nowrap;
+  font-size:.66rem;
+  font-weight:750;
+  color:var(--text-mute);
+}
+
+/* A dedicated scrolling result plane means the search box and empty-state area
+   do not move. If every row fits (the common Quick Edit desktop case), no
+   scrollbar appears at all. */
+.mf291-category-options{
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  align-content:start;
+  gap:6px;
+  padding:7px;
+}
+.mf291-category-search-empty{
+  margin:7px;
+  padding:14px 12px;
+  border:1px dashed var(--border);
+  border-radius:9px;
+  background:var(--panel-raised);
+  text-align:center;
+}
+.mf291-category-search-empty[hidden]{display:none!important}
+.mf291-category-search-empty b{display:block;font-size:.82rem;color:var(--text)}
+.mf291-category-search-empty span{display:block;margin-top:3px;font-size:.68rem;color:var(--text-mute)}
+
+/* Uniform Category rows: one fixed artwork column + one content column.
+   No injected action glyph, no staggered text starts, no per-row layout drift. */
+.mf291-category-option{
+  grid-template-columns:34px minmax(0,1fr)!important;
+  gap:10px!important;
+  min-height:49px;
+  padding:7px 10px!important;
+  align-items:center!important;
+}
+.mf291-category-option[hidden]{display:none!important}
+.mf291-category-option .mf290-category-option-icon{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  align-self:center;
+}
+.mf291-category-option .mf290-category-option-icon img{
+  width:28px!important;
+  height:28px!important;
+  object-fit:contain;
+}
+.mf291-category-option .mf290-category-option-copy{
+  min-width:0;
+  display:grid;
+  grid-template-rows:auto auto;
+  align-content:center;
+  gap:2px;
+  text-align:left;
+}
+.mf291-category-option .mf290-category-option-copy b{
+  display:block;
+  min-width:0;
+  font-size:.8rem;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mf291-category-option .mf290-category-option-copy small{
+  display:block;
+  min-width:0;
+  font-size:.63rem;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Quick Edit is no longer forced to squeeze Category results into the tiny
+   modal. The viewport-level chooser becomes a compact responsive grid, so a
+   normal desktop view can display the complete Category set at once. */
+.mf291-category-popover[data-context="quick-details"]{
+  border-radius:14px!important;
+  box-shadow:0 28px 80px rgba(0,0,0,.58),0 0 0 1px color-mix(in srgb,var(--flow) 9%,transparent)!important;
+}
+.mf291-category-popover[data-context="quick-details"] .mf291-category-options{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  padding:8px;
+}
+.v181-quick-detail-modal:has(.mf291-category-select){
+  width:min(720px,calc(100vw - 28px))!important;
+  max-width:720px!important;
+}
+
+/* Add/Edit Title keeps a compact one-column dropdown, now with search. */
+.mf291-category-popover:not([data-context="quick-details"]) .mf291-category-options{
+  grid-template-columns:minmax(0,1fr);
+}
+
+@media(max-width:900px){
+  .mf291-category-popover[data-context="quick-details"] .mf291-category-options{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:620px){
+  .mf291-category-searchbar{grid-template-columns:minmax(0,1fr);gap:5px;padding:8px}
+  .mf291-category-search-count{padding-inline:2px}
+  .mf291-category-popover[data-context="quick-details"] .mf291-category-options{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .v181-quick-detail-modal:has(.mf291-category-select){
+    width:min(560px,calc(100vw - 16px))!important;
+  }
+}
+@media(max-width:420px){
+  .mf291-category-search{min-height:38px;padding:7px 9px}
+  .mf291-category-options{padding:5px;gap:5px}
+  .mf291-category-option{min-height:47px;padding:6px 8px!important;gap:8px!important}
+  .mf291-category-option .mf290-category-option-icon{width:30px;height:30px}
+  .mf291-category-option .mf290-category-option-icon img{width:25px!important;height:25px!important}
+}

@@ -1,0 +1,92 @@
+/* ============================================================
+   MediaFlow v295 — responsive navigation repair
+   Keeps tablet / intermediate widths clean and prevents the More popup from
+   becoming a clipped browser-like strip at the far right.
+   ============================================================ */
+@media(max-width:1080px){
+  body.v260-redesign .mobile-tabbar{
+    padding-inline:max(8px,env(safe-area-inset-left),env(safe-area-inset-right))!important;
+    gap:4px!important;
+  }
+  body.v260-redesign .mobile-tabbar>.mtab,
+  body.v260-redesign .mobile-tabbar>.mobile-more-wrap{
+    min-width:0!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab{
+    min-height:60px!important;
+    max-height:70px!important;
+    padding:6px 5px 5px!important;
+    gap:5px!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab span{
+    font-size:clamp(9px,1.08vw,10.5px)!important;
+    letter-spacing:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  body.v260-redesign .mobile-tabbar .mtab svg{
+    width:clamp(20px,2.5vw,25px)!important;
+    height:clamp(20px,2.5vw,25px)!important;
+  }
+  body.v260-redesign .mobile-more-wrap{
+    position:relative!important;
+    overflow:visible!important;
+  }
+  body.v260-redesign .mobile-more-menu{
+    position:fixed!important;
+    left:max(14px,env(safe-area-inset-left))!important;
+    right:max(14px,env(safe-area-inset-right))!important;
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    max-width:none!important;
+    max-height:min(58dvh,430px)!important;
+    overflow:auto!important;
+    overscroll-behavior:contain!important;
+    padding:10px!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    border-radius:18px!important;
+    box-shadow:0 24px 70px rgba(0,0,0,.30)!important;
+    z-index:120!important;
+  }
+  body.v260-redesign .mobile-more-menu.hide{display:none!important;}
+  body.v260-redesign .mobile-more-item{
+    min-width:0!important;
+    min-height:48px!important;
+    padding:10px 11px!important;
+    border-radius:12px!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    overflow:hidden!important;
+  }
+  body.v260-redesign .mobile-more-item span{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+}
+
+@media(max-width:759px){
+  body.v260-redesign .mobile-more-menu{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media(max-width:479px){
+  body.v260-redesign .mobile-tabbar{gap:1px!important;padding-inline:4px!important;}
+  body.v260-redesign .mobile-tabbar .mtab{min-height:54px!important;max-height:64px!important;padding-inline:2px!important;}
+  body.v260-redesign .mobile-tabbar .mtab span{font-size:8.5px!important;}
+  body.v260-redesign .mobile-more-menu{
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    grid-template-columns:1fr!important;
+    max-height:min(64dvh,420px)!important;
+    padding:8px!important;
+  }
+}

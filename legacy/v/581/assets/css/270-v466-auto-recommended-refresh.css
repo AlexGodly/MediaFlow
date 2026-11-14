@@ -1,0 +1,25 @@
+/* v466 — native themed, responsive periodic recommended-title refresh */
+.mf466-refresh{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;min-width:0;border:1px solid var(--border-soft);border-radius:14px;background:color-mix(in srgb,var(--flow) 7%,var(--panel));padding:12px 14px}
+.mf466-refresh-details{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 210px}
+.mf466-refresh-details>svg{flex:none;color:var(--flow)}
+.mf466-refresh-details>span{display:grid;gap:4px;min-width:0}
+.mf466-refresh-details strong{font-size:12px;color:var(--text);overflow-wrap:anywhere}
+.mf466-refresh-details small{font-size:11px;color:var(--text-dim);overflow-wrap:anywhere;line-height:1.4}
+.mf466-now{flex:0 1 auto;display:inline-flex;align-items:center;gap:7px;max-width:100%;min-height:39px;white-space:normal;text-align:center}
+.mf466-now>svg{width:15px;height:15px;flex:none}
+.mf466-settings{display:grid;gap:12px;min-width:0;margin-top:14px;padding:15px;border-radius:14px;border:1px solid var(--border-soft);background:var(--panel-raised);color:var(--text)}
+.mf466-settings *{box-sizing:border-box}
+.mf466-settings-head{display:flex;align-items:center;gap:10px;min-width:0}
+.mf466-settings-head>svg{color:var(--flow);flex:none}
+.mf466-settings-head>div{display:grid;gap:5px;min-width:0}
+.mf466-settings-head strong{font-size:13px;overflow-wrap:anywhere}
+.mf466-settings-head small{font-size:11px;color:var(--text-dim);line-height:1.45}
+.mf466-interval{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--border-soft);border-radius:10px;padding:10px;font-weight:700;font-size:11px}
+.mf466-interval select{flex:1 1 190px;max-width:100%;min-width:0;padding:9px 10px;background:var(--panel);color:var(--text);border-radius:9px;border:1px solid var(--border-soft);min-height:39px}
+.mf466-options{display:grid;gap:8px}
+.mf466-option{display:flex;align-items:center;gap:9px;min-width:0;padding:10px;border-radius:10px;background:var(--panel);border:1px solid var(--border-soft);font-size:11px;line-height:1.4;cursor:pointer}
+.mf466-option input{flex:0 0 17px;width:17px;height:17px;accent-color:var(--flow)}
+.mf466-option span{overflow-wrap:anywhere}
+.mf466-settings>p{margin:0;color:var(--text-dim);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.mf466-now:focus-visible,.mf466-interval select:focus-visible,.mf466-option input:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+@media(max-width:390px){.mf466-refresh{gap:9px;padding:11px}.mf466-now{flex:1 1 100%;justify-content:center}.mf466-settings{padding:11px}.mf466-interval select{flex-basis:100%}}
