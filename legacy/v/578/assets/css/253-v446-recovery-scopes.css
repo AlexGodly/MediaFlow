@@ -1,0 +1,50 @@
+/* v446 Unified Recovery Workspace — editable sources, scope and category/status hierarchy. */
+.mf446-provider-tools,.mf446-category-tools{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 11px}
+.mf446-provider-tools button,.mf446-category-tools button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:7px 11px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel-raised);color:var(--text);font:inherit;font-size:10px;font-weight:750;cursor:pointer}
+.mf446-provider-tools button:hover,.mf446-category-tools button:hover{border-color:var(--flow)}
+.mf446-provider{min-width:0;gap:8px}
+.mf446-provider-check{display:flex;align-items:center;gap:9px;min-width:0;flex:1;cursor:pointer}
+.mf446-provider-check input{flex:none;accent-color:var(--flow);width:17px;height:17px;cursor:pointer}
+.mf446-provider-check input:disabled{opacity:.45;cursor:not-allowed}
+.mf446-provider[data-status="unavailable"]{opacity:.75}
+.mf446-provider .mf445-provider-info small{line-height:1.4}
+.mf446-scope{display:grid;gap:12px}
+.mf446-scope>header{display:grid;gap:5px}
+.mf446-scope>header strong{display:flex;gap:7px;align-items:center;font-size:13px}
+.mf446-scope>header small{font-size:10px;color:var(--text-dim)}
+.mf446-scope-mode{display:grid;gap:7px;font-size:11px;font-weight:750}
+.mf446-scope-mode select{width:100%;min-height:41px;border-radius:10px;padding:8px 12px;border:1px solid var(--border-soft);background:var(--panel-raised);color:var(--text);font:inherit;font-size:12px}
+.mf446-scope-mode select:disabled{opacity:.6}
+.mf446-explanation{margin:0;font-size:10px;line-height:1.55;color:var(--text-dim)}
+.mf446-categories{min-width:0;border-radius:11px;border:1px solid var(--border-soft);padding:11px;background:var(--panel-raised)}
+.mf446-categories[hidden]{display:none!important}
+.mf446-categories>summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;font-size:11px;font-weight:800}
+.mf446-categories>summary::-webkit-details-marker,.mf446-statuses>summary::-webkit-details-marker{display:none}
+.mf446-categories>summary small{margin-left:auto;font-size:10px;color:var(--text-dim)}
+.mf446-categories[open]>summary>svg:last-child{transform:rotate(180deg)}
+.mf446-category-tools{margin:12px 0 10px}
+.mf446-category-grid{max-height:300px;align-items:start}
+.mf446-category{min-width:0;border:1px solid var(--border-soft);border-radius:10px;background:var(--panel)}
+.mf446-category-top{display:flex;gap:9px;align-items:center;padding:9px;min-width:0;cursor:pointer}
+.mf446-category-top>input{flex:none;accent-color:var(--flow);width:17px;height:17px}
+.mf446-category .mf445-category-art{flex:none}
+.mf446-statuses{border-top:1px solid var(--border-soft);padding:8px 10px 10px}
+.mf446-statuses summary{cursor:pointer;color:var(--text);font-size:10px;font-weight:750}
+.mf446-statuses>div{display:grid;gap:7px;margin-top:9px}
+.mf446-statuses label{display:flex;gap:8px;align-items:center;font-size:10px;line-height:1.4;color:var(--text-dim)}
+.mf446-statuses input{accent-color:var(--flow);width:15px;height:15px;flex:none}
+.mf446-count{font-size:11px;color:var(--text-dim);background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:10px;padding:10px 12px}
+.mf446-count strong{color:var(--flow);font-size:15px;margin-right:4px;font-variant-numeric:tabular-nums}
+.mf446-count b{color:var(--text)}
+.mf446-widget-foot{display:flex;gap:7px;flex-wrap:wrap}
+.mf446-widget-foot button:first-child{border-color:var(--flow);color:var(--flow)}
+.mf446-scope input:focus-visible,.mf446-scope select:focus-visible,.mf446-provider-check input:focus-visible,.mf446-provider-tools button:focus-visible,.mf446-category-tools button:focus-visible{outline:2px solid var(--flow);outline-offset:2px}
+@media(max-width:590px){
+ .mf446-provider-grid{grid-template-columns:1fr}
+ .mf446-provider .mf445-provider-info strong{font-size:11px}
+ .mf446-category-grid{max-height:42dvh}
+ .mf446-category-top{gap:7px}
+ .mf446-widget-foot button{min-width:0;font-size:10px}
+}
+@media(max-width:370px){.mf446-provider-tools button,.mf446-category-tools button{flex:1}.mf446-categories{padding:8px}.mf446-count{line-height:1.55}}
+@media(prefers-reduced-motion:reduce){.mf446-categories summary svg{transition:none}}

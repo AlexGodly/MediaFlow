@@ -1,0 +1,18 @@
+/* v434 live API settings and ID lookup inherit active MediaFlow theme. */
+.mf434-connection,.mf434-id-lookup{border:1px solid var(--border-soft);border-radius:var(--radius,12px);padding:14px;margin:14px 0;background:var(--panel);color:var(--text)}
+.mf434-connection header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mf434-connection p,.mf434-id-lookup p{color:var(--text-dim);font-size:12px;line-height:1.55;margin:8px 0}
+.mf434-connection header span,.mf434-provider small{font-size:11px;color:var(--text-dim)}
+.mf434-test-toolbar,.mf434-lookup-tools{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:12px 0}
+.mf434-test-toolbar label{flex:1 1 180px;font-size:12px;color:var(--text-dim)}
+.mf434-test-toolbar input,.mf434-lookup-tools input,.mf434-lookup-tools select{width:100%;min-width:0;padding:9px 11px;color:var(--text);background:var(--panel-raised);border:1px solid var(--border-soft);border-radius:9px;font:inherit}
+.mf434-lookup-tools input{flex:2 1 170px}.mf434-lookup-tools select{flex:1 1 140px;width:auto}
+.mf434-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:8px}
+.mf434-provider{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:7px;border:1px solid var(--border-soft);padding:10px;border-radius:10px;background:var(--panel-raised)}
+.mf434-provider>div{display:grid;gap:3px;min-width:0}.mf434-provider small{overflow-wrap:anywhere}
+.mf434-provider button{white-space:nowrap}
+#mf434-test-results,#mf434-lookup-results{font-size:12px;overflow-wrap:anywhere;line-height:1.5}
+.mf434-id-result{display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:9px;border:1px solid var(--border-soft);border-radius:9px;margin:7px 0}
+.mf434-id-result small{grid-column:1;color:var(--text-dim);overflow-wrap:anywhere}
+.mf434-id-result button{grid-column:2;grid-row:1/span 2;align-self:center}
+@media(max-width:520px){.mf434-test-toolbar,.mf434-lookup-tools{display:grid;grid-template-columns:1fr}.mf434-lookup-tools input,.mf434-lookup-tools select{width:100%}.mf434-id-result{grid-template-columns:1fr}.mf434-id-result button{grid-column:1;grid-row:auto;justify-self:start}}
