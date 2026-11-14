@@ -353,6 +353,19 @@ if(typeof v148BackupManifest==='function'){
   v148BackupManifest=function(){const manifest=v269BackupManifestBase.apply(this,arguments);manifest.includes=Object.assign({},manifest.includes||{},{consumptionHistoryRedesignV269:true,weeklyHistorySummariesV269:true,latestConsumedStripV269:true,categoryBasedWeekBreakdownV269:true});manifest.v269={consumptionHistoryRedesign:true,weeklySummaries:true,categoryBreakdowns:true,latestConsumedCovers:true,coverFallbackToCategoryIcon:true,dynamicThemesPreserved:true,cloudSyncVersion:201,fullBackupSchema:29,settingsPresetSchema:1,personalOrderExportVersion:4};return manifest;};
 }
 
+/* v579: later modules adjust these through MediaFlowV269Hooks.wrap(name, fn),
+ * fn(base, ...args); this module is private, so plain reassignment elsewhere
+ * would not reach it. */
+const v269HookList={};
+function v269Hookable(name,base){return function(){let f=base;for(const w of (v269HookList[name]||[])){const prev=f;f=function(){return w.call(this,prev,...arguments);};}return f.apply(this,arguments);};}
+v269ProgressNoun=v269Hookable('progressNoun',v269ProgressNoun);
+v269LatestProgressLabel=v269Hookable('latestLabel',v269LatestProgressLabel);
+v269EventConsumedLabel=v269Hookable('consumedLabel',v269EventConsumedLabel);
+v269EventProgressMeta=v269Hookable('progressMeta',v269EventProgressMeta);
+v269CoverMarkup=v269Hookable('coverMarkup',v269CoverMarkup);
+v269HistoryCardHtml=v269Hookable('cardHtml',v269HistoryCardHtml);
+window.MediaFlowV269Hooks={wrap(name,fn){if(typeof fn==='function')(v269HookList[name]=v269HookList[name]||[]).push(fn);},call(name,...args){const f={progressNoun:v269ProgressNoun,latestLabel:v269LatestProgressLabel,consumedLabel:v269EventConsumedLabel,progressMeta:v269EventProgressMeta,coverMarkup:v269CoverMarkup,cardHtml:v269HistoryCardHtml}[name];return f?f(...args):undefined;}};
+
 Object.assign(App,{v269SetYear,v269SetMonth,v269SetWeekPage,v269SetWeeksPerPage,v269ToggleSelectMode,v269ResetViewFilters,v269SelectVisible,v269ConsumptionHtml});
 window.MediaFlowV269={version:269,focus:'Simkl-inspired week-by-week Consumption History with MediaFlow categories and themes'};
 MediaFlowRuntime.version=V269_RUNTIME_VERSION;

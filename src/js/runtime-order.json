@@ -283,5 +283,6 @@
   "components/427-v577-parts.js",
   "components/428-v577-xp-history.js",
   "components/429-v577-keyless-apis.js",
-  "components/430-v577-batch-draft.js"
+  "components/430-v577-batch-draft.js",
+  "components/431-v579-quick-select-history-units.js"
 ]

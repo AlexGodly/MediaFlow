@@ -207,11 +207,12 @@ function mf577ControlsHtml(kind,index,item,list,repeat){
     const reached=mode==='progress'&&!repeat;
     const input='<input type="number" min="'+(reached?from:0)+'" '+(reached&&total?'max="'+total+'"':'')+' step="1" inputmode="numeric" value="'+(reached?to:qty)+'" aria-label="'+escapeHtml(mf577PartName(p))+(reached?' reached':' amount')+'" onchange="'+fn+'('+index+',\''+escapeHtml(String(p.id))+'\',this.value)">';
     const label=reached?escapeHtml(unitLabel(unit,1).replace(/^./,c=>c.toUpperCase())):'Amount';
-    return '<div class="mf577-line"><b>'+escapeHtml(mf577PartName(p))+'</b><label><span>'+label+'</span>'+input+'</label>'+
-      '<small>'+(reached?from+' → '+to+' ':'')+'(+'+qty+' '+escapeHtml(unitLabel(unit,qty))+')'+(total?' · '+to+'/'+total+(to>=total?' ✓':''):'')+'</small>'+mf577Bar(p)+'</div>';
+    const secs=mf577PartSeconds(p,item,cat),mins=Math.round(qty*secs/60);
+    return '<div class="mf577-line mf579-part-card"><div class="mf579-part-head"><b>'+escapeHtml(mf577PartName(p))+'</b><label><span>'+label+(reached?' reached':'')+'</span>'+input+'</label></div>'+
+      '<small>'+(reached?escapeHtml(unitLabel(unit,1).replace(/^./,c=>c.toUpperCase()))+' '+from+' → '+to+' ':'')+'(+'+qty+' '+escapeHtml(unitLabel(unit,qty))+')'+(total?' · '+to+'/'+total+(to>=total?' ✓':''):'')+(secs?' · '+fmtMinutes(mins):'')+'</small>'+mf577Bar(p)+'</div>';
   }).join('');
   const sum=mf577Qty(mf577Clean(item,list));
-  return '<div class="mf577-parts" role="group" aria-label="Parts"><div class="mf577-chips">'+chips+'</div>'+lines+
+  return '<div class="mf577-parts" role="group" aria-label="Parts"><div class="mf579-parts-head"><b>Parts</b><small>'+parts.length+' part'+(parts.length===1?'':'s')+' · '+sum+' in all</small></div><div class="mf577-chips">'+chips+'</div>'+lines+
     '<small class="mf577-sum">'+(sum?'+'+sum+' in all · '+fmtMinutes(mf577Minutes(item,cat,list)):'Pick the parts you played, read or watched.')+'</small></div>';
 }
 function mf577EntryItem(index){
@@ -444,17 +445,13 @@ function mf577HistoryText(row){
     return Number.isFinite(Number(p.to))?name+' · '+u.charAt(0).toUpperCase()+u.slice(1)+' '+p.from+' → '+p.to+' (+'+p.qty+')':name+' +'+p.qty;
   }).join(' · ');
 }
-if(typeof v269EventProgressMeta==='function'){
-  const mf577MetaBase=v269EventProgressMeta;
-  v269EventProgressMeta=function(ev){return mf577HistoryText(ev?.row)||mf577MetaBase.apply(this,arguments);};
-}
-if(typeof v269LatestProgressLabel==='function'){
-  const mf577LatestBase=v269LatestProgressLabel;
-  v269LatestProgressLabel=function(ev){
+if(window.MediaFlowV269Hooks){
+  MediaFlowV269Hooks.wrap('progressMeta',function(base,ev){return mf577HistoryText(ev?.row)||base(ev);});
+  MediaFlowV269Hooks.wrap('latestLabel',function(base,ev){
     const list=Array.isArray(ev?.row?.mf577Parts)?ev.row.mf577Parts:[];
     if(list.length){const p=list[list.length-1];return (p.name||'Part')+(Number.isFinite(Number(p.to))?' '+p.to:' +'+p.qty);}
-    return mf577LatestBase.apply(this,arguments);
-  };
+    return base(ev);
+  });
 }
 
 /* ---------- Edit title: how this title is logged + the parts ---------- */
