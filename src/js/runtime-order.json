@@ -286,5 +286,6 @@
   "components/430-v577-batch-draft.js",
   "components/431-v579-quick-select-history-units.js",
   "components/432-v580-advanced-parts.js",
-  "components/433-v580-goal-xp.js"
+  "components/433-v580-goal-xp.js",
+  "components/434-v581-part-order.js"
 ]

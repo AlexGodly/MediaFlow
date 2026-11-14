@@ -1,0 +1,9 @@
+/* MediaFlow v581 release styles. */
+.mf581-order{display:none}
+.mf577-parts-editor .mf581-order{display:flex;align-items:center;gap:4px;flex:0 0 100%;grid-column:1/-1;order:-1;width:100%}
+.mf581-handle{cursor:grab;touch-action:none;user-select:none;font-size:18px;line-height:1;padding:6px 8px;border-radius:8px;color:var(--text-dim,var(--text-mute));background:var(--surface-2,rgba(127,127,127,.12))}
+.mf581-dragging .mf581-handle{cursor:grabbing}
+.mf581-order .btn{min-width:34px;padding-left:8px;padding-right:8px}
+.mf581-pos{width:64px!important;min-width:0}
+.mf581-dragging{opacity:.75;box-shadow:0 8px 24px rgba(0,0,0,.25);position:relative;z-index:2}
+.mf581-moved{outline:2px solid var(--flow);outline-offset:2px;transition:outline-color .4s}
