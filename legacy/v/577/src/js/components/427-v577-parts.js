@@ -617,3 +617,43 @@ App.v252ManagerAddSeason=v252ManagerAddSeason;
 
 window.MediaFlowV577=Object.freeze({version:577,isParts:mf577IsParts,parts:mf577Parts,partSeconds:mf577PartSeconds,
   minutes:mf577Minutes,categoryAmount:mf577CatAmount,history:mf577HistoryText});
+
+/* ---------- a selected season's (or part's) own bar ----------
+ * Normal titles with seasons: with a season selected, logging shows that
+ * season's own counter and bar (Season 2 · Ep. 3 → 5 / 12), in Progress
+ * reached and in Advanced logging (Per Unit, Progress Reached, Amount). */
+function mf577SeasonBarHtml(season,item,to){
+  if(!season)return '';
+  const from=Number(season.progress)||0,t=Number(season.total)>0?Number(season.total):0;
+  const end=Math.max(from,t?Math.min(t,Number(to)||0):Number(to)||0);
+  const u=unitLabel(mf577IsParts(item)?mf577PartUnitKey(season,item):mf565UnitKey(item,getCategory(item?.categoryId||'')),1);
+  return '<div class="mf577-season-bar"><span><b>'+escapeHtml(mf577IsParts(item)?mf577PartName(season):String(season.name||'Season'))+'</b> · '+
+    escapeHtml(u.charAt(0).toUpperCase()+u.slice(1))+' '+from+' → '+end+(t?' / '+t+(end>=t?' ✓':''):'')+' (+'+(end-from)+')</span>'+
+    (t?'<span class="mf577-bar" aria-hidden="true"><i style="width:'+Math.min(100,Math.round(end/t*100))+'%"></i></span>':'')+'</div>';
+}
+const mf577EntrySeasonBase=v252EntrySeasonControlsHtml;
+v252EntrySeasonControlsHtml=function(item,entry){
+  const raw=mf577EntrySeasonBase.apply(this,arguments);
+  if(entry?.v252UseSeasonView===false)return raw;
+  const season=v252Seasons(item).find(s=>String(s.id)===String(entry?.v252SeasonId));
+  return season?String(raw).replace(/<\/div>$/,mf577SeasonBarHtml(season,item,entry.v252SeasonEpisode)+'</div>'):raw;
+};
+const mf577DraftSeasonBarBase=v252DraftSeasonControlsHtml;
+v252DraftSeasonControlsHtml=function(item){
+  const raw=mf577DraftSeasonBarBase.apply(this,arguments);
+  if(!raw||S.entryDraft?.v252UseSeasonView===false)return raw;
+  const season=v252Seasons(item).find(s=>String(s.id)===String(S.entryDraft?.v252SeasonId));
+  return season?String(raw).replace(/<\/div>$/,mf577SeasonBarHtml(season,item,S.entryDraft.v252SeasonEpisode)+'</div>'):raw;
+};
+if(typeof v394BulkPanel==='function'){
+  const mf577BulkBase=v394BulkPanel;
+  v394BulkPanel=function(e,index,item){
+    const raw=String(mf577BulkBase.apply(this,arguments)||'');
+    try{
+      if(!item||!v252HasSeasons(item))return raw;
+      const season=v369SelectedSeason(e,item);if(!season)return raw;
+      const to=v369ContiguousProgress(season.progress,[...v369KnownUnits(item),...(Array.isArray(e?.v369Units)?e.v369Units:[])],season.id,season.total);
+      return mf577SeasonBarHtml(season,item,to)+raw;
+    }catch(_){return raw;}
+  };
+}
