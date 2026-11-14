@@ -25925,4 +25925,9 @@ body.mf565-batch-open #mf397-dock{z-index:1}
 .batch-log-row .batch-selected-title>.v144-cat-icon-img.v144-cat-icon-img,.batch-log-row .batch-selected-title>.v144-cat-icon-emoji.v144-cat-icon-emoji{display:none!important}
 .mf579-next-part{display:block;font-size:12px;font-weight:800;color:var(--flow);margin-top:2px}
 div.mf579-next-part{display:inline-block;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--flow) 14%,transparent);margin:6px 0}
+/* Edit title: "How this title is logged" sits full width right above the
+ * seasons / parts editor (it was a single 1/12 cell at the top of the form). */
+.v240-library-editor>.mf577-mode,.v238-library-editor>.mf577-mode{grid-column:1/-1!important;order:16!important;width:auto;max-width:none;box-sizing:border-box}
+.mf577-mode-pick label{border-radius:999px!important;min-height:0!important;padding:7px 14px!important;white-space:nowrap}
+.mf577-mode-pick input[type=radio]{width:16px!important;height:16px!important;min-width:16px;margin:0!important;flex:0 0 auto;box-shadow:none!important}
 
