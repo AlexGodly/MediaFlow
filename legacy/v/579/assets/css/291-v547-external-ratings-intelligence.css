@@ -1,0 +1,15 @@
+/* MediaFlow v547 — theme-native external rating automation controls. */
+.mf547-settings{display:grid;gap:11px;padding:14px;margin-top:12px;border:1px solid var(--border-soft);border-radius:14px;background:var(--panel-raised);color:var(--text);min-width:0}
+.mf547-settings-head{display:flex;align-items:flex-start;gap:10px}
+.mf547-settings-head>svg{flex:none;color:var(--flow)}
+.mf547-settings-head>div{display:grid;gap:4px;min-width:0}
+.mf547-settings-head strong{font-size:13px;font-weight:800}
+.mf547-settings-head small,.mf547-note{font-size:11px;line-height:1.5;color:var(--text-dim)}
+.mf547-option{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.45;cursor:pointer}
+.mf547-option input{margin-top:2px;accent-color:var(--flow);flex:none}
+.mf547-interval{display:grid;gap:6px;font-size:11px;color:var(--text-dim)}
+.mf547-interval select{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--border-soft);border-radius:9px;background:var(--panel);color:var(--text)}
+.mf547-status{font-size:11px;line-height:1.45;color:var(--flow);overflow-wrap:anywhere;padding:9px 10px;border-radius:9px;background:color-mix(in srgb,var(--flow) 8%,var(--panel))}
+.mf547-note{margin:0}
+.mf547-settings .btn{justify-self:start;max-width:100%;white-space:normal}
+@media(max-width:560px){.mf547-settings{padding:11px}.mf547-settings .btn{width:100%;justify-content:center}}
