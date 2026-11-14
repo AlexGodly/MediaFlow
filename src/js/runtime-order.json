@@ -284,5 +284,7 @@
   "components/428-v577-xp-history.js",
   "components/429-v577-keyless-apis.js",
   "components/430-v577-batch-draft.js",
-  "components/431-v579-quick-select-history-units.js"
+  "components/431-v579-quick-select-history-units.js",
+  "components/432-v580-advanced-parts.js",
+  "components/433-v580-goal-xp.js"
 ]

@@ -196,10 +196,12 @@ function mf577Bar(part){
 }
 /* Chips to pick parts, then one line per chosen part: its own counter. */
 function mf577ControlsHtml(kind,index,item,list,repeat){
-  const mode=v179Mode(kind==='batch'?'batch':'single');
+  /* v580: 'adv' = Advanced logging (Progress Reached → reached boxes; Per Unit
+   * and Amount Consumed → amounts), backed by the draft's v369Units. */
+  const mode=kind==='adv'?(v394Method(S.logDraft?.entries?.[index])==='last'?'progress':'amount'):v179Mode(kind==='batch'?'batch':'single');
   const parts=mf577Parts(item),chosen=new Map(mf577Clean(item,list).map(r=>[r.id,r.qty]));
   const cat=getCategory(item.categoryId);
-  const fn=kind==='batch'?'App.mf577BatchSet':'App.mf577SetPart',tg=kind==='batch'?'App.mf577BatchToggle':'App.mf577TogglePart';
+  const fn=kind==='batch'?'App.mf577BatchSet':kind==='adv'?'App.mf580AdvSet':'App.mf577SetPart',tg=kind==='batch'?'App.mf577BatchToggle':kind==='adv'?'App.mf580AdvToggle':'App.mf577TogglePart';
   const chips=parts.map(p=>'<button type="button" data-v225-iconified="1" class="mf577-chip'+(chosen.has(String(p.id))?' is-on':'')+'" aria-pressed="'+chosen.has(String(p.id))+'" onclick="'+tg+'('+index+',\''+escapeHtml(String(p.id))+'\')">'+escapeHtml(mf577PartName(p))+'</button>').join('');
   const lines=parts.filter(p=>chosen.has(String(p.id))).map(p=>{
     const qty=chosen.get(String(p.id))||0,from=Number(p.progress)||0,total=Number(p.total)>0?Number(p.total):0;
