@@ -21,3 +21,6 @@ A title's own recovery (details, or cover + details) has **Select all** and **De
 - The `mf556` fallback copy in `mediaflow_states` is already gzip-compressed (about 4.6 MB for a 31k-title account); nothing changed there.
 
 Matches MediaFlow app 10.0.0.579.
+
+### Fixed: Edit title layout
+"How this title is logged" was squeezed into a narrow column at the top of Edit title, pushing the form aside. It now spans the form, right above the seasons / parts editor, with normal-sized Normal / By parts choices.
