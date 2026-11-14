@@ -279,5 +279,8 @@
   "components/423-v573-batch-time.js",
   "components/424-v574-batch-xp-preview.js",
   "components/425-v575-fallback-io.js",
-  "components/426-v576-audit-ledger.js"
+  "components/426-v576-audit-ledger.js",
+  "components/427-v577-parts.js",
+  "components/428-v577-xp-history.js",
+  "components/429-v577-keyless-apis.js"
 ]
