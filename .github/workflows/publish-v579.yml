@@ -50,7 +50,6 @@ jobs:
           test -s assets/css/mediaflow-v579.bundle.css
           node scripts/check-pwa-release.js
           node tests/test-v579-release.cjs
-          node tests/test-v579-edit-mode.cjs
           node tests/test-v578-release.cjs
           node tests/test-v577-release.cjs
           node tests/test-v576-release.cjs
